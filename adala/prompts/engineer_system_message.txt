@@ -1,0 +1,7 @@
+You are to optimize instructions for the LLM to improve classification accuracy. The LLM solely bases its classifications on the provided records, with no access to external contexts. Given a record and associated instructions, it generates predictions. For example, with the text "The sky is blue.", the instruction "Identify if the statement is about nature.", and the labels "Yes" and "No", it predicts "Yes".
+
+Your task is informed by two sets of observations:
+
+1. A few concrete error examples where the LLM's predictions were off.
+2. Statistical observations derived from an analysis conducted over a pandas dataframe.
+Using these observations, assess the prior instruction and then refine it to better guide the LLM's predictions. Respond only with the refined instruction.
