@@ -26,7 +26,7 @@ class Adala:
         validation_sample_size: Optional[int] = 5,
         max_iterations: Optional[int] = 10,
         max_accuracy: Optional[float] = 0.9
-    ) -> Dict[str, pd.DataFrame]:
+    ) -> pd.DataFrame:
         """
         Run the ADALA on the input data frame and give back output with instructions and accuracies
         :param df:
@@ -50,56 +50,49 @@ class Adala:
 
         df = df.copy()
         prev_df_val = project.get_dataframe()
-        logger.debug(f'Retrieved dataframe from project:\n{prev_df_val}')
-
-        history = []
 
         for iteration in range(max_iterations):
             df_val = df.sample(n=validation_sample_size, axis=0)
             df.drop(df_val.index)
 
-            predictions = df_val.apply(
-                func=Labeler(),
-                axis=1,
-                instructions=current_instructions,
-                labels=labels
-            )
-            df_val = df_val.assign(predictions=predictions)
-
-            df_val = project.label_dataframe(df_val, preannotated_from_fields=['predictions'])
-
+            # create ground truth
+            df_val = project.label_dataframe(df_val)
             if not prev_df_val.empty:
-                predictions = prev_df_val.apply(
+                df_val = pd.concat([prev_df_val, df_val])
+
+            history = []
+            max_internal_iterations = 10
+            for internal_iteration in range(max_internal_iterations):
+                predictions = df_val.apply(
                     func=Labeler(),
                     axis=1,
                     instructions=current_instructions,
                     labels=labels
                 )
-                prev_df_val = prev_df_val.assign(predictions=predictions)
-                df_val = pd.concat([prev_df_val, df_val])
+                prev_df_val = df_val = df_val.assign(predictions=predictions)
+                accuracy = (df_val['predictions'] == df_val['ground_truth']).mean()
+                accuracy_str = f'{round(100 * accuracy)}%'
+                history.append({
+                    'iteration': internal_iteration,
+                    'accuracy': accuracy_str,
+                    'instructions': current_instructions
+                })
+                logger.info(f'Validation set: {df_val}')
+                logger.info(f'Current state: {pd.DataFrame.from_records(history)}')
+                if accuracy > max_accuracy:
+                    logger.info(f'Accuracy threshold reached: {accuracy} > {max_accuracy}')
+                    break
+                if len(history) >= 3 and (history[-1]['accuracy'] == history[-2]['accuracy'] == history[-3]['accuracy']):
+                    logger.info(f'Accuracy is not improving, trying to collect more data...')
+                    break
 
-            logger.debug(f'Updated dataframe:\n{df_val}')
-            prev_df_val = df_val
-            accuracy_score = (df_val['predictions'] == df_val['ground_truth']).mean()
-            accuracy = f'{round(100 * accuracy_score)}%'
-            logger.info(f'Accuracy: {accuracy}')
-            history.append({
-                'iteration': iteration,
-                'accuracy': accuracy,
-                'instructions': current_instructions
-            })
+                observations = self.analyst(df_val)
 
-            if accuracy_score > max_accuracy:
-                logger.info(f'Accuracy threshold reached: {accuracy_score} > {max_accuracy}')
-                break
+                new_instructions = self.engineer(current_instructions, observations)
 
-            observations = self.analyst(df_val)
+                logger.info(f'Old instructions: {current_instructions}\nNew instructions: {new_instructions}')
 
-            new_instructions = self.engineer(current_instructions, observations)
-
-            logger.info(f'Old instructions: {current_instructions}\nNew instructions: {new_instructions}')
-
-            current_instructions = new_instructions
+                current_instructions = new_instructions
 
         # run predictions on the rest of the dataset
         predictions = df.apply(
@@ -108,13 +101,9 @@ class Adala:
             instructions=current_instructions,
             labels=labels
         )
-        df = pd.concat(
-            [prev_df_val, df.assign(predictions=predictions)]
-        )
-        return {
-            'predicted_df': df,
-            'history': pd.DataFrame.from_records(history)
-        }
+        df = df.assign(predictions=predictions)
+        df = pd.concat([prev_df_val, df])
+        return df
 
 
 def label(

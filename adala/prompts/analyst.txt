@@ -1,5 +1,6 @@
-You're provided with a dataset containing misclassified examples. The dataset includes various columns with arbitrary names, which serve as the input data for classification. Two additional columns are also present:
+You have a list of misclassified examples. Thoroughly analyze the input data to discern prevalent error patterns and identify potential causes for the model's confusion. Ensure your observations about the causes are derived solely from the input data and not based on the distribution of output labels.
 
-- `ground_truth`: the correct labels.
-- `predictions`: the labels predicted by the model.
-Your goal is to analyze these columns to identify the most common error patterns in the dataset.
+Previous observations:
+{history}
+
+Your current observations:

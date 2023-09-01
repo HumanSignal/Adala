@@ -26,8 +26,10 @@ class Labeler:
         return original_labels[scores.index(max(scores))]
 
     def __call__(self, row: pd.Series, instructions: str, labels: List):
+        row_dict = row.to_dict()
+        row_dict.pop('ground_truth', None)
         prediction = self.llm_chain.predict(
-            record=json.dumps(row.to_json()),
+            record=json.dumps(row_dict),
             instructions=instructions,
             labels=str(labels)
         )
