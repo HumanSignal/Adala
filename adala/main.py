@@ -52,13 +52,14 @@ class Adala:
         prev_df_val = project.get_dataframe()
 
         for iteration in range(max_iterations):
-            df_val = df.sample(n=validation_sample_size, axis=0)
-            df.drop(df_val.index)
-
-            # create ground truth
-            df_val = project.label_dataframe(df_val)
-            if not prev_df_val.empty:
-                df_val = pd.concat([prev_df_val, df_val])
+            # df_val = df.sample(n=validation_sample_size, axis=0)
+            # df.drop(df_val.index)
+            #
+            # # create ground truth
+            # df_val = project.label_dataframe(df_val)
+            # if not prev_df_val.empty:
+            #     df_val = pd.concat([prev_df_val, df_val])
+            df_val = prev_df_val
 
             history = []
             max_internal_iterations = 10
@@ -82,9 +83,9 @@ class Adala:
                 if accuracy > max_accuracy:
                     logger.info(f'Accuracy threshold reached: {accuracy} > {max_accuracy}')
                     break
-                if len(history) >= 3 and (history[-1]['accuracy'] == history[-2]['accuracy'] == history[-3]['accuracy']):
-                    logger.info(f'Accuracy is not improving, trying to collect more data...')
-                    break
+                # if len(history) >= 3 and (history[-1]['accuracy'] == history[-2]['accuracy'] == history[-3]['accuracy']):
+                #     logger.info(f'Accuracy is not improving, trying to collect more data...')
+                #     break
 
                 observations = self.analyst(df_val)
 
