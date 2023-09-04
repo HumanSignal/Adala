@@ -36,7 +36,7 @@ export OPENAI_API_KEY=your_key
 Load the data into a pandas DataFrame:
 ```python
 import pandas as pd
-df = pd.read_csv('dataset.csv')
+input_df = pd.read_csv('dataset.csv')
 ```
 
 The following method allows you to finetune instructions to classify each row in the DataFrame, given the ground truth labels in the specified column:
@@ -44,7 +44,7 @@ The following method allows you to finetune instructions to classify each row in
 import adala as ad
 
 instructions = ad.generate_instructions(
-    df,
+    df=input_df,
     ground_truth_column='label'
 )
 ```
@@ -61,7 +61,7 @@ predictor = ad.LLMPredictor(model='gpt3')
 Predict the dataset:
 ```python
 predicted_df = predictor.predict(
-    df,
+    df=input_df,
     instructions=instructions,
     prediction_column='predictions'
 )
@@ -87,11 +87,11 @@ export LABEL_STUDIO_HOST=http://localhost:8080
 Run ADALA human-in-the-loop labeling:
 ```python
 labeled_df = ad.human_in_the_loop(
-    df,
+    df=input_df,
     label_studio_project_id=project_id,
-    output_column='autolabel'
+    output_column='predictions'
 )
-labeled_df['autolabel']
+labeled_df['predictions']
 ```
 
 ## LLM uncertainty estimation
@@ -100,10 +100,10 @@ ADALA can be used to estimate LLM uncertainty for each row in the dataset. It is
 
 ```python
 uncertainty_df = ad.estimate_uncertainty(
-    df,
+    df=labeled_df,
     instructions=instructions,
     prediction_column='predictions',
-    uncertainty_column='uncertainty'
+    output_column='uncertainty'
 )
 uncertainty_df['uncertainty']
 ```
