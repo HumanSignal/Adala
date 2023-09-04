@@ -1,7 +1,7 @@
 # ADALA
 ADALA: Automated Data Labeling Framework.
 
-ADALA is a framework for automated data labeling. It uses a combination of Large Language Models (LLMs) and Active Learning (AL) to label data. It is designed to be used with [Label Studio](https://labelstud.io/) to provide a human-in-the-loop data labeling experience.
+ADALA is a framework for automated data labeling. It uses a combination of Large Language Models (LLMs) autonomous agents and Active Learning (AL) to label data. It is designed to be used with [Label Studio](https://labelstud.io/) to provide a human-in-the-loop data labeling experience.
 
 Here is what ADALA does:
 - [LLM instructions generation](#llm-instructions-generation)
