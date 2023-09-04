@@ -11,14 +11,29 @@ logger = logging.getLogger(__name__)
 
 
 class Labeler:
+    PROMPT_TEMPLATE = '''\
+Classify the following JSON record [RECORD] based on these instructions [INSTRUCTIONS] and choose from the provided labels [LABELS].
 
-    PROMPT_TEMPLATE = open(os.path.join(os.path.dirname(__file__), 'prompts', 'labeler.txt')).read()
+Example:
+INSTRUCTIONS: Identify if the statement is about nature.
+RECORD: {{"text": "The sky is blue."}}
+LABELS: [Yes, No]
+ANSWER:
+Yes
+
+INSTRUCTIONS: {instructions}
+RECORD: {record}
+LABELS: {labels}
+ANSWER:
+'''
+    # PROMPT_TEMPLATE = open(os.path.join(os.path.dirname(__file__), 'prompts', 'labeler.txt')).read()
 
     def __init__(self):
         self.llm = OpenAI(model_name='text-davinci-003', temperature=0)
         self.llm_chain = LLMChain(
             llm=self.llm,
-            prompt=PromptTemplate.from_template(self.PROMPT_TEMPLATE)
+            prompt=PromptTemplate.from_template(self.PROMPT_TEMPLATE),
+            # verbose=True
         )
 
     def match_labels(self, response: str, original_labels: List[str]):
