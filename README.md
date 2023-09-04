@@ -43,7 +43,10 @@ The following method allows you to finetune instructions to classify each row in
 ```python
 import adala as ad
 
-instructions = ad.generate_instructions(df, ground_truth_column='label')
+instructions = ad.generate_instructions(
+    df,
+    ground_truth_column='label'
+)
 ```
 
 ## Applying LLM to the dataset given the instructions
@@ -57,7 +60,11 @@ predictor = ad.LLMPredictor(model='gpt3')
 
 Predict the dataset:
 ```python
-predicted_df = predictor.predict(df, instructions=instructions, prediction_column='predictions')
+predicted_df = predictor.predict(
+    df,
+    instructions=instructions,
+    prediction_column='predictions'
+)
 predicted_df['predictions']
 ```
 
@@ -79,7 +86,11 @@ export LABEL_STUDIO_HOST=http://localhost:8080
 
 Run ADALA human-in-the-loop labeling:
 ```python
-labeled_df = ad.human_in_the_loop(df, label_studio_project_id=project_id, output_column='autolabel')
+labeled_df = ad.human_in_the_loop(
+    df,
+    label_studio_project_id=project_id,
+    output_column='autolabel'
+)
 labeled_df['autolabel']
 ```
 
@@ -88,6 +99,11 @@ labeled_df['autolabel']
 ADALA can be used to estimate LLM uncertainty for each row in the dataset. It is useful if you want to detect hallucinations or other forms of LLM errors.
 
 ```python
-uncertainty_df = ad.estimate_uncertainty(df, instructions=instructions, prediction_column='predictions', uncertainty_column='uncertainty')
+uncertainty_df = ad.estimate_uncertainty(
+    df,
+    instructions=instructions,
+    prediction_column='predictions',
+    uncertainty_column='uncertainty'
+)
 uncertainty_df['uncertainty']
 ```
