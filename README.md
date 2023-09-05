@@ -1,11 +1,16 @@
-# ADALA
-ADALA: Automated Data Labeling Framework.
+# ADALA <img src="https://htx-pub.s3.amazonaws.com/samples/Adala.png" width="100" align="right"/>
+Automated Data Labeling Framework. 
+
+[![PyPI version](https://badge.fury.io/py/adala.svg)](https://badge.fury.io/py/adala)
+[![Python version](https://img.shields.io/pypi/pyversions/adala.svg)](https://pypi.python.org/pypi/adala)
+[![License](https://img.shields.io/pypi/l/adala.svg)](https://pypi.python.org/pypi/adala)
+
 
 ADALA is a framework for automated data labeling. It uses a combination of Large Language Models (LLMs) autonomous agents and Active Learning (AL) to label data. It is designed to be used with [Label Studio](https://labelstud.io/) to provide a human-in-the-loop data labeling experience.
 
 Here is what ADALA does:
 - [LLM instructions generation](#llm-instructions-generation)
-- [Predicting dataset with LLM given the instructions](#applying-llm-to-the-dataset-given-the-instructions)
+- [Predicting dataset with LLM](#predicting-dataset-with-llm)
 - [Active learning with Human-in-the-Loop](#active-learning-with-human-in-the-loop)
 - [LLM uncertainty estimation](#llm-uncertainty-estimation)
 
@@ -24,19 +29,63 @@ If you're planning to use human-in-the-loop labeling, install Label Studio:
 pip install label-studio
 ```
 
+## Load dataset
+ADALA works with datasets in various formats:
+- [Pandas DataFrame](#pandas-dataframe)
+- [Spark DataFrame](#spark-dataframe)
 
-## LLM instructions generation
-
-ADALA uses Large Language Models (LLMs) to generate instructions for data labeling. You need to have an [OpenAI API](https://platform.openai.com/) key to use ADALA.
-
-```bash
-export OPENAI_API_KEY=your_key
-```
+### Pandas DataFrame
 
 Load the data into a pandas DataFrame:
 ```python
 import pandas as pd
 input_df = pd.read_csv('dataset.csv')
+```
+
+### Spark DataFrame
+
+```python
+from pyspark.sql import SparkSession
+spark = SparkSession.builder.getOrCreate()
+```
+
+
+## Predicting dataset with LLM
+
+ADALA inference is optimized to run in the batch mode - it is much faster to predict the whole dataset at once, rather than row-by-row.
+
+Create LLM predictor:
+```python
+predictor = ad.LLMPredictor()
+```
+
+There are multiple LLM models available in the table below:
+| Model    | Initialize predictor |
+| -------- | ------- |
+| [Any LangChain's LLM](https://python.langchain.com/docs/get_started/introduction.html) | `ad.LangChainLLMPredictor()`    |
+| [HuggingFace TGI](https://huggingface.co/text-generation-inference) | `ad.HuggingFaceLLMPredictor()`     |
+| [vLLM](https://vllm.ai/)    | `ad.VLLMPredictor()`    |
+| [llama.cpp](https://github.com/ggerganov/llama.cpp)   | `ad.LlamaCppPredictor()`   |
+
+
+Predict the dataset:
+```python
+predicted_df = predictor.predict(
+    df=input_df,
+    instruction='Predict sentiment',
+    labels=['positive', 'negative'],
+    prediction_column='predictions'
+)
+predicted_df['predictions']
+```
+
+
+## LLM instructions generation
+
+ADALA can generate optimal LLM instructions for data labeling. You need to have an [OpenAI API](https://platform.openai.com/) key to use ADALA.
+
+```bash
+export OPENAI_API_KEY=your_key
 ```
 
 The following method allows you to finetune instructions to classify each row in the DataFrame, given the ground truth labels in the specified column:
@@ -47,25 +96,6 @@ instructions = ad.generate_instructions(
     df=input_df,
     ground_truth_column='label'
 )
-```
-
-## Applying LLM to the dataset given the instructions
-
-ADALA used optimized batch inference to run LLM on the dataset. 
-
-Create LLM predictor:
-```python
-predictor = ad.LLMPredictor(model='gpt3')
-```
-
-Predict the dataset:
-```python
-predicted_df = predictor.predict(
-    df=input_df,
-    instructions=instructions,
-    prediction_column='predictions'
-)
-predicted_df['predictions']
 ```
 
 ## Active learning with Human-in-the-Loop
