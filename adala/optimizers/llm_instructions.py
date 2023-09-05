@@ -8,16 +8,16 @@ from copy import deepcopy
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
 from langchain import PromptTemplate, OpenAI, LLMChain
-from adala.predictors import LLMPredictor
+from adala.labelers.base import LLMLabeler
 
 logger = logging.getLogger(__name__)
 
 
-def calc_fitness(predictor: LLMPredictor, records, df, labels, ground_truth_column, sample_size=5, top_n=5):
+def calc_fitness(labeler: LLMLabeler, records, df, labels, ground_truth_column, sample_size=5, top_n=5):
     df = df.sample(n=sample_size, axis=0)
     output_records = deepcopy(records)
     for record in output_records:
-        df_pred = predictor.predict(
+        df_pred = labeler.label(
             df=df.drop(columns=[ground_truth_column]),
             instruction=record['instruction'],
             labels=labels,
@@ -99,21 +99,27 @@ New refined instruction:
 @dataclass
 class GenerateInstructionResult:
     """Result of the generate_instruction()"""
-    instruction: str
+    best_instruction: str
     benchmark_table: pd.DataFrame
+    labels: List[str]
 
 
 def generate_instruction(
-    predictor: LLMPredictor,
+    labeler: LLMLabeler,
     df: pd.DataFrame,
     ground_truth_column: str,
     initial_instructions: List = None,
-    num_generations=10,
-    top_instructions=5,
-    validation_sample_size=5,
+    num_generations: int = 10,
+    top_instructions: int = 5,
+    validation_sample_size: int = 5,
+    human_in_the_loop: bool = False,
+    label_studio_project_id: int = None,
+    label_studio_api_token: str = None,
+    label_studio_host: str = None,
 ) -> GenerateInstructionResult:
     """Optimize the instruction for the LLM."""
 
+    initial_instructions = initial_instructions or ['']
     records = [
         {
             'instruction': instruction,
@@ -130,7 +136,7 @@ def generate_instruction(
         # calculate fitness value and corresponding errors
         logger.info(f'Calculating fitness for {len(records)} instructions')
         records = calc_fitness(
-            predictor=predictor,
+            labeler=labeler,
             records=records,
             df=df,
             labels=labels,
@@ -164,12 +170,13 @@ def generate_instruction(
             f'{pd.DataFrame.from_records(records)[["id", "instruction", "accuracy", "examples_seen"]]}')
 
     # calculate fitness on final results
-    fitness = calc_fitness(predictor, records, df, labels, ground_truth_column, validation_sample_size, top_instructions)
+    fitness = calc_fitness(labeler, records, df, labels, ground_truth_column, validation_sample_size, top_instructions)
     benchmark_table = pd.DataFrame.from_records(fitness)[["id", "instruction", "accuracy", "examples_seen"]]
     logger.info(f'Final results:\n{benchmark_table}')
 
     return GenerateInstructionResult(
-        instruction=fitness[0]['instruction'],
-        benchmark_table=benchmark_table
+        best_instruction=fitness[0]['instruction'],
+        benchmark_table=benchmark_table,
+        labels=labels
     )
 
