@@ -100,7 +100,7 @@ New refined instruction:
 class GenerateInstructionResult:
     """Result of the generate_instruction()"""
     best_instruction: str
-    benchmark_table: pd.DataFrame
+    benchmark: pd.DataFrame
     labels: List[str]
 
 

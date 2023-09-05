@@ -4,7 +4,7 @@ import json
 
 from pathlib import Path
 from abc import ABC, abstractmethod
-
+from tqdm import tqdm
 from pydantic import BaseModel, root_validator
 from typing import Optional, List, Dict
 from langchain import PromptTemplate, OpenAI, LLMChain
@@ -104,7 +104,8 @@ class LangChainLabeler(LLMLabeler):
         output_column: str = 'predictions'
     ) -> pd.DataFrame:
 
-        predictions = df.apply(
+        tqdm.pandas(desc='Labeling')
+        predictions = df.progress_apply(
             func=self.label_row,
             axis=1,
             instruction=instruction,
