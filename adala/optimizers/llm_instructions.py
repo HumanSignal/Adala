@@ -170,13 +170,21 @@ def generate_instruction(
             f'{pd.DataFrame.from_records(records)[["id", "instruction", "accuracy", "examples_seen"]]}')
 
     # calculate fitness on final results
-    fitness = calc_fitness(labeler, records, df, labels, ground_truth_column, validation_sample_size, top_instructions)
-    benchmark_table = pd.DataFrame.from_records(fitness)[["id", "instruction", "accuracy", "examples_seen"]]
+    records = calc_fitness(
+        labeler=labeler,
+        records=records,
+        df=df,
+        labels=labels,
+        ground_truth_column=ground_truth_column,
+        sample_size=len(df),
+        top_n=top_instructions,
+    )
+    benchmark_table = pd.DataFrame.from_records(records)[["id", "instruction", "accuracy", "examples_seen"]]
     logger.info(f'Final results:\n{benchmark_table}')
 
     return GenerateInstructionResult(
-        best_instruction=fitness[0]['instruction'],
-        benchmark_table=benchmark_table,
+        best_instruction=records[0]['instruction'],
+        benchmark=benchmark_table,
         labels=labels
     )
 
