@@ -1,6 +1,9 @@
 import pandas as pd
 import difflib
 import json
+import re
+import openai
+import guidance
 
 from pathlib import Path
 from abc import ABC, abstractmethod
@@ -10,7 +13,7 @@ from typing import Optional, List, Dict
 from langchain import PromptTemplate, OpenAI, LLMChain
 from langchain.llms import BaseLLM
 from langchain.chat_models import ChatOpenAI
-from langchain.prompts import HumanMessagePromptTemplate, ChatPromptTemplate
+from langchain.prompts import HumanMessagePromptTemplate, SystemMessagePromptTemplate, ChatPromptTemplate
 
 
 class Labeler(BaseModel, ABC):
@@ -26,9 +29,11 @@ class LLMLabeler(Labeler):
     to generate label predictions given text instructions:
     label = LLM(sample, instructions)
     """
+    prediction_column: str = 'predictions'
+    score_column: str = 'score'
 
     @abstractmethod
-    def label_string(self, input_string: str, instruction: str, labels: List[str]) -> str:
+    def label_string(self, input_string: str, instruction: str, labels: List[str]) -> Dict:
         """
         Label a string with LLM given instruction:
         label = LLM(input_string, instruction)
@@ -47,12 +52,56 @@ class LLMLabeler(Labeler):
         self,
         df: pd.DataFrame,
         instruction: str,
-        labels: List[str],
-        output_column: str = 'predictions'
+        labels: List[str]
     ) -> pd.DataFrame:
         """
         Label all rows from a pandas DataFrame.
         """
+
+
+class OpenAILabeler(LLMLabeler):
+    model_name: str = 'gpt-3.5-turbo-instruct'
+    temperature: float = 0
+    prompt_template: str = '{{instruction}}\nInput: {{input}}\nOutput: {{select "output" options=labels logprobs="logprobs"}}'
+    verbose: bool = False
+
+    _llm = None
+
+    @root_validator
+    def initialize_llm(cls, values):
+        values['_llm'] = guidance(
+            template=values.get('prompt_template'),
+            llm=guidance.llms.OpenAI(values.get('model_name')),
+            silent=not values.get('verbose')
+        )
+        return values
+
+    def label_string(self, input_string: str, instruction: str, labels: Optional[List[str]] = None) -> Dict:
+        result = self._llm(input=input_string, instruction=instruction, labels=labels)
+        return {
+            self.prediction_column: result['output'],
+            self.score_column: result['logprobs'][result['output']]
+        }
+
+    def label_row(self, row: pd.Series, instruction: str, labels: List[str]) -> Dict:
+        return self.label_string(row.to_json(force_ascii=False), instruction, labels)
+
+    def label(
+        self,
+        df: pd.DataFrame,
+        instruction: str,
+        labels: List[str],
+        output_column: str = 'predictions'
+    ) -> pd.DataFrame:
+        tqdm.pandas(desc='Labeling')
+        df[[self.prediction_column, self.score_column]] = df.progress_apply(
+            func=self.label_row,
+            axis=1,
+            result_type='expand',
+            instruction=instruction,
+            labels=labels,
+        )
+        return df
 
 
 class LangChainLabeler(LLMLabeler):
@@ -61,14 +110,16 @@ class LangChainLabeler(LLMLabeler):
     llm: Optional[BaseLLM] = None
     llm_chain: Optional[LLMChain] = None
     prompt: Optional[str] = None
+    system_prompt: Optional[str] = None
     verbose: bool = False
 
     @root_validator
     def initialize_llm(cls, values):
         if values.get('prompt') is None:
-            default_file = Path(__file__).parent / 'prompts' / 'simple_classification.txt'
-            with open(default_file, 'r') as f:
-                values['prompt'] = f.read()
+            # default_file = Path(__file__).parent / 'prompts' / 'simple_classification.txt'
+            # with open(default_file, 'r') as f:
+            #     values['prompt'] = f.read()
+            values['prompt'] = '{instructions}\n\nInput:\n{record}\n\nOutput:\n'
         if values.get('llm') is None:
             values['llm'] = ChatOpenAI(
                 model_name=values['model_name'],
@@ -76,31 +127,44 @@ class LangChainLabeler(LLMLabeler):
             )
         if values.get('llm_chain') is None:
             prompt = HumanMessagePromptTemplate(prompt=PromptTemplate.from_template(values['prompt']))
+            messages = [prompt]
+            if values.get('system_prompt') is not None:
+                system_prompt = SystemMessagePromptTemplate(prompt=PromptTemplate.from_template(values['system_prompt']))
+                messages.insert(0, system_prompt)
             values['llm_chain'] = LLMChain(
                 llm=values['llm'],
-                prompt=ChatPromptTemplate.from_messages([prompt]),
+                prompt=ChatPromptTemplate.from_messages(messages=messages),
                 verbose=values['verbose']
             )
         return values
 
-    def label_string(self, input_string: str, instruction: str, labels: List[str]):
+    def label_string(self, input_string: str, instruction: str, labels: Optional[List[str]] = None):
         prediction = self.llm_chain.run(
             record=input_string,
             instructions=instruction,
-            labels=str(labels)
+            # labels=str(labels)
         )
-        # match prediction to actual labels
-        scores = list(map(lambda l: difflib.SequenceMatcher(None, prediction, l).ratio(), labels))
-        return labels[scores.index(max(scores))]
+        if labels:
+            prediction = prediction.strip()
+            line_predictions = []
+            # for line_prediction in prediction.split('\n'):
+            for line_prediction in re.split(r',|\n', prediction):
 
-    def label_row(self, row: pd.Series, instruction: str, labels: List[str]) -> str:
-        return self.label_string(input_string=row.to_json(), instruction=instruction, labels=labels)
+                # match prediction to actual labels
+                scores = list(map(lambda l: difflib.SequenceMatcher(None, line_prediction.strip(), l).ratio(), labels))
+                line_prediction = labels[scores.index(max(scores))]
+                line_predictions.append(line_prediction)
+            prediction = ','.join(sorted(line_predictions))
+        return prediction
+
+    def label_row(self, row: pd.Series, instruction: str, labels: Optional[List[str]] = None) -> str:
+        return self.label_string(input_string=row.to_json(force_ascii=False), instruction=instruction, labels=labels)
 
     def label(
         self,
         df: pd.DataFrame,
         instruction: str,
-        labels: List[str],
+        labels: Optional[List[str]] = None,
         output_column: str = 'predictions'
     ) -> pd.DataFrame:
 
@@ -112,7 +176,3 @@ class LangChainLabeler(LLMLabeler):
             labels=labels,
         )
         return df.assign(**{output_column: predictions})
-
-
-class OpenAILabeler(LangChainLabeler):
-    model_name = 'gpt-3.5-turbo'

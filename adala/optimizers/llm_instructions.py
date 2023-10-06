@@ -16,20 +16,29 @@ logger = logging.getLogger(__name__)
 def calc_fitness(labeler: LLMLabeler, records, df, labels, ground_truth_column, sample_size=5, top_n=5):
     df = df.sample(n=sample_size, axis=0)
     output_records = deepcopy(records)
-    for record in output_records:
+    for i, record in enumerate(output_records):
         df_pred = labeler.label(
-            df=df.drop(columns=[ground_truth_column]),
+            df=df.drop(columns=[ground_truth_column] + [r['id'] for r in output_records[:i]]),
             instruction=record['instruction'],
-            labels=labels,
-            output_column='predictions'
+            labels=labels
         )
-        current_matches = (df_pred['predictions'] == df[ground_truth_column]).sum()
+        df_pred = pd.concat((df_pred, df[[ground_truth_column]]), axis=1)
+        current_matches = (df_pred['predictions'] == df_pred[ground_truth_column]).sum()
+        current_mismatches = (df_pred['predictions'] != df_pred[ground_truth_column]).sum()
         examples_seen = record['examples_seen']
         total_examples_seen = examples_seen + sample_size
         # iterative formula for calculating accuracy
         record['accuracy'] = (examples_seen * record['accuracy'] + current_matches) / total_examples_seen
         record['examples_seen'] = total_examples_seen
-        record['errors'] = df_pred[df_pred['predictions'] != df[ground_truth_column]].to_json(orient='records')
+        record['errors'] = '\n'.join(df_pred[df_pred['predictions'] != df_pred[ground_truth_column]].apply(
+            lambda r: f'INPUT: {r.drop(["predictions", ground_truth_column]).to_json()}\n'
+                      f'PREDICTED OUTPUT: {r["predictions"]}\n'
+                      f'EXPECTED OUTPUT: {r[ground_truth_column]}', axis=1))
+        record['mismatches'] = current_mismatches
+
+        df[record['id']] = df_pred['predictions']
+
+    logger.info(f'Result df:\n{df}')
 
     sorted_results = sorted(output_records, key=lambda x: x['accuracy'], reverse=True)
     best_results = sorted_results[:top_n]
@@ -62,24 +71,32 @@ def adapt(current_instruction, errors, labels):
     system_message_prompt = SystemMessagePromptTemplate.from_template('''\
 Act as an 'Instruction Tuner' for the LLM. You will be given the inputs:
 
-- The [CURRENT INSTRUCTION] used to guide the LLM's classification
+- The [CURRENT INSTRUCTION] used to guide the LLM's classification, including specific examples with ground truth labels.
 - Target set of [LABELS] for the dataset in question.
 - [CURRENT ERRORS] that emerged when this instruction was applied to a dataset.
 
-The ERRORS presented in JSON format, which contain the ground_truth label, \
-the predictions label, and the input data in one or more columns. \
-Here's an example format for the errors:
+The current errors are presented in the following format:
+INPUT: [input text]
+PREDICTED OUTPUT: [predicted label]
+EXPECTED OUTPUT: [ground truth label]
 
-```json
-[{{"ground_truth":"...","predictions":"...", "input_text": "...", "other": "data", ...}}, {{"ground_truth":"...","predictions":"...", "input_text": "...", "other": "data", ...}}, ...]
-```
+Carefully analyze these errors and craft a revised instruction for the LLM to fit the expected outputs. \
+Include 2-3 examples at the end of your response to demonstrate how the new instruction would be applied. \
+Use the following format for your examples:
 
-Analyze these inputs and craft a revised instruction for the LLM, aiming to enhance classification accuracy for the dataset in question. Deliver your response as the refined instruction.
-''')
+INPUT: [input text]
+OUTPUT: [expected output label]
+
+Use specific error examples and generalize them to address any observed errors that may occur in the future. 
+Deliver your response as the refined instruction.''')
+#Analyze these inputs and craft a revised instruction for the LLM, aiming to enhance classification accuracy for the dataset in question. Deliver your response as the refined instruction.
+#''')
     human_message_prompt = HumanMessagePromptTemplate.from_template('''\
-CURRENT INSTRUCTION: "{instruction}"
+CURRENT INSTRUCTION: {instruction}
 LABELS: {labels}
-CURRENT ERRORS: {errors}
+CURRENT ERRORS:
+
+{errors}
 
 New refined instruction:
 ''')
@@ -87,7 +104,7 @@ New refined instruction:
         system_message_prompt,
         human_message_prompt
     ])
-    chain = LLMChain(llm=llm, prompt=chat_prompt)
+    chain = LLMChain(llm=llm, prompt=chat_prompt, verbose=False)
     new_instructions = chain.run(
         instruction=current_instruction,
         errors=errors,
@@ -107,10 +124,10 @@ class GenerateInstructionResult:
 def generate_instruction(
     labeler: LLMLabeler,
     df: pd.DataFrame,
-    ground_truth_column: str,
+    ground_truth_column: str = 'ground_truth',
     initial_instructions: List = None,
     num_generations: int = 10,
-    top_instructions: int = 5,
+    top_instructions: int = 3,
     validation_sample_size: int = 5,
     human_in_the_loop: bool = False,
     label_studio_project_id: int = None,
@@ -120,6 +137,7 @@ def generate_instruction(
     """Optimize the instruction for the LLM."""
 
     initial_instructions = initial_instructions or ['']
+    df = df.dropna(subset=[ground_truth_column])
     records = [
         {
             'instruction': instruction,
@@ -132,6 +150,7 @@ def generate_instruction(
         for instruction in initial_instructions
     ]
     labels = df[ground_truth_column].unique().tolist()
+    # labels = None
     for generation in range(num_generations):
         # calculate fitness value and corresponding errors
         logger.info(f'Calculating fitness for {len(records)} instructions')
@@ -145,8 +164,12 @@ def generate_instruction(
             top_n=top_instructions,
         )
 
+        logger.info(
+            f'Results of {generation} generations:\n'
+            f'{pd.DataFrame.from_records(records)[["id", "instruction", "accuracy", "examples_seen", "mismatches"]]}')
+
         # mutate the best instructions with accuracy<100% based on errors
-        best_results_with_errors = next((x for x in records if x['accuracy'] < 1), None)
+        best_results_with_errors = next((x for x in records if x['mismatches'] > 0), None)
         if not best_results_with_errors:
             # TODO: change this to a more sophisticated mutation
             logger.info(f'All instructions have 100% accuracy. Mutating the best instruction {records[0]["id"]}...')
@@ -165,10 +188,6 @@ def generate_instruction(
             'id': uuid4().hex[:4]
         }]
 
-        logger.info(
-            f'Results of {generation} generation:\n'
-            f'{pd.DataFrame.from_records(records)[["id", "instruction", "accuracy", "examples_seen"]]}')
-
     # calculate fitness on final results
     records = calc_fitness(
         labeler=labeler,
@@ -179,7 +198,7 @@ def generate_instruction(
         sample_size=len(df),
         top_n=top_instructions,
     )
-    benchmark_table = pd.DataFrame.from_records(records)[["id", "instruction", "accuracy", "examples_seen"]]
+    benchmark_table = pd.DataFrame.from_records(records)[["id", "instruction", "accuracy", "examples_seen", "mismatches"]]
     logger.info(f'Final results:\n{benchmark_table}')
 
     return GenerateInstructionResult(
