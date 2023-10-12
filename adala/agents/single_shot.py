@@ -15,8 +15,10 @@ class SingleShotAgent(Agent):
         """
         if learn:
             self.skill.learn(self.dataset)
-            result = None
+            experience = None
         else:
-            result = self.skill.apply(self.dataset)
+            experience = self.skill.apply(self.dataset)
 
-        return AgentStep(artifacts=[result], is_last=True)
+        self.memory.remember(experience)
+
+        return AgentStep(artifacts=[experience], is_last=True)

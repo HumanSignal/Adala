@@ -9,7 +9,10 @@ filepath = 'https://hs-sandbox-pub.s3.amazonaws.com/amazon_cells_labelled.tsv'
 dataset = PandasDataframe(filepath, sep='\t', nrows=100)
 
 # enable target skill
-skill = LLMSkill('Classify a product review as either expressing "Subjective" or "Objective" statements.')
+skill = LLMSkill(
+    name='Understanding subjective and objective statements from text.',
+    instruction='Classify a product review as either expressing "Subjective" or "Objective" statements.'
+)
 
 # create agent to improve the skill
 agent = SingleShotAgent(dataset, skill)

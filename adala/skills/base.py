@@ -3,14 +3,18 @@ from typing import List, Optional
 from abc import ABC, abstractmethod
 
 from .datasets.base import Dataset, MutableDataset
-from .memories.base import ShortTermMemory, LongTermMemory
 from .tools.base import Tool
 
 
+class Experience(BaseModel):
+    """
+    Base class for skill experiences - results of evolving skills based on a dataset
+    """
+
+
 class Skill(BaseModel, ABC):
+    name: str
     instruction: str
-    short_term_memory: Optional[ShortTermMemory]
-    long_term_memory: Optional[LongTermMemory]
     tools: Optional[List[Tool]]
 
     @abstractmethod
@@ -26,9 +30,15 @@ class Skill(BaseModel, ABC):
         """
 
     @abstractmethod
-    def analyze(self, original_dataset: Dataset, annotated_dataset: MutableDataset) -> None:
+    def remember(self, annotated_dataset: MutableDataset) -> None:
         """
-        Analyze results and store observations in memory
+        Remember observations from validation results in short term memory
+        """
+
+    @abstractmethod
+    def analyze(self, original_dataset: Dataset, annotated_dataset: MutableDataset) -> Experience:
+        """
+        Analyze results and return observed experience - it will be stored in long term memory
         """
 
     @abstractmethod
@@ -37,11 +47,13 @@ class Skill(BaseModel, ABC):
         Improve current skill state based on memory and tools
         """
 
-    def evolve(self, dataset: Dataset):
+    def evolve(self, dataset: Dataset) -> Experience:
         """
         Apply, validate, analyze and optimize skill.
         """
         agent_predictions = self.apply(dataset)
         annotated_dataset = self.validate(dataset, agent_predictions)
-        self.analyze(dataset, annotated_dataset)
+        self.remember(annotated_dataset)
+        experience = self.analyze(dataset, annotated_dataset)
         self.optimize()
+        return experience
