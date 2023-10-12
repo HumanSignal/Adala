@@ -3,7 +3,6 @@ from typing import List, Optional, Any
 from abc import ABC, abstractmethod
 
 from .datasets.base import Dataset, MutableDataset
-from .tools.base import Tool
 
 
 class Experience(BaseModel):
@@ -35,7 +34,6 @@ class LongTermMemory(BaseModel, ABC):
 class Skill(BaseModel, ABC):
     name: str
     instruction: str
-    tools: Optional[List[Tool]]
 
     @abstractmethod
     def apply(self, dataset: Dataset) -> MutableDataset:
