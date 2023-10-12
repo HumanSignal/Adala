@@ -32,7 +32,6 @@ class LongTermMemory(BaseModel, ABC):
         """
 
 
-
 class Skill(BaseModel, ABC):
     name: str
     instruction: str
@@ -51,12 +50,6 @@ class Skill(BaseModel, ABC):
         """
 
     @abstractmethod
-    def remember(self, annotated_dataset: MutableDataset) -> None:
-        """
-        Remember observations from validation results in short term memory
-        """
-
-    @abstractmethod
     def analyze(
         self, original_dataset: Dataset, annotated_dataset: MutableDataset, memory: LongTermMemory
     ) -> Experience:
@@ -65,7 +58,7 @@ class Skill(BaseModel, ABC):
         """
 
     @abstractmethod
-    def optimize(self, experience: Experience) -> None:
+    def improve(self, experience: Experience) -> None:
         """
         Improve current skill state based on current experience
         """
@@ -76,7 +69,6 @@ class Skill(BaseModel, ABC):
         """
         agent_predictions = self.apply(dataset)
         annotated_dataset = self.validate(dataset, agent_predictions)
-        self.remember(annotated_dataset)
         experience = self.analyze(dataset, annotated_dataset, long_term_memory)
-        self.optimize(experience)
+        self.improve(experience)
         return experience
