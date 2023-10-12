@@ -57,15 +57,17 @@ class Skill(BaseModel, ABC):
         """
 
     @abstractmethod
-    def analyze(self, original_dataset: Dataset, annotated_dataset: MutableDataset) -> Experience:
+    def analyze(
+        self, original_dataset: Dataset, annotated_dataset: MutableDataset, memory: LongTermMemory
+    ) -> Experience:
         """
         Analyze results and return observed experience - it will be stored in long term memory
         """
 
     @abstractmethod
-    def optimize(self) -> None:
+    def optimize(self, experience: Experience) -> None:
         """
-        Improve current skill state based on memory and tools
+        Improve current skill state based on current experience
         """
 
     def learn(self, dataset: Dataset, long_term_memory: LongTermMemory) -> Experience:
@@ -75,6 +77,6 @@ class Skill(BaseModel, ABC):
         agent_predictions = self.apply(dataset)
         annotated_dataset = self.validate(dataset, agent_predictions)
         self.remember(annotated_dataset)
-        experience = self.analyze(dataset, annotated_dataset)
-        self.optimize()
+        experience = self.analyze(dataset, annotated_dataset, long_term_memory)
+        self.optimize(experience)
         return experience
