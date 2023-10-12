@@ -1,5 +1,4 @@
 from .base import Agent, AgentStep
-from typing import Any
 from .skills.base import Skill
 
 
@@ -14,10 +13,10 @@ class SingleShotAgent(Agent):
         Run agent step and return results
         """
         if learn:
-            self.skill.learn(self.dataset)
-            experience = None
+            experience = self.skill.learn(self.dataset, self.memory)
         else:
-            experience = self.skill.apply(self.dataset)
+            self.skill.apply(self.dataset)
+            experience = None
 
         self.memory.remember(experience)
 

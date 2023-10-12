@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List
 from .datasets.base import Dataset
-from .skills.base import Experience
+from .skills.base import Experience, LongTermMemory
 
 # following the protocol https://agentprotocol.ai/protocol
 
@@ -22,32 +22,12 @@ class AgentStep(BaseModel):
     is_last: bool
 
 
-class AgentMemory(BaseModel, ABC):
-
-    """
-    Base class for long-term memories.
-    Long-term memories are used to store acquired knowledge and can be shared between agents.
-    """
-
-    @abstractmethod
-    def remember(self, experience: Experience):
-        """
-        Base method for remembering experiences in long term memory.
-        """
-
-    @abstractmethod
-    def retrieve(self, observations: Any) -> Experience:
-        """
-        Base method for retrieving past experiences from long term memory, based on current observations
-        """
-
-
 class Agent(BaseModel, ABC):
     """
     Base class for agents.
     """
     dataset: Dataset
-    memory: Optional[AgentMemory]
+    memory: Optional[LongTermMemory]
 
     @abstractmethod
     def step(self, learn=True) -> AgentStep:
