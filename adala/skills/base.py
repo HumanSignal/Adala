@@ -36,7 +36,7 @@ class Skill(BaseModel, ABC):
     instructions: str
     description: Optional[str]
 
-    _previous_instructions: Optional[List[str]]
+    _previous_instructions: Optional[List[str]] = []
 
     @abstractmethod
     def apply(self, dataset: Dataset) -> Dataset:

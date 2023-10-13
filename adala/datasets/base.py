@@ -1,9 +1,14 @@
 from abc import ABC, abstractmethod
+
+import pandas as pd
 from pydantic import BaseModel
 from typing import List, Optional, Any, Dict, Union
 
 RawRecord = Dict[str, Any]
 RawRecords = List[RawRecord]
+
+# Internal data tables representation. Replace this with Dask or Polars in the future.
+InternalDataFrame = pd.DataFrame
 
 
 class Dataset(BaseModel, ABC):
@@ -16,7 +21,7 @@ class Dataset(BaseModel, ABC):
     def template_string_batches(
         self,
         template: str,
-        instruction: str,
+        instructions: str,
         batch_size: int = 100
     ):
         """
@@ -24,13 +29,13 @@ class Dataset(BaseModel, ABC):
         """
 
     @abstractmethod
-    def make_new_with_index(self, records: RawRecords) -> "Dataset":
+    def make_new_with_index(self, records: RawRecords) -> InternalDataFrame:
         """
         Return new dataset with the same index as original dataset, but with new records.
         """
 
     @abstractmethod
-    def assign(self, records: Union[RawRecords, "Dataset"], inplace=False) -> Optional["Dataset"]:
+    def assign(self, records: Union[RawRecords, InternalDataFrame], inplace=False) -> Optional[InternalDataFrame]:
         """
         Assign new records to the original dataset.
         If inplace is True, modify the original dataset.
@@ -52,7 +57,7 @@ class Dataset(BaseModel, ABC):
         """
 
     @abstractmethod
-    def get_ground_truth(self) -> "Dataset":
+    def get_ground_truth(self) -> InternalDataFrame:
         """
         Return ground truth subset if available.
         """

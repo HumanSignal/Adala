@@ -1,11 +1,16 @@
 import openai
+import pandas as pd
 
+from typing import Optional
 from .base import Skill, Experience, LongTermMemory
-from adala.datasets.base import Dataset
+from adala.datasets.base import Dataset, InternalDataFrame
 
 
 class LLMExperience(Experience):
-    errors: Dataset
+    errors: InternalDataFrame
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class LLMSkill(Skill):
@@ -14,54 +19,54 @@ class LLMSkill(Skill):
     """
     model_name: str = 'gpt-3.5-turbo-instruct'
     temperature: float = 0
-    prompt_template: str = '{instruction}\n\nInput: {input}\nOutput:\n'
+    prompt_template: str = '{instructions}\n\nInput: {input}\nOutput:\n'
     verbose: bool = False
 
-    def apply(self, dataset: Dataset) -> Dataset:
+    def apply(self, dataset: Dataset) -> InternalDataFrame:
         completions = []
         predictions_column_name = self.name
         for batch in dataset.template_string_batches(
-            template=self.prompt_template, instruction=self.instruction,
+            template=self.prompt_template, instructions=self.instructions,
             # this is the current OpenAI limit
             batch_size=20
         ):
             result = openai.Completion.create(model=self.model_name, prompt=batch)
-            completions.extend({predictions_column_name: c['text'] for c in result['choices']})
+            completions.extend({predictions_column_name: c['text']} for c in result['choices'])
 
         predictions = dataset.make_new_with_index(completions)
         return predictions
 
-    def evaluate(self, dataset: Dataset, predictions: Dataset) -> Dataset:
-        predictions_with_ground_truth = predictions.assign(dataset.get_ground_truth())
-        predictions_with_ground_truth.assign_columns_match(
-            column_a=self.name,
-            column_b=dataset.ground_truth_column,
-            inplace=True,
-            output_column_name=f'{self.name}_match'
-        )
-        return predictions_with_ground_truth
+    def evaluate(self, dataset: Dataset, predictions: InternalDataFrame) -> InternalDataFrame:
+        gt = dataset.get_ground_truth()
+        pred = predictions.loc[gt.index]
+        pred = pred[pred.notna()]
+
+        # TODO: implement more sophisticated evaluation beyond simple equality
+        match = pred[self.name] == gt[dataset.ground_truth_column]
+        pred[f'{self.name}_match'] = match
+        return pd.concat([gt, pred], axis=1)
 
     def analyze(
-        self, original_dataset: Dataset, evaluation: Dataset, memory: LongTermMemory
+        self, original_dataset: Dataset, evaluation: InternalDataFrame, memory: Optional[LongTermMemory] = None
     ) -> Experience:
-        match_column = f'{self.name}_match'
-        stats = evaluation.get_column_stats(match_column)
-        if self.verbose:
-            print(f'LLM Skill {self.name} stats: {stats}')
-        errors = evaluation.simple_select(match_column, False)
+        errors = evaluation[~evaluation[f'{self.name}_match']]
         return LLMExperience(errors=errors)
 
     def improve(self, original_dataset: Dataset, experience: LLMExperience) -> None:
-        errors = LLMExperience.errors
-        num_samples = min(3, len(errors))
-        few_errors = errors.sample(n=num_samples)
-        few_shot_list = few_errors.apply_template(f'INPUT: {{text}} -> {{{self.name}}} '
-                                                  f'(Must be {{{original_dataset.ground_truth_column}}}').tolist()
-        errors_str = "\n".join(few_shot_list)
+        errors = experience.errors
+        num_samples = min(3, errors.shape[0])
+        pred_column_name = self.name
+        gt_column_name = original_dataset.ground_truth_column
+        errors_list = errors.sample(n=num_samples).apply(
+            lambda r: f'INPUT: {r.drop([pred_column_name, gt_column_name]).to_json()}\n'
+                      f'PREDICTED OUTPUT: {r[pred_column_name]}\n'
+                      f'EXPECTED OUTPUT: {r[gt_column_name]}', axis=1)
+
+        errors_str = "\n".join(errors_list.tolist())
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                    {"role": "system", "content": '''\
+                {"role": "system", "content": '''\
         Act as an 'Instruction Tuner' for the LLM. You will be given the inputs:
 
         - The [CURRENT INSTRUCTION] used to guide the LLM's classification, including specific examples with ground truth labels.
@@ -81,7 +86,7 @@ class LLMSkill(Skill):
 
         Use specific error examples and generalize them to address any observed errors that may occur in the future.
         Deliver your response as the refined instruction.'''},
-                    {'role': 'user', 'content': f'''\
+                {'role': 'user', 'content': f'''\
         CURRENT INSTRUCTION: {self.instructions}
         CURRENT ERRORS:
 
@@ -93,4 +98,3 @@ class LLMSkill(Skill):
         new_instructions = response['choices'][0]['message']['content']
         self._previous_instructions.append(self.instructions)
         self.instructions = new_instructions
-
