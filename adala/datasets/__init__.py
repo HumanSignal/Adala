@@ -1,1 +1,1 @@
-from pandas_dataframe import PandasDataframe
+from .pandas_dataframe import PandasDataFrame

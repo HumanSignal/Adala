@@ -1,3 +1,4 @@
+import pandas as pd
 from adala.datasets import PandasDataframe
 from adala.skills import LLMSkill
 from adala.agents import SingleShotAgent
@@ -6,16 +7,18 @@ from adala.agents import SingleShotAgent
 
 # create dataset
 filepath = 'https://hs-sandbox-pub.s3.amazonaws.com/amazon_cells_labelled.tsv'
-dataset = PandasDataframe(filepath, sep='\t', nrows=100)
+df = pd.read_csv(filepath, sep='\t', nrows=100)
+dataset = PandasDataframe(df)
 
 # enable target skill
 skill = LLMSkill(
-    name='Understanding subjective and objective statements from text.',
-    instruction='Classify a product review as either expressing "Subjective" or "Objective" statements.'
+    name='subjectivity_detection',
+    description='Understanding subjective and objective statements from text.',
+    instructions='Classify a product review as either expressing "Subjective" or "Objective" statements.'
 )
 
 # create agent to improve the skill
-agent = SingleShotAgent(dataset, skill)
+agent = SingleShotAgent(dataset=dataset, skill=skill)
 
 # run agent
 step_result = agent.step()

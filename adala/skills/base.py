@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Any
 from abc import ABC, abstractmethod
 
-from .datasets.base import Dataset, MutableDataset
+from adala.datasets.base import Dataset
 
 
 class Experience(BaseModel):
@@ -33,23 +33,26 @@ class LongTermMemory(BaseModel, ABC):
 
 class Skill(BaseModel, ABC):
     name: str
-    instruction: str
+    instructions: str
+    description: Optional[str]
+
+    _previous_instructions: Optional[List[str]]
 
     @abstractmethod
-    def apply(self, dataset: Dataset) -> MutableDataset:
+    def apply(self, dataset: Dataset) -> Dataset:
         """
         Apply skill to dataset and return new dataset with skill results (predictions)
         """
 
     @abstractmethod
-    def validate(self, original_dataset: Dataset, predictions: MutableDataset) -> MutableDataset:
+    def evaluate(self, original_dataset: Dataset, predictions: Dataset) -> Dataset:
         """
-        Validate a dataset with predictions and return new Dataset with validation results
+        Test predictions and return new Dataset with evaluation results - e.g. error examples
         """
 
     @abstractmethod
     def analyze(
-        self, original_dataset: Dataset, annotated_dataset: MutableDataset, memory: LongTermMemory
+        self, original_dataset: Dataset, evaluation: Dataset, memory: LongTermMemory
     ) -> Experience:
         """
         Analyze results and return observed experience - it will be stored in long term memory
@@ -65,8 +68,8 @@ class Skill(BaseModel, ABC):
         """
         Apply, validate, analyze and optimize skill.
         """
-        agent_predictions = self.apply(dataset)
-        annotated_dataset = self.validate(dataset, agent_predictions)
+        predictions = self.apply(dataset)
+        annotated_dataset = self.evaluate(dataset, predictions)
         experience = self.analyze(dataset, annotated_dataset, long_term_memory)
-        self.improve(experience)
+        self.improve(dataset, experience)
         return experience
