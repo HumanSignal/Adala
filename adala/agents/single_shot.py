@@ -1,5 +1,5 @@
 from .base import Agent, AgentStep
-from .skills.base import Skill
+from adala.skills.base import Skill
 
 
 class SingleShotAgent(Agent):

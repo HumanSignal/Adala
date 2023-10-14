@@ -17,8 +17,13 @@ skill = LLMSkill(
     instructions='Classify a product review as either expressing "Subjective" or "Objective" statements.'
 )
 
+predictions = skill.apply(dataset)
+evaluations = skill.evaluate(dataset, predictions)
+experience = skill.analyze(dataset, evaluations)
+skill.improve(dataset, experience)
+
 # create agent to improve the skill
-agent = SingleShotAgent(dataset=dataset, skill=skill)
+# agent = SingleShotAgent(dataset=dataset, skill=skill)
 
 # run agent
-step_result = agent.step()
+# step_result = agent.step()

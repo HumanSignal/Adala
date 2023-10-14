@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List
-from .datasets.base import Dataset
-from .skills.base import Experience, LongTermMemory
+from adala.datasets.base import Dataset
+from adala.skills.base import Experience, LongTermMemory
 
 # following the protocol https://agentprotocol.ai/protocol
 
