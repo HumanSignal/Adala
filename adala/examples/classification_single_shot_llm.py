@@ -4,6 +4,7 @@ from adala.agents import SingleShotAgent
 from adala.runtimes import OpenAIGPTRuntime
 from adala.datasets import PandasDataFrame
 from adala.skills import LLMSkill
+from adala.memories import FileMemory
 
 filepath = 'https://hs-sandbox-pub.s3.amazonaws.com/amazon_cells_labelled.tsv'
 
@@ -18,6 +19,11 @@ agent = SingleShotAgent(
     # create runtime
     runtime=OpenAIGPTRuntime(
         model_name='gpt-3.5-turbo-instruct'
+    ),
+
+    # add agent memory
+    memory=FileMemory(
+        filepath='long_term_memory.jsonl'
     ),
 
     # enable skill
