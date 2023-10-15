@@ -1,5 +1,4 @@
-from .base import Memory
-from adala.skills.base import Experience
+from .base import Memory, Experience
 from typing import Any
 
 
@@ -11,7 +10,7 @@ class FileMemory(Memory):
         """
         Serialize experience in JSON and append to file
         """
-        experience_json = experience.json()
+        experience_json = experience.model_dump_json()
         with open(self.filepath, 'a') as f:
             f.write(experience_json + '\n')
 

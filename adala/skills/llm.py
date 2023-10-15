@@ -1,9 +1,10 @@
 import openai
 import pandas as pd
+from pydantic import Field, field_serializer
 
 from typing import Optional
 from .base import Skill, Experience, Memory
-from adala.datasets.base import Dataset, InternalDataFrame
+from adala.datasets.base import Dataset, InternalDataFrame, InternalDataFrame_encoder
 from adala.runtimes.base import LLMRuntime
 
 
@@ -13,6 +14,10 @@ class LLMExperience(Experience):
 
     class Config:
         arbitrary_types_allowed = True
+
+    @field_serializer('errors')
+    def serialize_dt(self, errors: InternalDataFrame):
+        return str(InternalDataFrame_encoder(errors))
 
 
 class LLMSkill(Skill):

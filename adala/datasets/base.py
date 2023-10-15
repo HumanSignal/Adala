@@ -11,6 +11,10 @@ RawRecords = List[RawRecord]
 InternalDataFrame = pd.DataFrame
 
 
+def InternalDataFrame_encoder(df: InternalDataFrame) -> List:
+    return df.to_dict(orient='records')
+
+
 class Dataset(BaseModel, ABC):
     """
     Base class for original datasets.
