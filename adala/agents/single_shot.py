@@ -1,4 +1,4 @@
-from .base import Agent, AgentStep
+from .base import Agent, AgentStep, AgentArtifact
 from adala.skills.base import Skill
 
 
@@ -21,4 +21,9 @@ class SingleShotAgent(Agent):
         if self.memory:
             self.memory.remember(experience)
 
-        return AgentStep(artifacts=[experience], is_last=True)
+        return AgentStep(
+            artifact=AgentArtifact(
+                experience=experience
+            ),
+            is_last=True
+        )

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional, List
 from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
-from adala.memories.base import Memory
+from adala.memories.base import Memory, Experience
 
 # following the protocol https://agentprotocol.ai/protocol
 
@@ -12,14 +12,14 @@ class AgentArtifact(BaseModel):
     """
     Base class for agent artifacts
     """
-    pass
+    experience: Experience
 
 
 class AgentStep(BaseModel):
     """
     Base class for agent steps results
     """
-    artifacts: List[AgentArtifact]
+    artifact: AgentArtifact
     is_last: bool
 
 
