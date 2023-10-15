@@ -2,7 +2,8 @@ from pydantic import BaseModel
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List
 from adala.datasets.base import Dataset
-from adala.skills.base import Experience, LongTermMemory
+from adala.runtimes.base import Runtime
+from adala.memories.base import Memory
 
 # following the protocol https://agentprotocol.ai/protocol
 
@@ -27,7 +28,8 @@ class Agent(BaseModel, ABC):
     Base class for agents.
     """
     dataset: Dataset
-    memory: Optional[LongTermMemory]
+    runtime: Runtime
+    memory: Optional[Memory] = None
 
     @abstractmethod
     def step(self, learn=True) -> AgentStep:

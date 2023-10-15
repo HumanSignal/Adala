@@ -13,11 +13,12 @@ class SingleShotAgent(Agent):
         Run agent step and return results
         """
         if learn:
-            experience = self.skill.learn(self.dataset, self.memory)
+            experience = self.skill.learn(self.dataset, runtime=self.runtime, memory=self.memory)
         else:
-            self.skill.apply(self.dataset)
+            self.skill.apply(self.dataset, runtime=self.runtime)
             experience = None
 
-        self.memory.remember(experience)
+        if self.memory:
+            self.memory.remember(experience)
 
         return AgentStep(artifacts=[experience], is_last=True)

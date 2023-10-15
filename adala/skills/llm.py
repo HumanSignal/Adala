@@ -2,12 +2,14 @@ import openai
 import pandas as pd
 
 from typing import Optional
-from .base import Skill, Experience, LongTermMemory
+from .base import Skill, Experience, Memory
 from adala.datasets.base import Dataset, InternalDataFrame
+from adala.runtimes.base import LLMRuntime
 
 
 class LLMExperience(Experience):
     errors: InternalDataFrame
+    accuracy: float  # TODO: implement moving average
 
     class Config:
         arbitrary_types_allowed = True
@@ -17,23 +19,20 @@ class LLMSkill(Skill):
     """
     LLM skill handles LLM to produce predictions given instructions
     """
-    model_name: str = 'gpt-3.5-turbo-instruct'
-    temperature: float = 0
     prompt_template: str = '{instructions}\n\nInput: {input}\nOutput:\n'
-    verbose: bool = False
 
-    def apply(self, dataset: Dataset) -> InternalDataFrame:
-        completions = []
-        predictions_column_name = self.name
+    def apply(self, dataset: Dataset, runtime: LLMRuntime) -> InternalDataFrame:
+        prediction_strings = []
+
         for batch in dataset.template_string_batches(
             template=self.prompt_template, instructions=self.instructions,
             # this is the current OpenAI limit
             batch_size=20
         ):
-            result = openai.Completion.create(model=self.model_name, prompt=batch)
-            completions.extend({predictions_column_name: c['text']} for c in result['choices'])
+            completions = runtime.process_batch(batch)
+            prediction_strings.extend({self.name: string} for string in completions)
 
-        predictions = dataset.make_new_with_index(completions)
+        predictions = dataset.make_new_with_index(prediction_strings)
         return predictions
 
     def evaluate(self, dataset: Dataset, predictions: InternalDataFrame) -> InternalDataFrame:
@@ -47,10 +46,11 @@ class LLMSkill(Skill):
         return pd.concat([gt, pred], axis=1)
 
     def analyze(
-        self, original_dataset: Dataset, evaluation: InternalDataFrame, memory: Optional[LongTermMemory] = None
+        self, original_dataset: Dataset, evaluation: InternalDataFrame, memory: Optional[Memory] = None
     ) -> Experience:
         errors = evaluation[~evaluation[f'{self.name}_match']]
-        return LLMExperience(errors=errors)
+        accuracy = evaluation[f'{self.name}_match'].mean()
+        return LLMExperience(errors=errors, accuracy=accuracy)
 
     def improve(self, original_dataset: Dataset, experience: LLMExperience) -> None:
         errors = experience.errors
