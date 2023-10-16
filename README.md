@@ -1,37 +1,28 @@
 # ADALA
 
-Adala is an Autonomous DatA (Labeling) Agent framework. 
+Adala is an Autonomous DatA (Labeling) Agent framework.
 
-Adala offers a robust framework for implementing agents specialized in
-data processing, with a particular emphasis on diverse data labeling
-tasks. These agents are autonomous, meaning they can independently
-acquire one or more skills through iterative learning. This learning
-process is influenced by their operating environment, observations,
-and reflections. Users define the environment by providing a ground
-truth dataset. Every agent learns and applies its skills in what we
-refer to as a "runtime", synonymous with LLM.
+Adala offers a robust framework for implementing agents specialized in data processing, with a particular emphasis on
+diverse data labeling tasks. These agents are autonomous, meaning they can independently acquire one or more skills
+through iterative learning. This learning process is influenced by their operating environment, observations, and
+reflections. Users define the environment by providing a ground truth dataset. Every agent learns and applies its skills
+in what we refer to as a "runtime", synonymous with LLM.
 
-Offered as an HTTP server, users can interact with Adala via command
-line or RESTful API, and directly integrate its features in Python
-Notebooks or scripts. The self-learning mechanism leverages Large
-Language Models (LLMs) from providers like OpenAI and VertexAI.
+Offered as an HTTP server, users can interact with Adala via command line or RESTful API, and directly integrate its
+features in Python Notebooks or scripts. The self-learning mechanism leverages Large Language Models (LLMs) from
+providers like OpenAI and VertexAI.
 
 ### Why Choose Adala?
 
-- **Specialized in Data Processing**: While our agents excel in diverse
-  data labeling tasks, they can be tailored to a wide range of data
-  processing needs.
-- **Autonomous Learning**: Adala agents aren't just automated;
-  they're intelligent. They iteratively and independently develop
-  skills based on environment, observations, and reflections.
-- **User-Centric Environment Setup**: You have control. Define your
-  agent's learning environment simply by providing a ground truth
-  dataset.
-- **Optimized Runtime**: Our agents operate in a state-of-the-art runtime
-  environment, synonymous with LLM, ensuring efficiency and
-  adaptability.
-- **Extend to your domain**: Build custom agents and skills focused on
-  your specific domain.
+- **Specialized in Data Processing**: While our agents excel in diverse data labeling tasks, they can be tailored to a
+  wide range of data processing needs.
+- **Autonomous Learning**: Adala agents aren't just automated; they're intelligent. They iteratively and independently
+  develop skills based on environment, observations, and reflections.
+- **User-Centric Environment Setup**: You have control. Define your agent's learning environment simply by providing a
+  ground truth dataset.
+- **Optimized Runtime**: Our agents operate in a state-of-the-art runtime environment, synonymous with LLM, ensuring
+  efficiency and adaptability.
+- **Extend to your domain**: Build custom agents and skills focused on your specific domain.
 
 ## Installation
 
@@ -43,10 +34,8 @@ cd ADALA/
 pip install -e .
 ```
 
-If you're planning to use human-in-the-loop labeling, or need a
-labeling tool to produce ground truth datasets, we suggest installing
-Label Studio. Adala is made to support Label Studio format right out
-of the box.  
+If you're planning to use human-in-the-loop labeling, or need a labeling tool to produce ground truth datasets, we
+suggest installing Label Studio. Adala is made to support Label Studio format right out of the box.
 
 ```sh
 pip install label-studio
@@ -54,8 +43,8 @@ pip install label-studio
 
 ## Quickstart
 
-In this example we will use ADALA as a standalone library directly
-inside our python notebook. You can open it in Collab right here.
+In this example we will use ADALA as a standalone library directly inside our python notebook. You can open it in Collab
+right here.
 
 ```python
 import adala as ad
@@ -70,34 +59,32 @@ agent = ad.agents.SingleShotAgent(
 
     # create runtime
     runtimes={
-        "openai": ad.runtimes.OpenAIGPTRuntime(
-            model_name='gpt-3.5-turbo-instruct'
-		)
-	},
-    
+        "openai": ad.runtimes.OpenAIGPTRuntime(model_name='gpt-3.5-turbo-instruct')
+    },
+
     # set default runtime
-	default_runtime="openai",
+    default_runtime="openai",
 
     # add agent memory
     memory=ad.memories.FileMemory(
         filepath='long_term_memory.jsonl'
     ),
-	
+
     skills={
-		"classify": ad.skills.ClassificationSkill(
-			name='subjectivity_detection',
-			description='Understanding subjective and objective statements from text.',
-			instructions='Classify a product review as either expressing "Subjective" or "Objective" statements.'
-		)
-	}
+        "classify": ad.skills.ClassificationSkill(
+            name='subjectivity_detection',
+            description='Understanding subjective and objective statements from text.',
+            instructions='Classify a product review as either expressing "Subjective" or "Objective" statements.'
+        )
+    }
 )
 
 step_result = agent.step()
 
-while step_result.artifact.experience.accuracy < 90 or \
-	  step_result.artifact.experience.learnings is not None:
-  print(step_result.summarize())
-  step_result = agent.step()
+while step_result.artifact.experience.accuracy < 90 or
+    step_result.artifact.experience.learnings is not None:
+    print(step_result.summarize())
+    step_result = agent.step()
 
 print("Done!")
 ```
@@ -147,11 +134,9 @@ adala status
 
 ### Applying Skills and Predictions
 
-You don't need to wait for optimization to finish. Instruct Adala to
-apply its skills on new data outside the environment, turning Adala
-into a prediction engine. If the predictions generated by the skill
-are then verified by human validators or another supervision system,
-this provides more ground truth data, enhancing the agent's skills.Use
+You don't need to wait for optimization to finish. Instruct Adala to apply its skills on new data outside the
+environment, turning Adala into a prediction engine. If the predictions generated by the skill are then verified by
+human validators or another supervision system, this provides more ground truth data, enhancing the agent's skills.Use
 the learned skills and generate predictions.
 
 ```sh
@@ -167,7 +152,6 @@ Get insights into Adala's performance.
 # View detailed metrics
 adala metrics
 ```
-
 
 ## Executing ADALA Command Line
 
@@ -214,13 +198,10 @@ adala help <command>
 
 ## Contributing to ADALA
 
-Dive into the heart of Adala by enhancing our Skills, optimizing
-Runtimes, or pioneering new Agent Types. Whether you're crafting
-nuanced tasks, refining computational environments, or sculpting
-specialized agents for unique domains, your contributions will power
-Adala's evolution. Join us in shaping the future of intelligent
-systems and making Adala more versatile and impactful for users across
-the globe.
+Dive into the heart of Adala by enhancing our Skills, optimizing Runtimes, or pioneering new Agent Types. Whether you're
+crafting nuanced tasks, refining computational environments, or sculpting specialized agents for unique domains, your
+contributions will power Adala's evolution. Join us in shaping the future of intelligent systems and making Adala more
+versatile and impactful for users across the globe.
 
 Read more here.
 
@@ -229,14 +210,12 @@ Read more here.
 ## FAQ
 
 - What is an agent?
-- Agent is a set of skills and runtimes that could be used to execute
-  those skills. Each agent has its own unique environment (dataset)
-  attached to it. You can define your own agent class that would have
-  a unique set of skills for your domain.
-  
-- 
+- Agent is a set of skills and runtimes that could be used to execute those skills. Each agent has its own unique
+  environment (dataset)
+  attached to it. You can define your own agent class that would have a unique set of skills for your domain.
+
+-
 
 ## Interesting Stuff
 
-Skill is a learned ability to solve a specific task. Skill gets
-trained from the ground truth dataset. 
+Skill is a learned ability to solve a specific task. Skill gets trained from the ground truth dataset. 
