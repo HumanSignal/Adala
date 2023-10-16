@@ -21,25 +21,10 @@ class PandasDataFrame(Dataset):
     def __len__(self):
         return len(self.df)
 
-    def apply_template(self, template: str) -> "PandasDataFrame":
-        return self.df.apply(
-            func=lambda row: template.format(**row.to_dict()),
-            axis=1
-        )
-
-    def sample(self, n: int) -> "PandasDataFrame":
-        return PandasDataFrame(df=self.df.sample(n))
-
-    def template_string_batches(
-        self,
-        template: str,
-        instructions: str,
-        batch_size: int = 100
-    ):
+    def batch_iterator(self, batch_size: int = 100) -> List[RawRecords]:
         for i in range(0, len(self.df), batch_size):
-            transformed_batch = self.df.iloc[i:i+batch_size].apply(
-                lambda row: template.format(instructions=instructions, input=row.to_json()), axis=1)
-            yield transformed_batch.tolist()
+            batch = self.df.iloc[i:i+batch_size]
+            yield batch.to_dict(orient='records')
 
     def make_new_with_index(self, records: RawRecords) -> InternalDataFrame:
         index = self.df.index

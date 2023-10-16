@@ -1,12 +1,12 @@
 from .base import Agent, AgentStep, AgentArtifact
-from adala.skills.base import Skill
+from adala.skills.base import BaseSkill
 
 
 class SingleShotAgent(Agent):
     """
     Single shot agent possesses a single skill and applies it immediately to a dataset.
     """
-    skill: Skill
+    skill: BaseSkill
 
     def step(self, learn=True) -> AgentStep:
         """

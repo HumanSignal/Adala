@@ -1,2 +1,1 @@
-from .llm import LLMSkill
-from .code import CodeSkill
+from .base import Skill

@@ -22,14 +22,9 @@ class Dataset(BaseModel, ABC):
     ground_truth_column: str = 'ground_truth'
 
     @abstractmethod
-    def template_string_batches(
-        self,
-        template: str,
-        instructions: str,
-        batch_size: int = 100
-    ):
+    def batch_iterator(self, batch_size: int = 100) -> List[RawRecords]:
         """
-        Yield batches of template strings for given template and instruction.
+        Yield batches of data.
         """
 
     @abstractmethod

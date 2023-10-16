@@ -6,22 +6,28 @@ from .base import LLMRuntime
 
 
 @retry(wait=wait_random(min=5, max=10), stop=stop_after_attempt(6))
-def _openai_completion_create_with_retry(model: str, prompt: List[str], max_tokens: int, temperature: float) -> Dict:
-    return openai.Completion.create(model=model, prompt=prompt, temperature=temperature, max_tokens=max_tokens)
+def _openai_completion_create_with_retry(**kwargs) -> Dict:
+    return openai.Completion.create(**kwargs)
 
 
 class OpenAIGPTRuntime(LLMRuntime):
 
-    model_name: str = 'gpt-3.5-turbo-instruct'
-    temperature: float = 0
-    max_tokens: int = 10
+    openai_model_name: str = 'gpt-3.5-turbo-instruct'
+    openai_temperature: float = 0
+    openai_max_tokens: int = 10
     verbose: bool = False
 
-    def process_batch(self, batch: List[str]) -> List[str]:
+    def process_batch(self, batch: List[str]) -> List[Dict]:
         completions = _openai_completion_create_with_retry(
-            model=self.model_name,
+            model=self.openai_model_name,
             prompt=batch,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature
+            max_tokens=self.openai_max_tokens,
+            temperature=self.openai_temperature,
+            logprobs=1
         )
-        return [c['text'] for c in completions['choices']]
+        return [{
+            self.text_key: c['text'],
+            self.score_key: sum(c['logprobs']['token_logprobs']) / len(c['logprobs']['token_logprobs']),
+            # TODO: add rationale
+            self.rationale_key: c['text']
+        } for c in completions['choices']]
