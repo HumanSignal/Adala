@@ -70,11 +70,12 @@ agent = ad.agents.SingleShotAgent(
 
     # create runtime
     runtimes={
-		"openai": ad.runtimes.OpenAIGPTRuntime(
-			model_name='gpt-3.5-turbo-instruct'
+        "openai": ad.runtimes.OpenAIGPTRuntime(
+            model_name='gpt-3.5-turbo-instruct'
 		)
-	}
-
+	},
+    
+    # set default runtime
 	default_runtime="openai",
 
     # add agent memory
@@ -93,8 +94,8 @@ agent = ad.agents.SingleShotAgent(
 
 step_result = agent.step()
 
-while step_result.artifact.experience.accuracy < 90 or 
-	  step_results.artifact.experience.learnings is not None:
+while step_result.artifact.experience.accuracy < 90 or \
+	  step_result.artifact.experience.learnings is not None:
   print(step_result.summarize())
   step_result = agent.step()
 
