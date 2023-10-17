@@ -5,7 +5,10 @@ import re
 from tqdm import tqdm
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, model_validator
-from typing import List, Dict
+from typing import List, Dict, Optional, Tuple
+from adala.datasets.base import InternalDataFrame
+
+tqdm.pandas()
 
 
 class Runtime(BaseModel, ABC):
@@ -40,13 +43,13 @@ class LLMRuntime(Runtime):
         # 'temperature': 0,
     }
     _llm = None
-    _program = None
+    # _program = None
 
     class Config:
         arbitrary_types_allowed = True
 
     def init_runtime(self):
-        if not self._program:
+        if not self._llm:
 
             # create an LLM instance
             if self.llm_runtime_type.value == LLMRuntimeModelType.OpenAI.value:
@@ -61,40 +64,57 @@ class LLMRuntime(Runtime):
         return self
 
     @classmethod
-    def _extract_output_names(cls, text: str) -> List[str]:
+    def _ensure_correct_inputs(cls, inputs: List[str], input_prompt: str) -> Tuple[Dict, str]:
         """
-        Extract names of output fields from the template.
+        guidance use specific built-in keywords for inputs, e.g. {{text}}.
+        We need to replace them with something else, e.g. {{text_}}.
         """
-        # Search for all occurrences of {{...}}
-        matches = re.findall(r'{{(.*?)}}', text)
+        corrected_inputs = {}
+        fixed_prompt = input_prompt
+        for input in inputs:
+            if input == 'text':
+                corrected_inputs['text'] = 'text_'
+                # TODO: replace it with regex replace
+                fixed_prompt = fixed_prompt.replace('{{text}}', '{{text_}}')
+            else:
+                corrected_inputs[input] = None
+        return corrected_inputs, fixed_prompt
 
-        names = []
+    def _process_record(self, record, program, inputs, outputs, extra_fields):
+        input = extra_fields.copy()
+        for orig_name, replacement in inputs.items():
+            if orig_name in input:
+                continue
+            input[replacement or orig_name] = record[orig_name]
 
-        for match in matches:
-            # Extract strings enclosed in single or double quotes within the match
-            quoted_strings = re.findall(r'\'(.*?)\'|"(.*?)"', match)
+        result = program(silent=True, **input)
 
-            for s in quoted_strings:
-                # Add non-empty matches to the names list
-                if s[0]:
-                    names.append(s[0])
-                elif s[1]:
-                    names.append(s[1])
-        return names
+        output = {field: result[field] for field in outputs}
 
-    def process_batch(self, batch: List[Dict], prompt_template: str, extra_fields: Dict) -> List[Dict]:
-        output = []
-        output_names = self._extract_output_names(prompt_template)
-        if 'text' in output_names or 'text' in extra_fields:
-            raise ValueError('The field with name "text" is not allowed.')
+        return output
+
+    def process_batch(
+        self,
+        batch: InternalDataFrame,
+        prompt_template: str,
+        inputs: List[str],
+        outputs: List[str],
+        extra_fields: Optional[Dict] = None
+    ) -> InternalDataFrame:
+
+        extra_fields = extra_fields or {}
+        corrected_inputs, fixed_prompt_template = self._ensure_correct_inputs(inputs, prompt_template)
         # TODO: it's not efficient way to initialize the program here - should be done once
-        self._program = guidance(prompt_template, llm=self._llm)
-        for record in tqdm(batch, disable=not self.verbose, desc='Processing batch'):
-            if 'text' in record:
-                raise ValueError('The field with name "text" is not allowed.')
-            input = {**record, **extra_fields}
-            result = self._program(silent=True, **input)
-            output.append({name: result[name] for name in output_names})
+        self._program = guidance(fixed_prompt_template, llm=self._llm)
+        output = batch.progress_apply(
+            self._process_record,
+            axis=1,
+            result_type='expand',
+            program=self._program,
+            inputs=corrected_inputs,
+            outputs=outputs,
+            extra_fields=extra_fields
+        )
         return output
 
 

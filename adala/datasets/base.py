@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import pandas as pd
 from pydantic import BaseModel
-from typing import List, Optional, Any, Dict, Union
+from typing import List, Optional, Any, Dict, Union, Iterable
 
 RawRecord = Dict[str, Any]
 RawRecords = List[RawRecord]
@@ -19,22 +19,21 @@ class Dataset(BaseModel, ABC):
     """
     Base class for original datasets.
     """
-    ground_truth_column: str = 'ground_truth'
 
     @abstractmethod
-    def batch_iterator(self, batch_size: int = 100) -> List[RawRecords]:
+    def batch_iterator(self, batch_size: int = 100) -> InternalDataFrame:
         """
-        Yield batches of data.
-        """
-
-    @abstractmethod
-    def make_new_with_index(self, records: RawRecords) -> InternalDataFrame:
-        """
-        Return new dataset with the same index as original dataset, but with new records.
+        Yield batches of data records
         """
 
     @abstractmethod
-    def get_ground_truth(self) -> InternalDataFrame:
+    def get_ground_truth(self, batch: Optional[InternalDataFrame]) -> InternalDataFrame:
         """
         Return ground truth subset if available.
+        """
+
+    @abstractmethod
+    def __len__(self) -> int:
+        """
+        Return number of records in dataset.
         """

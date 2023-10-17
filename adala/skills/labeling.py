@@ -1,30 +1,30 @@
-from .base import Skill
+from .base import ProcessingSkill
 
 
-class GenerationSkill(Skill):
+class TextGenerationSkill(ProcessingSkill):
     prompt_template: str = '''\
     {{instructions}}
 
-    Input: {{input}}
+    Input: {{text}}
     Output: {{gen 'predictions'}}
     '''
 
 
-class LabelingSkill(Skill):
+class ClassificationSkill(ProcessingSkill):
     prompt_template: str = '''\
     {{instructions}}
     
-    Input: {{input}}
+    Input: {{text}}
     Output: {{select 'predictions' options=labels logprobs='score'}}
     '''
 
 
-class LabelingSkillWithReasoning(Skill):
+class ClassificationSkillWithReasoning(ProcessingSkill):
     prompt_template: str = '''\
     {{instructions}}
     Describe your reasoning step-by-step then provide your output.
     
-    Input: {{input}}
+    Input: {{text}}
     Reasoning: {{gen 'rationale'}}
     Output: {{select 'predictions' options=labels logprobs='score'}}
     '''

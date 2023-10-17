@@ -1,1 +1,1 @@
-from .llm_skills import LabelingSkill, LabelingSkillWithReasoning, GenerationSkill
+from .labeling import ClassificationSkill, ClassificationSkillWithReasoning, TextGenerationSkill

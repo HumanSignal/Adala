@@ -1,10 +1,11 @@
 import openai
 import pandas as pd
+import re
 
 from pydantic import BaseModel
 from typing import List, Optional, Any
 from abc import ABC, abstractmethod
-from pydantic import Field, field_serializer
+from pydantic import Field, field_serializer, model_validator
 
 from typing import Optional
 from adala.datasets.base import InternalDataFrame, InternalDataFrame_encoder
@@ -17,10 +18,7 @@ from adala.memories.base import Memory, Experience
 
 class BaseSkill(BaseModel, ABC):
     name: str
-    instructions: str
     description: Optional[str]
-
-    _previous_instructions: Optional[List[str]] = []
 
     @abstractmethod
     def apply(self, dataset: Dataset, runtime: Runtime) -> Dataset:
@@ -71,12 +69,37 @@ class LLMExperience(Experience):
         return str(InternalDataFrame_encoder(errors))
 
 
-class Skill(BaseSkill):
+class ProcessingSkill(BaseSkill):
     """
     LLM skill handles LLM to produce predictions given instructions
     """
+    instructions: str
     prompt_template: str
     labels: Optional[List[str]] = None
+    # TODO: idk if we need this...
+    prediction_field: str = 'predictions'
+
+    _previous_instructions: Optional[List[str]] = []
+    _inputs: List[str]
+    _outputs: List[str]
+
+    @model_validator(mode='after')
+    def initialize(self):
+
+        # extract inputs from prompt template
+        # TODO: this is a very naive regex implementation - likely to fail in many cases
+        # search for all occurrences of {{input}}
+        self._inputs = re.findall(r'{{([^\}\s]+)}}', self.prompt_template)
+        # search for all occurrences of {{...'output'...}}
+        self._outputs = re.findall(r'\'(.*?)\'', self.prompt_template)
+
+        return self
+
+    def get_inputs(self):
+        return self._inputs
+
+    def get_outputs(self):
+        return self._outputs
 
     def apply(self, dataset: Dataset, runtime: LLMRuntime) -> InternalDataFrame:
         predictions = []
@@ -92,38 +115,39 @@ class Skill(BaseSkill):
             runtime_outputs = runtime.process_batch(
                 batch,
                 prompt_template=self.prompt_template,
-                extra_fields=extra_fields,
+                inputs=self._inputs,
+                outputs=self._outputs,
+                extra_fields=extra_fields
             )
-            predictions.extend(runtime_outputs)
+            predictions.append(runtime_outputs)
 
-        predictions = dataset.make_new_with_index(predictions)
+        predictions = pd.concat(predictions, copy=False)
         return predictions
 
     def evaluate(self, dataset: Dataset, predictions: InternalDataFrame) -> InternalDataFrame:
-        gt = dataset.get_ground_truth()
+        gt = dataset.get_ground_truth(predictions)
         pred = predictions.loc[gt.index]
         pred = pred[pred.notna()]
 
         # TODO: implement more sophisticated evaluation beyond simple equality
-        match = pred[self.name] == gt[dataset.ground_truth_column]
-        pred[f'{self.name}_match'] = match
+        match = pred[self.prediction_field] == gt[dataset.ground_truth_column]
+        pred[f'{self.prediction_field}_match'] = match
         return pd.concat([gt, pred], axis=1)
 
     def analyze(
         self, original_dataset: Dataset, evaluation: InternalDataFrame, memory: Optional[Memory] = None
     ) -> Experience:
-        errors = evaluation[~evaluation[f'{self.name}_match']]
-        accuracy = evaluation[f'{self.name}_match'].mean()
+        errors = evaluation[~evaluation[f'{self.prediction_field}_match']]
+        accuracy = evaluation[f'{self.prediction_field}_match'].mean()
         return LLMExperience(errors=errors, accuracy=accuracy)
 
     def improve(self, original_dataset: Dataset, experience: LLMExperience) -> None:
         errors = experience.errors
         num_samples = min(3, errors.shape[0])
-        pred_column_name = self.name
         gt_column_name = original_dataset.ground_truth_column
         errors_list = errors.sample(n=num_samples).apply(
-            lambda r: f'INPUT: {r.drop([pred_column_name, gt_column_name]).to_json()}\n'
-                      f'PREDICTED OUTPUT: {r[pred_column_name]}\n'
+            lambda r: f'INPUT: {r.drop([self.prediction_field, gt_column_name]).to_json()}\n'
+                      f'PREDICTED OUTPUT: {r[self.prediction_field]}\n'
                       f'EXPECTED OUTPUT: {r[gt_column_name]}', axis=1)
 
         errors_str = "\n".join(errors_list.tolist())
@@ -162,3 +186,14 @@ New refined instruction:
         new_instructions = response['choices'][0]['message']['content']
         self._previous_instructions.append(self.instructions)
         self.instructions = new_instructions
+
+
+class ConvergenceSkill(BaseSkill):
+    """
+    The skill that takes number of observations and deduce it to the single string
+    """
+
+class DivergenceSkill(BaseSkill):
+    """
+    The skill that takes single string and generates multiple observations based on it
+    """
