@@ -1,1 +1,1 @@
-from .base import Skill
+from .llm_skills import LabelingSkill, LabelingSkillWithReasoning, GenerationSkill

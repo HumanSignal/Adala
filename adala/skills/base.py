@@ -75,20 +75,25 @@ class Skill(BaseSkill):
     """
     LLM skill handles LLM to produce predictions given instructions
     """
-    prompt_template: str = '{instructions}\n\nInput: {text}\nOutput:\n'
+    prompt_template: str
+    labels: Optional[List[str]] = None
 
     def apply(self, dataset: Dataset, runtime: LLMRuntime) -> InternalDataFrame:
         predictions = []
+
+        extra_fields = {'instructions': self.instructions}
+        if self.labels:
+            extra_fields['labels'] = self.labels
 
         for batch in dataset.batch_iterator(
             # this is the current OpenAI limit
             batch_size=20
         ):
-            batch_strings = [
-                self.prompt_template.format(**dict(instructions=self.instructions, **record))
-                for record in batch
-            ]
-            runtime_outputs = runtime.process_batch(batch_strings)
+            runtime_outputs = runtime.process_batch(
+                batch,
+                prompt_template=self.prompt_template,
+                extra_fields=extra_fields,
+            )
             predictions.extend(runtime_outputs)
 
         predictions = dataset.make_new_with_index(predictions)
