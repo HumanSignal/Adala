@@ -20,6 +20,21 @@ class BaseSkill(BaseModel, ABC):
     name: str
     description: Optional[str]
 
+    def __call__(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
+        """
+        Call runtime to process batch of inputs.
+        Input and output shapes can be varying.
+        This method is supposed to be the main way of connecting different skills together.
+        It should also take care of input / output data types validation.
+        """
+        return self._call(input, runtime)
+
+    @abstractmethod
+    def _call(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
+        """
+        Apply skill to input data and return output data
+        """
+
     @abstractmethod
     def apply(self, dataset: Dataset, runtime: Runtime) -> Dataset:
         """
@@ -101,24 +116,27 @@ class ProcessingSkill(BaseSkill):
     def get_outputs(self):
         return self._outputs
 
-    def apply(self, dataset: Dataset, runtime: LLMRuntime) -> InternalDataFrame:
-        predictions = []
-
+    def _call(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
         extra_fields = {'instructions': self.instructions}
         if self.labels:
             extra_fields['labels'] = self.labels
+        runtime_outputs = runtime.process_batch(
+            input,
+            prompt_template=self.prompt_template,
+            inputs=self._inputs,
+            outputs=self._outputs,
+            extra_fields=extra_fields
+        )
+        return runtime_outputs
+
+    def apply(self, dataset: Dataset, runtime: LLMRuntime) -> InternalDataFrame:
+        predictions = []
 
         for batch in dataset.batch_iterator(
             # this is the current OpenAI limit
             batch_size=20
         ):
-            runtime_outputs = runtime.process_batch(
-                batch,
-                prompt_template=self.prompt_template,
-                inputs=self._inputs,
-                outputs=self._outputs,
-                extra_fields=extra_fields
-            )
+            runtime_outputs = self._call(batch, runtime)
             predictions.append(runtime_outputs)
 
         predictions = pd.concat(predictions, copy=False)
@@ -186,14 +204,3 @@ New refined instruction:
         new_instructions = response['choices'][0]['message']['content']
         self._previous_instructions.append(self.instructions)
         self.instructions = new_instructions
-
-
-class ConvergenceSkill(BaseSkill):
-    """
-    The skill that takes number of observations and deduce it to the single string
-    """
-
-class DivergenceSkill(BaseSkill):
-    """
-    The skill that takes single string and generates multiple observations based on it
-    """
