@@ -1,12 +1,12 @@
-from .base import Memory, Experience
+from .base import LongTermMemory, ShortTermMemory
 from typing import Any
 
 
-class FileMemory(Memory):
+class FileMemory(LongTermMemory):
 
     filepath: str
 
-    def remember(self, experience: Experience):
+    def remember(self, experience: ShortTermMemory):
         """
         Serialize experience in JSON and append to file
         """
@@ -14,7 +14,7 @@ class FileMemory(Memory):
         with open(self.filepath, 'a') as f:
             f.write(experience_json + '\n')
 
-    def retrieve(self, observations: Any) -> Experience:
+    def retrieve(self, observations: ShortTermMemory) -> ShortTermMemory:
         """
         Retrieve experience from file
         """

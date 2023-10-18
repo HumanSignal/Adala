@@ -13,12 +13,14 @@ from adala.runtimes.base import LLMRuntime
 
 from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
-from adala.memories.base import Memory, Experience
+from adala.memories.base import ShortTermMemory, LongTermMemory
 
 
 class BaseSkill(BaseModel, ABC):
-    name: str
-    description: Optional[str]
+    name: str = Field(default='')
+    description: Optional[str] = Field(default='')
+    prompt_template: str = Field(default='')
+    instructions: str = Field(default='')
 
     def __call__(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
         """
@@ -36,100 +38,63 @@ class BaseSkill(BaseModel, ABC):
         """
 
     @abstractmethod
-    def apply(self, dataset: Dataset, runtime: Runtime) -> Dataset:
+    def apply(self, dataset: Dataset, runtime: Runtime) -> ShortTermMemory:
         """
         Apply skill to dataset and return new dataset with skill results (predictions)
         """
 
     @abstractmethod
-    def evaluate(self, original_dataset: Dataset, predictions: Dataset) -> Dataset:
+    def evaluate(self, experience: ShortTermMemory) -> ShortTermMemory:
         """
         Test predictions and return new Dataset with evaluation results - e.g. error examples
         """
 
     @abstractmethod
-    def analyze(
-        self, original_dataset: Dataset, evaluation: Dataset, memory: Memory
-    ) -> Experience:
+    def analyze(self, experience: ShortTermMemory, memory: Optional[LongTermMemory] = None) -> ShortTermMemory:
         """
-        Analyze results and return observed experience - it will be stored in long term memory
+        Analyze results and return observed experience
+        Agent can optionally retrieve long term memory to enrich experience
         """
 
     @abstractmethod
-    def improve(self, dataset: Dataset, experience: Experience) -> None:
+    def improve(self, experience: ShortTermMemory) -> ShortTermMemory:
         """
         Improve current skill state based on current experience
         """
 
-    def learn(self, dataset: Dataset, runtime: Runtime, memory: Memory) -> Experience:
+    def learn(self, dataset: Dataset, runtime: Runtime, memory: Optional[LongTermMemory] = None) -> ShortTermMemory:
         """
         Apply, validate, analyze and optimize skill.
         """
-        predictions = self.apply(dataset, runtime=runtime)
-        annotated_dataset = self.evaluate(dataset, predictions)
-        experience = self.analyze(dataset, annotated_dataset, memory)
-        self.improve(dataset, experience)
+        experience = self.apply(dataset=dataset, runtime=runtime)
+        print('Evaluating, analyzing and improving...')
+        experience = self.evaluate(experience)
+        experience = self.analyze(experience, memory)
+        experience = self.improve(experience)
+        print('Done!')
         return experience
 
 
-class LLMExperience(Experience):
-    errors: InternalDataFrame
-    accuracy: float  # TODO: implement moving average
-
-    class Config:
-        arbitrary_types_allowed = True
-
-    @field_serializer('errors')
-    def serialize_dt(self, errors: InternalDataFrame):
-        return str(InternalDataFrame_encoder(errors))
-
-
-class ProcessingSkill(BaseSkill):
+class Skill(BaseSkill):
     """
     LLM skill handles LLM to produce predictions given instructions
     """
-    instructions: str
-    prompt_template: str
-    labels: Optional[List[str]] = None
     # TODO: idk if we need this...
     prediction_field: str = 'predictions'
 
-    _previous_instructions: Optional[List[str]] = []
-    _inputs: List[str]
-    _outputs: List[str]
-
-    @model_validator(mode='after')
-    def initialize(self):
-
-        # extract inputs from prompt template
-        # TODO: this is a very naive regex implementation - likely to fail in many cases
-        # search for all occurrences of {{input}}
-        self._inputs = re.findall(r'{{([^\}\s]+)}}', self.prompt_template)
-        # search for all occurrences of {{...'output'...}}
-        self._outputs = re.findall(r'\'(.*?)\'', self.prompt_template)
-
-        return self
-
-    def get_inputs(self):
-        return self._inputs
-
-    def get_outputs(self):
-        return self._outputs
+    # _previous_instructions: Optional[List[str]] = []
 
     def _call(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
-        extra_fields = {'instructions': self.instructions}
-        if self.labels:
-            extra_fields['labels'] = self.labels
+        extra_fields = self.model_dump(exclude={'name', 'description', 'prompt_template', 'instructions'})
         runtime_outputs = runtime.process_batch(
             input,
             prompt_template=self.prompt_template,
-            inputs=self._inputs,
-            outputs=self._outputs,
+            instructions=self.instructions,
             extra_fields=extra_fields
         )
         return runtime_outputs
 
-    def apply(self, dataset: Dataset, runtime: LLMRuntime) -> InternalDataFrame:
+    def apply(self, dataset: Dataset, runtime: LLMRuntime) -> ShortTermMemory:
         predictions = []
 
         for batch in dataset.batch_iterator(
@@ -139,30 +104,40 @@ class ProcessingSkill(BaseSkill):
             runtime_outputs = self._call(batch, runtime)
             predictions.append(runtime_outputs)
 
-        predictions = pd.concat(predictions, copy=False)
-        return predictions
+        experience = ShortTermMemory(dataset=dataset)
 
-    def evaluate(self, dataset: Dataset, predictions: InternalDataFrame) -> InternalDataFrame:
-        gt = dataset.get_ground_truth(predictions)
-        pred = predictions.loc[gt.index]
+        if not predictions:
+            experience.predictions = pd.DataFrame()
+        else:
+            experience.predictions = pd.concat(predictions, copy=False)
+
+        return experience
+
+    def evaluate(self, experience) -> ShortTermMemory:
+        gt = experience.dataset.get_ground_truth(experience.predictions)
+        pred = experience.predictions.loc[gt.index]
         pred = pred[pred.notna()]
 
         # TODO: implement more sophisticated evaluation beyond simple equality
-        match = pred[self.prediction_field] == gt[dataset.ground_truth_column]
+        match = pred[self.prediction_field] == gt[experience.dataset.ground_truth_column]
         pred[f'{self.prediction_field}_match'] = match
-        return pd.concat([gt, pred], axis=1)
+        evaluations = pd.concat([gt, pred], axis=1)
+        updated_experience = experience.model_copy()
+        updated_experience.evaluations = evaluations
+        return updated_experience
 
-    def analyze(
-        self, original_dataset: Dataset, evaluation: InternalDataFrame, memory: Optional[Memory] = None
-    ) -> Experience:
-        errors = evaluation[~evaluation[f'{self.prediction_field}_match']]
-        accuracy = evaluation[f'{self.prediction_field}_match'].mean()
-        return LLMExperience(errors=errors, accuracy=accuracy)
+    def analyze(self, experience: ShortTermMemory, memory: Optional[LongTermMemory] = None) -> ShortTermMemory:
+        errors = experience.evaluations[~experience.evaluations[f'{self.prediction_field}_match']]
+        accuracy = experience.evaluations[f'{self.prediction_field}_match'].mean()
+        updated_experience = experience.model_copy()
+        updated_experience.errors = errors
+        updated_experience.accuracy = accuracy
+        return updated_experience
 
-    def improve(self, original_dataset: Dataset, experience: LLMExperience) -> None:
+    def improve(self, experience: ShortTermMemory) -> ShortTermMemory:
         errors = experience.errors
         num_samples = min(3, errors.shape[0])
-        gt_column_name = original_dataset.ground_truth_column
+        gt_column_name = experience.dataset.ground_truth_column
         errors_list = errors.sample(n=num_samples).apply(
             lambda r: f'INPUT: {r.drop([self.prediction_field, gt_column_name]).to_json()}\n'
                       f'PREDICTED OUTPUT: {r[self.prediction_field]}\n'
@@ -201,6 +176,9 @@ CURRENT ERRORS:
 New refined instruction:
         '''}])
 
-        new_instructions = response['choices'][0]['message']['content']
-        self._previous_instructions.append(self.instructions)
-        self.instructions = new_instructions
+        updated_instructions = response['choices'][0]['message']['content']
+
+        updated_experience = experience.model_copy()
+        updated_experience.initial_instructions = self.instructions
+        updated_experience.updated_instructions = updated_instructions
+        return updated_experience

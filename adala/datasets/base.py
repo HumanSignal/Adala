@@ -21,6 +21,12 @@ class Dataset(BaseModel, ABC):
     """
 
     @abstractmethod
+    def info(self) -> None:
+        """
+        Print dataset information.
+        """
+
+    @abstractmethod
     def batch_iterator(self, batch_size: int = 100) -> InternalDataFrame:
         """
         Yield batches of data records
@@ -37,3 +43,18 @@ class Dataset(BaseModel, ABC):
         """
         Return number of records in dataset.
         """
+
+
+class BlankDataset(Dataset):
+
+    def batch_iterator(self, batch_size: int = 100) -> InternalDataFrame:
+        return InternalDataFrame()
+
+    def get_ground_truth(self, batch: Optional[InternalDataFrame]) -> InternalDataFrame:
+        return InternalDataFrame()
+
+    def __len__(self) -> int:
+        return 0
+
+    def info(self) -> None:
+        print('Blank dataset')

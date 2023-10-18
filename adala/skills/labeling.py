@@ -1,7 +1,8 @@
-from .base import ProcessingSkill
+from .base import Skill
+from typing import List
 
 
-class TextGenerationSkill(ProcessingSkill):
+class TextGenerationSkill(Skill):
     prompt_template: str = '''\
     {{instructions}}
 
@@ -10,16 +11,18 @@ class TextGenerationSkill(ProcessingSkill):
     '''
 
 
-class ClassificationSkill(ProcessingSkill):
+class LabelingSkill(Skill):
+    labels: List[str]
+    instructions: str = 'Label the input text with the following labels: {{labels}}'
     prompt_template: str = '''\
-    {{instructions}}
+    {{>instructions}}
     
     Input: {{text}}
     Output: {{select 'predictions' options=labels logprobs='score'}}
     '''
 
 
-class ClassificationSkillWithReasoning(ProcessingSkill):
+class LabelingSkillWithReasoning(LabelingSkill):
     prompt_template: str = '''\
     {{instructions}}
     Describe your reasoning step-by-step then provide your output.

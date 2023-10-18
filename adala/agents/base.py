@@ -1,25 +1,18 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, SkipValidation
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List
-from adala.datasets.base import Dataset
-from adala.runtimes.base import Runtime
-from adala.memories.base import Memory, Experience
+from adala.datasets.base import Dataset, BlankDataset
+from adala.runtimes.base import Runtime, LLMRuntime, LLMRuntimeModelType
+from adala.memories.base import ShortTermMemory, LongTermMemory
 
 # following the protocol https://agentprotocol.ai/protocol
-
-
-class AgentArtifact(BaseModel):
-    """
-    Base class for agent artifacts
-    """
-    experience: Experience
 
 
 class AgentStep(BaseModel):
     """
     Base class for agent steps results
     """
-    artifact: AgentArtifact
+    experience: ShortTermMemory
     is_last: bool
 
 
@@ -27,13 +20,27 @@ class Agent(BaseModel, ABC):
     """
     Base class for agents.
     """
-    dataset: Dataset
-    runtime: Runtime
-    memory: Optional[Memory] = None
+    dataset: Optional[Dataset] = Field(default_factory=lambda: BlankDataset())
+    memory: Optional[LongTermMemory] = Field(default=None)
+    runtime: Optional[Runtime] = Field(
+        default_factory=lambda: LLMRuntime(llm_runtime_type=LLMRuntimeModelType.OpenAI)
+    )
 
     @abstractmethod
-    def step(self, learn=True) -> AgentStep:
+    def greet(self) -> str:
         """
-        Run agent step and return results
-        If learn=False, agent will only act and not learn from environment
+        Return agent greeting and description
         """
+
+    @abstractmethod
+    def run(self) -> AgentStep:
+        """
+        Run agent and return results
+        """
+
+    @abstractmethod
+    def learn(self) -> AgentStep:
+        """
+        Learn from dataset and return results
+        """
+

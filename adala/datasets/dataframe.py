@@ -33,3 +33,6 @@ class DataFrameDataset(Dataset):
             return self.df[self.df[self.ground_truth_column].notna()]
         else:
             return self.df[self.df[self.ground_truth_column].notna() & self.df.index.isin(batch.index)]
+
+    def info(self) -> None:
+        print(self.df.describe())

@@ -1,5 +1,6 @@
 import label_studio_sdk
 
+from pprint import pprint
 from .base import Dataset, InternalDataFrame
 from pydantic import model_validator, SkipValidation
 from label_studio_sdk.project import LabelStudioException, Project
@@ -28,6 +29,9 @@ class LabelStudioDataset(Dataset):
 
     def get_project_info(self):
         return self._project_client.get_params()
+
+    def info(self) -> None:
+        pprint(self.get_project_info())
 
     def __len__(self):
         info = self.get_project_info()
