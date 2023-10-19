@@ -10,10 +10,10 @@ from abc import ABC, abstractmethod
 from tqdm import tqdm
 from pydantic import BaseModel, root_validator
 from typing import Optional, List, Dict
-from langchain import PromptTemplate, OpenAI, LLMChain
 from langchain.llms import BaseLLM
 from langchain.chat_models import ChatOpenAI
-from langchain.prompts import HumanMessagePromptTemplate, SystemMessagePromptTemplate, ChatPromptTemplate
+from langchain.chains import LLMChain
+from langchain.prompts import HumanMessagePromptTemplate, SystemMessagePromptTemplate, ChatPromptTemplate, PromptTemplate
 
 
 class Labeler(BaseModel, ABC):
@@ -157,7 +157,7 @@ class LangChainLabeler(LLMLabeler):
             prediction = ','.join(sorted(line_predictions))
         return prediction
 
-    def label_row(self, row: pd.Series, instruction: str, labels: Optional[List[str]] = None) -> str:
+    def label_row(self, row: pd.Series, instruction: str, labels: Optional[List[str]] = None) -> Dict:
         return self.label_string(input_string=row.to_json(force_ascii=False), instruction=instruction, labels=labels)
 
     def label(

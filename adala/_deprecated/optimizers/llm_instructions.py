@@ -7,7 +7,7 @@ from uuid import uuid4
 from copy import deepcopy
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
-from langchain import PromptTemplate, OpenAI, LLMChain
+from langchain.chains import LLMChain
 from adala.labelers.base import LLMLabeler
 
 logger = logging.getLogger(__name__)
@@ -126,7 +126,7 @@ def generate_instruction(
     df: pd.DataFrame,
     ground_truth_column: str = 'ground_truth',
     initial_instructions: List = None,
-    num_generations: int = 10,
+    max_iterations: int = 10,
     top_instructions: int = 3,
     validation_sample_size: int = 5,
     human_in_the_loop: bool = False,
@@ -151,7 +151,7 @@ def generate_instruction(
     ]
     labels = df[ground_truth_column].unique().tolist()
     # labels = None
-    for generation in range(num_generations):
+    for iteration in range(max_iterations):
         # calculate fitness value and corresponding errors
         logger.info(f'Calculating fitness for {len(records)} instructions')
         records = calc_fitness(
@@ -165,7 +165,7 @@ def generate_instruction(
         )
 
         logger.info(
-            f'Results of {generation} generations:\n'
+            f'Results of {iteration} iteration(s):\n'
             f'{pd.DataFrame.from_records(records)[["id", "instruction", "accuracy", "examples_seen", "mismatches"]]}')
 
         # mutate the best instructions with accuracy<100% based on errors
