@@ -47,49 +47,43 @@ In this example we will use ADALA as a standalone library directly inside our py
 right here.
 
 ```python
-import adala as ad
+import pandas as pd
 
-# this is the dataset with product reviews
+from adala.agents import SingleShotAgent
+from adala.datasets import DataFrameDataset
+from adala.skills import LabelingSkill
+
+# this is the dataset we will use to train our agent
 filepath = ""
+df = pd.read_csv(filepath, sep='\t', nrows=100)
 
-agent = ad.agents.SingleShotAgent(
-    dataset=ad.datasets.PandasDataFrame(
-        df=pd.read_csv(filepath, sep='\t', nrows=100)
-    ),
-
-    # create runtime
-    runtimes={
-        "openai": ad.runtimes.OpenAIGPTRuntime(model_name='gpt-3.5-turbo-instruct')
-    },
-
-    # set default runtime
-    default_runtime="openai",
-
-    # add agent memory
-    memory=ad.memories.FileMemory(
-        filepath='long_term_memory.jsonl'
-    ),
-
-    skills={
-        "classify": ad.skills.ClassificationSkill(
-            name='subjectivity_detection',
-            description='Understanding subjective and objective statements from text.',
-            instructions='Classify a product review as either expressing "Subjective" or "Objective" statements.'
-        )
-    }
+agent = SingleShotAgent(
+    # connect to a dataset
+    dataset=DataFrameDataset(df=df),
+    
+    # define a skill
+    skill = LabelingSkill(labels=['Positive', 'Negative', 'Neutral']),
 )
 
-step_result = agent.step()
+run = agent.run()
 
-while step_result.artifact.experience.accuracy < 90 or
-    step_result.artifact.experience.learnings is not None:
-    print(step_result.summarize())
-    step_result = agent.step()
+# display results
+print(pd.concat((df, run.experience.predictions), axis=1))
 
-print("Done!")
+# provide ground truth signal in the original dataset
+df.loc[0, 'ground_truth'] = 'Positive'
+df.loc[2, 'ground_truth'] = 'Negative'
+df.loc[4, 'ground_truth'] = 'Neutral'
+
+for _ in range(3):
+    # agent learns and improves from the ground truth signal
+    learnings = agent.learn(update_instructions=True)
+    
+    # display results
+    print(learnings.experience.accuracy)
 ```
 
-## Running ADALA as a standalone server
+## Running ADALA as a standalone server (Comming soon!)
 
 Initiate the Adala server. Note: Each agent operates as its own web server.
 
