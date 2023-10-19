@@ -83,6 +83,8 @@ for _ in range(3):
     print(learnings.experience.accuracy)
 ```
 
+Check [more examples in notebook tutorials.](https://github.com/HumanSignal/ADALA/tree/master/adala/examples)
+
 ## Running ADALA as a standalone server (Comming soon!)
 
 Initiate the Adala server. Note: Each agent operates as its own web server.
