@@ -15,7 +15,7 @@ I can use a single skill to process a dataset.
 For example, you can instruct me to label your dataset.'''
         if self.skill:
             greeting += f'''
-I have a skill {self.skill} which can label your dataset.'''
+I have a skill {self.skill}'''
         else:
             greeting += f'''
 

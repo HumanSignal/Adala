@@ -3,7 +3,7 @@ import pandas as pd
 import re
 
 from pydantic import BaseModel
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict
 from abc import ABC, abstractmethod
 from pydantic import Field, field_serializer, model_validator
 
@@ -19,8 +19,12 @@ from adala.memories.base import ShortTermMemory, LongTermMemory
 class BaseSkill(BaseModel, ABC):
     name: str = Field(default='')
     description: Optional[str] = Field(default='')
-    prompt_template: str = Field(default='')
     instructions: str = Field(default='')
+    input_template: str = Field(default='')
+    output_template: str = Field(default='')
+    # TODO: how to work with multiple outputs?
+    prediction_field: str = Field(default='')
+
 
     def __call__(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
         """
@@ -50,7 +54,11 @@ class BaseSkill(BaseModel, ABC):
         """
 
     @abstractmethod
-    def analyze(self, experience: ShortTermMemory, memory: Optional[LongTermMemory] = None) -> ShortTermMemory:
+    def analyze(
+        self, experience: ShortTermMemory,
+        memory: Optional[LongTermMemory] = None,
+        runtime: Optional[Runtime] = None
+    ) -> ShortTermMemory:
         """
         Analyze results and return observed experience
         Agent can optionally retrieve long term memory to enrich experience
@@ -69,7 +77,7 @@ class BaseSkill(BaseModel, ABC):
         experience = self.apply(dataset=dataset, runtime=runtime)
         print('Evaluating, analyzing and improving...')
         experience = self.evaluate(experience)
-        experience = self.analyze(experience, memory)
+        experience = self.analyze(experience, memory, runtime)
         experience = self.improve(experience)
         print('Done!')
         return experience
@@ -79,18 +87,21 @@ class Skill(BaseSkill):
     """
     LLM skill handles LLM to produce predictions given instructions
     """
-    # TODO: idk if we need this...
-    prediction_field: str = 'predictions'
 
-    # _previous_instructions: Optional[List[str]] = []
+    def _get_extra_fields(self) -> Dict[str, Any]:
+        extra_fields = self.model_dump(
+            # TODO: more robust way to exclude system fields
+            exclude={'name', 'description', 'input_template', 'output_template', 'instructions', 'prediction_field'})
+        return extra_fields
 
     def _call(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
-        extra_fields = self.model_dump(exclude={'name', 'description', 'prompt_template', 'instructions'})
+
         runtime_outputs = runtime.process_batch(
             input,
-            prompt_template=self.prompt_template,
+            input_template=self.input_template,
+            output_template=self.output_template,
             instructions=self.instructions,
-            extra_fields=extra_fields
+            extra_fields=self._get_extra_fields()
         )
         return runtime_outputs
 
@@ -126,59 +137,85 @@ class Skill(BaseSkill):
         updated_experience.evaluations = evaluations
         return updated_experience
 
-    def analyze(self, experience: ShortTermMemory, memory: Optional[LongTermMemory] = None) -> ShortTermMemory:
+    def analyze(
+        self, experience: ShortTermMemory,
+        memory: Optional[LongTermMemory] = None,
+        runtime: Optional[Runtime] = None
+    ) -> ShortTermMemory:
         errors = experience.evaluations[~experience.evaluations[f'{self.prediction_field}_match']]
         accuracy = experience.evaluations[f'{self.prediction_field}_match'].mean()
+
+        # collect errors and create error report
+        # first sample errors - make it uniform, but more sophisticated sampling can be implemented
+        errors = errors.sample(n=min(3, errors.shape[0]))
+        # collect error inputs from runtime
+        inputs = runtime.process_batch_inputs(
+            errors,
+            self.input_template,
+            extra_fields=self._get_extra_fields()
+        )
+        errors = pd.concat((inputs, errors[[self.prediction_field, experience.dataset.ground_truth_column]]), axis=1)
+        errors.columns = ['input', 'prediction', 'ground_truth']
+        smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
+        error_reasons = smart_runtime.process_batch(
+            errors,
+            instructions="{{#system~}}\n"
+                         "LLM prompt was created by concatenating instructions with text input:\n\n"
+                         "Prediction = LLM(Input, Instructions)\n\n"
+                         "We expect the prediction to be equal to the ground truth.\n"
+                         "Your task is to provide a reason for the error due to the original instruction.\n"
+                         "Be concise and specific.\n\n"
+                         "Instructions: {{llm_instructions}}\n"
+                         "{{~/system}}",
+            input_template="{{#user~}}\n"
+                           "Input: {{input}}\n"
+                           "Prediction: {{prediction}}\n"
+                           "Ground truth: {{ground_truth}}\n"
+                           "Explanation:\n"
+                           "{{~/user}}",
+            output_template="{{#assistant~}}{{gen 'reason'}}{{~/assistant}}",
+            extra_fields={'llm_instructions': self.instructions}
+        )
+        errors['reason'] = error_reasons['reason']
+
         updated_experience = experience.model_copy()
         updated_experience.errors = errors
         updated_experience.accuracy = accuracy
         return updated_experience
 
     def improve(self, experience: ShortTermMemory) -> ShortTermMemory:
-        errors = experience.errors
-        num_samples = min(3, errors.shape[0])
-        gt_column_name = experience.dataset.ground_truth_column
-        errors_list = errors.sample(n=num_samples).apply(
-            lambda r: f'INPUT: {r.drop([self.prediction_field, gt_column_name]).to_json()}\n'
-                      f'PREDICTED OUTPUT: {r[self.prediction_field]}\n'
-                      f'EXPECTED OUTPUT: {r[gt_column_name]}', axis=1)
-
-        errors_str = "\n".join(errors_list.tolist())
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": '''\
-Act as an 'Instruction Tuner' for the LLM. You will be given the inputs:
-
-- The [CURRENT INSTRUCTION] used to guide the LLM's classification, including specific examples with ground truth labels.
-- [CURRENT ERRORS] that emerged when this instruction was applied to a dataset.
-
-The current errors are presented in the following format:
-INPUT: [input text]
-PREDICTED OUTPUT: [predicted label]
-EXPECTED OUTPUT: [ground truth label]
-
-Carefully analyze these errors and craft a revised concise instruction for the LLM to fit the expected outputs. \
-Include 2-3 examples at the end of your response to demonstrate how the new instruction would be applied. \
-Use the following format for your examples:
-
-Input: [input text]
-Output: [expected output label]
-
-Use specific error examples and generalize them to address any observed errors that may occur in the future.
-Deliver your response as the refined instruction.'''},
-        {'role': 'user', 'content': f'''\
-CURRENT INSTRUCTION: {self.instructions}
-CURRENT ERRORS:
-
-{errors_str}
-
-New refined instruction:
-        '''}])
-
-        updated_instructions = response['choices'][0]['message']['content']
+        errors = experience.errors.to_dict(orient='records')
+        smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
+        result = smart_runtime.process_record(
+            record={
+                'old_instruction': self.instructions,
+                'errors': errors
+            },
+            instructions="{{#system~}}\n"
+                         "LLM prompt was created by concatenating instructions with text input:\n\n"
+                         "Prediction = LLM(Input, Instructions)\n\n"
+                         "We expect the prediction to be equal to the ground truth.\n"
+                         "Your task is to craft a revised concise instruction for the LLM. "
+                         "Follow best practices for LLM prompt engineering.\n"
+                         "Include 2-3 examples at the end of your response to demonstrate how the new instruction would be applied.\n"
+                         "Use the following format for your examples:\n"
+                         "Input: ...\n"
+                         "Output: ...\n\n"
+                         "{{~/system}}\n",
+            input_template="{{#user~}}\n"
+                           "Old instruction: {{old_instruction}}\n"
+                           "Errors: {{#each errors}}"
+                           "\nInput: {{this.input}}\n"
+                           "Prediction: {{this.prediction}}\n"
+                           "Ground truth: {{this.ground_truth}}\n"
+                           "{{/each}}\n"
+                           "New instruction:\n"
+                           "{{~/user}}",
+            output_template="{{#assistant~}}{{gen 'new_instruction'}}{{~/assistant}}",
+        )
+        new_instruction = result['new_instruction']
 
         updated_experience = experience.model_copy()
         updated_experience.initial_instructions = self.instructions
-        updated_experience.updated_instructions = updated_instructions
+        updated_experience.updated_instructions = new_instruction
         return updated_experience
