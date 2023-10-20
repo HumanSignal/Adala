@@ -91,7 +91,7 @@ agent = SingleShotAgent(
 print('\n=> Agent run')
 run = agent.run()
 # display results
-print('Agent results:\n', pd.concat((df, run.experience.predictions), axis=1))
+print('Agent results without training:\n', pd.concat((df, run.experience.predictions), axis=1))
 
 # provide ground truth signal in the original dataset
 df.loc[0, 'ground_truth'] = 'Positive'
