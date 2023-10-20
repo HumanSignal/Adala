@@ -103,7 +103,7 @@ df.loc[5, 'ground_truth'] = 'Neutral'
 # df.loc[10, 'ground_truth'] = 'None'
 
 print('\n=> Train agent\n')
-for i in range(3):
+for i in range(7):
     print(f'===> Iteration {i+1}:')
     # agent learns and improves from the ground truth signal
     learnings = agent.learn(update_instructions=True)
@@ -112,7 +112,7 @@ for i in range(3):
     # display results
     print(f'  accuracy = {learnings.experience.accuracy}')
     print(f'  updated instructions = \n{tw.fill(text, width=100, initial_indent=" "*4, subsequent_indent=" "*4)}')
-    print(f'  results =\n{pd.concat((df, run.experience.predictions), axis=1)}\n')
+    print(f'  results =\n{pd.concat((df, learnings.experience.predictions), axis=1)}\n')
 
 ```
 
