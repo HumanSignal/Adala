@@ -54,8 +54,17 @@ from adala.datasets import DataFrameDataset
 from adala.skills import LabelingSkill
 
 # this is the dataset we will use to train our agent
-filepath = ""
-df = pd.read_csv(filepath, sep='\t', nrows=100)
+# filepath = "path/to/dataset.csv"
+# df = pd.read_csv(filepath, sep='\t', nrows=100)
+
+texts = [
+    "The mic is great.",
+    "Will order from them again!",
+    "Not loud enough and doesn't turn on like it should.",
+    "The phone doesn't seem to accept anything except CBR mp3s",
+    "All three broke within two months of use."
+]
+df = pd.DataFrame(texts, columns=['text'])
 
 agent = SingleShotAgent(
     # connect to a dataset
