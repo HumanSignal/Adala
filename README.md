@@ -71,7 +71,7 @@ texts = [
     "It was the negative first impressions, and then it started working.",
     "Not loud enough and doesn't turn on like it should.",
     "I don't know what to say.",
-    "The manager was very rude, but mic shows very flat frequency response,.",
+    "The manager was very rude, but the most important that mic shows very flat frequency response.",
     "The phone doesn't seem to accept anything except CBR mp3s.",
     "I tried it before, I bought this device for my son.",
     "All three broke within two months of use.",
@@ -104,7 +104,7 @@ df.loc[5, 'ground_truth'] = 'Neutral'
 # df.loc[10, 'ground_truth'] = 'None'
 
 print('\n=> Train agent\n')
-for i in range(7):
+for i in range(10):
     print(f'===> Iteration {i+1}:')
     # agent learns and improves from the ground truth signal
     learnings = agent.learn(update_instructions=True)
@@ -116,6 +116,8 @@ for i in range(7):
     print(f'  updated instructions = \n{tw.fill(text, width=100, initial_indent=" "*4, subsequent_indent=" "*4)}')
     print(f'  results =\n{table[["text", "ground_truth", "predictions"]]}\n')
 
+    if learnings.experience.accuracy >= 1.0:
+        break
 ```
 
 Check [more examples in notebook tutorials.](https://github.com/HumanSignal/ADALA/tree/master/adala/examples)
