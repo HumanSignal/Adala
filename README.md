@@ -41,6 +41,15 @@ suggest installing Label Studio. Adala is made to support Label Studio format ri
 pip install label-studio
 ```
 
+## Prerequisites
+
+1. Set OPENAI_API_KEY ([see instructions here](https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key))
+2. Check OpenAI API availability, sometimes it's down: https://status.openai.com/uptime
+3. To run quickstart tutorials you have to install pandas:
+```
+pip install pandas
+```
+
 ## Quickstart
 
 In this example we will use ADALA as a standalone library directly inside our python notebook. You can open it in Collab
