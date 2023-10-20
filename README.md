@@ -71,7 +71,7 @@ texts = [
     "It was the negative first impressions, and then it started working.",
     "Not loud enough and doesn't turn on like it should.",
     "I don't know what to say.",
-    "The manager was very rude, but mic shows very flat frequency characteristics.",
+    "The manager was very rude, but mic shows very flat frequency response,.",
     "The phone doesn't seem to accept anything except CBR mp3s.",
     "I tried it before, I bought this device for my son.",
     "All three broke within two months of use.",
@@ -91,7 +91,8 @@ agent = SingleShotAgent(
 print('\n=> Agent run')
 run = agent.run()
 # display results
-print('Agent results without training:\n', pd.concat((df, run.experience.predictions), axis=1))
+result = pd.concat((df, run.experience.predictions), axis=1)
+print('Agent results without training:\n', result[["text", "ground_truth", "predictions"]])
 
 # provide ground truth signal in the original dataset
 df.loc[0, 'ground_truth'] = 'Positive'
@@ -114,6 +115,7 @@ for i in range(7):
     print(f'  accuracy = {learnings.experience.accuracy}')
     print(f'  updated instructions = \n{tw.fill(text, width=100, initial_indent=" "*4, subsequent_indent=" "*4)}')
     print(f'  results =\n{table[["text", "ground_truth", "predictions"]]}\n')
+
 ```
 
 Check [more examples in notebook tutorials.](https://github.com/HumanSignal/ADALA/tree/master/adala/examples)
