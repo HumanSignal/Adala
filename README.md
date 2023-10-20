@@ -51,8 +51,8 @@ export OPENAI_API_KEY='your-openai-api-key'
 
 ## Quickstart
 
-In this example we will use ADALA as a standalone library directly inside our python notebook. You can open it in Collab
-right here.
+In this example we will use ADALA as a standalone library. Check [more examples in notebook tutorials here.](https://github.com/HumanSignal/ADALA/tree/master/adala/examples)
+ 
 
 ```python
 import pandas as pd
@@ -119,8 +119,6 @@ for i in range(10):
         print('=> Accuracy is 100%, exit')
         break
 ```
-
-Check [more examples in notebook tutorials.](https://github.com/HumanSignal/ADALA/tree/master/adala/examples)
 
 ## Running ADALA as a standalone server (Comming soon!)
 
