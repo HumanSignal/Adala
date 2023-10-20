@@ -2,8 +2,8 @@ from .base import TextGenerationSkill
 
 
 class QuestionAnsweringSkill(TextGenerationSkill):
-    instructions = 'Answer the question.'
-    input_template = "Question: {{question}}"
-    output_template = "Answer: {{gen 'answer'}}"
-    prediction_field = 'answer'
+    instructions: str = 'Answer the question.'
+    input_template: str = "Question: {{question}}"
+    output_template: str = "Answer: {{gen 'answer'}}"
+    prediction_field: str = 'answer'
 

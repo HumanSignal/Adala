@@ -25,7 +25,6 @@ class BaseSkill(BaseModel, ABC):
     # TODO: how to work with multiple outputs?
     prediction_field: str = Field(default='')
 
-
     def __call__(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
         """
         Call runtime to process batch of inputs.

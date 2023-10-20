@@ -2,7 +2,7 @@ from .base import TextGenerationSkill
 
 
 class SummarizationSkill(TextGenerationSkill):
-    instructions = 'Summarize the text.'
-    input_template = "Text: {{text}}"
-    output_template = "Summary: {{gen 'summary'}}"
-    prediction_field = 'summary'
+    instructions: str = 'Summarize the text.'
+    input_template: str = "Text: {{text}}"
+    output_template: str = "Summary: {{gen 'summary'}}"
+    prediction_field: str = 'summary'
