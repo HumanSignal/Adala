@@ -71,8 +71,8 @@ texts = [
     "It was the negative first impressions, and then it started working.",
     "Not loud enough and doesn't turn on like it should.",
     "I don't know what to say.",
-    "The phone doesn't seem to accept anything except CBR mp3s.",
     "The manager was very rude, but mic shows very flat frequency characteristics.",
+    "The phone doesn't seem to accept anything except CBR mp3s.",
     "I tried it before, I bought this device for my son.",
     "All three broke within two months of use.",
     "The device worked for a long time, can't say anything bad.",
@@ -97,8 +97,8 @@ print('Agent results without training:\n', pd.concat((df, run.experience.predict
 df.loc[0, 'ground_truth'] = 'Positive'
 df.loc[1, 'ground_truth'] = 'Negative'
 df.loc[2, 'ground_truth'] = 'Neutral'
-df.loc[3, 'ground_truth'] = 'Negative'
-df.loc[4, 'ground_truth'] = 'Positive'
+df.loc[3, 'ground_truth'] = 'Positive'
+df.loc[4, 'ground_truth'] = 'Negative'
 df.loc[5, 'ground_truth'] = 'Neutral'
 # df.loc[10, 'ground_truth'] = 'None'
 
@@ -108,12 +108,12 @@ for i in range(7):
     # agent learns and improves from the ground truth signal
     learnings = agent.learn(update_instructions=True)
     text = learnings.experience.updated_instructions
+    table = pd.concat((df, learnings.experience.predictions), axis=1)
 
     # display results
     print(f'  accuracy = {learnings.experience.accuracy}')
     print(f'  updated instructions = \n{tw.fill(text, width=100, initial_indent=" "*4, subsequent_indent=" "*4)}')
-    print(f'  results =\n{pd.concat((df, learnings.experience.predictions), axis=1)}\n')
-
+    print(f'  results =\n{table[["text", "ground_truth", "predictions"]]}\n')
 ```
 
 Check [more examples in notebook tutorials.](https://github.com/HumanSignal/ADALA/tree/master/adala/examples)
