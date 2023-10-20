@@ -71,7 +71,7 @@ texts = [
     "It was the negative first impressions, and then it started working.",
     "Not loud enough and doesn't turn on like it should.",
     "I don't know what to say.",
-    "The manager was very rude, but the most important that mic shows very flat frequency response.",
+    "Manager was rude, but the most important that mic shows very flat frequency response.",
     "The phone doesn't seem to accept anything except CBR mp3s.",
     "I tried it before, I bought this device for my son.",
     "All three broke within two months of use.",
@@ -109,11 +109,12 @@ for i in range(10):
     # agent learns and improves from the ground truth signal
     learnings = agent.learn(update_instructions=True)
     text = learnings.experience.updated_instructions
+    text = tw.fill(text, width=100, initial_indent=" "*4, subsequent_indent=" "*4)
     table = pd.concat((df, learnings.experience.predictions), axis=1)
 
     # display results
     print(f'  accuracy = {learnings.experience.accuracy}')
-    print(f'  updated instructions = \n{tw.fill(text, width=100, initial_indent=" "*4, subsequent_indent=" "*4)}')
+    print(f'  updated instructions = \n{text}')
     print(f'  results =\n{table[["text", "ground_truth", "predictions"]]}\n')
 
     if learnings.experience.accuracy >= 1.0:
