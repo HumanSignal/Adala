@@ -1,6 +1,5 @@
-import openai
+import logging
 import pandas as pd
-import re
 
 from pydantic import BaseModel
 from typing import List, Optional, Any, Dict
@@ -14,6 +13,8 @@ from adala.runtimes.base import LLMRuntime
 from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
 from adala.memories.base import ShortTermMemory, LongTermMemory
+
+logger = logging.getLogger(__file__)
 
 
 class BaseSkill(BaseModel, ABC):
@@ -144,9 +145,18 @@ class Skill(BaseSkill):
         errors = experience.evaluations[~experience.evaluations[f'{self.prediction_field}_match']]
         accuracy = experience.evaluations[f'{self.prediction_field}_match'].mean()
 
-        # collect errors and create error report
-        # first sample errors - make it uniform, but more sophisticated sampling can be implemented
-        errors = errors.sample(n=min(3, errors.shape[0]))
+        # 100% accuracy, no errors
+        if errors.empty:
+            logger.warning(
+                'No errors found, nothing to improve. '
+                'Add more ground truth samples or try to change your input data.'
+            )
+            errors = experience.evaluations.sample(n=3)
+        else:
+            # collect errors and create error report
+            # first sample errors - make it uniform, but more sophisticated sampling can be implemented
+            errors = errors.sample(n=min(3, errors.shape[0]))
+
         # collect error inputs from runtime
         inputs = runtime.process_batch_inputs(
             errors,

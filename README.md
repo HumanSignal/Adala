@@ -56,48 +56,64 @@ right here.
 
 ```python
 import pandas as pd
+import textwrap as tw
 
 from adala.agents import SingleShotAgent
 from adala.datasets import DataFrameDataset
-from adala.skills import LabelingSkill
+from adala.skills import ClassificationSkill
 
 # this is the dataset we will use to train our agent
 # filepath = "path/to/dataset.csv"
 # df = pd.read_csv(filepath, sep='\t', nrows=100)
 
+print('\n=> Prepare dataset and ADALA agent')
 texts = [
-    "The mic is great.",
-    "Will order from them again!",
+    "It was the negative first impressions, and then it started working.",
     "Not loud enough and doesn't turn on like it should.",
-    "The phone doesn't seem to accept anything except CBR mp3s",
-    "All three broke within two months of use."
+    "I don't know what to say.",
+    "The phone doesn't seem to accept anything except CBR mp3s.",
+    "The manager was very rude, but mic shows very flat frequency characteristics.",
+    "I tried it before, I bought this device for my son.",
+    "All three broke within two months of use.",
+    "The device worked for a long time, can't say anything bad.",
+    "Just a random line of text.",
+    "Will order from them again!",
 ]
 df = pd.DataFrame(texts, columns=['text'])
 
 agent = SingleShotAgent(
     # connect to a dataset
     dataset=DataFrameDataset(df=df),
-    
     # define a skill
-    skill = LabelingSkill(labels=['Positive', 'Negative', 'Neutral']),
+    skill = ClassificationSkill(labels=['Positive', 'Negative', 'Neutral']),
 )
 
+print('\n=> Agent run')
 run = agent.run()
-
 # display results
-print(pd.concat((df, run.experience.predictions), axis=1))
+print('Agent results:\n', pd.concat((df, run.experience.predictions), axis=1))
 
 # provide ground truth signal in the original dataset
 df.loc[0, 'ground_truth'] = 'Positive'
-df.loc[2, 'ground_truth'] = 'Negative'
-df.loc[4, 'ground_truth'] = 'Neutral'
+df.loc[1, 'ground_truth'] = 'Negative'
+df.loc[2, 'ground_truth'] = 'Neutral'
+df.loc[3, 'ground_truth'] = 'Negative'
+df.loc[4, 'ground_truth'] = 'Positive'
+df.loc[5, 'ground_truth'] = 'Neutral'
+# df.loc[10, 'ground_truth'] = 'None'
 
-for _ in range(3):
+print('\n=> Train agent\n')
+for i in range(3):
+    print(f'===> Iteration {i+1}:')
     # agent learns and improves from the ground truth signal
     learnings = agent.learn(update_instructions=True)
-    
+    text = learnings.experience.updated_instructions
+
     # display results
-    print(learnings.experience.accuracy)
+    print(f'  accuracy = {learnings.experience.accuracy}')
+    print(f'  updated instructions = \n{tw.fill(text, width=100, initial_indent=" "*4, subsequent_indent=" "*4)}')
+    print(f'  results =\n{pd.concat((df, run.experience.predictions), axis=1)}\n')
+
 ```
 
 Check [more examples in notebook tutorials.](https://github.com/HumanSignal/ADALA/tree/master/adala/examples)
