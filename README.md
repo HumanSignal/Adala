@@ -88,11 +88,10 @@ agent = SingleShotAgent(
     skill = ClassificationSkill(labels=['Positive', 'Negative', 'Neutral']),
 )
 
-print('\n=> Agent run')
+print('\n=> Agent run without training')
 run = agent.run()
-# display results
 result = pd.concat((df, run.experience.predictions), axis=1)
-print('Agent results without training:\n', result[["text", "ground_truth", "predictions"]])
+print('Agent results:\n', result[["text", "ground_truth", "predictions"]])
 
 # provide ground truth signal in the original dataset
 df.loc[0, 'ground_truth'] = 'Positive'
@@ -101,12 +100,11 @@ df.loc[2, 'ground_truth'] = 'Neutral'
 df.loc[3, 'ground_truth'] = 'Positive'
 df.loc[4, 'ground_truth'] = 'Negative'
 df.loc[5, 'ground_truth'] = 'Neutral'
-# df.loc[10, 'ground_truth'] = 'None'
 
 print('\n=> Train agent\n')
 for i in range(10):
-    print(f'===> Iteration {i+1}:')
     # agent learns and improves from the ground truth signal
+    print(f'===> Iteration {i+1}:')
     learnings = agent.learn(update_instructions=True)
     text = learnings.experience.updated_instructions
     text = tw.fill(text, width=100, initial_indent=" "*4, subsequent_indent=" "*4)
@@ -118,6 +116,7 @@ for i in range(10):
     print(f'  results =\n{table[["text", "ground_truth", "predictions"]]}\n')
 
     if learnings.experience.accuracy >= 1.0:
+        print('=> Accuracy is 100%, exit')
         break
 ```
 
