@@ -1,163 +1,251 @@
-# ADALA <img src="https://htx-pub.s3.amazonaws.com/samples/Adala.png" width="100" align="right"/>
-Automated Data Labeling Framework. 
+# ADALA
 
-[![PyPI version](https://badge.fury.io/py/adala.svg)](https://badge.fury.io/py/adala)
-[![Python version](https://img.shields.io/pypi/pyversions/adala.svg)](https://pypi.python.org/pypi/adala)
-[![License](https://img.shields.io/pypi/l/adala.svg)](https://pypi.python.org/pypi/adala)
+Adala is an Autonomous DAta (Labeling) Agent framework.
 
+Adala offers a robust framework for implementing agents specialized in data processing, with a particular emphasis on
+diverse data labeling tasks. These agents are autonomous, meaning they can independently acquire one or more skills
+through iterative learning. This learning process is influenced by their operating environment, observations, and
+reflections. Users define the environment by providing a ground truth dataset. Every agent learns and applies its skills
+in what we refer to as a "runtime", synonymous with LLM.
 
-ADALA is a framework for automated data labeling. It uses a combination of Large Language Models (LLMs) autonomous agents and Active Learning (AL) to label data. It is designed to be used with [Label Studio](https://labelstud.io/) to provide a human-in-the-loop data labeling experience.
+<!-- Offered as an HTTP server, users can interact with Adala via command line or RESTful API, and directly integrate its features in Python Notebooks or scripts. The self-learning mechanism leverages Large Language Models (LLMs) from providers like OpenAI and VertexAI. -->
 
-Here is what ADALA does:
-- [LLM instructions generation](#llm-instructions-generation)
-- [Predicting dataset with LLM](#predicting-dataset-with-llm)
-- [Active learning with Human-in-the-Loop](#active-learning-with-human-in-the-loop)
-- [LLM uncertainty estimation](#llm-uncertainty-estimation)
+### Why Choose Adala?
 
+- **Reliable Agents**: Built upon a foundation of ground truth data,
+  our agents ensure consistent and trustworthy results, making Adala a
+  reliable choice for data processing needs.
+  
+- **Controllable Output**: For every skill, you can configure the
+  desired output, setting specific constraints with varying degrees of
+  flexibility. Whether you want strict adherence to particular
+  guidelines or more adaptive outputs based on the agent's learning,
+  Adala allows you to tailor results to your exact needs.
+
+- **Specialized in Data Processing**: While our agents excel in diverse
+  data labeling tasks, they can be tailored to a wide range of data
+  processing needs.
+  
+- **Autonomous Learning**: Adala agents aren't just automated;
+  they're intelligent. They iteratively and independently develop
+  skills based on environment, observations, and reflections.
+
+- **Flexible and Extensible Runtime**: Adala's runtime environment is
+  adaptable. A single skill can be deployed across multiple runtimes,
+  facilitating dynamic scenarios like the student/teacher
+  architecture. Moreover, the openness of our framework invites the
+  community to extend and tailor runtimes, ensuring continuous
+  evolution and adaptability to diverse needs.
+  
+- **Extend Skills**: Quickly tailor and develop agents to address the
+  specific challenges and nuances of your domain, without facing a
+  steep learning curve.
 
 ## Installation
 
 Install ADALA:
-```bash
+
+```sh
 git clone https://github.com/HumanSignal/ADALA.git
 cd ADALA/
 pip install -e .
 ```
 
-If you're planning to use human-in-the-loop labeling, install Label Studio:
-```bash
+If you're planning to use human-in-the-loop labeling, or need a labeling tool to produce ground truth datasets, we
+suggest installing Label Studio. Adala is made to support Label Studio format right out of the box.
+
+```sh
 pip install label-studio
 ```
 
-## Load dataset
-ADALA works with datasets in various formats:
-- [Pandas DataFrame](#pandas-dataframe)
-- [Spark DataFrame](#spark-dataframe)
+## Prerequisites
 
-### Pandas DataFrame
+Set OPENAI_API_KEY ([see instructions here](https://platform.openai.com/docs/quickstart/step-2-setup-your-api-key))
 
-Load the data into a pandas DataFrame:
+```
+export OPENAI_API_KEY='your-openai-api-key'
+```
+
+## Quickstart
+
+In this example we will use ADALA as a standalone library directly inside our python notebook. You can open it in Collab
+right here.
+
 ```python
 import pandas as pd
-input_df = pd.read_csv('dataset.csv')
-```
 
-### Spark DataFrame
+from adala.agents import SingleShotAgent
+from adala.datasets import DataFrameDataset
+from adala.skills import LabelingSkill
 
-```python
-from pyspark.sql import SparkSession
-spark = SparkSession.builder.getOrCreate()
-```
+# this is the dataset we will use to train our agent
+# filepath = "path/to/dataset.csv"
+# df = pd.read_csv(filepath, sep='\t', nrows=100)
 
+texts = [
+    "The mic is great.",
+    "Will order from them again!",
+    "Not loud enough and doesn't turn on like it should.",
+    "The phone doesn't seem to accept anything except CBR mp3s",
+    "All three broke within two months of use."
+]
+df = pd.DataFrame(texts, columns=['text'])
 
-## Predicting dataset with LLM
-
-ADALA inference is optimized to run in the batch mode - it is much faster to predict the whole dataset at once, rather than row-by-row.
-
-Create LLM labeler:
-
-```python
-import adala as ad
-
-labeler = ad.OpenAILabeler(model_name='gpt-4')
-labeler.label_string('The sun is white.', instruction='Is it true?', labels=['yes', 'no'])
-```
-
-There are multiple LLM models available in the table below:
-| Model    | Initialize predictor |
-| -------- | ------- |
-| [OpenAI API](https://platform.openai.com/) | `ad.OpenAILabeler()`    |
-| [Any LangChain's LLM](https://python.langchain.com/docs/get_started/introduction.html) | `ad.LangChainLLMPredictor()`    |
-| [HuggingFace TGI](https://huggingface.co/text-generation-inference) | `ad.HuggingFaceLLMPredictor()`     |
-| [vLLM](https://vllm.ai/)    | `ad.VLLMPredictor()`    |
-| [llama.cpp](https://github.com/ggerganov/llama.cpp)   | `ad.LlamaCppPredictor()`   |
-
-
-Predict the whole dataset:
-```python
-labeled_df = labeler.label(
-    df=input_df,
-    instruction='Predict sentiment',
-    labels=['positive', 'negative'],
-    output_column='predictions'
+agent = SingleShotAgent(
+    # connect to a dataset
+    dataset=DataFrameDataset(df=df),
+    
+    # define a skill
+    skill = LabelingSkill(labels=['Positive', 'Negative', 'Neutral']),
 )
-labeled_df['predictions']
+
+run = agent.run()
+
+# display results
+print(pd.concat((df, run.experience.predictions), axis=1))
+
+# provide ground truth signal in the original dataset
+df.loc[0, 'ground_truth'] = 'Positive'
+df.loc[2, 'ground_truth'] = 'Negative'
+df.loc[4, 'ground_truth'] = 'Neutral'
+
+for _ in range(3):
+    # agent learns and improves from the ground truth signal
+    learnings = agent.learn(update_instructions=True)
+    
+    # display results
+    print(learnings.experience.accuracy)
 ```
 
+Check [more examples in notebook tutorials.](https://github.com/HumanSignal/ADALA/tree/master/adala/examples)
 
-## LLM instructions generation
+## Running ADALA as a standalone server (Comming soon!)
 
-ADALA can generate optimal LLM instructions for data labeling. You need to have an [OpenAI API](https://platform.openai.com/) key to use ADALA.
+Initiate the Adala server. Note: Each agent operates as its own web server.
 
-```bash
-export OPENAI_API_KEY=your_key
+### Starting the Adala Server
+
+```sh
+# Start the Adala server on default port 8090
+adala start
 ```
 
-The following method allows you to finetune instructions to classify each row in the DataFrame, given the ground truth labels in the specified column:
-```python
-import adala as ad
+### Uploading Ground Truth Data
 
-result = ad.generate_instructions(
-    labeler=labeler,
-    df=input_df,
-    ground_truth_column='label'
-)
+Before teaching skills to Adala, you need to set up the environment and upload data.
+
+```sh
+# Upload your dataset
+adala upload --file sample_dataset_ground_truth.json
 ```
 
-Now you can use the generated instructions to label the dataset with LLM:
-```python
-labeled_df = labeler.label(
-    df=input_df,
-    instruction=result.best_instruction,
-    labels=result.labels,
-    output_column='predictions'
-)
+### Teaching Skills to Adala
+
+Now, define and teach a new skill to Adala.
+
+```sh
+# Define a new skill for classifying objects
+adala add-skill --name "Object Classification" --description "Classify text into categories." --instruction "Example: Label trees, cars, and buildings."
 ```
 
-
-## Active learning with Human-in-the-Loop
-
-Combining instructions generation and dataset prediction, ADALA can be used to create a human-in-the-loop automated data labeling experience with Label Studio.
-
-First [create a Label Studio project](https://labelstud.io/guide/setup_project).
-
-> Note: Currently ADALA is designed to work with Text Classification projects. Go to `Labeling Setup > Natural Language Processing > Text Classification`. Change label names to match your dataset labels.
-
-Get the project ID `project_id` from the URL, it will be used later.
-
-Setup environment variables with [Label Studio API token](https://labelstud.io/guide/api#Authenticate-to-the-API) and Label Studio host:
-```bash
-export LABEL_STUDIO_API_TOKEN=your_token
-export LABEL_STUDIO_HOST=http://localhost:8080
+```sh
+# Start the learning process
+adala learn --skill "Object Classification" --continuous
 ```
 
-Generate LLM instructions with human-in-the-loop labeling:
+### Monitoring Optimization
 
-```python
-import adala as ad
+Track the progress of the optimization process.
 
-labeled_df = ad.generate_instructions(
-    df=input_df,
-    # ... other parameters
-    human_in_the_loop=True,
-    label_studio_project_id=project_id,
-    # use your Label Studio API token and host if not set as environment variables
-    label_studio_api_token='your_token',
-    label_studio_host='your_host'
-)
-labeled_df['predictions']
+```sh
+# Check the optimization status
+adala status
 ```
 
-## LLM uncertainty estimation
+### Applying Skills and Predictions
 
-ADALA can be used to estimate LLM uncertainty for each row in the dataset. It is useful if you want to detect hallucinations or other forms of LLM errors.
+You don't need to wait for optimization to finish. Instruct Adala to apply its skills on new data outside the
+environment, turning Adala into a prediction engine. If the predictions generated by the skill are then verified by
+human validators or another supervision system, this provides more ground truth data, enhancing the agent's skills. Use
+the learned skills and generate predictions.
 
-```python
-uncertainty_df = ad.estimate_uncertainty(
-    df=labeled_df,
-    instructions=instructions,
-    prediction_column='predictions',
-    output_column='uncertainty'
-)
-uncertainty_df['uncertainty']
+```sh
+# Apply the 'Object Classification' skill on new data
+adala apply-skill --name "Object Classification" --file sample_dataset_predict.json
 ```
+
+### Review Metrics
+
+Get insights into Adala's performance.
+
+```sh
+# View detailed metrics
+adala metrics
+```
+
+## Executing ADALA Command Line
+
+```sh
+# Start the Adala server on default port 8090
+adala start --port 8090
+
+# Upload your dataset
+adala upload --file sample_dataset_ground_truth.json
+
+# Define a new skill for classifying objects
+adala add-skill --name "Object Classification" --description "Classify images into categories." --instruction "Example: Label trees, cars, and buildings."
+
+# Start the learning process
+adala learn --skill "Object Classification"
+
+# Check the optimization status
+adala status
+
+# Apply the 'Object Classification' skill on new data
+adala apply-skill --name "Object Classification" --file sample_dataset_predict.json
+
+# View detailed metrics
+adala metrics
+
+# Restart the Adala server
+adala restart
+
+# Shut down the Adala server
+adala shutdown
+
+# List all the skills
+adala list-skills
+
+# List all the runtimes
+adala list-runtimes
+
+# Retrieve raw logs
+adala logs
+
+# Provide help
+adala help <command>
+```
+
+## Contributing to ADALA
+
+Dive into the heart of Adala by enhancing our Skills, optimizing Runtimes, or pioneering new Agent Types. Whether you're
+crafting nuanced tasks, refining computational environments, or sculpting specialized agents for unique domains, your
+contributions will power Adala's evolution. Join us in shaping the future of intelligent systems and making Adala more
+versatile and impactful for users across the globe.
+
+Read more here.
+
+## How ADALA compares to other agent libraries
+
+## FAQ
+
+- What is an agent?
+- Agent is a set of skills and runtimes that could be used to execute those skills. Each agent has its own unique
+  environment (dataset)
+  attached to it. You can define your own agent class that would have a unique set of skills for your domain.
+
+-
+
+## Interesting Stuff
+
+Skill is a learned ability to solve a specific task. Skill gets trained from the ground truth dataset. 
