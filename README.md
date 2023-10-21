@@ -1,6 +1,6 @@
 # ADALA
 
-Adala is an Autonomous DatA (Labeling) Agent framework.
+Adala is an Autonomous DAta (Labeling) Agent framework.
 
 Adala offers a robust framework for implementing agents specialized in data processing, with a particular emphasis on
 diverse data labeling tasks. These agents are autonomous, meaning they can independently acquire one or more skills
@@ -8,21 +8,40 @@ through iterative learning. This learning process is influenced by their operati
 reflections. Users define the environment by providing a ground truth dataset. Every agent learns and applies its skills
 in what we refer to as a "runtime", synonymous with LLM.
 
-Offered as an HTTP server, users can interact with Adala via command line or RESTful API, and directly integrate its
-features in Python Notebooks or scripts. The self-learning mechanism leverages Large Language Models (LLMs) from
-providers like OpenAI and VertexAI.
+-- Offered as an HTTP server, users can interact with Adala via command line or RESTful API, and directly integrate its
+-- features in Python Notebooks or scripts. The self-learning mechanism leverages Large Language Models (LLMs) from
+-- providers like OpenAI and VertexAI.
 
 ### Why Choose Adala?
 
-- **Specialized in Data Processing**: While our agents excel in diverse data labeling tasks, they can be tailored to a
-  wide range of data processing needs.
-- **Autonomous Learning**: Adala agents aren't just automated; they're intelligent. They iteratively and independently
-  develop skills based on environment, observations, and reflections.
-- **User-Centric Environment Setup**: You have control. Define your agent's learning environment simply by providing a
-  ground truth dataset.
-- **Optimized Runtime**: Our agents operate in a state-of-the-art runtime environment, synonymous with LLM, ensuring
-  efficiency and adaptability.
-- **Extend to your domain**: Build custom agents and skills focused on your specific domain.
+- **Reliable Agents**: Built upon a foundation of ground truth data,
+  our agents ensure consistent and trustworthy results, making Adala a
+  reliable choice for data processing needs.
+  
+- **Controllable Output**: For every skill, you can configure the
+  desired output, setting specific constraints with varying degrees of
+  flexibility. Whether you want strict adherence to particular
+  guidelines or more adaptive outputs based on the agent's learning,
+  Adala allows you to tailor results to your exact needs.
+
+- **Specialized in Data Processing**: While our agents excel in diverse
+  data labeling tasks, they can be tailored to a wide range of data
+  processing needs.
+  
+- **Autonomous Learning**: Adala agents aren't just automated;
+  they're intelligent. They iteratively and independently develop
+  skills based on environment, observations, and reflections.
+
+- **Flexible and Extensible Runtime**: Adala's runtime environment is
+  adaptable. A single skill can be deployed across multiple runtimes,
+  facilitating dynamic scenarios like the student/teacher
+  architecture. Moreover, the openness of our framework invites the
+  community to extend and tailor runtimes, ensuring continuous
+  evolution and adaptability to diverse needs.
+  
+- **Extend Skills**: Quickly tailor and develop agents to address the
+  specific challenges and nuances of your domain, without facing a
+  steep learning curve.
 
 ## Installation
 
