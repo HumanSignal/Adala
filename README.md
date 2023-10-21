@@ -1,12 +1,14 @@
-# ADALA
+<a href="#"><img src="/static/logo.png" alt="ADALA logo" width="275" ></a>
 
-Adala is an Autonomous DAta (Labeling) Agent framework.
+Adala is an **A**utonomous **DA**ta (**L**abeling) **A**gent framework.
 
 Adala offers a robust framework for implementing agents specialized in data processing, with a particular emphasis on
 diverse data labeling tasks. These agents are autonomous, meaning they can independently acquire one or more skills
 through iterative learning. This learning process is influenced by their operating environment, observations, and
 reflections. Users define the environment by providing a ground truth dataset. Every agent learns and applies its skills
 in what we refer to as a "runtime", synonymous with LLM.
+
+![Diagram of components](./static/diagram.jpg "Diagram of components")
 
 <!-- Offered as an HTTP server, users can interact with Adala via command line or RESTful API, and directly integrate its features in Python Notebooks or scripts. The self-learning mechanism leverages Large Language Models (LLMs) from providers like OpenAI and VertexAI. -->
 
