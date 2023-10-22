@@ -69,11 +69,11 @@ class BaseSkill(BaseModel, ABC):
         Improve current skill state based on current experience
         """
 
-    def learn(self, dataset: Dataset, runtime: Runtime, memory: Optional[LongTermMemory] = None) -> ShortTermMemory:
+    def learn(self, env: Environment, runtime: Runtime, memory: Optional[LongTermMemory] = None) -> ShortTermMemory:
         """
         Apply, validate, analyze and optimize skill.
         """
-        experience = self.apply(dataset=dataset, runtime=runtime)
+        experience = self.apply(env=env, runtime=runtime)
         print('Evaluating, analyzing and improving...')
         experience = self.evaluate(experience)
         experience = self.analyze(experience, memory, runtime)
@@ -88,42 +88,34 @@ class Skill(BaseSkill):
     """
 
     def _get_extra_fields(self) -> Dict[str, Any]:
+        """ """
         extra_fields = self.model_dump(
             # TODO: more robust way to exclude system fields
             exclude={'name', 'description', 'input_template', 'output_template', 'instructions', 'prediction_field'})
         return extra_fields
-
-    def _call(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
-
-        runtime_outputs = runtime.process_batch(
+    
+    def _call_runtime(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
+        """ """
+        runtime_outputs = runtime.process(
             input,
             input_template=self.input_template,
             output_template=self.output_template,
             instructions=self.instructions,
             extra_fields=self._get_extra_fields()
         )
+        
         return runtime_outputs
 
-    def apply(self, dataset: Dataset, runtime: LLMRuntime) -> ShortTermMemory:
-        predictions = []
-
-        for batch in dataset.batch_iterator(
-            # this is the current OpenAI limit
-            batch_size=20
-        ):
-            runtime_outputs = self._call(batch, runtime)
-            predictions.append(runtime_outputs)
-
-        experience = ShortTermMemory(dataset=dataset)
-
-        if not predictions:
-            experience.predictions = pd.DataFrame()
-        else:
-            experience.predictions = pd.concat(predictions, copy=False)
-
+    def apply(self, env: Environment, runtime: LLMRuntime) -> ShortTermMemory:
+        """ """
+        dataset = env.dataset
+        predictions = self._call_runtime(dataset, runtime) or pd.DataFrame()
+        experience = ShortTermMemory(dataset=dataset, predictions=predictions)
+        
         return experience
 
     def evaluate(self, experience) -> ShortTermMemory:
+        """ """
         gt = experience.dataset.get_ground_truth(experience.predictions)
         pred = experience.predictions.loc[gt.index]
         pred = pred[pred.notna()]
@@ -141,6 +133,7 @@ class Skill(BaseSkill):
         memory: Optional[LongTermMemory] = None,
         runtime: Optional[Runtime] = None
     ) -> ShortTermMemory:
+        """ """
         errors = experience.evaluations[~experience.evaluations[f'{self.prediction_field}_match']]
         accuracy = experience.evaluations[f'{self.prediction_field}_match'].mean()
 

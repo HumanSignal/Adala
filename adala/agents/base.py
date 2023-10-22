@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field, SkipValidation
+from pydantic import BaseModel, Field, SkipValidation, validator
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List, Dict
+from adala.envs.base import BaseEnvironment, StaticEnvironment
 from adala.datasets.base import Dataset, BlankDataset
 from adala.runtimes.base import Runtime, LLMRuntime, LLMRuntimeModelType
 from adala.memories.base import ShortTermMemory, LongTermMemory
@@ -20,8 +21,11 @@ class Agent(BaseModel, ABC):
     """
     Base class for agents.
     """
-    dataset: Optional[Dataset] = Field(default_factory=lambda: BlankDataset())
+    dataset: Optional[Dataset] # = Field(default_factory=lambda: BlankDataset())
+    env: Optional[Environment] # = Field(default_factory=lambda: BlankEnvironment())
+    
     memory: Optional[LongTermMemory] = Field(default=None)
+    
     runtimes: Optional[Dict[str, Runtime]] = Field(
         default_factory=lambda: {
             'openai': LLMRuntime(
@@ -47,6 +51,16 @@ class Agent(BaseModel, ABC):
     )
     default_runtime: str = 'openai'
 
+    @validator('env', pre=True, always=True)
+    def set_defaults(cls, env, values):
+        if env is None:
+            if 'dataset' in values and values['dataset'] is not None:
+                return StaticEnvironment(dataset=values['dataset'])
+            else:
+                raise ValueError("Either dataset or env must be initialized.")
+
+        return env
+    
     @abstractmethod
     def greet(self) -> str:
         """
@@ -64,4 +78,3 @@ class Agent(BaseModel, ABC):
         """
         Learn from dataset and return results
         """
-

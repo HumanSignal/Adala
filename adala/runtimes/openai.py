@@ -10,6 +10,8 @@ class OpenAIRuntime(LLMRuntime):
     model_name: str = 'gpt-3.5-turbo-instruct'
     temperature: float = 0.0
 
+    batch_size: 20
+    
     @model_validator(mode='after')
     def init_runtime(self):
         self.llm_runtime_type = LLMRuntimeModelType.OpenAI

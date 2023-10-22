@@ -75,10 +75,7 @@ right here.
 
 ```python
 import pandas as pd
-
-from adala.agents import SingleShotAgent
-from adala.datasets import DataFrameDataset
-from adala.skills import LabelingSkill
+import adala import agents, skills, datasets, runtimes, envs
 
 # this is the dataset we will use to train our agent
 # filepath = "path/to/dataset.csv"
@@ -91,14 +88,33 @@ texts = [
     "The phone doesn't seem to accept anything except CBR mp3s",
     "All three broke within two months of use."
 ]
+
 df = pd.DataFrame(texts, columns=['text'])
 
-agent = SingleShotAgent(
-    # connect to a dataset
-    dataset=DataFrameDataset(df=df),
+# for this example we will use OpenAI GPT4 model as a runtime
+gpt4_runtime = runtimes.OpenAIRuntime(llm_params={
+	'model': 'gpt-4'
+})
+
+agent = agents.SingleShotAgent(
+    # provide a ground truth dataset directly
+    dataset=datasets.DataFrameDataset(df=df),
+    
+    # alternatively you can construct more complicated environments
+    # where GT dataset is just a part of the environemnt
+    # environment=envs.StaticEnvironment(dataset=datasets.DataFrameDataset(df=df))
+    
+    # initialize the runtime, you can have as many runtimes as you want
+    runtimes={ "openai-gpt4": gpt4_runtime },
+    
+    # if you don't want to pass the environment to each skill just
+    # provide it a default
+    default_runtime="openai-gpt4",
     
     # define a skill
-    skill = LabelingSkill(labels=['Positive', 'Negative', 'Neutral']),
+    # skill = skills.LabelingSkill(labels=['Positive', 'Negative', 'Neutral']),
+    
+    skills={ "classify": skills.ClassificationSkill(labels=['Positive', 'Negative', 'Neutral']) }
 )
 
 run = agent.run()

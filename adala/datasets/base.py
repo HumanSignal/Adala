@@ -46,7 +46,8 @@ class Dataset(BaseModel, ABC):
 
 
 class BlankDataset(Dataset):
-
+    """
+    """
     def batch_iterator(self, batch_size: int = 100) -> InternalDataFrame:
         return InternalDataFrame()
 

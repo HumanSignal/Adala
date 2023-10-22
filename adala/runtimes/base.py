@@ -35,7 +35,8 @@ class LLMRuntime(Runtime):
     """
     Base class for LLM runtimes.
     """
-
+    batch_size: None
+    
     llm_runtime_type: LLMRuntimeModelType = LLMRuntimeModelType.OpenAI
     llm_params: Dict[str, str] = {
         'model': 'gpt-3.5-turbo-instruct',
@@ -141,6 +142,30 @@ class LLMRuntime(Runtime):
         )
         return output
 
+    def process(
+            self,
+            dataset,
+            input_template: str,
+            output_template: str,
+            instructions: str,
+            extra_fields: Optional[Dict[str, Any]] = None
+    ) -> InternalDataFrame:
+        """ """
+        if self.batch_size:
+            predictions = []
+            
+            for batch in dataset.batch_iterator(batch_size=self.batch_size):
+                runtime_outputs = self.process_batch(dataset,
+                                                     input_template=input_template, output_template=output_template,
+                                                     instructions=instructions, extra_fields=extra_fields)
+                
+                predictions.append(runtime_outputs)
+            
+            return predictions
+        else:
+            pass
+        
+    
     def process_batch(
         self,
         batch: InternalDataFrame,
@@ -149,7 +174,6 @@ class LLMRuntime(Runtime):
         instructions: str,
         extra_fields: Optional[Dict[str, Any]] = None,
     ) -> InternalDataFrame:
-
         outputs = self.get_outputs(output_template)
 
         extra_fields = extra_fields or {}
