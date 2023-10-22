@@ -5,7 +5,6 @@ from typing import List
 class ClassificationSkill(LLMSkill):
     instructions: str = 'Label the input text with the following labels: {{{{labels}}}}'
     labels: List[str]
-    input_template: str = "Input: {{{{{input}}}}}"
     output_template: str = "Output: {{{{select 'predictions' options=labels logprobs='score'}}}}"
     prediction_field: str = 'predictions'
 
@@ -13,6 +12,6 @@ class ClassificationSkill(LLMSkill):
 class ClassificationSkillWithCoT(LLMSkill):
     instructions: str = 'Label the input text with the following labels: {{{{labels}}}}'
     labels: List[str]
-    input_template: str = "Input: {{{{text}}}}\nThoughts: {{{{gen 'rationale'}}}}\n"
+    input_template: str = "Input: {{{{{input}}}}}\nThoughts: {{{{gen 'rationale'}}}}\n"
     output_template: str = "Output: {{{{select 'predictions' options=labels logprobs='score'}}}}"
     prediction_field: str = 'predictions'

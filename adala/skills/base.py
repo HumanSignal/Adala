@@ -30,7 +30,7 @@ class BaseSkill(BaseModel, ABC):
         description='Instructs agent what to do with the input data. '
                     'Can use templating to refer to input fields.',
         default='',
-        examples=['Label the input text with the following labels: {{{{{labels}}}}}']
+        examples=['Label the input text with the following labels: {{{{labels}}}}']
     )
     description: Optional[str] = Field(
         default='',
@@ -43,15 +43,15 @@ class BaseSkill(BaseModel, ABC):
         description='Template for the input data. '
                     'Can use templating to refer to input parameters and perform data transformations.',
         default="Input: {{{{{input}}}}}",
-        examples=["Text: {{{{{text_column}}}}}, Date: {{{{{date_column}}}}}, Sentiment: {{{{{gen 'sentiment'}}}}}"]
+        examples=["Text: {{{{text_column}}}}, Date: {{{{date_column}}}}, Sentiment: {{{{gen 'sentiment'}}}}"]
     )
     output_template: Optional[str] = Field(
         title='Output template',
         description='Template for the output data. '
                     'Can use templating to refer to input parameters and perform data transformations. '
                     'Should contain at least one field matching `validation_fields`.',
-        default="Output: {{{{{gen 'predictions'}}}}}",
-        examples=["Output: {{{{{select 'predictions' options=labels logprobs='score'}}}}}"]
+        default="Output: {{{{gen 'predictions'}}}}",
+        examples=["Output: {{{{select 'predictions' options=labels logprobs='score'}}}}"]
     )
     validation_fields: Optional[List[str]] = Field(
         title='Prediction fields',
@@ -170,8 +170,12 @@ class LLMSkill(BaseSkill):
         gt = environment.dataset.get_ground_truth(experience.predictions)
         pred = experience.predictions.loc[gt.index]
         pred = pred[pred.notna()]
-        match = pred[self.prediction_field] == gt[environment.dataset.ground_truth_column]
-        pred[f'{self.prediction_field}_match'] = match
+
+        # TODO: can be multiple prediction validation fields
+        validation_field = self.validation_fields[0]
+
+        match = pred[validation_field] == gt[environment.dataset.ground_truth_column]
+        pred[f'{validation_field}_match'] = match
         evaluations = pd.concat([gt, pred], axis=1)
         # =====================
 
@@ -186,8 +190,9 @@ class LLMSkill(BaseSkill):
 
         experience = experience.model_copy()
 
-        errors = experience.evaluations[~experience.evaluations[f'{self.prediction_field}_match']]
-        experience.accuracy = experience.evaluations[f'{self.prediction_field}_match'].mean()
+        # TODO: can be multiple prediction validation fields
+        errors = experience.evaluations[~experience.evaluations[f'{self.validation_fields[0]}_match']]
+        experience.accuracy = experience.evaluations[f'{self.validation_fields[0]}_match'].mean()
         if errors.empty:
             # No errors - nothing to analyze
             experience.errors = errors
@@ -203,7 +208,7 @@ class LLMSkill(BaseSkill):
             input_template,
             extra_fields=self._get_extra_fields()
         )
-        errors = pd.concat((inputs, errors[[self.prediction_field, experience.dataset.ground_truth_column]]), axis=1)
+        errors = pd.concat((inputs, errors[[self.validation_fields[0], experience.dataset.ground_truth_column]]), axis=1)
         errors.columns = ['input', 'prediction', 'ground_truth']
         smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
         error_reasons = smart_runtime.process_batch(
