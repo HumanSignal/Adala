@@ -13,6 +13,7 @@ class Environment(BaseModel, ABC):
     """
     dataset: Dataset
     ground_truth_set: Any
+    matching_function: Union[str, Callable]
 
     @abstractmethod
     def request_feedback(self, predictions: InternalDataFrame):
