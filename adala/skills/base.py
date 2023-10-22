@@ -163,23 +163,14 @@ class LLMSkill(BaseSkill):
     def compare_to_ground_truth(self, experience: ShortTermMemory, environment: Environment) -> ShortTermMemory:
         experience = experience.model_copy()
 
-        # TODO: this block can implement more sophisticated logic how to obtain ground truth from environment
-        # and return evaluations, namely:
-        # evaluations = Environment.request_feedback(experience.predictions)
-        # =====================
-        gt = environment.request_feedback(experience)
-        pred = experience.predictions.loc[gt.index]
-        pred = pred[pred.notna()]
-
         # TODO: can be multiple prediction validation fields
         validation_field = self.validation_fields[0]
 
-        match = pred[validation_field] == gt[environment.dataset.ground_truth_column]
-        pred[f'{validation_field}_match'] = match
-        evaluations = pd.concat([gt, pred], axis=1)
-        # =====================
+        experience.evaluations = environment.compare_to_ground_truth(
+            predictions=experience.predictions,
+            validation_column=validation_field
+        )
 
-        experience.evaluations = evaluations
         return experience
 
     def analyze(

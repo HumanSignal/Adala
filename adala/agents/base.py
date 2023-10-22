@@ -73,8 +73,8 @@ class Agent(BaseModel, ABC):
             raise ValueError(f'Runtime "{runtime}" not found.')
         return self.runtimes[runtime]
 
-    def apply_skills(self, runtime: Optional[str] = None) -> ShortTermMemory:
-        return self.skills.apply(dataset=self.environment.dataset, runtime=self.get_runtime(runtime=runtime))
+    def apply_skills(self, dataset: Dataset, runtime: Optional[str] = None) -> ShortTermMemory:
+        return self.skills.apply(dataset=dataset, runtime=self.get_runtime(runtime=runtime))
 
     def learn(
         self,
@@ -96,7 +96,7 @@ class Agent(BaseModel, ABC):
         for iteration in range(learning_iterations):
 
             # 1. PREDICTION PHASE: Apply agent skills to dataset and get experience with predictions
-            experience = skills.apply(dataset=self.environment.dataset, runtime=runtime, experience=experience)
+            experience = skills.apply(dataset=self.environment.ground_truth_dataset, runtime=runtime, experience=experience)
 
             skills_improved = False
             log(f'Iteration #{iteration}: Comparing to ground truth, analyzing and improving...')
