@@ -167,7 +167,7 @@ class LLMSkill(BaseSkill):
         # and return evaluations, namely:
         # evaluations = Environment.request_feedback(experience.predictions)
         # =====================
-        gt = environment.dataset.get_ground_truth(experience.predictions)
+        gt = environment.request_feedback(experience)
         pred = experience.predictions.loc[gt.index]
         pred = pred[pred.notna()]
 
