@@ -1,24 +1,15 @@
 from abc import ABC, abstractmethod
+from pydantic import BaseModel, field_validator
+from typing import List, Optional, Any, Dict, Union
 
-import pandas as pd
-from pydantic import BaseModel
-from typing import List, Optional, Any, Dict, Union, Iterable
-
-RawRecord = Dict[str, Any]
-RawRecords = List[RawRecord]
-
-# Internal data tables representation. Replace this with Dask or Polars in the future.
-InternalDataFrame = pd.DataFrame
-
-
-def InternalDataFrame_encoder(df: InternalDataFrame) -> List:
-    return df.to_dict(orient='records')
+from adala.utils.internal_data import InternalDataFrame
 
 
 class Dataset(BaseModel, ABC):
     """
     Base class for original datasets.
     """
+    input_data_field: Optional[str] = None
 
     @abstractmethod
     def batch_iterator(self, batch_size: int = 100) -> InternalDataFrame:

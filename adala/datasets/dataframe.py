@@ -1,6 +1,7 @@
 import pandas as pd
 from typing import List, Dict, Any, Union, Optional, Callable, Iterable
-from .base import Dataset, RawRecords, InternalDataFrame
+from .base import Dataset
+from adala.utils.internal_data import InternalDataFrame
 from pydantic import model_validator
 
 

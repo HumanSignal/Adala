@@ -1,1 +1,1 @@
-from .single_shot import SingleShotAgent
+from .base import Agent

@@ -1,8 +1,12 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
 
 from pydantic import BaseModel
 from adala.datasets.base import Dataset, InternalDataFrame
+
+if TYPE_CHECKING:
+    from adala.skills.skillset import SkillSet
 
 
 class ShortTermMemory(BaseModel):
@@ -29,7 +33,7 @@ class LongTermMemory(BaseModel, ABC):
     """
 
     @abstractmethod
-    def remember(self, experience: ShortTermMemory):
+    def remember(self, experience: ShortTermMemory, skills: SkillSet):
         """
         Base method for remembering experiences in long term memory.
         """

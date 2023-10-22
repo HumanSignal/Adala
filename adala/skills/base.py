@@ -3,51 +3,115 @@ import pandas as pd
 import re
 
 from pydantic import BaseModel
-from typing import List, Optional, Any, Dict
+from typing import List, Optional, Any, Dict, Tuple
 from abc import ABC, abstractmethod
 from pydantic import Field, field_serializer, model_validator
 
 from typing import Optional
-from adala.datasets.base import InternalDataFrame, InternalDataFrame_encoder
 from adala.runtimes.base import LLMRuntime
-
 from adala.datasets.base import Dataset
+from adala.environments.base import Environment
 from adala.runtimes.base import Runtime
 from adala.memories.base import ShortTermMemory, LongTermMemory
+from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 
 
 class BaseSkill(BaseModel, ABC):
-    name: str = Field(default='')
-    description: Optional[str] = Field(default='')
-    instructions: str = Field(default='')
-    input_template: str = Field(default='')
-    output_template: str = Field(default='')
-    # TODO: how to work with multiple outputs?
-    prediction_field: str = Field(default='')
+    """
+    """
+    name: str = Field(
+        title='Skill name',
+        description='Unique name of the skill',
+        default='',
+        examples=['labeling', 'classification', 'text-generation']
+    )
+    instructions: str = Field(
+        title='Skill instructions',
+        description='Instructs agent what to do with the input data. '
+                    'Can use templating to refer to input fields.',
+        default='',
+        examples=['Label the input text with the following labels: {{{{{labels}}}}}']
+    )
+    description: Optional[str] = Field(
+        default='',
+        title='Skill description',
+        description='Description of the skill. Can be used to retrieve skill from the library.',
+        examples=['The skill to perform sentiment analysis on the input text.']
+    )
+    input_template: Optional[str] = Field(
+        title='Input template',
+        description='Template for the input data. '
+                    'Can use templating to refer to input parameters and perform data transformations.',
+        default="Input: {{{{{input}}}}}",
+        examples=["Text: {{{{{text_column}}}}}, Date: {{{{{date_column}}}}}, Sentiment: {{{{{gen 'sentiment'}}}}}"]
+    )
+    output_template: Optional[str] = Field(
+        title='Output template',
+        description='Template for the output data. '
+                    'Can use templating to refer to input parameters and perform data transformations. '
+                    'Should contain at least one field matching `validation_fields`.',
+        default="Output: {{{{{gen 'predictions'}}}}}",
+        examples=["Output: {{{{{select 'predictions' options=labels logprobs='score'}}}}}"]
+    )
+    validation_fields: Optional[List[str]] = Field(
+        title='Prediction fields',
+        description='List of fields that will require validation. '
+                    'Should match at least one field in `output_template`.',
+        examples=['predictions', 'more_predictions'],
+        default=['predictions']
+    )
 
-    def __call__(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
+    def __call__(self, input: InternalDataFrame, runtime: Runtime, dataset: Dataset) -> InternalDataFrame:
         """
         Call runtime to process batch of inputs.
         Input and output shapes can be varying.
         This method is supposed to be the main way of connecting different skills together.
         It should also take care of input / output data types validation.
         """
-        return self._call(input, runtime)
+
+        # get user defined dataset input fields
+        input_template, output_template, instructions = self._get_formatted_templates(dataset)
+
+        runtime_predictions = runtime.process_batch(
+            batch=input,
+            input_template=input_template,
+            output_template=output_template,
+            instructions=instructions,
+            extra_fields=self._get_extra_fields()
+        )
+        return runtime_predictions
+
+    def _get_formatted_templates(self, dataset: Dataset) -> Tuple[str, str, str]:
+        """
+        Format input and output templates with dataset input fields
+        """
+        inputs = {}
+        if dataset.input_data_field:
+            inputs['input'] = dataset.input_data_field
+        input_template = self.input_template.format(**inputs)
+        output_template = self.output_template.format(**inputs)
+        instructions = self.instructions.format(**inputs)
+        return input_template, output_template, instructions
+
+    def _get_extra_fields(self):
+        # TODO: more robust way to exclude system fields
+        system_fields = {
+            'name', 'description', 'input_template', 'output_template', 'instructions', 'validation_fields'}
+        extra_fields = self.model_dump(exclude=system_fields)
+        return extra_fields
 
     @abstractmethod
-    def _call(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
-        """
-        Apply skill to input data and return output data
-        """
-
-    @abstractmethod
-    def apply(self, dataset: Dataset, runtime: Runtime) -> ShortTermMemory:
+    def apply(
+        self, dataset: Dataset,
+        runtime: Runtime,
+        experience: ShortTermMemory
+    ) -> ShortTermMemory:
         """
         Apply skill to dataset and return new dataset with skill results (predictions)
         """
 
     @abstractmethod
-    def evaluate(self, experience: ShortTermMemory) -> ShortTermMemory:
+    def compare_to_ground_truth(self, experience: ShortTermMemory, environment: Environment) -> ShortTermMemory:
         """
         Test predictions and return new Dataset with evaluation results - e.g. error examples
         """
@@ -69,88 +133,74 @@ class BaseSkill(BaseModel, ABC):
         Improve current skill state based on current experience
         """
 
-    def learn(self, dataset: Dataset, runtime: Runtime, memory: Optional[LongTermMemory] = None) -> ShortTermMemory:
-        """
-        Apply, validate, analyze and optimize skill.
-        """
-        experience = self.apply(dataset=dataset, runtime=runtime)
-        print('Evaluating, analyzing and improving...')
-        experience = self.evaluate(experience)
-        experience = self.analyze(experience, memory, runtime)
-        experience = self.improve(experience)
-        print('Done!')
-        return experience
 
-
-class Skill(BaseSkill):
+class LLMSkill(BaseSkill):
     """
     LLM skill handles LLM to produce predictions given instructions
     """
 
-    def _get_extra_fields(self) -> Dict[str, Any]:
-        extra_fields = self.model_dump(
-            # TODO: more robust way to exclude system fields
-            exclude={'name', 'description', 'input_template', 'output_template', 'instructions', 'prediction_field'})
-        return extra_fields
+    def apply(
+        self, dataset: Dataset,
+        runtime: LLMRuntime,
+        experience: ShortTermMemory
+    ) -> ShortTermMemory:
 
-    def _call(self, input: InternalDataFrame, runtime: Runtime) -> InternalDataFrame:
+        experience = experience.model_copy()
 
-        runtime_outputs = runtime.process_batch(
-            input,
-            input_template=self.input_template,
-            output_template=self.output_template,
-            instructions=self.instructions,
-            extra_fields=self._get_extra_fields()
-        )
-        return runtime_outputs
-
-    def apply(self, dataset: Dataset, runtime: LLMRuntime) -> ShortTermMemory:
         predictions = []
 
-        for batch in dataset.batch_iterator(
-            # this is the current OpenAI limit
-            batch_size=20
-        ):
-            runtime_outputs = self._call(batch, runtime)
-            predictions.append(runtime_outputs)
-
-        experience = ShortTermMemory(dataset=dataset)
+        for batch in dataset.batch_iterator():
+            runtime_predictions = self(batch, runtime, dataset)
+            predictions.append(runtime_predictions)
 
         if not predictions:
-            experience.predictions = pd.DataFrame()
+            experience.predictions = InternalDataFrame()
         else:
-            experience.predictions = pd.concat(predictions, copy=False)
+            experience.predictions = InternalDataFrameConcat(predictions, copy=False)
 
         return experience
 
-    def evaluate(self, experience) -> ShortTermMemory:
-        gt = experience.dataset.get_ground_truth(experience.predictions)
+    def compare_to_ground_truth(self, experience: ShortTermMemory, environment: Environment) -> ShortTermMemory:
+        experience = experience.model_copy()
+
+        # TODO: this block can implement more sophisticated logic how to obtain ground truth from environment
+        # and return evaluations, namely:
+        # evaluations = Environment.request_feedback(experience.predictions)
+        # =====================
+        gt = environment.dataset.get_ground_truth(experience.predictions)
         pred = experience.predictions.loc[gt.index]
         pred = pred[pred.notna()]
-
-        # TODO: implement more sophisticated evaluation beyond simple equality
-        match = pred[self.prediction_field] == gt[experience.dataset.ground_truth_column]
+        match = pred[self.prediction_field] == gt[environment.dataset.ground_truth_column]
         pred[f'{self.prediction_field}_match'] = match
         evaluations = pd.concat([gt, pred], axis=1)
-        updated_experience = experience.model_copy()
-        updated_experience.evaluations = evaluations
-        return updated_experience
+        # =====================
+
+        experience.evaluations = evaluations
+        return experience
 
     def analyze(
         self, experience: ShortTermMemory,
         memory: Optional[LongTermMemory] = None,
         runtime: Optional[Runtime] = None
     ) -> ShortTermMemory:
+
+        experience = experience.model_copy()
+
         errors = experience.evaluations[~experience.evaluations[f'{self.prediction_field}_match']]
-        accuracy = experience.evaluations[f'{self.prediction_field}_match'].mean()
+        experience.accuracy = experience.evaluations[f'{self.prediction_field}_match'].mean()
+        if errors.empty:
+            # No errors - nothing to analyze
+            experience.errors = errors
+            return experience
 
         # collect errors and create error report
         # first sample errors - make it uniform, but more sophisticated sampling can be implemented
         errors = errors.sample(n=min(3, errors.shape[0]))
         # collect error inputs from runtime
+        input_template, _, _ = self._get_formatted_templates(experience.dataset)
         inputs = runtime.process_batch_inputs(
             errors,
-            self.input_template,
+            input_template,
             extra_fields=self._get_extra_fields()
         )
         errors = pd.concat((inputs, errors[[self.prediction_field, experience.dataset.ground_truth_column]]), axis=1)
@@ -177,12 +227,12 @@ class Skill(BaseSkill):
         )
         errors['reason'] = error_reasons['reason']
 
-        updated_experience = experience.model_copy()
-        updated_experience.errors = errors
-        updated_experience.accuracy = accuracy
-        return updated_experience
+        experience.errors = errors
+        return experience
 
     def improve(self, experience: ShortTermMemory) -> ShortTermMemory:
+        experience = experience.model_copy()
+
         errors = experience.errors.to_dict(orient='records')
         smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
         result = smart_runtime.process_record(
@@ -214,7 +264,6 @@ class Skill(BaseSkill):
         )
         new_instruction = result['new_instruction']
 
-        updated_experience = experience.model_copy()
-        updated_experience.initial_instructions = self.instructions
-        updated_experience.updated_instructions = new_instruction
-        return updated_experience
+        experience.initial_instructions = self.instructions
+        experience.updated_instructions = new_instruction
+        return experience
