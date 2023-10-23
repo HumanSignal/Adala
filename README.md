@@ -121,6 +121,9 @@ for _ in range(3):
 
 Check [more examples in notebook tutorials.](https://github.com/HumanSignal/ADALA/tree/master/adala/examples)
 
+## Examples
+
+<!-- 
 ## Running ADALA as a standalone server (Comming soon!)
 
 Initiate the Adala server. Note: Each agent operates as its own web server.
@@ -227,6 +230,9 @@ adala logs
 # Provide help
 adala help <command>
 ```
+-->
+
+## Roadmap
 
 ## Contributing to ADALA
 
@@ -236,6 +242,8 @@ contributions will power Adala's evolution. Join us in shaping the future of int
 versatile and impactful for users across the globe.
 
 Read more here.
+
+## Support
 
 ## How ADALA compares to other agent libraries
 
