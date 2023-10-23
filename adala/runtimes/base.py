@@ -93,7 +93,7 @@ class LLMRuntime(Runtime):
 
         verified_input.update(extra_fields)
         result = program(
-            silent=not self.verbose,
+            # silent=not self.verbose,
             **verified_input
         )
         if outputs is None:

@@ -84,7 +84,7 @@ class BaseSkill(BaseModel, ABC):
         """
         Format input and output templates with dataset input fields
         """
-        inputs = {}
+        inputs = self._get_extra_fields()
         if dataset.input_data_field:
             inputs['input'] = dataset.input_data_field
         input_template = self.input_template.format(**inputs)
@@ -155,7 +155,10 @@ class LLMSkill(BaseSkill):
         if experience.predictions is None:
             experience.predictions = predictions
         else:
-            experience.predictions = InternalDataFrameConcat((experience.predictions, predictions), axis=1)
+            experience.predictions = InternalDataFrameConcat([
+                experience.predictions.drop(columns=[col for col in experience.predictions.columns if col in predictions.columns]),
+                predictions
+            ], axis=1)
 
         return experience
 
@@ -181,11 +184,12 @@ class LLMSkill(BaseSkill):
         errors = errors.sample(n=min(3, errors.shape[0]))
 
         # collect error inputs from runtime
-        input_template, _, _ = self._get_formatted_templates(experience.dataset)
+        input_template, _, instructions = self._get_formatted_templates(experience.dataset)
+        extra_fields = self._get_extra_fields()
         inputs = runtime.process_batch_inputs(
             errors,
             input_template,
-            extra_fields=self._get_extra_fields()
+            extra_fields=extra_fields
         )
 
         # construct error report
@@ -203,7 +207,7 @@ class LLMSkill(BaseSkill):
                          "We expect the prediction to be equal to the ground truth.\n"
                          "Your task is to provide a reason for the error due to the original instruction.\n"
                          "Be concise and specific.\n\n"
-                         "Instructions: {{llm_instructions}}\n"
+                         f"Instructions: {instructions}\n"
                          "{{~/system}}",
             input_template="{{#user~}}\n"
                            "Input: {{input}}\n"
@@ -212,7 +216,7 @@ class LLMSkill(BaseSkill):
                            "Explanation:\n"
                            "{{~/user}}",
             output_template="{{#assistant~}}{{gen 'reason'}}{{~/assistant}}",
-            extra_fields={'llm_instructions': self.instructions}
+            extra_fields=extra_fields
         )
         errors['reason'] = error_reasons['reason']
 

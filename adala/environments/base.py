@@ -60,12 +60,16 @@ class BasicEnvironment(Environment):
         To extract ground truth from predictions, we simply take the ground truth column,
         and add extracted ground truth to ground truth set.
         """
-        gt = experience.predictions[self.ground_truth_column].rename(self.ground_truth_column)
+        gt = experience.predictions[self.ground_truth_column]
         gt = gt[gt.notna()]
         gt = gt[~gt.index.isin(self.ground_truth_set.index)]
         if not gt.empty:
-            # TODO: control the size of ground truth set to avoid memory issues
-            self.ground_truth_set = InternalDataFrameConcat([self.ground_truth_set, gt], axis=0)
+            gt = gt.to_frame(self.ground_truth_column)
+            if self.ground_truth_set.empty:
+                self.ground_truth_set = gt
+            else:
+                # TODO: control the size of ground truth set to avoid memory issues
+                self.ground_truth_set = InternalDataFrameConcat([self.ground_truth_set, gt], axis=0)
 
     def compare_to_ground_truth(self, skill: BaseSkill, experience: ShortTermMemory) -> ShortTermMemory:
         """

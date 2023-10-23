@@ -95,7 +95,7 @@ agent = Agent(
     # connect to a dataset
     environment=BasicEnvironment(ground_truth_column="ground_truth"),
     # define a skill
-    skill = ClassificationSkill(labels=["Subjective", "Objective"]),
+    skills=ClassificationSkill(labels=["Subjective", "Objective"]),
 )
 
 run = agent.learn(train_dataset=dataset, learning_iterations=3, accuracy_threshold=0.95)
