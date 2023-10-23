@@ -100,8 +100,11 @@ agent = Agent(
 
 run = agent.learn(train_dataset=dataset, learning_iterations=3, accuracy_threshold=0.95)
 
+print('=====================')
 print(f'New instructions: {run.updated_instructions}')
-print(f'Accuracy: {run.accuracy}')
+print('=====================')
+print('Predictions:')
+print(run.predictions)
 ```
 
 ## More Notebooks
