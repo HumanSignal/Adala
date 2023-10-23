@@ -234,18 +234,22 @@ adala help <command>
 
 ## Roadmap
 
-## Contributing to ADALA
+- [ ] Create Named Entity Recognition Skill
+- [ ] Command Line Utility (see the source for this readme for example)
+- [ ] REST API to interact with Adala
 
-Dive into the heart of Adala by enhancing our Skills, optimizing Runtimes, or pioneering new Agent Types. Whether you're
+## Contributing to Adala
+
+Dive into the heart of Adala by enhancing Skills, optimizing Runtimes, or pioneering new Agent Types. Whether you're
 crafting nuanced tasks, refining computational environments, or sculpting specialized agents for unique domains, your
 contributions will power Adala's evolution. Join us in shaping the future of intelligent systems and making Adala more
 versatile and impactful for users across the globe.
 
-Read more here.
+[Read more here.](./CONTRIBUTION.md)
 
 ## Support
 
-## How ADALA compares to other agent libraries
+## How Adala compares to other agent libraries
 
 ## FAQ
 
