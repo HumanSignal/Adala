@@ -26,7 +26,8 @@ class Agent(BaseModel, ABC):
                 llm_runtime_type=LLMRuntimeModelType.OpenAI,
                 llm_params={
                     'model': 'gpt-3.5-turbo-instruct',
-                }
+                },
+                # verbose=True
             ),
             'openai-gpt4': LLMRuntime(
                 llm_runtime_type=LLMRuntimeModelType.OpenAI,

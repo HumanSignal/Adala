@@ -79,7 +79,7 @@ class BasicEnvironment(Environment):
         gt = gt[gt.index.isin(pred.index)]
         if gt.empty:
             # return empty memory
-            return ShortTermMemory()
+            return experience
 
         gt = gt.to_frame(self.ground_truth_column)
 

@@ -215,7 +215,7 @@ class LLMSkill(BaseSkill):
                          f"Instructions: {self.instructions}\n"
                          "{{~/system}}",
             input_template="{{#user~}}\n"
-                           "Input: {{input}}\n"
+                           "{{input}}\n"
                            "Prediction: {{prediction}}\n"
                            "Ground truth: {{ground_truth}}\n"
                            "Explanation:\n"
@@ -249,9 +249,9 @@ class LLMSkill(BaseSkill):
                          "Output: ...\n\n"
                          "{{~/system}}\n",
             input_template="{{#user~}}\n"
-                           f"Old instruction: {self.instructions}\n"
-                           "Errors: {{#each errors}}"
-                           "\nInput: {{this.input}}\n"
+                           f"Old instruction: {self.instructions}\n\n"
+                           "Errors:\n{{#each errors}}"
+                           "\n{{this.input}}\n"
                            "Prediction: {{this.prediction}}\n"
                            "Ground truth: {{this.ground_truth}}\n"
                            "{{/each}}\n"

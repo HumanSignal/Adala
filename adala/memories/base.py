@@ -26,6 +26,14 @@ class ShortTermMemory(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
+    def reset(self):
+        self.predictions = None
+        self.evaluations = None
+        self.errors = None
+        self.accuracy = None
+        self.initial_instructions = None
+        self.updated_instructions = None
+
 
 class LongTermMemory(BaseModel, ABC):
 
