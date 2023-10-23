@@ -151,7 +151,11 @@ class Skill(BaseSkill):
                 'No errors found, nothing to improve. '
                 'Add more ground truth samples or try to change your input data.'
             )
-            errors = experience.evaluations.sample(n=3)
+            updated_experience = experience.model_copy()
+            updated_experience.accuracy = 1.0
+            updated_experience.updated_instructions = 'None'
+            updated_experience.finish = True
+            return updated_experience
         else:
             # collect errors and create error report
             # first sample errors - make it uniform, but more sophisticated sampling can be implemented
@@ -193,6 +197,10 @@ class Skill(BaseSkill):
         return updated_experience
 
     def improve(self, experience: ShortTermMemory) -> ShortTermMemory:
+        if experience.finish:
+            logger.warning('Nothing to improve, learning is finished')
+            return experience
+
         errors = experience.errors.to_dict(orient='records')
         smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
         result = smart_runtime.process_record(

@@ -16,6 +16,7 @@ class ShortTermMemory(BaseModel):
     accuracy: float = None
     initial_instructions: str = None
     updated_instructions: str = None
+    finish: bool = False
 
     class Config:
         arbitrary_types_allowed = True
