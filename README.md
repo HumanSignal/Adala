@@ -98,7 +98,10 @@ agent = Agent(
         ground_truth_column="ground_truth"
     ),
     # define a skill
-    skills=ClassificationSkill(labels=["Subjective", "Objective"]),
+    skills=ClassificationSkill(
+        instructions="Label text as subjective or objective.",
+        labels=["Subjective", "Objective"]
+    ),
 )
 
 run = agent.learn(learning_iterations=3, accuracy_threshold=0.95)
