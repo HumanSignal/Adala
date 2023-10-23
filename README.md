@@ -76,47 +76,32 @@ right here.
 ```python
 import pandas as pd
 
-from adala.agents import SingleShotAgent
+from adala.agents import Agent
 from adala.datasets import DataFrameDataset
-from adala.skills import LabelingSkill
+from adala.environments import BasicEnvironment
+from adala.skills import ClassificationSkill
 
-# this is the dataset we will use to train our agent
-# filepath = "path/to/dataset.csv"
-# df = pd.read_csv(filepath, sep='\t', nrows=100)
+df = pd.DataFrame([
+    ["The mic is great.", "Subjective"],
+    ["Will order from them again!", "Subjective"],
+    ["Not loud enough and doesn't turn on like it should.", "Objective"],
+    ["The phone doesn't seem to accept anything except CBR mp3s", "Objective"],
+    ["All three broke within two months of use.", "Objective"]
+], columns=["text", "ground_truth"])
 
-texts = [
-    "The mic is great.",
-    "Will order from them again!",
-    "Not loud enough and doesn't turn on like it should.",
-    "The phone doesn't seem to accept anything except CBR mp3s",
-    "All three broke within two months of use."
-]
-df = pd.DataFrame(texts, columns=['text'])
+dataset = DataFrameDataset(df=df, input_data_field="text")
 
-agent = SingleShotAgent(
+agent = Agent(
     # connect to a dataset
-    dataset=DataFrameDataset(df=df),
-    
+    environment=BasicEnvironment(ground_truth_column="ground_truth"),
     # define a skill
-    skill = LabelingSkill(labels=['Positive', 'Negative', 'Neutral']),
+    skill = ClassificationSkill(labels=["Subjective", "Objective"]),
 )
 
-run = agent.run()
+run = agent.learn(train_dataset=dataset, learning_iterations=3, accuracy_threshold=0.95)
 
-# display results
-print(pd.concat((df, run.experience.predictions), axis=1))
-
-# provide ground truth signal in the original dataset
-df.loc[0, 'ground_truth'] = 'Positive'
-df.loc[2, 'ground_truth'] = 'Negative'
-df.loc[4, 'ground_truth'] = 'Neutral'
-
-for _ in range(3):
-    # agent learns and improves from the ground truth signal
-    learnings = agent.learn(update_instructions=True)
-    
-    # display results
-    print(learnings.experience.accuracy)
+print(f'New instructions: {run.updated_instructions}')
+print(f'Accuracy: {run.accuracy}')
 ```
 
 ## More Notebooks
