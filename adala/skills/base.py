@@ -42,7 +42,7 @@ class BaseSkill(BaseModel, ABC):
         description='Template for the input data. '
                     'Can use templating to refer to input parameters and perform data transformations.',
         default="Input: {{{{{input}}}}}",
-        examples=["Text: {{{{input}}}}, Date: {{{{date_column}}}}, Sentiment: {{{{gen 'sentiment'}}}}"]
+        examples=["Text: {{{{{input}}}}}, Date: {{{{date_column}}}}, Sentiment: {{{{gen 'sentiment'}}}}"]
     )
     input_data_field: Optional[str] = Field(
         title='Input data field',
@@ -122,7 +122,7 @@ class BaseSkill(BaseModel, ABC):
         """
 
     @abstractmethod
-    def improve(self, experience: ShortTermMemory) -> ShortTermMemory:
+    def improve(self, experience: ShortTermMemory, update_instructions: bool = True) -> ShortTermMemory:
         """
         Improve current skill state based on current experience
         """
@@ -228,7 +228,7 @@ class LLMSkill(BaseSkill):
         experience.errors = errors
         return experience
 
-    def improve(self, experience: ShortTermMemory) -> ShortTermMemory:
+    def improve(self, experience: ShortTermMemory, update_instructions: bool = True) -> ShortTermMemory:
         experience = experience.model_copy()
 
         errors = experience.errors.to_dict(orient='records')
@@ -264,4 +264,8 @@ class LLMSkill(BaseSkill):
 
         experience.initial_instructions = self.instructions
         experience.updated_instructions = new_instruction
+
+        if update_instructions:
+            self.instructions = new_instruction
+
         return experience
