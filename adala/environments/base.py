@@ -5,6 +5,7 @@ from typing import Any, Optional, Dict, Union, Callable
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 from adala.skills.base import BaseSkill
 from adala.memories.base import ShortTermMemory
+from adala.datasets.dataframe import DataFrameDataset
 
 
 class Environment(BaseModel, ABC):
@@ -50,7 +51,7 @@ class BasicEnvironment(Environment):
     Once new ground truth points are added, they are saved in `self.ground_truth_set`.
     To compare with ground truth, exact matching is used.
     """
-    ground_truth_set: InternalDataFrame = Field(default_factory=InternalDataFrame)
+    ground_truth_dataset: DataFrameDataset = Field(default_factory=DataFrameDataset)
     ground_truth_column: str = 'ground_truth'
 
     _prediction_column: str
@@ -60,9 +61,15 @@ class BasicEnvironment(Environment):
         To extract ground truth from predictions, we simply take the ground truth column,
         and add extracted ground truth to ground truth set.
         """
-        gt = experience.predictions[self.ground_truth_column]
-        gt = gt[gt.notna()]
-        gt = gt[~gt.index.isin(self.ground_truth_set.index)]
+
+    def compare_to_ground_truth(self, skill: BaseSkill, experience: ShortTermMemory) -> ShortTermMemory:
+        """
+        Compare predictions with ground truth set and return match results.
+        """
+        gt = self.ground_truth_dataset.df[self.ground_truth_column]
+        pred = experience.predictions[self._prediction_column]
+        # select
+        gt = gt[gt.index.isin(pred.index)]
         if not gt.empty:
             gt = gt.to_frame(self.ground_truth_column)
             if self.ground_truth_set.empty:
@@ -71,10 +78,6 @@ class BasicEnvironment(Environment):
                 # TODO: control the size of ground truth set to avoid memory issues
                 self.ground_truth_set = InternalDataFrameConcat([self.ground_truth_set, gt], axis=0)
 
-    def compare_to_ground_truth(self, skill: BaseSkill, experience: ShortTermMemory) -> ShortTermMemory:
-        """
-        Compare predictions with ground truth set and return match results.
-        """
         experience = experience.model_copy()
         predictions = experience.predictions
 

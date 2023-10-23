@@ -93,12 +93,15 @@ dataset = DataFrameDataset(df=df, input_data_field="text")
 
 agent = Agent(
     # connect to a dataset
-    environment=BasicEnvironment(ground_truth_column="ground_truth"),
+    environment=BasicEnvironment(
+        ground_truth_dataset=dataset,
+        ground_truth_column="ground_truth"
+    ),
     # define a skill
     skills=ClassificationSkill(labels=["Subjective", "Objective"]),
 )
 
-run = agent.learn(train_dataset=dataset, learning_iterations=3, accuracy_threshold=0.95)
+run = agent.learn(learning_iterations=3, accuracy_threshold=0.95)
 
 print('=====================')
 print(f'New instructions: {run.updated_instructions}')

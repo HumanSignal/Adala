@@ -78,7 +78,6 @@ class Agent(BaseModel, ABC):
 
     def learn(
         self,
-        train_dataset: Dataset,
         learning_iterations: int = 3,
         accuracy_threshold: float = 0.9,
         update_skills: bool = True,
@@ -93,7 +92,7 @@ class Agent(BaseModel, ABC):
         skills = self.skills.model_copy(deep=True)
 
         # Apply agent skills to dataset and get experience with predictions
-        experience = skills.apply(dataset=train_dataset, runtime=runtime, experience=experience)
+        experience = skills.apply(dataset=self.environment.ground_truth_dataset, runtime=runtime, experience=experience)
 
         # Agent select one skill to improve
         learned_skill = skills.select_skill_to_improve(experience)
