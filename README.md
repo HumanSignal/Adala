@@ -252,7 +252,7 @@ versatile and impactful for users across the globe.
 
 ## Support
 
-## How Adala compares to other agent libraries
+Are you in need of assistance or looking to engage with our community? Our [Discord channel]() is the perfect place for real-time support and interaction. Whether you have questions, need clarifications, or simply want to discuss topics related to our project, the Discord community is welcoming!
 
 ## FAQ
 
@@ -260,7 +260,6 @@ versatile and impactful for users across the globe.
 - Agent is a set of skills and runtimes that could be used to execute those skills. Each agent has its own unique
   environment (dataset)
   attached to it. You can define your own agent class that would have a unique set of skills for your domain.
-
 -
 
 ## Interesting Stuff
