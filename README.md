@@ -235,6 +235,7 @@ adala help <command>
 ## Roadmap
 
 - [ ] Create Named Entity Recognition Skill
+- [ ] Extend Environemnt with one more example
 - [ ] Command Line Utility (see the source for this readme for example)
 - [ ] REST API to interact with Adala
 
