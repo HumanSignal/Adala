@@ -5,7 +5,7 @@ from typing import Any, Optional, Dict, Union, Callable
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 from adala.skills.base import BaseSkill
 from adala.memories.base import ShortTermMemory
-from adala.datasets.dataframe import DataFrameDataset
+from adala.datasets import Dataset, DataFrameDataset
 
 
 class Environment(BaseModel, ABC):
@@ -15,7 +15,6 @@ class Environment(BaseModel, ABC):
     and the way it compares ground truth with predictions.
     Environment uses predictions index as a way to match predictions with ground truth.
     """
-    ground_truth_set: Any
 
     @abstractmethod
     def request_feedback(self, skill: BaseSkill, experience: ShortTermMemory):
@@ -27,6 +26,12 @@ class Environment(BaseModel, ABC):
     def compare_to_ground_truth(self, skill: BaseSkill, experience: ShortTermMemory) -> ShortTermMemory:
         """
         Compare predictions with ground truth set and return match results.
+        """
+
+    @abstractmethod
+    def as_dataset(self) -> Dataset:
+        """
+        Return environment as a dataset.
         """
 
     @abstractmethod
@@ -100,6 +105,9 @@ class BasicEnvironment(Environment):
         experience.ground_truth_column_name = self.ground_truth_column
         experience.match_column_name = match_column_name
         return experience
+
+    def as_dataset(self) -> Dataset:
+        return self.ground_truth_dataset
 
     def save(self):
         raise NotImplementedError
