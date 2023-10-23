@@ -10,12 +10,12 @@ ADALA welcomes agents equipped with a wide range of skills, each offering unique
 
 ### Extending Skills:
 
-Start with the foundational Skill class and extend it to facilitate Adala in acquiring new skills. To understand better, examine how the Classification or NamedEntity skills were implemented.
+Start with the foundational Skill class and extend it to facilitate Adala in acquiring new skills. To understand better, examine how the Classification skills were implemented.
 
 Example:
 
 ```python
-
+class 
 ```
 
 ### Domain-Specific Skills
@@ -36,7 +36,7 @@ Example:
 
 ### New Runtimes 
 
-Introduce innovative runtimes utilizing varying language models or even distinct model types for labeling tasks. Enhancing current implementations through performance optimization or new feature introduction is also encouraged.
+Introduce runtimes utilizing varying language models or even distinct model types for labeling tasks. Enhancing current implementations through performance optimization or new feature introduction is also encouraged.
 
 #### Adding a New Runtime:
 To introduce a new runtime, adhere to the structure delineated by the Runtime abstract class. Below is a rudimentary example:
@@ -44,6 +44,18 @@ To introduce a new runtime, adhere to the structure delineated by the Runtime ab
 ```python
 
 ```
+
+### Environments
+
+The environment offers a unique method for collecting user feedback, which assists Adala agents in learning. For instance, you can create a setting where it attempts to call your phone using Twilio integration, seeking your oversight.
+
+```python
+
+```
+
+### Roadmap Driven
+
+Contributions that align with the items detailed in our roadmap, found in the main README, are not only welcome but are greatly encouraged. Adhering to this roadmap ensures that all efforts are in synergy with project's vision.
 
 ## How to Contribute:
 
