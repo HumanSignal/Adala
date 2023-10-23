@@ -119,9 +119,11 @@ for _ in range(3):
     print(learnings.experience.accuracy)
 ```
 
-Check [more examples in notebook tutorials.](https://github.com/HumanSignal/ADALA/tree/master/adala/examples)
+## More Notebooks
 
-## Examples
+- [Quickstart](./examples/quickstart.ipynb) – An extended example of the above with comments and outputs.
+- [Creating New Skill](./examples/creating_new_skill.ipynb) – An example that walks you through creating a new skill.
+- [Label Studio Tutorial](examples/tutorial_label_studio.ipynb) – An example of connecting Adala to an external labeling tool for enhanced supervision.
 
 <!-- 
 ## Running ADALA as a standalone server (Comming soon!)
@@ -246,7 +248,7 @@ crafting nuanced tasks, refining computational environments, or sculpting specia
 contributions will power Adala's evolution. Join us in shaping the future of intelligent systems and making Adala more
 versatile and impactful for users across the globe.
 
-[Read more here.](./CONTRIBUTION.md)
+[Read more](./CONTRIBUTION.md) here.
 
 ## Support
 
