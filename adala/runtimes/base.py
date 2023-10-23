@@ -123,6 +123,7 @@ class LLMRuntime(Runtime):
         input_template: str,
         output_template: str,
         instructions: str,
+        extra_fields: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
 
         outputs = re.findall(r'\'(.*?)\'', output_template)
@@ -137,7 +138,7 @@ class LLMRuntime(Runtime):
             record=input,
             program=self._program,
             outputs=outputs,
-            extra_fields={}
+            extra_fields=extra_fields
         )
         return output
 

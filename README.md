@@ -8,7 +8,7 @@ through iterative learning. This learning process is influenced by their operati
 reflections. Users define the environment by providing a ground truth dataset. Every agent learns and applies its skills
 in what we refer to as a "runtime", synonymous with LLM.
 
-![Diagram of components](./static/diagram.jpg "Diagram of components")
+![Diagram of components](./static/diagram.png "Diagram of components")
 
 <!-- Offered as an HTTP server, users can interact with Adala via command line or RESTful API, and directly integrate its features in Python Notebooks or scripts. The self-learning mechanism leverages Large Language Models (LLMs) from providers like OpenAI and VertexAI. -->
 
@@ -76,47 +76,42 @@ right here.
 ```python
 import pandas as pd
 
-from adala.agents import SingleShotAgent
+from adala.agents import Agent
 from adala.datasets import DataFrameDataset
-from adala.skills import LabelingSkill
+from adala.environments import BasicEnvironment
+from adala.skills import ClassificationSkill
 
-# this is the dataset we will use to train the agent
-# filepath = "path/to/dataset.csv"
-# df = pd.read_csv(filepath, sep='\t', nrows=100)
+df = pd.DataFrame([
+    ["The mic is great.", "Subjective"],
+    ["Will order from them again!", "Subjective"],
+    ["Not loud enough and doesn't turn on like it should.", "Objective"],
+    ["The phone doesn't seem to accept anything except CBR mp3s", "Objective"],
+    ["All three broke within two months of use.", "Objective"]
+], columns=["text", "ground_truth"])
 
-texts = [
-    "The mic is great.",
-    "Will order from them again!",
-    "Not loud enough and doesn't turn on like it should.",
-    "The phone doesn't seem to accept anything except CBR mp3s",
-    "All three broke within two months of use."
-]
-df = pd.DataFrame(texts, columns=['text'])
+dataset = DataFrameDataset(df=df, input_data_field="text")
 
-agent = SingleShotAgent(
+agent = Agent(
+
     # connect to a dataset
-    dataset=DataFrameDataset(df=df),
-    
+    environment=BasicEnvironment(
+        ground_truth_dataset=dataset,
+        ground_truth_column="ground_truth"
+    ),
     # define a skill
-    skill = LabelingSkill(labels=['Positive', 'Negative', 'Neutral']),
+    skills=ClassificationSkill(
+        instructions="Label text as subjective or objective.",
+        labels=["Subjective", "Objective"]
+    ),
 )
 
-run = agent.run()
+run = agent.learn(learning_iterations=3, accuracy_threshold=0.95)
 
-# display results
-print(pd.concat((df, run.experience.predictions), axis=1))
-
-# provide ground truth signal in the original dataset
-df.loc[0, 'ground_truth'] = 'Positive'
-df.loc[2, 'ground_truth'] = 'Negative'
-df.loc[4, 'ground_truth'] = 'Neutral'
-
-for _ in range(3):
-    # agent learns and improves from the ground truth signal
-    learnings = agent.learn(update_instructions=True)
-    
-    # display results
-    print(learnings.experience.accuracy)
+print('=====================')
+print(f'New instructions: {run.updated_instructions}')
+print('=====================')
+print('Predictions:')
+print(run.predictions)
 ```
 
 ## More Notebooks
@@ -256,9 +251,9 @@ Are you in need of assistance or looking to engage with the community? The [Disc
 
 ## FAQ
 
-### What is an agent?
-Agent is a set of skills and runtimes that could be used to execute those skills. Each agent has its own unique environment (dataset) attached to it. You can define your own agent class that would have a unique set of skills for your domain.
+- What is an agent?
+  - Agent is a set of skills and runtimes that could be used to execute those skills. Each agent has its own unique environment (dataset) attached to it. You can define your own agent class that would have a unique set of skills for your domain.
+- What is a skill?
+  - Skill is a learned ability to solve a specific task. Skill gets trained from the ground truth dataset.
 
-## Interesting Stuff
 
-Skill is a learned ability to solve a specific task. Skill gets trained from the ground truth dataset. 

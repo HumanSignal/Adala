@@ -80,9 +80,9 @@ class Agent(BaseModel, ABC):
         self,
         learning_iterations: int = 3,
         accuracy_threshold: float = 0.9,
-        apply_latest_skills: bool = True,
         update_skills: bool = True,
         update_memory: bool = True,
+        request_environment_feedback: bool = True,
         experience: Optional[ShortTermMemory] = None,
         runtime: Optional[str] = None,
     ) -> ShortTermMemory:
@@ -91,38 +91,37 @@ class Agent(BaseModel, ABC):
 
         skills = self.skills.model_copy(deep=True)
 
-        skills_improved = True
+        # Apply agent skills to dataset and get experience with predictions
+        experience = skills.apply(dataset=self.environment.as_dataset(), runtime=runtime, experience=experience)
+
+        # Agent select one skill to improve
+        learned_skill = skills.select_skill_to_improve(experience)
+
+        # Request feedback from environment is necessary
+        if request_environment_feedback:
+            self.environment.request_feedback(learned_skill, experience)
 
         for iteration in range(learning_iterations):
 
-            # 1. PREDICTION PHASE: Apply agent skills to dataset and get experience with predictions
-            experience = skills.apply(dataset=self.environment.ground_truth_dataset, runtime=runtime, experience=experience)
-
-            skills_improved = False
             log(f'Iteration #{iteration}: Comparing to ground truth, analyzing and improving...')
 
-            # Agent select one skill to improve
-            learned_skill = skills.select_skill_to_improve(experience)
+            # 1. EVALUATION PHASE: Compare predictions to ground truth
+            experience = self.environment.compare_to_ground_truth(learned_skill, experience)
 
-            # 2. EVALUATION PHASE: Compare predictions to ground truth
-            experience = learned_skill.compare_to_ground_truth(experience, environment=self.environment)
-
-            # 3. ANALYSIS PHASE: Analyze evaluation experience, optionally use long term memory
+            # 2. ANALYSIS PHASE: Analyze evaluation experience, optionally use long term memory
             experience = learned_skill.analyze(experience, self.memory, runtime)
 
             if experience.accuracy >= accuracy_threshold:
                 log(f'Accuracy threshold reached ({experience.accuracy} >= {accuracy_threshold})')
                 break
 
-            # 4. IMPROVEMENT PHASE: Improve skills based on analysis
+            # 3. IMPROVEMENT PHASE: Improve skills based on analysis
             experience = learned_skill.improve(experience)
-            skills_improved = True
 
-        # 5. LAST PREDICTION PHASE: Apply latest skills to dataset
-        if skills_improved and apply_latest_skills:
-            experience = skills.apply(self.environment.dataset, runtime, experience=experience)
+            # 4. RE-APPLY PHASE: Re-apply skills to dataset
+            experience = learned_skill.apply(train_dataset, runtime, experience=experience)
 
-        # 6. UPDATE PHASE: Update skills and memory based on experience
+        # Update skills and memory based on experience
         if update_skills:
             self.skills = skills
 
