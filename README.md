@@ -15,7 +15,7 @@ in what we refer to as a "runtime", synonymous with LLM.
 ### Why Choose Adala?
 
 - **Reliable Agents**: Built upon a foundation of ground truth data,
-  our agents ensure consistent and trustworthy results, making Adala a
+  agents ensure consistent and trustworthy results, making Adala a
   reliable choice for data processing needs.
   
 - **Controllable Output**: For every skill, you can configure the
@@ -24,7 +24,7 @@ in what we refer to as a "runtime", synonymous with LLM.
   guidelines or more adaptive outputs based on the agent's learning,
   Adala allows you to tailor results to your exact needs.
 
-- **Specialized in Data Processing**: While our agents excel in diverse
+- **Specialized in Data Processing**: While agents excel in diverse
   data labeling tasks, they can be tailored to a wide range of data
   processing needs.
   
@@ -35,7 +35,7 @@ in what we refer to as a "runtime", synonymous with LLM.
 - **Flexible and Extensible Runtime**: Adala's runtime environment is
   adaptable. A single skill can be deployed across multiple runtimes,
   facilitating dynamic scenarios like the student/teacher
-  architecture. Moreover, the openness of our framework invites the
+  architecture. Moreover, the openness of the framework invites the
   community to extend and tailor runtimes, ensuring continuous
   evolution and adaptability to diverse needs.
   
@@ -70,7 +70,7 @@ export OPENAI_API_KEY='your-openai-api-key'
 
 ## Quickstart
 
-In this example we will use ADALA as a standalone library directly inside our python notebook. You can open it in Collab
+In this example we will use ADALA as a standalone library directly inside the python notebook. You can open it in Collab
 right here.
 
 ```python
@@ -80,7 +80,7 @@ from adala.agents import SingleShotAgent
 from adala.datasets import DataFrameDataset
 from adala.skills import LabelingSkill
 
-# this is the dataset we will use to train our agent
+# this is the dataset we will use to train the agent
 # filepath = "path/to/dataset.csv"
 # df = pd.read_csv(filepath, sep='\t', nrows=100)
 
@@ -121,9 +121,9 @@ for _ in range(3):
 
 ## More Notebooks
 
-- [Quickstart](./examples/quickstart.ipynb) – An extended example of the above with comments and outputs.
-- [Creating New Skill](./examples/creating_new_skill.ipynb) – An example that walks you through creating a new skill.
-- [Label Studio Tutorial](examples/tutorial_label_studio.ipynb) – An example of connecting Adala to an external labeling tool for enhanced supervision.
+- [Quickstart](./adala/examples/quickstart.ipynb) – An extended example of the above with comments and outputs.
+- [Creating New Skill](./adala/examples/creating_new_skill.ipynb) – An example that walks you through creating a new skill.
+- [Label Studio Tutorial](./adala/examples/tutorial_label_studio.ipynb) – An example of connecting Adala to an external labeling tool for enhanced supervision.
 
 <!-- 
 ## Running ADALA as a standalone server (Comming soon!)
@@ -252,15 +252,12 @@ versatile and impactful for users across the globe.
 
 ## Support
 
-Are you in need of assistance or looking to engage with our community? Our [Discord channel]() is the perfect place for real-time support and interaction. Whether you have questions, need clarifications, or simply want to discuss topics related to our project, the Discord community is welcoming!
+Are you in need of assistance or looking to engage with the community? The [Discord channel]() is the perfect place for real-time support and interaction. Whether you have questions, need clarifications, or simply want to discuss topics related to the project, the Discord community is welcoming!
 
 ## FAQ
 
-- What is an agent?
-- Agent is a set of skills and runtimes that could be used to execute those skills. Each agent has its own unique
-  environment (dataset)
-  attached to it. You can define your own agent class that would have a unique set of skills for your domain.
--
+### What is an agent?
+Agent is a set of skills and runtimes that could be used to execute those skills. Each agent has its own unique environment (dataset) attached to it. You can define your own agent class that would have a unique set of skills for your domain.
 
 ## Interesting Stuff
 
