@@ -89,7 +89,7 @@ df = pd.DataFrame([
     ["All three broke within two months of use.", "Objective"]
 ], columns=["text", "ground_truth"])
 
-dataset = DataFrameDataset(df=df, input_data_field="text")
+dataset = DataFrameDataset(df=df)
 
 agent = Agent(
     # connect to a dataset
@@ -99,8 +99,10 @@ agent = Agent(
     ),
     # define a skill
     skills=ClassificationSkill(
+        name='subjectivity',
         instructions="Label text as subjective or objective.",
-        labels=["Subjective", "Objective"]
+        labels=["Subjective", "Objective"],
+        input_data_field='text'
     ),
 )
 

@@ -63,45 +63,34 @@ class BasicEnvironment(Environment):
 
     def request_feedback(self, skill: BaseSkill, experience: ShortTermMemory):
         """
-        To extract ground truth from predictions, we simply take the ground truth column,
-        and add extracted ground truth to ground truth set.
+        For BasicEnvironment, ground truth is already provided with the input data.
         """
 
     def compare_to_ground_truth(self, skill: BaseSkill, experience: ShortTermMemory) -> ShortTermMemory:
         """
         Compare predictions with ground truth set and return match results.
         """
-        gt = self.ground_truth_dataset.df[self.ground_truth_column]
-        pred = experience.predictions[self._prediction_column]
-        # select
-        gt = gt[gt.index.isin(pred.index)]
-        if not gt.empty:
-            gt = gt.to_frame(self.ground_truth_column)
-            if self.ground_truth_set.empty:
-                self.ground_truth_set = gt
-            else:
-                # TODO: control the size of ground truth set to avoid memory issues
-                self.ground_truth_set = InternalDataFrameConcat([self.ground_truth_set, gt], axis=0)
 
         experience = experience.model_copy()
-        predictions = experience.predictions
 
-        # TODO: support multiple prediction columns
-        prediction_column = skill.validation_fields[0]
+        gt = self.ground_truth_dataset.df[self.ground_truth_column]
+        pred = experience.predictions
+        # select
+        gt = gt[gt.index.isin(pred.index)]
+        if gt.empty:
+            # return empty memory
+            return ShortTermMemory()
 
-        # get ground truth data based on matching index
-        gt = self.ground_truth_set[self.ground_truth_set.index.isin(experience.predictions.index)]
-        pred = predictions[predictions.index.isin(gt.index)]
+        gt = gt.to_frame(self.ground_truth_column)
 
         # compare ground truth with predictions using exact matching
-        match_column_name = f'{self.ground_truth_column}__x__{prediction_column}'
+        match_column_name = f'{self.ground_truth_column}__x__{skill.name}'
         evaluations = InternalDataFrameConcat([
             pred,
-            (gt[self.ground_truth_column] == pred[prediction_column]).rename(match_column_name)
+            (gt[self.ground_truth_column] == pred[skill.name]).rename(match_column_name)
         ], axis=1)
         experience.evaluations = evaluations
         # remember the last column names used in evaluations
-        experience.prediction_column_name = prediction_column
         experience.ground_truth_column_name = self.ground_truth_column
         experience.match_column_name = match_column_name
         return experience

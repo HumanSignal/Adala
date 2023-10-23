@@ -9,7 +9,6 @@ class Dataset(BaseModel, ABC):
     """
     Base class for original datasets.
     """
-    input_data_field: Optional[str] = None
 
     @abstractmethod
     def batch_iterator(self, batch_size: int = 100) -> InternalDataFrame:

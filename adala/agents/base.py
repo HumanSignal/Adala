@@ -90,9 +90,10 @@ class Agent(BaseModel, ABC):
         runtime = self.get_runtime(runtime=runtime)
 
         skills = self.skills.model_copy(deep=True)
+        dataset = self.environment.as_dataset()
 
         # Apply agent skills to dataset and get experience with predictions
-        experience = skills.apply(dataset=self.environment.as_dataset(), runtime=runtime, experience=experience)
+        experience = skills.apply(dataset=dataset, runtime=runtime, experience=experience)
 
         # Agent select one skill to improve
         learned_skill = skills.select_skill_to_improve(experience)
@@ -119,7 +120,7 @@ class Agent(BaseModel, ABC):
             experience = learned_skill.improve(experience)
 
             # 4. RE-APPLY PHASE: Re-apply skills to dataset
-            experience = learned_skill.apply(train_dataset, runtime, experience=experience)
+            experience = learned_skill.apply(dataset, runtime, experience=experience)
 
         # Update skills and memory based on experience
         if update_skills:

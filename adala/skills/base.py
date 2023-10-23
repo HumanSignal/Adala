@@ -5,7 +5,7 @@ import re
 from pydantic import BaseModel
 from typing import List, Optional, Any, Dict, Tuple
 from abc import ABC, abstractmethod
-from pydantic import Field, field_serializer, model_validator
+from pydantic import Field, model_validator
 
 from typing import Optional
 from adala.runtimes.base import LLMRuntime
@@ -29,7 +29,7 @@ class BaseSkill(BaseModel, ABC):
         description='Instructs agent what to do with the input data. '
                     'Can use templating to refer to input fields.',
         default='',
-        examples=['Label the input text with the following labels: {{{{labels}}}}']
+        examples=['Label the input text with the following labels: {{labels}}']
     )
     description: Optional[str] = Field(
         default='',
@@ -42,23 +42,37 @@ class BaseSkill(BaseModel, ABC):
         description='Template for the input data. '
                     'Can use templating to refer to input parameters and perform data transformations.',
         default="Input: {{{{{input}}}}}",
-        examples=["Text: {{{{text_column}}}}, Date: {{{{date_column}}}}, Sentiment: {{{{gen 'sentiment'}}}}"]
+        examples=["Text: {{{{input}}}}, Date: {{{{date_column}}}}, Sentiment: {{{{gen 'sentiment'}}}}"]
+    )
+    input_data_field: Optional[str] = Field(
+        title='Input data field',
+        description='Input data field name that will be used to match input data.',
+        examples=['text'],
+        # TODO: either make it required, or `input_template` required
+        default='text'
     )
     output_template: Optional[str] = Field(
         title='Output template',
         description='Template for the output data. '
                     'Can use templating to refer to input parameters and perform data transformations. '
                     'Should contain at least one field matching `validation_fields`.',
-        default="Output: {{{{gen 'predictions'}}}}",
-        examples=["Output: {{{{select 'predictions' options=labels logprobs='score'}}}}"]
+        default="Output: {{gen 'predictions'}}",
+        examples=["Output: {{select 'predictions' options=labels logprobs='score'}}"]
     )
-    validation_fields: Optional[List[str]] = Field(
-        title='Prediction fields',
-        description='List of fields that will require validation. '
-                    'Should match at least one field in `output_template`.',
-        examples=['predictions', 'more_predictions'],
-        default=['predictions']
+    prediction_field: Optional[str] = Field(
+        title='Prediction field',
+        description='Prediction field name that will be used to match ground truth labels.'
+                    'Should match at least one output field in `output_template`, e.g. \'predictions\'',
+        examples=['predictions'],
+        default='predictions'
     )
+
+    @model_validator(mode='after')
+    def validate_input_template(self):
+        if '{{{{{input}}}}}' in self.input_template:
+            # TODO: check why it is called multiple times
+            self.input_template = self.input_template.format(input=self.input_data_field)
+        return self
 
     def __call__(self, input: InternalDataFrame, runtime: Runtime, dataset: Dataset) -> InternalDataFrame:
         """
@@ -69,28 +83,15 @@ class BaseSkill(BaseModel, ABC):
         """
 
         # get user defined dataset input fields
-        input_template, output_template, instructions = self._get_formatted_templates(dataset)
 
         runtime_predictions = runtime.process_batch(
             batch=input,
-            input_template=input_template,
-            output_template=output_template,
-            instructions=instructions,
+            input_template=self.input_template,
+            output_template=self.output_template,
+            instructions=self.instructions,
             extra_fields=self._get_extra_fields()
         )
         return InternalDataFrameConcat((input, runtime_predictions), axis=1)
-
-    def _get_formatted_templates(self, dataset: Dataset) -> Tuple[str, str, str]:
-        """
-        Format input and output templates with dataset input fields
-        """
-        inputs = self._get_extra_fields()
-        if dataset.input_data_field:
-            inputs['input'] = dataset.input_data_field
-        input_template = self.input_template.format(**inputs)
-        output_template = self.output_template.format(**inputs)
-        instructions = self.instructions.format(**inputs)
-        return input_template, output_template, instructions
 
     def _get_extra_fields(self):
         # TODO: more robust way to exclude system fields
@@ -133,7 +134,8 @@ class LLMSkill(BaseSkill):
     """
 
     def apply(
-        self, dataset: Dataset,
+        self,
+        dataset: Dataset,
         runtime: LLMRuntime,
         experience: ShortTermMemory
     ) -> ShortTermMemory:
@@ -150,6 +152,7 @@ class LLMSkill(BaseSkill):
             predictions = InternalDataFrame()
         else:
             predictions = InternalDataFrameConcat(predictions, copy=False)
+            predictions.rename(columns={self.prediction_field: self.name}, inplace=True)
 
         # append predictions to existing experience, to chain skills
         # TODO: implement predictions chaining
@@ -187,18 +190,17 @@ class LLMSkill(BaseSkill):
         errors = errors.sample(n=min(3, errors.shape[0]))
 
         # collect error inputs from runtime
-        input_template, _, instructions = self._get_formatted_templates(experience.dataset)
         extra_fields = self._get_extra_fields()
         inputs = runtime.process_batch_inputs(
-            errors,
-            input_template,
+            batch=errors,
+            input_template=self.input_template,
             extra_fields=extra_fields
         )
 
         # construct error report
         errors = pd.concat([
             inputs,
-            errors[[experience.prediction_column_name, experience.ground_truth_column_name]]
+            errors[[self.name, experience.ground_truth_column_name]]
         ], axis=1)
         errors.columns = ['input', 'prediction', 'ground_truth']
         smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
@@ -210,7 +212,7 @@ class LLMSkill(BaseSkill):
                          "We expect the prediction to be equal to the ground truth.\n"
                          "Your task is to provide a reason for the error due to the original instruction.\n"
                          "Be concise and specific.\n\n"
-                         f"Instructions: {instructions}\n"
+                         f"Instructions: {self.instructions}\n"
                          "{{~/system}}",
             input_template="{{#user~}}\n"
                            "Input: {{input}}\n"
@@ -231,7 +233,6 @@ class LLMSkill(BaseSkill):
 
         errors = experience.errors.to_dict(orient='records')
         smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
-        _, _, instructions = self._get_formatted_templates(experience.dataset)
         result = smart_runtime.process_record(
             record={
                 'errors': errors
@@ -248,7 +249,7 @@ class LLMSkill(BaseSkill):
                          "Output: ...\n\n"
                          "{{~/system}}\n",
             input_template="{{#user~}}\n"
-                           f"Old instruction: {instructions}\n"
+                           f"Old instruction: {self.instructions}\n"
                            "Errors: {{#each errors}}"
                            "\nInput: {{this.input}}\n"
                            "Prediction: {{this.prediction}}\n"
