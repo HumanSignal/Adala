@@ -1,12 +1,12 @@
-# ADALA Project Contribution Guide: Agent and Skill Development
+# Adala Project Contribution Guide: Agent and Skill Development
 
-Thank you for your interest in contributing to the ADALA Project's agent development! The robustness and versatility of our system primarily stem from the diverse agents and skills we deploy. This guide focuses on agent-related contributions, highlighting the importance of domain and task specificity.
+Thank you for your interest in contributing to the Adala Project's agent development! The robustness and versatility of our system primarily stem from the diverse agents and skills we deploy. This guide focuses on agent-related contributions, highlighting the importance of domain and task specificity.
 
 ## Areas of Contribution:
 
 ### Diverse Skills Contributions:
 
-ADALA welcomes agents equipped with a wide range of skills, each offering unique capabilities. From tasks such as classification, anomaly detection, and regression to specialized roles like sentiment analysis or recommendation systems, there's endless potential to broaden our agent spectrum. Skills designed for specific domains (like medical, finance, or nature) or tailored tasks within these areas can considerably amplify the system's efficacy.
+Adala welcomes agents equipped with a wide range of skills, each offering unique capabilities. From tasks such as classification, anomaly detection, and regression to specialized roles like sentiment analysis or recommendation systems, there's endless potential to broaden our agent spectrum. Skills designed for specific domains (like medical, finance, or nature) or tailored tasks within these areas can considerably amplify the system's efficacy.
 
 ### Extending Skills:
 
@@ -30,9 +30,9 @@ Example:
 #### Guidelines for New Skills:
 
 - Uniqueness: Focus on specificity. What unique problem does your skill resolve?
-- Integration: Ensure your skill aligns well with the existing ADALA framework.
+- Integration: Ensure your skill aligns well with the existing Adala framework.
 - Documentation: Offer comprehensive documentation, usage instances for your agent, and a testing environment (with a ground truth dataset).
-- Testing: Incorporate both unit and integration tests to guarantee a seamless integration with the ADALA system.
+- Testing: Incorporate both unit and integration tests to guarantee a seamless integration with the Adala system.
 
 ### New Runtimes 
 
@@ -59,7 +59,7 @@ Contributions that align with the items detailed in our roadmap, found in the ma
 
 ## How to Contribute:
 
-- Fork the Repository: Create a fork of the ADALA repository on your GitHub account.
+- Fork the Repository: Create a fork of the Adala repository on your GitHub account.
 - Clone, Branch, and Develop: Clone your fork, spawn a new branch for your contribution, and commence development.
 - Test and Commit: After modifications, conduct comprehensive testing. Once content, commit with an informative message.
 - Push and Pull Request: Push your amendments and formulate a pull request detailing your contribution's value.
