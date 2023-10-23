@@ -245,11 +245,7 @@ Are you in need of assistance or looking to engage with our community? Our [Disc
 ## FAQ
 
 - What is an agent?
-- Agent is a set of skills and runtimes that could be used to execute those skills. Each agent has its own unique
-  environment (dataset)
-  attached to it. You can define your own agent class that would have a unique set of skills for your domain.
--
+  - Agent is a set of skills and runtimes that could be used to execute those skills. Each agent has its own unique environment (dataset) attached to it. You can define your own agent class that would have a unique set of skills for your domain.
+- What is a skill?
+  - Skill is a learned ability to solve a specific task. Skill gets trained from the ground truth dataset.
 
-## Interesting Stuff
-
-Skill is a learned ability to solve a specific task. Skill gets trained from the ground truth dataset. 
