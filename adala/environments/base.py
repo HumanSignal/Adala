@@ -1,28 +1,29 @@
-from pydantic import BaseModel, dataclasses
+from pydantic import BaseModel, dataclasses, Field
 from abc import ABC, abstractmethod
 from typing import Any, Optional, Dict, Union, Callable
 
-from adala.datasets.base import Dataset
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
+from adala.skills.base import BaseSkill
 from adala.memories.base import ShortTermMemory
 
 
 class Environment(BaseModel, ABC):
     """
     Base class for environments.
+    Each environment differs by the way it obtains ground truth information from raw data and predictions,
+    and the way it compares ground truth with predictions.
+    Environment uses predictions index as a way to match predictions with ground truth.
     """
-    dataset: Dataset
     ground_truth_set: Any
-    matching_function: Union[str, Callable]
 
     @abstractmethod
-    def request_feedback(self, predictions: InternalDataFrame):
+    def request_feedback(self, skill: BaseSkill, experience: ShortTermMemory):
         """
         Using predictions, request feedback from user and update internal ground truth set.
         """
 
     @abstractmethod
-    def compare_to_ground_truth(self, predictions: InternalDataFrame, validation_column: str) -> InternalDataFrame:
+    def compare_to_ground_truth(self, skill: BaseSkill, experience: ShortTermMemory) -> ShortTermMemory:
         """
         Compare predictions with ground truth set and return match results.
         """
@@ -39,35 +40,62 @@ class Environment(BaseModel, ABC):
         Restore environment state.
         """
 
+    class Config:
+        arbitrary_types_allowed = True
 
-class DataFrameEnvironment(Environment):
+
+class BasicEnvironment(Environment):
     """
-    Environment based on a pandas DataFrame, with a ground truth specified as a column.
+    BasicEnvironment assumes ground truth signal comes explicitly with the input data.
+    Once new ground truth points are added, they are saved in `self.ground_truth_set`.
+    To compare with ground truth, exact matching is used.
     """
-    ground_truth_set: InternalDataFrame = None
+    ground_truth_set: InternalDataFrame = Field(default_factory=InternalDataFrame)
     ground_truth_column: str = 'ground_truth'
-    matching_function: Union[str, Callable] = 'exact_match'
 
-    def request_feedback(self, predictions: InternalDataFrame):
-        """
-        Using predictions, request feedback from user and save it in `self.ground_truth_set`.
-        """
-        raise NotImplementedError
+    _prediction_column: str
 
-    def compare_to_ground_truth(self, predictions: InternalDataFrame, validation_column: str) -> InternalDataFrame:
+    def request_feedback(self, skill: BaseSkill, experience: ShortTermMemory):
+        """
+        To extract ground truth from predictions, we simply take the ground truth column,
+        and add extracted ground truth to ground truth set.
+        """
+        gt = experience.predictions[self.ground_truth_column].rename(self.ground_truth_column)
+        gt = gt[gt.notna()]
+        gt = gt[~gt.index.isin(self.ground_truth_set.index)]
+        if not gt.empty:
+            # TODO: control the size of ground truth set to avoid memory issues
+            self.ground_truth_set = InternalDataFrameConcat([self.ground_truth_set, gt], axis=0)
+
+    def compare_to_ground_truth(self, skill: BaseSkill, experience: ShortTermMemory) -> ShortTermMemory:
         """
         Compare predictions with ground truth set and return match results.
         """
+        experience = experience.model_copy()
+        predictions = experience.predictions
+
+        # TODO: support multiple prediction columns
+        prediction_column = skill.validation_fields[0]
 
         # get ground truth data based on matching index
-        gt = self.ground_truth_set[self.ground_truth_set[self.ground_truth_column].notna() & self.ground_truth_set.index.isin(predictions.index)]
-        pred = predictions[gt.index]
-        pred = pred[pred.notna()]
+        gt = self.ground_truth_set[self.ground_truth_set.index.isin(experience.predictions.index)]
+        pred = predictions[predictions.index.isin(gt.index)]
 
-        if self.matching_function == 'exact_match':
-            match = pred[validation_column] == gt[self.ground_truth_column]
-        elif isinstance(self.matching_function, Callable):
-            match = InternalDataFrameConcat([pred, gt], axis=1).apply(self.matching_function, axis=1)
+        # compare ground truth with predictions using exact matching
+        match_column_name = f'{self.ground_truth_column}__x__{prediction_column}'
+        evaluations = InternalDataFrameConcat([
+            pred,
+            (gt[self.ground_truth_column] == pred[prediction_column]).rename(match_column_name)
+        ], axis=1)
+        experience.evaluations = evaluations
+        # remember the last column names used in evaluations
+        experience.prediction_column_name = prediction_column
+        experience.ground_truth_column_name = self.ground_truth_column
+        experience.match_column_name = match_column_name
+        return experience
 
-        evaluations = InternalDataFrameConcat([gt, pred, match.rename('match')], axis=1)
-        return evaluations
+    def save(self):
+        raise NotImplementedError
+
+    def restore(self):
+        raise NotImplementedError

@@ -18,12 +18,6 @@ class Dataset(BaseModel, ABC):
         """
 
     @abstractmethod
-    def get_ground_truth(self, batch: Optional[InternalDataFrame]) -> InternalDataFrame:
-        """
-        Return ground truth subset if available.
-        """
-
-    @abstractmethod
     def __len__(self) -> int:
         """
         Return number of records in dataset.
@@ -39,9 +33,6 @@ class Dataset(BaseModel, ABC):
 class BlankDataset(Dataset):
 
     def batch_iterator(self, batch_size: int = 100) -> InternalDataFrame:
-        return InternalDataFrame()
-
-    def get_ground_truth(self, batch: Optional[InternalDataFrame]) -> InternalDataFrame:
         return InternalDataFrame()
 
     def __len__(self) -> int:

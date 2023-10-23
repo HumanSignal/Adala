@@ -10,7 +10,6 @@ from pydantic import Field, field_serializer, model_validator
 from typing import Optional
 from adala.runtimes.base import LLMRuntime
 from adala.datasets.base import Dataset
-from adala.environments.base import Environment
 from adala.runtimes.base import Runtime
 from adala.memories.base import ShortTermMemory, LongTermMemory
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
@@ -79,7 +78,7 @@ class BaseSkill(BaseModel, ABC):
             instructions=instructions,
             extra_fields=self._get_extra_fields()
         )
-        return runtime_predictions
+        return InternalDataFrameConcat((input, runtime_predictions), axis=1)
 
     def _get_formatted_templates(self, dataset: Dataset) -> Tuple[str, str, str]:
         """
@@ -108,12 +107,6 @@ class BaseSkill(BaseModel, ABC):
     ) -> ShortTermMemory:
         """
         Apply skill to dataset and return new dataset with skill results (predictions)
-        """
-
-    @abstractmethod
-    def compare_to_ground_truth(self, experience: ShortTermMemory, environment: Environment) -> ShortTermMemory:
-        """
-        Test predictions and return new Dataset with evaluation results - e.g. error examples
         """
 
     @abstractmethod
@@ -154,22 +147,15 @@ class LLMSkill(BaseSkill):
             predictions.append(runtime_predictions)
 
         if not predictions:
-            experience.predictions = InternalDataFrame()
+            predictions = InternalDataFrame()
         else:
-            experience.predictions = InternalDataFrameConcat(predictions, copy=False)
+            predictions = InternalDataFrameConcat(predictions, copy=False)
 
-        return experience
-
-    def compare_to_ground_truth(self, experience: ShortTermMemory, environment: Environment) -> ShortTermMemory:
-        experience = experience.model_copy()
-
-        # TODO: can be multiple prediction validation fields
-        validation_field = self.validation_fields[0]
-
-        experience.evaluations = environment.compare_to_ground_truth(
-            predictions=experience.predictions,
-            validation_column=validation_field
-        )
+        # append predictions to existing experience, to chain skills
+        if experience.predictions is None:
+            experience.predictions = predictions
+        else:
+            experience.predictions = InternalDataFrameConcat((experience.predictions, predictions), axis=1)
 
         return experience
 
@@ -182,8 +168,9 @@ class LLMSkill(BaseSkill):
         experience = experience.model_copy()
 
         # TODO: can be multiple prediction validation fields
-        errors = experience.evaluations[~experience.evaluations[f'{self.validation_fields[0]}_match']]
-        experience.accuracy = experience.evaluations[f'{self.validation_fields[0]}_match'].mean()
+        match = experience.match_column_name
+        errors = experience.evaluations[~experience.evaluations[match]]
+        experience.accuracy = experience.evaluations[match].mean()
         if errors.empty:
             # No errors - nothing to analyze
             experience.errors = errors
@@ -192,6 +179,7 @@ class LLMSkill(BaseSkill):
         # collect errors and create error report
         # first sample errors - make it uniform, but more sophisticated sampling can be implemented
         errors = errors.sample(n=min(3, errors.shape[0]))
+
         # collect error inputs from runtime
         input_template, _, _ = self._get_formatted_templates(experience.dataset)
         inputs = runtime.process_batch_inputs(
@@ -199,7 +187,12 @@ class LLMSkill(BaseSkill):
             input_template,
             extra_fields=self._get_extra_fields()
         )
-        errors = pd.concat((inputs, errors[[self.validation_fields[0], experience.dataset.ground_truth_column]]), axis=1)
+
+        # construct error report
+        errors = pd.concat([
+            inputs,
+            errors[[experience.prediction_column_name, experience.ground_truth_column_name]]
+        ], axis=1)
         errors.columns = ['input', 'prediction', 'ground_truth']
         smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
         error_reasons = smart_runtime.process_batch(

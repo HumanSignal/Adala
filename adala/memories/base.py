@@ -16,6 +16,9 @@ class ShortTermMemory(BaseModel):
     dataset: Dataset = None
     predictions: InternalDataFrame = None
     evaluations: InternalDataFrame = None
+    prediction_column_name: str = None
+    ground_truth_column_name: str = None
+    match_column_name: str = None
     errors: InternalDataFrame = None
     accuracy: float = None
     initial_instructions: str = None
