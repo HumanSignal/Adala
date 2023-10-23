@@ -152,13 +152,16 @@ class LLMSkill(BaseSkill):
             predictions = InternalDataFrameConcat(predictions, copy=False)
 
         # append predictions to existing experience, to chain skills
-        if experience.predictions is None:
-            experience.predictions = predictions
-        else:
-            experience.predictions = InternalDataFrameConcat([
-                experience.predictions.drop(columns=[col for col in experience.predictions.columns if col in predictions.columns]),
-                predictions
-            ], axis=1)
+        # TODO: implement predictions chaining
+        experience.predictions = predictions
+        # if experience.predictions is None:
+        #     experience.predictions = predictions
+        # else:
+        #     experience.predictions = InternalDataFrameConcat([
+        #         experience.predictions.drop(columns=[col for col in experience.predictions.columns if col in predictions.columns]),
+        #         predictions
+        #     ], axis=1)
+        #     raise NotImplementedError
 
         return experience
 
@@ -228,9 +231,9 @@ class LLMSkill(BaseSkill):
 
         errors = experience.errors.to_dict(orient='records')
         smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
+        _, _, instructions = self._get_formatted_templates(experience.dataset)
         result = smart_runtime.process_record(
             record={
-                'old_instruction': self.instructions,
                 'errors': errors
             },
             instructions="{{#system~}}\n"
@@ -245,7 +248,7 @@ class LLMSkill(BaseSkill):
                          "Output: ...\n\n"
                          "{{~/system}}\n",
             input_template="{{#user~}}\n"
-                           "Old instruction: {{old_instruction}}\n"
+                           f"Old instruction: {instructions}\n"
                            "Errors: {{#each errors}}"
                            "\nInput: {{this.input}}\n"
                            "Prediction: {{this.prediction}}\n"
@@ -254,6 +257,7 @@ class LLMSkill(BaseSkill):
                            "New instruction:\n"
                            "{{~/user}}",
             output_template="{{#assistant~}}{{gen 'new_instruction'}}{{~/assistant}}",
+            extra_fields=self._get_extra_fields()
         )
         new_instruction = result['new_instruction']
 
