@@ -9,6 +9,7 @@ from typing import Optional
 from .internal_data import InternalDataFrame
 
 console = Console()
+error_console = Console(stderr=True, style="bold red")
 
 
 def print_text(text: str, style=None, streaming_style=False):
@@ -19,6 +20,10 @@ def print_text(text: str, style=None, streaming_style=False):
         console.print()
     else:
         console.print(text, style=style)
+
+
+def print_error(text: str):
+    error_console.print(text)
 
 
 def print_dataframe(dataframe: InternalDataFrame):

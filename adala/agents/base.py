@@ -4,6 +4,7 @@ from typing import Any, Optional, List, Dict, Union
 from adala.environments.base import Environment
 from adala.datasets import Dataset, DataFrameDataset
 from adala.runtimes.base import Runtime, LLMRuntime, LLMRuntimeModelType
+from adala.runtimes.openai import OpenAIRuntime
 from adala.memories.base import ShortTermMemory, LongTermMemory
 from adala.skills.base import BaseSkill
 from adala.skills.skillset import SkillSet, LinearSkillSet
@@ -30,19 +31,9 @@ class Agent(BaseModel, ABC):
     memory: LongTermMemory = Field(default=None)
     runtimes: Optional[Dict[str, Runtime]] = Field(
         default_factory=lambda: {
-            'openai': LLMRuntime(
-                llm_runtime_type=LLMRuntimeModelType.OpenAI,
-                llm_params={
-                    'model': 'gpt-3.5-turbo-instruct',
-                },
-                # verbose=True
-            ),
-            'openai-gpt4': LLMRuntime(
-                llm_runtime_type=LLMRuntimeModelType.OpenAI,
-                llm_params={
-                    'model': 'gpt-4',
-                }
-            ),
+            'openai': OpenAIRuntime(gpt_model_name='gpt-3.5-turbo-instruct'),
+            'openai-gpt3': OpenAIRuntime(gpt_model_name='gpt-3.5-turbo'),
+            'openai-gpt4': OpenAIRuntime(gpt_model_name='gpt-4')
             # 'llama2': LLMRuntime(
             #     llm_runtime_type=LLMRuntimeModelType.Transformers,
             #     llm_params={
@@ -53,6 +44,7 @@ class Agent(BaseModel, ABC):
         }
     )
     default_runtime: str = 'openai'
+    default_teacher_runtime: str = 'openai-gpt4'
 
     class Config:
         arbitrary_types_allowed = True
@@ -73,7 +65,8 @@ class Agent(BaseModel, ABC):
             f"Environment: {self.environment.__class__.__name__}\n"
             f"Skills: {skill_names}\n"
             f"Runtimes: {runtime_names}\n"
-            f"Default Runtime: {self.default_runtime}"
+            f"Default Runtime: {self.default_runtime}\n"
+            f"Default Teacher Runtime: {self.default_teacher_runtime}"
         )
 
     @field_validator('environment')
@@ -135,20 +128,29 @@ class Agent(BaseModel, ABC):
             raise ValueError(f'Runtime "{runtime}" not found.')
         return self.runtimes[runtime]
 
-    def apply_skills(self, dataset: Union[Dataset, InternalDataFrame], runtime: Optional[str] = None) -> ShortTermMemory:
+    def apply_skills(
+        self,
+        dataset: Union[Dataset, InternalDataFrame],
+        runtime: Optional[Union[str, Runtime]] = None,
+        experience: Optional[ShortTermMemory] = None,
+    ) -> ShortTermMemory:
         """
         Applies the agent's skills to a given dataset using the specified runtime.
 
         Args:
             dataset (Dataset): The dataset to apply skills on.
             runtime (str, optional): The runtime to use. Defaults to None.
+            experience (ShortTermMemory, optional): The agent's short-term memory. Defaults to None.
 
         Returns:
             ShortTermMemory: The short-term memory resulting from the application of skills.
         """
+        runtime = runtime or self.default_runtime
         if isinstance(dataset, InternalDataFrame):
             dataset = DataFrameDataset(df=dataset)
-        return self.skills.apply(dataset=dataset, runtime=self.get_runtime(runtime=runtime))
+        if isinstance(runtime, str):
+            runtime = self.get_runtime(runtime=runtime)
+        return self.skills.apply(dataset=dataset, runtime=runtime, experience=experience)
 
     def learn(
         self,
@@ -177,12 +179,13 @@ class Agent(BaseModel, ABC):
         """
         
         runtime = self.get_runtime(runtime=runtime)
+        teacher_runtime = self.get_runtime(runtime=self.default_teacher_runtime)
 
         skills = self.skills.model_copy(deep=True)
         dataset = self.environment.as_dataset()
 
         # Apply agent skills to dataset and get experience with predictions
-        experience = skills.apply(dataset=dataset, runtime=runtime, experience=experience)
+        experience = self.apply_skills(dataset=dataset, runtime=runtime, experience=experience)
 
         # Agent select one skill to improve
         learned_skill = skills.select_skill_to_improve(experience)
@@ -201,7 +204,12 @@ class Agent(BaseModel, ABC):
 
             # 2. ANALYSIS PHASE: Analyze evaluation experience, optionally use long term memory
             print_text(f'Analyze evaluation experience ...')
-            experience = learned_skill.analyze(experience, self.memory, runtime)
+            experience = learned_skill.analyze(
+                experience=experience,
+                student_runtime=runtime,
+                teacher_runtime=teacher_runtime,
+                memory=self.memory
+            )
             print_text(f'Number of errors: {len(experience.errors)}')
 
             print_text(f'Accuracy = {experience.accuracy*100:0.2f}%', style='bold red')
@@ -211,9 +219,13 @@ class Agent(BaseModel, ABC):
 
             # 3. IMPROVEMENT PHASE: Improve skills based on analysis
             print_text(f"Improve \"{learned_skill.name}\" skill based on analysis ...")
-            experience = learned_skill.improve(experience)
+            experience = learned_skill.improve(
+                experience=experience,
+                runtime=teacher_runtime,
+                update_instructions=True
+            )
             print_text(f'Updated instructions for skill "{learned_skill.name}":\n')
-            print_text(experience.updated_instructions, style='bold green')
+            print_text(learned_skill.instructions, style='bold green')
 
             # 4. RE-APPLY PHASE: Re-apply skills to dataset
             print_text(f"Re-apply {learned_skill.name} skill to dataset ...")

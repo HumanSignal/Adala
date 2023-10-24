@@ -68,6 +68,16 @@ class LLMRuntime(Runtime):
     class Config:
         arbitrary_types_allowed = True
 
+    def _create_program(self):
+        # create an LLM instance
+        if self.llm_runtime_type.value == LLMRuntimeModelType.OpenAI.value:
+            self._llm = guidance.llms.OpenAI(**self.llm_params)
+        elif self.llm_runtime_type.value == LLMRuntimeModelType.Transformers.value:
+            self._llm = guidance.llms.Transformers(**self.llm_params)
+        else:
+            raise NotImplementedError(f'LLM runtime type {self.llm_runtime_type} is not implemented.')
+        self._program = guidance(self._llm_template, llm=self._llm, silent=not self.verbose)
+
     def init_runtime(self):
         """Initializes the LLM runtime environment.
 
@@ -76,18 +86,7 @@ class LLMRuntime(Runtime):
         Returns:
             LLMRuntime: Initialized runtime instance.
         """
-        
-        if not self._llm:
-
-            # create an LLM instance
-            if self.llm_runtime_type.value == LLMRuntimeModelType.OpenAI.value:
-                self._llm = guidance.llms.OpenAI(**self.llm_params)
-            elif self.llm_runtime_type.value == LLMRuntimeModelType.Transformers.value:
-                self._llm = guidance.llms.Transformers(**self.llm_params)
-            else:
-                raise NotImplementedError(f'LLM runtime type {self.llm_runtime_type} is not implemented.')
-
-            self._program = guidance(self._llm_template, llm=self._llm, silent=not self.verbose)
+        self._create_program()
         return self
 
     def get_outputs(self, output_template: str) -> List[str]:
