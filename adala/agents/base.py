@@ -25,7 +25,7 @@ class Agent(BaseModel, ABC):
         default_runtime (str): The default runtime used by the agent. Defaults to 'openai'.
     """
     
-    environment: Union[InternalDataFrame, Dataset, Environment]
+    environment: Union[InternalDataFrame, Dataset, Environment] = Field(default_factory=DataFrameDataset)
     skills: Union[SkillSet, BaseSkill, List[BaseSkill], Dict[str, BaseSkill]]
 
     memory: LongTermMemory = Field(default=None)
