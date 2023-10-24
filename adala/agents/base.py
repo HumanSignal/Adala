@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, SkipValidation, field_validator, model_validator, ValidationError
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List, Dict, Union
-from adala.environments.base import Environment
+from adala.environments.base import Environment, BasicEnvironment
 from adala.datasets import Dataset, DataFrameDataset
 from adala.runtimes.base import Runtime, LLMRuntime, LLMRuntimeType, LLMRuntimeModelType
 from adala.runtimes.openai import OpenAIRuntime
@@ -43,8 +43,8 @@ class Agent(BaseModel, ABC):
     )
     teacher_runtimes: Optional[Dict[str, Runtime]] = Field(
         default_factory=lambda: {
-            'openai-gpt3': OpenAIRuntime(model='gpt-3.5-turbo', llm_runtime_type=LLMRuntimeType.TEACHER),
-            'openai-gpt4': OpenAIRuntime(model='gpt-4', llm_runtime_type=LLMRuntimeType.TEACHER)
+            'openai-gpt3': OpenAIRuntime(model='gpt-3.5-turbo'),
+            'openai-gpt4': OpenAIRuntime(model='gpt-4')
         }
     )
     default_runtime: str = 'openai'
@@ -87,7 +87,7 @@ class Agent(BaseModel, ABC):
         if isinstance(v, InternalDataFrame):
             v = DataFrameDataset(df=v)
         if isinstance(v, Dataset):
-            v = Environment(dataset=v)
+            v = BasicEnvironment(dataset=v)
         return v
 
     @field_validator('skills')
