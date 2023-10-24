@@ -1,0 +1,27 @@
+[project]
+name = "adala-pk-test"
+version = "0.0.1"
+description = "ADALA: Automated Data Labeling Agent"
+authors = [
+    {name = "Human Signal", email = "hello@humansignal.com"},
+]
+dependencies = [
+    "pandas",
+    "openai",
+    "guidance",
+    "pydantic>=2.4.2",
+]
+requires-python = ">=3.8"
+readme = "README.md"
+[project.optional-dependencies]
+# label-studio = [
+#     "label-studio-sdk @ git+https://github.com/HumanSignal/label-studio-sdk.git@pd-support",
+# ]
+devel = [
+    "jupyterlab>=4.0.7",
+]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
