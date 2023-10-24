@@ -134,9 +134,9 @@ print_evaluations(run.predictions)
 
 ## More Notebooks
 
-- [Quickstart](./examples/quickstart.ipynb) – An extended example of the above with comments and outputs.
-- [Creating New Skill](./examples/creating_new_skill.ipynb) – An example that walks you through creating a new skill.
-- [Label Studio Tutorial](examples/tutorial_label_studio.ipynb) – An example of connecting Adala to an external labeling tool for enhanced supervision.
+- [Quickstart](./adala/examples/quickstart.ipynb) – An extended example of the above with comments and outputs.
+- [Creating New Skill](./adala/examples/creating_new_skill.ipynb) – An example that walks you through creating a new skill.
+- [Label Studio Tutorial](./adala/examples/tutorial_label_studio.ipynb) – An example of connecting Adala to an external labeling tool for enhanced supervision.
 
 <!-- 
 ## Running ADALA as a standalone server (Comming soon!)
