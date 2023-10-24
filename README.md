@@ -280,7 +280,7 @@ versatile and impactful for users across the globe.
 
 ## Support
 
-Are you in need of assistance or looking to engage with our community? Our [Discord channel]() is the perfect place for real-time support and interaction. Whether you have questions, need clarifications, or simply want to discuss topics related to our project, the Discord community is welcoming!
+Are you in need of assistance or looking to engage with our community? Our [Discord channel](https://discord.gg/QBtgTbXTgU)) is the perfect place for real-time support and interaction. Whether you have questions, need clarifications, or simply want to discuss topics related to our project, the Discord community is welcoming!
 
 ## FAQ
 
