@@ -1,6 +1,6 @@
+[![PyPI version](https://badge.fury.io/py/adala-pk-test.svg)](https://badge.fury.io/py/adala-pk-test)
 ![GitHub Repo stars](https://img.shields.io/github/stars/HumanSignal/Adala)
 [![](https://img.shields.io/discord/1166330284300570624?logo=discord&style=flat)](https://discord.gg/QBtgTbXTgU)
-
 
 <a href="#"><img src="/static/logo.png" alt="ADALA logo" width="275" ></a>
 
