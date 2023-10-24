@@ -43,7 +43,7 @@ class OpenAIRuntime(LLMRuntime):
         models = set(model['id'] for model in models['data'])
         if self.gpt_model_name not in models:
             print_error(
-                f'Requested model "{self.gpt_model_name}" is not available in your OpenAI account.'
+                f'Requested model "{self.gpt_model_name}" is not available in your OpenAI account. '
                 f'Available models are: {models}\n\n'
                 f'Try to change the runtime settings for {self.__class__.__name__}, for example:\n\n'
                 f'{self.__class__.__name__}(..., model="gpt-3.5-turbo")\n\n'

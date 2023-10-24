@@ -114,15 +114,19 @@ agent = Agent(
     ),
     # define a skill
     skills=ClassificationSkill(
-        name='sentiment',
+        name='sentiment_classification',
         instructions="Label text as subjective or objective.",
         labels=["Positive", "Negative", "Neutral"],
         input_data_field='text'
     ),
+    
+    # uncomment this if you want more quality and you have access to OPENAI GPT-4 model
+    # default_teacher_runtime='openai-gpt4',
 )
 print(agent)
 
-run = agent.learn(learning_iterations=10, accuracy_threshold=0.95)
+agent.learn(learning_iterations=3, accuracy_threshold=0.95)
+print(agent.skills)
 
 print('\n=> Run tests ...')
 run = agent.apply_skills(test_dataset)

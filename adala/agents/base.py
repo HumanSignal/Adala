@@ -31,9 +31,9 @@ class Agent(BaseModel, ABC):
     memory: LongTermMemory = Field(default=None)
     runtimes: Optional[Dict[str, Runtime]] = Field(
         default_factory=lambda: {
-            'openai': OpenAIRuntime(gpt_model_name='gpt-3.5-turbo-instruct'),
-            'openai-gpt3': OpenAIRuntime(gpt_model_name='gpt-3.5-turbo'),
-            'openai-gpt4': OpenAIRuntime(gpt_model_name='gpt-4')
+            'openai': OpenAIRuntime(model='gpt-3.5-turbo-instruct'),
+            'openai-gpt3': OpenAIRuntime(model='gpt-3.5-turbo'),
+            'openai-gpt4': OpenAIRuntime(model='gpt-4')
             # 'llama2': LLMRuntime(
             #     llm_runtime_type=LLMRuntimeModelType.Transformers,
             #     llm_params={
@@ -44,7 +44,7 @@ class Agent(BaseModel, ABC):
         }
     )
     default_runtime: str = 'openai'
-    default_teacher_runtime: str = 'openai-gpt4'
+    default_teacher_runtime: str = 'openai-gpt3'
 
     class Config:
         arbitrary_types_allowed = True

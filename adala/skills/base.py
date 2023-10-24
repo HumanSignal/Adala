@@ -284,6 +284,7 @@ class LLMSkill(BaseSkill):
         errors.columns = ['input', 'prediction', 'ground_truth']
         if not teacher_runtime:
             teacher_runtime = student_runtime
+
         error_reasons = teacher_runtime.process_batch(
             errors,
             instructions="{{#system~}}\n"
