@@ -80,7 +80,7 @@ from adala.agents import Agent
 from adala.datasets import DataFrameDataset
 from adala.environments import BasicEnvironment
 from adala.skills import ClassificationSkill
-from adala.utils.logs import print_evaluations
+from rich import print
 
 print("=> Initialize datasets ...")
 
@@ -120,16 +120,14 @@ agent = Agent(
         input_data_field='text'
     ),
 )
+print(agent)
+
 run = agent.learn(learning_iterations=10, accuracy_threshold=0.95)
 
-print('\n\n=> Final instructions:')
-print('=====================')
-print(f'{run.updated_instructions}')
-print('=====================')
-
-print('\n=> Run test ...')
+print('\n=> Run tests ...')
 run = agent.apply_skills(test_dataset)
-print_evaluations(run.predictions)
+print('\n => Test results:')
+print(run)
 ```
 
 ## More Notebooks

@@ -7,7 +7,8 @@ from adala.runtimes.base import Runtime, LLMRuntime, LLMRuntimeModelType
 from adala.memories.base import ShortTermMemory, LongTermMemory
 from adala.skills.base import BaseSkill
 from adala.skills.skillset import SkillSet, LinearSkillSet
-from adala.utils.logs import log, info, print_instructions, print_evaluations, print_dataframe, print_text
+from adala.utils.logs import print_dataframe, print_text
+from adala.utils.internal_data import InternalDataFrame
 
 
 class Agent(BaseModel, ABC):
@@ -23,7 +24,7 @@ class Agent(BaseModel, ABC):
         default_runtime (str): The default runtime used by the agent. Defaults to 'openai'.
     """
     
-    environment: Union[Dataset, Environment]
+    environment: Union[InternalDataFrame, Dataset, Environment]
     skills: Union[SkillSet, BaseSkill, List[BaseSkill], Dict[str, BaseSkill]]
 
     memory: LongTermMemory = Field(default=None)
@@ -74,8 +75,7 @@ class Agent(BaseModel, ABC):
             f"Runtimes: {runtime_names}\n"
             f"Default Runtime: {self.default_runtime}"
         )
-    
-        
+
     @field_validator('environment')
     def environment_validator(cls, v):
         """
@@ -87,7 +87,8 @@ class Agent(BaseModel, ABC):
         Returns:
             Environment: The validated environment.
         """
-        
+        if isinstance(v, InternalDataFrame):
+            v = DataFrameDataset(df=v)
         if isinstance(v, Dataset):
             v = Environment(dataset=v)
         return v
@@ -134,7 +135,7 @@ class Agent(BaseModel, ABC):
             raise ValueError(f'Runtime "{runtime}" not found.')
         return self.runtimes[runtime]
 
-    def apply_skills(self, dataset: Dataset, runtime: Optional[str] = None) -> ShortTermMemory:
+    def apply_skills(self, dataset: Union[Dataset, InternalDataFrame], runtime: Optional[str] = None) -> ShortTermMemory:
         """
         Applies the agent's skills to a given dataset using the specified runtime.
 
@@ -145,7 +146,8 @@ class Agent(BaseModel, ABC):
         Returns:
             ShortTermMemory: The short-term memory resulting from the application of skills.
         """
-        
+        if isinstance(dataset, InternalDataFrame):
+            dataset = DataFrameDataset(df=dataset)
         return self.skills.apply(dataset=dataset, runtime=self.get_runtime(runtime=runtime))
 
     def learn(
@@ -208,10 +210,10 @@ class Agent(BaseModel, ABC):
                 break
 
             # 3. IMPROVEMENT PHASE: Improve skills based on analysis
-            print_text(f"Improve {learned_skill.name} skill based on analysis ...")
+            print_text(f"Improve \"{learned_skill.name}\" skill based on analysis ...")
             experience = learned_skill.improve(experience)
             print_text(f'Updated instructions for skill "{learned_skill.name}":\n')
-            print_text(experience.updated_instructions, style='bold green', streaming_style=True)
+            print_text(experience.updated_instructions, style='bold green')
 
             # 4. RE-APPLY PHASE: Re-apply skills to dataset
             print_text(f"Re-apply {learned_skill.name} skill to dataset ...")
