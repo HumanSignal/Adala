@@ -13,6 +13,7 @@ from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
 from adala.memories.base import ShortTermMemory, LongTermMemory
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
+from adala.utils.logs import print_error
 
 
 class BaseSkill(BaseModel, ABC):
@@ -70,7 +71,7 @@ class BaseSkill(BaseModel, ABC):
     )
 
     @model_validator(mode='after')
-    def validate_input_template(self):
+    def validate_inputs(self):
         """
         Validates the input_template, updating it if necessary.
         
@@ -79,7 +80,13 @@ class BaseSkill(BaseModel, ABC):
         """
         
         if '{{{{{input}}}}}' in self.input_template:
-            # TODO: check why it is called multiple times
+            if self.input_data_field is None:
+                print_error(f'You are using skill template {self.input_template} '
+                            'that contains {{{{{input}}}}} placeholder.'
+                            'In this case, you have to provide skill with `skill.input_data_field` to match the input data.'
+                            f'For example, if your input data stored in `"text"` column, '
+                            f'you can set `skill = {self.__class__.__name__}(..., input_data_field="text")`.')
+                raise ValueError(f'`input_data_field` is not provided for skill {self.name}')
             self.input_template = self.input_template.format(input=self.input_data_field)
         return self
 
