@@ -145,12 +145,20 @@ run = agent.apply_skills(test_dataset)
 print('\n => Test results:')
 print(run)
 ```
+
+### Available skills
+- [ClassificationSkill](./adala/examples/classification_skill.ipynb) – Classify text into a set of predefined labels.
+- [ClassificationSkillWithCoT](./adala/examples/classification_skill_with_CoT.ipynb) – Classify text into a set of predefined labels, using Chain-of-Thoughts reasoning.
+- [SummarizationSkill](./adala/examples/summarization_skill.ipynb) – Summarize text into a shorter text.
+- [QuestionAnsweringSkill](./adala/examples/question_answering_skill.ipynb) – Answer questions based on a given context.
+- [TranslationSkill](./adala/examples/translation_skill.ipynb) – Translate text from one language to another.
+- [TextGenerationSkill](./adala/examples/text_generation_skill.ipynb) – Generate text based on a given prompt.
 <!-- 
 ## 📒 More notebooks
 
 - [Quickstart](./adala/examples/quickstart.ipynb) – An extended example of the above with comments and outputs.
-- [Creating New Skill](./adala/examples/creating_new_skill.ipynb) – An example that walks you through creating a new skill.
-- [Label Studio Tutorial](examples/tutorial_label_studio.ipynb) – An example of connecting Adala to an external labeling tool for enhanced supervision.
+- [Creating New Skill (coming soon!)](./adala/examples/creating_new_skill.ipynb) – An example that walks you through creating a new skill.
+- [Label Studio Tutorial (coming soon!)](examples/tutorial_label_studio.ipynb) – An example of connecting Adala to an external labeling tool for enhanced supervision.
 -->
 <!-- 
 ## Running ADALA as a standalone server (Coming soon!)
@@ -264,9 +272,11 @@ adala help <command>
 ## 🗺 Roadmap
 
 - [ ] Create Named Entity Recognition Skill
-- [ ] Extend environemnt with one more example
+- [ ] Extend environment with one more example
 - [ ] Command line utility (see the source for this readme for example)
 - [ ] REST API to interact with Adala
+- [ ] Multi-task learning (learn multiple skills at once)
+- [ ] Vision and multi-modal agent skills
 
 ## 🤩 Contributing to Adala
 
