@@ -2,7 +2,7 @@ import os
 import openai
 from pydantic import model_validator, field_validator, ValidationError, ValidationInfo, Field
 from typing import Optional, Dict
-from .base import LLMRuntime, LLMRuntimeModelType
+from .base import LLMRuntime, LLMRuntimeType, LLMRuntimeModelType
 from adala.utils.logs import print_error
 
 
@@ -54,7 +54,17 @@ class OpenAIRuntime(LLMRuntime):
         self._check_api_key()
         self._check_model_availability()
 
-        self.llm_runtime_type = LLMRuntimeModelType.OpenAI
+        student_models = {'gpt-3.5-turbo-instruct', 'text-davinci-003'}
+        teacher_models = {'gpt-4', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k'}
+
+        if self.gpt_model_name in student_models:
+            self.llm_runtime_type = LLMRuntimeType.STUDENT
+        elif self.gpt_model_name in teacher_models:
+            self.llm_runtime_type = LLMRuntimeType.TEACHER
+        else:
+            raise NotImplementedError(f'Not supported model: {self.gpt_model_name}.')
+
+        self.llm_runtime_model_type = LLMRuntimeModelType.OpenAI
         self.llm_params = {
             'model': self.gpt_model_name,
             'temperature': self.temperature,
