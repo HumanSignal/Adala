@@ -39,9 +39,8 @@ in what we refer to as a "runtime", synonymous with LLM.
   community to extend and tailor runtimes, ensuring continuous
   evolution and adaptability to diverse needs.
   
-- 🚀 **Extend skills**: Quickly customize and develop agents to address the
-  specific challenges and nuances of your domain, without facing a
-  steep learning curve.
+- 🚀 **Easily customizable**: Quickly customize and develop agents to address
+  challenges specific to your needs, without facing a steep learning curve.
 
 ## 🫵 Who is Adala for?
 
@@ -262,7 +261,7 @@ adala help <command>
 ```
 -->
 
-## 📅 Roadmap
+## 🗺 Roadmap
 
 - [ ] Create Named Entity Recognition Skill
 - [ ] Extend environemnt with one more example
@@ -271,7 +270,7 @@ adala help <command>
 
 ## 🤩 Contributing to Adala
 
-Dive into the heart of Adala by enhancing Skills, optimizing Runtimes, or pioneering new Agent Types. Whether you're
+Enhance skills, optimize runtimes, or pioneer new agent types. Whether you're
 crafting nuanced tasks, refining computational environments, or sculpting specialized agents for unique domains, your
 contributions will power Adala's evolution. Join us in shaping the future of intelligent systems and making Adala more
 versatile and impactful for users across the globe.
