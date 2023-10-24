@@ -54,7 +54,7 @@ Adala is a versatile framework designed for individuals and professionals in the
 While the roles highlighted above are central, it's pivotal to note that Adala is intricately designed to streamline and elevate the AI development journey, 
 catering to all enthusiasts, irrespective of their specific niche in the field. 🥰
 
-## ⬇️ Installation
+## 🔌Installation
 
 Install Adala:
 
@@ -146,7 +146,7 @@ print('\n => Test results:')
 print(run)
 ```
 
-### Available skills
+### 👉 Available skills
 - [ClassificationSkill](./adala/examples/classification_skill.ipynb) – Classify text into a set of predefined labels.
 - [ClassificationSkillWithCoT](./adala/examples/classification_skill_with_CoT.ipynb) – Classify text into a set of predefined labels, using Chain-of-Thoughts reasoning.
 - [SummarizationSkill](./adala/examples/summarization_skill.ipynb) – Summarize text into a shorter text.
