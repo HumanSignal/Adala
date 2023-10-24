@@ -272,7 +272,7 @@ class LLMSkill(BaseSkill):
             errors[[self.name, experience.ground_truth_column_name]]
         ], axis=1)
         errors.columns = ['input', 'prediction', 'ground_truth']
-        smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
+        smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=False)
         error_reasons = smart_runtime.process_batch(
             errors,
             instructions="{{#system~}}\n"
@@ -312,7 +312,7 @@ class LLMSkill(BaseSkill):
         experience = experience.model_copy()
 
         errors = experience.errors.to_dict(orient='records')
-        smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
+        smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=False)
         result = smart_runtime.process_record(
             record={
                 'errors': errors

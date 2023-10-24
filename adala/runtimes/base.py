@@ -87,7 +87,7 @@ class LLMRuntime(Runtime):
             else:
                 raise NotImplementedError(f'LLM runtime type {self.llm_runtime_type} is not implemented.')
 
-            self._program = guidance(self._llm_template, llm=self._llm)
+            self._program = guidance(self._llm_template, llm=self._llm, silent=not self.verbose)
         return self
 
     def get_outputs(self, output_template: str) -> List[str]:
@@ -159,7 +159,7 @@ class LLMRuntime(Runtime):
         fixed_input_template = input_template
         if '{{text}}' in fixed_input_template:
             fixed_input_template = fixed_input_template.replace('{{text}}', '{{text_}}')
-        input_program = guidance(fixed_input_template, llm=self._llm)
+        input_program = guidance(fixed_input_template, llm=self._llm, silent=not self.verbose)
         return input_program
 
     def get_output_program(self, output_template):

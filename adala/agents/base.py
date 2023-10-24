@@ -1,9 +1,3 @@
-import pandas as pd
-from rich import box
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-
 from pydantic import BaseModel, Field, SkipValidation, field_validator
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List, Dict, Union
@@ -13,7 +7,7 @@ from adala.runtimes.base import Runtime, LLMRuntime, LLMRuntimeModelType
 from adala.memories.base import ShortTermMemory, LongTermMemory
 from adala.skills.base import BaseSkill
 from adala.skills.skillset import SkillSet, LinearSkillSet
-from adala.utils.logs import log, info, print_instructions, print_evaluations
+from adala.utils.logs import log, info, print_instructions, print_evaluations, print_dataframe, print_text
 
 
 class Agent(BaseModel, ABC):
@@ -70,7 +64,7 @@ class Agent(BaseModel, ABC):
             str: A rich-formatted representation of the agent.
         """
         
-        skill_names = ", ".join(self.skills.skills.keys())
+        skill_names = ", ".join([skill.name for skill in self.skills.skills.values()])
         runtime_names = ", ".join(self.runtimes.keys())
         
         return (
@@ -196,29 +190,31 @@ class Agent(BaseModel, ABC):
             self.environment.request_feedback(learned_skill, experience)
 
         for iteration in range(learning_iterations):
-            log(f'\n\n=> Iteration #{iteration}: Comparing to ground truth, analyzing and improving ...')
+            print_text(f'\n\n=> Iteration #{iteration}: Comparing to ground truth, analyzing and improving ...')
 
             # 1. EVALUATION PHASE: Compare predictions to ground truth
-            info(f'Compare predictions to ground truth ...')
             experience = self.environment.compare_to_ground_truth(learned_skill, experience)
-            print_evaluations(experience.evaluations)
+            print_text(f'Comparing predictions to ground truth data ...')
+            print_dataframe(experience.evaluations)
 
             # 2. ANALYSIS PHASE: Analyze evaluation experience, optionally use long term memory
-            info(f'Analyze evaluation experience ...')
+            print_text(f'Analyze evaluation experience ...')
             experience = learned_skill.analyze(experience, self.memory, runtime)
+            print_text(f'Number of errors: {len(experience.errors)}')
 
-            info(f'Accuracy = {experience.accuracy*100:0.2f}%')
+            print_text(f'Accuracy = {experience.accuracy*100:0.2f}%', style='bold red')
             if experience.accuracy >= accuracy_threshold:
-                log(f'Accuracy threshold reached ({experience.accuracy} >= {accuracy_threshold})')
+                print_text(f'Accuracy threshold reached ({experience.accuracy} >= {accuracy_threshold})')
                 break
 
             # 3. IMPROVEMENT PHASE: Improve skills based on analysis
-            info(f"Improve skills based on analysis ...")
+            print_text(f"Improve {learned_skill.name} skill based on analysis ...")
             experience = learned_skill.improve(experience)
-            print_instructions(experience.updated_instructions, compact=True)
+            print_text(f'Updated instructions for skill "{learned_skill.name}":\n')
+            print_text(experience.updated_instructions, style='bold green', streaming_style=True)
 
             # 4. RE-APPLY PHASE: Re-apply skills to dataset
-            info(f"Re-apply skills to dataset ...")
+            print_text(f"Re-apply {learned_skill.name} skill to dataset ...")
             experience = learned_skill.apply(dataset, runtime, experience=experience)
 
         # Update skills and memory based on experience
@@ -228,5 +224,5 @@ class Agent(BaseModel, ABC):
         if self.memory and update_memory:
             self.memory.remember(experience, self.skills)
 
-        log('Train is done!')
+        print_text('Train is done!')
         return experience
