@@ -2,7 +2,7 @@
 
 Adala is an **A**utonomous **DA**ta (**L**abeling) **A**gent framework.
 
-Adala offers a robust framework for implementing agents specialized in data processing, with a particular emphasis on
+Adala offers a robust framework for implementing agents specialized in data processing, with an emphasis on
 diverse data labeling tasks. These agents are autonomous, meaning they can independently acquire one or more skills
 through iterative learning. This learning process is influenced by their operating environment, observations, and
 reflections. Users define the environment by providing a ground truth dataset. Every agent learns and applies its skills
@@ -12,55 +12,66 @@ in what we refer to as a "runtime", synonymous with LLM.
 
 <!-- Offered as an HTTP server, users can interact with Adala via command line or RESTful API, and directly integrate its features in Python Notebooks or scripts. The self-learning mechanism leverages Large Language Models (LLMs) from providers like OpenAI and VertexAI. -->
 
-### Why Choose Adala?
+## 📢 Why choose Adala?
 
-- **Reliable Agents**: Built upon a foundation of ground truth data,
-  our agents ensure consistent and trustworthy results, making Adala a
-  reliable choice for data processing needs.
+- 🌟 **Reliable agents**: Our agents are built upon a foundation of ground
+  truth data. This ensures consistent and trustworthy results, making Adala a
+  reliable choice for your data processing needs.
   
-- **Controllable Output**: For every skill, you can configure the
-  desired output, setting specific constraints with varying degrees of
+- 🎮 **Controllable output**: For every skill, you can configure the
+  desired output and set specific constraints with varying degrees of
   flexibility. Whether you want strict adherence to particular
   guidelines or more adaptive outputs based on the agent's learning,
   Adala allows you to tailor results to your exact needs.
 
-- **Specialized in Data Processing**: While our agents excel in diverse
-  data labeling tasks, they can be tailored to a wide range of data
+- 🎯 **Specialized in data processing**: While our agents excel in diverse
+  data labeling tasks, they can be customized for a wide range of data
   processing needs.
   
-- **Autonomous Learning**: Adala agents aren't just automated;
+- 🧠 **Autonomous learning**: Adala agents aren't just automated;
   they're intelligent. They iteratively and independently develop
   skills based on environment, observations, and reflections.
 
-- **Flexible and Extensible Runtime**: Adala's runtime environment is
+- ✅ **Flexible and extensible runtime**: Adala's runtime environment is
   adaptable. A single skill can be deployed across multiple runtimes,
   facilitating dynamic scenarios like the student/teacher
   architecture. Moreover, the openness of our framework invites the
   community to extend and tailor runtimes, ensuring continuous
   evolution and adaptability to diverse needs.
   
-- **Extend Skills**: Quickly tailor and develop agents to address the
-  specific challenges and nuances of your domain, without facing a
-  steep learning curve.
+- 🚀 **Easily customizable**: Quickly customize and develop agents to address
+  challenges specific to your needs, without facing a steep learning curve.
 
-## Installation
+## 🫵 Who is Adala for?
 
-Install ADALA:
+Adala is a versatile framework designed for individuals and professionals in the field of AI and machine learning. Here's who can benefit:
+
+- 🧡 **AI engineers:** Architect and design AI agent systems with modular, interconnected skills. Build production-level agent systems, abstracting low-level ML to Adala and LLMs.
+- 💻 **Machine learning researchers:** Experiment with complex problem decomposition and causal reasoning.
+- 📈 **Data scientists:** Apply agents to preprocess and postprocess your data. Interact with Adala natively through Python notebooks when working with large Dataframes.
+- 🏫 **Educators and students:** Use Adala as a teaching tool or as a base for advanced projects and research.
+
+While the roles highlighted above are central, it's pivotal to note that Adala is intricately designed to streamline and elevate the AI development journey, 
+catering to all enthusiasts, irrespective of their specific niche in the field. 🥰
+
+## ⬇️ Installation
+
+Install Adala:
 
 ```sh
-git clone https://github.com/HumanSignal/ADALA.git
-cd ADALA/
+git clone https://github.com/HumanSignal/adala.git
+cd adala/
 pip install -e .
 ```
 
 If you're planning to use human-in-the-loop labeling, or need a labeling tool to produce ground truth datasets, we
-suggest installing Label Studio. Adala is made to support Label Studio format right out of the box.
+suggest installing Label Studio. Adala supports Label Studio format out of the box.
 
 ```sh
 pip install label-studio
 ```
 
-## Prerequisites
+## 📝 Prerequisites
 
 Set OPENAI_API_KEY ([see instructions here](https://platform.openai.com/docs/quickstart/step-2-setup-your-api-key))
 
@@ -68,10 +79,11 @@ Set OPENAI_API_KEY ([see instructions here](https://platform.openai.com/docs/qui
 export OPENAI_API_KEY='your-openai-api-key'
 ```
 
-## Quickstart
+## 🎬 Quickstart
 
-In this example we will use ADALA as a standalone library directly inside our python notebook. You can open it in Collab
-right here.
+In this example we will use Adala as a standalone library directly inside our Python notebook. You can open it in Colab.
+
+Click [here](./adala/examples/quickstart.ipynb) to see an extended quickstart example. 
 
 ```python
 import pandas as pd
@@ -105,7 +117,7 @@ test_df = pd.DataFrame([
 train_dataset = DataFrameDataset(df=train_df)
 test_dataset = DataFrameDataset(df=test_df)
 
-print("=> Initialize and train ADALA agent ...")
+print("=> Initialize and train Adala agent ...")
 agent = Agent(
     # connect to a dataset
     environment=BasicEnvironment(
@@ -133,15 +145,15 @@ run = agent.apply_skills(test_dataset)
 print('\n => Test results:')
 print(run)
 ```
-
-## More Notebooks
-
-- [Quickstart](./examples/quickstart.ipynb) – An extended example of the above with comments and outputs.
-- [Creating New Skill](./examples/creating_new_skill.ipynb) – An example that walks you through creating a new skill.
-- [Label Studio Tutorial](examples/tutorial_label_studio.ipynb) – An example of connecting Adala to an external labeling tool for enhanced supervision.
-
 <!-- 
-## Running ADALA as a standalone server (Comming soon!)
+## 📒 More notebooks
+
+- [Quickstart](./adala/examples/quickstart.ipynb) – An extended example of the above with comments and outputs.
+- [Creating New Skill](./adala/examples/creating_new_skill.ipynb) – An example that walks you through creating a new skill.
+- [Label Studio Tutorial](examples/tutorial_label_studio.ipynb) – An example of connecting Adala to an external labeling tool for enhanced supervision.
+-->
+<!-- 
+## Running ADALA as a standalone server (Coming soon!)
 
 Initiate the Adala server. Note: Each agent operates as its own web server.
 
@@ -249,33 +261,23 @@ adala help <command>
 ```
 -->
 
-### Who Adala is for?
-
-Adala is a versatile framework designed for individuals and professionals in the field of AI and machine learning. Here's who can benefit:
-
-- **AI Engineers:** Architect and design AI Agent systems with modular, interconnected skills. Build production-level agent systems, abstracting low-level ML to Adala and LLMs.
-- **Machine Learning Researchers:** Experiment with complex problem decomposition and causal reasoning.
-- **Data Scientists:** Apply agents to preprocess and postprocess your data. Interact with Adala natively through Python notebooks when working with large Dataframes.
-- **Educators and Students:** Use Adala as a teaching tool or as a base for advanced projects and research.
-
-While the roles highlighted above are central, it's pivotal to note that Adala is intricately designed to streamline and elevate the AI development journey, catering to all enthusiasts, irrespective of their specific niche in the field.
-
-## Roadmap
+## 🗺 Roadmap
 
 - [ ] Create Named Entity Recognition Skill
-- [ ] Extend Environemnt with one more example
-- [ ] Command Line Utility (see the source for this readme for example)
+- [ ] Extend environemnt with one more example
+- [ ] Command line utility (see the source for this readme for example)
 - [ ] REST API to interact with Adala
 
-## Contributing to Adala
+## 🤩 Contributing to Adala
 
-Dive into the heart of Adala by enhancing Skills, optimizing Runtimes, or pioneering new Agent Types. Whether you're
+Enhance skills, optimize runtimes, or pioneer new agent types. Whether you're
 crafting nuanced tasks, refining computational environments, or sculpting specialized agents for unique domains, your
 contributions will power Adala's evolution. Join us in shaping the future of intelligent systems and making Adala more
 versatile and impactful for users across the globe.
 
 [Read more](./CONTRIBUTION.md) here.
 
-## Support
+## 💬 Support
 
-Are you in need of assistance or looking to engage with our community? Our [Discord channel](https://discord.gg/QBtgTbXTgU) is the perfect place for real-time support and interaction. Whether you have questions, need clarifications, or simply want to discuss topics related to our project, the Discord community is welcoming!
+Do you need help or are you looking to engage with our community? Check out our [Discord channel](https://discord.gg/QBtgTbXTgU)!
+Whether you have questions, need clarification, or simply want to discuss topics related to our project, the Discord community is welcoming!
