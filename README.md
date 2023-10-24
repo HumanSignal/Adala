@@ -230,6 +230,17 @@ adala help <command>
 ```
 -->
 
+### Who Adala is for?
+
+Adala is a versatile framework designed for individuals and professionals in the field of AI and machine learning. Here's who can benefit:
+
+- AI Engineers - Architect and design AI Agent systems with modular, interconnected skills. Build production-level agent systems, abstracting low-level ML to Adala and LLMs.
+- Machine Learning Researchers - Experiment with complex problem decomposition and causal reasoning.
+- Data Scientists - Apply agents to preprocess and postprocess your data. Interact with Adala natively through Python notebooks when working with large Dataframes.
+- Educators and Students - Use Adala as a teaching tool or as a base for advanced projects and research.
+
+While the roles highlighted above are central, it's pivotal to note that Adala is intricately designed to streamline and elevate the AI development journey, catering to all enthusiasts, irrespective of their specific niche in the field.
+
 ## Roadmap
 
 - [ ] Create Named Entity Recognition Skill

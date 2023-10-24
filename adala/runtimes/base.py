@@ -13,29 +13,43 @@ tqdm.pandas()
 
 class Runtime(BaseModel, ABC):
     """
-    Base class for runtimes.
+    Base class representing a generic runtime environment.
+
+    Attributes:
+        verbose (bool): Flag indicating if runtime outputs should be verbose. Defaults to False.
     """
     verbose: bool = False
 
     @model_validator(mode='after')
     def init_runtime(self):
-        """
-        Check that runtime is valid.
-        Use this method to initialize runtime.
-        """
+        """Initializes the runtime.
+
+        This method should be used to validate and potentially initialize the runtime instance.
+
+        Returns:
+            Runtime: The initialized runtime instance.
+        """  
         return self
 
 
 class LLMRuntimeModelType(enum.Enum):
+    """Enumeration for LLM runtime model types."""    
     OpenAI = 'OpenAI'
     Transformers = 'Transformers'
 
 
 class LLMRuntime(Runtime):
     """
-    Base class for LLM runtimes.
-    """
+    Class representing an LLM runtime environment.
 
+    Attributes:
+        llm_runtime_type (LLMRuntimeModelType): Type of the LLM runtime. Defaults to OpenAI.
+        llm_params (Dict[str, str]): Parameters for the LLM runtime. Defaults to a basic GPT-3.5 configuration.
+    
+        _llm: Internal instance for the LLM model. Initialized in `init_runtime`.
+        _program: Program instance used for guidance. Initialized in `init_runtime`.
+        _llm_template (str): Template string for LLM guidance.
+    """
     llm_runtime_type: LLMRuntimeModelType = LLMRuntimeModelType.OpenAI
     llm_params: Dict[str, str] = {
         'model': 'gpt-3.5-turbo-instruct',
@@ -55,6 +69,14 @@ class LLMRuntime(Runtime):
         arbitrary_types_allowed = True
 
     def init_runtime(self):
+        """Initializes the LLM runtime environment.
+
+        Creates an LLM instance based on the runtime type and parameters.
+
+        Returns:
+            LLMRuntime: Initialized runtime instance.
+        """
+        
         if not self._llm:
 
             # create an LLM instance
@@ -69,6 +91,14 @@ class LLMRuntime(Runtime):
         return self
 
     def get_outputs(self, output_template: str) -> List[str]:
+        """Extracts output fields from the output template.
+
+        Args:
+            output_template (str): The template string to extract output fields from.
+
+        Returns:
+            List[str]: List of extracted output fields.
+        """
         # search for all occurrences of {{...'output'...}}
         # TODO: this is a very naive regex implementation - likely to fail in many cases
         outputs = re.findall(r'\'(.*?)\'', output_template)
@@ -81,6 +111,18 @@ class LLMRuntime(Runtime):
         extra_fields,
         outputs=None
     ):
+        """Processes a single record using the guidance program.
+
+        Args:
+            record (dict or InternalDataFrame): The record to be processed.
+            program (callable): The guidance program for processing.
+            extra_fields (dict, optional): Additional fields to include in the processed record.
+            outputs (list of str, optional): Specific output fields to extract from the result.
+
+        Returns:
+            dict: Processed output for the record.
+        """
+        
         if not isinstance(record, dict):
             record = record.to_dict()
         else:
@@ -104,6 +146,15 @@ class LLMRuntime(Runtime):
         return verified_output
 
     def get_input_program(self, input_template):
+        """Generates an input program from the provided template.
+
+        Args:
+            input_template (str): Template to generate the input program.
+
+        Returns:
+            callable: The generated input program.
+        """
+        
         # fix input template in case "text" is presented there - there might be other paramater names as well...
         fixed_input_template = input_template
         if '{{text}}' in fixed_input_template:
@@ -112,10 +163,28 @@ class LLMRuntime(Runtime):
         return input_program
 
     def get_output_program(self, output_template):
+        """Generates an output program from the provided template.
+
+        Args:
+            output_template (str): Template to generate the output program.
+
+        Returns:
+            callable: The generated output program.
+        """
+        
         return guidance(output_template, llm=self._llm)
 
     def get_instructions_program(self, instructions):
-         return guidance(instructions, llm=self._llm)
+        """Generates an instructions program from the provided template.
+
+        Args:
+            instructions (str): The instructions to generate the program.
+
+        Returns:
+            callable: The generated instructions program.
+        """
+        
+        return guidance(instructions, llm=self._llm)
 
     def process_record(
         self,
@@ -125,7 +194,19 @@ class LLMRuntime(Runtime):
         instructions: str,
         extra_fields: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
+        """Processes a record using the provided templates and instructions.
 
+        Args:
+            record (Dict[str, Any]): The record data to be processed.
+            input_template (str): Template for input processing.
+            output_template (str): Template for output processing.
+            instructions (str): Instructions for guidance.
+            extra_fields (Dict[str, Any], optional): Additional fields to include during processing.
+
+        Returns:
+            Dict[str, Any]: The processed record.
+        """
+        
         outputs = re.findall(r'\'(.*?)\'', output_template)
 
         input = record.copy()
@@ -150,7 +231,19 @@ class LLMRuntime(Runtime):
         instructions: str,
         extra_fields: Optional[Dict[str, Any]] = None,
     ) -> InternalDataFrame:
+        """Processes a batch of records using the provided templates and instructions.
 
+        Args:
+            batch (InternalDataFrame): The batch of records to be processed.
+            input_template (str): Template for input processing.
+            output_template (str): Template for output processing.
+            instructions (str): Instructions for guidance.
+            extra_fields (Dict[str, Any], optional): Additional fields to include during batch processing.
+
+        Returns:
+            InternalDataFrame: The processed batch of records.
+        """
+        
         outputs = self.get_outputs(output_template)
 
         extra_fields = extra_fields or {}
@@ -178,7 +271,17 @@ class LLMRuntime(Runtime):
         input_template: str,
         extra_fields: Optional[Dict[str, Any]] = None,
     ) -> InternalDataFrame:
+        """Processes inputs for a batch of records using the provided input template.
 
+        Args:
+            batch (InternalDataFrame): The batch of records for input processing.
+            input_template (str): The template for input processing.
+            extra_fields (Dict[str, Any], optional): Additional fields to include during input processing.
+
+        Returns:
+            InternalDataFrame: The processed inputs for the batch of records.
+        """
+        
         output = batch.progress_apply(
             self._process_record,
             axis=1,
@@ -190,6 +293,4 @@ class LLMRuntime(Runtime):
 
 
 class CodeRuntime(Runtime):
-    """
-    Base class for code runtimes.
-    """
+    """Base class representing a runtime designed for executing code."""
