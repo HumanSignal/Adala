@@ -19,7 +19,7 @@ class ClassificationSkill(LLMSkill):
     prediction_field: str = 'predictions'
 
 
-class ClassificationSkillWithCoT(LLMSkill):
+class ClassificationSkillWithCoT(ClassificationSkill):
     """
     Skill specialized for classifying text inputs with the addition of generating a Chain of Thought.
 
@@ -31,8 +31,5 @@ class ClassificationSkillWithCoT(LLMSkill):
         prediction_field (str): Specifies the field in which predictions will be stored.
     """
     
-    instructions: str = 'Label the input text with the following labels: {{{{labels}}}}'
-    labels: List[str]
-    input_template: str = "Input: {{{{{input}}}}}}\nThoughts: {{{{gen 'rationale'}}}}\n"
-    output_template: str = "Output: {{select 'predictions' options=labels logprobs='score'}}"
-    prediction_field: str = 'predictions'
+    instructions: str = 'Label the input text with the following labels: {{labels}}. Provide a rationale for your answer.'
+    output_template: str = "Thoughts: {{gen 'rationale'}}\nOutput: {{select 'predictions' options=labels logprobs='score'}}"
