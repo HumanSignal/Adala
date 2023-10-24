@@ -9,7 +9,7 @@ from adala.runtimes.base import Runtime, LLMRuntime, LLMRuntimeModelType
 from adala.memories.base import ShortTermMemory, LongTermMemory
 from adala.skills.base import BaseSkill
 from adala.skills.skillset import SkillSet, LinearSkillSet
-from adala.utils.logs import log
+from adala.utils.logs import log, info, print_instructions, print_evaluations
 
 
 class Agent(BaseModel, ABC):
@@ -104,23 +104,29 @@ class Agent(BaseModel, ABC):
             self.environment.request_feedback(learned_skill, experience)
 
         for iteration in range(learning_iterations):
-
-            log(f'Iteration #{iteration}: Comparing to ground truth, analyzing and improving...')
+            log(f'\n\n=> Iteration #{iteration}: Comparing to ground truth, analyzing and improving ...')
 
             # 1. EVALUATION PHASE: Compare predictions to ground truth
+            info(f'Compare predictions to ground truth ...')
             experience = self.environment.compare_to_ground_truth(learned_skill, experience)
+            print_evaluations(experience.evaluations)
 
             # 2. ANALYSIS PHASE: Analyze evaluation experience, optionally use long term memory
+            info(f'Analyze evaluation experience ...')
             experience = learned_skill.analyze(experience, self.memory, runtime)
 
+            info(f'Accuracy = {experience.accuracy*100:0.2f}%')
             if experience.accuracy >= accuracy_threshold:
                 log(f'Accuracy threshold reached ({experience.accuracy} >= {accuracy_threshold})')
                 break
 
             # 3. IMPROVEMENT PHASE: Improve skills based on analysis
+            info(f"Improve skills based on analysis ...")
             experience = learned_skill.improve(experience)
+            print_instructions(experience.updated_instructions, compact=True)
 
             # 4. RE-APPLY PHASE: Re-apply skills to dataset
+            info(f"Re-apply skills to dataset ...")
             experience = learned_skill.apply(dataset, runtime, experience=experience)
 
         # Update skills and memory based on experience
@@ -130,6 +136,5 @@ class Agent(BaseModel, ABC):
         if self.memory and update_memory:
             self.memory.remember(experience, self.skills)
 
-        log('Done!')
-
+        log('Train is done!')
         return experience

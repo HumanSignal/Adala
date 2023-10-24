@@ -80,39 +80,56 @@ from adala.agents import Agent
 from adala.datasets import DataFrameDataset
 from adala.environments import BasicEnvironment
 from adala.skills import ClassificationSkill
+from adala.utils.logs import print_evaluations
 
-df = pd.DataFrame([
-    ["The mic is great.", "Subjective"],
-    ["Will order from them again!", "Subjective"],
-    ["Not loud enough and doesn't turn on like it should.", "Objective"],
-    ["The phone doesn't seem to accept anything except CBR mp3s", "Objective"],
-    ["All three broke within two months of use.", "Objective"]
+print("=> Initialize datasets ...")
+
+# Train dataset
+train_df = pd.DataFrame([
+    ["It was the negative first impressions, and then it started working.", "Positive"],
+    ["Not loud enough and doesn't turn on like it should.", "Negative"],
+    ["I don't know what to say.", "Neutral"],
+    ["Manager was rude, but the most important that mic shows very flat frequency response.", "Positive"],
+    ["The phone doesn't seem to accept anything except CBR mp3s.", "Negative"],
+    ["I tried it before, I bought this device for my son.", "Neutral"],
 ], columns=["text", "ground_truth"])
 
-dataset = DataFrameDataset(df=df)
+# Test dataset
+test_df = pd.DataFrame([
+    "All three broke within two months of use.",
+    "The device worked for a long time, can't say anything bad.",
+    "Just a random line of text.",
+    "Will order from them again!",
+], columns=["text"])
 
+train_dataset = DataFrameDataset(df=train_df)
+test_dataset = DataFrameDataset(df=test_df)
+
+print("=> Initialize and train ADALA agent ...")
 agent = Agent(
     # connect to a dataset
     environment=BasicEnvironment(
-        ground_truth_dataset=dataset,
+        ground_truth_dataset=train_dataset,
         ground_truth_column="ground_truth"
     ),
     # define a skill
     skills=ClassificationSkill(
-        name='subjectivity',
+        name='sentiment',
         instructions="Label text as subjective or objective.",
-        labels=["Subjective", "Objective"],
+        labels=["Positive", "Negative", "Neutral"],
         input_data_field='text'
     ),
 )
+run = agent.learn(learning_iterations=10, accuracy_threshold=0.95)
 
-run = agent.learn(learning_iterations=3, accuracy_threshold=0.95)
+print('\n\n=> Final instructions:')
+print('=====================')
+print(f'{run.updated_instructions}')
+print('=====================')
 
-print('=====================')
-print(f'New instructions: {run.updated_instructions}')
-print('=====================')
-print('Predictions:')
-print(run.predictions)
+print('\n=> Run test ...')
+run = agent.apply_skills(test_dataset)
+print_evaluations(run.predictions)
 ```
 
 ## More Notebooks
