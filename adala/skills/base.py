@@ -17,6 +17,8 @@ from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 
 class BaseSkill(BaseModel, ABC):
     """
+    A foundational abstract class representing a skill. This class sets the foundation 
+    for all skills and provides common attributes and methods for skill-based operations.
     """
     name: str = Field(
         title='Skill name',
@@ -69,17 +71,31 @@ class BaseSkill(BaseModel, ABC):
 
     @model_validator(mode='after')
     def validate_input_template(self):
+        """
+        Validates the input_template, updating it if necessary.
+        
+        Returns:
+            BaseSkill: Updated instance of the BaseSkill class.
+        """
+        
         if '{{{{{input}}}}}' in self.input_template:
             # TODO: check why it is called multiple times
             self.input_template = self.input_template.format(input=self.input_data_field)
         return self
 
     def __call__(self, input: InternalDataFrame, runtime: Runtime, dataset: Dataset) -> InternalDataFrame:
-        """
-        Call runtime to process batch of inputs.
-        Input and output shapes can be varying.
-        This method is supposed to be the main way of connecting different skills together.
-        It should also take care of input / output data types validation.
+        """Calls the runtime to process a batch of inputs. Input and
+        output shapes can be varying, and it should also take care of
+        data types validation
+
+        Args:
+            input (InternalDataFrame): Input data in the form of an InternalDataFrame.
+            runtime (Runtime): The runtime instance to be used for processing.
+            dataset (Dataset): The dataset containing the data to be processed.
+        
+        Returns:
+            InternalDataFrame: Concatenated dataframe with the original input and the predictions from the runtime.
+
         """
 
         # get user defined dataset input fields
@@ -94,6 +110,13 @@ class BaseSkill(BaseModel, ABC):
         return InternalDataFrameConcat((input, runtime_predictions), axis=1)
 
     def _get_extra_fields(self):
+        """
+        Retrieves fields that are not categorized as system fields.
+        
+        Returns:
+            dict: A dictionary containing fields that are not system fields.
+        """
+        
         # TODO: more robust way to exclude system fields
         system_fields = {
             'name', 'description', 'input_template', 'output_template', 'instructions', 'validation_fields'}
@@ -107,8 +130,16 @@ class BaseSkill(BaseModel, ABC):
         experience: ShortTermMemory
     ) -> ShortTermMemory:
         """
-        Apply skill to dataset and return new dataset with skill results (predictions)
-        """
+        Applies the skill to a dataset and returns the results.
+        
+        Args:
+            dataset (Dataset): The dataset on which the skill is to be applied.
+            runtime (Runtime): The runtime instance to be used for processing.
+            experience (ShortTermMemory): Previous experiences or results.
+        
+        Returns:
+            ShortTermMemory: The updated experience after applying the skill.
+        """        
 
     @abstractmethod
     def analyze(
@@ -117,20 +148,36 @@ class BaseSkill(BaseModel, ABC):
         runtime: Optional[Runtime] = None
     ) -> ShortTermMemory:
         """
-        Analyze results and return observed experience
-        Agent can optionally retrieve long term memory to enrich experience
+        Analyzes the results to derive new experiences.
+        
+        Args:
+            experience (ShortTermMemory): The current experience.
+            memory (LongTermMemory, optional): Previous long term memories. Defaults to None.
+            runtime (Runtime, optional): The runtime instance. Defaults to None.
+        
+        Returns:
+            ShortTermMemory: The updated experience after analysis.
         """
 
     @abstractmethod
     def improve(self, experience: ShortTermMemory, update_instructions: bool = True) -> ShortTermMemory:
         """
-        Improve current skill state based on current experience
+        Refines the current state of the skill based on its experiences.
+        
+        Args:
+            experience (ShortTermMemory): The current experience.
+            update_instructions (bool, optional): Flag to decide if instructions should be updated. Defaults to True.
+        
+        Returns:
+            ShortTermMemory: The updated experience after improvements.
         """
 
 
 class LLMSkill(BaseSkill):
     """
-    LLM skill handles LLM to produce predictions given instructions
+    A skill specialized for Language Models (LLM). Inherits from the BaseSkill 
+    class and provides specific implementations for handling LLM predictions based 
+    on given instructions.
     """
 
     def apply(
@@ -139,7 +186,18 @@ class LLMSkill(BaseSkill):
         runtime: LLMRuntime,
         experience: ShortTermMemory
     ) -> ShortTermMemory:
-
+        """
+        Applies the LLM skill on a dataset and returns the results.
+        
+        Args:
+            dataset (Dataset): The dataset on which the skill is to be applied.
+            runtime (LLMRuntime): The runtime instance to be used for processing.
+            experience (ShortTermMemory): Previous experiences or results.
+        
+        Returns:
+            ShortTermMemory: The updated experience after applying the skill.
+        """
+        
         experience = experience.model_copy()
 
         predictions = []
@@ -173,7 +231,18 @@ class LLMSkill(BaseSkill):
         memory: Optional[LongTermMemory] = None,
         runtime: Optional[Runtime] = None
     ) -> ShortTermMemory:
-
+        """
+        Analyzes the results to identify any discrepancies and returns the observed experience.
+        
+        Args:
+            experience (ShortTermMemory): The current experience.
+            memory (LongTermMemory, optional): Previous long term memories. Defaults to None.
+            runtime (Runtime, optional): The runtime instance. Defaults to None.
+        
+        Returns:
+            ShortTermMemory: The updated experience after analysis.
+        """
+        
         experience = experience.model_copy()
 
         # TODO: can be multiple prediction validation fields
@@ -229,6 +298,17 @@ class LLMSkill(BaseSkill):
         return experience
 
     def improve(self, experience: ShortTermMemory, update_instructions: bool = True) -> ShortTermMemory:
+        """
+        Refines the LLM skill based on its recent experiences.
+        
+        Args:
+            experience (ShortTermMemory): The current experience.
+            update_instructions (bool, optional): Flag to decide if instructions should be updated. Defaults to True.
+        
+        Returns:
+            ShortTermMemory: The updated experience after improvements.
+        """
+        
         experience = experience.model_copy()
 
         errors = experience.errors.to_dict(orient='records')

@@ -9,66 +9,71 @@ from adala.datasets import Dataset, DataFrameDataset
 
 
 class Environment(BaseModel, ABC):
-    """
-    Base class for environments.
-    Each environment differs by the way it obtains ground truth information from raw data and predictions,
-    and the way it compares ground truth with predictions.
-    Environment uses predictions index as a way to match predictions with ground truth.
-    """
+    """Abstract base class for environments.
 
+    The environment provides a mechanism to obtain ground truth information from raw data and predictions, 
+    and also facilitates comparison of ground truth with predictions.
+
+    Attributes:
+        Config (class): Configuration for the environment class, allows arbitrary types.
+    """
+        
     @abstractmethod
     def request_feedback(self, skill: BaseSkill, experience: ShortTermMemory):
-        """
-        Using predictions, request feedback from user and update internal ground truth set.
-        """
+        """Request user feedback using predictions and update internal ground truth set."""
 
     @abstractmethod
     def compare_to_ground_truth(self, skill: BaseSkill, experience: ShortTermMemory) -> ShortTermMemory:
-        """
-        Compare predictions with ground truth set and return match results.
-        """
+        """Compare predictions with ground truth and return the results."""
 
     @abstractmethod
     def as_dataset(self) -> Dataset:
-        """
-        Return environment as a dataset.
-        """
+        """Convert the environment to a dataset."""
 
     @abstractmethod
     def save(self):
-        """
-        Save environment state.
-        """
+        """Persist the state of the environment."""
 
     @abstractmethod
     def restore(self):
-        """
-        Restore environment state.
-        """
+        """Retrieve and set the state of the environment."""
 
     class Config:
         arbitrary_types_allowed = True
 
 
 class BasicEnvironment(Environment):
+    """Basic environment implementation.
+
+    This environment assumes the ground truth is provided explicitly with the input data.
+    For comparison with ground truth, exact matching is used.
+
+    Attributes:
+        ground_truth_dataset (DataFrameDataset): Dataset containing the ground truth data.
+                                                 Defaults to an empty DataFrameDataset.
+        ground_truth_column (str): Name of the column containing ground truth in the dataset.
+                                   Defaults to 'ground_truth'.
+        _prediction_column (str): Name of the column containing predictions.
+
     """
-    BasicEnvironment assumes ground truth signal comes explicitly with the input data.
-    Once new ground truth points are added, they are saved in `self.ground_truth_set`.
-    To compare with ground truth, exact matching is used.
-    """
+    
     ground_truth_dataset: DataFrameDataset = Field(default_factory=DataFrameDataset)
     ground_truth_column: str = 'ground_truth'
 
     _prediction_column: str
 
     def request_feedback(self, skill: BaseSkill, experience: ShortTermMemory):
-        """
-        For BasicEnvironment, ground truth is already provided with the input data.
-        """
+        """In the BasicEnvironment, ground truth is already provided with the input data."""
 
     def compare_to_ground_truth(self, skill: BaseSkill, experience: ShortTermMemory) -> ShortTermMemory:
-        """
-        Compare predictions with ground truth set and return match results.
+        """Compare the predictions with the ground truth using exact matching.
+
+        Args:
+            skill (BaseSkill): The skill being evaluated.
+            experience (ShortTermMemory): The experience memory containing predictions.
+
+        Returns:
+            ShortTermMemory: Updated memory containing evaluation results against ground truth.
         """
 
         experience = experience.model_copy()
@@ -96,10 +101,20 @@ class BasicEnvironment(Environment):
         return experience
 
     def as_dataset(self) -> Dataset:
+        """Return the ground truth dataset.
+
+        Returns:
+            Dataset: The dataset containing ground truth data.
+        """
+        
         return self.ground_truth_dataset
 
     def save(self):
+        """Save method for BasicEnvironment. Not implemented."""
+        
         raise NotImplementedError
 
     def restore(self):
+        """Restore method for BasicEnvironment. Not implemented."""
+        
         raise NotImplementedError
