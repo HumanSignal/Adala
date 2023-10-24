@@ -119,6 +119,15 @@ class LinearSkillSet(SkillSet):
         # TODO: implement real logic for skill selection
         return self.skills[self.skill_sequence[0]]
 
+    def __rich__(self):
+        """Returns a rich representation of the skill."""
+        # TODO: move it to a base class and use repr derived from Skills
+        text = f"[bold blue]Total Agent Skills: {len(self.skills)}[/bold blue]\n\n"
+        for skill in self.skills.values():
+            text += f'[bold underline green]{skill.name}[/bold underline green]\n' \
+                    f'[green]{skill.instructions}[green]\n'
+        return text
+
 
 class ParallelSkillSet(SkillSet):
     """

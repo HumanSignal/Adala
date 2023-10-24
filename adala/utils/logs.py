@@ -1,30 +1,48 @@
 import pandas as pd
-import textwrap as tw
+import time
+
+from rich import print
+from rich.table import Table
+from rich import box
+from rich.console import Console
+from typing import Optional
+from .internal_data import InternalDataFrame
+
+console = Console()
+error_console = Console(stderr=True, style="bold red")
 
 
-def log(message: str):
-    print(message)
+def print_text(text: str, style=None, streaming_style=False):
+    if streaming_style:
+        for char in text:
+            console.print(char, sep='', end='', style=style)
+            time.sleep(0.01)
+        console.print()
+    else:
+        console.print(text, style=style)
 
 
-def info(message: str = ''):
-    print(message)
+def print_error(text: str):
+    error_console.print(text)
 
 
-def print_instructions(text: str, compact: bool = False):
-    segments = text.split('\n')
-    wrapped_segments = [
-        tw.fill(segment, width=100, initial_indent=" " * 4, subsequent_indent=" " * 4)
-        for segment in segments
-    ]
-    wrapped_text = '\n'.join(wrapped_segments)
-    if compact:
-        wrapped_text = wrapped_text.replace('\n\n', '\n')
+def print_dataframe(dataframe: InternalDataFrame):
+    num_rows = 5
+    table = Table(show_header=True, header_style="bold magenta")
+    # index_name = dataframe.index.name or 'index'
+    # table.add_column(index_name)
 
-    print(f'Instructions = \n{wrapped_text}')
+    for column in dataframe.columns:
+        table.add_column(str(column))
 
+    for index, value_list in enumerate(dataframe.iloc[:num_rows].values.tolist()):
+        # row = [str(index)]
+        row = []
+        row += [str(x) for x in value_list]
+        table.add_row(*row)
 
-def print_evaluations(evaluations: pd.DataFrame):
-    evaluations = evaluations[evaluations.columns.difference(['score', 'ground_truth__x__sentiment'])[::-1]]
-    lines = str(evaluations)
-    lines = '    ' + '\n    '.join(lines.split('\n'))
-    print(lines)
+    # Update the style of the table
+    table.row_styles = ["none", "dim"]
+    table.box = box.SIMPLE_HEAD
+
+    console.print(table)

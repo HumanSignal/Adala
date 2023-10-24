@@ -13,6 +13,7 @@ from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
 from adala.memories.base import ShortTermMemory, LongTermMemory
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
+from adala.utils.logs import print_error
 
 
 class BaseSkill(BaseModel, ABC):
@@ -70,7 +71,7 @@ class BaseSkill(BaseModel, ABC):
     )
 
     @model_validator(mode='after')
-    def validate_input_template(self):
+    def validate_inputs(self):
         """
         Validates the input_template, updating it if necessary.
         
@@ -79,7 +80,13 @@ class BaseSkill(BaseModel, ABC):
         """
         
         if '{{{{{input}}}}}' in self.input_template:
-            # TODO: check why it is called multiple times
+            if self.input_data_field is None:
+                print_error(f'You are using skill template {self.input_template} '
+                            'that contains {{{{{input}}}}} placeholder.'
+                            'In this case, you have to provide skill with `skill.input_data_field` to match the input data.'
+                            f'For example, if your input data stored in `"text"` column, '
+                            f'you can set `skill = {self.__class__.__name__}(..., input_data_field="text")`.')
+                raise ValueError(f'`input_data_field` is not provided for skill {self.name}')
             self.input_template = self.input_template.format(input=self.input_data_field)
         return self
 
@@ -144,28 +151,36 @@ class BaseSkill(BaseModel, ABC):
     @abstractmethod
     def analyze(
         self, experience: ShortTermMemory,
+        student_runtime: Runtime,
+        teacher_runtime: Optional[Runtime] = None,
         memory: Optional[LongTermMemory] = None,
-        runtime: Optional[Runtime] = None
     ) -> ShortTermMemory:
         """
         Analyzes the results to derive new experiences.
         
         Args:
             experience (ShortTermMemory): The current experience.
+            student_runtime (Runtime): The student runtime instance. Defaults to None.
+            teacher_runtime (Runtime, optional): The teacher runtime instance. Defaults to None.
             memory (LongTermMemory, optional): Previous long term memories. Defaults to None.
-            runtime (Runtime, optional): The runtime instance. Defaults to None.
-        
+
         Returns:
             ShortTermMemory: The updated experience after analysis.
         """
 
     @abstractmethod
-    def improve(self, experience: ShortTermMemory, update_instructions: bool = True) -> ShortTermMemory:
+    def improve(
+        self,
+        experience: ShortTermMemory,
+        runtime: Runtime,
+        update_instructions: bool = True,
+    ) -> ShortTermMemory:
         """
         Refines the current state of the skill based on its experiences.
         
         Args:
             experience (ShortTermMemory): The current experience.
+            runtime (Runtime): The runtime instance to be used for processing.
             update_instructions (bool, optional): Flag to decide if instructions should be updated. Defaults to True.
         
         Returns:
@@ -228,17 +243,19 @@ class LLMSkill(BaseSkill):
 
     def analyze(
         self, experience: ShortTermMemory,
-        memory: Optional[LongTermMemory] = None,
-        runtime: Optional[Runtime] = None
+        student_runtime: Runtime,
+        teacher_runtime: Optional[Runtime] = None,
+        memory: Optional[LongTermMemory] = None
     ) -> ShortTermMemory:
         """
         Analyzes the results to identify any discrepancies and returns the observed experience.
         
         Args:
             experience (ShortTermMemory): The current experience.
+            student_runtime (Runtime): The student runtime instance. Defaults to None.
+            teacher_runtime (Runtime, optional): The teacher runtime instance. Defaults to None.
             memory (LongTermMemory, optional): Previous long term memories. Defaults to None.
-            runtime (Runtime, optional): The runtime instance. Defaults to None.
-        
+
         Returns:
             ShortTermMemory: The updated experience after analysis.
         """
@@ -260,7 +277,7 @@ class LLMSkill(BaseSkill):
 
         # collect error inputs from runtime
         extra_fields = self._get_extra_fields()
-        inputs = runtime.process_batch_inputs(
+        inputs = student_runtime.process_batch_inputs(
             batch=errors,
             input_template=self.input_template,
             extra_fields=extra_fields
@@ -272,8 +289,10 @@ class LLMSkill(BaseSkill):
             errors[[self.name, experience.ground_truth_column_name]]
         ], axis=1)
         errors.columns = ['input', 'prediction', 'ground_truth']
-        smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
-        error_reasons = smart_runtime.process_batch(
+        if not teacher_runtime:
+            teacher_runtime = student_runtime
+
+        error_reasons = teacher_runtime.process_batch(
             errors,
             instructions="{{#system~}}\n"
                          "LLM prompt was created by concatenating instructions with text input:\n\n"
@@ -297,12 +316,18 @@ class LLMSkill(BaseSkill):
         experience.errors = errors
         return experience
 
-    def improve(self, experience: ShortTermMemory, update_instructions: bool = True) -> ShortTermMemory:
+    def improve(
+        self,
+        experience: ShortTermMemory,
+        runtime: Runtime,
+        update_instructions: bool = True,
+    ) -> ShortTermMemory:
         """
         Refines the LLM skill based on its recent experiences.
         
         Args:
             experience (ShortTermMemory): The current experience.
+            runtime (Runtime): The runtime instance to be used for processing.
             update_instructions (bool, optional): Flag to decide if instructions should be updated. Defaults to True.
         
         Returns:
@@ -312,8 +337,7 @@ class LLMSkill(BaseSkill):
         experience = experience.model_copy()
 
         errors = experience.errors.to_dict(orient='records')
-        smart_runtime = LLMRuntime(llm_params={'model': 'gpt-4'}, verbose=True)
-        result = smart_runtime.process_record(
+        result = runtime.process_record(
             record={
                 'errors': errors
             },

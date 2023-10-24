@@ -32,6 +32,11 @@ class Runtime(BaseModel, ABC):
         return self
 
 
+class LLMRuntimeType(enum.Enum):
+    STUDENT = 'student'
+    TEACHER = 'teacher'
+
+
 class LLMRuntimeModelType(enum.Enum):
     """Enumeration for LLM runtime model types."""    
     OpenAI = 'OpenAI'
@@ -50,7 +55,8 @@ class LLMRuntime(Runtime):
         _program: Program instance used for guidance. Initialized in `init_runtime`.
         _llm_template (str): Template string for LLM guidance.
     """
-    llm_runtime_type: LLMRuntimeModelType = LLMRuntimeModelType.OpenAI
+    llm_runtime_type: LLMRuntimeType = LLMRuntimeType.STUDENT
+    llm_runtime_model_type: LLMRuntimeModelType = LLMRuntimeModelType.OpenAI
     llm_params: Dict[str, str] = {
         'model': 'gpt-3.5-turbo-instruct',
         # 'max_tokens': 10,
@@ -68,6 +74,16 @@ class LLMRuntime(Runtime):
     class Config:
         arbitrary_types_allowed = True
 
+    def _create_program(self):
+        # create an LLM instance
+        if self.llm_runtime_model_type.value == LLMRuntimeModelType.OpenAI.value:
+            self._llm = guidance.llms.OpenAI(**self.llm_params)
+        elif self.llm_runtime_model_type.value == LLMRuntimeModelType.Transformers.value:
+            self._llm = guidance.llms.Transformers(**self.llm_params)
+        else:
+            raise NotImplementedError(f'LLM runtime type {self.llm_runtime_model_type} is not implemented.')
+        self._program = guidance(self._llm_template, llm=self._llm, silent=not self.verbose)
+
     def init_runtime(self):
         """Initializes the LLM runtime environment.
 
@@ -76,18 +92,7 @@ class LLMRuntime(Runtime):
         Returns:
             LLMRuntime: Initialized runtime instance.
         """
-        
-        if not self._llm:
-
-            # create an LLM instance
-            if self.llm_runtime_type.value == LLMRuntimeModelType.OpenAI.value:
-                self._llm = guidance.llms.OpenAI(**self.llm_params)
-            elif self.llm_runtime_type.value == LLMRuntimeModelType.Transformers.value:
-                self._llm = guidance.llms.Transformers(**self.llm_params)
-            else:
-                raise NotImplementedError(f'LLM runtime type {self.llm_runtime_type} is not implemented.')
-
-            self._program = guidance(self._llm_template, llm=self._llm)
+        self._create_program()
         return self
 
     def get_outputs(self, output_template: str) -> List[str]:
@@ -159,7 +164,7 @@ class LLMRuntime(Runtime):
         fixed_input_template = input_template
         if '{{text}}' in fixed_input_template:
             fixed_input_template = fixed_input_template.replace('{{text}}', '{{text_}}')
-        input_program = guidance(fixed_input_template, llm=self._llm)
+        input_program = guidance(fixed_input_template, llm=self._llm, silent=not self.verbose)
         return input_program
 
     def get_output_program(self, output_template):
