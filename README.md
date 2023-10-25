@@ -4,9 +4,9 @@
 [![](https://img.shields.io/discord/1166330284300570624?label=Discord&logo=discord)](https://discord.gg/QBtgTbXTgU)
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="/docs/src/img/logo-bw.png">
-  <source media="(prefers-color-scheme: light)" srcset="/docs/src/img/logo.png">
-  <img alt="Shows Adala logo in light mode and dark mode." src="/docs/src/img/logo.png">
+  <source media="(prefers-color-scheme: dark)" srcset="/docs/src/img/logo-bw.png" width="275" >
+  <source media="(prefers-color-scheme: light)" srcset="/docs/src/img/logo.png" width="275" >
+  <img alt="Shows Adala logo in light mode and dark mode." src="/docs/src/img/logo.png" width="275" >
 </picture>
 
 Adala is an **A**utonomous **DA**ta (**L**abeling) **A**gent framework.
