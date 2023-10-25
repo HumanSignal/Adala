@@ -34,16 +34,10 @@ def process_record_generator(*args, **kwargs):
 
 @patch.object(OpenAIRuntime, '_check_api_key', return_value=None)
 @patch.object(OpenAIRuntime, '_check_model_availability', return_value=None)
-# @patch.object(OpenAIRuntime, 'get_input_program', return_value=MagicMock())
-# @patch.object(OpenAIRuntime, 'get_output_program', return_value=MagicMock())
-# @patch.object(OpenAIRuntime, 'get_instructions_program', return_value=MagicMock())
 @patch.object(OpenAIRuntime, '_process_record', side_effect=process_record_generator())
 def test_classification_skill(
         mock_check_api_key,
         mock_check_model_availability,
-        # mock_get_input_program,
-        # mock_get_output_program,
-        # mock_get_instructions_program,
         mock_process_record
 ):
     print("=> Initialize datasets ...")

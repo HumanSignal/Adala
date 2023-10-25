@@ -1,4 +1,4 @@
-name: pytest:ubnt
+name: pytests
 on:
   push:
     paths:
@@ -23,13 +23,15 @@ env:
 
 jobs:
   run_pytest_ubuntu:
-    name: Ubuntu pytests
+    name: Ubuntu
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version:
           - '3.8'
+          - '3.9'
+          - '3.10'
           - '3.11'
 
     steps:
@@ -58,19 +60,20 @@ jobs:
       - name: Run functional tests
         run: |
           cd tests/
-          pytest --junitxml report.xml --cov=. -vv
+          pytest --junitxml report.xml --cov=. -vv -n auto
 
 
 
 
   run_pytests_windows:
-    name: Windows pytests
+    name: Windows
     runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
         python-version:
           - '3.8'
+          - '3.9'
           - '3.10'
           - '3.11'
 
