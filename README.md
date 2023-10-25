@@ -14,7 +14,7 @@ in what we refer to as a "runtime", synonymous with LLM.
 
 ## 📢 Why choose Adala?
 
-- 🌟 **Reliable agents**: Our agents are built upon a foundation of ground
+- 🌟 **Reliable agents**: Agents are built upon a foundation of ground
   truth data. This ensures consistent and trustworthy results, making Adala a
   reliable choice for your data processing needs.
   
@@ -24,7 +24,7 @@ in what we refer to as a "runtime", synonymous with LLM.
   guidelines or more adaptive outputs based on the agent's learning,
   Adala allows you to tailor results to your exact needs.
 
-- 🎯 **Specialized in data processing**: While our agents excel in diverse
+- 🎯 **Specialized in data processing**: While agents excel in diverse
   data labeling tasks, they can be customized for a wide range of data
   processing needs.
   
@@ -35,7 +35,7 @@ in what we refer to as a "runtime", synonymous with LLM.
 - ✅ **Flexible and extensible runtime**: Adala's runtime environment is
   adaptable. A single skill can be deployed across multiple runtimes,
   facilitating dynamic scenarios like the student/teacher
-  architecture. Moreover, the openness of our framework invites the
+  architecture. Moreover, the openness of framework invites the
   community to extend and tailor runtimes, ensuring continuous
   evolution and adaptability to diverse needs.
   
@@ -81,7 +81,7 @@ export OPENAI_API_KEY='your-openai-api-key'
 
 ## 🎬 Quickstart
 
-In this example we will use Adala as a standalone library directly inside our Python notebook. You can open it in Colab.
+In this example we will use Adala as a standalone library directly inside Python notebook. You can open it in Colab.
 
 Click [here](./adala/examples/quickstart.ipynb) to see an extended quickstart example. 
 
@@ -299,5 +299,5 @@ versatile and impactful for users across the globe.
 
 ## 💬 Support
 
-Do you need help or are you looking to engage with our community? Check out our [Discord channel](https://discord.gg/QBtgTbXTgU)!
-Whether you have questions, need clarification, or simply want to discuss topics related to our project, the Discord community is welcoming!
+Do you need help or are you looking to engage with community? Check out [Discord channel](https://discord.gg/QBtgTbXTgU)!
+Whether you have questions, need clarification, or simply want to discuss topics related to the project, the Discord community is welcoming!
