@@ -85,7 +85,7 @@ export OPENAI_API_KEY='your-openai-api-key'
 
 ## 🎬 Quickstart
 
-In this example we will use Adala as a standalone library directly inside Python notebook. You can open it in Colab.
+In this example we will use Adala as a standalone library directly inside Python notebook.
 
 Click [here](./adala/examples/quickstart.ipynb) to see an extended quickstart example. 
 
