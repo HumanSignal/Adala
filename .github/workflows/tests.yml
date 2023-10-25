@@ -38,15 +38,15 @@ jobs:
           - '3.11'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
         id: setup_python
-        uses: actions/setup-python@v4.7.0
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/cache@v3.3.1
+      - uses: actions/cache@v3
         name: Configure pip cache
         id: pip-cache
         with:
@@ -79,8 +79,6 @@ jobs:
           - '3.11'
 
     steps:
-      - uses: hmarr/debug-action@v2.1.0
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
