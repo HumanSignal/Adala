@@ -5,8 +5,9 @@ on:
       - master
     paths:
       - 'adala/**'
+      - 'tests/**'
       - '.github/workflows/tests.yml'
-      - 'requirements**'
+      - '**/requirements**'
     tags-ignore:
       - '**'
   pull_request:
@@ -38,6 +39,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4.7.0
         with:
@@ -48,14 +50,12 @@ jobs:
         id: pip-cache
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements-test.txt') }}
-          restore-keys: |
-            ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ matrix.python-version }}-
+          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ steps.setup_python.outputs.python-version }}-adala-${{ hashFiles('requirements.txt', 'tests/requirements-test.txt') }}
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip setuptools
-          pip install -U pip
+          pip install --quiet --upgrade pip setuptools
+          pip -V
           pip install -r requirements.txt -r tests/requirements-test.txt
           pip install -e .
 
@@ -63,8 +63,6 @@ jobs:
         run: |
           cd tests/
           pytest --junitxml report.xml --cov=. -vv 
-
-
 
 
   run_pytests_windows:
@@ -96,9 +94,7 @@ jobs:
         name: Configure pip cache
         with:
           path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements-test.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ steps.setup_python.outputs.python-version }}-adala-${{ hashFiles('requirements.txt', 'tests/requirements-test.txt') }}
 
       - name: Install dependencies
         run: |
