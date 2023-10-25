@@ -1,0 +1,46 @@
+site_name: Adala Docs
+
+logo: src/img/logo.png
+favicon: src/img/logo.png
+
+repo_url: https://github.com/humansignal/Adala
+edit_uri: https://github.com/humansignal/Adala/tree/main/docs/src
+
+repo_name: humansignal/Adala
+docs_dir: src
+
+plugins:
+  - search
+  - autorefs
+  - mkdocs-jupyter
+  - mkdocstrings                
+
+  
+theme:
+  name: "material"
+  features:
+    - content.code.copy
+    - content.tabs.link
+    - content.action.edit
+    - toc.follow
+    - toc.integrate
+    - navigation.top
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.footer
+    - navigation.tracking
+    - navigation.instant
+    - navigation.indexes
+    - navigation.expand
+    - navigation.sections
+
+
+nav:
+  - Home: 'index.md'
+  - agents.md
+  - datasets.md
+  - environments.md
+  - memories.md
+  - runtimes.md
+  - skills.md
+  # - utils.md
