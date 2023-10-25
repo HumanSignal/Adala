@@ -1,0 +1,61 @@
+name: pytest:ubnt
+on:
+  push:
+    paths:
+      - 'adala/**'
+      - '.github/workflows/tests.yml'
+      - 'requirements**'
+    tags-ignore:
+      - '**'
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    branches:
+      - master
+      - 'release/**'
+
+env:
+  CACHE_NAME_PREFIX: v1
+
+jobs:
+  run_pytest_sqlite:
+    name: LS SDK
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - 3.8
+          - 3.10
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/cache@v3.3.1
+        name: Configure pip cache
+        id: pip-cache
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements-test.txt') }}
+          restore-keys: |
+            ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ matrix.python-version }}-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools
+          pip install -U pip
+          pip install -r requirements.txt -r tests/requirements-test.txt
+          pip install -e .
+
+      - name: Run functional tests
+        run: |
+          cd tests/
+          pytest --junitxml report.xml --cov=. -vv
+
