@@ -1,18 +1,16 @@
-# Adala
+# Quickstart
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+## Installation
 
-## Commands
+```bash
+pip install adala
+```
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+## Reference
 
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
-
+- [**Agents**](agents.md) - main interface for  interacting with environment
+- [**Datasets**](datasets.md) - data inputs for agents
+- [**Environments**](environments.md) - environments for agents, where it collects ground truth signal
+- [**Memories**](memories.md) - agent's memory for storing and retrieving data
+- [**Runtimes**](runtimes.md) - agent's execution runtime (e.g. LLMs providers)
+- [**Skills**](skills.md) - agent skills for data labeling
