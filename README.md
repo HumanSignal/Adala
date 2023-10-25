@@ -1,3 +1,8 @@
+[![PyPI version](https://badge.fury.io/py/adala-pk-test.svg)](https://badge.fury.io/py/adala-pk-test)
+![GitHub](https://img.shields.io/github/license/HumanSignal/Adala)
+![GitHub Repo stars](https://img.shields.io/github/stars/HumanSignal/Adala)
+[![](https://img.shields.io/discord/1166330284300570624?label=Discord&logo=discord)](https://discord.gg/QBtgTbXTgU)
+
 <a href="#"><img src="/static/logo.png" alt="ADALA logo" width="275" ></a>
 
 Adala is an **A**utonomous **DA**ta (**L**abeling) **A**gent framework.
