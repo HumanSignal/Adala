@@ -59,9 +59,7 @@ catering to all enthusiasts, irrespective of their specific niche in the field. 
 Install Adala:
 
 ```sh
-git clone https://github.com/HumanSignal/adala.git
-cd adala/
-pip install -e .
+pip install adala
 ```
 
 If you're planning to use human-in-the-loop labeling, or need a labeling tool to produce ground truth datasets, we

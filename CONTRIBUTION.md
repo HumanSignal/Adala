@@ -64,6 +64,10 @@ Contributions that align with the items detailed in our roadmap, found in the ma
 - Test and Commit: After modifications, conduct comprehensive testing. Once content, commit with an informative message.
 - Push and Pull Request: Push your amendments and formulate a pull request detailing your contribution's value.
 
+## Development Environment
+
+Adala uses [PDM](https://pdm.fming.dev/latest) to manage dependencies. To create an environment, [install PDM](https://pdm.fming.dev/latest/#recommended-installation-method) and run `pdm install` from the root of the repository. To activate the environment, run `source .venv/bin/activate` from the root of the repo after creating the environment.
+
 ## Code of Conduct:
 While diverse contributions invigorate our project, it's paramount to sustain a harmonious and cooperative environment. Please adhere to our code of conduct.
 
