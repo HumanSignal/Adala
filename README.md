@@ -3,7 +3,7 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/HumanSignal/Adala)
 [![](https://img.shields.io/discord/1166330284300570624?label=Discord&logo=discord)](https://discord.gg/QBtgTbXTgU)
 
-<a href="#"><img src="/static/logo.png" alt="ADALA logo" width="275" ></a>
+<a href="#"><img src="/docs/src/img/logo.png" alt="ADALA logo" width="275" ></a>
 
 Adala is an **A**utonomous **DA**ta (**L**abeling) **A**gent framework.
 
@@ -13,7 +13,7 @@ through iterative learning. This learning process is influenced by their operati
 reflections. Users define the environment by providing a ground truth dataset. Every agent learns and applies its skills
 in what we refer to as a "runtime", synonymous with LLM.
 
-![Diagram of components](./static/diagram.png "Diagram of components")
+![Diagram of components](./docs/src/img/diagram.png "Diagram of components")
 
 <!-- Offered as an HTTP server, users can interact with Adala via command line or RESTful API, and directly integrate its features in Python Notebooks or scripts. The self-learning mechanism leverages Large Language Models (LLMs) from providers like OpenAI and VertexAI. -->
 
@@ -87,7 +87,7 @@ export OPENAI_API_KEY='your-openai-api-key'
 
 In this example we will use Adala as a standalone library directly inside Python notebook.
 
-Click [here](./adala/examples/quickstart.ipynb) to see an extended quickstart example. 
+Click [here](./examples/quickstart.ipynb) to see an extended quickstart example. 
 
 ```python
 import pandas as pd
