@@ -19,6 +19,7 @@ on:
 
 env:
   CACHE_NAME_PREFIX: v1
+  OPENAI_API_KEY=test
 
 jobs:
   run_pytest_sqlite:
@@ -28,8 +29,8 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
-          - 3.8
-          - 3.10
+          - '3.8'
+          - '3.11'
 
     steps:
       - uses: actions/checkout@v3
