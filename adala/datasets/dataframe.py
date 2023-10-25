@@ -1,6 +1,7 @@
 from typing import Iterable
 from .base import Dataset
 from adala.utils.internal_data import InternalDataFrame
+from pydantic import Field
 
 
 class DataFrameDataset(Dataset):
@@ -15,7 +16,7 @@ class DataFrameDataset(Dataset):
         df (InternalDataFrame): The internal data frame storing the dataset.
     """
     
-    df: InternalDataFrame
+    df: InternalDataFrame = Field(default_factory=InternalDataFrame)
 
     class Config:
         arbitrary_types_allowed = True

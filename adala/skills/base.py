@@ -13,6 +13,7 @@ from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
 from adala.memories.base import ShortTermMemory, LongTermMemory
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
+from adala.utils.logs import print_error
 
 
 class BaseSkill(BaseModel, ABC):
@@ -51,7 +52,7 @@ class BaseSkill(BaseModel, ABC):
         description='Input data field name that will be used to match input data.',
         examples=['text'],
         # TODO: either make it required, or `input_template` required
-        default='text'
+        default=None
     )
     output_template: Optional[str] = Field(
         title='Output template',
@@ -70,16 +71,22 @@ class BaseSkill(BaseModel, ABC):
     )
 
     @model_validator(mode='after')
-    def validate_input_template(self):
+    def validate_inputs(self):
         """
         Validates the input_template, updating it if necessary.
         
         Returns:
             BaseSkill: Updated instance of the BaseSkill class.
         """
-        
         if '{{{{{input}}}}}' in self.input_template:
-            # TODO: check why it is called multiple times
+            if self.input_data_field is None:
+                print_error(f'You provided skill "{self.name}" with input template:\n\n'
+                            f'{self.__class__.__name__}.input_template = "{self.input_template}"\n\n'
+                            'that contains "{{{{{input}}}}}" placeholder. (yes... 5 curly braces!) \n\n'
+                            'In this case, you have to provide skill with `skill.input_data_field` to match the input data.'
+                            f'\nFor example, if your input data stored in `"text"` column, '
+                            f'you can set\n\nskill = {self.__class__.__name__}(..., input_data_field="text")')
+                raise ValueError(f'`input_data_field` is not provided for skill {self.name}')
             self.input_template = self.input_template.format(input=self.input_data_field)
         return self
 

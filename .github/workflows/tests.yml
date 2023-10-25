@@ -1,0 +1,116 @@
+name: pytests
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'adala/**'
+      - '.github/workflows/tests.yml'
+      - 'requirements**'
+    tags-ignore:
+      - '**'
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    branches:
+      - master
+      - 'release/**'
+
+env:
+  CACHE_NAME_PREFIX: v1
+  OPENAI_API_KEY: test
+
+jobs:
+  run_pytest_ubuntu:
+    name: Ubuntu
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - '3.8'
+          - '3.9'
+          - '3.10'
+          - '3.11'
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/cache@v3.3.1
+        name: Configure pip cache
+        id: pip-cache
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements-test.txt') }}
+          restore-keys: |
+            ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ matrix.python-version }}-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools
+          pip install -U pip
+          pip install -r requirements.txt -r tests/requirements-test.txt
+          pip install -e .
+
+      - name: Run functional tests
+        run: |
+          cd tests/
+          pytest --junitxml report.xml --cov=. -vv 
+
+
+
+
+  run_pytests_windows:
+    name: Windows
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - '3.8'
+          - '3.9'
+          - '3.10'
+          - '3.11'
+
+    steps:
+      - uses: hmarr/debug-action@v2.1.0
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.head_sha }}
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/cache@v3
+        name: Configure pip cache
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements-test.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools
+          pip install --upgrade cython
+          if (Test-Path -Path '.\requirements.txt' -PathType Leaf)
+          {pip install -r requirements.txt}
+          if (Test-Path -Path '.\tests\requirements-test.txt' -PathType Leaf)
+          {pip install -r tests/requirements-test.txt}
+          pip install -e .
+
+      - name: Test with pytest
+        run: |
+          cd tests/
+          python -m pytest -vv

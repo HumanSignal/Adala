@@ -1,4 +1,4 @@
-from pydantic import BaseModel, dataclasses, Field
+from pydantic import BaseModel, dataclasses, Field, field_validator
 from abc import ABC, abstractmethod
 from typing import Any, Optional, Dict, Union, Callable
 
@@ -57,10 +57,16 @@ class BasicEnvironment(Environment):
 
     """
     
-    ground_truth_dataset: DataFrameDataset = Field(default_factory=DataFrameDataset)
+    ground_truth_dataset: Union[InternalDataFrame, DataFrameDataset] = Field(default_factory=DataFrameDataset)
     ground_truth_column: str = 'ground_truth'
 
     _prediction_column: str
+
+    @field_validator('ground_truth_dataset')
+    def _validate_ground_truth_dataset(cls, v):
+        if isinstance(v, InternalDataFrame):
+            return DataFrameDataset(df=v)
+        return v
 
     def request_feedback(self, skill: BaseSkill, experience: ShortTermMemory):
         """In the BasicEnvironment, ground truth is already provided with the input data."""

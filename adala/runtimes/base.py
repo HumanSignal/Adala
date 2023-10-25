@@ -32,6 +32,11 @@ class Runtime(BaseModel, ABC):
         return self
 
 
+class LLMRuntimeType(enum.Enum):
+    STUDENT = 'student'
+    TEACHER = 'teacher'
+
+
 class LLMRuntimeModelType(enum.Enum):
     """Enumeration for LLM runtime model types."""    
     OpenAI = 'OpenAI'
@@ -50,7 +55,8 @@ class LLMRuntime(Runtime):
         _program: Program instance used for guidance. Initialized in `init_runtime`.
         _llm_template (str): Template string for LLM guidance.
     """
-    llm_runtime_type: LLMRuntimeModelType = LLMRuntimeModelType.OpenAI
+    llm_runtime_type: LLMRuntimeType = LLMRuntimeType.STUDENT
+    llm_runtime_model_type: LLMRuntimeModelType = LLMRuntimeModelType.OpenAI
     llm_params: Dict[str, str] = {
         'model': 'gpt-3.5-turbo-instruct',
         # 'max_tokens': 10,
@@ -70,12 +76,12 @@ class LLMRuntime(Runtime):
 
     def _create_program(self):
         # create an LLM instance
-        if self.llm_runtime_type.value == LLMRuntimeModelType.OpenAI.value:
+        if self.llm_runtime_model_type.value == LLMRuntimeModelType.OpenAI.value:
             self._llm = guidance.llms.OpenAI(**self.llm_params)
-        elif self.llm_runtime_type.value == LLMRuntimeModelType.Transformers.value:
+        elif self.llm_runtime_model_type.value == LLMRuntimeModelType.Transformers.value:
             self._llm = guidance.llms.Transformers(**self.llm_params)
         else:
-            raise NotImplementedError(f'LLM runtime type {self.llm_runtime_type} is not implemented.')
+            raise NotImplementedError(f'LLM runtime type {self.llm_runtime_model_type} is not implemented.')
         self._program = guidance(self._llm_template, llm=self._llm, silent=not self.verbose)
 
     def init_runtime(self):

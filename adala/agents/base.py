@@ -1,14 +1,14 @@
-from pydantic import BaseModel, Field, SkipValidation, field_validator
+from pydantic import BaseModel, Field, SkipValidation, field_validator, model_validator, ValidationError
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List, Dict, Union
-from adala.environments.base import Environment
+from adala.environments.base import Environment, BasicEnvironment
 from adala.datasets import Dataset, DataFrameDataset
-from adala.runtimes.base import Runtime, LLMRuntime, LLMRuntimeModelType
+from adala.runtimes.base import Runtime, LLMRuntime, LLMRuntimeType, LLMRuntimeModelType
 from adala.runtimes.openai import OpenAIRuntime
 from adala.memories.base import ShortTermMemory, LongTermMemory
 from adala.skills.base import BaseSkill
 from adala.skills.skillset import SkillSet, LinearSkillSet
-from adala.utils.logs import print_dataframe, print_text
+from adala.utils.logs import print_dataframe, print_text, print_error
 from adala.utils.internal_data import InternalDataFrame
 
 
@@ -25,15 +25,13 @@ class Agent(BaseModel, ABC):
         default_runtime (str): The default runtime used by the agent. Defaults to 'openai'.
     """
     
-    environment: Union[InternalDataFrame, Dataset, Environment]
+    environment: Union[InternalDataFrame, Dataset, Environment] = Field(default_factory=DataFrameDataset)
     skills: Union[SkillSet, BaseSkill, List[BaseSkill], Dict[str, BaseSkill]]
 
     memory: LongTermMemory = Field(default=None)
     runtimes: Optional[Dict[str, Runtime]] = Field(
         default_factory=lambda: {
             'openai': OpenAIRuntime(model='gpt-3.5-turbo-instruct'),
-            'openai-gpt3': OpenAIRuntime(model='gpt-3.5-turbo'),
-            'openai-gpt4': OpenAIRuntime(model='gpt-4')
             # 'llama2': LLMRuntime(
             #     llm_runtime_type=LLMRuntimeModelType.Transformers,
             #     llm_params={
@@ -41,6 +39,12 @@ class Agent(BaseModel, ABC):
             #         'device': 'cuda:0',
             #     }
             # )
+        }
+    )
+    teacher_runtimes: Optional[Dict[str, Runtime]] = Field(
+        default_factory=lambda: {
+            'openai-gpt3': OpenAIRuntime(model='gpt-3.5-turbo'),
+            'openai-gpt4': OpenAIRuntime(model='gpt-4')
         }
     )
     default_runtime: str = 'openai'
@@ -83,7 +87,7 @@ class Agent(BaseModel, ABC):
         if isinstance(v, InternalDataFrame):
             v = DataFrameDataset(df=v)
         if isinstance(v, Dataset):
-            v = Environment(dataset=v)
+            v = BasicEnvironment(dataset=v)
         return v
 
     @field_validator('skills')
@@ -108,6 +112,23 @@ class Agent(BaseModel, ABC):
             v = LinearSkillSet(skills=v)
         return v
 
+    @model_validator(mode='after')
+    def verify_input_parameters(self):
+        def _raise_default_runtime_error(val, runtime, runtimes, default_value):
+            print_error(f"The Agent.{runtime} is set to {val}, "
+                        f"but this runtime is not available in the list: {list(runtimes)}. "
+                        f"Please choose one of the available runtimes and initialize the agent again, for example:\n\n"
+                        f"agent = Agent(..., {runtime}='{default_value}')\n\n"
+                        f"Make sure the default runtime is available in the list of runtimes. For example:\n\n"
+                        f"agent = Agent(..., runtimes={{'{default_value}': OpenAIRuntime(model='gpt-4')}})\n\n")
+            raise ValueError(f"default runtime {val} not found in provided runtimes.")
+
+        if self.default_runtime not in self.runtimes:
+            _raise_default_runtime_error(self.default_runtime, 'default_runtime', self.runtimes, 'openai')
+        if self.default_teacher_runtime not in self.teacher_runtimes:
+            _raise_default_runtime_error(self.default_teacher_runtime, 'default_teacher_runtime', self.teacher_runtimes, 'openai-gpt4')
+        return self
+
     def get_runtime(self, runtime: Optional[str] = None) -> Runtime:
         """
         Retrieves the specified runtime or the default runtime if none is specified.
@@ -127,6 +148,26 @@ class Agent(BaseModel, ABC):
         if runtime not in self.runtimes:
             raise ValueError(f'Runtime "{runtime}" not found.')
         return self.runtimes[runtime]
+
+    def get_teacher_runtime(self, runtime: Optional[str] = None) -> Runtime:
+        """
+        Retrieves the specified teacher runtime or the default runtime if none is specified.
+
+        Args:
+            runtime (str, optional): The name of the runtime to retrieve. Defaults to None.
+
+        Returns:
+            Runtime: The requested runtime.
+
+        Raises:
+            ValueError: If the specified runtime is not found.
+        """
+
+        if runtime is None:
+            runtime = self.default_teacher_runtime
+        if runtime not in self.teacher_runtimes:
+            raise ValueError(f'Teacher Runtime "{runtime}" not found.')
+        return self.teacher_runtimes[runtime]
 
     def apply_skills(
         self,
@@ -179,7 +220,8 @@ class Agent(BaseModel, ABC):
         """
         
         runtime = self.get_runtime(runtime=runtime)
-        teacher_runtime = self.get_runtime(runtime=self.default_teacher_runtime)
+        # TODO: support teacher runtime input, not default
+        teacher_runtime = self.get_teacher_runtime(runtime=self.default_teacher_runtime)
 
         skills = self.skills.model_copy(deep=True)
         dataset = self.environment.as_dataset()
