@@ -41,6 +41,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
+        id: setup_python
         uses: actions/setup-python@v4.7.0
         with:
           python-version: ${{ matrix.python-version }}
@@ -50,7 +51,7 @@ jobs:
         id: pip-cache
         with:
           path: ~/.cache/pip
-          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ matrix.python-version }}-adala-${{ hashFiles('requirements.txt', 'tests/requirements-test.txt') }}
+          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ steps.setup_python.outputs.python-version }}-adala-${{ hashFiles('requirements.txt', 'tests/requirements-test.txt') }}
 
       - name: Install dependencies
         run: |
