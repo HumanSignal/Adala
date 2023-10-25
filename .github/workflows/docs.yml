@@ -16,14 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pages: write
-      id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         id: setup_python
-        uses: actions/setup-python@v4.7.0
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
