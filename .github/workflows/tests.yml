@@ -50,7 +50,7 @@ jobs:
         id: pip-cache
         with:
           path: ~/.cache/pip
-          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ steps.setup_python.outputs.python-version }}-adala-${{ hashFiles('requirements.txt', 'tests/requirements-test.txt') }}
+          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ matrix.python-version }}-adala-${{ hashFiles('requirements.txt', 'tests/requirements-test.txt') }}
 
       - name: Install dependencies
         run: |
@@ -94,7 +94,7 @@ jobs:
         name: Configure pip cache
         with:
           path: ~\AppData\Local\pip\Cache
-          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ steps.setup_python.outputs.python-version }}-adala-${{ hashFiles('requirements.txt', 'tests/requirements-test.txt') }}
+          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ matrix.python-version }}-adala-${{ hashFiles('requirements.txt', 'tests/requirements-test.txt') }}
 
       - name: Install dependencies
         run: |
