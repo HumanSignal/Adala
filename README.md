@@ -92,6 +92,7 @@ from adala.agents import Agent
 from adala.datasets import DataFrameDataset
 from adala.environments import BasicEnvironment
 from adala.skills import ClassificationSkill
+from adala.runtimes import OpenAIRuntime
 from rich import print
 
 print("=> Initialize datasets ...")
@@ -131,9 +132,17 @@ agent = Agent(
         labels=["Positive", "Negative", "Neutral"],
         input_data_field='text'
     ),
+
+    runtimes = {
+        # You can specify your OPENAI API KEY here via `OpenAIRuntime(..., api_key='your-api-key')`
+        'openai': OpenAIRuntime(model='gpt-3.5-turbo-instruct'),
+        'openai-gpt3': OpenAIRuntime(model='gpt-3.5-turbo'),
+        # 'openai-gpt4': OpenAIRuntime(model='gpt-4'),
+    },
+    default_runtime='openai',
     
-    # uncomment this if you want more quality and you have access to OPENAI GPT-4 model
-    # default_teacher_runtime='openai-gpt4',
+    # NOTE! If you don't have an access to gpt4 - replace it with "openai-gpt3"
+    # default_teacher_runtime='openai-gpt4'    
 )
 print(agent)
 
