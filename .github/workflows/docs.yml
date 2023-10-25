@@ -1,0 +1,40 @@
+name: "Docs"
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+
+env:
+  CACHE_NAME_PREFIX: v1
+
+jobs:
+  upload:
+    name: "Upload"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        id: setup_python
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: 3.10
+
+      - uses: actions/cache@v3.3.1
+        name: Configure pip cache
+        id: pip-cache
+        with:
+          path: ~/.cache/pip
+          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ steps.setup_python.outputs.python-version }}-docs-${{ hashFiles('docs/requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r docs/requirements.txt
+
+      - name: Deploy docs
+        run: |
+          cd docs/
+          mkdocs gh-deploy
