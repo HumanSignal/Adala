@@ -95,10 +95,8 @@ from adala.skills import ClassificationSkill
 from adala.runtimes import OpenAIRuntime
 from rich import print
 
-print("=> Initialize datasets ...")
-
 # Train dataset
-train_df = pd.DataFrame([
+ground_truth_df = pd.DataFrame([
     ["It was the negative first impressions, and then it started working.", "Positive"],
     ["Not loud enough and doesn't turn on like it should.", "Negative"],
     ["I don't know what to say.", "Neutral"],
@@ -108,23 +106,22 @@ train_df = pd.DataFrame([
 ], columns=["text", "ground_truth"])
 
 # Test dataset
-test_df = pd.DataFrame([
+predict_df = pd.DataFrame([
     "All three broke within two months of use.",
     "The device worked for a long time, can't say anything bad.",
-    "Just a random line of text.",
-    "Will order from them again!",
+    "Just a random line of text."
 ], columns=["text"])
 
-train_dataset = DataFrameDataset(df=train_df)
-test_dataset = DataFrameDataset(df=test_df)
+ground_truth_dataset = DataFrameDataset(df=ground_truth_df)
+predict_dataset = DataFrameDataset(df=predict_df)
 
-print("=> Initialize and train Adala agent ...")
 agent = Agent(
     # connect to a dataset
     environment=BasicEnvironment(
-        ground_truth_dataset=train_dataset,
+        ground_truth_dataset=ground_truth_dataset,
         ground_truth_column="ground_truth"
     ),
+
     # define a skill
     skills=ClassificationSkill(
         name='sentiment_classification',
@@ -133,6 +130,7 @@ agent = Agent(
         input_data_field='text'
     ),
 
+    # define all the different runtimes your skills may use
     runtimes = {
         # You can specify your OPENAI API KEY here via `OpenAIRuntime(..., api_key='your-api-key')`
         'openai': OpenAIRuntime(model='gpt-3.5-turbo-instruct'),
@@ -144,13 +142,14 @@ agent = Agent(
     # NOTE! If you don't have an access to gpt4 - replace it with "openai-gpt3"
     # default_teacher_runtime='openai-gpt4'    
 )
-print(agent)
 
-agent.learn(learning_iterations=3, accuracy_threshold=0.95)
+print(agent)
 print(agent.skills)
 
+agent.learn(learning_iterations=3, accuracy_threshold=0.95)
+
 print('\n=> Run tests ...')
-run = agent.apply_skills(test_dataset)
+run = agent.apply_skills(predict_dataset)
 print('\n => Test results:')
 print(run)
 ```
