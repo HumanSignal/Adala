@@ -61,13 +61,14 @@ Install Adala:
 ```sh
 pip install adala
 ```
-
+<!--
 If you're planning to use human-in-the-loop labeling, or need a labeling tool to produce ground truth datasets, we
 suggest installing Label Studio. Adala supports Label Studio format out of the box.
 
 ```sh
 pip install label-studio
 ```
+-->
 
 ## 📝 Prerequisites
 
@@ -153,12 +154,12 @@ print(run)
 ```
 
 ### 👉 Available skills
-- [ClassificationSkill](./adala/examples/classification_skill.ipynb) – Classify text into a set of predefined labels.
-- [ClassificationSkillWithCoT](./adala/examples/classification_skill_with_CoT.ipynb) – Classify text into a set of predefined labels, using Chain-of-Thoughts reasoning.
-- [SummarizationSkill](./adala/examples/summarization_skill.ipynb) – Summarize text into a shorter text.
-- [QuestionAnsweringSkill](./adala/examples/question_answering_skill.ipynb) – Answer questions based on a given context.
-- [TranslationSkill](./adala/examples/translation_skill.ipynb) – Translate text from one language to another.
-- [TextGenerationSkill](./adala/examples/text_generation_skill.ipynb) – Generate text based on a given prompt.
+- [ClassificationSkill](./examples/classification_skill.ipynb) – Classify text into a set of predefined labels.
+- [ClassificationSkillWithCoT](./examples/classification_skill_with_CoT.ipynb) – Classify text into a set of predefined labels, using Chain-of-Thoughts reasoning.
+- [SummarizationSkill](./examples/summarization_skill.ipynb) – Summarize text into a shorter text.
+- [QuestionAnsweringSkill](./examples/question_answering_skill.ipynb) – Answer questions based on a given context.
+- [TranslationSkill](./examples/translation_skill.ipynb) – Translate text from one language to another.
+- [TextGenerationSkill](./examples/text_generation_skill.ipynb) – Generate text based on a given prompt.
 <!-- 
 ## 📒 More notebooks
 
