@@ -6,6 +6,11 @@
 <a href="#"><img src="/docs/src/img/logo.png#gh-light-mode-only" alt="ADALA logo" width="275" ></a>
 <a href="#"><img src="/docs/src/img/logo-bw.png#gh-dark-mode-only" alt="ADALA logo" width="275" ></a>
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="/docs/src/img/logo.png#gh-light-mode-only" width="275">
+  <source media="(prefers-color-scheme: light)" srcset="/docs/src/img/logo.png#gh-light-mode-only" width="275">
+  <img alt="Shows Adala logo in light and dark mode." src="docs/src/img/logo.png">
+</picture>
 
 Adala is an **A**utonomous **DA**ta (**L**abeling) **A**gent framework.
 
