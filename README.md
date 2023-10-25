@@ -3,7 +3,7 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/HumanSignal/Adala)
 [![](https://img.shields.io/discord/1166330284300570624?label=Discord&logo=discord)](https://discord.gg/QBtgTbXTgU)
 
-<a href="#"><img src="/docs/src/img/logo.png" alt="ADALA logo" width="275" ></a>
+<a href="#"><img src="/docs/src/img/logo-dm.svg" alt="ADALA logo" width="275" ></a>
 
 Adala is an **A**utonomous **DA**ta (**L**abeling) **A**gent framework.
 
