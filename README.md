@@ -279,6 +279,7 @@ adala help <command>
 
 ## 🗺 Roadmap
 
+- [ ] Low-level skill management (i.e. agent.get_skill("name"))
 - [ ] Create Named Entity Recognition Skill
 - [ ] Extend environment with one more example
 - [ ] Command line utility (see the source for this readme for example)
