@@ -1,6 +1,8 @@
 name: pytests
 on:
   push:
+    branches:
+      - master
     paths:
       - 'adala/**'
       - '.github/workflows/tests.yml'
