@@ -1,0 +1,31 @@
+name: "Release"
+
+on:
+  release:
+    types:
+      - released
+
+jobs:
+  release:
+    name: "Publish"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v3
+        with:
+          python-version: '3.10'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          pdm install --prod
+
+      - name: Release to PyPI
+        env:
+          PDM_PUBLISH_USERNAME: __token__
+          PDM_PUBLISH_PASSWORD: ${{ secrets.PYPI_APIKEY }}
+        run: |
+          pdm publish
