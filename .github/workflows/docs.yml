@@ -28,10 +28,12 @@ jobs:
         id: pip-cache
         with:
           path: ~/.cache/pip
-          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ steps.setup_python.outputs.python-version }}-docs-${{ hashFiles('docs/requirements.txt') }}
+          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ steps.setup_python.outputs.python-version }}-adala-${{ hashFiles('requirements.txt', 'tests/requirements-test.txt') }}
 
       - name: Install dependencies
         run: |
+          pip install -r requirements.txt
+          pip install -e .
           pip install -r docs/requirements.txt
 
       - name: Deploy docs
