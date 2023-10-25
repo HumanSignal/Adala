@@ -48,9 +48,7 @@ in what we refer to as a "runtime", synonymous with LLM.
 Install ADALA:
 
 ```sh
-git clone https://github.com/HumanSignal/ADALA.git
-cd ADALA/
-pip install -e .
+pip install adala
 ```
 
 If you're planning to use human-in-the-loop labeling, or need a labeling tool to produce ground truth datasets, we

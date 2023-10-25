@@ -9,17 +9,16 @@ dependencies = [
     "pandas",
     "openai",
     "guidance",
-    "pydantic>=2.4.2",
+    "pydantic>=2",
+    "rich>=13",
+    "redis-om",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.8.8"
 readme = "README.md"
 [project.optional-dependencies]
 # label-studio = [
 #     "label-studio-sdk @ git+https://github.com/HumanSignal/label-studio-sdk.git@pd-support",
 # ]
-devel = [
-    "jupyterlab>=4.0.7",
-]
 
 [build-system]
 requires = ["pdm-backend"]
