@@ -70,7 +70,7 @@ agent = Agent(
     # define a skill
     skills=ClassificationSkill(
         name='sentiment_classification',
-        instructions="Label text as subjective or objective.",
+        instructions="Label text as positive, negative or neutral.",
         labels=["Positive", "Negative", "Neutral"],
         input_data_field='text'
     ),
@@ -80,12 +80,14 @@ agent = Agent(
         # You can specify your OPENAI API KEY here via `OpenAIRuntime(..., api_key='your-api-key')`
         'openai': OpenAIRuntime(model='gpt-3.5-turbo-instruct'),
         'openai-gpt3': OpenAIRuntime(model='gpt-3.5-turbo'),
-        # 'openai-gpt4': OpenAIRuntime(model='gpt-4'),
     },
     default_runtime='openai',
     
-    # NOTE! If you don't have an access to gpt4 - replace it with "openai-gpt3"
-    # default_teacher_runtime='openai-gpt4'    
+    # NOTE! If you have access to GPT-4, you can uncomment the lines bellow for better results
+    # default_teacher_runtime='openai-gpt4',
+    # teacher_runtimes = {
+    #   'openai-gpt4': OpenAIRuntime(model='gpt-4')
+    # }   
 )
 
 print(agent)

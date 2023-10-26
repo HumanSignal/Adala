@@ -1,6 +1,6 @@
 import os
 import openai
-from pydantic import model_validator, field_validator, ValidationError, ValidationInfo, Field
+from pydantic import model_validator, field_validator, ValidationInfo, Field
 from typing import Optional, Dict
 from .base import LLMRuntime, LLMRuntimeType, LLMRuntimeModelType
 from adala.utils.logs import print_error
@@ -36,7 +36,7 @@ class OpenAIRuntime(LLMRuntime):
                 'or set the `api_key` attribute of the `OpenAIRuntime` python class:\n\n'
                 f'{self.__class__.__name__}(..., api_key="your-openai-api-key")\n\n'
                 f'Read more about OpenAI API keys at https://platform.openai.com/docs/quickstart/step-2-setup-your-api-key')
-            raise ValidationError('OpenAI API key is not provided.')
+            raise ValueError('OpenAI API key is not provided.')
 
     def _check_model_availability(self):
         models = openai.Model.list(api_key=self.api_key)
@@ -48,7 +48,7 @@ class OpenAIRuntime(LLMRuntime):
                 f'Try to change the runtime settings for {self.__class__.__name__}, for example:\n\n'
                 f'{self.__class__.__name__}(..., model="gpt-3.5-turbo")\n\n'
             )
-            raise ValidationError(f'Requested model {self.gpt_model_name} is not available in your OpenAI account.')
+            raise ValueError(f'Requested model {self.gpt_model_name} is not available in your OpenAI account.')
 
     def init_runtime(self):
         self._check_api_key()
