@@ -273,6 +273,9 @@ class Agent(BaseModel, ABC):
             print_text(f"Re-apply {learned_skill.name} skill to dataset ...")
             experience = learned_skill.apply(dataset, runtime, experience=experience)
 
+        # Mark skill as evolved - it will not be selected for improvement again
+        learned_skill.evolved = True
+
         # Update skills and memory based on experience
         if update_skills:
             self.skills = skills

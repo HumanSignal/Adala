@@ -4,6 +4,7 @@ from typing import List, Union, Dict, Any, Optional
 from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
 from adala.memories.base import ShortTermMemory
+from adala.utils.logs import print_text
 from .base import BaseSkill, LLMSkill
 
 
@@ -20,7 +21,8 @@ class SkillSet(BaseModel, ABC):
         skills (Union[List[str], Dict[str, str], List[BaseSkill], Dict[str, BaseSkill]]): Provided skills
     """
     
-    skills: Union[List[str], Dict[str, str], List[BaseSkill], Dict[str, BaseSkill]]
+    # skills: Union[List[str], Dict[str, str], List[BaseSkill], Dict[str, BaseSkill]]
+    skills: Dict[str, BaseSkill]
 
     @abstractmethod
     def apply(self, dataset: Dataset, runtime: Runtime, experience: Optional[ShortTermMemory] = None) -> ShortTermMemory:
@@ -79,7 +81,7 @@ class LinearSkillSet(SkillSet):
     
     skill_sequence: List[str] = None
 
-    @field_validator('skills')
+    @field_validator('skills', mode='before')
     def skills_validator(cls, v: Union[List[str], List[BaseSkill], Dict[str, BaseSkill]]) -> Dict[str, BaseSkill]:
         """
         Validates and converts the skills attribute to a dictionary of skill names to BaseSkill instances.
@@ -164,11 +166,12 @@ class LinearSkillSet(SkillSet):
             skill = self.skills[skill_name]
             # use input dataset for the first node in the pipeline
             input_dataset = dataset if i == 0 else experience.predictions
+            print_text(f"Applying skill: {skill_name}")
             experience = skill.apply(input_dataset, runtime, experience)
         
         return experience
 
-    def select_skill_to_improve(self, experience: ShortTermMemory) -> BaseSkill:
+    def select_skill_to_improve(self, experience: ShortTermMemory) -> Optional[BaseSkill]:
         """
         Picks the next skill for improvement in the sequence.
         
@@ -179,8 +182,9 @@ class LinearSkillSet(SkillSet):
             BaseSkill: The next skill selected for improvement.
         """
         
-        # TODO: implement real logic for skill selection
-        return self.skills[self.skill_sequence[-1]]
+        for skill_name in self.skill_sequence:
+            if self.skills[skill_name].can_be_improved(experience):
+                return self.skills[skill_name]
 
     def __rich__(self):
         """Returns a rich representation of the skill."""

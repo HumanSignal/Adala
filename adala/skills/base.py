@@ -69,6 +69,11 @@ class BaseSkill(BaseModel, ABC):
         examples=['predictions'],
         default='predictions'
     )
+    evolved: bool = Field(
+        title='Evolved',
+        description='Whether the skill has been evolved or not.',
+        default=False
+    )
 
     @model_validator(mode='after')
     def validate_inputs(self):
@@ -167,6 +172,18 @@ class BaseSkill(BaseModel, ABC):
 
         Returns:
             ShortTermMemory: The updated experience after analysis.
+        """
+
+    @abstractmethod
+    def can_be_improved(self, experience: ShortTermMemory) -> bool:
+        """
+        Checks if the current skill can be improved.
+
+        Args:
+            experience (ShortTermMemory): The current experience.
+
+        Returns:
+            bool: True if the skill can be improved, False otherwise.
         """
 
     @abstractmethod
@@ -307,6 +324,9 @@ class LLMSkill(BaseSkill):
 
         experience.errors = errors
         return experience
+
+    def can_be_improved(self, experience: ShortTermMemory) -> bool:
+        return not self.evolved
 
     def improve(
         self,
