@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel, model_validator
 from typing import List, Dict, Optional, Tuple, Any
 from adala.datasets.base import InternalDataFrame
+from adala.utils.logs import print_text
 
 tqdm.pandas()
 
@@ -139,6 +140,8 @@ class LLMRuntime(Runtime):
             del verified_input['text']
 
         verified_input.update(extra_fields)
+        if self.verbose:
+            print_text(verified_input)
         result = program(
             silent=not self.verbose,
             **verified_input

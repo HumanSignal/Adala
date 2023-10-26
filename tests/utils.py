@@ -42,15 +42,15 @@ def patching(target_function, data, strict=False):
                 if strict:
                     if actual_input != expected_input:
                         raise AssertionError(
-                            f"Expected input {expected_input}, but got {actual_input} on call number {call_index[0] + 1} to {target_function}")
+                            f"Expected input {expected_input}\n\nbut got {actual_input}\non call number {call_index[0] + 1} to {target_function}")
                 else:
                     for key, value in expected_input.items():
                         if key not in actual_input:
                             raise AssertionError(
-                                f"Expected input {expected_input}, but key '{key}' was missing on actual call number {call_index[0] + 1} to {target_function}. Actual input: {actual_input}")
+                                f"Expected input {expected_input}\n\nbut key '{key}' was missing on actual call number {call_index[0] + 1} to {target_function}.\n\nActual input: {actual_input}")
                         if actual_input[key] != value:
                             raise AssertionError(
-                                f"Expected input {expected_input}, but actual_input['{key}'] != expected_input['{key}'] on call number {call_index[0] + 1} to {target_function}. Actual input: {actual_input}")
+                                f"Expected input {expected_input}\n\nbut actual_input['{key}'] != expected_input['{key}']\non call number {call_index[0] + 1} to {target_function}.\n\nActual input: {actual_input}")
 
                 call_index[0] += 1
                 return expected_output

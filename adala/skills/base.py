@@ -3,13 +3,13 @@ import pandas as pd
 import re
 
 from pydantic import BaseModel
-from typing import List, Optional, Any, Dict, Tuple
+from typing import List, Optional, Any, Dict, Tuple, Union
 from abc import ABC, abstractmethod
 from pydantic import Field, model_validator
 
 from typing import Optional
 from adala.runtimes.base import LLMRuntime
-from adala.datasets.base import Dataset
+from adala.datasets import Dataset, DataFrameDataset
 from adala.runtimes.base import Runtime
 from adala.memories.base import ShortTermMemory, LongTermMemory
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
@@ -126,7 +126,8 @@ class BaseSkill(BaseModel, ABC):
         
         # TODO: more robust way to exclude system fields
         system_fields = {
-            'name', 'description', 'input_template', 'output_template', 'instructions', 'validation_fields'}
+            'name', 'description', 'input_template', 'output_template', 'instructions',
+            'input_data_field', 'prediction_field'}
         extra_fields = self.model_dump(exclude=system_fields)
         return extra_fields
 
@@ -197,7 +198,7 @@ class LLMSkill(BaseSkill):
 
     def apply(
         self,
-        dataset: Dataset,
+        dataset: Union[Dataset, InternalDataFrame],
         runtime: LLMRuntime,
         experience: ShortTermMemory
     ) -> ShortTermMemory:
@@ -205,7 +206,7 @@ class LLMSkill(BaseSkill):
         Applies the LLM skill on a dataset and returns the results.
         
         Args:
-            dataset (Dataset): The dataset on which the skill is to be applied.
+            dataset (Union[Dataset, InternalDataFrame]): The dataset on which the skill is to be applied.
             runtime (LLMRuntime): The runtime instance to be used for processing.
             experience (ShortTermMemory): Previous experiences or results.
         
@@ -216,6 +217,8 @@ class LLMSkill(BaseSkill):
         experience = experience.model_copy()
 
         predictions = []
+        if isinstance(dataset, InternalDataFrame):
+            dataset = DataFrameDataset(df=dataset)
 
         for batch in dataset.batch_iterator():
             runtime_predictions = self(batch, runtime, dataset)
@@ -227,18 +230,7 @@ class LLMSkill(BaseSkill):
             predictions = InternalDataFrameConcat(predictions, copy=False)
             predictions.rename(columns={self.prediction_field: self.name}, inplace=True)
 
-        # append predictions to existing experience, to chain skills
-        # TODO: implement predictions chaining
         experience.predictions = predictions
-        # if experience.predictions is None:
-        #     experience.predictions = predictions
-        # else:
-        #     experience.predictions = InternalDataFrameConcat([
-        #         experience.predictions.drop(columns=[col for col in experience.predictions.columns if col in predictions.columns]),
-        #         predictions
-        #     ], axis=1)
-        #     raise NotImplementedError
-
         return experience
 
     def analyze(
