@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 class PatchedCalls(enum.Enum):
     GUIDANCE = 'guidance._program.Program.__call__'
+    OPENAI_MODEL_LIST = 'openai.api_resources.model.Model.list'
 
 
 def patching(target_function, data, strict=False):

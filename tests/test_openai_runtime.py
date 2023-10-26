@@ -2,6 +2,10 @@ from utils import patching, PatchedCalls
 
 
 @patching(
+    target_function=PatchedCalls.OPENAI_MODEL_LIST.value,
+    data=[{'input': {}, 'output': {'data': [{'id': 'gpt-3.5-turbo-instruct'}]}}],
+)
+@patching(
     target_function=PatchedCalls.GUIDANCE.value,
     data=[{
         'input': dict(text_='Hello', comments='Yes', silent=True, labels=list('abc')),
