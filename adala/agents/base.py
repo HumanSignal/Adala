@@ -44,7 +44,7 @@ class Agent(BaseModel, ABC):
     teacher_runtimes: Optional[Dict[str, Runtime]] = Field(
         default_factory=lambda: {
             'openai-gpt3': OpenAIRuntime(model='gpt-3.5-turbo'),
-            'openai-gpt4': OpenAIRuntime(model='gpt-4')
+            # 'openai-gpt4': OpenAIRuntime(model='gpt-4')
         }
     )
     default_runtime: str = 'openai'
