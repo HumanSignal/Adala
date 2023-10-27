@@ -66,7 +66,7 @@ Contributions that align with the items detailed in our roadmap, found in the ma
 
 ## Development Environment
 
-Adala uses [PDM](https://pdm.fming.dev/latest) to manage dependencies. To create an environment, [install PDM](https://pdm.fming.dev/latest/#recommended-installation-method) and run `pdm install` from the root of the repository. To activate the environment, run `source .venv/bin/activate` from the root of the repo after creating the environment.
+Adala uses [PDM](https://pdm.fming.dev/latest) to manage dependencies. To create an environment, [install PDM](https://pdm.fming.dev/latest/#recommended-installation-method) and run `pdm install --dev` from the root of the repository. To activate the environment, run `eval $(pdm venv activate)` from the root of the repo after creating the environment.
 
 ## Code of Conduct:
 While diverse contributions invigorate our project, it's paramount to sustain a harmonious and cooperative environment. Please adhere to our code of conduct.
