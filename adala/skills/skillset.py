@@ -1,10 +1,10 @@
 from pydantic import BaseModel, model_validator, field_validator
 from abc import ABC, abstractmethod
-from typing import List, Union, Dict, Any, Optional
+from typing import List, Union, Dict, Any, Optional, Mapping
 from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
-from adala.memories.base import ShortTermMemory
 from adala.utils.logs import print_text
+from adala.utils.internal_data import InternalDataFrame, InternalSeries, InternalDataFrameConcat
 from .base import BaseSkill, LLMSkill
 
 
@@ -25,30 +25,65 @@ class SkillSet(BaseModel, ABC):
     skills: Dict[str, BaseSkill]
 
     @abstractmethod
-    def apply(self, dataset: Dataset, runtime: Runtime, experience: Optional[ShortTermMemory] = None) -> ShortTermMemory:
+    def apply(
+        self,
+        dataset: Union[Dataset, InternalDataFrame],
+        runtime: Runtime,
+        improved_skill: Optional[str] = None
+    ) -> InternalDataFrame:
         """
         Apply the skill set to a dataset using a specified runtime.
         
         Args:
-            dataset (Dataset): The dataset to apply the skill set to.
+            dataset (Union[Dataset, InternalDataFrame]): The dataset to apply the skill set to.
             runtime (Runtime): The runtime environment in which to apply the skills.
-            experience (Optional[ShortTermMemory], optional): Existing experience data. Defaults to None.
-            
+            improved_skill (Optional[str], optional): Name of the skill to start from (to optimize calculations). Defaults to None.
         Returns:
-            ShortTermMemory: Updated experience after applying the skill set.
+            InternalDataFrame: Skill predictions.
         """
 
     @abstractmethod
-    def select_skill_to_improve(self, experience: ShortTermMemory) -> BaseSkill:
+    def select_skill_to_improve(self, accuracy: Mapping, accuracy_threshold: Optional[float] = 1.0) -> Optional[BaseSkill]:
         """
-        Select the next skill to enhance based on the current experience.
-        
+        Select skill to improve based on accuracy.
+
         Args:
-            experience (ShortTermMemory): Current experience data.
-            
+            accuracy (Mapping): Skills accuracies.
+            accuracy_threshold (Optional[float], optional): Accuracy threshold. Defaults to 1.0.
         Returns:
-            BaseSkill: Skill selected for improvement.
+            Optional[BaseSkill]: Skill to improve. None if no skill to improve.
         """
+
+    def __getitem__(self, skill_name) -> BaseSkill:
+        """
+        Select skill by name.
+
+        Args:
+            skill_name (str): Name of the skill to select.
+
+        Returns:
+            BaseSkill: Skill
+        """
+        return self.skills[skill_name]
+
+    def __setitem__(self, skill_name, skill: BaseSkill):
+        """
+        Set skill by name.
+
+        Args:
+            skill_name (str): Name of the skill to set.
+            skill (BaseSkill): Skill to set.
+        """
+        self.skills[skill_name] = skill
+
+    def get_skill_names(self) -> List[str]:
+        """
+        Get list of skill names.
+
+        Returns:
+            List[str]: List of skill names.
+        """
+        return list(self.skills.keys())
 
 
 class LinearSkillSet(SkillSet):
@@ -142,48 +177,53 @@ class LinearSkillSet(SkillSet):
         return self
 
     def apply(
-        self, dataset: Dataset,
+        self,
+        dataset: Union[Dataset, InternalDataFrame],
         runtime: Runtime,
-        experience: Optional[ShortTermMemory] = None
-    ) -> ShortTermMemory:
+        improved_skill: Optional[str] = None,
+    ) -> InternalDataFrame:
         """
         Sequentially applies each skill on the dataset, enhancing the agent's experience.
         
         Args:
             dataset (Dataset): The dataset to apply the skills on.
             runtime (Runtime): The runtime environment in which to apply the skills.
-            experience (Optional[ShortTermMemory], optional): Existing experience data. Defaults to None.
-            
+            improved_skill (Optional[str], optional): Name of the skill to improve. Defaults to None.
         Returns:
-            ShortTermMemory: Updated experience after sequentially applying the skills.
+            InternalDataFrame: Skill predictions.
         """
-        if experience is None:
-            experience = ShortTermMemory(dataset=dataset)
-        else:
-            experience = experience.model_copy()
 
-        for i, skill_name in enumerate(self.skill_sequence):
+        predictions = None
+        if improved_skill:
+            # start from the specified skill, assuming previous skills have already been applied
+            skill_sequence = self.skill_sequence[self.skill_sequence.index(improved_skill):]
+        else:
+            skill_sequence = self.skill_sequence
+        for i, skill_name in enumerate(skill_sequence):
             skill = self.skills[skill_name]
             # use input dataset for the first node in the pipeline
-            input_dataset = dataset if i == 0 else experience.predictions
+            input_dataset = dataset if i == 0 else predictions
             print_text(f"Applying skill: {skill_name}")
-            experience = skill.apply(input_dataset, runtime, experience)
+            predictions = skill.apply(input_dataset, runtime)
         
-        return experience
+        return predictions
 
-    def select_skill_to_improve(self, experience: ShortTermMemory) -> Optional[BaseSkill]:
+    def select_skill_to_improve(
+        self,
+        accuracy: Mapping,
+        accuracy_threshold: Optional[float] = 1.0
+    ) -> Optional[BaseSkill]:
         """
-        Picks the next skill for improvement in the sequence.
-        
+        Selects the skill with the lowest accuracy to improve.
+
         Args:
-            experience (ShortTermMemory): Current experience data.
-            
+            accuracy (Mapping): Accuracy of each skill.
+            accuracy_threshold (Optional[float], optional): Accuracy threshold. Defaults to 1.0.
         Returns:
-            BaseSkill: The next skill selected for improvement.
+            Optional[BaseSkill]: Skill to improve. None if no skill to improve.
         """
-        
         for skill_name in self.skill_sequence:
-            if self.skills[skill_name].can_be_improved(experience):
+            if accuracy[skill_name] < accuracy_threshold:
                 return self.skills[skill_name]
 
     def __rich__(self):

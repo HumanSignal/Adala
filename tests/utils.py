@@ -28,7 +28,7 @@ def patching(target_function, data, strict=False):
             def side_effect(*args, **kwargs):
 
                 if call_index[0] >= len(data):
-                    raise AssertionError(f"Unexpected call number {call_index[0] + 1} to {target_function}")
+                    raise AssertionError(f"Unexpected call number {call_index[0]} to {target_function}")
 
                 expected_input = data[call_index[0]]['input']
                 expected_output = data[call_index[0]]['output']
@@ -42,15 +42,25 @@ def patching(target_function, data, strict=False):
                 if strict:
                     if actual_input != expected_input:
                         raise AssertionError(
-                            f"Expected input {expected_input}\n\nbut got {actual_input}\non call number {call_index[0] + 1} to {target_function}")
+                            f"Expected input {expected_input}\n\n"
+                            f"but got {actual_input}\non call number {call_index[0]}"
+                            f" to {target_function}")
                 else:
                     for key, value in expected_input.items():
                         if key not in actual_input:
                             raise AssertionError(
-                                f"Expected input {expected_input}\n\nbut key '{key}' was missing on actual call number {call_index[0] + 1} to {target_function}.\n\nActual input: {actual_input}")
+                                f"Expected input {expected_input}\n\n"
+                                f"but key '{key}' was missing "
+                                f"on actual call number {call_index[0]} "
+                                f"to {target_function}.\n\n"
+                                f"Actual input: {actual_input}")
                         if actual_input[key] != value:
                             raise AssertionError(
-                                f"Expected input {expected_input}\n\nbut actual_input['{key}'] != expected_input['{key}']\non call number {call_index[0] + 1} to {target_function}.\n\nActual input: {actual_input}")
+                                f"Expected input {expected_input}\n\n"
+                                f"but actual_input['{key}'] != expected_input['{key}']\n"
+                                f"on call number {call_index[0]} "
+                                f"to {target_function}.\n\n"
+                                f"Actual input: {actual_input}")
 
                 call_index[0] += 1
                 return expected_output

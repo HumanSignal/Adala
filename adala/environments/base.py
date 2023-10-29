@@ -1,11 +1,35 @@
-from pydantic import BaseModel, dataclasses, Field, field_validator
+from pydantic import BaseModel, Field, field_validator
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Dict, Union, Callable
+from typing import Any, Optional, Dict, Union, Callable, Dict
 
-from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
+from adala.utils.internal_data import InternalDataFrame, InternalSeries, InternalDataFrameConcat
 from adala.skills.base import BaseSkill
-from adala.memories.base import ShortTermMemory
+from adala.skills.skillset import SkillSet
 from adala.datasets import Dataset, DataFrameDataset
+
+
+class GroundTruthSignal(BaseModel):
+    match: InternalDataFrame
+    errors: Optional[Dict[str, InternalDataFrame]] = None
+
+    def get_accuracy(self) -> InternalSeries:
+        return self.match.mean()
+
+    def get_errors(self, skill_name: str) -> InternalDataFrame:
+        errors = self.errors[skill_name]
+        assert len(errors.columns) == 2  # ["predictions", "ground_truth name"]
+        return errors
+
+    def __rich__(self):
+        text = '[bold blue]Ground Truth Signal:[/bold blue]\n\n'
+        text += f'\n[bold]Match[/bold]\n{self.match}'
+        if self.errors is not None:
+            for skill_name, errors in self.errors.items():
+                text += f'\n[bold]Errors for {skill_name}[/bold]\n{errors}'
+        return text
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class Environment(BaseModel, ABC):
@@ -19,11 +43,11 @@ class Environment(BaseModel, ABC):
     """
         
     @abstractmethod
-    def request_feedback(self, skill: BaseSkill, experience: ShortTermMemory):
+    def request_feedback(self, skill_set: SkillSet, predictions: InternalDataFrame):
         """Request user feedback using predictions and update internal ground truth set."""
 
     @abstractmethod
-    def compare_to_ground_truth(self, skill: BaseSkill, experience: ShortTermMemory) -> ShortTermMemory:
+    def compare_to_ground_truth(self, skill_set: SkillSet, predictions: InternalDataFrame) -> GroundTruthSignal:
         """Compare predictions with ground truth and return the results."""
 
     @abstractmethod
@@ -53,14 +77,11 @@ class BasicEnvironment(Environment):
                                                  Defaults to an empty DataFrameDataset.
         ground_truth_column (str): Name of the column containing ground truth in the dataset.
                                    Defaults to 'ground_truth'.
-        _prediction_column (str): Name of the column containing predictions.
 
     """
     
     ground_truth_dataset: Union[InternalDataFrame, DataFrameDataset] = Field(default_factory=DataFrameDataset)
-    ground_truth_column: str = 'ground_truth'
-
-    _prediction_column: str
+    ground_truth_columns: Dict[str, str]
 
     @field_validator('ground_truth_dataset')
     def _validate_ground_truth_dataset(cls, v):
@@ -68,43 +89,46 @@ class BasicEnvironment(Environment):
             return DataFrameDataset(df=v)
         return v
 
-    def request_feedback(self, skill: BaseSkill, experience: ShortTermMemory):
+    def request_feedback(self, skill: BaseSkill, predictions: InternalDataFrame):
         """In the BasicEnvironment, ground truth is already provided with the input data."""
 
-    def compare_to_ground_truth(self, skill: BaseSkill, experience: ShortTermMemory) -> ShortTermMemory:
+    def compare_to_ground_truth(self, skill_set: SkillSet, predictions: InternalDataFrame) -> GroundTruthSignal:
         """Compare the predictions with the ground truth using exact matching.
 
         Args:
-            skill (BaseSkill): The skill being evaluated.
-            experience (ShortTermMemory): The experience memory containing predictions.
-
+            skill_set (SkillSet): The skill set being evaluated.
+            predictions (InternalDataFrame): The predictions to compare with ground truth.
         Returns:
-            ShortTermMemory: Updated memory containing evaluation results against ground truth.
+            GroundTruthSignal: The ground truth signal.
         """
 
-        experience = experience.model_copy()
+        ground_truth_match = InternalDataFrame()
+        errors = {}
+        for skill_id, skill in skill_set.skills.items():
+            gt_column = self.ground_truth_columns[skill.name]
+            gt = self.ground_truth_dataset.df[gt_column]
+            pred = predictions[skill.name]
+            # from ground truth dataset, select only the rows that are in the predictions
+            gt, pred = gt.align(pred)
+            # compare ground truth with predictions
+            # TODO: we can customize the matching function here beyond exact matching
+            gt_pred_match = (gt == pred)[gt.notnull() & pred.notnull()]
+            error_index = gt_pred_match[~gt_pred_match].index
+            # concatenate errors - dataframe with two columns: predictions and ground truth
+            errors[skill.name] = InternalDataFrameConcat([pred[error_index], gt[error_index]], axis=1)
+            errors[skill.name].columns = ["predictions", gt_column]
+            # concatenate matching columns
+            ground_truth_match = InternalDataFrameConcat([
+                # previous skills' ground truth matches
+                ground_truth_match,
+                # current skill's ground truth match
+                gt_pred_match.rename(skill.name),
+            ], axis=1)
 
-        gt = self.ground_truth_dataset.df[self.ground_truth_column]
-        pred = experience.predictions
-        # select
-        gt = gt[gt.index.isin(pred.index)]
-        if gt.empty:
-            # return empty memory
-            return experience
-
-        gt = gt.to_frame(self.ground_truth_column)
-
-        # compare ground truth with predictions using exact matching
-        match_column_name = f'{self.ground_truth_column}__x__{skill.name}'
-        evaluations = InternalDataFrameConcat([
-            pred,
-            (gt[self.ground_truth_column] == pred[skill.name]).rename(match_column_name)
-        ], axis=1)
-        experience.evaluations = evaluations
-        # remember the last column names used in evaluations
-        experience.ground_truth_column_name = self.ground_truth_column
-        experience.match_column_name = match_column_name
-        return experience
+        return GroundTruthSignal(
+            match=ground_truth_match.reindex(predictions.index),
+            errors=errors
+        )
 
     def as_dataset(self) -> Dataset:
         """Return the ground truth dataset.

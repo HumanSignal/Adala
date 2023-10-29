@@ -6,6 +6,7 @@ RawRecords = List[RawRecord]
 
 # Internal data tables representation. Replace this with Dask or Polars in the future.
 InternalDataFrame = pd.DataFrame
+InternalSeries = pd.Series
 
 
 def InternalDataFrame_encoder(df: InternalDataFrame) -> List:
