@@ -229,7 +229,7 @@ class Agent(BaseModel, ABC):
             # Compare predictions to ground truth -> get ground truth signal
             ground_truth_signal = self.environment.compare_to_ground_truth(self.skills, predictions)
             print_text(f'Comparing predictions to ground truth data ...')
-            print(ground_truth_signal)
+            print_dataframe(InternalDataFrameConcat([predictions, ground_truth_signal.match], axis=1))
 
             # Use ground truth signal to find the skill to improve
             accuracy = ground_truth_signal.get_accuracy()
@@ -251,7 +251,8 @@ class Agent(BaseModel, ABC):
                 teacher_runtime=teacher_runtime,
                 memory=self.memory
             )
-            print_text(error_analysis)
+            print_text(f'Error analysis for skill "{train_skill.name}":\n')
+            print_text(error_analysis, style='green')
             if self.memory and update_memory:
                 self.memory.remember(error_analysis, self.skills)
 

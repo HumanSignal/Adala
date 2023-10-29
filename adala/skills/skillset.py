@@ -132,6 +132,7 @@ class LinearSkillSet(SkillSet):
         skills = {}
         if isinstance(v, list) and isinstance(v[0], str):
             # if list of strings presented, they are interpreted as skill instructions
+            # TODO: specify input_data_field as parameter
             input_data_field = 'text'
             for i, instructions in enumerate(v):
                 skill_name = f"skill_{i}"

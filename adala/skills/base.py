@@ -254,13 +254,25 @@ class LLMSkill(BaseSkill):
         errors = errors.sample(n=min(MAX_ERRORS, errors.shape[0]))
         # TODO: ground truth column name can be the input parameter that comes from GT signal
         ground_truth_column_name = errors.columns[-1]
+        extra_fields = self._get_extra_fields()
+
+        # get error prepared inputs
+        inputs = student_runtime.process_batch(
+            batch=predictions.loc[errors.index],
+            input_template=self.input_template,
+            extra_fields=extra_fields
+        )
 
         if not teacher_runtime:
             teacher_runtime = student_runtime
 
-        predictions_and_errors = pd.concat([predictions.loc[errors.index], errors[ground_truth_column_name]], axis=1)
+        predictions_and_errors = pd.concat([
+            inputs,
+            predictions[self.name].loc[errors.index],
+            errors[ground_truth_column_name]
+        ], axis=1)
+        predictions_and_errors.columns = ['input', 'prediction', 'ground_truth']
         predictions_and_errors.columns = predictions_and_errors.columns[:-1].tolist() + [ground_truth_column_name]
-
         error_reasons = teacher_runtime.process_batch(
             batch=predictions_and_errors,
             instructions="{{#system~}}\n"
@@ -272,16 +284,15 @@ class LLMSkill(BaseSkill):
                          f"Instructions: {self.instructions}\n"
                          "{{~/system}}",
             input_template="{{#user~}}\n"
-                           f"{{{{>{self.input_template}}}}}\n"
-                           f"Prediction: {{{{{self.name}}}}}\n"
-                           f"Ground truth: {{{{{ground_truth_column_name}}}}}\n"
-                           "Reason:\n"
+                           "{{input}}\n"
+                           "Prediction: {{prediction}}\n"
+                           "Ground truth: {{ground_truth}}\n"
+                           "Error reason:\n"
                            "{{~/user}}",
             output_template="{{#assistant~}}{{gen 'reason'}}{{~/assistant}}",
-            extra_fields=self._get_extra_fields()
+            extra_fields=extra_fields
         )
         predictions_and_errors['reason'] = error_reasons['reason']
-
         # build error report
         result = teacher_runtime.process_record(
             record={
@@ -291,7 +302,7 @@ class LLMSkill(BaseSkill):
                            "\n{{this.input}}\n"
                            "Prediction: {{this.prediction}}\n"
                            "Ground truth: {{this.ground_truth}}\n"
-                           'Reason: {{this.reason}}\n'
+                           'Error reason: {{this.reason}}\n'
                            "{{/each}}"
         )
         # no specific output specified, all output is in the error report
@@ -319,7 +330,8 @@ class LLMSkill(BaseSkill):
                          "LLM prompt was created by concatenating instructions with text input:\n\n"
                          "Prediction = LLM(Input, Instructions)\n\n"
                          "We expect the prediction to be equal to the ground truth.\n"
-                         "Your task is to craft a revised concise instruction for the LLM. "
+                         "Your task is to analyze errors made by old instructions "
+                         "and craft new instructions for the LLM.\n"
                          "Follow best practices for LLM prompt engineering.\n"
                          "Include 2-3 examples at the end of your response to demonstrate how the new instruction would be applied.\n"
                          "Use the following format for your examples:\n"
@@ -327,7 +339,7 @@ class LLMSkill(BaseSkill):
                          "Output: ...\n\n"
                          "{{~/system}}\n",
             input_template="{{#user~}}\n"
-                           f"Old instruction: {self.instructions}\n\n"
+                           f"Old instructions: {self.instructions}\n\n"
                            "Errors:\n{{error_analysis}}\n"
                            "New instruction:\n"
                            "{{~/user}}",

@@ -141,7 +141,6 @@ class LLMRuntime(Runtime):
         if 'text' in verified_input:
             verified_input['text_'] = verified_input['text']
             del verified_input['text']
-
         verified_input.update(extra_fields)
         if self.verbose:
             print_text(str(verified_input))
@@ -183,7 +182,8 @@ class LLMRuntime(Runtime):
             callable: The generated output program.
         """
         
-        return guidance(output_template, llm=self._llm)
+        output_program = guidance(output_template, llm=self._llm)
+        return output_program
 
     def get_instructions_program(self, instructions):
         """Generates an instructions program from the provided template.
@@ -195,7 +195,8 @@ class LLMRuntime(Runtime):
             callable: The generated instructions program.
         """
         
-        return guidance(instructions, llm=self._llm)
+        instructions_program = guidance(instructions, llm=self._llm)
+        return instructions_program
 
     def _prepare_program_and_params(self, input_template, output_template, instructions, extra_fields):
         extra_fields = extra_fields or {}
@@ -234,7 +235,6 @@ class LLMRuntime(Runtime):
         """
         outputs = self.get_outputs(output_template)
         program, extra_fields = self._prepare_program_and_params(input_template, output_template, instructions, extra_fields)
-
         output = self._process_record(
             record=record,
             program=program,
@@ -247,8 +247,8 @@ class LLMRuntime(Runtime):
         self,
         batch: InternalDataFrame,
         input_template: str,
-        output_template: str,
-        instructions: str,
+        output_template: Optional[str] = None,
+        instructions: Optional[str] = None,
         extra_fields: Optional[Dict[str, Any]] = None,
     ) -> InternalDataFrame:
         """Processes a batch of records using the provided templates and instructions.
