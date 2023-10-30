@@ -1,6 +1,7 @@
 from pydantic import BaseModel, model_validator, field_validator
 from abc import ABC, abstractmethod
 from typing import List, Union, Dict, Any, Optional, Mapping
+from collections import OrderedDict
 from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
 from adala.utils.logs import print_text
@@ -115,6 +116,7 @@ class LinearSkillSet(SkillSet):
     """
     
     skill_sequence: List[str] = None
+    input_data_field: Optional[str] = None
 
     @field_validator('skills', mode='before')
     def skills_validator(cls, v: Union[List[str], List[BaseSkill], Dict[str, BaseSkill]]) -> Dict[str, BaseSkill]:
@@ -127,13 +129,13 @@ class LinearSkillSet(SkillSet):
         Returns:
             Dict[str, BaseSkill]: Dictionary mapping skill names to their corresponding BaseSkill instances.
         """
+        skills = OrderedDict()
         if not v:
-            return {}
-        skills = {}
+            return skills
+
+        input_data_field = None
         if isinstance(v, list) and isinstance(v[0], str):
             # if list of strings presented, they are interpreted as skill instructions
-            # TODO: specify input_data_field as parameter
-            input_data_field = 'text'
             for i, instructions in enumerate(v):
                 skill_name = f"skill_{i}"
                 skills[skill_name] = LLMSkill(
@@ -145,7 +147,6 @@ class LinearSkillSet(SkillSet):
                 input_data_field = skill_name
         elif isinstance(v, dict) and isinstance(v[list(v.keys())[0]], str):
             # if dictionary of strings presented, they are interpreted as skill instructions
-            input_data_field = 'text'
             for skill_name, instructions in v.items():
                 skills[skill_name] = LLMSkill(
                     name=skill_name,
@@ -156,7 +157,8 @@ class LinearSkillSet(SkillSet):
                 input_data_field = skill_name
         elif isinstance(v, list) and isinstance(v[0], BaseSkill):
             # convert list of skill names to dictionary
-            skills = {skill.name: skill for skill in v}
+            for skill in v:
+                skills[skill.name] = skill
         elif isinstance(v, dict):
             skills = v
         else:
@@ -171,10 +173,13 @@ class LinearSkillSet(SkillSet):
         Returns:
             LinearSkillSet: The current instance with updated skill_sequence attribute.
         """
-        
         if self.skill_sequence is None:
             # use default skill sequence defined by lexicographical order
-            self.skill_sequence = sorted(self.skills.keys())
+            self.skill_sequence = list(self.skills.keys())
+        if len(self.skill_sequence) != len(self.skills):
+            raise ValueError(f"skill_sequence must contain all skill names - "
+                             f"length of skill_sequence is {len(self.skill_sequence)} "
+                             f"while length of skills is {len(self.skills)}")
         return self
 
     def apply(

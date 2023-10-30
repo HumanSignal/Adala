@@ -21,6 +21,8 @@ def process_record_generator(*args, **kwargs):
         if i < 2:
             yield {'reason': 'Test reason'}
             yield {'reason': 'Test reason'}
+            yield {'reason': 'Test reason'}
+            yield {'reason': 'Test reason'}
             yield {'': 'Test reason'}
 
             # instruction generation

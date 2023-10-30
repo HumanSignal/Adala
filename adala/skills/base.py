@@ -272,7 +272,6 @@ class LLMSkill(BaseSkill):
             errors[ground_truth_column_name]
         ], axis=1)
         predictions_and_errors.columns = ['input', 'prediction', 'ground_truth']
-        predictions_and_errors.columns = predictions_and_errors.columns[:-1].tolist() + [ground_truth_column_name]
         error_reasons = teacher_runtime.process_batch(
             batch=predictions_and_errors,
             instructions="{{#system~}}\n"

@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional, Dict, Union, Callable, Dict
 
 from adala.utils.internal_data import InternalDataFrame, InternalSeries, InternalDataFrameConcat
+from adala.utils.matching import fuzzy_match
 from adala.skills.base import BaseSkill
 from adala.skills.skillset import SkillSet
 from adala.datasets import Dataset, DataFrameDataset
@@ -82,6 +83,8 @@ class BasicEnvironment(Environment):
     
     ground_truth_dataset: Union[InternalDataFrame, DataFrameDataset] = Field(default_factory=DataFrameDataset)
     ground_truth_columns: Dict[str, str]
+    matching_function: str = 'exact'
+    matching_threshold: float = 0.8
 
     @field_validator('ground_truth_dataset')
     def _validate_ground_truth_dataset(cls, v):
@@ -110,9 +113,17 @@ class BasicEnvironment(Environment):
             pred = predictions[skill.name]
             # from ground truth dataset, select only the rows that are in the predictions
             gt, pred = gt.align(pred)
+            nonnull_index = gt.notnull() & pred.notnull()
+            gt = gt[nonnull_index]
+            pred = pred[nonnull_index]
             # compare ground truth with predictions
-            # TODO: we can customize the matching function here beyond exact matching
-            gt_pred_match = (gt == pred)[gt.notnull() & pred.notnull()]
+            if self.matching_function == 'exact':
+                gt_pred_match = gt == pred
+            elif self.matching_function == 'fuzzy':
+                gt_pred_match = fuzzy_match(gt, pred, threshold=self.matching_threshold)
+            else:
+                raise NotImplementedError(f'Unknown matching function {self.matching_function}')
+
             error_index = gt_pred_match[~gt_pred_match].index
             # concatenate errors - dataframe with two columns: predictions and ground truth
             errors[skill.name] = InternalDataFrameConcat([pred[error_index], gt[error_index]], axis=1)

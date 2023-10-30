@@ -34,15 +34,15 @@ from utils import patching, PatchedCalls
     strict=False
 )
 def test_llm_linear_skillset():
-    from adala.skills.skillset import LinearSkillSet
+    from adala.skills.skillset import LinearSkillSet, LLMSkill
     from adala.datasets import DataFrameDataset, InternalDataFrame
     from adala.runtimes import OpenAIRuntime
 
     skillset = LinearSkillSet(
         skills=[
-            "Extract named entities",
-            "Translate to French",
-            "Create a structured output in JSON format"
+            LLMSkill(name="skill_0", instructions="Extract named entities", input_data_field="text"),
+            LLMSkill(name="skill_1", instructions="Translate to French", input_data_field="skill_0"),
+            LLMSkill(name="skill_2", instructions="Create a structured output in JSON format", input_data_field="skill_1"),
         ]
     )
     dataset = DataFrameDataset(df=InternalDataFrame([
