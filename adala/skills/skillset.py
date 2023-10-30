@@ -19,10 +19,9 @@ class SkillSet(BaseModel, ABC):
     cases, task decomposition can involve a graph-based approach.
 
     Args:
-        skills (Union[List[str], Dict[str, str], List[BaseSkill], Dict[str, BaseSkill]]): Provided skills
+        skills (Dict[str, BaseSkill]): Skills in the skill set.
     """
     
-    # skills: Union[List[str], Dict[str, str], List[BaseSkill], Dict[str, BaseSkill]]
     skills: Dict[str, BaseSkill]
 
     @abstractmethod

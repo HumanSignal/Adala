@@ -25,6 +25,8 @@ class Agent(BaseModel, ABC):
         memory (LongTermMemory, optional): The agent's long-term memory. Defaults to None.
         runtimes (Dict[str, Runtime], optional): The runtimes available to the agent. Defaults to predefined runtimes.
         default_runtime (str): The default runtime used by the agent. Defaults to 'openai'.
+        teacher_runtimes (Dict[str, Runtime], optional): The runtimes available to the agent's teacher. Defaults to predefined runtimes.
+        default_teacher_runtime (str): The default runtime used by the agent's teacher. Defaults to 'openai-gpt3'.
     """
     
     environment: Union[InternalDataFrame, Dataset, Environment] = Field(default_factory=DataFrameDataset)
@@ -198,18 +200,15 @@ class Agent(BaseModel, ABC):
         Args:
             learning_iterations (int, optional): The number of iterations for learning. Defaults to 3.
             accuracy_threshold (float, optional): The desired accuracy threshold to reach. Defaults to 0.9.
-            update_skills (bool, optional): Flag to determine if skills should be updated after learning. Defaults to True.
             update_memory (bool, optional): Flag to determine if memory should be updated after learning. Defaults to True.
             request_environment_feedback (bool, optional): Flag to determine if feedback should be requested from the environment. Defaults to True.
-            experience (ShortTermMemory, optional): Initial experience for the learning process. Defaults to None.
             runtime (str, optional): The runtime to be used for the learning process. Defaults to None.
-
+            teacher_runtime (str, optional): The teacher runtime to be used for the learning process. Defaults to None.
         Returns:
-            ShortTermMemory: The short-term memory after the learning process.
+            GroundTruthSignal: The ground truth signal.
         """
         
         runtime = self.get_runtime(runtime=runtime)
-        # TODO: support teacher runtime input, not default
         teacher_runtime = self.get_teacher_runtime(runtime=teacher_runtime)
 
         dataset = self.environment.as_dataset()
