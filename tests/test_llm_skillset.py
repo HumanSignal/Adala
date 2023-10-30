@@ -34,15 +34,15 @@ from utils import patching, PatchedCalls
     strict=False
 )
 def test_llm_linear_skillset():
-    from adala.skills.skillset import LinearSkillSet
+    from adala.skills.skillset import LinearSkillSet, LLMSkill
     from adala.datasets import DataFrameDataset, InternalDataFrame
     from adala.runtimes import OpenAIRuntime
 
     skillset = LinearSkillSet(
         skills=[
-            "Extract named entities",
-            "Translate to French",
-            "Create a structured output in JSON format"
+            LLMSkill(name="skill_0", instructions="Extract named entities", input_data_field="text"),
+            LLMSkill(name="skill_1", instructions="Translate to French", input_data_field="skill_0"),
+            LLMSkill(name="skill_2", instructions="Create a structured output in JSON format", input_data_field="skill_1"),
         ]
     )
     dataset = DataFrameDataset(df=InternalDataFrame([
@@ -50,12 +50,12 @@ def test_llm_linear_skillset():
         "Apple's latest product, the iPhone 15, was released in September 2023.",
         # "The Louvre Museum in Paris houses the Mona Lisa."
     ], columns=["text"]))
-    result = skillset.apply(
+    predictions = skillset.apply(
         dataset=dataset,
         runtime=OpenAIRuntime(verbose=True),
     )
 
-    assert result.predictions.equals(pd.DataFrame.from_records([
+    pd.testing.assert_frame_equal(InternalDataFrame.from_records([
         # FIRST ROW
         {'text': 'Barack Obama was the 44th president of the United States.',
          'skill_0': '\n- Barack Obama (person)\n- 44th (ordinal number)\n- president (title)\n- United States (location)',
@@ -71,4 +71,4 @@ def test_llm_linear_skillset():
         #  'skill_0': '\n- The Louvre Museum (Organization)\n- Paris (Location)\n- Mona Lisa (Artwork)',
         #  'skill_1': "\n- Le Musée du Louvre (Organisation)\n- Paris (Lieu)\n- La Joconde (Œuvre d'art)",
         #  'skill_2': '\n{\n    "Organisation": "Le Musée du Louvre",\n    "Lieu": "Paris",\n    "Œuvre d\'art": "La Joconde"\n}'}
-    ]))
+    ]), predictions)

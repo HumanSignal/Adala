@@ -96,7 +96,7 @@ class LLMRuntime(Runtime):
         self._create_program()
         return self
 
-    def get_outputs(self, output_template: str) -> List[str]:
+    def get_outputs(self, output_template: Optional[str] = None) -> List[str]:
         """Extracts output fields from the output template.
 
         Args:
@@ -107,6 +107,8 @@ class LLMRuntime(Runtime):
         """
         # search for all occurrences of {{...'output'...}}
         # TODO: this is a very naive regex implementation - likely to fail in many cases
+        if output_template is None:
+            return []
         outputs = re.findall(r'\'(.*?)\'', output_template)
         return outputs
 
@@ -116,7 +118,8 @@ class LLMRuntime(Runtime):
         program,
         extra_fields,
         outputs=None
-    ):
+    ) -> Dict[str, Any]:
+
         """Processes a single record using the guidance program.
 
         Args:
@@ -138,15 +141,14 @@ class LLMRuntime(Runtime):
         if 'text' in verified_input:
             verified_input['text_'] = verified_input['text']
             del verified_input['text']
-
         verified_input.update(extra_fields)
         if self.verbose:
-            print_text(verified_input)
+            print_text(str(verified_input))
         result = program(
             silent=not self.verbose,
             **verified_input
         )
-        if outputs is None:
+        if not outputs:
             verified_output = {'': str(result)}
         else:
             verified_output = {field: result[field] for field in outputs}
@@ -180,7 +182,8 @@ class LLMRuntime(Runtime):
             callable: The generated output program.
         """
         
-        return guidance(output_template, llm=self._llm)
+        output_program = guidance(output_template, llm=self._llm)
+        return output_program
 
     def get_instructions_program(self, instructions):
         """Generates an instructions program from the provided template.
@@ -192,14 +195,30 @@ class LLMRuntime(Runtime):
             callable: The generated instructions program.
         """
         
-        return guidance(instructions, llm=self._llm)
+        instructions_program = guidance(instructions, llm=self._llm)
+        return instructions_program
+
+    def _prepare_program_and_params(self, input_template, output_template, instructions, extra_fields):
+        extra_fields = extra_fields or {}
+        extra_fields = extra_fields.copy()
+        # if only one program template is provided, use it as a program
+        if output_template is None and instructions is None:
+            program = self.get_input_program(input_template)
+        else:
+            program = self._program
+            extra_fields.update({
+                'input_program': self.get_input_program(input_template),
+                'output_program': self.get_output_program(output_template),
+                'instructions_program': self.get_instructions_program(instructions),
+            })
+        return program, extra_fields
 
     def process_record(
         self,
         record: Dict[str, Any],
         input_template: str,
-        output_template: str,
-        instructions: str,
+        output_template: Optional[str] = None,
+        instructions: Optional[str] = None,
         extra_fields: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Processes a record using the provided templates and instructions.
@@ -214,18 +233,11 @@ class LLMRuntime(Runtime):
         Returns:
             Dict[str, Any]: The processed record.
         """
-        
-        outputs = re.findall(r'\'(.*?)\'', output_template)
-
-        input = record.copy()
-        input.update({
-            'input_program': self.get_input_program(input_template),
-            'output_program': self.get_output_program(output_template),
-            'instructions_program': self.get_instructions_program(instructions),
-        })
+        outputs = self.get_outputs(output_template)
+        program, extra_fields = self._prepare_program_and_params(input_template, output_template, instructions, extra_fields)
         output = self._process_record(
-            record=input,
-            program=self._program,
+            record=record,
+            program=program,
             outputs=outputs,
             extra_fields=extra_fields
         )
@@ -235,8 +247,8 @@ class LLMRuntime(Runtime):
         self,
         batch: InternalDataFrame,
         input_template: str,
-        output_template: str,
-        instructions: str,
+        output_template: Optional[str] = None,
+        instructions: Optional[str] = None,
         extra_fields: Optional[Dict[str, Any]] = None,
     ) -> InternalDataFrame:
         """Processes a batch of records using the provided templates and instructions.
@@ -253,49 +265,14 @@ class LLMRuntime(Runtime):
         """
         
         outputs = self.get_outputs(output_template)
-
-        extra_fields = extra_fields or {}
-        # copy extra fields to avoid modification of the original dict
-        extra_fields = extra_fields.copy()
-        # TODO: it's not efficient way to initialize the program here - should be done once
-        extra_fields.update({
-            'input_program': self.get_input_program(input_template),
-            'output_program': self.get_output_program(output_template),
-            'instructions_program': self.get_instructions_program(instructions),
-        })
+        program, extra_fields = self._prepare_program_and_params(input_template, output_template, instructions, extra_fields)
         output = batch.progress_apply(
             self._process_record,
             axis=1,
             result_type='expand',
-            program=self._program,
+            program=program,
             outputs=outputs,
             extra_fields=extra_fields
-        )
-        return output
-
-    def process_batch_inputs(
-        self,
-        batch: InternalDataFrame,
-        input_template: str,
-        extra_fields: Optional[Dict[str, Any]] = None,
-    ) -> InternalDataFrame:
-        """Processes inputs for a batch of records using the provided input template.
-
-        Args:
-            batch (InternalDataFrame): The batch of records for input processing.
-            input_template (str): The template for input processing.
-            extra_fields (Dict[str, Any], optional): Additional fields to include during input processing.
-
-        Returns:
-            InternalDataFrame: The processed inputs for the batch of records.
-        """
-        
-        output = batch.progress_apply(
-            self._process_record,
-            axis=1,
-            result_type='expand',
-            program=self.get_input_program(input_template),
-            extra_fields=extra_fields or {}
         )
         return output
 

@@ -11,7 +11,7 @@ from typing import Optional
 from adala.runtimes.base import LLMRuntime
 from adala.datasets import Dataset, DataFrameDataset
 from adala.runtimes.base import Runtime
-from adala.memories.base import ShortTermMemory, LongTermMemory
+from adala.memories.base import Memory
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 from adala.utils.logs import print_error
 
@@ -114,7 +114,10 @@ class BaseSkill(BaseModel, ABC):
             instructions=self.instructions,
             extra_fields=self._get_extra_fields()
         )
-        return InternalDataFrameConcat((input, runtime_predictions), axis=1)
+        runtime_predictions.rename(columns={self.prediction_field: self.name}, inplace=True)
+        output = input.copy()
+        output[runtime_predictions.columns] = runtime_predictions[runtime_predictions.columns]
+        return output
 
     def _get_extra_fields(self):
         """
@@ -135,27 +138,27 @@ class BaseSkill(BaseModel, ABC):
     def apply(
         self, dataset: Dataset,
         runtime: Runtime,
-        experience: ShortTermMemory
-    ) -> ShortTermMemory:
+    ) -> InternalDataFrame:
         """
         Applies the skill to a dataset and returns the results.
         
         Args:
             dataset (Dataset): The dataset on which the skill is to be applied.
             runtime (Runtime): The runtime instance to be used for processing.
-            experience (ShortTermMemory): Previous experiences or results.
-        
+
         Returns:
             ShortTermMemory: The updated experience after applying the skill.
         """        
 
     @abstractmethod
     def analyze(
-        self, experience: ShortTermMemory,
+        self,
+        predictions: InternalDataFrame,
+        errors: InternalDataFrame,
         student_runtime: Runtime,
         teacher_runtime: Optional[Runtime] = None,
-        memory: Optional[LongTermMemory] = None,
-    ) -> ShortTermMemory:
+        memory: Optional[Memory] = None,
+    ) -> str:
         """
         Analyzes the results to derive new experiences.
         
@@ -172,18 +175,16 @@ class BaseSkill(BaseModel, ABC):
     @abstractmethod
     def improve(
         self,
-        experience: ShortTermMemory,
-        runtime: Runtime,
-        update_instructions: bool = True,
-    ) -> ShortTermMemory:
+        error_analysis: str,
+        runtime: Runtime
+    ):
         """
         Refines the current state of the skill based on its experiences.
         
         Args:
             experience (ShortTermMemory): The current experience.
             runtime (Runtime): The runtime instance to be used for processing.
-            update_instructions (bool, optional): Flag to decide if instructions should be updated. Defaults to True.
-        
+
         Returns:
             ShortTermMemory: The updated experience after improvements.
         """
@@ -200,8 +201,7 @@ class LLMSkill(BaseSkill):
         self,
         dataset: Union[Dataset, InternalDataFrame],
         runtime: LLMRuntime,
-        experience: ShortTermMemory
-    ) -> ShortTermMemory:
+    ) -> InternalDataFrame:
         """
         Applies the LLM skill on a dataset and returns the results.
         
@@ -213,8 +213,6 @@ class LLMSkill(BaseSkill):
         Returns:
             ShortTermMemory: The updated experience after applying the skill.
         """
-        
-        experience = experience.model_copy()
 
         predictions = []
         if isinstance(dataset, InternalDataFrame):
@@ -224,21 +222,19 @@ class LLMSkill(BaseSkill):
             runtime_predictions = self(batch, runtime, dataset)
             predictions.append(runtime_predictions)
 
-        if not predictions:
-            predictions = InternalDataFrame()
-        else:
-            predictions = InternalDataFrameConcat(predictions, copy=False)
-            predictions.rename(columns={self.prediction_field: self.name}, inplace=True)
+        if predictions:
+            return InternalDataFrameConcat(predictions, copy=False)
 
-        experience.predictions = predictions
-        return experience
+        return InternalDataFrame(columns=dataset.df.columns.tolist() + [self.name])
 
     def analyze(
-        self, experience: ShortTermMemory,
+        self,
+        predictions: InternalDataFrame,
+        errors: InternalDataFrame,
         student_runtime: Runtime,
         teacher_runtime: Optional[Runtime] = None,
-        memory: Optional[LongTermMemory] = None
-    ) -> ShortTermMemory:
+        memory: Optional[Memory] = None
+    ) -> str:
         """
         Analyzes the results to identify any discrepancies and returns the observed experience.
         
@@ -251,41 +247,33 @@ class LLMSkill(BaseSkill):
         Returns:
             ShortTermMemory: The updated experience after analysis.
         """
-        
-        experience = experience.model_copy()
-
-        # TODO: can be multiple prediction validation fields
-        match = experience.match_column_name
-        errors = experience.evaluations[~experience.evaluations[match]]
-        experience.accuracy = experience.evaluations[match].mean()
-        if errors.empty:
-            # No errors - nothing to analyze
-            experience.errors = errors
-            return experience
 
         # collect errors and create error report
         # first sample errors - make it uniform, but more sophisticated sampling can be implemented
-        errors = errors.sample(n=min(3, errors.shape[0]))
-
-        # collect error inputs from runtime
+        MAX_ERRORS = 3
+        errors = errors.sample(n=min(MAX_ERRORS, errors.shape[0]))
+        # TODO: ground truth column name can be the input parameter that comes from GT signal
+        ground_truth_column_name = errors.columns[-1]
         extra_fields = self._get_extra_fields()
-        inputs = student_runtime.process_batch_inputs(
-            batch=errors,
+
+        # get error prepared inputs
+        inputs = student_runtime.process_batch(
+            batch=predictions.loc[errors.index],
             input_template=self.input_template,
             extra_fields=extra_fields
         )
 
-        # construct error report
-        errors = pd.concat([
-            inputs,
-            errors[[self.name, experience.ground_truth_column_name]]
-        ], axis=1)
-        errors.columns = ['input', 'prediction', 'ground_truth']
         if not teacher_runtime:
             teacher_runtime = student_runtime
 
+        predictions_and_errors = pd.concat([
+            inputs,
+            predictions[self.name].loc[errors.index],
+            errors[ground_truth_column_name]
+        ], axis=1)
+        predictions_and_errors.columns = ['input', 'prediction', 'ground_truth']
         error_reasons = teacher_runtime.process_batch(
-            errors,
+            batch=predictions_and_errors,
             instructions="{{#system~}}\n"
                          "LLM prompt was created by concatenating instructions with text input:\n\n"
                          "Prediction = LLM(Input, Instructions)\n\n"
@@ -298,46 +286,51 @@ class LLMSkill(BaseSkill):
                            "{{input}}\n"
                            "Prediction: {{prediction}}\n"
                            "Ground truth: {{ground_truth}}\n"
-                           "Explanation:\n"
+                           "Error reason:\n"
                            "{{~/user}}",
             output_template="{{#assistant~}}{{gen 'reason'}}{{~/assistant}}",
             extra_fields=extra_fields
         )
-        errors['reason'] = error_reasons['reason']
-
-        experience.errors = errors
-        return experience
+        predictions_and_errors['reason'] = error_reasons['reason']
+        # build error report
+        result = teacher_runtime.process_record(
+            record={
+                'predictions_and_errors': predictions_and_errors.to_dict(orient='records'),
+            },
+            input_template="{{#each predictions_and_errors}}"
+                           "\n{{this.input}}\n"
+                           "Prediction: {{this.prediction}}\n"
+                           "Ground truth: {{this.ground_truth}}\n"
+                           'Error reason: {{this.reason}}\n'
+                           "{{/each}}"
+        )
+        # no specific output specified, all output is in the error report
+        error_report = result['']
+        return error_report
 
     def improve(
         self,
-        experience: ShortTermMemory,
+        error_analysis: str,
         runtime: Runtime,
-        update_instructions: bool = True,
-    ) -> ShortTermMemory:
+    ):
         """
         Refines the LLM skill based on its recent experiences.
         
         Args:
             experience (ShortTermMemory): The current experience.
             runtime (Runtime): The runtime instance to be used for processing.
-            update_instructions (bool, optional): Flag to decide if instructions should be updated. Defaults to True.
-        
-        Returns:
-            ShortTermMemory: The updated experience after improvements.
         """
-        
-        experience = experience.model_copy()
 
-        errors = experience.errors.to_dict(orient='records')
         result = runtime.process_record(
             record={
-                'errors': errors
+                'error_analysis': error_analysis
             },
             instructions="{{#system~}}\n"
                          "LLM prompt was created by concatenating instructions with text input:\n\n"
                          "Prediction = LLM(Input, Instructions)\n\n"
                          "We expect the prediction to be equal to the ground truth.\n"
-                         "Your task is to craft a revised concise instruction for the LLM. "
+                         "Your task is to analyze errors made by old instructions "
+                         "and craft new instructions for the LLM.\n"
                          "Follow best practices for LLM prompt engineering.\n"
                          "Include 2-3 examples at the end of your response to demonstrate how the new instruction would be applied.\n"
                          "Use the following format for your examples:\n"
@@ -345,23 +338,11 @@ class LLMSkill(BaseSkill):
                          "Output: ...\n\n"
                          "{{~/system}}\n",
             input_template="{{#user~}}\n"
-                           f"Old instruction: {self.instructions}\n\n"
-                           "Errors:\n{{#each errors}}"
-                           "\n{{this.input}}\n"
-                           "Prediction: {{this.prediction}}\n"
-                           "Ground truth: {{this.ground_truth}}\n"
-                           "{{/each}}\n"
+                           f"Old instructions: {self.instructions}\n\n"
+                           "Errors:\n{{error_analysis}}\n"
                            "New instruction:\n"
                            "{{~/user}}",
             output_template="{{#assistant~}}{{gen 'new_instruction'}}{{~/assistant}}",
             extra_fields=self._get_extra_fields()
         )
-        new_instruction = result['new_instruction']
-
-        experience.initial_instructions = self.instructions
-        experience.updated_instructions = new_instruction
-
-        if update_instructions:
-            self.instructions = new_instruction
-
-        return experience
+        self.instructions = result['new_instruction']

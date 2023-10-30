@@ -1,21 +1,26 @@
-from .base import LongTermMemory, ShortTermMemory
+import json
+from .base import Memory
 from typing import Any
 
 
-class FileMemory(LongTermMemory):
+class FileMemory(Memory):
 
     filepath: str
 
-    def remember(self, experience: ShortTermMemory):
+    def remember(self, observation: str, experience: Any):
         """
         Serialize experience in JSON and append to file
         """
-        experience_json = experience.model_dump_json()
-        with open(self.filepath, 'a') as f:
-            f.write(experience_json + '\n')
+        with open(self.filepath) as f:
+            memory = json.load(f)
+        memory[observation] = experience
+        with open(self.filepath, 'w') as f:
+            json.dump(memory, f, indent=2)
 
-    def retrieve(self, observations: ShortTermMemory) -> ShortTermMemory:
+    def retrieve(self, observation: str) -> Any:
         """
         Retrieve experience from file
         """
-        raise NotImplementedError
+        with open(self.filepath) as f:
+            memory = json.load(f)
+        return memory[observation]

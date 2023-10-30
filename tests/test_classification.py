@@ -18,13 +18,15 @@ def process_record_generator(*args, **kwargs):
         yield {'sentiment': 'Neutral'}
 
         # errors
-        yield {'reason': 'Test reason'}
-        yield {'reason': 'Test reason'}
-        yield {'reason': 'Test reason'}
-        yield {'reason': 'Test reason'}
+        if i < 2:
+            yield {'reason': 'Test reason'}
+            yield {'reason': 'Test reason'}
+            yield {'reason': 'Test reason'}
+            yield {'reason': 'Test reason'}
+            yield {'': 'Test reason'}
 
-        # instruction generation
-        yield {'new_instruction': 'Test instruction'}
+            # instruction generation
+            yield {'new_instruction': 'Test instruction'}
 
     # test
     yield {'sentiment': 'Positive'}
@@ -64,7 +66,7 @@ def test_classification_skill(
         # connect to a dataset
         environment=BasicEnvironment(
             ground_truth_dataset=train_dataset,
-            ground_truth_column="ground_truth"
+            ground_truth_columns={"sentiment": "ground_truth"}
         ),
         # define a skill
         skills=ClassificationSkill(
@@ -75,15 +77,15 @@ def test_classification_skill(
         ),
     )
     run = agent.learn(learning_iterations=3, accuracy_threshold=0.95)
-    assert run.accuracy > 0.8
+    assert run.get_accuracy()['sentiment'] > 0.8
 
     print('\n\n=> Final instructions:')
     print('=====================')
-    print(f'{run.updated_instructions}')
+    print(f'{agent.skills["sentiment"].instructions}')
     print('=====================')
 
     print('\n=> Run test ...')
-    run = agent.apply_skills(test_dataset)
-    print_dataframe(run.predictions)
+    predictions = agent.run(test_dataset)
+    print_dataframe(predictions)
 
-    assert not run.predictions.empty
+    assert not predictions.empty

@@ -64,7 +64,7 @@ agent = Agent(
     # connect to a dataset
     environment=BasicEnvironment(
         ground_truth_dataset=ground_truth_dataset,
-        ground_truth_column="ground_truth"
+        ground_truth_columns={"sentiment_classification": "ground_truth"}
     ),
 
     # define a skill
@@ -79,15 +79,15 @@ agent = Agent(
     runtimes = {
         # You can specify your OPENAI API KEY here via `OpenAIRuntime(..., api_key='your-api-key')`
         'openai': OpenAIRuntime(model='gpt-3.5-turbo-instruct'),
-        'openai-gpt3': OpenAIRuntime(model='gpt-3.5-turbo'),
+        'openai-gpt3': OpenAIRuntime(model='gpt-3.5-turbo')
     },
     default_runtime='openai',
     
     # NOTE! If you have access to GPT-4, you can uncomment the lines bellow for better results
-    # default_teacher_runtime='openai-gpt4',
-    # teacher_runtimes = {
-    #   'openai-gpt4': OpenAIRuntime(model='gpt-4')
-    # }   
+#     default_teacher_runtime='openai-gpt4',
+#     teacher_runtimes = {
+#       'openai-gpt4': OpenAIRuntime(model='gpt-4')
+#     }
 )
 
 print(agent)
@@ -96,9 +96,9 @@ print(agent.skills)
 agent.learn(learning_iterations=3, accuracy_threshold=0.95)
 
 print('\n=> Run tests ...')
-run = agent.apply_skills(predict_dataset)
+predictions = agent.run(predict_dataset)
 print('\n => Test results:')
-print(run)
+print(predictions)
 ```
 
 ## Reference
