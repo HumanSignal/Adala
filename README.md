@@ -290,7 +290,8 @@ adala help <command>
 
 ## 🗺 Roadmap
 
-- [x] Low-level skill management (i.e. agent.get_skill("name"))
+- [x] Low-level skill management (i.e. agent.get_skill("name")) [COMPLETE @niklub]
+- [ ] Make every notebook example to run in Google Collab and add a badge into README
 - [ ] Extend environment with one more example
 - [ ] Multi-task learning (learn multiple skills at once)
 - [ ] Calculate and store top line Agent metrics (predictions created, runtime executions, learning loops, etc)
