@@ -290,13 +290,14 @@ adala help <command>
 
 ## 🗺 Roadmap
 
-- [ ] Low-level skill management (i.e. agent.get_skill("name"))
+- [x] Low-level skill management (i.e. agent.get_skill("name")) [COMPLETE @niklub]
+- [ ] Make every notebook example to run in Google Collab and add a badge into README
+- [ ] Extend environment with one more example
+- [ ] Multi-task learning (learn multiple skills at once)
 - [ ] Calculate and store top line Agent metrics (predictions created, runtime executions, learning loops, etc)
 - [ ] Create Named Entity Recognition Skill
-- [ ] Extend environment with one more example
 - [ ] Command line utility (see the source for this readme for example)
 - [ ] REST API to interact with Adala
-- [ ] Multi-task learning (learn multiple skills at once)
 - [ ] Vision and multi-modal agent skills
 
 ## 🤩 Contributing to Adala
