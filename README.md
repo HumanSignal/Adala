@@ -71,6 +71,12 @@ Install Adala:
 ```sh
 pip install adala
 ```
+
+Adala frequently releases updates. In order to ensure that you are using the most up-to-date version, it is recommended that you install it from GitHub:
+```sh
+pip install git+https://github.com/HumanSignal/Adala.git
+```
+
 <!--
 If you're planning to use human-in-the-loop labeling, or need a labeling tool to produce ground truth datasets, we
 suggest installing Label Studio. Adala supports Label Studio format out of the box.
