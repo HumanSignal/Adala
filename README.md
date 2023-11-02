@@ -178,6 +178,7 @@ print(predictions)
 - [QuestionAnsweringSkill](./examples/question_answering_skill.ipynb) – Answer questions based on a given context.
 - [TranslationSkill](./examples/translation_skill.ipynb) – Translate text from one language to another.
 - [TextGenerationSkill](./examples/text_generation_skill.ipynb) – Generate text based on a given prompt.
+- [Skill Sets](././examples/skillsets_sequence_of_skills.ipynb) – Process complex tasks through a sequence of skills.
 
 ![Executing Agent Skill](./docs/src/img/executing-agents-skill.png "Executing Agent Skill")
 
