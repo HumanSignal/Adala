@@ -11,7 +11,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name='adala',
-    version='0.0.1',
+    version='0.0.2',
     author='Heartex',
     author_email="hello@humansignal.com",
     description='ADALA: Automated Data Labeling Agent',
