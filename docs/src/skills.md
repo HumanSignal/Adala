@@ -10,5 +10,3 @@
 ::: adala.skills.generation.summarization
 
 ::: adala.skills.labeling.classification
-
-::: adala.skills.labeling.sequence_labeling

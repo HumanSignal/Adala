@@ -20,6 +20,15 @@ class BaseSkill(BaseModel, ABC):
     """
     A foundational abstract class representing a skill. This class sets the foundation 
     for all skills and provides common attributes and methods for skill-based operations.
+
+    Attributes:
+        name (str): Unique name of the skill.
+        instructions (str): Instructs agent what to do with the input data.
+        description (str): Description of the skill.
+        input_template (str): Template for the input data.
+        output_template (str): Template for the output data.
+        input_data_field (str): Name of the input data field.
+        prediction_field (str): Name of the prediction field to be used for the output data.
     """
     name: str = Field(
         title='Skill name',
@@ -71,7 +80,7 @@ class BaseSkill(BaseModel, ABC):
     )
 
     @model_validator(mode='after')
-    def validate_inputs(self):
+    def validate_inputs(self) -> 'BaseSkill':
         """
         Validates the input_template, updating it if necessary.
         
@@ -161,15 +170,36 @@ class BaseSkill(BaseModel, ABC):
     ) -> str:
         """
         Analyzes the results to derive new experiences.
+        It gets provided skill predictions in the format:
+
+        ```markdown
+        | input | skill_1 | skill_2 | skill_3 |
+        |-------|---------|---------|---------|
+        | text1 | label11 | label21 | label31 |
+        | text2 | label12 | label22 | label32 |
+        | ...   | ...     | ...     | ...     |
+        ```
+
+        and the errors for a specific skill to analyze in the format:
+
+        ```markdown
+        | prediction | ground_truth |
+        |------------|--------------|
+        | label11    | label12      |
+        | ...        | ...          |
+        ```
+
+        and returns the string that contains the error analysis report.
         
         Args:
-            experience (ShortTermMemory): The current experience.
-            student_runtime (Runtime): The student runtime instance. Defaults to None.
-            teacher_runtime (Runtime, optional): The teacher runtime instance. Defaults to None.
-            memory (LongTermMemory, optional): Previous long term memories. Defaults to None.
+            predictions (InternalDataFrame): The predictions made by the skill.
+            errors (InternalDataFrame): The errors made by the skill.
+            student_runtime (Runtime): The runtime instance used to get predictions.
+            teacher_runtime (Optional[Runtime]): The runtime instance to be used for analysing the errors.
+            memory (Optional[Memory]): The memory instance to be used for processing.
 
         Returns:
-            ShortTermMemory: The updated experience after analysis.
+            str: The error analysis report.
         """
 
     @abstractmethod
@@ -179,14 +209,11 @@ class BaseSkill(BaseModel, ABC):
         runtime: Runtime
     ):
         """
-        Refines the current state of the skill based on its experiences.
-        
-        Args:
-            experience (ShortTermMemory): The current experience.
-            runtime (Runtime): The runtime instance to be used for processing.
+        Refines the LLM skill based on its recent experiences and updates the skill's instructions.
 
-        Returns:
-            ShortTermMemory: The updated experience after improvements.
+        Args:
+            error_analysis (str): The error analysis report.
+            runtime (Runtime): The runtime instance to be used for processing.
         """
 
 
@@ -195,6 +222,15 @@ class LLMSkill(BaseSkill):
     A skill specialized for Language Models (LLM). Inherits from the BaseSkill 
     class and provides specific implementations for handling LLM predictions based 
     on given instructions.
+
+    Attributes:
+        name (str): Unique name of the skill.
+        instructions (str): Instructs agent what to do with the input data.
+        description (str): Description of the skill.
+        input_template (str): Template for the input data.
+        output_template (str): Template for the output data.
+        input_data_field (str): Name of the input data field.
+        prediction_field (str): Name of the prediction field to be used for the output data.
     """
 
     def apply(
@@ -208,10 +244,9 @@ class LLMSkill(BaseSkill):
         Args:
             dataset (Union[Dataset, InternalDataFrame]): The dataset on which the skill is to be applied.
             runtime (LLMRuntime): The runtime instance to be used for processing.
-            experience (ShortTermMemory): Previous experiences or results.
-        
+
         Returns:
-            ShortTermMemory: The updated experience after applying the skill.
+            predictions (InternalDataFrame): The predictions made by the skill.
         """
 
         predictions = []
@@ -239,13 +274,14 @@ class LLMSkill(BaseSkill):
         Analyzes the results to identify any discrepancies and returns the observed experience.
         
         Args:
-            experience (ShortTermMemory): The current experience.
-            student_runtime (Runtime): The student runtime instance. Defaults to None.
-            teacher_runtime (Runtime, optional): The teacher runtime instance. Defaults to None.
-            memory (LongTermMemory, optional): Previous long term memories. Defaults to None.
+            predictions (InternalDataFrame): The predictions made by the skill.
+            errors (InternalDataFrame): The errors made by the skill.
+            student_runtime (Runtime): The runtime instance used to get predictions.
+            teacher_runtime (Optional[Runtime]): The runtime instance to be used for analysing the errors.
+            memory (Optional[Memory]): The memory instance to be used for processing.
 
         Returns:
-            ShortTermMemory: The updated experience after analysis.
+            str: The error analysis report.
         """
 
         # collect errors and create error report
@@ -314,10 +350,10 @@ class LLMSkill(BaseSkill):
         runtime: Runtime,
     ):
         """
-        Refines the LLM skill based on its recent experiences.
-        
+        Refines the LLM skill based on its recent experiences and updates the skill's instructions.
+
         Args:
-            experience (ShortTermMemory): The current experience.
+            error_analysis (str): The error analysis report.
             runtime (Runtime): The runtime instance to be used for processing.
         """
 

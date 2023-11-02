@@ -21,7 +21,7 @@ class DataFrameDataset(Dataset):
     class Config:
         arbitrary_types_allowed = True
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         Provides the number of records in the dataset.
         

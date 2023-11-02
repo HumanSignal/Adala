@@ -16,8 +16,30 @@ class GroundTruthSignal(BaseModel):
 
     Attributes:
         match (InternalDataFrame): A DataFrame indicating the correctness of predictions.
+                                   Each row corresponds to a prediction, and each column is a boolean indicating if skill matches ground truth.
+                                   Columns are named after the skill names.
+                                   Indices correspond to prediction indices.
+                                   Example:
+                                       ```
+                                        | index | skill_1 | skill_2 | skill_3 |
+                                        |-------|---------|---------|---------|
+                                        | 0     | True    | True    | False   |
+                                        | 1     | False   | False   | False   |
+                                        | 2     | True    | True    | True    |
+                                        ```
         errors (Optional[Dict[str, InternalDataFrame]]): A dictionary mapping skill names to DataFrames
             containing the errors between predictions and ground truth. Default is None.
+            Each DataFrame has two columns ["predictions", "user-defined ground truth name"].
+            User defined ground truth name is taken from Environment
+            Example:
+            ```json
+                {
+                    "skill_1": InternalDataFrame({
+                        "predictions": ['a', 'b', 'c'],
+                        "my_gr_truth": ['a', 'a', 'c']
+                    }, index=[0, 1, 2])
+                }
+            ```
     """
     
     match: InternalDataFrame
@@ -29,6 +51,10 @@ class GroundTruthSignal(BaseModel):
 
         Returns:
             InternalSeries: A series representing the accuracy of predictions.
+
+        Examples:
+            
+
         """
         
         return self.match.mean()

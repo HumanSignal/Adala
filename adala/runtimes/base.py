@@ -5,7 +5,7 @@ import re
 from tqdm import tqdm
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, model_validator
-from typing import List, Dict, Optional, Tuple, Any
+from typing import List, Dict, Optional, Tuple, Any, Callable
 from adala.datasets.base import InternalDataFrame
 from adala.utils.logs import print_text
 
@@ -22,7 +22,7 @@ class Runtime(BaseModel, ABC):
     verbose: bool = False
 
     @model_validator(mode='after')
-    def init_runtime(self):
+    def init_runtime(self) -> 'Runtime':
         """Initializes the runtime.
 
         This method should be used to validate and potentially initialize the runtime instance.
@@ -85,7 +85,7 @@ class LLMRuntime(Runtime):
             raise NotImplementedError(f'LLM runtime type {self.llm_runtime_model_type} is not implemented.')
         self._program = guidance(self._llm_template, llm=self._llm, silent=not self.verbose)
 
-    def init_runtime(self):
+    def init_runtime(self) -> 'LLMRuntime':
         """Initializes the LLM runtime environment.
 
         Creates an LLM instance based on the runtime type and parameters.
@@ -155,7 +155,7 @@ class LLMRuntime(Runtime):
 
         return verified_output
 
-    def get_input_program(self, input_template):
+    def get_input_program(self, input_template) -> Callable:
         """Generates an input program from the provided template.
 
         Args:
@@ -172,7 +172,7 @@ class LLMRuntime(Runtime):
         input_program = guidance(fixed_input_template, llm=self._llm, silent=not self.verbose)
         return input_program
 
-    def get_output_program(self, output_template):
+    def get_output_program(self, output_template) -> Callable:
         """Generates an output program from the provided template.
 
         Args:
@@ -185,7 +185,7 @@ class LLMRuntime(Runtime):
         output_program = guidance(output_template, llm=self._llm)
         return output_program
 
-    def get_instructions_program(self, instructions):
+    def get_instructions_program(self, instructions) -> Callable:
         """Generates an instructions program from the provided template.
 
         Args:

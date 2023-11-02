@@ -18,8 +18,8 @@ class SkillSet(BaseModel, ABC):
     sequentially for complex problem decompositions and causal reasoning. In the most generic
     cases, task decomposition can involve a graph-based approach.
 
-    Args:
-        skills (Dict[str, BaseSkill]): Skills in the skill set.
+    Attributes:
+        skills (Dict[str, BaseSkill]): A dictionary of skills in the skill set.
     """
     
     skills: Dict[str, BaseSkill]
@@ -93,11 +93,12 @@ class LinearSkillSet(SkillSet):
     LinearSkillSet ensures that skills are developed in a sequential manner, determined either 
     by the provided skill_sequence or by the lexicographical order of skill names.
 
-    Args:
+    Attributes:
         skills (Union[List[str], Dict[str, str], List[BaseSkill], Dict[str, BaseSkill]]): Provided skills
         skill_sequence (List[str], optional): Ordered list of skill names indicating the order 
                                               in which they should be acquired.
                                               By default, lexographical order of skill names is used.
+        input_data_field (Optional[str], optional): Name of the input data field. Defaults to None.
 
     Examples:
         Create a LinearSkillSet with a list of skills specified as strings:
@@ -111,7 +112,6 @@ class LinearSkillSet(SkillSet):
         Create a LinearSkillSet with a dictionary of skill names to instructions:
         >>> from adala.skills import LinearSkillSet
         >>> skillset = LinearSkillSet(skills={'extract': 'Extract keywords from text', 'classify': 'Classify keywords', 'structured_output': 'Create structured output from keywords'})
-
     """
     
     skill_sequence: List[str] = None
@@ -123,7 +123,7 @@ class LinearSkillSet(SkillSet):
         Validates and converts the skills attribute to a dictionary of skill names to BaseSkill instances.
 
         Args:
-            skills (Union[List[str], List[BaseSkill], Dict[str, BaseSkill]]): The skills attribute to validate.
+            v (Union[List[str], List[BaseSkill], Dict[str, BaseSkill]]): The skills attribute to validate.
 
         Returns:
             Dict[str, BaseSkill]: Dictionary mapping skill names to their corresponding BaseSkill instances.
@@ -165,7 +165,7 @@ class LinearSkillSet(SkillSet):
         return skills
 
     @model_validator(mode='after')
-    def skill_sequence_validator(self):
+    def skill_sequence_validator(self) -> 'LinearSkillSet':
         """
         Validates and sets the default order for the skill sequence if not provided.
         

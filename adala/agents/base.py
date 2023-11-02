@@ -57,7 +57,7 @@ class Agent(BaseModel, ABC):
     class Config:
         arbitrary_types_allowed = True
 
-    def __rich__(self):
+    def __rich__(self) -> str:
         """
         Returns a colorized and formatted representation of the Agent instance.
 
@@ -78,7 +78,7 @@ class Agent(BaseModel, ABC):
         )
 
     @field_validator('environment')
-    def environment_validator(cls, v):
+    def environment_validator(cls, v) -> Environment:
         """
         Validates and possibly transforms the environment attribute.
 
@@ -95,7 +95,7 @@ class Agent(BaseModel, ABC):
         return v
 
     @field_validator('skills', mode='before')
-    def skills_validator(cls, v):
+    def skills_validator(cls, v) -> SkillSet:
         """
         Validates and possibly transforms the skills attribute.
 
