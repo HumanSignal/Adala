@@ -95,6 +95,20 @@ pdm add -dG test <package-name>
 
 Happy developing, we're excited to review your contributions!
 
+### Documentation
+
+Interested in contributing to our docs? Wonderful! Docs are located in `./docs`. After installing dev dependecies (including `docs` group), you can build and serve docs dynamically with
+
+```bash
+mkdocs serve -f ./docs/mkdocs.yml
+```
+
+All doc dependencies are managed by `pdm`, and similar to test development dependenices, can be expanded upon with
+
+```bash
+pdm add -dG doc <package-name>
+```
+
 ## Code of Conduct
 
 While diverse contributions invigorate our project, it's paramount to sustain a harmonious and cooperative environment. Please adhere to our code of conduct.
