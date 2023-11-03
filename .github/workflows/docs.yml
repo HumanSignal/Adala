@@ -8,9 +8,6 @@ on:
       - 'adala/**'
       - '.github/workflows/docs.yml'
 
-env:
-  CACHE_NAME_PREFIX: v1
-
 jobs:
   upload:
     name: "Upload"
@@ -20,24 +17,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        id: setup_python
-        uses: actions/setup-python@v4
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v3
         with:
-          python-version: '3.10'
+          python-version: "3.11"
+          cache: true
 
-      - uses: actions/cache@v3
-        name: Configure pip cache
-        id: pip-cache
-        with:
-          path: ~/.cache/pip
-          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ steps.setup_python.outputs.python-version }}-adala-${{ hashFiles('requirements.txt', 'tests/requirements-test.txt') }}
-
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
-          pip install -r requirements.txt
-          pip install -e .
-          pip install -r docs/requirements.txt
+          pdm sync -G doc
 
       - name: Deploy docs
         run: |
