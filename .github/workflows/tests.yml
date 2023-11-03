@@ -52,8 +52,7 @@ jobs:
       - name: Run functional tests
         run: |
           cd tests/
-          pytest --junitxml report.xml --cov=. -vv 
-
+          pdm run pytest --junitxml report.xml --cov=. -vv 
 
   run_pytests_windows:
     name: Windows
@@ -85,5 +84,4 @@ jobs:
 
       - name: Test with pytest
         run: |
-          cd tests/
-          python -m pytest -vv
+          pdm run pytest -vv

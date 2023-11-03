@@ -30,4 +30,4 @@ jobs:
       - name: Deploy docs
         run: |
           cd docs/
-          mkdocs gh-deploy --force
+          pdm run mkdocs gh-deploy --force
