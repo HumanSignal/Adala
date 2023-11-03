@@ -3,7 +3,7 @@ name = "adala"
 version = "0.0.2"
 description = "Adala: Autonomous Data Labeling Agent"
 authors = [
-    {name = "Human Signal", email = "hello@humansignal.com"},
+    {name = "HumanSignal", email = "hello@humansignal.com"},
 ]
 dependencies = [
     "pandas",
@@ -32,3 +32,8 @@ readme = "README.md"
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
+[tool.pdm.dev-dependencies]
+test = [
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+]
