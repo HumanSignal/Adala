@@ -14,7 +14,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='/', intents=intents)
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
-CHANNEL_ID = 1170485562692603944
+CHANNEL_ID = int(os.getenv('CHANNEL_ID'))
 
 
 @bot.event
