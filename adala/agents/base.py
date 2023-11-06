@@ -170,7 +170,11 @@ class Agent(BaseModel, ABC):
             raise ValueError(f'Teacher Runtime "{runtime}" not found.')
         return self.teacher_runtimes[runtime]
 
-    def run(self, dataset: Union[Dataset, InternalDataFrame], runtime: Optional[str] = None) -> InternalDataFrame:
+    def run(
+        self,
+        dataset: Optional[Union[Dataset, InternalDataFrame]] = None,
+        runtime: Optional[str] = None
+    ) -> InternalDataFrame:
         """
         Runs the agent on the specified dataset.
 
@@ -181,6 +185,7 @@ class Agent(BaseModel, ABC):
         Returns:
             InternalDataFrame: The dataset with the agent's predictions.
         """
+        dataset = dataset or self.environment.as_dataset()
         runtime = self.get_runtime(runtime=runtime)
         predictions = self.skills.apply(dataset, runtime=runtime)
         return predictions
@@ -191,6 +196,7 @@ class Agent(BaseModel, ABC):
         accuracy_threshold: float = 0.9,
         update_memory: bool = True,
         request_environment_feedback: bool = True,
+        wait_for_environment_feedback: Optional[float] = None,
         runtime: Optional[str] = None,
         teacher_runtime: Optional[str] = None,
     ) -> GroundTruthSignal:
@@ -202,6 +208,7 @@ class Agent(BaseModel, ABC):
             accuracy_threshold (float, optional): The desired accuracy threshold to reach. Defaults to 0.9.
             update_memory (bool, optional): Flag to determine if memory should be updated after learning. Defaults to True.
             request_environment_feedback (bool, optional): Flag to determine if feedback should be requested from the environment. Defaults to True.
+            wait_for_environment_feedback (float, optional): The timeout in seconds to wait for environment feedback. Defaults to None.
             runtime (str, optional): The runtime to be used for the learning process. Defaults to None.
             teacher_runtime (str, optional): The teacher runtime to be used for the learning process. Defaults to None.
         Returns:
@@ -226,7 +233,12 @@ class Agent(BaseModel, ABC):
                 self.environment.request_feedback(self.skills, predictions)
 
             # Compare predictions to ground truth -> get ground truth signal
-            ground_truth_signal = self.environment.compare_to_ground_truth(self.skills, predictions)
+            ground_truth_signal = self.environment.compare_to_ground_truth(
+                self.skills,
+                predictions,
+                wait=wait_for_environment_feedback
+            )
+
             print_text(f'Comparing predictions to ground truth data ...')
             print_dataframe(InternalDataFrameConcat([predictions, ground_truth_signal.match], axis=1))
 

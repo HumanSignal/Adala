@@ -6,7 +6,7 @@ from rich.table import Table
 from rich import box
 from rich.console import Console
 from typing import Optional
-from .internal_data import InternalDataFrame
+from .internal_data import InternalDataFrame, InternalSeries
 
 console = Console()
 error_console = Console(stderr=True, style="bold red")
@@ -45,4 +45,20 @@ def print_dataframe(dataframe: InternalDataFrame):
     table.row_styles = ["none", "dim"]
     table.box = box.SIMPLE_HEAD
 
+    console.print(table)
+
+
+def print_series(data: InternalSeries):
+
+    # Create a Rich Table with a column for each series value
+    table = Table(show_header=True, header_style="bold magenta")
+
+    # Add a column for each value in the series with the index as the header
+    for index in data.index:
+        table.add_column(str(index))
+
+    # Add a single row with all the values from the series
+    table.add_row(*[str(value) for value in data])
+
+    # Print the table with the Rich console
     console.print(table)

@@ -56,6 +56,7 @@ class BaseSkill(BaseModel, ABC):
         default="Input: {{{{{input}}}}}",
         examples=["Text: {{{{{input}}}}}, Date: {{{{date_column}}}}, Sentiment: {{{{gen 'sentiment'}}}}"]
     )
+    # TODO: skill can have multiple input fields
     input_data_field: Optional[str] = Field(
         title='Input data field',
         description='Input data field name that will be used to match input data.',
@@ -66,8 +67,7 @@ class BaseSkill(BaseModel, ABC):
     output_template: Optional[str] = Field(
         title='Output template',
         description='Template for the output data. '
-                    'Can use templating to refer to input parameters and perform data transformations. '
-                    'Should contain at least one field matching `validation_fields`.',
+                    'Can use templating to refer to input parameters and perform data transformations',
         default="Output: {{gen 'predictions'}}",
         examples=["Output: {{select 'predictions' options=labels logprobs='score'}}"]
     )
@@ -308,6 +308,8 @@ class LLMSkill(BaseSkill):
             errors[ground_truth_column_name]
         ], axis=1)
         predictions_and_errors.columns = ['input', 'prediction', 'ground_truth']
+        # TODO: move handlebars to Runtime level and abstract template language for skill
+        # For example, using f-string format as generic, that translates to handlebars inside GuidanceRuntime
         error_reasons = teacher_runtime.process_batch(
             batch=predictions_and_errors,
             instructions="{{#system~}}\n"
