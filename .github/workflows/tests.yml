@@ -21,7 +21,6 @@ on:
       - 'release/**'
 
 env:
-  CACHE_NAME_PREFIX: v1
   OPENAI_API_KEY: test
 
 jobs:
@@ -40,31 +39,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        id: setup_python
-        uses: actions/setup-python@v4
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v3
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "${{ matrix.python-version }}"
+          cache: true
 
-      - uses: actions/cache@v3
-        name: Configure pip cache
-        id: pip-cache
-        with:
-          path: ~/.cache/pip
-          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ steps.setup_python.outputs.python-version }}-adala-${{ hashFiles('requirements.txt', 'tests/requirements-test.txt') }}
-
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
-          pip install --quiet --upgrade pip setuptools
-          pip -V
-          pip install -r requirements.txt -r tests/requirements-test.txt
-          pip install -e .
+          pdm sync -G test
 
       - name: Run functional tests
         run: |
           cd tests/
-          pytest --junitxml report.xml --cov=. -vv 
-
+          pdm run pytest --junitxml report.xml --cov=. -vv 
 
   run_pytests_windows:
     name: Windows
@@ -84,28 +72,16 @@ jobs:
         with:
           ref: ${{ inputs.head_sha }}
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v3
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "${{ matrix.python-version }}"
+          cache: true
 
-      - uses: actions/cache@v3
-        name: Configure pip cache
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ env.CACHE_NAME_PREFIX }}-${{ runner.os }}-pip-${{ matrix.python-version }}-adala-${{ hashFiles('requirements.txt', 'tests/requirements-test.txt') }}
-
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip setuptools
-          pip install --upgrade cython
-          if (Test-Path -Path '.\requirements.txt' -PathType Leaf)
-          {pip install -r requirements.txt}
-          if (Test-Path -Path '.\tests\requirements-test.txt' -PathType Leaf)
-          {pip install -r tests/requirements-test.txt}
-          pip install -e .
+          pdm sync -G test
 
       - name: Test with pytest
         run: |
-          cd tests/
-          python -m pytest -vv
+          pdm run pytest -vv
