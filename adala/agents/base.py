@@ -185,7 +185,8 @@ class Agent(BaseModel, ABC):
         Returns:
             InternalDataFrame: The dataset with the agent's predictions.
         """
-        dataset = dataset or self.environment.as_dataset()
+        if dataset is None:
+            dataset = self.environment.as_dataset()
         runtime = self.get_runtime(runtime=runtime)
         predictions = self.skills.apply(dataset, runtime=runtime)
         return predictions

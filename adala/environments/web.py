@@ -35,15 +35,11 @@ class WebEnvironment(Environment):
         if wait:
             with Progress() as progress:
                 task = progress.add_task(f"Waiting for ground truth {wait} seconds...", total=wait)
-                while not gt_records and not progress.finished:
-                    st = time.time()
-                    gt_records = self.get_gt_records()
-                    if not gt_records:
-                        time.sleep(10)
-                        time_elapsed = time.time() - st
-                        progress.advance(task, time_elapsed)
-        else:
-            gt_records = self.get_gt_records()
+                while not progress.finished:
+                    progress.advance(task, wait / 100)
+                    time.sleep(wait / 100)
+
+        gt_records = self.get_gt_records()
 
         if not gt_records:
             raise RuntimeError('No ground truth found.')

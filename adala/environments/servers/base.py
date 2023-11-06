@@ -39,11 +39,11 @@ class BaseAPI(FastAPI):
         async with aiosqlite.connect(STORAGE_DB) as db:
             await db.execute('''
                 CREATE TABLE IF NOT EXISTS ground_truth (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     prediction_id INTEGER NOT NULL,
                     skill_name TEXT NOT NULL,
                     gt_match BOOLEAN,
-                    gt_data TEXT
+                    gt_data TEXT,
+                    PRIMARY KEY (prediction_id, skill_name)
                 )
             ''')
             await db.commit()
@@ -63,7 +63,7 @@ class BaseAPI(FastAPI):
 
     async def store_ground_truths(self, ground_truths: List[GroundTruth], db: aiosqlite.Connection):
         await db.executemany('''
-            INSERT INTO ground_truth (prediction_id, skill_name, gt_match, gt_data)
+            INSERT OR REPLACE INTO ground_truth (prediction_id, skill_name, gt_match, gt_data)
             VALUES (?, ?, ?, ?)
         ''', [(gt.prediction_id, gt.skill_name, gt.gt_match, gt.gt_data) for gt in ground_truths])
         await db.commit()
