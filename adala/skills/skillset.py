@@ -1,15 +1,11 @@
 from pydantic import BaseModel, model_validator, field_validator, ValidationError
 from abc import ABC, abstractmethod
-from typing import List, Union, Dict, Any, Optional, Mapping
+from typing import List, Union, Dict, Optional, Mapping
 from collections import OrderedDict
 from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
 from adala.utils.logs import print_text
-from adala.utils.internal_data import (
-    InternalDataFrame,
-    InternalSeries,
-    InternalDataFrameConcat,
-)
+from adala.utils.internal_data import InternalDataFrame
 from .base import BaseSkill, LLMSkill
 
 
@@ -227,10 +223,10 @@ class LinearSkillSet(SkillSet):
         return predictions
 
     def select_skill_to_improve(
-        self, accuracy: Mapping, accuracy_threshold: Optional[float] = 1.0
+        self, accuracy: Mapping, accuracy_threshold: Optional[float] = 0.9
     ) -> Optional[BaseSkill]:
         """
-        Selects the skill with the lowest accuracy to improve.
+        Selects the first skill in the sequence with accuracy below the threshold to improve.
 
         Args:
             accuracy (Mapping): Accuracy of each skill.
@@ -257,8 +253,11 @@ class LinearSkillSet(SkillSet):
 class ParallelSkillSet(SkillSet):
     """
     Represents a set of skills that are acquired simultaneously to reach a goal.
-    """
 
+    In a ParallelSkillSet, each skill can be developed independently of the others. This is useful
+    for agents that require multiple, diverse capabilities, or tasks where each skill contributes a piece of
+    the overall solution.
+    """
 
     @field_validator("skills", mode="before")
     @classmethod
@@ -285,9 +284,10 @@ class ParallelSkillSet(SkillSet):
         elif isinstance(v, dict):
             skills = v
         else:
-            raise ValidationError(f"skills must be a list or dictionary, not {type(skills)}")
+            raise ValidationError(
+                f"skills must be a list or dictionary, not {type(skills)}"
+            )
         return skills
-
 
     def apply(
         self,
@@ -317,7 +317,7 @@ class ParallelSkillSet(SkillSet):
         return predictions
 
     def select_skill_to_improve(
-        self, accuracy: Mapping, accuracy_threshold: Optional[float] = 1.0
+        self, accuracy: Mapping, accuracy_threshold: Optional[float] = 0.9
     ) -> Optional[BaseSkill]:
         """
         Selects the skill with the lowest accuracy to improve.
