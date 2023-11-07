@@ -198,6 +198,7 @@ class Agent(BaseModel, ABC):
         update_memory: bool = True,
         request_environment_feedback: bool = True,
         wait_for_environment_feedback: Optional[float] = None,
+        num_predictions_feedback: Optional[int] = None,
         runtime: Optional[str] = None,
         teacher_runtime: Optional[str] = None,
     ) -> GroundTruthSignal:
@@ -210,6 +211,7 @@ class Agent(BaseModel, ABC):
             update_memory (bool, optional): Flag to determine if memory should be updated after learning. Defaults to True.
             request_environment_feedback (bool, optional): Flag to determine if feedback should be requested from the environment. Defaults to True.
             wait_for_environment_feedback (float, optional): The timeout in seconds to wait for environment feedback. Defaults to None.
+            num_predictions_feedback (int, optional): The number of predictions to request feedback for. Defaults to None.
             runtime (str, optional): The runtime to be used for the learning process. Defaults to None.
             teacher_runtime (str, optional): The teacher runtime to be used for the learning process. Defaults to None.
         Returns:
@@ -231,7 +233,12 @@ class Agent(BaseModel, ABC):
 
             # Request feedback from environment is necessary
             if request_environment_feedback:
-                self.environment.request_feedback(self.skills, predictions)
+                if num_predictions_feedback is not None:
+                    # predictions_for_feedback = predictions.sample(num_predictions_feedback)
+                    predictions_for_feedback = predictions.head(num_predictions_feedback)
+                else:
+                    predictions_for_feedback = predictions
+                self.environment.request_feedback(self.skills, predictions_for_feedback)
 
             # Compare predictions to ground truth -> get ground truth signal
             ground_truth_signal = self.environment.compare_to_ground_truth(
