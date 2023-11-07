@@ -1,4 +1,5 @@
 name: "Docs"
+
 on:
   push:
     branches:
@@ -7,11 +8,38 @@ on:
       - 'docs/**'
       - 'adala/**'
       - '.github/workflows/docs.yml'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'adala/**'
 
 jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'  # Run this job for pull requests only
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v3
+        with:
+          python-version: "3.11"
+          cache: true
+
+      - name: Install Python dependencies
+        run: |
+          pdm sync -G doc
+
+      - name: Build MkDocs site
+        run: |
+          cd docs/
+          pdm run mkdocs build
+
   upload:
     name: "Upload"
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'  # Run this job for pushes to the master branch only
     permissions:
       contents: write
     steps:

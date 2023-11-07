@@ -5,7 +5,7 @@ from .internal_data import InternalSeries
 
 # Function to apply fuzzy matching
 def _fuzzy_match(str1, str2, match_threshold=0.95):
-    ratio = difflib.SequenceMatcher(None, str1.strip(), str2.strip()).ratio()
+    ratio = difflib.SequenceMatcher(None, str(str1).strip(), str(str2).strip()).ratio()
     return ratio >= match_threshold
 
 

@@ -1,0 +1,23 @@
+name: "Release: Pipeline"
+
+on:
+  release:
+    types:
+      - released
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.pull_request.head.ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-pypi:
+    name: "Build"
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build_pypi.yml
+    with:
+      version: ${{ github.ref_name }}
+      ref: ${{ github.ref_name }}
+      upload_to_pypi: true
+      release-id: ${{ github.event.release.id }}
+    secrets: inherit

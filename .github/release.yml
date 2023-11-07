@@ -1,0 +1,18 @@
+changelog:
+  exclude:
+    labels:
+      - 'skip-changelog'
+      - 'skip-ci'
+  categories:
+    - title: 'BREAKING CHANGES'
+      labels:
+        - breaking
+    - title: 'Features'
+      labels:
+        - feat
+    - title: 'Bug Fixes'
+      labels:
+        - fix
+    - title: 'Other Changes'
+      labels:
+        - "*"
