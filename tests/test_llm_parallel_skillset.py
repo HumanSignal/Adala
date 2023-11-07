@@ -9,30 +9,39 @@ from utils import patching, PatchedCalls
 @patching(
     target_function=PatchedCalls.GUIDANCE.value,
     data=[
+        # Responses for the first text entry
         {
-            'input': {"text_": "Barack Obama was the 44th president of the United States."},
-            'output': {"predictions": "Barack Obama"}
+        'input': {"text_": "Apple's latest product, the iPhone 15, was released in September 2023."},
+        'output': {"predictions": ""}  # No person mentioned
         },
         {
-            'input': {"text_": "Apple's latest product, the iPhone 15, was released in September 2023."},
-            'output': {"predictions": "Apple"}
+        'input': {"text_": "Barack Obama was the 44th president of the United States."},
+        'output': {"predictions": "Barack Obama"}
         },
         {
-            'input': {"text_": "Barack Obama was the 44th president of the United States."},
-            'output': {"predictions": "United States"}
+        'input': {"text_": "Apple's latest product, the iPhone 15, was released in September 2023."},
+        'output': {"predictions": "iPhone 15"}
         },
         {
-            'input': {"text_": "Apple's latest product, the iPhone 15, was released in September 2023."},
-            'output': {"predictions": "September 2023"}
+        'input': {"text_": "Barack Obama was the 44th president of the United States."},
+        'output': {"predictions": ""}  # No product mentioned
         },
         {
-            'input': {"text_": "Barack Obama was the 44th president of the United States."},
-            'output': {"predictions": "44th"}
+        'input': {"text_": "Apple's latest product, the iPhone 15, was released in September 2023."},
+        'output': {"predictions": "September 2023"}
         },
         {
-            'input': {"text_": "Apple's latest product, the iPhone 15, was released in September 2023."},
-            'output': {"predictions": "iPhone 15"}
+        'input': {"text_": "Barack Obama was the 44th president of the United States."},
+        'output': {"predictions": ""}  # No date mentioned
         },
+        {
+        'input': {"text_": "Apple's latest product, the iPhone 15, was released in September 2023."},
+        'output': {"predictions": ""}  # No location mentioned
+        },
+        {
+        'input': {"text_": "Barack Obama was the 44th president of the United States."},
+        'output': {"predictions": "United States"}
+        }
     ],
     strict=False
 )
@@ -50,8 +59,8 @@ def test_llm_parallel_skillset():
         ]
     )
     dataset = DataFrameDataset(df=InternalDataFrame([
-        "Barack Obama was the 44th president of the United States.",
         "Apple's latest product, the iPhone 15, was released in September 2023.",
+        "Barack Obama was the 44th president of the United States.",
     ], columns=["text"]))
     predictions = skillset.apply(
         dataset=dataset,
@@ -60,17 +69,17 @@ def test_llm_parallel_skillset():
 
     pd.testing.assert_frame_equal(InternalDataFrame.from_records([
         {
-            'text': 'Barack Obama was the 44th president of the United States.',
-            'skill_person': 'Barack Obama',
-            'skill_product': None,  # No product mentioned
-            'skill_date': None,  # No date mentioned
-            'skill_location': 'United States'
+        'text': "Apple's latest product, the iPhone 15, was released in September 2023.",
+        'skill_person': "",  # No person mentioned
+        'skill_product': 'iPhone 15',
+        'skill_date': 'September 2023',
+        'skill_location': ""  # No location mentioned
         },
         {
-            'text': "Apple's latest product, the iPhone 15, was released in September 2023.",
-            'skill_person': None,  # No person mentioned
-            'skill_product': 'iPhone 15',
-            'skill_date': 'September 2023',
-            'skill_location': None  # No location mentioned
-        },
+        'text': 'Barack Obama was the 44th president of the United States.',
+        'skill_person': 'Barack Obama',
+        'skill_product': "",  # No product mentioned
+        'skill_date': "",  # No date mentioned
+        'skill_location': 'United States'
+        }
     ]), predictions)
