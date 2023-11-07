@@ -257,6 +257,15 @@ class ParallelSkillSet(SkillSet):
     In a ParallelSkillSet, each skill can be developed independently of the others. This is useful
     for agents that require multiple, diverse capabilities, or tasks where each skill contributes a piece of
     the overall solution.
+
+    Examples: 
+        Create a ParallelSkillSet with a list of skills specified as BaseSkill instances
+        >>> from adala.skills import ParallelSkillSet, TextClassificationSkill, TextGenerationSkill
+        >>> skillset = ParallelSkillSet(skills=[TextClassificationSkill(name='Classify sentiment', instructions='Classify the sentiment'), TextGenerationSkill(name='Summarize text', instructions='Generate a summar')])
+
+        Create a ParallelSkillSet with a dictionary of skill names to BaseSkill instances
+        >>> from adala.skills import ParallelSkillSet, TextClassificationSkill, TextGenerationSkill
+        >>> skillset = ParallelSkillSet(skills={'sentiment_analysis': TextClassificationSkill(name='Classify sentiment', instructions='Classify the sentiment'),'text_summary': TextGenerationSkill(name='Summarize text', instructions='Generate a summary')})
     """
 
     @field_validator("skills", mode="before")
