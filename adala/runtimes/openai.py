@@ -55,7 +55,7 @@ class OpenAIRuntime(LLMRuntime):
         self._check_model_availability()
 
         student_models = {'gpt-3.5-turbo-instruct', 'text-davinci-003'}
-        teacher_models = {'gpt-4', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k'}
+        teacher_models = {'gpt-4', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4-1106-preview', 'gpt-4-vision-preview'}
 
         if self.gpt_model_name in student_models:
             self.llm_runtime_type = LLMRuntimeType.STUDENT
