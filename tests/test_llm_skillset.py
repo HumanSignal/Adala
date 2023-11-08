@@ -72,3 +72,57 @@ def test_llm_linear_skillset():
         #  'skill_1': "\n- Le Musée du Louvre (Organisation)\n- Paris (Lieu)\n- La Joconde (Œuvre d'art)",
         #  'skill_2': '\n{\n    "Organisation": "Le Musée du Louvre",\n    "Lieu": "Paris",\n    "Œuvre d\'art": "La Joconde"\n}'}
     ]), predictions)
+
+
+
+
+@patching(
+    target_function=PatchedCalls.OPENAI_MODEL_LIST.value,
+    data=[{'input': {}, 'output': {'data': [{'id': 'gpt-3.5-turbo-instruct'}]}}],
+)
+@patching(
+    target_function=PatchedCalls.GUIDANCE.value,
+    data=[{
+        'input': {
+            "text_": "Barack Obama",
+            "date": "2009-2017",
+            "location": "United States"
+        },
+        'output': {"predictions": "Barack Obama served as president from 2009 to 2017 in the United States."}
+    }],
+    strict=False
+)
+def test_llm_skill_with_multiple_input_fields():
+    from adala.skills.skillset import LLMSkill
+    from adala.datasets import DataFrameDataset, InternalDataFrame
+    from adala.runtimes import OpenAIRuntime
+
+    # Define a skill that uses multiple input fields
+    skill = LLMSkill(
+        name="skill_summary",
+        instructions="Summarize the presidency term",
+        input_data_field=["text", "date", "location"],  # Multiple input fields
+        input_template="Tell me about {{text}} in {{location}} during {{date}}."  # Template using multiple fields
+    )
+
+    # Create a dataset with multiple columns corresponding to the input fields
+    dataset = DataFrameDataset(df=InternalDataFrame([
+        {"text": "Barack Obama", "date": "2009-2017", "location": "United States"}
+    ]))
+
+    # Apply the skill using the OpenAIRuntime
+    runtime = OpenAIRuntime(verbose=True)
+    predictions = skill.apply(dataset=dataset, runtime=runtime)
+
+    # Define the expected output dataframe
+    expected_output = InternalDataFrame.from_records([
+        {
+            "text": "Barack Obama",
+            "date": "2009-2017",
+            "location": "United States",
+            "skill_summary": "Barack Obama served as president from 2009 to 2017 in the United States."
+        }
+    ])
+
+    # Assert that the actual predictions match the expected output
+    pd.testing.assert_frame_equal(expected_output, predictions)
