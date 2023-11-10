@@ -237,6 +237,95 @@ class LinearSkillSet(SkillSet):
 class ParallelSkillSet(SkillSet):
     """
     Represents a set of skills that are acquired simultaneously to reach a goal.
+
+    In a ParallelSkillSet, each skill can be developed independently of the others. This is useful
+    for agents that require multiple, diverse capabilities, or tasks where each skill contributes a piece of
+    the overall solution.
+
+    Examples: 
+        Create a ParallelSkillSet with a list of skills specified as BaseSkill instances
+        >>> from adala.skills import ParallelSkillSet, TextClassificationSkill, TextGenerationSkill
+        >>> skillset = ParallelSkillSet(skills=[TextClassificationSkill(name='Classify sentiment', instructions='Classify the sentiment'), TextGenerationSkill(name='Summarize text', instructions='Generate a summar')])
+
+        Create a ParallelSkillSet with a dictionary of skill names to BaseSkill instances
+        >>> from adala.skills import ParallelSkillSet, TextClassificationSkill, TextGenerationSkill
+        >>> skillset = ParallelSkillSet(skills={'sentiment_analysis': TextClassificationSkill(name='Classify sentiment', instructions='Classify the sentiment'),'text_summary': TextGenerationSkill(name='Summarize text', instructions='Generate a summary')})
     """
-    
-    pass
+
+    @field_validator("skills", mode="before")
+    @classmethod
+    def skills_validator(
+        cls, v: Union[List[BaseSkill], Dict[str, BaseSkill]]
+    ) -> Dict[str, BaseSkill]:
+        """
+        Validates and converts the skills attribute to a dictionary of skill names to BaseSkill instances.
+
+        Args:
+            v (List[BaseSkill], Dict[str, BaseSkill]]): The skills attribute to validate.
+
+        Returns:
+            Dict[str, BaseSkill]: Dictionary mapping skill names to their corresponding BaseSkill instances.
+        """
+        skills = OrderedDict()
+        if not v:
+            return skills
+
+        if isinstance(v, list) and isinstance(v[0], BaseSkill):
+            # convert list of skill names to dictionary
+            for skill in v:
+                skills[skill.name] = skill
+        elif isinstance(v, dict):
+            skills = v
+        else:
+            raise ValidationError(
+                f"skills must be a list or dictionary, not {type(skills)}"
+            )
+        return skills
+
+    def apply(
+        self,
+        dataset: Union[Dataset, InternalDataFrame],
+        runtime: Runtime,
+        improved_skill: Optional[str] = None,
+    ) -> InternalDataFrame:
+        """
+        Applies each skill on the dataset, enhancing the agent's experience.
+
+        Args:
+            dataset (Dataset): The dataset to apply the skills on.
+            runtime (Runtime): The runtime environment in which to apply the skills.
+            improved_skill (Optional[str], optional): Unused in ParallelSkillSet. Defaults to None.
+        Returns:
+            InternalDataFrame: Skill predictions.
+        """
+        predictions = None
+
+        for i, skill_name in enumerate(self.skills.keys()):
+            skill = self.skills[skill_name]
+            # use input dataset for the first node in the pipeline
+            input_dataset = dataset if i == 0 else predictions
+            print_text(f"Applying skill: {skill_name}")
+            predictions = skill.apply(input_dataset, runtime)
+
+        return predictions
+
+    def select_skill_to_improve(
+        self, accuracy: Mapping, accuracy_threshold: Optional[float] = 0.9
+    ) -> Optional[BaseSkill]:
+        """
+        Selects the skill with the lowest accuracy to improve.
+
+        Args:
+            accuracy (Mapping): Accuracy of each skill.
+            accuracy_threshold (Optional[float], optional): Accuracy threshold. Defaults to 1.0.
+        Returns:
+            Optional[BaseSkill]: Skill to improve. None if no skill to improve.
+        """
+        skills_below_threshold = [
+            skill_name
+            for skill_name in self.skills.keys()
+            if accuracy[skill_name] < accuracy_threshold
+        ]
+        if skills_below_threshold:
+            weakest_skill_name = min(skills_below_threshold, key=accuracy.get)
+            return self.skills[weakest_skill_name]
