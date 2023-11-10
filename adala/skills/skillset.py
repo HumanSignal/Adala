@@ -189,7 +189,7 @@ class LinearSkillSet(SkillSet):
     ) -> InternalDataFrame:
         """
         Sequentially applies each skill on the dataset, enhancing the agent's experience.
-
+        
         Args:
             dataset (Dataset): The dataset to apply the skills on.
             runtime (Runtime): The runtime environment in which to apply the skills.
@@ -210,7 +210,6 @@ class LinearSkillSet(SkillSet):
             input_dataset = dataset if i == 0 else predictions
             print_text(f"Applying skill: {skill_name}")
             predictions = skill.apply(input_dataset, runtime)
-
         return predictions
 
     def select_skill_to_improve(
