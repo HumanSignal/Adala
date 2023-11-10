@@ -33,7 +33,7 @@ class SkillSet(BaseModel, ABC):
     ) -> InternalDataFrame:
         """
         Apply the skill set to a dataset using a specified runtime.
-
+        
         Args:
             dataset (Union[Dataset, InternalDataFrame]): The dataset to apply the skill set to.
             runtime (Runtime): The runtime environment in which to apply the skills.
@@ -90,7 +90,7 @@ class LinearSkillSet(SkillSet):
     """
     Represents a sequence of skills that are acquired in a specific order to achieve a goal.
 
-    LinearSkillSet ensures that skills are developed in a sequential manner, determined either
+    LinearSkillSet ensures that skills are developed in a sequential manner, determined either 
     by the provided skill_sequence or by the lexicographical order of skill names.
 
     Attributes:
