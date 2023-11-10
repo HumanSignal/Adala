@@ -3,4 +3,5 @@ from .labeling.classification import LLMSkill, ClassificationSkill, Classificati
 from .generation.base import TextGenerationSkill
 from .generation.qa import QuestionAnsweringSkill
 from .generation.summarization import SummarizationSkill
+from .collection.classification import ClassificationSkill
 

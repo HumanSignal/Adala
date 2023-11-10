@@ -1,4 +1,4 @@
-from utils import patching, PatchedCalls
+from utils import patching, PatchedCalls, mdict
 
 
 @patching(

@@ -1,10 +1,10 @@
 import pandas as pd
 from unittest.mock import MagicMock, patch
-from adala.runtimes.openai import OpenAIRuntime
+from adala.runtimes import OpenAIChatRuntime
 
 from adala.agents import Agent
 from adala.datasets import DataFrameDataset
-from adala.environments import BasicEnvironment
+from adala.environments import StaticEnvironment
 from adala.skills import ClassificationSkill
 from adala.utils.logs import print_dataframe
 
@@ -34,9 +34,9 @@ def process_record_generator(*args, **kwargs):
     yield {'sentiment': 'Neutral'}
 
 
-@patch.object(OpenAIRuntime, '_check_api_key', return_value=None)
-@patch.object(OpenAIRuntime, '_check_model_availability', return_value=None)
-@patch.object(OpenAIRuntime, '_process_record', side_effect=process_record_generator())
+@patch.object(OpenAIChatRuntime, '_check_api_key', return_value=None)
+@patch.object(OpenAIChatRuntime, '_check_model_availability', return_value=None)
+@patch.object(OpenAIChatRuntime, '_process_record', side_effect=process_record_generator())
 def test_classification_skill(
         mock_check_api_key,
         mock_check_model_availability,

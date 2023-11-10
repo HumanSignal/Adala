@@ -1,13 +1,13 @@
 from rich import print
 from rich.prompt import Prompt
-from .base import BasicEnvironment
+from .base import StaticEnvironment
 from adala.skills import SkillSet
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_series
 from adala.datasets import Dataset, DataFrameDataset
 
 
-class ConsoleEnvironment(BasicEnvironment):
+class ConsoleEnvironment(StaticEnvironment):
 
     def request_feedback(self, skill_set: SkillSet, predictions: InternalDataFrame):
 
@@ -24,5 +24,4 @@ class ConsoleEnvironment(BasicEnvironment):
                     pred_row[skill.name] = ground_truth
             ground_truth_dataset.append(pred_row)
 
-        self.ground_truth_dataset = DataFrameDataset(
-            df=InternalDataFrame(ground_truth_dataset))
+        self.df = InternalDataFrame(ground_truth_dataset)

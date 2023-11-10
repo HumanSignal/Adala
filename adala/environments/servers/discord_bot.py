@@ -141,13 +141,13 @@ class DiscordAPI(BaseAPI):
         if not channel:
             raise Exception(f'Channel with id {CHANNEL_ID} not found')
         ground_truths = []
-        skill_names = [skill['name'] for skill in skills]
-        for skill in skill_names:
+        skill_outputs = sum([skill['outputs'] for skill in skills], [])
+        for skill_output in skill_outputs:
             for prediction in predictions:
                 text = '========================\n'
-                text += '\n'.join(f'**{k}**: {v}' for k, v in prediction.items() if k not in skill_names + ['index'])
-                text += f'\n\n__**{skill}**__: {prediction[skill]}'
-                ground_truth = GroundTruth(prediction_id=prediction['index'], skill_name=skill)
+                text += '\n'.join(f'**{k}**: {v}' for k, v in prediction.items() if k not in skill_outputs + ['index'])
+                text += f'\n\n__**{skill_output}**__: {prediction[skill_output]}'
+                ground_truth = GroundTruth(prediction_id=prediction['index'], skill_name=skill_output)
 
                 message = await channel.send(
                     text, view=AcceptRejectView(

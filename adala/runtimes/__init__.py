@@ -1,2 +1,2 @@
 from .base import Runtime, LLMRuntime, LLMRuntimeModelType
-from .openai import OpenAIRuntime
+from ._openai import OpenAIChatRuntime, OpenAIVisionRuntime

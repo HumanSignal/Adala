@@ -1,3 +1,3 @@
-from .base import Environment, BasicEnvironment
+from .base import Environment, StaticEnvironment
 from .console import ConsoleEnvironment
-from .web import WebEnvironment
+from .web import WebStaticEnvironment

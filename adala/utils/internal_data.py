@@ -1,8 +1,7 @@
 import pandas as pd
 from typing import List, Dict, Any, Union, Iterable
 
-RawRecord = Dict[str, Any]
-RawRecords = List[RawRecord]
+Record = Dict[str, str]
 
 # Internal data tables representation. Replace this with Dask or Polars in the future.
 InternalDataFrame = pd.DataFrame
