@@ -1,27 +1,27 @@
-from pydantic import BaseModel, model_validator, field_validator, ValidationError
+from pydantic import BaseModel, model_validator, field_validator
 from abc import ABC, abstractmethod
-from typing import List, Union, Dict, Optional, Mapping
+from typing import List, Union, Dict, Any, Optional, Mapping
 from collections import OrderedDict
 from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
 from adala.utils.logs import print_text
-from adala.utils.internal_data import InternalDataFrame
+from adala.utils.internal_data import InternalDataFrame, InternalSeries, InternalDataFrameConcat
 from .base import BaseSkill, LLMSkill
 
 
 class SkillSet(BaseModel, ABC):
     """
     Represents a collection of interdependent skills aiming to achieve a specific goal.
-
+    
     A skill set breaks down the path to achieve a goal into necessary precursor skills.
-    Agents can evolve these skills either in parallel for tasks like self-consistency or
+    Agents can evolve these skills either in parallel for tasks like self-consistency or 
     sequentially for complex problem decompositions and causal reasoning. In the most generic
     cases, task decomposition can involve a graph-based approach.
 
     Attributes:
         skills (Dict[str, BaseSkill]): A dictionary of skills in the skill set.
     """
-
+    
     skills: Dict[str, BaseSkill]
 
     @abstractmethod
@@ -115,7 +115,7 @@ class LinearSkillSet(SkillSet):
         >>> from adala.skills import LinearSkillSet
         >>> skillset = LinearSkillSet(skills={'extract': 'Extract keywords from text', 'classify': 'Classify keywords', 'structured_output': 'Create structured output from keywords'})
     """
-
+    
     skill_sequence: List[str] = None
     input_data_field: Optional[str] = None
 
@@ -173,7 +173,7 @@ class LinearSkillSet(SkillSet):
     def skill_sequence_validator(self) -> "LinearSkillSet":
         """
         Validates and sets the default order for the skill sequence if not provided.
-
+        
         Returns:
             LinearSkillSet: The current instance with updated skill_sequence attribute.
         """
