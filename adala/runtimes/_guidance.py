@@ -41,12 +41,38 @@ class GuidanceRuntime(Runtime):
         self._program = guidance(self._llm_template, llm=self._llm, silent=not self.verbose)
         return self
 
-    def _double_brackets(self, text):
+    def _input_template_to_guidance(self, input_template, program_input):
+        # TODO: this check is brittle, will likely to fail in various cases
+        # exclude guidance parameter from input
+        if 'text' in program_input:
+            program_input['text_'] = program_input['text']
+            del program_input['text']
+        if '{text}' in input_template:
+            input_template = input_template.replace('{text}', '{text_}')
         # This regex replaces occurrences of {word} with {{word}},
         # but ignores occurrences of {{word}}.
         # Negative lookbehind (?<!\{) ensures that the { is not preceded by another {
         # Negative lookahead (?!}) ensures that the } is not followed by another }
-        return re.sub(r'(?<!\{)\{(\w+)\}(?!})', r'{{\1}}', text)
+        return re.sub(r'(?<!\{)\{(\w+)\}(?!})', r'{{\1}}', input_template)
+
+    def _output_template_to_guidance(self, output_template, program_input, output_fields, field_schema):
+        for output_field in output_fields:
+            field_name = output_field['text']
+            if field_name in field_schema and field_schema[field_name]['type'] == 'array':
+                # when runtime is called with a categorical field:
+                #    runtime.record_to_record(
+                #        ...,
+                #        output_template='Predictions: {labels}',
+                #        field_schema={'labels': {'type': 'array', 'items': {'type': 'string', 'enum': ['a', 'b', 'c']}}}
+                #    )
+                # replace {field_name} with {select 'field_name' options=field_name_options}
+                # and add "field_name_options" to program input
+                program_input[f'{field_name}_options'] = field_schema[field_name]['items']['enum']
+                output_template = output_template.replace(f'{{{field_name}}}', f'{{{{select \'{field_name}\' options={field_name}_options}}}}')
+            else:
+                # In simple generation scenario, replace {field_name} with {{gen 'field_name'}}
+                output_template = output_template.replace(f'{{{field_name}}}', f'{{{{gen \'{field_name}\'}}}}')
+        return output_template
 
     def record_to_record(
         self,
@@ -59,43 +85,24 @@ class GuidanceRuntime(Runtime):
     ) -> Dict[str, str]:
 
         extra_fields = extra_fields or {}
-        field_types = field_schema or {}
+        field_schema = field_schema or {}
 
         if not isinstance(record, dict):
             record = record.to_dict()
         else:
             record = record.copy()
         program_input = record
-
-        output_fields = parse_template(partial_str_format(output_template, **record), include_texts=False)
-        for output_field in output_fields:
-            field_name = output_field['text']
-            if field_name in field_schema and field_schema[field_name]['type'] == 'array':
-                # when runtime is called with a categorical field:
-                #    runtime.record_to_record(
-                #        ...,
-                #        output_template='Predictions: {labels}',
-                #        field_schema={'labels': {'type': 'array', 'items': {'type': 'string', 'enum': ['a', 'b', 'c']}}}
-                #    )
-                # replace {field_name} with {select 'field_name' options=field_name_options}
-                # and add "field_name_options" to program input
-                output_template = output_template.replace(
-                    f'{{{field_name}}}',
-                    f'{{{{select \'{field_name}\' options={field_name}}}}}'
-                )
-                program_input[field_name] = field_types[field_name]['items']['enum']
-
-        # exclude guidance parameter from input
-        if 'text' in program_input:
-            program_input['text_'] = program_input['text']
-            del program_input['text']
-            # TODO: this check is brittle, will likely to fail in various cases
-            if '{text}' in input_template:
-                input_template = input_template.replace('{text}', '{text_}')
-        program_input['input_program'] = guidance(self._double_brackets(input_template), llm=self._llm, silent=not self.verbose)
-        program_input['output_program'] = guidance(self._double_brackets(output_template), llm=self._llm)
-        program_input['instructions_program'] = guidance(self._double_brackets(instructions_template), llm=self._llm)
         program_input.update(extra_fields)
+
+        output_fields = parse_template(partial_str_format(output_template, **extra_fields), include_texts=False)
+
+        input_template = self._input_template_to_guidance(input_template, program_input)
+        instructions_template = self._input_template_to_guidance(instructions_template, program_input)
+        output_template = self._output_template_to_guidance(output_template, program_input, output_fields, field_schema)
+
+        program_input['input_program'] = guidance(input_template, llm=self._llm)
+        program_input['instructions_program'] = guidance(instructions_template, llm=self._llm)
+        program_input['output_program'] = guidance(output_template, llm=self._llm)
 
         if self.verbose:
             print(program_input)

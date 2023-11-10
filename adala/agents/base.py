@@ -5,9 +5,9 @@ from rich import print
 
 from adala.environments.base import Environment, StaticEnvironment, GroundTruthSignal
 from adala.datasets import Dataset, DataFrameDataset
-from adala.runtimes.base import Runtime, LLMRuntime, LLMRuntimeType, LLMRuntimeModelType
-# from adala.runtimes.openai import OpenAIRuntime
+from adala.runtimes.base import Runtime
 from adala.runtimes._openai import OpenAIChatRuntime
+from adala.runtimes import GuidanceRuntime, GuidanceModelType
 from adala.skills._base import Skill
 from adala.memories.base import Memory
 from adala.skills.base import BaseSkill
@@ -39,7 +39,8 @@ class Agent(BaseModel, ABC):
     memory: Memory = Field(default=None)
     runtimes: Optional[Dict[str, Runtime]] = Field(
         default_factory=lambda: {
-            'openai': OpenAIChatRuntime(model='gpt-3.5-turbo'),
+            'openai': GuidanceRuntime()
+            # 'openai': OpenAIChatRuntime(model='gpt-3.5-turbo'),
             # 'llama2': LLMRuntime(
             #     llm_runtime_type=LLMRuntimeModelType.Transformers,
             #     llm_params={
@@ -52,7 +53,7 @@ class Agent(BaseModel, ABC):
     teacher_runtimes: Optional[Dict[str, Runtime]] = Field(
         default_factory=lambda: {
             'openai-gpt3': OpenAIChatRuntime(model='gpt-3.5-turbo'),
-            # 'openai-gpt4': OpenAIRuntime(model='gpt-4')
+            # 'openai-gpt4': OpenAIChatRuntime(model='gpt-4')
         }
     )
     default_runtime: str = 'openai'

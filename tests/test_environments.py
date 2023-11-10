@@ -1,9 +1,9 @@
 import pandas as pd
 import pytest
 
-from adala.skills import LinearSkillSet, LLMSkill
+from adala.skills import LinearSkillSet, TransformSkill
 from adala.utils.internal_data import InternalDataFrame
-from adala.environments.base import BasicEnvironment
+from adala.environments import StaticEnvironment
 
 NaN = float("nan")
 
@@ -11,7 +11,7 @@ NaN = float("nan")
 @pytest.mark.parametrize("skillset, predictions, ground_truth, ground_truth_columns, expected_match, expected_errors", [
     # test single skill, full ground truth signal
     (
-        LinearSkillSet(skills=[LLMSkill(name='some_skill', input_data_field="text")]),
+        LinearSkillSet(skills=[TransformSkill(name='some_skill', input_template="Input {text}")]),
         InternalDataFrame({"text": list('abcd'), "some_skill": ['1', '0', '1', '0']}),
         InternalDataFrame({"my_ground_truth": ['1', '1', '1', '1']}),
         {"some_skill": "my_ground_truth"},
@@ -27,8 +27,8 @@ NaN = float("nan")
     (
         # skills
         LinearSkillSet(skills=[
-            LLMSkill(name='skill_1', input_data_field="text"),
-            LLMSkill(name="skill_2", input_data_field="text")
+            TransformSkill(name='skill_1', input_template="Input: {text}"),
+            TransformSkill(name="skill_2", input_template="Input: {text}")
         ]),
         # predictions
         InternalDataFrame({
@@ -59,8 +59,8 @@ NaN = float("nan")
     (
         # skills
         LinearSkillSet(skills=[
-            LLMSkill(name='skill_1', input_data_field="text"),
-            LLMSkill(name="skill_2", input_data_field="text")
+            TransformSkill(name='skill_1', input_template="Input: {text}"),
+            TransformSkill(name="skill_2", input_template="Input: {text}")
         ]),
         # predictions
         InternalDataFrame({
@@ -90,8 +90,8 @@ NaN = float("nan")
 ])
 def test_basic_env_compare_to_ground_truth(skillset, predictions, ground_truth, ground_truth_columns, expected_match, expected_errors):
 
-    basic_env = BasicEnvironment(
-        ground_truth_dataset=ground_truth,
+    basic_env = StaticEnvironment(
+        df=ground_truth,
         ground_truth_columns=ground_truth_columns
     )
 
