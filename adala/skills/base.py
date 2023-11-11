@@ -56,12 +56,11 @@ class BaseSkill(BaseModel, ABC):
         default="Input: {{{{{input}}}}}",
         examples=["Text: {{{{{input}}}}}, Date: {{{{date_column}}}}, Sentiment: {{{{gen 'sentiment'}}}}"]
     )
-    # TODO: skill can have multiple input fields
-    input_data_field: Optional[str] = Field(
-        title='Input data field',
-        description='Input data field name that will be used to match input data.',
-        examples=['text'],
-        # TODO: either make it required, or `input_template` required
+
+    input_data_field: Union[str, List[str], None] = Field( # kept name singular to not break existing code
+        title='Input data fields',
+        description='Input data field name(s) that will be used to match input data.',
+        examples=['text', ['text', 'date']],
         default=None
     )
     output_template: Optional[str] = Field(
@@ -96,7 +95,14 @@ class BaseSkill(BaseModel, ABC):
                             f'\nFor example, if your input data stored in `"text"` column, '
                             f'you can set\n\nskill = {self.__class__.__name__}(..., input_data_field="text")')
                 raise ValueError(f'`input_data_field` is not provided for skill {self.name}')
-            self.input_template = self.input_template.format(input=self.input_data_field)
+            # handling multiple input fields
+            if isinstance(self.input_data_field, list):
+                for field in self.input_data_field:
+                    if f'{{{{{{{field}}}}}}}' not in self.input_template:
+                        raise ValueError(f'`input_template` does not contain placeholder for field `{field}`')
+                    self.input_template = self.input_template.format(input=field)
+            else:
+                self.input_template = self.input_template.format(input=self.input_data_field)
         return self
 
     def __call__(self, input: InternalDataFrame, runtime: Runtime, dataset: Dataset) -> InternalDataFrame:
