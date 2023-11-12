@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from adala.skills import LinearSkillSet, TransformSkill
-from adala.utils.internal_data import InternalDataFrame
+from adala.utils.internal_data import InternalDataFrame, InternalSeries
 from adala.environments import StaticEnvironment
 
 NaN = float("nan")
@@ -11,24 +11,34 @@ NaN = float("nan")
 @pytest.mark.parametrize("skillset, predictions, ground_truth, ground_truth_columns, expected_match, expected_errors", [
     # test single skill, full ground truth signal
     (
-        LinearSkillSet(skills=[TransformSkill(name='some_skill', input_template="Input {text}")]),
-        InternalDataFrame({"text": list('abcd'), "some_skill": ['1', '0', '1', '0']}),
+        # skills
+        LinearSkillSet(skills=[
+            TransformSkill(
+                name='some_skill',
+                input_template="Input: {text}",
+                output_template="Output: {skill_output}",
+                instructions="Convert all letters to '1'"
+            )
+        ]),
+        # predictions
+        InternalDataFrame({"text": list('abcd'), "skill_output": ['1', '0', '1', '0']}),
+        # ground truths
         InternalDataFrame({"my_ground_truth": ['1', '1', '1', '1']}),
-        {"some_skill": "my_ground_truth"},
+        # ground truth
+        {"skill_output": "my_ground_truth"},
         # match
-        InternalDataFrame({"some_skill": [True, False, True, False]}),
+        InternalDataFrame({"skill_output": [True, False, True, False]}),
         # errors
         {
-            "some_skill": InternalDataFrame({
-                "predictions": ['0', '0'], "my_ground_truth": ['1', '1']}, index=[1, 3])
+            "skill_output": InternalSeries(data=['1', '1'], index=[1, 3], name="my_ground_truth")
         }
     ),
     # test two linear skills, partial ground truth signal
     (
         # skills
         LinearSkillSet(skills=[
-            TransformSkill(name='skill_1', input_template="Input: {text}"),
-            TransformSkill(name="skill_2", input_template="Input: {text}")
+            TransformSkill(name='skill_1', input_template="Input: {text}", output_template="Output: {skill_1}", instructions="..."),
+            TransformSkill(name="skill_2", input_template="Input: {text}", output_template="Output: {skill_2}", instructions="...")
         ]),
         # predictions
         InternalDataFrame({
@@ -49,18 +59,16 @@ NaN = float("nan")
         }, index=[11, 22, 33, 44]),
         # expected errors
         {
-            "skill_1": InternalDataFrame({
-                "predictions": ['0'], "gt_1": ['1']}, index=[44]),
-            "skill_2": InternalDataFrame({
-                "predictions": ['0'], "gt_2": ['1']}, index=[33])
+            "skill_1": InternalSeries(data=['1'], index=[44], name="gt_1"),
+            "skill_2": InternalSeries(data=['1'], index=[33], name="gt_2")
         }
     ),
     # test two linear skills, no ground truth signal for one skill, different size of dataframes
     (
         # skills
         LinearSkillSet(skills=[
-            TransformSkill(name='skill_1', input_template="Input: {text}"),
-            TransformSkill(name="skill_2", input_template="Input: {text}")
+            TransformSkill(name='skill_1', input_template="Input: {text}", output_template="Output: {skill_1}", instructions="..."),
+            TransformSkill(name="skill_2", input_template="Input: {text}", output_template="Output: {skill_2}", instructions="...")
         ]),
         # predictions
         InternalDataFrame({
@@ -81,10 +89,8 @@ NaN = float("nan")
         }, index=[11, 22, 33, 44]),
         # expected errors
         {
-            "skill_1": InternalDataFrame({
-                "predictions": [], "gt_1": []}, index=[]),
-            "skill_2": InternalDataFrame({
-                "predictions": ['1'], "gt_2": ['0']}, index=[44])
+            "skill_1": InternalSeries(data=[], index=[], name="gt_1"),
+            "skill_2": InternalSeries(data=['0'], index=[44], name="gt_2")
         }
     ),
 ])
@@ -102,9 +108,8 @@ def test_basic_env_compare_to_ground_truth(skillset, predictions, ground_truth, 
         f'Expected: {expected_match}\nGot: {ground_truth_signal.match}'
 
     if expected_errors is not None:
-        for skill_name in skillset.skills:
-            skill_errors = ground_truth_signal.errors[skill_name]
-            expected_skill_errors = expected_errors[skill_name]
-            pd.testing.assert_frame_equal(expected_skill_errors, skill_errors, check_index_type=False, check_dtype=False), \
-                f'Skill {skill_name}\n\nExpected: {expected_skill_errors}\nGot: {skill_errors}'
-
+        for skill_output in skillset.get_skill_outputs():
+            skill_errors = ground_truth_signal.errors[skill_output]
+            expected_skill_errors = expected_errors[skill_output]
+            pd.testing.assert_series_equal(expected_skill_errors, skill_errors, check_index_type=False, check_dtype=False), \
+                f'Skill output {skill_output}\n\nExpected: {expected_skill_errors}\nGot: {skill_errors}'

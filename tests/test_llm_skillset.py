@@ -12,47 +12,62 @@ from utils import patching, PatchedCalls
     data=[{
         # apply "Extract named entities" -> Produce "skill_0" column
         'input': {"text_": "Barack Obama was the 44th president of the United States."},
-        'output': {"predictions": "\n- Barack Obama (person)\n- 44th (ordinal number)\n- president (title)\n- United States (location)"}
+        'output': {"skill_0": "\n- Barack Obama (person)\n- 44th (ordinal number)\n- president (title)\n- United States (location)"}
     }, {
         'input': {"text_": "Apple's latest product, the iPhone 15, was released in September 2023."},
-        'output': {"predictions": '\n- Apple (company)\n- iPhone 15 (product)\n- September 2023 (date)'}
+        'output': {"skill_0": '\n- Apple (company)\n- iPhone 15 (product)\n- September 2023 (date)'}
     }, {
         # apply "Translate to French" -> Produce "skill_1" column
         'input': {"text_": "Barack Obama was the 44th president of the United States.", "skill_0": "\n- Barack Obama (person)\n- 44th (ordinal number)\n- president (title)\n- United States (location)"},
-        'output': {"predictions": '\n- Barack Obama (personne)\n- 44e (numéro ordinal)\n- président (titre)\n- États-Unis (emplacement)'}
+        'output': {"skill_1": '\n- Barack Obama (personne)\n- 44e (numéro ordinal)\n- président (titre)\n- États-Unis (emplacement)'}
     }, {
         'input': {"text_": "Apple's latest product, the iPhone 15, was released in September 2023.", "skill_0": '\n- Apple (company)\n- iPhone 15 (product)\n- September 2023 (date)'},
-        'output': {"predictions": '\n- Apple (entreprise)\n- iPhone 15 (produit)\n- Septembre 2023 (date)'}
+        'output': {"skill_1": '\n- Apple (entreprise)\n- iPhone 15 (produit)\n- Septembre 2023 (date)'}
     }, {
         # apply "Create a structured output in JSON format" -> Produce "skill_2" column
         'input': {"text_": "Barack Obama was the 44th president of the United States.", "skill_0": "\n- Barack Obama (person)\n- 44th (ordinal number)\n- president (title)\n- United States (location)", "skill_1": '\n- Barack Obama (personne)\n- 44e (numéro ordinal)\n- président (titre)\n- États-Unis (emplacement)'},
-        'output': {'predictions': '\n{\n    "personne": "Barack Obama",\n    "numéro ordinal": "44e",\n    "titre": "président",\n    "emplacement": "États-Unis"\n}'}
+        'output': {'skill_2': '\n{\n    "personne": "Barack Obama",\n    "numéro ordinal": "44e",\n    "titre": "président",\n    "emplacement": "États-Unis"\n}'}
     }, {
         'input': {"text_": "Apple's latest product, the iPhone 15, was released in September 2023.", "skill_0": '\n- Apple (company)\n- iPhone 15 (product)\n- September 2023 (date)', 'skill_1': '\n- Apple (entreprise)\n- iPhone 15 (produit)\n- Septembre 2023 (date)'},
-        'output': {'predictions': '\n{\n  "entreprise": "Apple",\n  "produit": "iPhone 15",\n  "date": "Septembre 2023"\n}'}
+        'output': {'skill_2': '\n{\n  "entreprise": "Apple",\n  "produit": "iPhone 15",\n  "date": "Septembre 2023"\n}'}
     },],
     strict=False
 )
 def test_llm_linear_skillset():
-    from adala.skills.skillset import LinearSkillSet, LLMSkill
+    from adala.skills import LinearSkillSet, TransformSkill
     from adala.datasets import DataFrameDataset, InternalDataFrame
-    from adala.runtimes import OpenAIRuntime
+    from adala.runtimes import GuidanceRuntime
 
     skillset = LinearSkillSet(
         skills=[
-            LLMSkill(name="skill_0", instructions="Extract named entities", input_data_field="text"),
-            LLMSkill(name="skill_1", instructions="Translate to French", input_data_field="skill_0"),
-            LLMSkill(name="skill_2", instructions="Create a structured output in JSON format", input_data_field="skill_1"),
+            TransformSkill(
+                name="skill_0",
+                instructions="Extract named entities",
+                input_template="Input: {text}",
+                output_template="Output: {skill_0}"
+            ),
+            TransformSkill(
+                name="skill_1",
+                instructions="Translate to French",
+                input_template="Input: {skill_0}",
+                output_template="Output: {skill_1}"
+            ),
+            TransformSkill(
+                name="skill_2",
+                instructions="Create a structured output in JSON format",
+                input_template="Input: {skill_1}",
+                output_template="Output: {skill_2}"
+            ),
         ]
     )
-    dataset = DataFrameDataset(df=InternalDataFrame([
+    df = InternalDataFrame([
         "Barack Obama was the 44th president of the United States.",
         "Apple's latest product, the iPhone 15, was released in September 2023.",
         # "The Louvre Museum in Paris houses the Mona Lisa."
-    ], columns=["text"]))
+    ], columns=["text"])
     predictions = skillset.apply(
-        dataset=dataset,
-        runtime=OpenAIRuntime(verbose=True),
+        input=df,
+        runtime=GuidanceRuntime(),
     )
 
     pd.testing.assert_frame_equal(InternalDataFrame.from_records([

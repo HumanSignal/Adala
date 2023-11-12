@@ -1,4 +1,4 @@
-from .skillset import SkillSet, LinearSkillSet
+from .skillset import SkillSet, LinearSkillSet, ParallelSkillSet
 from .labeling.classification import LLMSkill, ClassificationSkill, ClassificationSkillWithCoT
 from .generation.base import TextGenerationSkill
 from .generation.qa import QuestionAnsweringSkill

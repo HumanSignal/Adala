@@ -321,19 +321,19 @@ def test_agent_quickstart_two_skills():
 )
 def test_agent_quickstart_three_skills_only_second_fail():
     from adala.agents import Agent
-    from adala.skills import LinearSkillSet, LLMSkill
-    from adala.environments import BasicEnvironment
+    from adala.skills import LinearSkillSet, TransformSkill
+    from adala.environments import StaticEnvironment
 
     agent = Agent(
         skills=LinearSkillSet(
             skills=[
-                LLMSkill(name="0->1", instructions="...", input_data_field="input"),
-                LLMSkill(name="1->2", instructions="...", input_data_field="0->1"),
-                LLMSkill(name="2->3", instructions="...", input_data_field="1->2"),
+                TransformSkill(name="0->1", instructions="...", input_template="Input: {input}"),
+                TransformSkill(name="1->2", instructions="...", input_data_field="Input: {0->1}"),
+                TransformSkill(name="2->3", instructions="...", input_data_field="Input: {1->2}"),
             ]
         ),
-        environment=BasicEnvironment(
-            ground_truth_dataset=pd.DataFrame([
+        environment=StaticEnvironment(
+            df=pd.DataFrame([
                 ['0 5 0', '1 5 1', '2 5 2', '3 5 3'],
             ], columns=['input', 'gt_0', 'gt_1', 'gt_2']),
             ground_truth_columns={
