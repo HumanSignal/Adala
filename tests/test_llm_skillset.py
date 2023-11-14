@@ -35,7 +35,6 @@ from utils import patching, PatchedCalls
 )
 def test_llm_linear_skillset():
     from adala.skills import LinearSkillSet, TransformSkill
-    from adala.datasets import DataFrameDataset, InternalDataFrame
     from adala.runtimes import GuidanceRuntime
 
     skillset = LinearSkillSet(
