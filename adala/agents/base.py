@@ -3,8 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional, List, Dict, Union, Tuple
 from rich import print
 
-from adala.environments.base import Environment, StaticEnvironment
-from adala.datasets import Dataset, DataFrameDataset
+from adala.environments.base import Environment, StaticEnvironment, EnvironmentFeedback
 from adala.runtimes.base import Runtime
 from adala.runtimes._openai import OpenAIChatRuntime
 from adala.runtimes import GuidanceRuntime
@@ -17,20 +16,29 @@ from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 
 class Agent(BaseModel, ABC):
     """
-    Represents a customizable agent that can interact with environments, 
+    Represents a customizable agent that can interact with environments,
     employ skills, and leverage memory and runtimes.
 
     Attributes:
-        environment (Union[Dataset, Environment]): The environment with which the agent interacts.
-        skills (Union[SkillSet, BaseSkill, List[BaseSkill], Dict[str, BaseSkill]]): The skills possessed by the agent.
+        environment (Environment): The environment with which the agent interacts.
+        skills (Union[SkillSet, List[Skill]]): The skills possessed by the agent.
         memory (LongTermMemory, optional): The agent's long-term memory. Defaults to None.
         runtimes (Dict[str, Runtime], optional): The runtimes available to the agent. Defaults to predefined runtimes.
         default_runtime (str): The default runtime used by the agent. Defaults to 'openai'.
         teacher_runtimes (Dict[str, Runtime], optional): The runtimes available to the agent's teacher. Defaults to predefined runtimes.
         default_teacher_runtime (str): The default runtime used by the agent's teacher. Defaults to 'openai-gpt3'.
+
+    Examples:
+        >>> from adala.environments import StaticEnvironment
+        >>> from adala.skills import LinearSkillSet, TransformSkill
+        >>> from adala.agents import Agent
+        >>> agent = Agent(skills=LinearSkillSet(skills=[TransformSkill()]), environment=StaticEnvironment())
+        >>> agent.learn()  # starts the learning process
+        >>> predictions = agent.run()  # runs the agent and returns the predictions
+
     """
 
-    environment: Union[InternalDataFrame, Dataset, Environment] = Field(default_factory=DataFrameDataset)
+    environment: Environment
     skills: SkillSet
 
     memory: Memory = Field(default=None)
@@ -79,16 +87,11 @@ class Agent(BaseModel, ABC):
             f"Default Teacher Runtime: {self.default_teacher_runtime}"
         )
 
-    @field_validator('environment')
+    @field_validator('environment', mode='before')
     def environment_validator(cls, v) -> Environment:
         """
-        Validates and possibly transforms the environment attribute.
-
-        Args:
-            v (Union[Dataset, Environment]): The environment value to validate.
-
-        Returns:
-            Environment: The validated environment.
+        Validates and possibly transforms the environment attribute:
+        if the environment is an InternalDataFrame, it is transformed into a StaticEnvironment.
         """
         if isinstance(v, InternalDataFrame):
             v = StaticEnvironment(df=v)
@@ -98,12 +101,6 @@ class Agent(BaseModel, ABC):
     def skills_validator(cls, v) -> SkillSet:
         """
         Validates and possibly transforms the skills attribute.
-
-        Args:
-            v (Union[SkillSet, BaseSkill, List[BaseSkill], Dict[str, BaseSkill]]): The skills value to validate.
-
-        Returns:
-            SkillSet: The validated set of skills.
         """
         if isinstance(v, SkillSet):
             return v
@@ -114,6 +111,9 @@ class Agent(BaseModel, ABC):
 
     @model_validator(mode='after')
     def verify_input_parameters(self):
+        """
+        Verifies that the input parameters are valid."""
+
         def _raise_default_runtime_error(val, runtime, runtimes, default_value):
             print_error(f"The Agent.{runtime} is set to {val}, "
                         f"but this runtime is not available in the list: {list(runtimes)}. "
@@ -191,7 +191,21 @@ class Agent(BaseModel, ABC):
         predictions = self.skills.apply(input, runtime=runtime)
         return predictions
 
-    def select_skill_to_train(self, feedback, accuracy_threshold):
+    def select_skill_to_train(self, feedback: EnvironmentFeedback, accuracy_threshold: float) -> Tuple[str, str, float]:
+        """
+        Selects the skill to train based on the feedback signal.
+
+        Args:
+            feedback (Feedback): The feedback signal.
+            accuracy_threshold (float): The accuracy threshold to use for selecting the skill to train.
+
+        Returns:
+            str: The name of the skill to train.
+            str: The name of the skill output to train.
+            float: The accuracy score of the skill to train.
+
+        """
+
         # Use ground truth signal to find the skill to improve
         # TODO: what if it is not possible to estimate accuracy per skill?
         accuracy = feedback.get_accuracy()
@@ -209,7 +223,6 @@ class Agent(BaseModel, ABC):
         learning_iterations: int = 3,
         accuracy_threshold: float = 0.9,
         update_memory: bool = True,
-        wait_for_feedback: Optional[float] = True,
         num_feedbacks: Optional[int] = None,
         runtime: Optional[str] = None,
         teacher_runtime: Optional[str] = None,
@@ -221,7 +234,6 @@ class Agent(BaseModel, ABC):
             learning_iterations (int, optional): The number of iterations for learning. Defaults to 3.
             accuracy_threshold (float, optional): The desired accuracy threshold to reach. Defaults to 0.9.
             update_memory (bool, optional): Flag to determine if memory should be updated after learning. Defaults to True.
-            wait_for_feedback (float, optional): The timeout in seconds to wait for environment feedback. Defaults to None.
             num_feedbacks (int, optional): The number of predictions to request feedback for. Defaults to None.
             runtime (str, optional): The runtime to be used for the learning process. Defaults to None.
             teacher_runtime (str, optional): The teacher runtime to be used for the learning process. Defaults to None.
@@ -251,13 +263,11 @@ class Agent(BaseModel, ABC):
 
             print_text(f'\n\n=> Iteration #{iteration}: Getting feedback, analyzing and improving ...')
 
-            inputs = self.environment.get_data_batch(batch_size=num_feedbacks)
+            inputs = self.environment.get_data_batch()
 
             predictions = self.skills.apply(inputs, runtime=runtime)
 
-            self.environment.request_feedback(self.skills, predictions, num_feedbacks, wait_for_feedback)
-
-            feedback = self.environment.get_feedback(self.skills, predictions)
+            feedback = self.environment.get_feedback(self.skills, predictions, num_feedbacks=num_feedbacks)
             print('Predictions and feedback:')
             fb = feedback.feedback.rename(columns=lambda x: x + '__fb' if x in predictions.columns else x)
             print_dataframe(InternalDataFrameConcat([predictions, feedback.match, fb], axis=1))

@@ -1,4 +1,4 @@
-from .base import TextGenerationSkill
+from .text_generation import TextGenerationSkill
 
 
 class SummarizationSkill(TextGenerationSkill):
@@ -15,8 +15,7 @@ class SummarizationSkill(TextGenerationSkill):
         output_template (str): Expected format of the LLM's summary.
         prediction_field (str): Field name for the generated summary.
     """
-    
+    name = 'summarization'
     instructions: str = 'Summarize the text.'
-    input_template: str = "Text: {{{{{input}}}}}"
-    output_template: str = "Summary: {{gen 'summary'}}"
-    prediction_field: str = 'summary'
+    input_template: str = "Text: {text}"
+    output_template: str = "Summary: {summary}"

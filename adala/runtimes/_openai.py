@@ -3,6 +3,7 @@ from rich import print
 
 from typing import Optional, Dict, Any, List
 
+
 def check_if_new_openai_version():
     # check openai package version
     from openai import __version__ as openai_version
@@ -28,6 +29,15 @@ from adala.utils.parse import parse_template, partial_str_format
 
 
 class OpenAIChatRuntime(Runtime):
+    """
+    Runtime that uses [OpenAI API](https://openai.com/) and chat completion models to perform the skill.
+
+    Attributes:
+        openai_model: OpenAI model name.
+        openai_api_key: OpenAI API key. If not provided, will be taken from OPENAI_API_KEY environment variable.
+        max_tokens: Maximum number of tokens to generate. Defaults to 1000.
+    """
+
     openai_model: str = Field(alias='model')
     openai_api_key: Optional[str] = Field(default=os.getenv('OPENAI_API_KEY'), alias='api_key')
     max_tokens: Optional[int] = 1000
@@ -61,6 +71,9 @@ class OpenAIChatRuntime(Runtime):
         return self
 
     def execute(self, messages: List):
+        """
+        Execute OpenAI request given list of messages in OpenAI API format
+        """
         if self.verbose:
             print(f'OpenAI request: {messages}')
 
@@ -88,6 +101,20 @@ class OpenAIChatRuntime(Runtime):
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
     ) -> Dict[str, str]:
+        """
+        Execute OpenAI request given record and templates for input, instructions and output.
+
+        Args:
+            record: Record to be used for input, instructions and output templates.
+            input_template: Template for input message.
+            instructions_template: Template for instructions message.
+            output_template: Template for output message.
+            extra_fields: Extra fields to be used in templates.
+            field_schema: Field schema to be used for parsing templates.
+
+        Returns:
+            Dict[str, str]: Output record.
+        """
 
         extra_fields = extra_fields or {}
 
@@ -114,6 +141,10 @@ class OpenAIChatRuntime(Runtime):
 
 
 class OpenAIVisionRuntime(OpenAIChatRuntime):
+    """
+    Runtime that uses [OpenAI API](https://openai.com/) and vision models to perform the skill.
+    Only compatible with OpenAI API version 1.0.0 or higher.
+    """
 
     def record_to_record(
         self,
@@ -124,6 +155,26 @@ class OpenAIVisionRuntime(OpenAIChatRuntime):
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
     ) -> Dict[str, str]:
+        """
+        Execute OpenAI request given record and templates for input, instructions and output.
+
+        Args:
+            record: Record to be used for input, instructions and output templates.
+            input_template: Template for input message.
+            instructions_template: Template for instructions message.
+            output_template: Template for output message.
+            extra_fields: Extra fields to be used in templates.
+            field_schema: Field jsonschema to be used for parsing templates.
+                         Field schema must contain "format": "uri" for image fields. For example:
+                            ```json
+                            {
+                                "image": {
+                                    "type": "string",
+                                    "format": "uri"
+                                }
+                            }
+                            ```
+        """
 
         if not check_if_new_openai_version():
             raise NotImplementedError(f'{self.__class__.__name__} requires OpenAI API version 1.0.0 or higher.')

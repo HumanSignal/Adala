@@ -14,6 +14,12 @@ class GuidanceModelType(enum.Enum):
 
 
 class GuidanceRuntime(Runtime):
+    """
+    Runtime for LLMs powered by [guidance](https://github.com/guidance-ai/guidance).
+    Here you can rely on constrained generation problem formulation,
+    which require structured programs to be defined on the input and output data.
+    """
+
     llm_runtime_model_type: GuidanceModelType = GuidanceModelType.OpenAI
     llm_params: Dict[str, str] = {
         'model': 'gpt-3.5-turbo-instruct',
@@ -31,6 +37,10 @@ class GuidanceRuntime(Runtime):
 {{>output_program}}'''
 
     def init_runtime(self) -> Runtime:
+        """
+        Initializes the runtime.
+        """
+
         # create an LLM instance
         if self.llm_runtime_model_type.value == GuidanceModelType.OpenAI.value:
             self._llm = guidance.llms.OpenAI(**self.llm_params)
@@ -86,6 +96,20 @@ class GuidanceRuntime(Runtime):
         extra_fields: Optional[Dict[str, Any]] = None,
         field_schema: Optional[Dict] = None,
     ) -> Dict[str, str]:
+        """
+        Generates a record from a record.
+
+        Args:
+            record (Dict[str, str]): Input record.
+            input_template (str): Input template.
+            instructions_template (str): Instructions template.
+            output_template (str): Output template.
+            extra_fields (Optional[Dict[str, Any]], optional): Extra fields. Defaults to None.
+            field_schema (Optional[Dict], optional): Field schema. Defaults to None.
+
+        Returns:
+            Dict[str, str]: Generated record.
+        """
 
         extra_fields = extra_fields or {}
         field_schema = field_schema or {}

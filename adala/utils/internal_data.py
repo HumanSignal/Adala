@@ -13,4 +13,13 @@ def InternalDataFrame_encoder(df: InternalDataFrame) -> List:
 
 
 def InternalDataFrameConcat(dfs: Iterable[InternalDataFrame], **kwargs) -> InternalDataFrame:
+    """
+    Concatenate dataframes.
+
+    Args:
+        dfs (Iterable[InternalDataFrame]): The dataframes to concatenate.
+
+    Returns:
+        InternalDataFrame: The concatenated dataframe.
+    """
     return pd.concat(dfs, **kwargs)

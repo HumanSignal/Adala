@@ -10,8 +10,8 @@ from adala.skills.skillset import SkillSet
 
 class EnvironmentFeedback(BaseModel):
     """
-        A model that represents the comparison between predictions and ground truth data,
-    potentially holding information about matching results and errors per skill.
+    A class that represents the feedback received from an environment,
+    along with the calculated correctness of predictions.
 
     Attributes:
         match (InternalDataFrame): A DataFrame indicating the correctness of predictions.
@@ -41,10 +41,6 @@ class EnvironmentFeedback(BaseModel):
 
         Returns:
             InternalSeries: A series representing the accuracy of predictions.
-
-        Examples:
-
-
         """
         return self.match.mean()
 
@@ -66,42 +62,33 @@ class Environment(BaseModel, ABC):
     """
 
     @abstractmethod
-    def get_data_batch(self, batch_size = None) -> InternalDataFrame:
+    def get_data_batch(self, batch_size=None) -> InternalDataFrame:
         """
         Get a batch of data from data stream to be processed by the skill set.
+
+        Args:
+            batch_size (Optional[int], optional): The size of the batch. Defaults to None
 
         Returns:
             InternalDataFrame: The data batch.
         """
 
     @abstractmethod
-    def request_feedback(
+    def get_feedback(
         self,
         skills: SkillSet,
         predictions: InternalDataFrame,
         num_feedbacks: Optional[int] = None,
-        wait_for_feedback: Optional[bool] = False
-    ):
+    ) -> EnvironmentFeedback:
         """
-        Abstract method to request user feedback on the predictions made by the model.
+        Request feedback for the predictions.
 
         Args:
             skills (SkillSet): The set of skills/models whose predictions are being evaluated.
-            predictions (InternalDataFrame): The predictions made by the skills.
-            num_feedbacks (Optional[int], optional): The number of feedbacks to request. Defaults to all predictions
-            wait_for_feedback (Optional[bool], optional): Whether to wait for feedback to be available. Defaults to False.
-        """
-
-    @abstractmethod
-    def get_feedback(self, skills: SkillSet, predictions: InternalDataFrame) -> EnvironmentFeedback:
-        """
-        Get feedback for the predictions.
-
-        Args:
             predictions (InternalDataFrame): The predictions to compare with the ground truth.
-
+            num_feedbacks (Optional[int], optional): The number of feedbacks to request. Defaults to all predictions
         Returns:
-            InternalDataFrame: The feedback data for the predictions.
+            EnvironmentFeedback: The resulting ground truth signal, with matches and errors detailed.
         """
 
     @abstractmethod
@@ -130,39 +117,42 @@ class StaticEnvironment(Environment):
     """
     Static environment that initializes everything from the dataframe
     and doesn't not require requesting feedback to create the ground truth.
+
+    Attributes
+        df (InternalDataFrame): The dataframe containing the ground truth.
+        ground_truth_columns (Optional[Dict[str, str]], optional):
+            A dictionary mapping skill outputs to ground truth columns.
+            If None, the skill outputs names are assumed to be the ground truth columns names.
+            Defaults to None.
+        matching_function (str, optional): The matching function to match ground truth strings with prediction strings.
+                                           Defaults to 'fuzzy'.
+        matching_threshold (float, optional): The matching threshold for the matching function.
+
+    Examples:
+        >>> df = pd.DataFrame({'skill_1': ['a', 'b', 'c'], 'skill_2': ['d', 'e', 'f'], 'skill_3': ['g', 'h', 'i']})
+        >>> env = StaticEnvironment(df)
     """    
     df: InternalDataFrame = None
     ground_truth_columns: Optional[Dict[str, str]] = None
     matching_function: str = 'fuzzy'
     matching_threshold: float = 0.9
 
-    def request_feedback(
-        self, skills: SkillSet,
+    def get_feedback(
+        self,
+        skills: SkillSet,
         predictions: InternalDataFrame,
-        num_feedbacks: Optional[int] = None,
-        wait_for_feedback: Optional[float] = False
-    ):
-        """
-        In the StaticEnvironment, this method is a placeholder as ground truth is already provided with the input data.
-
-        Args:
-            skills (SkillSet): The set of skills/models whose predictions are being evaluated.
-            predictions (InternalDataFrame): The predictions made by the skills.
-            num_feedbacks (Optional[int], optional): The number of feedbacks to request. Defaults to all predictions.
-            wait_for_feedback (Optional[float], optional): If True, wait for feedback to be available. Defaults to False.
-        """
-        pass
-
-    def get_feedback(self, skills: SkillSet, predictions: InternalDataFrame) -> EnvironmentFeedback:
+        num_feedbacks: Optional[int] = None
+    ) -> EnvironmentFeedback:
         """
         Compare the predictions with the ground truth using the specified matching function.
 
         Args:
             skills (SkillSet): The skill set being evaluated.
             predictions (InternalDataFrame): The predictions to compare with the ground truth.
+            num_feedbacks (Optional[int], optional): The number of feedbacks to request. Defaults to all predictions
 
         Returns:
-            GroundTruthSignal: The resulting ground truth signal, with matches and errors detailed.
+            EnvironmentFeedback: The resulting ground truth signal, with matches and errors detailed.
 
         Raises:
             NotImplementedError: If the matching_function is unknown.
@@ -171,6 +161,9 @@ class StaticEnvironment(Environment):
         pred_columns = list(skills.get_skill_outputs())
         pred_match = {}
         pred_feedback = {}
+
+        if num_feedbacks is not None:
+            predictions = predictions.sample(n=num_feedbacks)
 
         for pred_column in pred_columns:
             if not self.ground_truth_columns:
@@ -208,7 +201,7 @@ class StaticEnvironment(Environment):
         Return the dataset containing the ground truth data.
 
         Returns:
-            Dataset: The ground truth dataset as a DataFrameDataset.
+            InternalDataFrame: The data batch.
         """
         if batch_size is not None:
             return self.df.sample(n=batch_size)

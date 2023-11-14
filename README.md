@@ -134,7 +134,7 @@ agent = Agent(
     skills=ClassificationSkill(
         name='sentiment',
         instructions="Label text as positive, negative or neutral.",
-        labels=["Positive", "Negative", "Neutral"],
+        labels={'sentiment': ["Positive", "Negative", "Neutral"]},
         input_template="Text: {text}",
         output_template="Sentiment: {sentiment}"
     ),

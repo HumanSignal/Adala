@@ -7,6 +7,23 @@ from adala.runtimes.base import Runtime
 
 
 class Skill(BaseModel, ABC):
+    """
+    Abstract base class representing a skill.
+
+    Provides methods to interact with and obtain information about skills.
+
+    Attributes:
+        name (str): Unique name of the skill.
+        instructions (str): Instructs agent what to do with the input data.
+        input_template (str): Template for the input data.
+        output_template (str): Template for the output data.
+        description (Optional[str]): Description of the skill.
+        field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
+            i.e. analogous to {"field_n": {"type": "string"}}.
+        extra_fields (Optional[Dict[str, str]]): Extra fields to use in the templates. Defaults to None.
+        verbose (bool): Flag indicating if runtime outputs should be verbose. Defaults to False.
+    """
+
     name: str = Field(
         title='Skill name',
         description='Unique name of the skill',
@@ -81,7 +98,10 @@ class Skill(BaseModel, ABC):
 
 
 class TransformSkill(Skill):
-
+    """
+    Transform skill that transforms a dataframe to another dataframe (e.g. for data annotation purposes).
+    See base class Skill for more information about the attributes.
+    """
     def apply(
         self,
         input: InternalDataFrame,
@@ -95,7 +115,7 @@ class TransformSkill(Skill):
             runtime (Runtime): The runtime instance to be used for processing.
 
         Returns:
-            InternalDataFrame: The processed data.
+            InternalDataFrame: The transformed data.
         """
 
         return runtime.batch_to_batch(
@@ -109,6 +129,10 @@ class TransformSkill(Skill):
 
 
 class SynthesisSkill(Skill):
+    """
+    Synthesis skill that synthesize a dataframe from a record (e.g. for dataset generation purposes).
+    See base class Skill for more information about the attributes.
+    """
 
     def apply(
         self,
@@ -121,6 +145,9 @@ class SynthesisSkill(Skill):
         Args:
             input (InternalSeries): The input data to be processed.
             runtime (Runtime): The runtime instance to be used for processing.
+
+        Returns:
+            InternalDataFrame: The synthesized data.
         """
         if isinstance(input, InternalSeries):
             input = input.to_dict()
@@ -135,6 +162,10 @@ class SynthesisSkill(Skill):
 
 
 class AnalysisSkill(Skill):
+    """
+    Analysis skill that analyzes a dataframe and returns a record (e.g. for data analysis purposes).
+    See base class Skill for more information about the attributes.
+    """
 
     def apply(
         self,
@@ -147,6 +178,9 @@ class AnalysisSkill(Skill):
         Args:
             input (InternalDataFrame): The input data to be processed.
             runtime (Runtime): The runtime instance to be used for processing.
+
+        Returns:
+            InternalSeries: The record containing the analysis results.
         """
         if isinstance(input, InternalSeries):
             input = input.to_frame()

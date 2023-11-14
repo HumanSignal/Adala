@@ -19,6 +19,10 @@ PartialStringFormat = PartialStringFormatter()
 
 
 def partial_str_format(string, **kwargs):
+    """
+    Formats a string with a subset of the arguments.
+    Analogous to str.format, but ignores missing arguments.
+    """
     return PartialStringFormat.format(string, **kwargs)
 
 

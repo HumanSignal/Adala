@@ -9,7 +9,9 @@ from adala.utils.internal_data import InternalDataFrame
 
 
 class LangChainRuntime(Runtime):
-    """A runtime for the LangChain API."""
+    """
+    Runtime that uses [LangChain](https://www.langchain.com/) models to perform the skill.
+    """
     lc_model_name: str = Field(alias='model')
 
     def _prepare_chain(

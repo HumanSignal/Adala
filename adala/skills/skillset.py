@@ -111,28 +111,18 @@ class LinearSkillSet(SkillSet):
     """
     Represents a sequence of skills that are acquired in a specific order to achieve a goal.
 
-    LinearSkillSet ensures that skills are developed in a sequential manner, determined either 
-    by the provided skill_sequence or by the lexicographical order of skill names.
+    LinearSkillSet ensures that skills are applied in a sequential manner.
 
     Attributes:
-        skills (Union[List[str], Dict[str, str], List[BaseSkill], Dict[str, BaseSkill]]): Provided skills
+        skills (Union[List[Skill], Dict[str, Skill]]): Provided skills
         skill_sequence (List[str], optional): Ordered list of skill names indicating the order 
                                               in which they should be acquired.
-                                              By default, lexographical order of skill names is used.
-        input_data_field (Optional[str], optional): Name of the input data field. Defaults to None.
 
     Examples:
-        Create a LinearSkillSet with a list of skills specified as strings:
-        >>> from adala.skills import LinearSkillSet
-        >>> skillset = LinearSkillSet(skills=['Extract keywords', 'Classify keywords', 'Create structured output'])
 
         Create a LinearSkillSet with a list of skills specified as BaseSkill instances:
-        >>> from adala.skills import LinearSkillSet, TextGenerationSkill
-        >>> skillset = LinearSkillSet(skills=[TextGenerationSkill(name='Generate text', instructions='Generate text from keywords'),])
-
-        Create a LinearSkillSet with a dictionary of skill names to instructions:
-        >>> from adala.skills import LinearSkillSet
-        >>> skillset = LinearSkillSet(skills={'extract': 'Extract keywords from text', 'classify': 'Classify keywords', 'structured_output': 'Create structured output from keywords'})
+        >>> from adala.skills import LinearSkillSet, TransformSkill, AnalysisSkill, ClassificationSkill
+        >>> skillset = LinearSkillSet(skills=[TransformSkill(), ClassificationSkill(), AnalysisSkill()])
     """
     
     skill_sequence: List[str] = None
@@ -223,12 +213,8 @@ class ParallelSkillSet(SkillSet):
 
     Examples: 
         Create a ParallelSkillSet with a list of skills specified as BaseSkill instances
-        >>> from adala.skills import ParallelSkillSet, ClassificationSkill, TextGenerationSkill
-        >>> skillset = ParallelSkillSet(skills=[ClassificationSkill(name='Classify sentiment', instructions='Classify the sentiment'), TextGenerationSkill(name='Summarize text', instructions='Generate a summar')])
-
-        Create a ParallelSkillSet with a dictionary of skill names to BaseSkill instances
-        >>> from adala.skills import ParallelSkillSet, ClassificationSkill, TextGenerationSkill
-        >>> skillset = ParallelSkillSet(skills={'sentiment_analysis': ClassificationSkill(name='Classify sentiment', instructions='Classify the sentiment'),'text_summary': TextGenerationSkill(name='Summarize text', instructions='Generate a summary')})
+        >>> from adala.skills import ParallelSkillSet, ClassificationSkill, TransformSkill
+        >>> skillset = ParallelSkillSet(skills=[ClassificationSkill(), TransformSkill()])
     """
 
     def apply(

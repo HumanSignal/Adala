@@ -1,4 +1,4 @@
-from .base import TextGenerationSkill
+from .text_generation import TextGenerationSkill
 
 
 class TranslationSkill(TextGenerationSkill):
@@ -13,15 +13,13 @@ class TranslationSkill(TextGenerationSkill):
         instructions (str): Instruction to guide the LLM in translating the text.
         input_template (str): Format in which the full text is presented to the LLM.
         output_template (str): Expected format of the LLM's translation.
-        prediction_field (str): Field name for the generated translation.
         target_language (str): Language to which the input text is translated.
     """
 
     name: str = 'translation'
     description: str = 'Translate text from one language to another.'
-    instructions: str = 'Identify the language of the given text and translate it to {{target_language}}.'
-    input_template: str = "Text: {{{{{input}}}}}"
+    instructions: str = 'Identify the language of the given text and translate it to {target_language}.'
+    input_template: str = "Text: {text}"
     # output_template: str = "Input language: {{gen 'detected_language'}}\nTranslation: {{gen 'translation'}}"
-    output_template: str = "Translation: {{gen 'translation'}}"
-    prediction_field: str = 'translation'
+    output_template: str = "Translation: {translation}"
     target_language: str = 'English'

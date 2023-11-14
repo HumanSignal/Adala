@@ -1,14 +1,8 @@
-import enum
-import guidance
-import re
-
 from tqdm import tqdm
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, model_validator
-from pydantic.dataclasses import dataclass
 from typing import List, Dict, Optional, Tuple, Any, Callable
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
-from adala.utils.logs import print_text
 
 tqdm.pandas()
 
