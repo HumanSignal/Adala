@@ -6,6 +6,17 @@ class PatchedCalls(enum.Enum):
     GUIDANCE = 'guidance._program.Program.__call__'
     # OPENAI_MODEL_LIST = 'openai.models.list'
     OPENAI_MODEL_LIST = 'openai.api_resources.model.Model.list'
+    OPENAI_CHAT_COMPLETION = 'openai.api_resources.chat_completion.ChatCompletion.create'
+
+
+class OpenaiChatCompletionMock(object):
+
+    def __init__(self, content):
+        self.content = content
+
+    def __getattr__(self, item):
+        if item == 'choices':
+            return [{'message': {'content': self.content}}]
 
 
 def patching(target_function, data, strict=False):

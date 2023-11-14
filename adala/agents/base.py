@@ -3,19 +3,16 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional, List, Dict, Union, Tuple
 from rich import print
 
-from adala.environments.base import Environment, StaticEnvironment, GroundTruthSignal
+from adala.environments.base import Environment, StaticEnvironment
 from adala.datasets import Dataset, DataFrameDataset
 from adala.runtimes.base import Runtime
 from adala.runtimes._openai import OpenAIChatRuntime
-from adala.runtimes import GuidanceRuntime, GuidanceModelType
+from adala.runtimes import GuidanceRuntime
 from adala.skills._base import Skill
 from adala.memories.base import Memory
-from adala.skills.base import BaseSkill
 from adala.skills.skillset import SkillSet, LinearSkillSet
 from adala.utils.logs import print_dataframe, print_text, print_error
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
-from adala.skills.collection.analyze_errors import AnalyzeLLMPromptErrorsExactMatch
-from adala.skills.collection.improve_llm import ImproveLLMInstructions
 
 
 class Agent(BaseModel, ABC):
@@ -32,7 +29,7 @@ class Agent(BaseModel, ABC):
         teacher_runtimes (Dict[str, Runtime], optional): The runtimes available to the agent's teacher. Defaults to predefined runtimes.
         default_teacher_runtime (str): The default runtime used by the agent's teacher. Defaults to 'openai-gpt3'.
     """
-    
+
     environment: Union[InternalDataFrame, Dataset, Environment] = Field(default_factory=DataFrameDataset)
     skills: SkillSet
 
@@ -69,10 +66,10 @@ class Agent(BaseModel, ABC):
         Returns:
             str: A rich-formatted representation of the agent.
         """
-        
+
         skill_names = ", ".join([skill.name for skill in self.skills.skills.values()])
         runtime_names = ", ".join(self.runtimes.keys())
-        
+
         return (
             f"[bold blue]Agent Instance[/bold blue]\n\n"
             f"Environment: {self.environment.__class__.__name__}\n"
@@ -129,7 +126,8 @@ class Agent(BaseModel, ABC):
         if self.default_runtime not in self.runtimes:
             _raise_default_runtime_error(self.default_runtime, 'default_runtime', self.runtimes, 'openai')
         if self.default_teacher_runtime not in self.teacher_runtimes:
-            _raise_default_runtime_error(self.default_teacher_runtime, 'default_teacher_runtime', self.teacher_runtimes, 'openai-gpt4')
+            _raise_default_runtime_error(self.default_teacher_runtime, 'default_teacher_runtime', self.teacher_runtimes,
+                                         'openai-gpt4')
         return self
 
     def get_runtime(self, runtime: Optional[str] = None) -> Runtime:
@@ -145,7 +143,7 @@ class Agent(BaseModel, ABC):
         Raises:
             ValueError: If the specified runtime is not found.
         """
-        
+
         if runtime is None:
             runtime = self.default_runtime
         if runtime not in self.runtimes:
@@ -193,17 +191,29 @@ class Agent(BaseModel, ABC):
         predictions = self.skills.apply(input, runtime=runtime)
         return predictions
 
+    def select_skill_to_train(self, feedback, accuracy_threshold):
+        # Use ground truth signal to find the skill to improve
+        # TODO: what if it is not possible to estimate accuracy per skill?
+        accuracy = feedback.get_accuracy()
+        train_skill_name, train_skill_output, acc_score = '', '', None
+        for skill_output, skill_name in self.skills.get_skill_outputs().items():
+            if accuracy[skill_output] < accuracy_threshold:
+                train_skill_name, train_skill_output = skill_name, skill_output
+                acc_score = accuracy[skill_output]
+                break
+
+        return train_skill_name, train_skill_output, acc_score
+
     def learn(
         self,
         learning_iterations: int = 3,
         accuracy_threshold: float = 0.9,
         update_memory: bool = True,
-        request_environment_feedback: bool = True,
         wait_for_feedback: Optional[float] = True,
         num_feedbacks: Optional[int] = None,
         runtime: Optional[str] = None,
         teacher_runtime: Optional[str] = None,
-    ) -> GroundTruthSignal:
+    ):
         """
         Enables the agent to learn and improve its skills based on interactions with its environment.
 
@@ -211,88 +221,84 @@ class Agent(BaseModel, ABC):
             learning_iterations (int, optional): The number of iterations for learning. Defaults to 3.
             accuracy_threshold (float, optional): The desired accuracy threshold to reach. Defaults to 0.9.
             update_memory (bool, optional): Flag to determine if memory should be updated after learning. Defaults to True.
-            request_environment_feedback (bool, optional): Flag to determine if feedback should be requested from the environment. Defaults to True.
             wait_for_feedback (float, optional): The timeout in seconds to wait for environment feedback. Defaults to None.
             num_feedbacks (int, optional): The number of predictions to request feedback for. Defaults to None.
             runtime (str, optional): The runtime to be used for the learning process. Defaults to None.
             teacher_runtime (str, optional): The teacher runtime to be used for the learning process. Defaults to None.
-        Returns:
-            GroundTruthSignal: The ground truth signal.
         """
-        
+
         runtime = self.get_runtime(runtime=runtime)
         teacher_runtime = self.get_teacher_runtime(runtime=teacher_runtime)
 
-        data_batch = self.environment.get_data_batch()
+        messages = [
+            {'role': 'system',
+             'content': "Act as LLM instructions generator. Full LLM prompt is created by concatenating LLM instructions and input text. "
+                        "You should respond only with the LLM instructions. After each generation, user provides "
+                        "a feedback which includes example of input text, LLM output, and user feedback. "
+                        "Based on this analysis, generate new "
+                        "instructions for the LLM. These instructions should be concise, direct, and "
+                        "focused solely on addressing the points raised in the user feedback, "
+                        "aligning with the input, and improving upon the predictions. "
+                        "Include relevant few-shot examples within the instructions that are aligned "
+                        "with the user's feedback and the initial input, demonstrating the desired "
+                        "format and approach for the LLM’s prediction. These examples should serve "
+                        "as clear models for the expected output in the next iteration."}
+        ]
 
-        # Apply agent skills to dataset and get experience with predictions
-        predictions = self.skills.apply(data_batch, runtime=runtime)
-
-        ground_truth_signal = None
+        skill_accuracies = {}
 
         for iteration in range(learning_iterations):
-            print_text(f'\n\n=> Iteration #{iteration}: Comparing to ground truth, analyzing and improving ...')
 
-            # Request feedback from environment is necessary
-            if request_environment_feedback:
-                self.environment.request_feedback(self.skills, predictions, num_feedbacks, wait_for_feedback)
+            print_text(f'\n\n=> Iteration #{iteration}: Getting feedback, analyzing and improving ...')
 
-            # Compare predictions to ground truth -> get ground truth signal
-            ground_truth_signal = self.environment.compare_to_ground_truth(self.skills, predictions)
+            inputs = self.environment.get_data_batch(batch_size=num_feedbacks)
 
-            print_text(f'Comparing predictions to ground truth data ...')
-            print_dataframe(InternalDataFrameConcat([predictions, ground_truth_signal.match], axis=1))
+            predictions = self.skills.apply(inputs, runtime=runtime)
 
-            # Use ground truth signal to find the skill to improve
-            accuracy = ground_truth_signal.get_accuracy()
-            train_skill_name, train_skill_output = '', ''
-            for skill_output, skill_name in self.skills.get_skill_outputs().items():
-                if accuracy[skill_output] < accuracy_threshold:
-                    train_skill_name, train_skill_output = skill_name, skill_output
-                    break
+            self.environment.request_feedback(self.skills, predictions, num_feedbacks, wait_for_feedback)
 
+            feedback = self.environment.get_feedback(self.skills, predictions)
+            print('Predictions and feedback:')
+            fb = feedback.feedback.rename(columns=lambda x: x + '__fb' if x in predictions.columns else x)
+            print_dataframe(InternalDataFrameConcat([predictions, feedback.match, fb], axis=1))
+
+            train_skill_name, train_skill_output, accuracy = self.select_skill_to_train(feedback, accuracy_threshold)
             if not train_skill_name:
-                print_text(f'No skill to improve found. Stopping learning process.')
-                break
-
+                print_text(f'No skill to improve found. Continue learning...')
+                continue
             train_skill = self.skills[train_skill_name]
-            # select the worst performing skill
             print_text(f'Output to improve: "{train_skill_output}" (Skill="{train_skill_name}")\n'
-                       f'Accuracy = {accuracy[train_skill_output] * 100:0.2f}%', style='bold red')
+                       f'Accuracy = {accuracy * 100:0.2f}%', style='bold red')
 
-            skill_errors = ground_truth_signal.get_errors(train_skill_output).rename('_ground_truth')
-            skill_errors = InternalDataFrameConcat((skill_errors, predictions), axis=1, join='inner')
-            print(f'Errors for skill "{train_skill_name}":')
-            print_dataframe(skill_errors)
+            # collect user feedback
+            messages.append({'role': 'assistant', 'content': train_skill.instructions})
+            message = ''
+            if train_skill_output in skill_accuracies and accuracy <= skill_accuracies[train_skill_output]:
+                message += 'The quality of the proposed instructions has not improved. ' \
+                           'Carefully analyze the feedback and do your best to improve the instructions. '
+            skill_accuracies[train_skill_output] = accuracy
+            message += 'Here is the feedback based on the current instructions:\n\n'
+            for row in InternalDataFrameConcat((predictions, fb), axis=1).to_dict(orient='records'):
+                # if fb marked as NaN, skip
+                if not row[f'{train_skill_output}__fb']:
+                    continue
+                message = f'{message}\n' \
+                          f'{train_skill.input_template.format(**row)}\n' \
+                          f'{train_skill.output_template.format(**row)}\n' \
+                          f'{row[f"{train_skill_output}__fb"]}\n\n'
 
-            # 2. ANALYSIS PHASE: Analyze evaluation experience, optionally use long term memory
-
-            teacher = LinearSkillSet(skills=[
-                AnalyzeLLMPromptErrorsExactMatch(
-                    name='analyze',
-                    input_template=train_skill.input_template,
-                    output_template='{error_report}',
-                    initial_llm_instructions=train_skill.instructions,
-                    prediction_column=train_skill_output,
-                    ground_truth_column='_ground_truth',
-                    field_schema=train_skill.field_schema,
-                ),
-                ImproveLLMInstructions(
-                    name='improve',
-                    old_instructions=train_skill.instructions,
-                    field_schema=train_skill.field_schema,
-                )
-            ])
-
-            result = teacher.apply(skill_errors, runtime=teacher_runtime)
-            train_skill.instructions = result['new_instructions']
-            print_text(f'Updated instructions for skill "{train_skill.name}":\n')
-            print_text(train_skill.instructions, style='bold green')
-
-            # 4. RE-APPLY PHASE: Re-apply skills to dataset
-            print_text(f"Re-apply {train_skill.name} skill to dataset ...")
-            self.skills[train_skill.name] = train_skill
-            predictions = self.skills.apply(predictions, runtime=runtime, improved_skill=train_skill.name)
+            messages.append({
+                'role': 'user',
+                'content': f'{message}\n\n'
+                           f'Please address the feedback and provide new improved instructions for the LLM. '
+                           f'Use the following format for the few-shot examples:\n\n'
+                           f'{train_skill.input_template}\n'
+                           f'{train_skill.output_template}\n\n'
+                           f'Carefully analyze this feedback, and provide updated prompting instructions for LLM:'
+            })
+            # print(messages)
+            new_instructions = teacher_runtime.execute(messages)
+            train_skill.instructions = new_instructions
+            print_text(f'{train_skill.instructions}', style='bold green')
 
         print_text('Train is done!')
-        return ground_truth_signal

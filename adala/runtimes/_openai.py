@@ -60,6 +60,25 @@ class OpenAIChatRuntime(Runtime):
                 raise ValueError(f'Requested model {self.openai_model} is not available in your OpenAI account.')
         return self
 
+    def execute(self, messages: List):
+        if self.verbose:
+            print(f'OpenAI request: {messages}')
+
+        if check_if_new_openai_version():
+            completion = self._client.chat.completions.create(
+                model=self.openai_model,
+                messages=messages
+            )
+            completion_text = completion.choices[0].message.content
+        else:
+            # deprecated
+            completion = openai.ChatCompletion.create(
+                model=self.openai_model,
+                messages=messages
+            )
+            completion_text = completion.choices[0]['message']['content']
+        return completion_text
+
     def record_to_record(
         self,
         record: Dict[str, str],
@@ -89,23 +108,8 @@ class OpenAIChatRuntime(Runtime):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ]
-        if self.verbose:
-            print(f'OpenAI request: {messages}')
 
-        if check_if_new_openai_version():
-            completion = self._client.chat.completions.create(
-                model=self.openai_model,
-                messages=messages
-            )
-            completion_text = completion.choices[0].message.content
-        else:
-            # deprecated
-            completion = openai.ChatCompletion.create(
-                model=self.openai_model,
-                messages=messages
-            )
-            completion_text = completion.choices[0]['message']['content']
-
+        completion_text = self.execute(messages)
         return {output_field_name: completion_text}
 
 

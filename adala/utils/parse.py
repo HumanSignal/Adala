@@ -51,7 +51,8 @@ def parse_template(string, include_texts=True) -> List[TemplateChunks]:
     chunks: List[TemplateChunks] = []
     last_index = 0
 
-    for match in re.finditer(r'\{(.*?)\}', string):
+    for match in re.finditer(r'(?<!\{)\{(.*?)\}(?!})', string):
+    # for match in re.finditer(r'\{(.*?)\}', string):
         # Text before field
         if last_index < match.start() and include_texts:
             text = string[last_index:match.start()]

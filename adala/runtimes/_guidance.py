@@ -18,7 +18,7 @@ class GuidanceRuntime(Runtime):
     llm_params: Dict[str, str] = {
         'model': 'gpt-3.5-turbo-instruct',
         # 'max_tokens': 10,
-        # 'temperature': 0,
+        'temperature': 0,
     }
 
     _llm = None
@@ -49,11 +49,14 @@ class GuidanceRuntime(Runtime):
             del program_input['text']
         if '{text}' in input_template:
             input_template = input_template.replace('{text}', '{text_}')
-        # This regex replaces occurrences of {word} with {{word}},
-        # but ignores occurrences of {{word}}.
-        # Negative lookbehind (?<!\{) ensures that the { is not preceded by another {
-        # Negative lookahead (?!}) ensures that the } is not followed by another }
-        return re.sub(r'(?<!\{)\{(\w+)\}(?!})', r'{{\1}}', input_template)
+
+        fields = parse_template(input_template, include_texts=False)
+        # replace {field_name} with {{field_name}}
+        for input_field in fields:
+            field_name = input_field['text']
+            if field_name in program_input:
+                input_template = input_template.replace(f'{{{field_name}}}', f'{{{{{field_name}}}}}')
+        return input_template
 
     def _output_template_to_guidance(self, output_template, program_input, output_fields, field_schema):
         for output_field in output_fields:

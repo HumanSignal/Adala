@@ -1,18 +1,16 @@
-from pydantic import BaseModel, Field, field_validator
+import pandas as pd
+import numpy as np
+from pydantic import BaseModel
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Dict, Union, Callable, Dict
-from collections import defaultdict
-
+from typing import Optional, Dict
 from adala.utils.internal_data import InternalDataFrame, InternalSeries, InternalDataFrameConcat
 from adala.utils.matching import fuzzy_match
-from adala.skills.base import BaseSkill
 from adala.skills.skillset import SkillSet
-from adala.datasets import Dataset, DataFrameDataset
 
 
-class GroundTruthSignal(BaseModel):
+class EnvironmentFeedback(BaseModel):
     """
-    A model that represents the comparison between predictions and ground truth data,
+        A model that represents the comparison between predictions and ground truth data,
     potentially holding information about matching results and errors per skill.
 
     Attributes:
@@ -28,23 +26,14 @@ class GroundTruthSignal(BaseModel):
                                         | 1     | False   | False   | False   |
                                         | 2     | True    | True    | True    |
                                         ```
-        errors (Optional[Dict[str, InternalDataFrame]]): A dictionary mapping skill names to DataFrames
-            containing the errors between predictions and ground truth. Default is None.
-            Each DataFrame has two columns ["predictions", "user-defined ground truth name"].
-            User defined ground truth name is taken from Environment
-            Example:
-            ```json
-                {
-                    "skill_1": InternalDataFrame({
-                        "predictions": ['a', 'b', 'c'],
-                        "my_gr_truth": ['a', 'a', 'c']
-                    }, index=[0, 1, 2])
-                }
-            ```
+        feedback (InternalDataFrame): A DataFrame that contains ground truth feedback per each skill output
     """
-    
-    match: InternalDataFrame = Field(default_factory=InternalDataFrame)
-    errors: Optional[Dict[str, InternalSeries]] = None
+
+    match: InternalDataFrame
+    feedback: InternalDataFrame
+
+    class Config:
+        arbitrary_types_allowed = True
 
     def get_accuracy(self) -> InternalSeries:
         """
@@ -54,37 +43,17 @@ class GroundTruthSignal(BaseModel):
             InternalSeries: A series representing the accuracy of predictions.
 
         Examples:
-            
+
 
         """
         return self.match.mean()
 
-    def get_errors(self, skill_output: str) -> InternalSeries:
-        """
-        Retrieve the errors associated with a particular skill.
-
-        Args:
-            skill_name (str): The name of the skill to retrieve errors for.
-
-        Returns:
-            InternalSeries: A series representing the errors of predictions for the given skill.
-            Index is prediction index, value is ground truth.
-        Raises:
-            AssertionError: If the error DataFrame does not have exactly two columns.
-        """
-        
-        return self.errors[skill_output]
-
     def __rich__(self):
-        text = '[bold blue]Ground Truth Signal:[/bold blue]\n\n'
+        text = '[bold blue]Environment Feedback:[/bold blue]\n\n'
         text += f'\n[bold]Match[/bold]\n{self.match}'
-        if self.errors is not None:
-            for skill_name, errors in self.errors.items():
-                text += f'\n[bold]Errors for {skill_name}[/bold]\n{errors}'
+        if self.feedback is not None:
+            text += f'\n[bold]Feedback[/bold]\n{self.feedback}'
         return text
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 class Environment(BaseModel, ABC):
@@ -95,12 +64,9 @@ class Environment(BaseModel, ABC):
     Subclasses should implement methods to handle feedback requests, comparison to ground truth,
     dataset conversion, and state persistence.
     """
-    ground_truth_columns: Optional[Dict[str, str]] = None
-    matching_function: str = 'exact'
-    matching_threshold: float = 0.8
 
     @abstractmethod
-    def get_data_batch(self) -> InternalDataFrame:
+    def get_data_batch(self, batch_size = None) -> InternalDataFrame:
         """
         Get a batch of data from data stream to be processed by the skill set.
 
@@ -127,15 +93,15 @@ class Environment(BaseModel, ABC):
         """
 
     @abstractmethod
-    def get_ground_truth(self, predictions: InternalDataFrame) -> InternalDataFrame:
+    def get_feedback(self, skills: SkillSet, predictions: InternalDataFrame) -> EnvironmentFeedback:
         """
-        Get ground truth data for the predictions.
+        Get feedback for the predictions.
 
         Args:
             predictions (InternalDataFrame): The predictions to compare with the ground truth.
 
         Returns:
-            InternalDataFrame: The ground truth data for the predictions.
+            InternalDataFrame: The feedback data for the predictions.
         """
 
     @abstractmethod
@@ -156,66 +122,6 @@ class Environment(BaseModel, ABC):
             NotImplementedError: This method is not implemented for BasicEnvironment.
         """
 
-    def compare_to_ground_truth(
-        self,
-        skills: SkillSet,
-        predictions: InternalDataFrame,
-    ) -> GroundTruthSignal:
-        """
-        Compare the predictions with the ground truth using the specified matching function.
-
-        Args:
-            skills (SkillSet): The skill set being evaluated.
-            predictions (InternalDataFrame): The predictions to compare with the ground truth.
-
-        Returns:
-            GroundTruthSignal: The resulting ground truth signal, with matches and errors detailed.
-
-        Raises:
-            NotImplementedError: If the matching_function is unknown.
-        """
-
-        errors = {}
-        ground_truth_dataset = self.get_ground_truth(predictions=predictions)
-        if ground_truth_dataset.empty:
-            raise ValueError('Ground truth dataset is empty. Run `request_feedback()` first.')
-
-        pred_columns = list(skills.get_skill_outputs())
-
-        skill_match = {}
-        for pred_column in pred_columns:
-            if not self.ground_truth_columns:
-                gt_column = pred_column
-            else:
-                gt_column = self.ground_truth_columns[pred_column]
-            gt = ground_truth_dataset[gt_column]
-            pred = predictions[pred_column]
-            # from ground truth dataset, select only the rows that are in the predictions
-            gt, pred = gt.align(pred)
-            nonnull_index = gt.notnull() & pred.notnull()
-            gt = gt[nonnull_index]
-            pred = pred[nonnull_index]
-            # compare ground truth with predictions
-            if self.matching_function == 'exact':
-                gt_pred_match = gt == pred
-            elif self.matching_function == 'fuzzy':
-                gt_pred_match = fuzzy_match(gt, pred, threshold=self.matching_threshold)
-            else:
-                raise NotImplementedError(f'Unknown matching function {self.matching_function}')
-
-            # for values with True, we assume them equal to predictions
-            gt_pred_match[gt == True] = True
-            gt_pred_match[gt == False] = False
-
-            error_index = gt_pred_match[~gt_pred_match].index
-            # concatenate errors - dataframe with two columns: predictions and ground truth
-            errors[pred_column] = gt[error_index]
-            # concatenate matching columns
-            skill_match[pred_column] = gt_pred_match
-        match = InternalDataFrame(skill_match).reindex(predictions.index)
-
-        return GroundTruthSignal(match=match, errors=errors)
-
     class Config:
         arbitrary_types_allowed = True
 
@@ -226,6 +132,9 @@ class StaticEnvironment(Environment):
     and doesn't not require requesting feedback to create the ground truth.
     """    
     df: InternalDataFrame = None
+    ground_truth_columns: Optional[Dict[str, str]] = None
+    matching_function: str = 'fuzzy'
+    matching_threshold: float = 0.9
 
     def request_feedback(
         self, skills: SkillSet,
@@ -244,19 +153,65 @@ class StaticEnvironment(Environment):
         """
         pass
 
-    def get_ground_truth(self, predictions: InternalDataFrame) -> InternalDataFrame:
+    def get_feedback(self, skills: SkillSet, predictions: InternalDataFrame) -> EnvironmentFeedback:
         """
-        Get the ground truth dataset.
-        """
-        return self.df
+        Compare the predictions with the ground truth using the specified matching function.
 
-    def get_data_batch(self) -> InternalDataFrame:
+        Args:
+            skills (SkillSet): The skill set being evaluated.
+            predictions (InternalDataFrame): The predictions to compare with the ground truth.
+
+        Returns:
+            GroundTruthSignal: The resulting ground truth signal, with matches and errors detailed.
+
+        Raises:
+            NotImplementedError: If the matching_function is unknown.
+        """
+
+        pred_columns = list(skills.get_skill_outputs())
+        pred_match = {}
+        pred_feedback = {}
+
+        for pred_column in pred_columns:
+            if not self.ground_truth_columns:
+                gt_column = pred_column
+            else:
+                gt_column = self.ground_truth_columns[pred_column]
+
+            gt = self.df[gt_column]
+            pred = predictions[pred_column]
+            gt, pred = gt.align(pred)
+            nonnull_index = gt.notnull() & pred.notnull()
+            gt = gt[nonnull_index]
+            pred = pred[nonnull_index]
+            # compare ground truth with predictions
+            if self.matching_function == 'exact':
+                gt_pred_match = gt == pred
+            elif self.matching_function == 'fuzzy':
+                gt_pred_match = fuzzy_match(gt, pred, threshold=self.matching_threshold)
+            else:
+                raise NotImplementedError(f'Unknown matching function {self.matching_function}')
+            pred_match[pred_column] = gt_pred_match
+            # leave feedback about mismatches
+            match_concat = InternalDataFrameConcat([gt_pred_match.rename('match'), gt], axis=1)
+            pred_feedback[pred_column] = match_concat.apply(
+                lambda row: 'Correct.' if row['match']
+                else f'Incorrect. Must be equal to {row[gt_column]}' if not pd.isna(row['match']) else np.nan, axis=1)
+
+        return EnvironmentFeedback(
+            match=InternalDataFrame(pred_match).reindex(predictions.index),
+            feedback=InternalDataFrame(pred_feedback).reindex(predictions.index)
+        )
+
+    def get_data_batch(self, batch_size: int = None) -> InternalDataFrame:
         """
         Return the dataset containing the ground truth data.
 
         Returns:
             Dataset: The ground truth dataset as a DataFrameDataset.
         """
+        if batch_size is not None:
+            return self.df.sample(n=batch_size)
         return self.df
 
     def save(self):

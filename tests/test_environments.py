@@ -8,7 +8,7 @@ from adala.environments import StaticEnvironment
 NaN = float("nan")
 
 
-@pytest.mark.parametrize("skillset, predictions, ground_truth, ground_truth_columns, expected_match, expected_errors", [
+@pytest.mark.parametrize("skillset, predictions, ground_truth, ground_truth_columns, expected_match, expected_feedback", [
     # test single skill, full ground truth signal
     (
         # skills
@@ -28,10 +28,8 @@ NaN = float("nan")
         {"skill_output": "my_ground_truth"},
         # match
         InternalDataFrame({"skill_output": [True, False, True, False]}),
-        # errors
-        {
-            "skill_output": InternalSeries(data=['1', '1'], index=[1, 3], name="my_ground_truth")
-        }
+        # feedback
+        InternalDataFrame({"skill_output": ["Correct.", "Incorrect. Must be equal to 1", "Correct.", "Incorrect. Must be equal to 1"]}),
     ),
     # test two linear skills, partial ground truth signal
     (
@@ -57,11 +55,11 @@ NaN = float("nan")
             "skill_1": [NaN, True, NaN, False],
             "skill_2": [True, True, False, NaN]
         }, index=[11, 22, 33, 44]),
-        # expected errors
-        {
-            "skill_1": InternalSeries(data=['1'], index=[44], name="gt_1"),
-            "skill_2": InternalSeries(data=['1'], index=[33], name="gt_2")
-        }
+        # expected feedback
+        InternalDataFrame({
+            "skill_1": [NaN, "Correct.", NaN, "Incorrect. Must be equal to 1"],
+            "skill_2": ["Correct.", "Correct.", "Incorrect. Must be equal to 1", NaN]
+        }, index=[11, 22, 33, 44])
     ),
     # test two linear skills, no ground truth signal for one skill, different size of dataframes
     (
@@ -87,29 +85,23 @@ NaN = float("nan")
             "skill_1": [NaN, NaN, NaN, NaN],
             "skill_2": [NaN, NaN, NaN, False]
         }, index=[11, 22, 33, 44]),
-        # expected errors
-        {
-            "skill_1": InternalSeries(data=[], index=[], name="gt_1"),
-            "skill_2": InternalSeries(data=['0'], index=[44], name="gt_2")
-        }
+        # expected feedback
+        InternalDataFrame({
+            "skill_1": [NaN, NaN, NaN, NaN],
+            "skill_2": [NaN, NaN, NaN, "Incorrect. Must be equal to 0"]
+        }, index=[11, 22, 33, 44])
     ),
 ])
-def test_basic_env_compare_to_ground_truth(skillset, predictions, ground_truth, ground_truth_columns, expected_match, expected_errors):
+def test_basic_env_compare_to_ground_truth(skillset, predictions, ground_truth, ground_truth_columns, expected_match, expected_feedback):
 
     basic_env = StaticEnvironment(
         df=ground_truth,
         ground_truth_columns=ground_truth_columns
     )
 
-    ground_truth_signal = basic_env.compare_to_ground_truth(skillset, predictions)
+    fb = basic_env.get_feedback(skillset, predictions)
 
     # TODO: we should check the index type and dtype, but it's not working for empty and NaN dataframes
-    pd.testing.assert_frame_equal(expected_match, ground_truth_signal.match, check_index_type=False, check_dtype=False), \
-        f'Expected: {expected_match}\nGot: {ground_truth_signal.match}'
+    pd.testing.assert_frame_equal(expected_match, fb.match, check_index_type=False, check_dtype=False)
 
-    if expected_errors is not None:
-        for skill_output in skillset.get_skill_outputs():
-            skill_errors = ground_truth_signal.errors[skill_output]
-            expected_skill_errors = expected_errors[skill_output]
-            pd.testing.assert_series_equal(expected_skill_errors, skill_errors, check_index_type=False, check_dtype=False), \
-                f'Skill output {skill_output}\n\nExpected: {expected_skill_errors}\nGot: {skill_errors}'
+    pd.testing.assert_frame_equal(expected_feedback, fb.feedback, check_index_type=False, check_dtype=False)

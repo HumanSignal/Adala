@@ -1,12 +1,9 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Any, Dict, Tuple, Union
 from abc import ABC, abstractmethod
-from adala.utils.internal_data import InternalDataFrame
+from adala.utils.internal_data import InternalDataFrame, InternalSeries
 from adala.utils.parse import parse_template, partial_str_format
 from adala.runtimes.base import Runtime
-
-
-Record = Dict[str, str]
 
 
 class Skill(BaseModel, ABC):
@@ -87,7 +84,7 @@ class TransformSkill(Skill):
 
     def apply(
         self,
-        input: Union[InternalDataFrame, Record],
+        input: InternalDataFrame,
         runtime: Runtime,
     ) -> InternalDataFrame:
         """
@@ -101,8 +98,6 @@ class TransformSkill(Skill):
             InternalDataFrame: The processed data.
         """
 
-        if isinstance(input, dict):
-            input = InternalDataFrame([input])
         return runtime.batch_to_batch(
             input,
             input_template=self.input_template,
@@ -117,16 +112,18 @@ class SynthesisSkill(Skill):
 
     def apply(
         self,
-        input: Record,
+        input: Union[Dict, InternalSeries],
         runtime: Runtime,
     ) -> InternalDataFrame:
         """
         Applies the skill to a record and returns a dataframe.
 
         Args:
-            input (Dict[str, str]): The input data to be processed.
+            input (InternalSeries): The input data to be processed.
             runtime (Runtime): The runtime instance to be used for processing.
         """
+        if isinstance(input, InternalSeries):
+            input = input.to_dict()
         return runtime.record_to_batch(
             input,
             input_template=self.input_template,
@@ -141,9 +138,9 @@ class AnalysisSkill(Skill):
 
     def apply(
         self,
-        input: Union[InternalDataFrame, Record],
+        input: Union[InternalDataFrame, InternalSeries, Dict],
         runtime: Runtime,
-    ) -> Record:
+    ) -> InternalSeries:
         """
         Applies the skill to a dataframe and returns a record.
 
@@ -151,18 +148,23 @@ class AnalysisSkill(Skill):
             input (InternalDataFrame): The input data to be processed.
             runtime (Runtime): The runtime instance to be used for processing.
         """
-        if isinstance(input, dict):
+        if isinstance(input, InternalSeries):
+            input = input.to_frame()
+        elif isinstance(input, dict):
             input = InternalDataFrame([input])
-        elif isinstance(input, InternalDataFrame):
-            if len(input) > 1:
-                raise ValueError('Input dataframe must contain only one record.')
 
-        output = runtime.batch_to_batch(
-            input,
-            input_template=self.input_template,
+        extra_fields = self._get_extra_fields()
+
+        aggregated_input = input.apply(
+            lambda row: self.input_template.format(**row, **extra_fields), axis=1
+        ).str.cat(sep='\n')
+
+        output = runtime.record_to_record(
+            {'aggregated_input': aggregated_input},
+            input_template='{aggregated_input}',
             output_template=self.output_template,
             instructions_template=self.instructions,
             field_schema=self.field_schema,
             extra_fields=self._get_extra_fields(),
         )
-        return output.to_dict(orient='records')[0]
+        return InternalSeries(output)

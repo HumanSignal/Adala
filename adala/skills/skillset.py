@@ -2,11 +2,9 @@ from pydantic import BaseModel, model_validator, field_validator
 from abc import ABC, abstractmethod
 from typing import List, Union, Dict, Any, Optional, Mapping
 from collections import OrderedDict
-from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
 from adala.utils.logs import print_text
 from adala.utils.internal_data import InternalDataFrame, InternalSeries, InternalDataFrameConcat, Record
-from .base import BaseSkill, LLMSkill
 from ._base import Skill
 
 
@@ -238,16 +236,16 @@ class ParallelSkillSet(SkillSet):
         input: Union[Record, InternalDataFrame],
         runtime: Runtime,
         improved_skill: Optional[str] = None,
-    ) -> InternalDataFrame:
+    ) -> Union[Record, InternalDataFrame]:
         """
         Applies each skill on the dataset, enhancing the agent's experience.
 
         Args:
-            d
+            input (Union[Record, InternalDataFrame]): Input data
             runtime (Runtime): The runtime environment in which to apply the skills.
             improved_skill (Optional[str], optional): Unused in ParallelSkillSet. Defaults to None.
         Returns:
-            InternalDataFrame: Skill predictions.
+            Union[Record, InternalDataFrame]: Skill predictions.
         """
         if improved_skill:
             # start from the specified skill, assuming previous skills have already been applied
