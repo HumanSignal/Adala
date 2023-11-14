@@ -104,52 +104,45 @@ Click [here](./examples/quickstart.ipynb) to see an extended quickstart example.
 import pandas as pd
 
 from adala.agents import Agent
-from adala.datasets import DataFrameDataset
-from adala.environments import BasicEnvironment
+from adala.environments import StaticEnvironment
 from adala.skills import ClassificationSkill
-from adala.runtimes import OpenAIRuntime
+from adala.runtimes import OpenAIChatRuntime
 from rich import print
 
 # Train dataset
-ground_truth_df = pd.DataFrame([
+train_df = pd.DataFrame([
     ["It was the negative first impressions, and then it started working.", "Positive"],
     ["Not loud enough and doesn't turn on like it should.", "Negative"],
     ["I don't know what to say.", "Neutral"],
     ["Manager was rude, but the most important that mic shows very flat frequency response.", "Positive"],
     ["The phone doesn't seem to accept anything except CBR mp3s.", "Negative"],
     ["I tried it before, I bought this device for my son.", "Neutral"],
-], columns=["text", "ground_truth"])
+], columns=["text", "sentiment"])
 
 # Test dataset
-predict_df = pd.DataFrame([
+test_df = pd.DataFrame([
     "All three broke within two months of use.",
     "The device worked for a long time, can't say anything bad.",
     "Just a random line of text."
 ], columns=["text"])
 
-ground_truth_dataset = DataFrameDataset(df=ground_truth_df)
-predict_dataset = DataFrameDataset(df=predict_df)
-
 agent = Agent(
     # connect to a dataset
-    environment=BasicEnvironment(
-        ground_truth_dataset=ground_truth_dataset,
-        ground_truth_columns={"sentiment_classification": "ground_truth"}
-    ),
+    environment=StaticEnvironment(df=train_df),
 
     # define a skill
     skills=ClassificationSkill(
-        name='sentiment_classification',
+        name='sentiment',
         instructions="Label text as positive, negative or neutral.",
-        labels=["Positive", "Negative", "Neutral"],
-        input_data_field='text'
+        labels={'sentiment': ["Positive", "Negative", "Neutral"]},
+        input_template="Text: {text}",
+        output_template="Sentiment: {sentiment}"
     ),
 
     # define all the different runtimes your skills may use
     runtimes = {
         # You can specify your OPENAI API KEY here via `OpenAIRuntime(..., api_key='your-api-key')`
-        'openai': OpenAIRuntime(model='gpt-3.5-turbo-instruct'),
-        'openai-gpt3': OpenAIRuntime(model='gpt-3.5-turbo')
+        'openai': OpenAIChatRuntime(model='gpt-3.5-turbo'),
     },
     default_runtime='openai',
     
@@ -166,7 +159,7 @@ print(agent.skills)
 agent.learn(learning_iterations=3, accuracy_threshold=0.95)
 
 print('\n=> Run tests ...')
-predictions = agent.run(predict_dataset)
+predictions = agent.run(test_df)
 print('\n => Test results:')
 print(predictions)
 ```

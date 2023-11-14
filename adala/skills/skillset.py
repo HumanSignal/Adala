@@ -2,11 +2,10 @@ from pydantic import BaseModel, model_validator, field_validator
 from abc import ABC, abstractmethod
 from typing import List, Union, Dict, Any, Optional, Mapping
 from collections import OrderedDict
-from adala.datasets.base import Dataset
 from adala.runtimes.base import Runtime
 from adala.utils.logs import print_text
-from adala.utils.internal_data import InternalDataFrame, InternalSeries, InternalDataFrameConcat
-from .base import BaseSkill, LLMSkill
+from adala.utils.internal_data import InternalDataFrame, InternalSeries, InternalDataFrameConcat, Record
+from ._base import Skill
 
 
 class SkillSet(BaseModel, ABC):
@@ -19,15 +18,40 @@ class SkillSet(BaseModel, ABC):
     cases, task decomposition can involve a graph-based approach.
 
     Attributes:
-        skills (Dict[str, BaseSkill]): A dictionary of skills in the skill set.
+        skills (Dict[str, Skill]): A dictionary of skills in the skill set.
     """
     
-    skills: Dict[str, BaseSkill]
+    skills: Dict[str, Skill]
+
+    @field_validator('skills', mode='before')
+    def skills_validator(cls, v: Union[List[Skill], Dict[str, Skill]]) -> Dict[str, Skill]:
+        """
+        Validates and converts the skills attribute to a dictionary of skill names to BaseSkill instances.
+
+        Args:
+            v (Union[List[Skill], Dict[str, Skill]]): The skills attribute to validate and convert.
+
+        Returns:
+            Dict[str, BaseSkill]: Dictionary mapping skill names to their corresponding BaseSkill instances.
+        """
+        skills = OrderedDict()
+        if not v:
+            return skills
+
+        elif isinstance(v, list) and isinstance(v[0], Skill):
+            # convert list of skill names to dictionary
+            for skill in v:
+                skills[skill.name] = skill
+        elif isinstance(v, dict):
+            skills = v
+        else:
+            raise ValueError(f"skills must be a list or dictionary, not {type(skills)}")
+        return skills
 
     @abstractmethod
     def apply(
         self,
-        dataset: Union[Dataset, InternalDataFrame],
+        input: Union[Record, InternalDataFrame],
         runtime: Runtime,
         improved_skill: Optional[str] = None
     ) -> InternalDataFrame:
@@ -35,26 +59,14 @@ class SkillSet(BaseModel, ABC):
         Apply the skill set to a dataset using a specified runtime.
         
         Args:
-            dataset (Union[Dataset, InternalDataFrame]): The dataset to apply the skill set to.
+            input (Union[Record, InternalDataFrame]): Input data to apply the skill set to.
             runtime (Runtime): The runtime environment in which to apply the skills.
             improved_skill (Optional[str], optional): Name of the skill to start from (to optimize calculations). Defaults to None.
         Returns:
             InternalDataFrame: Skill predictions.
         """
 
-    @abstractmethod
-    def select_skill_to_improve(self, accuracy: Mapping, accuracy_threshold: Optional[float] = 1.0) -> Optional[BaseSkill]:
-        """
-        Select skill to improve based on accuracy.
-
-        Args:
-            accuracy (Mapping): Skills accuracies.
-            accuracy_threshold (Optional[float], optional): Accuracy threshold. Defaults to 1.0.
-        Returns:
-            Optional[BaseSkill]: Skill to improve. None if no skill to improve.
-        """
-
-    def __getitem__(self, skill_name) -> BaseSkill:
+    def __getitem__(self, skill_name) -> Skill:
         """
         Select skill by name.
 
@@ -66,7 +78,7 @@ class SkillSet(BaseModel, ABC):
         """
         return self.skills[skill_name]
 
-    def __setitem__(self, skill_name, skill: BaseSkill):
+    def __setitem__(self, skill_name, skill: Skill):
         """
         Set skill by name.
 
@@ -85,84 +97,35 @@ class SkillSet(BaseModel, ABC):
         """
         return list(self.skills.keys())
 
+    def get_skill_outputs(self) -> Dict[str, str]:
+        """
+        Get dictionary of skill outputs.
+
+        Returns:
+            Dict[str, str]: Dictionary of skill outputs. Keys are output names and values are skill names
+        """
+        return {field: skill.name for skill in self.skills.values() for field in skill.get_output_fields()}
+
 
 class LinearSkillSet(SkillSet):
     """
     Represents a sequence of skills that are acquired in a specific order to achieve a goal.
 
-    LinearSkillSet ensures that skills are developed in a sequential manner, determined either 
-    by the provided skill_sequence or by the lexicographical order of skill names.
+    LinearSkillSet ensures that skills are applied in a sequential manner.
 
     Attributes:
-        skills (Union[List[str], Dict[str, str], List[BaseSkill], Dict[str, BaseSkill]]): Provided skills
+        skills (Union[List[Skill], Dict[str, Skill]]): Provided skills
         skill_sequence (List[str], optional): Ordered list of skill names indicating the order 
                                               in which they should be acquired.
-                                              By default, lexographical order of skill names is used.
-        input_data_field (Optional[str], optional): Name of the input data field. Defaults to None.
 
     Examples:
-        Create a LinearSkillSet with a list of skills specified as strings:
-        >>> from adala.skills import LinearSkillSet
-        >>> skillset = LinearSkillSet(skills=['Extract keywords', 'Classify keywords', 'Create structured output'])
 
         Create a LinearSkillSet with a list of skills specified as BaseSkill instances:
-        >>> from adala.skills import LinearSkillSet, TextGenerationSkill
-        >>> skillset = LinearSkillSet(skills=[TextGenerationSkill(name='Generate text', instructions='Generate text from keywords'),])
-
-        Create a LinearSkillSet with a dictionary of skill names to instructions:
-        >>> from adala.skills import LinearSkillSet
-        >>> skillset = LinearSkillSet(skills={'extract': 'Extract keywords from text', 'classify': 'Classify keywords', 'structured_output': 'Create structured output from keywords'})
+        >>> from adala.skills import LinearSkillSet, TransformSkill, AnalysisSkill, ClassificationSkill
+        >>> skillset = LinearSkillSet(skills=[TransformSkill(), ClassificationSkill(), AnalysisSkill()])
     """
     
     skill_sequence: List[str] = None
-    input_data_field: Optional[str] = None
-
-    @field_validator('skills', mode='before')
-    def skills_validator(cls, v: Union[List[str], List[BaseSkill], Dict[str, BaseSkill]]) -> Dict[str, BaseSkill]:
-        """
-        Validates and converts the skills attribute to a dictionary of skill names to BaseSkill instances.
-
-        Args:
-            v (Union[List[str], List[BaseSkill], Dict[str, BaseSkill]]): The skills attribute to validate.
-
-        Returns:
-            Dict[str, BaseSkill]: Dictionary mapping skill names to their corresponding BaseSkill instances.
-        """
-        skills = OrderedDict()
-        if not v:
-            return skills
-
-        input_data_field = None
-        if isinstance(v, list) and isinstance(v[0], str):
-            # if list of strings presented, they are interpreted as skill instructions
-            for i, instructions in enumerate(v):
-                skill_name = f"skill_{i}"
-                skills[skill_name] = LLMSkill(
-                    name=skill_name,
-                    instructions=instructions,
-                    input_data_field=input_data_field
-                )
-                # Linear skillset creates skills pipeline - update input_data_field for next skill
-                input_data_field = skill_name
-        elif isinstance(v, dict) and isinstance(v[list(v.keys())[0]], str):
-            # if dictionary of strings presented, they are interpreted as skill instructions
-            for skill_name, instructions in v.items():
-                skills[skill_name] = LLMSkill(
-                    name=skill_name,
-                    instructions=instructions,
-                    input_data_field=input_data_field
-                )
-                # Linear skillset creates skills pipeline - update input_data_field for next skill
-                input_data_field = skill_name
-        elif isinstance(v, list) and isinstance(v[0], BaseSkill):
-            # convert list of skill names to dictionary
-            for skill in v:
-                skills[skill.name] = skill
-        elif isinstance(v, dict):
-            skills = v
-        else:
-            raise ValueError(f"skills must be a list or dictionary, not {type(skills)}")
-        return skills
 
     @model_validator(mode='after')
     def skill_sequence_validator(self) -> 'LinearSkillSet':
@@ -183,7 +146,7 @@ class LinearSkillSet(SkillSet):
 
     def apply(
         self,
-        dataset: Union[Dataset, InternalDataFrame],
+        input: Union[Record, InternalDataFrame],
         runtime: Runtime,
         improved_skill: Optional[str] = None,
     ) -> InternalDataFrame:
@@ -191,45 +154,44 @@ class LinearSkillSet(SkillSet):
         Sequentially applies each skill on the dataset, enhancing the agent's experience.
         
         Args:
-            dataset (Dataset): The dataset to apply the skills on.
+            input (InternalDataFrame): Input dataset.
             runtime (Runtime): The runtime environment in which to apply the skills.
             improved_skill (Optional[str], optional): Name of the skill to improve. Defaults to None.
         Returns:
             InternalDataFrame: Skill predictions.
         """
-
-        predictions = None
         if improved_skill:
             # start from the specified skill, assuming previous skills have already been applied
             skill_sequence = self.skill_sequence[self.skill_sequence.index(improved_skill):]
         else:
             skill_sequence = self.skill_sequence
+        skill_input = input
         for i, skill_name in enumerate(skill_sequence):
             skill = self.skills[skill_name]
             # use input dataset for the first node in the pipeline
-            input_dataset = dataset if i == 0 else predictions
             print_text(f"Applying skill: {skill_name}")
-            predictions = skill.apply(input_dataset, runtime)
-        
-        return predictions
+            skill_output = skill.apply(skill_input, runtime)
+            if isinstance(skill_output, InternalDataFrame) and isinstance(skill_input, InternalDataFrame):
+                # Columns to drop from skill_input because they are also in skill_output
+                cols_to_drop = set(skill_output.columns) & set(skill_input.columns)
+                skill_input_reduced = skill_input.drop(columns=cols_to_drop)
 
-    def select_skill_to_improve(
-        self,
-        accuracy: Mapping,
-        accuracy_threshold: Optional[float] = 1.0
-    ) -> Optional[BaseSkill]:
-        """
-        Selects the skill with the lowest accuracy to improve.
+                skill_input = skill_input_reduced.merge(
+                    skill_output,
+                    left_index=True,
+                    right_index=True,
+                    how='inner'
+                )
+            elif isinstance(skill_output, InternalDataFrame) and isinstance(skill_input, dict):
+                skill_input = skill_output
+            elif isinstance(skill_output, dict) and isinstance(skill_input, InternalDataFrame):
+                skill_input = skill_output
+            elif isinstance(skill_output, dict) and isinstance(skill_input, dict):
+                skill_input = dict(skill_output, **skill_input)
+            else:
+                raise ValueError(f"Unsupported input type: {type(skill_input)} and output type: {type(skill_output)}")
 
-        Args:
-            accuracy (Mapping): Accuracy of each skill.
-            accuracy_threshold (Optional[float], optional): Accuracy threshold. Defaults to 1.0.
-        Returns:
-            Optional[BaseSkill]: Skill to improve. None if no skill to improve.
-        """
-        for skill_name in self.skill_sequence:
-            if accuracy[skill_name] < accuracy_threshold:
-                return self.skills[skill_name]
+        return skill_input
 
     def __rich__(self):
         """Returns a rich representation of the skill."""
@@ -251,47 +213,13 @@ class ParallelSkillSet(SkillSet):
 
     Examples: 
         Create a ParallelSkillSet with a list of skills specified as BaseSkill instances
-        >>> from adala.skills import ParallelSkillSet, TextClassificationSkill, TextGenerationSkill
-        >>> skillset = ParallelSkillSet(skills=[TextClassificationSkill(name='Classify sentiment', instructions='Classify the sentiment'), TextGenerationSkill(name='Summarize text', instructions='Generate a summar')])
-
-        Create a ParallelSkillSet with a dictionary of skill names to BaseSkill instances
-        >>> from adala.skills import ParallelSkillSet, TextClassificationSkill, TextGenerationSkill
-        >>> skillset = ParallelSkillSet(skills={'sentiment_analysis': TextClassificationSkill(name='Classify sentiment', instructions='Classify the sentiment'),'text_summary': TextGenerationSkill(name='Summarize text', instructions='Generate a summary')})
+        >>> from adala.skills import ParallelSkillSet, ClassificationSkill, TransformSkill
+        >>> skillset = ParallelSkillSet(skills=[ClassificationSkill(), TransformSkill()])
     """
-
-    @field_validator("skills", mode="before")
-    @classmethod
-    def skills_validator(
-        cls, v: Union[List[BaseSkill], Dict[str, BaseSkill]]
-    ) -> Dict[str, BaseSkill]:
-        """
-        Validates and converts the skills attribute to a dictionary of skill names to BaseSkill instances.
-
-        Args:
-            v (List[BaseSkill], Dict[str, BaseSkill]]): The skills attribute to validate.
-
-        Returns:
-            Dict[str, BaseSkill]: Dictionary mapping skill names to their corresponding BaseSkill instances.
-        """
-        skills = OrderedDict()
-        if not v:
-            return skills
-
-        if isinstance(v, list) and isinstance(v[0], BaseSkill):
-            # convert list of skill names to dictionary
-            for skill in v:
-                skills[skill.name] = skill
-        elif isinstance(v, dict):
-            skills = v
-        else:
-            raise ValidationError(
-                f"skills must be a list or dictionary, not {type(skills)}"
-            )
-        return skills
 
     def apply(
         self,
-        dataset: Union[Dataset, InternalDataFrame],
+        input: Union[InternalSeries, InternalDataFrame],
         runtime: Runtime,
         improved_skill: Optional[str] = None,
     ) -> InternalDataFrame:
@@ -299,40 +227,40 @@ class ParallelSkillSet(SkillSet):
         Applies each skill on the dataset, enhancing the agent's experience.
 
         Args:
-            dataset (Dataset): The dataset to apply the skills on.
+            input (Union[Record, InternalDataFrame]): Input data
             runtime (Runtime): The runtime environment in which to apply the skills.
             improved_skill (Optional[str], optional): Unused in ParallelSkillSet. Defaults to None.
         Returns:
-            InternalDataFrame: Skill predictions.
+            Union[Record, InternalDataFrame]: Skill predictions.
         """
-        predictions = None
+        if improved_skill:
+            # start from the specified skill, assuming previous skills have already been applied
+            skill_sequence = [improved_skill]
+        else:
+            skill_sequence = list(self.skills.keys())
 
-        for i, skill_name in enumerate(self.skills.keys()):
+        skill_outputs = []
+        for i, skill_name in enumerate(skill_sequence):
             skill = self.skills[skill_name]
             # use input dataset for the first node in the pipeline
-            input_dataset = dataset if i == 0 else predictions
             print_text(f"Applying skill: {skill_name}")
-            predictions = skill.apply(input_dataset, runtime)
+            skill_output = skill.apply(input, runtime)
+            skill_outputs.append(skill_output)
+        if not skill_outputs:
+            return InternalDataFrame()
+        else:
+            if isinstance(skill_outputs[0], InternalDataFrame):
+                skill_outputs = InternalDataFrameConcat(skill_outputs, axis=1)
+                cols_to_drop = set(input.columns) & set(skill_outputs.columns)
+                skill_input_reduced = input.drop(columns=cols_to_drop)
 
-        return predictions
-
-    def select_skill_to_improve(
-        self, accuracy: Mapping, accuracy_threshold: Optional[float] = 0.9
-    ) -> Optional[BaseSkill]:
-        """
-        Selects the skill with the lowest accuracy to improve.
-
-        Args:
-            accuracy (Mapping): Accuracy of each skill.
-            accuracy_threshold (Optional[float], optional): Accuracy threshold. Defaults to 1.0.
-        Returns:
-            Optional[BaseSkill]: Skill to improve. None if no skill to improve.
-        """
-        skills_below_threshold = [
-            skill_name
-            for skill_name in self.skills.keys()
-            if accuracy[skill_name] < accuracy_threshold
-        ]
-        if skills_below_threshold:
-            weakest_skill_name = min(skills_below_threshold, key=accuracy.get)
-            return self.skills[weakest_skill_name]
+                return skill_input_reduced.merge(
+                    skill_outputs,
+                    left_index=True,
+                    right_index=True,
+                    how='inner'
+                )
+            elif isinstance(skill_outputs[0], (dict, InternalSeries)):
+                return InternalDataFrame(skill_outputs)
+            else:
+                raise ValueError(f"Unsupported output type: {type(skill_outputs[0])}")

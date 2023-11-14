@@ -13,6 +13,9 @@ error_console = Console(stderr=True, style="bold red")
 
 
 def print_text(text: str, style=None, streaming_style=False):
+    """
+    Print text to console with optional style and streaming style.
+    """
     if streaming_style:
         for char in text:
             console.print(char, sep='', end='', style=style)
@@ -23,10 +26,16 @@ def print_text(text: str, style=None, streaming_style=False):
 
 
 def print_error(text: str):
+    """
+    Print error message to console.
+    """
     error_console.print(text)
 
 
 def print_dataframe(dataframe: InternalDataFrame):
+    """
+    Print dataframe to console.
+    """
     num_rows = 5
     table = Table(show_header=True, header_style="bold magenta")
     # index_name = dataframe.index.name or 'index'
@@ -49,6 +58,9 @@ def print_dataframe(dataframe: InternalDataFrame):
 
 
 def print_series(data: InternalSeries):
+    """
+    Print series to console.
+    """
 
     # Create a Rich Table with a column for each series value
     table = Table(show_header=True, header_style="bold magenta")

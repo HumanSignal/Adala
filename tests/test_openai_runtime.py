@@ -1,4 +1,4 @@
-from utils import patching, PatchedCalls
+from utils import patching, PatchedCalls, mdict
 
 
 @patching(
@@ -8,17 +8,17 @@ from utils import patching, PatchedCalls
 @patching(
     target_function=PatchedCalls.GUIDANCE.value,
     data=[{
-        'input': dict(text_='Hello', comments='Yes', silent=True, labels=list('abc')),
-        'output': {'output': 'Hello, World!', 'label': 'World', 'logprobs': {'World': -0.1, 'Test': -0.2}}
+        'input': dict(text_='Hello', comments='Yes', silent=True, label_options=list('abc')),
+        'output': {'output': 'Hello, World!', 'label': 'World'}
     }, {
-        'input': dict(text_='Test', comments='No', silent=True, labels=list('abc')),
-        'output': {'output': 'Hello, Test!', 'label': 'Test', 'logprobs': {'World': 0.2, 'Test': 0.1}}
+        'input': dict(text_='Test', comments='No', silent=True, label_options=list('abc')),
+        'output': {'output': 'Hello, Test!', 'label': 'Test'}
     }],
     strict=False
 )
 def test_process_batch():
     from adala.utils.internal_data import InternalDataFrame
-    from adala.runtimes.openai import OpenAIRuntime
+    from adala.runtimes import GuidanceRuntime
 
     df = InternalDataFrame(
         [['Hello', 'Yes'],
@@ -26,16 +26,27 @@ def test_process_batch():
         columns=['text', 'comments']
     )
 
-    runtime = OpenAIRuntime()
-    result = runtime.process_batch(
+    runtime = GuidanceRuntime()
+    result = runtime.batch_to_batch(
         batch=df,
-        input_template='Input: {{text}} {{comments}}',
-        output_template="Output: {{gen 'output'}} {{select 'label' options=labels logprobs='logprobs'}}",
-        instructions='This is a test.',
-        extra_fields={'labels': list('abc')}
+        input_template='Input: {text} {comments}',
+        output_template="Output: {output} {label}",
+        instructions_template='This is a test.',
+        field_schema={
+            'output': {
+                'type': 'string'
+            },
+            'label': {
+                'type': 'array',
+                'items': {
+                    'type': 'string',
+                    'enum': list('abc')
+                }
+            }
+        }
     )
     assert isinstance(result, InternalDataFrame)
     assert result.equals(InternalDataFrame([
-        ['Hello, World!', 'World', {'World': -0.1, 'Test': -0.2}],
-        ['Hello, Test!', 'Test', {'World': 0.2, 'Test': 0.1}]
-    ], columns=['output', 'label', 'logprobs']))
+        ['Hello, World!', 'World'],
+        ['Hello, Test!', 'Test']
+    ], columns=['output', 'label']))

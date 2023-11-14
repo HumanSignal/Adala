@@ -1,28 +1,39 @@
 from rich import print
 from rich.prompt import Prompt
-from .base import BasicEnvironment
+from .base import Environment
 from adala.skills import SkillSet
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_series
-from adala.datasets import Dataset, DataFrameDataset
+from typing import Optional
+from collections import defaultdict
+from adala.environments.base import EnvironmentFeedback
 
 
-class ConsoleEnvironment(BasicEnvironment):
+class ConsoleEnvironment(Environment):
 
-    def request_feedback(self, skill_set: SkillSet, predictions: InternalDataFrame):
+    def get_feedback(
+        self,
+        skills: SkillSet,
+        predictions: InternalDataFrame,
+        num_feedbacks: Optional[int] = None
+    ):
+        if num_feedbacks is not None:
+            predictions = predictions.sample(n=num_feedbacks)
 
-        ground_truth_dataset = []
-        for _, prediction in predictions.iterrows():
-            print_series(prediction)
-            pred_row = prediction.to_dict()
-            for skill in skill_set.skills.values():
-                ground_truth = Prompt.ask(
-                    f'Does this prediction match "{skill.name}"? ("Yes" or provide your answer)', default="Yes")
-                if ground_truth == "Yes":
-                    pass
+        feedback = defaultdict(list)
+        match = defaultdict(list)
+        for skill_output, skill_name in skills.get_skill_outputs():
+            for _, prediction in predictions.iterrows():
+                print_series(prediction)
+                print(f'Prediction for "{skill_name}": {skill_output} = {prediction[skill_output]}')
+                fb = Prompt.ask('Your feedback: (Correct/Incorrect/Provide your answer)', default='Correct')
+                if fb == 'Correct':
+                    match[skill_output].append(True)
                 else:
-                    pred_row[skill.name] = ground_truth
-            ground_truth_dataset.append(pred_row)
+                    match[skill_output].append(False)
+                feedback[skill_output].append(fb)
 
-        self.ground_truth_dataset = DataFrameDataset(
-            df=InternalDataFrame(ground_truth_dataset))
+        return EnvironmentFeedback(
+            match=InternalDataFrame(match, index=predictions.index),
+            feedback=InternalDataFrame(feedback, index=predictions.index)
+        )

@@ -12,7 +12,7 @@ STORAGE_DB = 'feedback.db'
 
 class GroundTruth(BaseModel):
     prediction_id: int
-    skill_name: str
+    skill_output: str
     gt_match: Optional[bool] = None
     gt_data: Optional[str] = None
 
