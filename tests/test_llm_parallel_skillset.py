@@ -49,6 +49,7 @@ from utils import patching, PatchedCalls
 def test_llm_parallel_skillset():
     from adala.skills import ParallelSkillSet, TransformSkill
     from adala.runtimes import GuidanceRuntime
+    from adala.utils.internal_data import InternalDataFrame
 
     skillset = ParallelSkillSet(
         skills=[
