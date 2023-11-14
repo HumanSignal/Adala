@@ -3,8 +3,6 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional, TYPE_CHECKING, Dict
 
 from pydantic import BaseModel, Field
-from adala.datasets.base import Dataset, InternalDataFrame
-from rich import print
 
 
 class Memory(BaseModel, ABC):
