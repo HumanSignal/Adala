@@ -233,10 +233,10 @@ class ParallelSkillSet(SkillSet):
 
     def apply(
         self,
-        input: Union[Record, InternalDataFrame],
+        input: Union[InternalSeries, InternalDataFrame],
         runtime: Runtime,
         improved_skill: Optional[str] = None,
-    ) -> Union[Record, InternalDataFrame]:
+    ) -> InternalDataFrame:
         """
         Applies each skill on the dataset, enhancing the agent's experience.
 
@@ -274,7 +274,7 @@ class ParallelSkillSet(SkillSet):
                     right_index=True,
                     how='inner'
                 )
-            elif isinstance(skill_outputs[0], dict):
+            elif isinstance(skill_outputs[0], (dict, InternalSeries)):
                 return InternalDataFrame(skill_outputs)
             else:
                 raise ValueError(f"Unsupported output type: {type(skill_outputs[0])}")
