@@ -10,18 +10,11 @@ import aiosqlite
 STORAGE_DB = 'feedback.db'
 
 
-class GroundTruth(BaseModel):
+class Feedback(BaseModel):
     prediction_id: int
-    skill_output: str
-    gt_match: Optional[bool] = None
-    gt_data: Optional[str] = None
-
-
-class Prediction(BaseModel):
-    id: int
-    input: Dict[str, Any]
-    skill_name: str
-    output: str
+    prediction_column: str
+    fb_match: Optional[bool] = None
+    fb_message: Optional[str] = None
 
 
 router = APIRouter()
@@ -38,34 +31,34 @@ class BaseAPI(FastAPI):
         print(f'Initializing database {STORAGE_DB}...')
         async with aiosqlite.connect(STORAGE_DB) as db:
             await db.execute('''
-                CREATE TABLE IF NOT EXISTS ground_truth (
+                CREATE TABLE IF NOT EXISTS feedback (
                     prediction_id INTEGER NOT NULL,
-                    skill_name TEXT NOT NULL,
-                    gt_match BOOLEAN,
-                    gt_data TEXT,
-                    PRIMARY KEY (prediction_id, skill_name)
+                    prediction_column TEXT NOT NULL,
+                    fb_match BOOLEAN,
+                    fb_message TEXT,
+                    PRIMARY KEY (prediction_id, prediction_column)
                 )
             ''')
             await db.commit()
 
     async def request_feedback(
         self,
-        predictions: List[Prediction],
+        predictions: List[Dict[str, Any]],
         skills: List[Dict[str, Any]],
         db: aiosqlite.Connection
     ):
         raise NotImplementedError
 
-    async def retrieve_ground_truth(self, db: aiosqlite.Connection):
-        cursor = await db.execute('SELECT prediction_id, skill_name, gt_match, gt_data FROM ground_truth')
+    async def retrieve_feedback(self, db: aiosqlite.Connection):
+        cursor = await db.execute('SELECT prediction_id, prediction_column, fb_match, fb_message FROM feedback')
         rows = await cursor.fetchall()
-        return [GroundTruth(prediction_id=row[0], skill_name=row[1], gt_match=row[2], gt_data=row[3]) for row in rows]
+        return [Feedback(prediction_id=row[0], prediction_column=row[1], fb_match=row[2], fb_message=row[3]) for row in rows]
 
-    async def store_ground_truths(self, ground_truths: List[GroundTruth], db: aiosqlite.Connection):
+    async def store_feedback(self, feedbacks: List[Feedback], db: aiosqlite.Connection):
         await db.executemany('''
-            INSERT OR REPLACE INTO ground_truth (prediction_id, skill_name, gt_match, gt_data)
+            INSERT OR REPLACE INTO feedback (prediction_id, prediction_column, fb_match, fb_message)
             VALUES (?, ?, ?, ?)
-        ''', [(gt.prediction_id, gt.skill_name, gt.gt_match, gt.gt_data) for gt in ground_truths])
+        ''', [(fb.prediction_id, fb.prediction_column, fb.fb_match, fb.fb_message) for fb in feedbacks])
         await db.commit()
 
 
@@ -79,8 +72,8 @@ async def get_db() -> aiosqlite.Connection:
 app = BaseAPI()
 
 
-@router.post("/feedback")
-async def create_feedback(
+@router.post("/request-feedback")
+async def request_feedback(
     request: Request,
     predictions: List[Dict[str, Any]],
     skills: List[Dict[str, Any]],
@@ -88,14 +81,14 @@ async def create_feedback(
 ):
     app = request.app
     await app.request_feedback(predictions, skills, db)
-    return {"message": "Feedback received successfully"}
+    return {"message": "Feedback requested successfully"}
 
 
-@router.get("/ground-truth", response_model=List[GroundTruth])
-async def get_ground_truth(request: Request, db: aiosqlite.Connection = Depends(get_db)):
+@router.get("/feedback", response_model=List[Feedback])
+async def get_feedback(request: Request, db: aiosqlite.Connection = Depends(get_db)):
     app = request.app
-    ground_truths = await app.retrieve_ground_truth(db)
-    return ground_truths
+    fb = await app.retrieve_feedback(db)
+    return fb
 
 
 @app.on_event("startup")

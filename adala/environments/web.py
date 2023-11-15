@@ -1,8 +1,8 @@
 import requests
 import time
 from typing import Optional
-from .base import StaticEnvironment
-from .servers.base import GroundTruth
+from .base import StaticEnvironment, EnvironmentFeedback
+from .servers.base import Feedback
 from adala.skills import SkillSet
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
 from collections import defaultdict
@@ -13,17 +13,22 @@ class WebStaticEnvironment(StaticEnvironment):
     """
     Web environment interacts with server API to request feedback and retrieve ground truth.
     Following endpoints are expected:
-    - POST /feedback
-    - GET /ground-truth
+    - POST /request-feedback
+    - GET /feedback
     """
     url: str
+
+    def _get_fb_records(self):
+        fb_records = requests.get(f'{self.url}/feedback', timeout=3).json()
+        fb_records = [Feedback(**r) for r in fb_records]
+        return fb_records
 
     def get_feedback(
         self,
         skills: SkillSet,
         predictions: InternalDataFrame,
         num_feedbacks: Optional[int] = None,
-    ):
+    ) -> EnvironmentFeedback:
         """
         Request feedback for the predictions.
 
@@ -45,30 +50,35 @@ class WebStaticEnvironment(StaticEnvironment):
             'predictions': predictions.reset_index().to_dict(orient='records')
         }
 
-        requests.post(f'{self.url}/feedback', json=payload, timeout=3)
+        requests.post(f'{self.url}/request-feedback', json=payload, timeout=3)
 
         # wait for feedback
         with Progress() as progress:
             task = progress.add_task(f"Waiting for feedback...", total=3600)
-            gt_records = []
-            while len(gt_records) < num_feedbacks:
+            fb_records = []
+            while len(fb_records) < num_feedbacks:
                 progress.advance(task, 10)
                 time.sleep(10)
-                gt_records = self.get_gt_records()
+                fb_records = self._get_fb_records()
+                print('ZZZZ', fb_records)
 
-        if not gt_records:
+        if not fb_records:
             raise RuntimeError('No ground truth found.')
 
-        gt = defaultdict(dict)
-        for g in gt_records:
-            gt[g.skill_output][g.prediction_id] = g.gt_data or True
+        match = defaultdict(list)
+        feedback = defaultdict(list)
+        index = []
+        for f in fb_records:
+            match[f.prediction_column].append(f.fb_match)
+            feedback[f.prediction_column].append(f.fb_message)
+            index.append(f.prediction_id)
 
-        df = InternalDataFrame({skill: InternalSeries(g) for skill, g in gt.items()})
+        print(11111, match)
+        print(2222, feedback)
+        print(3333, fb_records)
 
-        return df
+        match = InternalDataFrame(match, index=index)
+        feedback = InternalDataFrame(feedback, index=index)
 
-    def get_gt_records(self):
-        gt_records = requests.get(f'{self.url}/ground-truth', timeout=3).json()
-        gt_records = [GroundTruth(**r) for r in gt_records]
-        gt_records = [r for r in gt_records if r.gt_data or r.gt_match]
-        return gt_records
+
+        return EnvironmentFeedback(match=match, feedback=feedback)

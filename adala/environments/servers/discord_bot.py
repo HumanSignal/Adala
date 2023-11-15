@@ -7,7 +7,7 @@ import aiosqlite
 from typing import List, Dict, Any
 from discord.ext import commands
 from discord.ui import View
-from adala.environments.servers.base import BaseAPI, Prediction, GroundTruth, STORAGE_DB
+from adala.environments.servers.base import BaseAPI, Feedback, STORAGE_DB
 
 
 intents = discord.Intents.default()
@@ -43,17 +43,17 @@ async def on_message(message):
         initial_message_id = message.reference.message_id
         print(f'Got reply in thread for message id: {initial_message_id}', message)
         async with aiosqlite.connect(STORAGE_DB) as db:
-            async with db.execute('SELECT * FROM discord_gt_message WHERE message_id = ?', (initial_message_id,)) as cursor:
+            async with db.execute('SELECT * FROM discord_fb_message WHERE message_id = ?', (initial_message_id,)) as cursor:
                 row = await cursor.fetchone()
                 if row is None:
                     print(f'No ground truth message found for message id: {initial_message_id}')
                     return
-                prediction_id, skill_name = int(row[1]), row[2]
+                prediction_id, prediction_column = int(row[1]), row[2]
 
             # update ground truth with reply
-            await db.execute('UPDATE ground_truth SET gt_data = ? '
-                             'WHERE prediction_id = ? AND skill_name = ?',
-                             (message.content, prediction_id, skill_name))
+            await db.execute('UPDATE feedback SET fb_message = ? '
+                             'WHERE prediction_id = ? AND prediction_column = ?',
+                             (message.content, prediction_id, prediction_column))
             await db.commit()
 
     # Process other messages normally
@@ -63,11 +63,11 @@ async def on_message(message):
 @bot.event
 async def on_interaction(interaction: discord.Interaction):
 
-    async def update_ground_truth_match(prediction_id: int, skill_name: str, match: bool):
+    async def update_feedback_match(prediction_id: int, prediction_column: str, match: bool):
         async with aiosqlite.connect(STORAGE_DB) as db:
-            await db.execute('UPDATE ground_truth SET gt_match = ?, gt_data = NULL '
-                             'WHERE prediction_id = ? AND skill_name = ?',
-                             (match, prediction_id, skill_name))
+            await db.execute('UPDATE feedback SET fb_match = ?, fb_message = NULL '
+                             'WHERE prediction_id = ? AND prediction_column = ?',
+                             (match, prediction_id, prediction_column))
             await db.commit()
             print(f'Updated ground truth for prediction id: {prediction_id} with match: {match}')
 
@@ -75,34 +75,34 @@ async def on_interaction(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
 
         custom_id = interaction.data['custom_id']
-        action, prediction_id_str, skill_name = custom_id.split(':')
+        action, prediction_id_str, prediction_column = custom_id.split(':')
         prediction_id = int(prediction_id_str)  # Convert prediction_id to int
 
         if action == 'accept':
             # Handle the accept action
-            await update_ground_truth_match(prediction_id, skill_name, True)
+            await update_feedback_match(prediction_id, prediction_column, True)
             # React with a checkmark emoji to the message
             await interaction.message.add_reaction('✅')
         elif action == 'reject':
             # Handle the reject action
-            await update_ground_truth_match(prediction_id, skill_name, False)
+            await update_feedback_match(prediction_id, prediction_column, False)
             # React with a cross mark emoji to the message
             await interaction.message.add_reaction('❌')
 
 
 class AcceptRejectView(View):
 
-    def __init__(self, prediction_id: int, skill_name: str, *args, **kwargs):
+    def __init__(self, prediction_id: int, prediction_column: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_item(discord.ui.Button(
             label='Accept',
             style=discord.ButtonStyle.success,
-            custom_id=f'accept:{prediction_id}:{skill_name}'
+            custom_id=f'accept:{prediction_id}:{prediction_column}'
         ))
         self.add_item(discord.ui.Button(
             label='Reject',
             style=discord.ButtonStyle.danger,
-            custom_id=f'reject:{prediction_id}:{skill_name}'
+            custom_id=f'reject:{prediction_id}:{prediction_column}'
         ))
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
@@ -115,10 +115,10 @@ class DiscordAPI(BaseAPI):
     async def init_db_gt_message(self):
         async with aiosqlite.connect(STORAGE_DB) as db:
             await db.execute('''
-                CREATE TABLE IF NOT EXISTS discord_gt_message (
+                CREATE TABLE IF NOT EXISTS discord_fb_message (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     prediction_id INTEGER NOT NULL,
-                    skill_name TEXT NOT NULL,
+                    prediction_column TEXT NOT NULL,
                     message_id INTEGER NOT NULL
                 )
             ''')
@@ -140,29 +140,29 @@ class DiscordAPI(BaseAPI):
         channel = bot.get_channel(CHANNEL_ID)
         if not channel:
             raise Exception(f'Channel with id {CHANNEL_ID} not found')
-        ground_truths = []
+        fbs = []
         skill_outputs = sum([skill['outputs'] for skill in skills], [])
         for skill_output in skill_outputs:
             for prediction in predictions:
                 text = '========================\n'
                 text += '\n'.join(f'**{k}**: {v}' for k, v in prediction.items() if k not in skill_outputs + ['index'])
                 text += f'\n\n__**{skill_output}**__: {prediction[skill_output]}'
-                ground_truth = GroundTruth(prediction_id=prediction['index'], skill_name=skill_output)
-
+                text = text[:2000]
+                fb = Feedback(prediction_id=prediction['index'], prediction_column=skill_output)
                 message = await channel.send(
                     text, view=AcceptRejectView(
-                        prediction_id=ground_truth.prediction_id,
-                        skill_name=ground_truth.skill_name)
+                        prediction_id=fb.prediction_id,
+                        prediction_column=fb.prediction_column)
                 )
-                ground_truths.append(ground_truth)
+                fbs.append(fb)
                 await db.execute('''
-                    INSERT INTO discord_gt_message (prediction_id, skill_name, message_id)
+                    INSERT INTO discord_fb_message (prediction_id, prediction_column, message_id)
                     VALUES (?, ?, ?)
-                ''', (ground_truth.prediction_id, ground_truth.skill_name, message.id))
+                ''', (fb.prediction_id, fb.prediction_column, message.id))
                 await db.commit()
 
         # TODO: do we need to store it in advance?
-        await self.store_ground_truths(ground_truths, db)
+        await self.store_feedback(fbs, db)
 
 
 app = DiscordAPI()
