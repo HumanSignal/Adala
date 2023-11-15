@@ -18,7 +18,7 @@ class Skill(BaseModel, ABC):
         input_template (str): Template for the input data.
         output_template (str): Template for the output data.
         description (Optional[str]): Description of the skill.
-        field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
+        field_schema (Optional[Dict]): Field [JSON schema](https://json-schema.org/) to use in the templates. Defaults to all fields are strings,
             i.e. analogous to {"field_n": {"type": "string"}}.
         extra_fields (Optional[Dict[str, str]]): Extra fields to use in the templates. Defaults to None.
         verbose (bool): Flag indicating if runtime outputs should be verbose. Defaults to False.
