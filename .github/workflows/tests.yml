@@ -19,6 +19,7 @@ on:
     branches:
       - master
       - 'release/**'
+  workflow_dispatch:
 
 env:
   OPENAI_API_KEY: test
