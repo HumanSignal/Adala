@@ -7,7 +7,7 @@ from adala.environments.base import Environment, StaticEnvironment, EnvironmentF
 from adala.runtimes.base import Runtime
 from adala.runtimes._openai import OpenAIChatRuntime
 from adala.runtimes import GuidanceRuntime
-from adala.skills._base import Skill
+from adala.skills._base import Skill, AnalysisSkill, TransformSkill, SynthesisSkill
 from adala.memories.base import Memory
 from adala.skills.skillset import SkillSet, LinearSkillSet
 from adala.utils.logs import print_dataframe, print_text, print_error
@@ -218,11 +218,102 @@ class Agent(BaseModel, ABC):
 
         return train_skill_name, train_skill_output, acc_score
 
+    def pe_optimization(self, skill, examples, teacher_runtime):
+        # system messages
+        messages = [{'role': 'system', 'content': 'You are a helpful assistant.'}]
+
+        messages += [{
+            'role': 'user',
+            'content': '''
+A prompt is a text paragraph that outlines the expected actions and instructs the model to \
+generate a specific output. This prompt is concatenated with the input text, and the \
+model then creates the required output. Formally, the prompt is a prefix to the input:
+
+output = model(concatenate(prompt, input))
+
+Model can produce erroneous output if the prompt is not well defined. \
+In our collaboration, we’ll work together to refine a prompt. The process consists of two main steps:
+
+## Step 1
+I will provide you with the current prompt, how the prompt is concatenated with the input text
+(i.e., "full template"), along with some example(s) that are associated with
+this prompt. Each example contains the input, the final answer produced by the model, and the user feedback.
+Your task is to analyze the examples, determining whether the
+existing prompt is decsribing the task reflected by these examples precisely, and suggest
+changes to the prompt.
+
+## Step 2
+Next, you will carefully review your reasoning in step 1, integrate the insights to craft a
+new, optimized prompt.'''
+        }]
+
+        messages += [{
+            'role': 'assistant',
+            'content': 'Sure, I’d be happy to help you with this prompt engineering problem. '
+                       'Please provide me with the current prompt, the full template, and the examples.'
+        }]
+
+        messages += [{
+            'role': 'user',
+            'content': f'''
+## Current Prompt
+{skill.instructions}
+
+## Full Template
+{{current prompt}}
+{skill.input_template}
+{skill.output_template}
+
+## Examples
+{examples}
+
+## Instructions
+For some of these examples, the user feedback points out that the model is not producing the correct output. \
+This may be due to the prompt being misleading or not describing the task precisely. 
+
+Please examine the example(s) carefully. Note that the user feedback should be considered as ground truth, but \
+the prompts (task descriptions) may be incorrect and need modification.
+For each example, provide reasoning according to the following template:
+
+### Example <id>
+Input: <input>
+Output: <output>
+Feedback: <feedback>
+Is the output correct according to the feedback: <yes or no, and your reasoning>
+To output the correct label, is it necessary to edit the prompt: <yes or no, and your
+reasoning>
+If yes, provide detailed analysis and actionable suggestions to edit the prompt: <analysis and
+suggestions>
+'''}]
+
+        reasoning = teacher_runtime.execute(messages)
+
+        messages += [
+            {'role': 'assistant', 'content': reasoning},
+            {'role': 'user', 'content': f'''
+Now please carefully review your reasoning in Step 1 and help with Step 2: refining the prompt.
+
+## Current prompt
+{skill.instructions}
+
+## Instructions
+
+- The new prompt should be concise and direct.
+- The new prompt should should describe the task precisely and address the points raised in the user feedback.
+- Include a few examples in the prompt to help the model learn the task, by providing inputs and outputs that follow full template.
+- Reply only with the prompt. Do not include other text.
+'''}]
+
+        print(messages)
+        new_prompt = teacher_runtime.execute(messages)
+        return new_prompt
+
     def learn(
         self,
         learning_iterations: int = 3,
         accuracy_threshold: float = 0.9,
         update_memory: bool = True,
+        batch_size: Optional[int] = None,
         num_feedbacks: Optional[int] = None,
         runtime: Optional[str] = None,
         teacher_runtime: Optional[str] = None,
@@ -242,36 +333,17 @@ class Agent(BaseModel, ABC):
         runtime = self.get_runtime(runtime=runtime)
         teacher_runtime = self.get_teacher_runtime(runtime=teacher_runtime)
 
-        messages = [
-            {'role': 'system',
-             'content': "Act as LLM instructions generator. Full LLM prompt is created by concatenating LLM instructions and input text. "
-                        "You should respond only with the LLM instructions. After each generation, user provides "
-                        "a feedback which includes example of input text, LLM output, and user feedback. "
-                        "Based on this analysis, generate new "
-                        "instructions for the LLM. These instructions should be concise, direct, and "
-                        "focused solely on addressing the points raised in the user feedback, "
-                        "aligning with the input, and improving upon the predictions. "
-                        "Include relevant few-shot examples within the instructions that are aligned "
-                        "with the user's feedback and the initial input, demonstrating the desired "
-                        "format and approach for the LLM’s prediction. These examples should serve "
-                        "as clear models for the expected output in the next iteration."}
-        ]
-
-        skill_accuracies = {}
-
         for iteration in range(learning_iterations):
 
             print_text(f'\n\n=> Iteration #{iteration}: Getting feedback, analyzing and improving ...')
 
-            inputs = self.environment.get_data_batch()
-
+            inputs = self.environment.get_data_batch(batch_size=batch_size)
             predictions = self.skills.apply(inputs, runtime=runtime)
-
             feedback = self.environment.get_feedback(self.skills, predictions, num_feedbacks=num_feedbacks)
             print('Predictions and feedback:')
             fb = feedback.feedback.rename(columns=lambda x: x + '__fb' if x in predictions.columns else x)
-            print_dataframe(InternalDataFrameConcat([predictions, feedback.match, fb], axis=1))
-
+            analyzed_df = fb.merge(predictions, left_index=True, right_index=True)
+            print_dataframe(analyzed_df)
             train_skill_name, train_skill_output, accuracy = self.select_skill_to_train(feedback, accuracy_threshold)
             if not train_skill_name:
                 print_text(f'No skill to improve found. Continue learning...')
@@ -280,34 +352,19 @@ class Agent(BaseModel, ABC):
             print_text(f'Output to improve: "{train_skill_output}" (Skill="{train_skill_name}")\n'
                        f'Accuracy = {accuracy * 100:0.2f}%', style='bold red')
 
-            # collect user feedback
-            messages.append({'role': 'assistant', 'content': train_skill.instructions})
-            message = ''
-            if train_skill_output in skill_accuracies and accuracy <= skill_accuracies[train_skill_output]:
-                message += 'The quality of the proposed instructions has not improved. ' \
-                           'Carefully analyze the feedback and do your best to improve the instructions. '
-            skill_accuracies[train_skill_output] = accuracy
-            message += 'Here is the feedback based on the current instructions:\n\n'
-            for row in InternalDataFrameConcat((predictions, fb), axis=1).to_dict(orient='records'):
+            examples = []
+
+            for row in analyzed_df.to_dict(orient='records'):
                 # if fb marked as NaN, skip
                 if not row[f'{train_skill_output}__fb']:
                     continue
-                message = f'{message}\n' \
-                          f'{train_skill.input_template.format(**row)}\n' \
-                          f'{train_skill.output_template.format(**row)}\n' \
-                          f'{row[f"{train_skill_output}__fb"]}\n\n'
+                examples.append(
+                    f'{train_skill.input_template.format(**row)}\n'
+                    f'{train_skill.output_template.format(**row)}\n'
+                    f'Feedback: {row[f"{train_skill_output}__fb"]}\n\n'
+                )
 
-            messages.append({
-                'role': 'user',
-                'content': f'{message}\n\n'
-                           f'Please address the feedback and provide new improved instructions for the LLM. '
-                           f'Use the following format for the few-shot examples:\n\n'
-                           f'{train_skill.input_template}\n'
-                           f'{train_skill.output_template}\n\n'
-                           f'Carefully analyze this feedback, and provide updated prompting instructions for LLM:'
-            })
-            # print(messages)
-            new_instructions = teacher_runtime.execute(messages)
+            new_instructions = self.pe_optimization(train_skill, '\n'.join(examples), teacher_runtime)
             train_skill.instructions = new_instructions
             print_text(f'{train_skill.instructions}', style='bold green')
 

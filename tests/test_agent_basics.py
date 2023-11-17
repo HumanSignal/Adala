@@ -28,29 +28,10 @@ from utils import patching, PatchedCalls, OpenaiChatCompletionMock
 @patching(
     target_function=PatchedCalls.OPENAI_CHAT_COMPLETION.value,
     data=[
-        {'input': {'model': 'gpt-3.5-turbo', 'messages': [
-            {
-                'role': 'system',
-                'content': '''Act as LLM instructions generator. Full LLM prompt is created by concatenating LLM instructions and input text. You \
-should respond only with the LLM instructions. After each generation, user provides a feedback which includes example of input text, LLM \
-output, and user feedback. Based on this analysis, generate new instructions for the LLM. These instructions should be concise, direct, \
-and focused solely on addressing the points raised in the user feedback, aligning with the input, and improving upon the predictions. \
-Include relevant few-shot examples within the instructions that are aligned with the user's feedback and the initial input, \
-demonstrating the desired format and approach for the LLM’s prediction. These examples should serve as clear models for the expected \
-output in the next iteration.'''
-            },
-            {'role': 'assistant', 'content': '...'},
-            {
-                'role': 'user',
-                'content': '''Here is the feedback based on the current instructions:\n\n\nInput: 0 5 0\nOutput: 1 5 1\nCorrect.\n\n\nInput: 0 0 \
-0\nOutput: 1 5 1\nIncorrect. Must be equal to 1 1 1\n\n\n\nPlease address the feedback and provide new improved instructions for the \
-LLM. Use the following format for the few-shot examples:\n\nInput: {input}\nOutput: {0_to_1}\n\nCarefully analyze this feedback, and \
-provide updated prompting instructions for LLM:'''
-            }
-        ]},
-            'output': OpenaiChatCompletionMock(content='Transform 0 to 1')}
+        {'input': {'model': 'gpt-3.5-turbo'}, 'output': OpenaiChatCompletionMock(content='Reasoning...')},
+        {'input': {'model': 'gpt-3.5-turbo'}, 'output': OpenaiChatCompletionMock(content='Transform 0 to 1')},
     ],
-    strict=True
+    strict=False
 )
 def test_agent_quickstart_single_skill():
     from adala.agents import Agent
@@ -125,7 +106,9 @@ def test_agent_quickstart_single_skill():
 @patching(
     target_function=PatchedCalls.OPENAI_CHAT_COMPLETION.value,
     data=[
+        {'input': {}, 'output': OpenaiChatCompletionMock(content='Reasoning for 0 to 1')},
         {'input': {}, 'output': OpenaiChatCompletionMock(content='Transform 0 to 1')},
+        {'input': {}, 'output': OpenaiChatCompletionMock(content='Reasoning for 1 to 2')},
         {'input': {}, 'output': OpenaiChatCompletionMock(content='Transform 1 to 2')},
     ])
 def test_agent_quickstart_two_skills():
@@ -188,6 +171,7 @@ def test_agent_quickstart_two_skills():
 @patching(
     target_function=PatchedCalls.OPENAI_CHAT_COMPLETION.value,
     data=[
+        {'input': {}, 'output': OpenaiChatCompletionMock(content='Reasoning for 1 to 2')},
         {'input': {}, 'output': OpenaiChatCompletionMock(content='Transform 1 to 2')},
     ])
 def test_agent_quickstart_three_skills_only_second_fail():
