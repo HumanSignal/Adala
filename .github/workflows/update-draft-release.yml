@@ -23,7 +23,7 @@ jobs:
       rc-version: ${{ steps.create-draft-release.outputs.rc-version }}
     steps:
       - name: Create release draft
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         id: create-draft-release
         env:
           TARGET_COMMITISH: "${{ github.ref_name }}"
