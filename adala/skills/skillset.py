@@ -5,7 +5,7 @@ from collections import OrderedDict
 from adala.runtimes.base import Runtime
 from adala.utils.logs import print_text
 from adala.utils.internal_data import InternalDataFrame, InternalSeries, InternalDataFrameConcat, Record
-from ._base import Skill
+from ._base import Skill, TransformSkill, AnalysisSkill, SynthesisSkill
 
 
 class SkillSet(BaseModel, ABC):
@@ -171,7 +171,7 @@ class LinearSkillSet(SkillSet):
             # use input dataset for the first node in the pipeline
             print_text(f"Applying skill: {skill_name}")
             skill_output = skill.apply(skill_input, runtime)
-            if isinstance(skill_output, InternalDataFrame) and isinstance(skill_input, InternalDataFrame):
+            if isinstance(skill, TransformSkill):
                 # Columns to drop from skill_input because they are also in skill_output
                 cols_to_drop = set(skill_output.columns) & set(skill_input.columns)
                 skill_input_reduced = skill_input.drop(columns=cols_to_drop)
@@ -182,15 +182,12 @@ class LinearSkillSet(SkillSet):
                     right_index=True,
                     how='inner'
                 )
-            elif isinstance(skill_output, InternalDataFrame) and isinstance(skill_input, dict):
+            elif isinstance(skill, (AnalysisSkill, SynthesisSkill)):
                 skill_input = skill_output
-            elif isinstance(skill_output, dict) and isinstance(skill_input, InternalDataFrame):
-                skill_input = skill_output
-            elif isinstance(skill_output, dict) and isinstance(skill_input, dict):
-                skill_input = dict(skill_output, **skill_input)
             else:
-                raise ValueError(f"Unsupported input type: {type(skill_input)} and output type: {type(skill_output)}")
-
+                raise ValueError(f"Unsupported skill type: {type(skill)}")
+        if isinstance(skill_input, InternalSeries):
+            skill_input = skill_input.to_frame().T
         return skill_input
 
     def __rich__(self):
@@ -261,6 +258,11 @@ class ParallelSkillSet(SkillSet):
                     how='inner'
                 )
             elif isinstance(skill_outputs[0], (dict, InternalSeries)):
-                return InternalDataFrame(skill_outputs)
+                # concatenate output to each row of input
+                output = skill_outputs[0]
+                return InternalDataFrameConcat(
+                    [input,
+                     InternalDataFrame([output] * len(input), columns=output.index, index=input.index)],
+                    axis=1)
             else:
                 raise ValueError(f"Unsupported output type: {type(skill_outputs[0])}")

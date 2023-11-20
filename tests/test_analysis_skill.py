@@ -9,7 +9,7 @@ from utils import patching, PatchedCalls
     target_function=PatchedCalls.GUIDANCE.value,
     data=[{
         'input': {
-            'aggregated_input': 'Input JSON format: {"a": 1, "b": 2}\nInput JSON format: {"a": 3, "b": 4}\nInput JSON format: {"a": 5, "b": 6}'
+            'input': 'Input JSON format: {"a": 1, "b": 2}\nInput JSON format: {"a": 3, "b": 4}\nInput JSON format: {"a": 5, "b": 6}'
         },
         'output': {
             'code': 'def convert(input_json):\npass\n'
@@ -38,4 +38,9 @@ def test_code_generation():
     predictions = agent.run()
     pd.testing.assert_frame_equal(
         predictions,
-        pd.DataFrame([{'code': 'def convert(input_json):\npass\n'}]))
+        pd.DataFrame([
+            {'payload': '{"a": 1, "b": 2}', 'code': 'def convert(input_json):\npass\n'},
+            {'payload': '{"a": 3, "b": 4}', 'code': 'def convert(input_json):\npass\n'},
+            {'payload': '{"a": 5, "b": 6}', 'code': 'def convert(input_json):\npass\n'}
+        ])
+    )

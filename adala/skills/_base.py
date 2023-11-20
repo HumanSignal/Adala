@@ -194,11 +194,13 @@ class AnalysisSkill(Skill):
         ).str.cat(sep='\n')
 
         output = runtime.record_to_record(
-            {'aggregated_input': aggregated_input},
-            input_template='{aggregated_input}',
+            {'input': aggregated_input},
+            input_template='{input}',
             output_template=self.output_template,
             instructions_template=self.instructions,
             field_schema=self.field_schema,
             extra_fields=self._get_extra_fields(),
         )
+        # output['input'] = aggregated_input
+        # concatenate input and output and return dataframe
         return InternalSeries(output)
