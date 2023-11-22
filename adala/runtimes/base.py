@@ -36,6 +36,7 @@ class Runtime(BaseModel, ABC):
         output_template: str,
         extra_fields: Optional[Dict[str, Any]] = None,
         field_schema: Optional[Dict] = None,
+        instructions_first: bool = True,
     ) -> Dict[str, str]:
         """
         Processes a record.
@@ -61,6 +62,7 @@ class Runtime(BaseModel, ABC):
         output_template: str,
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
+        instructions_first: bool = True,
     ) -> InternalDataFrame:
         """
         Processes a record.
@@ -85,7 +87,8 @@ class Runtime(BaseModel, ABC):
             instructions_template=instructions_template,
             output_template=output_template,
             extra_fields=extra_fields,
-            field_schema=field_schema
+            field_schema=field_schema,
+            instructions_first=instructions_first,
         )
         return output
 
@@ -98,6 +101,7 @@ class Runtime(BaseModel, ABC):
         output_batch_size: int = 1,
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
+        instructions_first: bool = True,
     ) -> InternalDataFrame:
 
         """
@@ -123,5 +127,6 @@ class Runtime(BaseModel, ABC):
             instructions_template=instructions_template,
             output_template=output_template,
             extra_fields=extra_fields,
-            field_schema=field_schema
+            field_schema=field_schema,
+            instructions_first=instructions_first,
         )

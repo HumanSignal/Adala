@@ -124,7 +124,7 @@ class OpenAIChatRuntime(Runtime):
                                       f'Found: {output_fields}')
         output_field = output_fields[0]
         output_field_name = output_field['text']
-        system_prompt = instructions_template.format(**record, **extra_fields)
+        system_prompt = instructions_template
         user_prompt = input_template.format(**record, **extra_fields)
         # TODO: this truncates the suffix of the output template
         # for example, output template "Output: {answer} is correct" results in output_prefix "Output: "
@@ -196,7 +196,7 @@ class OpenAIVisionRuntime(OpenAIChatRuntime):
         input_text = ''
         content = [{
             'type': 'text',
-            'text': instructions_template.format(**dict(**record, **extra_fields))
+            'text': instructions_template,
         }]
         for field in input_fields:
             if field['type'] == 'text':
