@@ -10,7 +10,7 @@ from adala.runtimes import GuidanceRuntime
 from adala.skills._base import Skill, AnalysisSkill, TransformSkill, SynthesisSkill
 from adala.memories.base import Memory
 from adala.skills.skillset import SkillSet, LinearSkillSet
-from adala.utils.logs import print_dataframe, print_text, print_error
+from adala.utils.logs import print_dataframe, print_text, print_error, highlight_differences
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 
 
@@ -301,7 +301,7 @@ Now please carefully review your reasoning in Step 1 and help with Step 2: refin
     Example:
     - Current prompt: "The model should generate a summary of the input text."
     - New prompt: "The model should generate a summary of the input text. Pay attention to the original style."
-    
+        
 3. Reply only with the new prompt. Do not include input and output templates in the prompt.'''}]
 
         # display dialogue:
@@ -368,7 +368,8 @@ Now please carefully review your reasoning in Step 1 and help with Step 2: refin
                 )
 
             new_instructions = self.pe_optimization(train_skill, '\n'.join(examples), teacher_runtime)
+            highlight_differences(train_skill.instructions, new_instructions)
             train_skill.instructions = new_instructions
-            print_text(f'{train_skill.instructions}', style='bold green')
+            # print_text(f'{train_skill.instructions}', style='bold green')
 
         print_text('Train is done!')
