@@ -28,13 +28,25 @@ class GuidanceRuntime(Runtime):
     }
 
     _llm = None
-    _program = None
-    # do not override this template
-    _llm_template: str = '''\
-{{>instructions_program}}
+    # _program = None
+    #     # do not override this template
+    #     _llm_template: str = '''\
+    # {{>instructions_program}}
+    #
+    # {{>input_program}}
+    # {{>output_program}}'''
 
+    # do not override this template
+    _llm_templates: Dict[str, str] = {
+        True: '''\
+{{>instructions_program}}
 {{>input_program}}
+{{>output_program}}''',
+        False: '''\
+{{>input_program}}
+{{>instructions_program}}
 {{>output_program}}'''
+    }
 
     def init_runtime(self) -> Runtime:
         """
@@ -48,7 +60,7 @@ class GuidanceRuntime(Runtime):
             self._llm = guidance.llms.Transformers(**self.llm_params)
         else:
             raise NotImplementedError(f'LLM runtime type {self.llm_runtime_model_type} is not implemented.')
-        self._program = guidance(self._llm_template, llm=self._llm, silent=not self.verbose)
+        # self._program = guidance(self._llm_templates[self.instruction_first], llm=self._llm, silent=not self.verbose)
         return self
 
     def _input_template_to_guidance(self, input_template, program_input):
@@ -81,7 +93,8 @@ class GuidanceRuntime(Runtime):
                 # replace {field_name} with {select 'field_name' options=field_name_options}
                 # and add "field_name_options" to program input
                 program_input[f'{field_name}_options'] = field_schema[field_name]['items']['enum']
-                output_template = output_template.replace(f'{{{field_name}}}', f'{{{{select \'{field_name}\' options={field_name}_options}}}}')
+                output_template = output_template.replace(f'{{{field_name}}}',
+                                                          f'{{{{select \'{field_name}\' options={field_name}_options}}}}')
             else:
                 # In simple generation scenario, replace {field_name} with {{gen 'field_name'}}
                 output_template = output_template.replace(f'{{{field_name}}}', f'{{{{gen \'{field_name}\'}}}}')
@@ -95,6 +108,7 @@ class GuidanceRuntime(Runtime):
         output_template: str,
         extra_fields: Optional[Dict[str, Any]] = None,
         field_schema: Optional[Dict] = None,
+        instructions_first: bool = True,
     ) -> Dict[str, str]:
         """
         Generates a record from a record.
@@ -106,6 +120,7 @@ class GuidanceRuntime(Runtime):
             output_template (str): Output template.
             extra_fields (Optional[Dict[str, Any]], optional): Extra fields. Defaults to None.
             field_schema (Optional[Dict], optional): Field schema. Defaults to None.
+            instructions_first (bool, optional): Whether to put instructions first. Defaults to True.
 
         Returns:
             Dict[str, str]: Generated record.
@@ -134,7 +149,9 @@ class GuidanceRuntime(Runtime):
         if self.verbose:
             print(program_input)
 
-        result = self._program(
+        program = guidance(self._llm_templates[instructions_first], llm=self._llm, silent=not self.verbose)
+
+        result = program(
             silent=not self.verbose,
             **program_input
         )

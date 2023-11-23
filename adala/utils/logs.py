@@ -7,6 +7,8 @@ from rich import box
 from rich.console import Console
 from typing import Optional
 from .internal_data import InternalDataFrame, InternalSeries
+from difflib import ndiff
+from IPython.display import HTML, display
 
 console = Console()
 error_console = Console(stderr=True, style="bold red")
@@ -74,3 +76,10 @@ def print_series(data: InternalSeries):
 
     # Print the table with the Rich console
     console.print(table)
+
+
+def highlight_differences(text1, text2):
+    diff = ndiff(text1, text2)
+    highlighted = ''.join(['<span style="background-color: lightgreen;">' + i[2] + '</span>' if i[0] == '+' else i[2] for i in diff if i[0] != '-'])
+    highlighted = highlighted.replace(' \n ', '<br>')
+    display(HTML(highlighted))

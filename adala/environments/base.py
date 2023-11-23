@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel
 from abc import ABC, abstractmethod
-from typing import Optional, Dict
+from typing import Optional, Dict, Union, Callable
 from adala.utils.internal_data import InternalDataFrame, InternalSeries, InternalDataFrameConcat
 from adala.utils.matching import fuzzy_match
 from adala.skills.skillset import SkillSet
@@ -134,7 +134,7 @@ class StaticEnvironment(Environment):
     """    
     df: InternalDataFrame = None
     ground_truth_columns: Optional[Dict[str, str]] = None
-    matching_function: str = 'fuzzy'
+    matching_function: Union[str, Callable] = 'fuzzy'
     matching_threshold: float = 0.9
 
     def get_feedback(
@@ -171,6 +171,9 @@ class StaticEnvironment(Environment):
             else:
                 gt_column = self.ground_truth_columns[pred_column]
 
+            if gt_column not in self.df.columns:
+                continue
+
             gt = self.df[gt_column]
             pred = predictions[pred_column]
             gt, pred = gt.align(pred)
@@ -178,22 +181,25 @@ class StaticEnvironment(Environment):
             gt = gt[nonnull_index]
             pred = pred[nonnull_index]
             # compare ground truth with predictions
-            if self.matching_function == 'exact':
-                gt_pred_match = gt == pred
-            elif self.matching_function == 'fuzzy':
-                gt_pred_match = fuzzy_match(gt, pred, threshold=self.matching_threshold)
-            else:
-                raise NotImplementedError(f'Unknown matching function {self.matching_function}')
+            if isinstance(self.matching_function, str):
+                if self.matching_function == 'exact':
+                    gt_pred_match = gt == pred
+                elif self.matching_function == 'fuzzy':
+                    gt_pred_match = fuzzy_match(gt, pred, threshold=self.matching_threshold)
+                else:
+                    raise NotImplementedError(f'Unknown matching function {self.matching_function}')
+            elif callable(self.matching_function):
+                gt_pred_match = gt.combine(pred, lambda g, p: self.matching_function(g, p))
             pred_match[pred_column] = gt_pred_match
             # leave feedback about mismatches
             match_concat = InternalDataFrameConcat([gt_pred_match.rename('match'), gt], axis=1)
             pred_feedback[pred_column] = match_concat.apply(
-                lambda row: 'Correct.' if row['match']
-                else f'Incorrect. Must be equal to {row[gt_column]}' if not pd.isna(row['match']) else np.nan, axis=1)
-
+                lambda row: 'Prediction is correct.' if row['match']
+                else f'Prediction is incorrect. Correct answer: "{row[gt_column]}"'
+                    if not pd.isna(row['match']) else np.nan, axis=1)
         return EnvironmentFeedback(
             match=InternalDataFrame(pred_match).reindex(predictions.index),
-            feedback=InternalDataFrame(pred_feedback).reindex(predictions.index)
+            feedback=InternalDataFrame(pred_feedback).reindex(predictions.index),
         )
 
     def get_data_batch(self, batch_size: int = None) -> InternalDataFrame:

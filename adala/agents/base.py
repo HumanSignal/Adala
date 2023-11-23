@@ -10,7 +10,7 @@ from adala.runtimes import GuidanceRuntime
 from adala.skills._base import Skill, AnalysisSkill, TransformSkill, SynthesisSkill
 from adala.memories.base import Memory
 from adala.skills.skillset import SkillSet, LinearSkillSet
-from adala.utils.logs import print_dataframe, print_text, print_error
+from adala.utils.logs import print_dataframe, print_text, print_error, highlight_differences
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 
 
@@ -211,7 +211,7 @@ class Agent(BaseModel, ABC):
         accuracy = feedback.get_accuracy()
         train_skill_name, train_skill_output, acc_score = '', '', None
         for skill_output, skill_name in self.skills.get_skill_outputs().items():
-            if accuracy[skill_output] < accuracy_threshold:
+            if skill_output in accuracy and accuracy[skill_output] < accuracy_threshold:
                 train_skill_name, train_skill_output = skill_name, skill_output
                 acc_score = accuracy[skill_output]
                 break
@@ -222,69 +222,65 @@ class Agent(BaseModel, ABC):
         # system messages
         messages = [{'role': 'system', 'content': 'You are a helpful assistant.'}]
 
+        # full template
+        if skill.instructions_first:
+            full_template = f'''
+{{prompt}}
+{skill.input_template}
+{skill.output_template}'''
+        else:
+            full_template = f'''
+{skill.input_template}
+{{prompt}}
+{skill.output_template}'''
+
         messages += [{
             'role': 'user',
-            'content': '''
-A prompt is a text paragraph that outlines the expected actions and instructs the model to \
+            'content': f'''
+A prompt is a text paragraph that outlines the expected actions and instructs the large language model (LLM) to \
 generate a specific output. This prompt is concatenated with the input text, and the \
-model then creates the required output. Formally, the prompt is a prefix to the input:
+model then creates the required output.
+This describes the full template how the prompt is concatenated with the input to produce the output:
 
-output = model(concatenate(prompt, input))
+```
+{full_template}
+```
 
-Model can produce erroneous output if the prompt is not well defined. \
+Here:
+- "{skill.input_template}" is input template,
+- "{{prompt}}" is the LLM prompt,
+- "{skill.output_template}" is the output template.
+
+Model can produce erroneous output if a prompt is not well defined. \
 In our collaboration, we’ll work together to refine a prompt. The process consists of two main steps:
 
 ## Step 1
-I will provide you with the current prompt, how the prompt is concatenated with the input text
-(i.e., "full template"), along with some example(s) that are associated with
-this prompt. Each example contains the input, the final answer produced by the model, and the user feedback.
-Your task is to analyze the examples, determining whether the
-existing prompt is decsribing the task reflected by these examples precisely, and suggest
-changes to the prompt.
+I will provide you with the current prompt along with prediction examples. Each example contains the input text, the final prediction produced by the model, and the user feedback. \
+User feedback indicates whether the model prediction is correct or not. \
+Your task is to analyze the examples and user feedback, determining whether the \
+existing instruction is describing the task reflected by these examples precisely, and suggests changes to the prompt to address the incorrect predictions.
 
 ## Step 2
-Next, you will carefully review your reasoning in step 1, integrate the insights to craft a
-new, optimized prompt.'''
+Next, you will carefully review your reasoning in step 1, integrate the insights to refine the prompt, \
+and provide me with the new prompt that improves the model’s performance.'''
         }]
 
         messages += [{
             'role': 'assistant',
             'content': 'Sure, I’d be happy to help you with this prompt engineering problem. '
-                       'Please provide me with the current prompt, the full template, and the examples.'
+                       'Please provide me with the current prompt and the examples with user feedback.'
         }]
 
         messages += [{
             'role': 'user',
             'content': f'''
-## Current Prompt
+## Current prompt
 {skill.instructions}
-
-## Full Template
-{{current prompt}}
-{skill.input_template}
-{skill.output_template}
 
 ## Examples
 {examples}
 
-## Instructions
-For some of these examples, the user feedback points out that the model is not producing the correct output. \
-This may be due to the prompt being misleading or not describing the task precisely. 
-
-Please examine the example(s) carefully. Note that the user feedback should be considered as ground truth, but \
-the prompts (task descriptions) may be incorrect and need modification.
-For each example, provide reasoning according to the following template:
-
-### Example <id>
-Input: <input>
-Output: <output>
-Feedback: <feedback>
-Is the output correct according to the feedback: <yes or no, and your reasoning>
-To output the correct label, is it necessary to edit the prompt: <yes or no, and your
-reasoning>
-If yes, provide detailed analysis and actionable suggestions to edit the prompt: <analysis and
-suggestions>
-'''}]
+Summarize your analysis about incorrect predictions and suggest changes to the prompt.'''}]
 
         reasoning = teacher_runtime.execute(messages)
 
@@ -296,15 +292,20 @@ Now please carefully review your reasoning in Step 1 and help with Step 2: refin
 ## Current prompt
 {skill.instructions}
 
-## Instructions
+## Follow this guidance to refine the prompt:
 
-- The new prompt should be concise and direct.
-- The new prompt should should describe the task precisely and address the points raised in the user feedback.
-- Include a few examples in the prompt to help the model learn the task, by providing inputs and outputs that follow full template.
-- Reply only with the prompt. Do not include other text.
-'''}]
+1. The new prompt should should describe the task precisely, and address the points raised in the user feedback.
+    
+2. The new prompt should be similar to the current instruction, and only differ in the parts that address the issues you identified in Step 1.
+    Example:
+    - Current prompt: "The model should generate a summary of the input text."
+    - New prompt: "The model should generate a summary of the input text. Pay attention to the original style."
+        
+3. Reply only with the new prompt. Do not include input and output templates in the prompt.'''}]
 
-        print(messages)
+        # display dialogue:
+        for message in messages:
+            print(f'"{{{message["role"]}}}":\n{message["content"]}')
         new_prompt = teacher_runtime.execute(messages)
         return new_prompt
 
@@ -354,18 +355,20 @@ Now please carefully review your reasoning in Step 1 and help with Step 2: refin
 
             examples = []
 
-            for row in analyzed_df.to_dict(orient='records'):
+            for i, row in enumerate(analyzed_df.to_dict(orient='records')):
                 # if fb marked as NaN, skip
                 if not row[f'{train_skill_output}__fb']:
                     continue
                 examples.append(
-                    f'{train_skill.input_template.format(**row)}\n'
-                    f'{train_skill.output_template.format(**row)}\n'
-                    f'Feedback: {row[f"{train_skill_output}__fb"]}\n\n'
+                    f'### Example #{i}\n\n'
+                    f'{train_skill.input_template.format(**row)}\n\n'
+                    f'{train_skill.output_template.format(**row)}\n\n'
+                    f'User feedback: {row[f"{train_skill_output}__fb"]}\n\n'
                 )
 
             new_instructions = self.pe_optimization(train_skill, '\n'.join(examples), teacher_runtime)
+            highlight_differences(train_skill.instructions, new_instructions)
             train_skill.instructions = new_instructions
-            print_text(f'{train_skill.instructions}', style='bold green')
+            # print_text(f'{train_skill.instructions}', style='bold green')
 
         print_text('Train is done!')

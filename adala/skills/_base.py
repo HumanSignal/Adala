@@ -68,6 +68,12 @@ class Skill(BaseModel, ABC):
                 }
             }
         }])
+    instructions_first: bool = Field(
+        default=True,
+        title='Instructions first',
+        description='Flag indicating if instructions should be shown before the input data.',
+        examples=[True, False]
+    )
 
     def _get_extra_fields(self):
         """
@@ -125,6 +131,7 @@ class TransformSkill(Skill):
             instructions_template=self.instructions,
             field_schema=self.field_schema,
             extra_fields=self._get_extra_fields(),
+            instructions_first=self.instructions_first,
         )
 
 
@@ -158,6 +165,7 @@ class SynthesisSkill(Skill):
             instructions_template=self.instructions,
             field_schema=self.field_schema,
             extra_fields=self._get_extra_fields(),
+            instructions_first=self.instructions_first,
         )
 
 
@@ -200,6 +208,7 @@ class AnalysisSkill(Skill):
             instructions_template=self.instructions,
             field_schema=self.field_schema,
             extra_fields=self._get_extra_fields(),
+            instructions_first=self.instructions_first,
         )
         # output['input'] = aggregated_input
         # concatenate input and output and return dataframe
