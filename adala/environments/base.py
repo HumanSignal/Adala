@@ -198,8 +198,8 @@ class StaticEnvironment(Environment):
                 else f'Prediction is incorrect. Correct answer: "{row[gt_column]}"'
                     if not pd.isna(row['match']) else np.nan, axis=1)
         return EnvironmentFeedback(
-            match=InternalDataFrame(pred_match),
-            feedback=InternalDataFrame(pred_feedback)
+            match=InternalDataFrame(pred_match).reindex(predictions.index),
+            feedback=InternalDataFrame(pred_feedback).reindex(predictions.index),
         )
 
     def get_data_batch(self, batch_size: int = None) -> InternalDataFrame:
