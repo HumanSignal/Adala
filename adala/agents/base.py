@@ -294,8 +294,7 @@ Now please carefully review your reasoning in Step 1 and help with Step 2: refin
 
 ## Follow this guidance to refine the prompt:
 
-1. The new prompt should be concise and direct. Avoid unnecessary words. Be specific and clear.
-    Example: “The model should generate a summary of the input text” is better than “The model should generate a summary of the input text by using the input text to generate a summary.”
+1. The new prompt should should describe the task precisely, and address the points raised in the user feedback.
     
 2. The new prompt should be similar to the current instruction, and only differ in the parts that address the issues you identified in Step 1.
     Example:
