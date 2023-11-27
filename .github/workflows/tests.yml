@@ -26,7 +26,7 @@ env:
 
 jobs:
   run_black:
-    name: Black
+    name: Code formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
