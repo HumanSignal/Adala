@@ -9,10 +9,12 @@ InternalSeries = pd.Series
 
 
 def InternalDataFrame_encoder(df: InternalDataFrame) -> List:
-    return df.to_dict(orient='records')
+    return df.to_dict(orient="records")
 
 
-def InternalDataFrameConcat(dfs: Iterable[InternalDataFrame], **kwargs) -> InternalDataFrame:
+def InternalDataFrameConcat(
+    dfs: Iterable[InternalDataFrame], **kwargs
+) -> InternalDataFrame:
     """
     Concatenate dataframes.
 

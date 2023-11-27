@@ -4,27 +4,34 @@ from typing import List, Union, Dict, Any, Optional, Mapping
 from collections import OrderedDict
 from adala.runtimes.base import Runtime
 from adala.utils.logs import print_text
-from adala.utils.internal_data import InternalDataFrame, InternalSeries, InternalDataFrameConcat, Record
+from adala.utils.internal_data import (
+    InternalDataFrame,
+    InternalSeries,
+    InternalDataFrameConcat,
+    Record,
+)
 from ._base import Skill, TransformSkill, AnalysisSkill, SynthesisSkill
 
 
 class SkillSet(BaseModel, ABC):
     """
     Represents a collection of interdependent skills aiming to achieve a specific goal.
-    
+
     A skill set breaks down the path to achieve a goal into necessary precursor skills.
-    Agents can evolve these skills either in parallel for tasks like self-consistency or 
+    Agents can evolve these skills either in parallel for tasks like self-consistency or
     sequentially for complex problem decompositions and causal reasoning. In the most generic
     cases, task decomposition can involve a graph-based approach.
 
     Attributes:
         skills (Dict[str, Skill]): A dictionary of skills in the skill set.
     """
-    
+
     skills: Dict[str, Skill]
 
-    @field_validator('skills', mode='before')
-    def skills_validator(cls, v: Union[List[Skill], Dict[str, Skill]]) -> Dict[str, Skill]:
+    @field_validator("skills", mode="before")
+    def skills_validator(
+        cls, v: Union[List[Skill], Dict[str, Skill]]
+    ) -> Dict[str, Skill]:
         """
         Validates and converts the skills attribute to a dictionary of skill names to BaseSkill instances.
 
@@ -53,11 +60,11 @@ class SkillSet(BaseModel, ABC):
         self,
         input: Union[Record, InternalDataFrame],
         runtime: Runtime,
-        improved_skill: Optional[str] = None
+        improved_skill: Optional[str] = None,
     ) -> InternalDataFrame:
         """
         Apply the skill set to a dataset using a specified runtime.
-        
+
         Args:
             input (Union[Record, InternalDataFrame]): Input data to apply the skill set to.
             runtime (Runtime): The runtime environment in which to apply the skills.
@@ -104,7 +111,11 @@ class SkillSet(BaseModel, ABC):
         Returns:
             Dict[str, str]: Dictionary of skill outputs. Keys are output names and values are skill names
         """
-        return {field: skill.name for skill in self.skills.values() for field in skill.get_output_fields()}
+        return {
+            field: skill.name
+            for skill in self.skills.values()
+            for field in skill.get_output_fields()
+        }
 
 
 class LinearSkillSet(SkillSet):
@@ -115,7 +126,7 @@ class LinearSkillSet(SkillSet):
 
     Attributes:
         skills (Union[List[Skill], Dict[str, Skill]]): Provided skills
-        skill_sequence (List[str], optional): Ordered list of skill names indicating the order 
+        skill_sequence (List[str], optional): Ordered list of skill names indicating the order
                                               in which they should be acquired.
 
     Examples:
@@ -124,14 +135,14 @@ class LinearSkillSet(SkillSet):
         >>> from adala.skills import LinearSkillSet, TransformSkill, AnalysisSkill, ClassificationSkill
         >>> skillset = LinearSkillSet(skills=[TransformSkill(), ClassificationSkill(), AnalysisSkill()])
     """
-    
+
     skill_sequence: List[str] = None
 
-    @model_validator(mode='after')
-    def skill_sequence_validator(self) -> 'LinearSkillSet':
+    @model_validator(mode="after")
+    def skill_sequence_validator(self) -> "LinearSkillSet":
         """
         Validates and sets the default order for the skill sequence if not provided.
-        
+
         Returns:
             LinearSkillSet: The current instance with updated skill_sequence attribute.
         """
@@ -139,9 +150,11 @@ class LinearSkillSet(SkillSet):
             # use default skill sequence defined by lexicographical order
             self.skill_sequence = list(self.skills.keys())
         if len(self.skill_sequence) != len(self.skills):
-            raise ValueError(f"skill_sequence must contain all skill names - "
-                             f"length of skill_sequence is {len(self.skill_sequence)} "
-                             f"while length of skills is {len(self.skills)}")
+            raise ValueError(
+                f"skill_sequence must contain all skill names - "
+                f"length of skill_sequence is {len(self.skill_sequence)} "
+                f"while length of skills is {len(self.skills)}"
+            )
         return self
 
     def apply(
@@ -152,7 +165,7 @@ class LinearSkillSet(SkillSet):
     ) -> InternalDataFrame:
         """
         Sequentially applies each skill on the dataset, enhancing the agent's experience.
-        
+
         Args:
             input (InternalDataFrame): Input dataset.
             runtime (Runtime): The runtime environment in which to apply the skills.
@@ -162,7 +175,9 @@ class LinearSkillSet(SkillSet):
         """
         if improved_skill:
             # start from the specified skill, assuming previous skills have already been applied
-            skill_sequence = self.skill_sequence[self.skill_sequence.index(improved_skill):]
+            skill_sequence = self.skill_sequence[
+                self.skill_sequence.index(improved_skill) :
+            ]
         else:
             skill_sequence = self.skill_sequence
         skill_input = input
@@ -177,10 +192,7 @@ class LinearSkillSet(SkillSet):
                 skill_input_reduced = skill_input.drop(columns=cols_to_drop)
 
                 skill_input = skill_input_reduced.merge(
-                    skill_output,
-                    left_index=True,
-                    right_index=True,
-                    how='inner'
+                    skill_output, left_index=True, right_index=True, how="inner"
                 )
             elif isinstance(skill, (AnalysisSkill, SynthesisSkill)):
                 skill_input = skill_output
@@ -195,8 +207,10 @@ class LinearSkillSet(SkillSet):
         # TODO: move it to a base class and use repr derived from Skills
         text = f"[bold blue]Total Agent Skills: {len(self.skills)}[/bold blue]\n\n"
         for skill in self.skills.values():
-            text += f'[bold underline green]{skill.name}[/bold underline green]\n' \
-                    f'[green]{skill.instructions}[green]\n'
+            text += (
+                f"[bold underline green]{skill.name}[/bold underline green]\n"
+                f"[green]{skill.instructions}[green]\n"
+            )
         return text
 
 
@@ -208,7 +222,7 @@ class ParallelSkillSet(SkillSet):
     for agents that require multiple, diverse capabilities, or tasks where each skill contributes a piece of
     the overall solution.
 
-    Examples: 
+    Examples:
         Create a ParallelSkillSet with a list of skills specified as BaseSkill instances
         >>> from adala.skills import ParallelSkillSet, ClassificationSkill, TransformSkill
         >>> skillset = ParallelSkillSet(skills=[ClassificationSkill(), TransformSkill()])
@@ -252,17 +266,21 @@ class ParallelSkillSet(SkillSet):
                 skill_input_reduced = input.drop(columns=cols_to_drop)
 
                 return skill_input_reduced.merge(
-                    skill_outputs,
-                    left_index=True,
-                    right_index=True,
-                    how='inner'
+                    skill_outputs, left_index=True, right_index=True, how="inner"
                 )
             elif isinstance(skill_outputs[0], (dict, InternalSeries)):
                 # concatenate output to each row of input
                 output = skill_outputs[0]
                 return InternalDataFrameConcat(
-                    [input,
-                     InternalDataFrame([output] * len(input), columns=output.index, index=input.index)],
-                    axis=1)
+                    [
+                        input,
+                        InternalDataFrame(
+                            [output] * len(input),
+                            columns=output.index,
+                            index=input.index,
+                        ),
+                    ],
+                    axis=1,
+                )
             else:
                 raise ValueError(f"Unsupported output type: {type(skill_outputs[0])}")

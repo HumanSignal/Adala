@@ -3,7 +3,11 @@ import numpy as np
 from pydantic import BaseModel
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, Union, Callable
-from adala.utils.internal_data import InternalDataFrame, InternalSeries, InternalDataFrameConcat
+from adala.utils.internal_data import (
+    InternalDataFrame,
+    InternalSeries,
+    InternalDataFrameConcat,
+)
 from adala.utils.matching import fuzzy_match
 from adala.skills.skillset import SkillSet
 
@@ -45,10 +49,10 @@ class EnvironmentFeedback(BaseModel):
         return self.match.mean()
 
     def __rich__(self):
-        text = '[bold blue]Environment Feedback:[/bold blue]\n\n'
-        text += f'\n[bold]Match[/bold]\n{self.match}'
+        text = "[bold blue]Environment Feedback:[/bold blue]\n\n"
+        text += f"\n[bold]Match[/bold]\n{self.match}"
         if self.feedback is not None:
-            text += f'\n[bold]Feedback[/bold]\n{self.feedback}'
+            text += f"\n[bold]Feedback[/bold]\n{self.feedback}"
         return text
 
 
@@ -131,17 +135,18 @@ class StaticEnvironment(Environment):
     Examples:
         >>> df = pd.DataFrame({'skill_1': ['a', 'b', 'c'], 'skill_2': ['d', 'e', 'f'], 'skill_3': ['g', 'h', 'i']})
         >>> env = StaticEnvironment(df)
-    """    
+    """
+
     df: InternalDataFrame = None
     ground_truth_columns: Optional[Dict[str, str]] = None
-    matching_function: Union[str, Callable] = 'fuzzy'
+    matching_function: Union[str, Callable] = "fuzzy"
     matching_threshold: float = 0.9
 
     def get_feedback(
         self,
         skills: SkillSet,
         predictions: InternalDataFrame,
-        num_feedbacks: Optional[int] = None
+        num_feedbacks: Optional[int] = None,
     ) -> EnvironmentFeedback:
         """
         Compare the predictions with the ground truth using the specified matching function.
@@ -182,21 +187,33 @@ class StaticEnvironment(Environment):
             pred = pred[nonnull_index]
             # compare ground truth with predictions
             if isinstance(self.matching_function, str):
-                if self.matching_function == 'exact':
+                if self.matching_function == "exact":
                     gt_pred_match = gt == pred
-                elif self.matching_function == 'fuzzy':
-                    gt_pred_match = fuzzy_match(gt, pred, threshold=self.matching_threshold)
+                elif self.matching_function == "fuzzy":
+                    gt_pred_match = fuzzy_match(
+                        gt, pred, threshold=self.matching_threshold
+                    )
                 else:
-                    raise NotImplementedError(f'Unknown matching function {self.matching_function}')
+                    raise NotImplementedError(
+                        f"Unknown matching function {self.matching_function}"
+                    )
             elif callable(self.matching_function):
-                gt_pred_match = gt.combine(pred, lambda g, p: self.matching_function(g, p))
+                gt_pred_match = gt.combine(
+                    pred, lambda g, p: self.matching_function(g, p)
+                )
             pred_match[pred_column] = gt_pred_match
             # leave feedback about mismatches
-            match_concat = InternalDataFrameConcat([gt_pred_match.rename('match'), gt], axis=1)
+            match_concat = InternalDataFrameConcat(
+                [gt_pred_match.rename("match"), gt], axis=1
+            )
             pred_feedback[pred_column] = match_concat.apply(
-                lambda row: 'Prediction is correct.' if row['match']
+                lambda row: "Prediction is correct."
+                if row["match"]
                 else f'Prediction is incorrect. Correct answer: "{row[gt_column]}"'
-                    if not pd.isna(row['match']) else np.nan, axis=1)
+                if not pd.isna(row["match"])
+                else np.nan,
+                axis=1,
+            )
         return EnvironmentFeedback(
             match=InternalDataFrame(pred_match).reindex(predictions.index),
             feedback=InternalDataFrame(pred_feedback).reindex(predictions.index),
@@ -217,10 +234,10 @@ class StaticEnvironment(Environment):
         """
         Save the current state of the StaticEnvironment.
         """
-        raise NotImplementedError('StaticEnvironment does not support save/restore.')
+        raise NotImplementedError("StaticEnvironment does not support save/restore.")
 
     def restore(self):
         """
         Restore the state of the StaticEnvironment.
         """
-        raise NotImplementedError('StaticEnvironment does not support save/restore.')
+        raise NotImplementedError("StaticEnvironment does not support save/restore.")

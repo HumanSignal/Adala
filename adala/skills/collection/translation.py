@@ -16,10 +16,12 @@ class TranslationSkill(TextGenerationSkill):
         target_language (str): Language to which the input text is translated.
     """
 
-    name: str = 'translation'
-    description: str = 'Translate text from one language to another.'
-    instructions: str = 'Identify the language of the given text and translate it to {target_language}.'
+    name: str = "translation"
+    description: str = "Translate text from one language to another."
+    instructions: str = (
+        "Identify the language of the given text and translate it to {target_language}."
+    )
     input_template: str = "Text: {text}"
     # output_template: str = "Input language: {{gen 'detected_language'}}\nTranslation: {{gen 'translation'}}"
     output_template: str = "Translation: {translation}"
-    target_language: str = 'English'
+    target_language: str = "English"

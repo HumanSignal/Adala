@@ -14,17 +14,18 @@ class Runtime(BaseModel, ABC):
     Attributes:
         verbose (bool): Flag indicating if runtime outputs should be verbose. Defaults to False.
     """
+
     verbose: bool = False
 
-    @model_validator(mode='after')
-    def init_runtime(self) -> 'Runtime':
+    @model_validator(mode="after")
+    def init_runtime(self) -> "Runtime":
         """Initializes the runtime.
 
         This method should be used to validate and potentially initialize the runtime instance.
 
         Returns:
             Runtime: The initialized runtime instance.
-        """  
+        """
         return self
 
     @abstractmethod
@@ -49,6 +50,7 @@ class Runtime(BaseModel, ABC):
             extra_fields (Optional[Dict[str, str]]): Extra fields to use in the templates. Defaults to None.
             field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
                 i.e. analogous to {"field_n": {"type": "string"}}.
+            instructions_first (bool): Whether to put instructions first. Defaults to True.
 
         Returns:
             Dict[str, str]: The processed record.
@@ -75,6 +77,7 @@ class Runtime(BaseModel, ABC):
             extra_fields (Optional[Dict[str, str]]): Extra fields to use in the templates. Defaults to None.
             field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
                 i.e. analogous to {"field_n": {"type": "string"}}.
+            instructions_first (bool): Whether to put instructions first. Defaults to True.
 
         Returns:
             InternalDataFrame: The processed batch.
@@ -82,7 +85,7 @@ class Runtime(BaseModel, ABC):
         output = batch.progress_apply(
             self.record_to_record,
             axis=1,
-            result_type='expand',
+            result_type="expand",
             input_template=input_template,
             instructions_template=instructions_template,
             output_template=output_template,
@@ -103,7 +106,6 @@ class Runtime(BaseModel, ABC):
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
     ) -> InternalDataFrame:
-
         """
         Processes a record and return a batch.
 
@@ -116,6 +118,7 @@ class Runtime(BaseModel, ABC):
             extra_fields (Optional[Dict[str, str]]): Extra fields to use in the templates. Defaults to None.
             field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
                 i.e. analogous to {"field_n": {"type": "string"}}.
+            instructions_first (bool): Whether to put instructions first. Defaults to True.
 
         Returns:
             InternalDataFrame: The processed batch.

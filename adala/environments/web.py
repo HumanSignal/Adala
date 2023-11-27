@@ -16,10 +16,11 @@ class WebStaticEnvironment(StaticEnvironment):
     - POST /request-feedback
     - GET /feedback
     """
+
     url: str
 
     def _get_fb_records(self):
-        fb_records = requests.get(f'{self.url}/feedback', timeout=3).json()
+        fb_records = requests.get(f"{self.url}/feedback", timeout=3).json()
         fb_records = [Feedback(**r) for r in fb_records]
         return fb_records
 
@@ -42,15 +43,15 @@ class WebStaticEnvironment(StaticEnvironment):
         skills_payload = []
         for skill in skills.skills.values():
             skill_payload = dict(skill)
-            skill_payload['outputs'] = skill.get_output_fields()
+            skill_payload["outputs"] = skill.get_output_fields()
             skills_payload.append(skill_payload)
 
         payload = {
-            'skills': skills_payload,
-            'predictions': predictions.reset_index().to_dict(orient='records')
+            "skills": skills_payload,
+            "predictions": predictions.reset_index().to_dict(orient="records"),
         }
 
-        requests.post(f'{self.url}/request-feedback', json=payload, timeout=3)
+        requests.post(f"{self.url}/request-feedback", json=payload, timeout=3)
 
         # wait for feedback
         with Progress() as progress:
@@ -60,10 +61,10 @@ class WebStaticEnvironment(StaticEnvironment):
                 progress.advance(task, 10)
                 time.sleep(10)
                 fb_records = self._get_fb_records()
-                print('ZZZZ', fb_records)
+                print("ZZZZ", fb_records)
 
         if not fb_records:
-            raise RuntimeError('No ground truth found.')
+            raise RuntimeError("No ground truth found.")
 
         match = defaultdict(list)
         feedback = defaultdict(list)
@@ -79,6 +80,5 @@ class WebStaticEnvironment(StaticEnvironment):
 
         match = InternalDataFrame(match, index=index)
         feedback = InternalDataFrame(feedback, index=index)
-
 
         return EnvironmentFeedback(match=match, feedback=feedback)

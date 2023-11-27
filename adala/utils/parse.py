@@ -10,7 +10,7 @@ class PartialStringFormatter(string.Formatter):
             try:
                 return kwds[key]
             except KeyError:
-                return '{' + key + '}'
+                return "{" + key + "}"
         else:
             Formatter.get_value(key, args, kwds)
 
@@ -55,12 +55,19 @@ def parse_template(string, include_texts=True) -> List[TemplateChunks]:
     chunks: List[TemplateChunks] = []
     last_index = 0
 
-    for match in re.finditer(r'(?<!\{)\{(.*?)\}(?!})', string):
-    # for match in re.finditer(r'\{(.*?)\}', string):
+    for match in re.finditer(r"(?<!\{)\{(.*?)\}(?!})", string):
+        # for match in re.finditer(r'\{(.*?)\}', string):
         # Text before field
         if last_index < match.start() and include_texts:
-            text = string[last_index:match.start()]
-            chunks.append({"text": text, "start": last_index, "end": match.start(), "type": "text"})
+            text = string[last_index : match.start()]
+            chunks.append(
+                {
+                    "text": text,
+                    "start": last_index,
+                    "end": match.start(),
+                    "type": "text",
+                }
+            )
 
         # Field itself
         field = match.group(1)
@@ -73,6 +80,8 @@ def parse_template(string, include_texts=True) -> List[TemplateChunks]:
     # Text after the last field
     if last_index < len(string) and include_texts:
         text = string[last_index:]
-        chunks.append({"text": text, "start": last_index, "end": len(string), "type": "text"})
+        chunks.append(
+            {"text": text, "start": last_index, "end": len(string), "type": "text"}
+        )
 
     return chunks

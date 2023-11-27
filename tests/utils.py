@@ -3,20 +3,21 @@ from unittest.mock import patch
 
 
 class PatchedCalls(enum.Enum):
-    GUIDANCE = 'guidance._program.Program.__call__'
+    GUIDANCE = "guidance._program.Program.__call__"
     # OPENAI_MODEL_LIST = 'openai.models.list'
-    OPENAI_MODEL_LIST = 'openai.api_resources.model.Model.list'
-    OPENAI_CHAT_COMPLETION = 'openai.api_resources.chat_completion.ChatCompletion.create'
+    OPENAI_MODEL_LIST = "openai.api_resources.model.Model.list"
+    OPENAI_CHAT_COMPLETION = (
+        "openai.api_resources.chat_completion.ChatCompletion.create"
+    )
 
 
 class OpenaiChatCompletionMock(object):
-
     def __init__(self, content):
         self.content = content
 
     def __getattr__(self, item):
-        if item == 'choices':
-            return [{'message': {'content': self.content}}]
+        if item == "choices":
+            return [{"message": {"content": self.content}}]
 
 
 def patching(target_function, data, strict=False):
@@ -38,12 +39,13 @@ def patching(target_function, data, strict=False):
             call_index = [0]  # Using list to make it mutable inside nested function
 
             def side_effect(*args, **kwargs):
-
                 if call_index[0] >= len(data):
-                    raise AssertionError(f"Unexpected call number {call_index[0]} to {target_function}")
+                    raise AssertionError(
+                        f"Unexpected call number {call_index[0]} to {target_function}"
+                    )
 
-                expected_input = data[call_index[0]]['input']
-                expected_output = data[call_index[0]]['output']
+                expected_input = data[call_index[0]]["input"]
+                expected_output = data[call_index[0]]["output"]
 
                 # Merging positional arguments into the keyword arguments for comparison
                 actual_input = {**kwargs}
@@ -56,7 +58,8 @@ def patching(target_function, data, strict=False):
                         raise AssertionError(
                             f"Expected input {expected_input}\n\n"
                             f"but got {actual_input}\non call number {call_index[0]}"
-                            f" to {target_function}")
+                            f" to {target_function}"
+                        )
                 else:
                     for key, value in expected_input.items():
                         if key not in actual_input:
@@ -65,14 +68,16 @@ def patching(target_function, data, strict=False):
                                 f"but key '{key}' was missing "
                                 f"on actual call number {call_index[0]} "
                                 f"to {target_function}.\n\n"
-                                f"Actual input: {actual_input}")
+                                f"Actual input: {actual_input}"
+                            )
                         if actual_input[key] != value:
                             raise AssertionError(
                                 f"Expected input {expected_input}\n\n"
                                 f"but actual_input['{key}'] != expected_input['{key}']\n"
                                 f"on call number {call_index[0]} "
                                 f"to {target_function}.\n\n"
-                                f"Actual input: {actual_input}")
+                                f"Actual input: {actual_input}"
+                            )
 
                 call_index[0] += 1
                 return expected_output
@@ -86,6 +91,5 @@ def patching(target_function, data, strict=False):
 
 
 class mdict(dict):
-
     def __getattr__(self, item):
         return self[item]

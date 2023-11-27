@@ -5,8 +5,8 @@ class SummarizationSkill(TextGenerationSkill):
     """
     Skill specialized for summarizing lengthy texts based on the provided input.
 
-    Inherits from the TextGenerationSkill and focuses on generating concise summaries 
-    for the input texts. The class customizes the instructions, input, and output templates 
+    Inherits from the TextGenerationSkill and focuses on generating concise summaries
+    for the input texts. The class customizes the instructions, input, and output templates
     specifically for text summarization tasks.
 
     Attributes:
@@ -15,7 +15,8 @@ class SummarizationSkill(TextGenerationSkill):
         output_template (str): Expected format of the LLM's summary.
         prediction_field (str): Field name for the generated summary.
     """
-    name = 'summarization'
-    instructions: str = 'Summarize the text.'
+
+    name = "summarization"
+    instructions: str = "Summarize the text."
     input_template: str = "Text: {text}"
     output_template: str = "Summary: {summary}"

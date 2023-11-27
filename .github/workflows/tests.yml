@@ -25,6 +25,26 @@ env:
   OPENAI_API_KEY: test
 
 jobs:
+  run_black:
+    name: Black
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v3
+        with:
+          python-version: '3.9'
+          cache: true
+
+      - name: Install Python dependencies
+        run: |
+          pdm sync -G test
+
+      - name: Run black
+        run: |
+          pdm run pytest --black .
+
   run_pytest_ubuntu:
     name: Ubuntu
     runs-on: ubuntu-latest

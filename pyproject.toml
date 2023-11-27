@@ -44,6 +44,8 @@ build-backend = "pdm.backend"
 test = [
     "pytest>=7.4.3",
     "pytest-cov>=4.1.0",
+    "black>=23.11.0",
+    "pytest-black>=0.3.12",
 ]
 doc = [
     "mkdocs>=1.5.3",

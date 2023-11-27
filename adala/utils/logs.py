@@ -20,7 +20,7 @@ def print_text(text: str, style=None, streaming_style=False):
     """
     if streaming_style:
         for char in text:
-            console.print(char, sep='', end='', style=style)
+            console.print(char, sep="", end="", style=style)
             time.sleep(0.01)
         console.print()
     else:
@@ -80,6 +80,14 @@ def print_series(data: InternalSeries):
 
 def highlight_differences(text1, text2):
     diff = ndiff(text1, text2)
-    highlighted = ''.join(['<span style="background-color: lightgreen;">' + i[2] + '</span>' if i[0] == '+' else i[2] for i in diff if i[0] != '-'])
-    highlighted = highlighted.replace(' \n ', '<br>')
+    highlighted = "".join(
+        [
+            '<span style="background-color: lightgreen;">' + i[2] + "</span>"
+            if i[0] == "+"
+            else i[2]
+            for i in diff
+            if i[0] != "-"
+        ]
+    )
+    highlighted = highlighted.replace(" \n ", "<br>")
     display(HTML(highlighted))

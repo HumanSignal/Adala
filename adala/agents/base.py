@@ -10,7 +10,12 @@ from adala.runtimes import GuidanceRuntime
 from adala.skills._base import Skill, AnalysisSkill, TransformSkill, SynthesisSkill
 from adala.memories.base import Memory
 from adala.skills.skillset import SkillSet, LinearSkillSet
-from adala.utils.logs import print_dataframe, print_text, print_error, highlight_differences
+from adala.utils.logs import (
+    print_dataframe,
+    print_text,
+    print_error,
+    highlight_differences,
+)
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 
 
@@ -42,9 +47,9 @@ class Agent(BaseModel, ABC):
     skills: SkillSet
 
     memory: Memory = Field(default=None)
-    runtimes: Optional[Dict[str, Runtime]] = Field(
+    runtimes: Dict[str, Runtime] = Field(
         default_factory=lambda: {
-            'openai': GuidanceRuntime()
+            "openai": GuidanceRuntime()
             # 'openai': OpenAIChatRuntime(model='gpt-3.5-turbo'),
             # 'llama2': LLMRuntime(
             #     llm_runtime_type=LLMRuntimeModelType.Transformers,
@@ -55,14 +60,14 @@ class Agent(BaseModel, ABC):
             # )
         }
     )
-    teacher_runtimes: Optional[Dict[str, Runtime]] = Field(
+    teacher_runtimes: Dict[str, Runtime] = Field(
         default_factory=lambda: {
-            'openai-gpt3': OpenAIChatRuntime(model='gpt-3.5-turbo'),
+            "openai-gpt3": OpenAIChatRuntime(model="gpt-3.5-turbo"),
             # 'openai-gpt4': OpenAIChatRuntime(model='gpt-4')
         }
     )
-    default_runtime: str = 'openai'
-    default_teacher_runtime: str = 'openai-gpt3'
+    default_runtime: str = "openai"
+    default_teacher_runtime: str = "openai-gpt3"
 
     class Config:
         arbitrary_types_allowed = True
@@ -87,7 +92,7 @@ class Agent(BaseModel, ABC):
             f"Default Teacher Runtime: {self.default_teacher_runtime}"
         )
 
-    @field_validator('environment', mode='before')
+    @field_validator("environment", mode="before")
     def environment_validator(cls, v) -> Environment:
         """
         Validates and possibly transforms the environment attribute:
@@ -97,7 +102,7 @@ class Agent(BaseModel, ABC):
             v = StaticEnvironment(df=v)
         return v
 
-    @field_validator('skills', mode='before')
+    @field_validator("skills", mode="before")
     def skills_validator(cls, v) -> SkillSet:
         """
         Validates and possibly transforms the skills attribute.
@@ -109,25 +114,33 @@ class Agent(BaseModel, ABC):
         else:
             raise ValueError(f"skills must be of type SkillSet or Skill, not {type(v)}")
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def verify_input_parameters(self):
         """
         Verifies that the input parameters are valid."""
 
         def _raise_default_runtime_error(val, runtime, runtimes, default_value):
-            print_error(f"The Agent.{runtime} is set to {val}, "
-                        f"but this runtime is not available in the list: {list(runtimes)}. "
-                        f"Please choose one of the available runtimes and initialize the agent again, for example:\n\n"
-                        f"agent = Agent(..., {runtime}='{default_value}')\n\n"
-                        f"Make sure the default runtime is available in the list of runtimes. For example:\n\n"
-                        f"agent = Agent(..., runtimes={{'{default_value}': OpenAIRuntime(model='gpt-4')}})\n\n")
+            print_error(
+                f"The Agent.{runtime} is set to {val}, "
+                f"but this runtime is not available in the list: {list(runtimes)}. "
+                f"Please choose one of the available runtimes and initialize the agent again, for example:\n\n"
+                f"agent = Agent(..., {runtime}='{default_value}')\n\n"
+                f"Make sure the default runtime is available in the list of runtimes. For example:\n\n"
+                f"agent = Agent(..., runtimes={{'{default_value}': OpenAIRuntime(model='gpt-4')}})\n\n"
+            )
             raise ValueError(f"default runtime {val} not found in provided runtimes.")
 
         if self.default_runtime not in self.runtimes:
-            _raise_default_runtime_error(self.default_runtime, 'default_runtime', self.runtimes, 'openai')
+            _raise_default_runtime_error(
+                self.default_runtime, "default_runtime", self.runtimes, "openai"
+            )
         if self.default_teacher_runtime not in self.teacher_runtimes:
-            _raise_default_runtime_error(self.default_teacher_runtime, 'default_teacher_runtime', self.teacher_runtimes,
-                                         'openai-gpt4')
+            _raise_default_runtime_error(
+                self.default_teacher_runtime,
+                "default_teacher_runtime",
+                self.teacher_runtimes,
+                "openai-gpt4",
+            )
         return self
 
     def get_runtime(self, runtime: Optional[str] = None) -> Runtime:
@@ -171,9 +184,7 @@ class Agent(BaseModel, ABC):
         return self.teacher_runtimes[runtime]
 
     def run(
-        self,
-        input: InternalDataFrame = None,
-        runtime: Optional[str] = None
+        self, input: InternalDataFrame = None, runtime: Optional[str] = None
     ) -> InternalDataFrame:
         """
         Runs the agent on the specified dataset.
@@ -187,13 +198,15 @@ class Agent(BaseModel, ABC):
         """
         if input is None:
             if self.environment is None:
-                raise ValueError('input is None and no environment is set.')
+                raise ValueError("input is None and no environment is set.")
             input = self.environment.get_data_batch()
         runtime = self.get_runtime(runtime=runtime)
         predictions = self.skills.apply(input, runtime=runtime)
         return predictions
 
-    def select_skill_to_train(self, feedback: EnvironmentFeedback, accuracy_threshold: float) -> Tuple[str, str, float]:
+    def select_skill_to_train(
+        self, feedback: EnvironmentFeedback, accuracy_threshold: float
+    ) -> Tuple[str, str, float]:
         """
         Selects the skill to train based on the feedback signal.
 
@@ -211,7 +224,7 @@ class Agent(BaseModel, ABC):
         # Use ground truth signal to find the skill to improve
         # TODO: what if it is not possible to estimate accuracy per skill?
         accuracy = feedback.get_accuracy()
-        train_skill_name, train_skill_output, acc_score = '', '', None
+        train_skill_name, train_skill_output, acc_score = "", "", None
         for skill_output, skill_name in self.skills.get_skill_outputs().items():
             if skill_output in accuracy and accuracy[skill_output] < accuracy_threshold:
                 train_skill_name, train_skill_output = skill_name, skill_output
@@ -219,97 +232,6 @@ class Agent(BaseModel, ABC):
                 break
 
         return train_skill_name, train_skill_output, acc_score
-
-    def pe_optimization(self, skill, examples, teacher_runtime):
-        # system messages
-        messages = [{'role': 'system', 'content': 'You are a helpful assistant.'}]
-
-        # full template
-        if skill.instructions_first:
-            full_template = f'''
-{{prompt}}
-{skill.input_template}
-{skill.output_template}'''
-        else:
-            full_template = f'''
-{skill.input_template}
-{{prompt}}
-{skill.output_template}'''
-
-        messages += [{
-            'role': 'user',
-            'content': f'''
-A prompt is a text paragraph that outlines the expected actions and instructs the large language model (LLM) to \
-generate a specific output. This prompt is concatenated with the input text, and the \
-model then creates the required output.
-This describes the full template how the prompt is concatenated with the input to produce the output:
-
-```
-{full_template}
-```
-
-Here:
-- "{skill.input_template}" is input template,
-- "{{prompt}}" is the LLM prompt,
-- "{skill.output_template}" is the output template.
-
-Model can produce erroneous output if a prompt is not well defined. \
-In our collaboration, we’ll work together to refine a prompt. The process consists of two main steps:
-
-## Step 1
-I will provide you with the current prompt along with prediction examples. Each example contains the input text, the final prediction produced by the model, and the user feedback. \
-User feedback indicates whether the model prediction is correct or not. \
-Your task is to analyze the examples and user feedback, determining whether the \
-existing instruction is describing the task reflected by these examples precisely, and suggests changes to the prompt to address the incorrect predictions.
-
-## Step 2
-Next, you will carefully review your reasoning in step 1, integrate the insights to refine the prompt, \
-and provide me with the new prompt that improves the model’s performance.'''
-        }]
-
-        messages += [{
-            'role': 'assistant',
-            'content': 'Sure, I’d be happy to help you with this prompt engineering problem. '
-                       'Please provide me with the current prompt and the examples with user feedback.'
-        }]
-
-        messages += [{
-            'role': 'user',
-            'content': f'''
-## Current prompt
-{skill.instructions}
-
-## Examples
-{examples}
-
-Summarize your analysis about incorrect predictions and suggest changes to the prompt.'''}]
-
-        reasoning = teacher_runtime.execute(messages)
-
-        messages += [
-            {'role': 'assistant', 'content': reasoning},
-            {'role': 'user', 'content': f'''
-Now please carefully review your reasoning in Step 1 and help with Step 2: refining the prompt.
-
-## Current prompt
-{skill.instructions}
-
-## Follow this guidance to refine the prompt:
-
-1. The new prompt should should describe the task precisely, and address the points raised in the user feedback.
-    
-2. The new prompt should be similar to the current instruction, and only differ in the parts that address the issues you identified in Step 1.
-    Example:
-    - Current prompt: "The model should generate a summary of the input text."
-    - New prompt: "The model should generate a summary of the input text. Pay attention to the original style."
-        
-3. Reply only with the new prompt. Do not include input and output templates in the prompt.'''}]
-
-        # display dialogue:
-        for message in messages:
-            print(f'"{{{message["role"]}}}":\n{message["content"]}')
-        new_prompt = teacher_runtime.execute(messages)
-        return new_prompt
 
     def learn(
         self,
@@ -337,40 +259,42 @@ Now please carefully review your reasoning in Step 1 and help with Step 2: refin
         teacher_runtime = self.get_teacher_runtime(runtime=teacher_runtime)
 
         for iteration in range(learning_iterations):
-
-            print_text(f'\n\n=> Iteration #{iteration}: Getting feedback, analyzing and improving ...')
+            print_text(
+                f"\n\n=> Iteration #{iteration}: Getting feedback, analyzing and improving ..."
+            )
 
             inputs = self.environment.get_data_batch(batch_size=batch_size)
             predictions = self.skills.apply(inputs, runtime=runtime)
-            feedback = self.environment.get_feedback(self.skills, predictions, num_feedbacks=num_feedbacks)
-            print('Predictions and feedback:')
-            fb = feedback.feedback.rename(columns=lambda x: x + '__fb' if x in predictions.columns else x)
-            analyzed_df = fb.merge(predictions, left_index=True, right_index=True)
-            print_dataframe(analyzed_df)
-            train_skill_name, train_skill_output, accuracy = self.select_skill_to_train(feedback, accuracy_threshold)
+            feedback = self.environment.get_feedback(
+                self.skills, predictions, num_feedbacks=num_feedbacks
+            )
+            # TODO: this is just pretty printing - remove later for efficiency
+            print("Predictions and feedback:")
+            print_dataframe(
+                feedback.feedback.rename(
+                    columns=lambda x: x + "__fb" if x in predictions.columns else x
+                ).merge(predictions, left_index=True, right_index=True)
+            )
+            # -----------------------------
+            train_skill_name, train_skill_output, accuracy = self.select_skill_to_train(
+                feedback, accuracy_threshold
+            )
             if not train_skill_name:
-                print_text(f'No skill to improve found. Continue learning...')
+                print_text(f"No skill to improve found. Continue learning...")
                 continue
             train_skill = self.skills[train_skill_name]
-            print_text(f'Output to improve: "{train_skill_output}" (Skill="{train_skill_name}")\n'
-                       f'Accuracy = {accuracy * 100:0.2f}%', style='bold red')
+            print_text(
+                f'Output to improve: "{train_skill_output}" (Skill="{train_skill_name}")\n'
+                f"Accuracy = {accuracy * 100:0.2f}%",
+                style="bold red",
+            )
 
-            examples = []
+            old_instructions = train_skill.instructions
+            train_skill.improve(
+                predictions, train_skill_output, feedback, runtime=teacher_runtime
+            )
 
-            for i, row in enumerate(analyzed_df.to_dict(orient='records')):
-                # if fb marked as NaN, skip
-                if not row[f'{train_skill_output}__fb']:
-                    continue
-                examples.append(
-                    f'### Example #{i}\n\n'
-                    f'{train_skill.input_template.format(**row)}\n\n'
-                    f'{train_skill.output_template.format(**row)}\n\n'
-                    f'User feedback: {row[f"{train_skill_output}__fb"]}\n\n'
-                )
-
-            new_instructions = self.pe_optimization(train_skill, '\n'.join(examples), teacher_runtime)
-            highlight_differences(train_skill.instructions, new_instructions)
-            train_skill.instructions = new_instructions
+            highlight_differences(old_instructions, train_skill.instructions)
             # print_text(f'{train_skill.instructions}', style='bold green')
 
-        print_text('Train is done!')
+        print_text("Train is done!")

@@ -12,7 +12,8 @@ class LangChainRuntime(Runtime):
     """
     Runtime that uses [LangChain](https://www.langchain.com/) models to perform the skill.
     """
-    lc_model_name: str = Field(alias='model')
+
+    lc_model_name: str = Field(alias="model")
 
     def _prepare_chain(
         self,
@@ -21,18 +22,19 @@ class LangChainRuntime(Runtime):
         instructions_template: str,
         output_template: str,
         extra_fields: Optional[Dict[str, Any]] = None,
-        field_schema: Optional[Dict] = None
+        field_schema: Optional[Dict] = None,
     ):
-
         field_schema = field_schema or {}
         extra_fields = extra_fields or {}
-        output_fields = parse_template(partial_str_format(output_template, **record, **extra_fields),
-                                       include_texts=False)
+        output_fields = parse_template(
+            partial_str_format(output_template, **record, **extra_fields),
+            include_texts=False,
+        )
         response_schemas = []
         for output_field in output_fields:
-            name = output_field['text']
-            if name in field_schema and 'description' in field_schema[name]:
-                description = field_schema[name]['description']
+            name = output_field["text"]
+            if name in field_schema and "description" in field_schema[name]:
+                description = field_schema[name]["description"]
             else:
                 description = name
             response_schemas.append(ResponseSchema(name=name, description=description))
@@ -43,15 +45,18 @@ class LangChainRuntime(Runtime):
         model = ChatOpenAI(model_name=self.lc_model_name, verbose=self.verbose)
 
         prompt = ChatPromptTemplate.from_template(
-            '{instructions_template}\n{format_instructions}\n{input_template}',
+            "{instructions_template}\n{format_instructions}\n{input_template}",
             partial_variables={
                 "format_instructions": format_instructions,
-                "instructions_template": instructions_template.format(**record, **extra_fields),
+                "instructions_template": instructions_template.format(
+                    **record, **extra_fields
+                ),
                 "input_template": input_template.format(**record, **extra_fields),
-            })
+            },
+        )
 
         if self.verbose:
-            print(f'**Prompt content**:\n{prompt}')
+            print(f"**Prompt content**:\n{prompt}")
 
         chain = prompt | model | output_parser
         return chain
@@ -65,6 +70,12 @@ class LangChainRuntime(Runtime):
         extra_fields: Optional[Dict[str, Any]] = None,
         field_schema: Optional[Dict] = None,
     ) -> Dict[str, str]:
-
-        chain = self._prepare_chain(record, input_template, instructions_template, output_template, extra_fields, field_schema)
+        chain = self._prepare_chain(
+            record,
+            input_template,
+            instructions_template,
+            output_template,
+            extra_fields,
+            field_schema,
+        )
         return chain.invoke(record)

@@ -9,8 +9,9 @@ from adala.utils.parse import parse_template, partial_str_format
 
 class GuidanceModelType(enum.Enum):
     """Enumeration for LLM runtime model types."""
-    OpenAI = 'OpenAI'
-    Transformers = 'Transformers'
+
+    OpenAI = "OpenAI"
+    Transformers = "Transformers"
 
 
 class GuidanceRuntime(Runtime):
@@ -22,9 +23,9 @@ class GuidanceRuntime(Runtime):
 
     llm_runtime_model_type: GuidanceModelType = GuidanceModelType.OpenAI
     llm_params: Dict[str, str] = {
-        'model': 'gpt-3.5-turbo-instruct',
+        "model": "gpt-3.5-turbo-instruct",
         # 'max_tokens': 10,
-        'temperature': 0,
+        "temperature": 0,
     }
 
     _llm = None
@@ -38,14 +39,14 @@ class GuidanceRuntime(Runtime):
 
     # do not override this template
     _llm_templates: Dict[str, str] = {
-        True: '''\
+        True: """\
 {{>instructions_program}}
 {{>input_program}}
-{{>output_program}}''',
-        False: '''\
+{{>output_program}}""",
+        False: """\
 {{>input_program}}
 {{>instructions_program}}
-{{>output_program}}'''
+{{>output_program}}""",
     }
 
     def init_runtime(self) -> Runtime:
@@ -59,31 +60,40 @@ class GuidanceRuntime(Runtime):
         elif self.llm_runtime_model_type.value == GuidanceModelType.Transformers.value:
             self._llm = guidance.llms.Transformers(**self.llm_params)
         else:
-            raise NotImplementedError(f'LLM runtime type {self.llm_runtime_model_type} is not implemented.')
+            raise NotImplementedError(
+                f"LLM runtime type {self.llm_runtime_model_type} is not implemented."
+            )
         # self._program = guidance(self._llm_templates[self.instruction_first], llm=self._llm, silent=not self.verbose)
         return self
 
     def _input_template_to_guidance(self, input_template, program_input):
         # TODO: this check is brittle, will likely to fail in various cases
         # exclude guidance parameter from input
-        if 'text' in program_input:
-            program_input['text_'] = program_input['text']
-            del program_input['text']
-        if '{text}' in input_template:
-            input_template = input_template.replace('{text}', '{text_}')
+        if "text" in program_input:
+            program_input["text_"] = program_input["text"]
+            del program_input["text"]
+        if "{text}" in input_template:
+            input_template = input_template.replace("{text}", "{text_}")
 
         fields = parse_template(input_template, include_texts=False)
         # replace {field_name} with {{field_name}}
         for input_field in fields:
-            field_name = input_field['text']
+            field_name = input_field["text"]
             if field_name in program_input:
-                input_template = input_template.replace(f'{{{field_name}}}', f'{{{{{field_name}}}}}')
+                input_template = input_template.replace(
+                    f"{{{field_name}}}", f"{{{{{field_name}}}}}"
+                )
         return input_template
 
-    def _output_template_to_guidance(self, output_template, program_input, output_fields, field_schema):
+    def _output_template_to_guidance(
+        self, output_template, program_input, output_fields, field_schema
+    ):
         for output_field in output_fields:
-            field_name = output_field['text']
-            if field_name in field_schema and field_schema[field_name]['type'] == 'array':
+            field_name = output_field["text"]
+            if (
+                field_name in field_schema
+                and field_schema[field_name]["type"] == "array"
+            ):
                 # when runtime is called with a categorical field:
                 #    runtime.record_to_record(
                 #        ...,
@@ -92,12 +102,18 @@ class GuidanceRuntime(Runtime):
                 #    )
                 # replace {field_name} with {select 'field_name' options=field_name_options}
                 # and add "field_name_options" to program input
-                program_input[f'{field_name}_options'] = field_schema[field_name]['items']['enum']
-                output_template = output_template.replace(f'{{{field_name}}}',
-                                                          f'{{{{select \'{field_name}\' options={field_name}_options}}}}')
+                program_input[f"{field_name}_options"] = field_schema[field_name][
+                    "items"
+                ]["enum"]
+                output_template = output_template.replace(
+                    f"{{{field_name}}}",
+                    f"{{{{select '{field_name}' options={field_name}_options}}}}",
+                )
             else:
                 # In simple generation scenario, replace {field_name} with {{gen 'field_name'}}
-                output_template = output_template.replace(f'{{{field_name}}}', f'{{{{gen \'{field_name}\'}}}}')
+                output_template = output_template.replace(
+                    f"{{{field_name}}}", f"{{{{gen '{field_name}'}}}}"
+                )
         return output_template
 
     def record_to_record(
@@ -136,32 +152,43 @@ class GuidanceRuntime(Runtime):
         program_input = record
         program_input.update(extra_fields)
 
-        output_fields = parse_template(partial_str_format(output_template, **extra_fields), include_texts=False)
+        output_fields = parse_template(
+            partial_str_format(output_template, **extra_fields), include_texts=False
+        )
 
         input_template = self._input_template_to_guidance(input_template, program_input)
-        instructions_template = self._input_template_to_guidance(instructions_template, program_input)
-        output_template = self._output_template_to_guidance(output_template, program_input, output_fields, field_schema)
+        instructions_template = self._input_template_to_guidance(
+            instructions_template, program_input
+        )
+        output_template = self._output_template_to_guidance(
+            output_template, program_input, output_fields, field_schema
+        )
 
-        program_input['input_program'] = guidance(input_template, llm=self._llm)
-        program_input['instructions_program'] = guidance(instructions_template, llm=self._llm)
-        program_input['output_program'] = guidance(output_template, llm=self._llm)
+        program_input["input_program"] = guidance(input_template, llm=self._llm)
+        program_input["instructions_program"] = guidance(
+            instructions_template, llm=self._llm
+        )
+        program_input["output_program"] = guidance(output_template, llm=self._llm)
 
         if self.verbose:
             print(program_input)
 
-        program = guidance(self._llm_templates[instructions_first], llm=self._llm, silent=not self.verbose)
-
-        result = program(
+        program = guidance(
+            self._llm_templates[instructions_first],
+            llm=self._llm,
             silent=not self.verbose,
-            **program_input
         )
+
+        result = program(silent=not self.verbose, **program_input)
 
         output = {}
         for output_field in output_fields:
-            if output_field['text'] in extra_fields:
+            if output_field["text"] in extra_fields:
                 continue
-            if output_field['text'] not in result:
-                raise ValueError(f'Output field {output_field["text"]} is not in the output. '
-                                 f'The current output is {result}.')
-            output[output_field['text']] = result[output_field['text']].strip()
+            if output_field["text"] not in result:
+                raise ValueError(
+                    f'Output field {output_field["text"]} is not in the output. '
+                    f"The current output is {result}."
+                )
+            output[output_field["text"]] = result[output_field["text"]].strip()
         return output
