@@ -38,7 +38,7 @@ class Agent(BaseModel, ABC):
 
     """
 
-    environment: Environment
+    environment: Optional[Environment] = None
     skills: SkillSet
 
     memory: Memory = Field(default=None)
@@ -186,6 +186,8 @@ class Agent(BaseModel, ABC):
             InternalDataFrame: The dataset with the agent's predictions.
         """
         if input is None:
+            if self.environment is None:
+                raise ValueError('input is None and no environment is set.')
             input = self.environment.get_data_batch()
         runtime = self.get_runtime(runtime=runtime)
         predictions = self.skills.apply(input, runtime=runtime)

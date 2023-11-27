@@ -160,5 +160,8 @@ class GuidanceRuntime(Runtime):
         for output_field in output_fields:
             if output_field['text'] in extra_fields:
                 continue
-            output[output_field['text']] = result[output_field['text']]
+            if output_field['text'] not in result:
+                raise ValueError(f'Output field {output_field["text"]} is not in the output. '
+                                 f'The current output is {result}.')
+            output[output_field['text']] = result[output_field['text']].strip()
         return output
