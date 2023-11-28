@@ -171,16 +171,20 @@ class StaticEnvironment(Environment):
             predictions = predictions.sample(n=num_feedbacks)
 
         for pred_column in pred_columns:
+            pred = predictions[pred_column]
+
             if not self.ground_truth_columns:
                 gt_column = pred_column
             else:
-                gt_column = self.ground_truth_columns[pred_column]
+                gt_column = self.ground_truth_columns.get(pred_column)
 
             if gt_column not in self.df.columns:
+                pred_match[pred_column] = InternalSeries(np.nan, index=pred.index)
+                pred_feedback[pred_column] = InternalSeries(np.nan, index=pred.index)
                 continue
 
             gt = self.df[gt_column]
-            pred = predictions[pred_column]
+
             gt, pred = gt.align(pred)
             nonnull_index = gt.notnull() & pred.notnull()
             gt = gt[nonnull_index]
@@ -214,10 +218,11 @@ class StaticEnvironment(Environment):
                 else np.nan,
                 axis=1,
             )
-        return EnvironmentFeedback(
+        fb = EnvironmentFeedback(
             match=InternalDataFrame(pred_match).reindex(predictions.index),
             feedback=InternalDataFrame(pred_feedback).reindex(predictions.index),
         )
+        return fb
 
     def get_data_batch(self, batch_size: int = None) -> InternalDataFrame:
         """

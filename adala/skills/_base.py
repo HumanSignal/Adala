@@ -80,6 +80,13 @@ class Skill(BaseModel, ABC):
         examples=[True, False],
     )
 
+    frozen: bool = Field(
+        default=False,
+        title="Frozen",
+        description="Flag indicating if the skill is frozen.",
+        examples=[True, False],
+    )
+
     def _get_extra_fields(self):
         """
         Retrieves fields that are not categorized as system fields.
@@ -257,13 +264,13 @@ and provide me with the new prompt that improves the model’s performance.""",
             {
                 "role": "user",
                 "content": f"""
-        ## Current prompt
-        {self.instructions}
+## Current prompt
+{self.instructions}
 
-        ## Examples
-        {examples}
+## Examples
+{examples}
 
-        Summarize your analysis about incorrect predictions and suggest changes to the prompt.""",
+Summarize your analysis about incorrect predictions and suggest changes to the prompt.""",
             }
         ]
 
