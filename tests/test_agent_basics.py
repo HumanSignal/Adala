@@ -6,18 +6,7 @@ from utils import patching, PatchedCalls, OpenaiChatCompletionMock
 @patching(
     target_function=PatchedCalls.OPENAI_MODEL_LIST.value,
     data=[
-        # calling API model list for the first runtime (student)
-        {
-            "input": {},
-            "output": {
-                "data": [
-                    {"id": "gpt-3.5-turbo-instruct"},
-                    {"id": "gpt-3.5-turbo"},
-                    {"id": "gpt-4"},
-                ]
-            },
-        },
-        # calling API model list for the second runtime (teacher)
+        # calling API model list for the teacher runtime
         {
             "input": {},
             "output": {
@@ -91,18 +80,7 @@ def test_agent_quickstart_single_skill():
 @patching(
     target_function=PatchedCalls.OPENAI_MODEL_LIST.value,
     data=[
-        # calling API model list for the first runtime (student)
-        {
-            "input": {},
-            "output": {
-                "data": [
-                    {"id": "gpt-3.5-turbo-instruct"},
-                    {"id": "gpt-3.5-turbo"},
-                    {"id": "gpt-4"},
-                ]
-            },
-        },
-        # calling API model list for the second runtime (teacher)
+        # calling API model list for the teacher runtime
         {
             "input": {},
             "output": {
@@ -200,18 +178,7 @@ def test_agent_quickstart_two_skills():
 @patching(
     target_function=PatchedCalls.OPENAI_MODEL_LIST.value,
     data=[
-        # calling API model list for the first runtime (student)
-        {
-            "input": {},
-            "output": {
-                "data": [
-                    {"id": "gpt-3.5-turbo-instruct"},
-                    {"id": "gpt-3.5-turbo"},
-                    {"id": "gpt-4"},
-                ]
-            },
-        },
-        # calling API model list for the second runtime (teacher)
+        # calling API model list for the teacher
         {
             "input": {},
             "output": {
@@ -296,7 +263,7 @@ def test_agent_quickstart_three_skills_only_second_fail():
         ),
     )
 
-    agent.learn(learning_iterations=1)
+    agent.learn(learning_iterations=2)
 
     # assert final instruction
     assert agent.skills["0->1"].instructions == "..."

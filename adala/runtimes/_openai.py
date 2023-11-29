@@ -142,7 +142,7 @@ class OpenAIChatRuntime(Runtime):
         # for example, output template "Output: {answer} is correct" results in output_prefix "Output: "
         output_prefix = output_template[: output_field["start"]]
         if instructions_first:
-            user_prompt += f"\n\n{output_prefix}"
+            user_prompt += f"\n{output_prefix}"
             messages = [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},

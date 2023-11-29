@@ -9,6 +9,7 @@ class PatchedCalls(enum.Enum):
     OPENAI_CHAT_COMPLETION = (
         "openai.api_resources.chat_completion.ChatCompletion.create"
     )
+    OPENAI_EMBEDDING_CREATE = "openai.Embedding.create"
 
 
 class OpenaiChatCompletionMock(object):
@@ -83,7 +84,12 @@ def patching(target_function, data, strict=False):
                 return expected_output
 
             with patch(target_function, side_effect=side_effect):
-                return test_func(*args, **kwargs)
+                result = test_func(*args, **kwargs)
+                if call_index[0] != len(data):
+                    raise AssertionError(
+                        f"Expected {len(data)} calls to {target_function}, but got {call_index[0]}"
+                    )
+                return result
 
         return wrapper
 

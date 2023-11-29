@@ -3,7 +3,7 @@ from utils import patching, PatchedCalls, mdict
 
 @patching(
     target_function=PatchedCalls.OPENAI_MODEL_LIST.value,
-    data=[{"input": {}, "output": {"data": [{"id": "gpt-3.5-turbo-instruct"}]}}],
+    data=[],
 )
 @patching(
     target_function=PatchedCalls.GUIDANCE.value,

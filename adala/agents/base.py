@@ -15,6 +15,7 @@ from adala.utils.logs import (
     print_text,
     print_error,
     highlight_differences,
+    is_running_in_jupyter,
 )
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 
@@ -276,25 +277,37 @@ class Agent(BaseModel, ABC):
                 ).merge(predictions, left_index=True, right_index=True)
             )
             # -----------------------------
-            train_skill_name, train_skill_output, accuracy = self.select_skill_to_train(
-                feedback, accuracy_threshold
-            )
-            if not train_skill_name:
-                print_text(f"No skill to improve found. Continue learning...")
+            skill_mismatch = feedback.match.fillna(True) == False
+            has_errors = skill_mismatch.any(axis=1).any()
+            if not has_errors:
+                print_text("No errors found!")
                 continue
-            train_skill = self.skills[train_skill_name]
-            print_text(
-                f'Output to improve: "{train_skill_output}" (Skill="{train_skill_name}")\n'
-                f"Accuracy = {accuracy * 100:0.2f}%",
-                style="bold red",
-            )
+            first_skill_with_errors = skill_mismatch.any(axis=0).idxmax()
 
-            old_instructions = train_skill.instructions
-            train_skill.improve(
-                predictions, train_skill_output, feedback, runtime=teacher_runtime
-            )
+            accuracy = feedback.get_accuracy()
+            # TODO: iterating over skill can be more complex, and we should take order into account
+            for skill_output, skill_name in self.skills.get_skill_outputs().items():
+                skill = self.skills[skill_name]
+                if skill.frozen:
+                    continue
 
-            highlight_differences(old_instructions, train_skill.instructions)
-            # print_text(f'{train_skill.instructions}', style='bold green')
+                print_text(
+                    f'Skill output to improve: "{skill_output}" (Skill="{skill_name}")\n'
+                    f"Accuracy = {accuracy[skill_output] * 100:0.2f}%",
+                    style="bold red",
+                )
+
+                old_instructions = skill.instructions
+                skill.improve(
+                    predictions, skill_output, feedback, runtime=teacher_runtime
+                )
+
+                if is_running_in_jupyter():
+                    highlight_differences(old_instructions, skill.instructions)
+                else:
+                    print_text(skill.instructions, style="bold green")
+
+                if skill_name == first_skill_with_errors:
+                    break
 
         print_text("Train is done!")
