@@ -34,10 +34,7 @@ from tenacity import retry, stop_after_attempt, wait_random
 
 @retry(wait=wait_random(min=5, max=10), stop=stop_after_attempt(6))
 def chat_completion_call(model, messages):
-    return openai.ChatCompletion.create(
-        model=model,
-        messages=messages
-    )
+    return openai.ChatCompletion.create(model=model, messages=messages)
 
 
 class OpenAIChatRuntime(Runtime):
