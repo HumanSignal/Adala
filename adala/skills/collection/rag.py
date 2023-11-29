@@ -1,8 +1,10 @@
+from pydantic import model_validator
 from typing import Optional
 from adala.skills._base import TransformSkill
 from adala.utils.internal_data import InternalDataFrame
 from adala.runtimes.base import Runtime
 from adala.memories import Memory
+from adala.memories.vectordb import VectorDBMemory
 
 
 class RAGSkill(TransformSkill):
@@ -14,7 +16,13 @@ class RAGSkill(TransformSkill):
     instructions: str = ''
     output_template: str = '{rag}'
     num_results: int = 1
-    memory: Memory
+    memory: Memory = None
+
+    @model_validator(mode='after')
+    def init_memory(self):
+        if self.memory is None:
+            self.memory = VectorDBMemory(db_name=self.name)
+        return self
 
     def apply(
         self,
@@ -40,7 +48,9 @@ class RAGSkill(TransformSkill):
                 output_template=self.output_template
             )
         else:
-            output = rag_input.reindex(input.index)
+            output = rag_input
+            output.index = input.index
+
         return output
 
     def improve(

@@ -78,6 +78,16 @@ def print_series(data: InternalSeries):
     console.print(table)
 
 
+def is_running_in_jupyter():
+    try:
+        from IPython import get_ipython
+        if 'IPKernelApp' not in get_ipython().config:
+            return False
+        return True
+    except (AttributeError, ImportError):
+        return False
+
+
 def highlight_differences(text1, text2):
     diff = ndiff(text1, text2)
     highlighted = "".join(

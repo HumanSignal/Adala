@@ -25,14 +25,22 @@ class Memory(BaseModel, ABC):
             self.remember(observation, d)
 
     @abstractmethod
-    def retrieve(self, observation: str) -> Any:
+    def retrieve(self, observation: str, num_results: int = 1) -> Any:
         """
         Base method for retrieving past experiences from long term memory, based on current observations
+
+        Args:
+            observation: the current observation
+            num_results: the number of results to return
         """
 
-    def retrieve_many(self, observations: List[str]) -> List[Any]:
+    def retrieve_many(self, observations: List[str], num_results: int = 1) -> List[Any]:
         """
         Base method for retrieving past experiences from long term memory, based on current observations
+
+        Args:
+            observation: the current observation
+            num_results: the number of results to return
         """
         return [self.retrieve(observation) for observation in observations]
 

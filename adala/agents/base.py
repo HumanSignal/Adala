@@ -15,6 +15,7 @@ from adala.utils.logs import (
     print_text,
     print_error,
     highlight_differences,
+    is_running_in_jupyter
 )
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 
@@ -276,16 +277,18 @@ class Agent(BaseModel, ABC):
                 ).merge(predictions, left_index=True, right_index=True)
             )
             # -----------------------------
+            skill_mismatch = feedback.match.fillna(True) == False
+            has_errors = skill_mismatch.any(axis=1).any()
+            if not has_errors:
+                print_text("No errors found!")
+                continue
+            first_skill_with_errors = skill_mismatch.any(axis=0).idxmax()
 
             accuracy = feedback.get_accuracy()
+            # TODO: iterating over skill can be more complex, and we should take order into account
             for skill_output, skill_name in self.skills.get_skill_outputs().items():
                 skill = self.skills[skill_name]
                 if skill.frozen:
-                    continue
-                match = feedback.match[skill_output]
-                nothing_to_improve = match.all() and not match.isna().all()
-                if nothing_to_improve:
-                    print_text(f'Nothing to improve for skill output "{skill_output}" (Skill="{skill_name}")')
                     continue
 
                 print_text(
@@ -297,6 +300,12 @@ class Agent(BaseModel, ABC):
                 old_instructions = skill.instructions
                 skill.improve(predictions, skill_output, feedback, runtime=teacher_runtime)
 
-                highlight_differences(old_instructions, skill.instructions)
+                if is_running_in_jupyter():
+                    highlight_differences(old_instructions, skill.instructions)
+                else:
+                    print_text(skill.instructions, style="bold green")
+
+                if skill_name == first_skill_with_errors:
+                    break
 
         print_text("Train is done!")
