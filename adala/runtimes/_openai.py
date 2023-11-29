@@ -29,6 +29,12 @@ from .base import Runtime
 from adala.utils.logs import print_error
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.parse import parse_template, partial_str_format
+from tenacity import retry, stop_after_attempt, wait_random
+
+
+@retry(wait=wait_random(min=5, max=10), stop=stop_after_attempt(6))
+def chat_completion_call(model, messages):
+    return openai.ChatCompletion.create(model=model, messages=messages)
 
 
 class OpenAIChatRuntime(Runtime):
@@ -92,9 +98,7 @@ class OpenAIChatRuntime(Runtime):
             completion_text = completion.choices[0].message.content
         else:
             # deprecated
-            completion = openai.ChatCompletion.create(
-                model=self.openai_model, messages=messages
-            )
+            completion = chat_completion_call(self.openai_model, messages)
             completion_text = completion.choices[0]["message"]["content"]
         return completion_text
 
