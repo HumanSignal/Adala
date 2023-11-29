@@ -9,6 +9,7 @@ class PatchedCalls(enum.Enum):
     OPENAI_CHAT_COMPLETION = (
         "openai.api_resources.chat_completion.ChatCompletion.create"
     )
+    OPENAI_EMBEDDING_CREATE = "openai.Embedding.create"
 
 
 class OpenaiChatCompletionMock(object):

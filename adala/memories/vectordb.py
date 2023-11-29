@@ -4,7 +4,7 @@ from .base import Memory
 from uuid import uuid4
 from pydantic import BaseModel, Field, model_validator
 from chromadb.utils import embedding_functions
-from typing import Any, List
+from typing import Any, List, Dict
 
 
 class VectorDBMemory(Memory):
@@ -26,10 +26,13 @@ class VectorDBMemory(Memory):
         return hashlib.md5(string.encode()).hexdigest()
 
     def remember(self, observation: str, data: Any):
+        self.remember_many([observation], [data])
+
+    def remember_many(self, observations: List[str], data: List[Dict]):
         self._collection.add(
-            ids=[self.create_unique_id(observation)],
-            documents=[observation],
-            metadatas=[data]
+            ids=[self.create_unique_id(o) for o in observations],
+            documents=observations,
+            metadatas=data
         )
 
     def retrieve_many(self, observations: List[str], num_results: int = 1) -> List[Any]:
