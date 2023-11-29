@@ -11,16 +11,21 @@ class VectorDBMemory(Memory):
     """
     Memory backed by a vector database.
     """
-    db_name: str = ''
+
+    db_name: str = ""
     _client = None
     _collection = None
     _embedding_function = None
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def init_database(self):
         self._client = chromadb.Client()
-        self._embedding_function = embedding_functions.OpenAIEmbeddingFunction(model_name="text-embedding-ada-002")
-        self._collection = self._client.get_or_create_collection(name=self.db_name, embedding_function=self._embedding_function)
+        self._embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+            model_name="text-embedding-ada-002"
+        )
+        self._collection = self._client.get_or_create_collection(
+            name=self.db_name, embedding_function=self._embedding_function
+        )
 
     def create_unique_id(self, string):
         return hashlib.md5(string.encode()).hexdigest()
@@ -32,19 +37,18 @@ class VectorDBMemory(Memory):
         self._collection.add(
             ids=[self.create_unique_id(o) for o in observations],
             documents=observations,
-            metadatas=data
+            metadatas=data,
         )
 
     def retrieve_many(self, observations: List[str], num_results: int = 1) -> List[Any]:
-        result = self._collection.query(
-            query_texts=observations,
-            n_results=num_results
-        )
-        return result['metadatas']
+        result = self._collection.query(query_texts=observations, n_results=num_results)
+        return result["metadatas"]
 
     def retrieve(self, observation: str, num_results: int = 1) -> Any:
         return self.retrieve_many([observation], num_results=num_results)[0]
 
     def clear(self):
         self._client.delete_collection(name=self.db_name)
-        self._collection = self._client.create_collection(name=self.db_name, embedding_function=self._embedding_function)
+        self._collection = self._client.create_collection(
+            name=self.db_name, embedding_function=self._embedding_function
+        )

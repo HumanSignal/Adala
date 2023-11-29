@@ -11,14 +11,15 @@ class RAGSkill(TransformSkill):
     """
     Skill for RAG (Retrieval-Augmented Generation) models.
     """
-    name: str = 'rag'
+
+    name: str = "rag"
     rag_input_template: str
-    instructions: str = ''
-    output_template: str = '{rag}'
+    instructions: str = ""
+    output_template: str = "{rag}"
     num_results: int = 1
     memory: Memory = None
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def init_memory(self):
         if self.memory is None:
             self.memory = VectorDBMemory(db_name=self.name)
@@ -32,20 +33,29 @@ class RAGSkill(TransformSkill):
         """
         Apply the skill.
         """
-        input_strings = input.apply(lambda r: self.input_template.format(**r), axis=1).tolist()
-        rag_input_data = self.memory.retrieve_many(input_strings, num_results=self.num_results)
-        rag_input_strings = ['\n\n'.join(self.rag_input_template.format(**i) for i in rag_items) for rag_items in rag_input_data]
+        input_strings = input.apply(
+            lambda r: self.input_template.format(**r), axis=1
+        ).tolist()
+        rag_input_data = self.memory.retrieve_many(
+            input_strings, num_results=self.num_results
+        )
+        rag_input_strings = [
+            "\n\n".join(self.rag_input_template.format(**i) for i in rag_items)
+            for rag_items in rag_input_data
+        ]
         output_fields = self.get_output_fields()
         if len(output_fields) != 1:
-            raise ValueError(f'RAG skill must have exactly one output field, but has {len(output_fields)}')
+            raise ValueError(
+                f"RAG skill must have exactly one output field, but has {len(output_fields)}"
+            )
         output_field = output_fields[0]
         rag_input = InternalDataFrame({output_field: rag_input_strings})
         if self.instructions:
             output = runtime.batch_to_batch(
                 rag_input,
                 instructions_template=self.instructions,
-                input_template=f'{{{output_field}}}',
-                output_template=self.output_template
+                input_template=f"{{{output_field}}}",
+                output_template=self.output_template,
             )
         else:
             output = rag_input
@@ -64,9 +74,13 @@ class RAGSkill(TransformSkill):
         Improve the skill.
         """
 
-        error_indices = feedback.match[(feedback.match.fillna(True) == False).any(axis=1)].index
+        error_indices = feedback.match[
+            (feedback.match.fillna(True) == False).any(axis=1)
+        ].index
         inputs = predictions.loc[error_indices]
-        input_strings = inputs.apply(lambda r: self.input_template.format(**r), axis=1).tolist()
-        fb = feedback.feedback.loc[error_indices].rename(columns=lambda c: f'{c}__fb')
+        input_strings = inputs.apply(
+            lambda r: self.input_template.format(**r), axis=1
+        ).tolist()
+        fb = feedback.feedback.loc[error_indices].rename(columns=lambda c: f"{c}__fb")
         inputs = inputs.join(fb)
-        self.memory.remember_many(input_strings, inputs.to_dict(orient='records'))
+        self.memory.remember_many(input_strings, inputs.to_dict(orient="records"))

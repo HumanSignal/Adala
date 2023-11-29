@@ -15,7 +15,7 @@ from adala.utils.logs import (
     print_text,
     print_error,
     highlight_differences,
-    is_running_in_jupyter
+    is_running_in_jupyter,
 )
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 
@@ -298,7 +298,9 @@ class Agent(BaseModel, ABC):
                 )
 
                 old_instructions = skill.instructions
-                skill.improve(predictions, skill_output, feedback, runtime=teacher_runtime)
+                skill.improve(
+                    predictions, skill_output, feedback, runtime=teacher_runtime
+                )
 
                 if is_running_in_jupyter():
                     highlight_differences(old_instructions, skill.instructions)

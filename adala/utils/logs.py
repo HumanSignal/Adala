@@ -81,7 +81,8 @@ def print_series(data: InternalSeries):
 def is_running_in_jupyter():
     try:
         from IPython import get_ipython
-        if 'IPKernelApp' not in get_ipython().config:
+
+        if "IPKernelApp" not in get_ipython().config:
             return False
         return True
     except (AttributeError, ImportError):

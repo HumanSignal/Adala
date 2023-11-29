@@ -184,7 +184,10 @@ class TransformSkill(Skill):
             runtime (Runtime): The runtime instance to be used for processing (CURRENTLY SUPPORTS ONLY `OpenAIChatRuntime`).
 
         """
-        if feedback.match[train_skill_output].all() and not feedback.match[train_skill_output].isna().all():
+        if (
+            feedback.match[train_skill_output].all()
+            and not feedback.match[train_skill_output].isna().all()
+        ):
             # nothing to improve
             return
 
