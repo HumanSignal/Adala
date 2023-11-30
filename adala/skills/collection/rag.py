@@ -46,6 +46,7 @@ class RAGSkill(TransformSkill):
     output_template: str = "{rag}"
     num_results: int = 1
     memory: Memory = None
+    only_errors: bool = True
 
     @model_validator(mode="after")
     def init_memory(self):
@@ -119,13 +120,16 @@ class RAGSkill(TransformSkill):
             runtime: Runtime to use for generation (not used).
         """
 
-        error_indices = feedback.match[
-            (feedback.match.fillna(True) == False).any(axis=1)
-        ].index
-        inputs = predictions.loc[error_indices]
+        if self.only_errors:
+            indices = feedback.match[
+                (feedback.match.fillna(True) == False).any(axis=1)
+            ].index
+        else:
+            indices = feedback.match.index
+        inputs = predictions.loc[indices]
         input_strings = inputs.apply(
             lambda r: self.input_template.format(**r), axis=1
         ).tolist()
-        fb = feedback.feedback.loc[error_indices].rename(columns=lambda c: f"{c}__fb")
+        fb = feedback.feedback.loc[indices].rename(columns=lambda c: f"{c}__fb")
         inputs = inputs.join(fb)
         self.memory.remember_many(input_strings, inputs.to_dict(orient="records"))

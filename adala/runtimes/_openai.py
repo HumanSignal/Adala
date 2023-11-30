@@ -1,4 +1,5 @@
 import os
+import difflib
 from rich import print
 
 from typing import Optional, Dict, Any, List
@@ -32,9 +33,9 @@ from adala.utils.parse import parse_template, partial_str_format
 from tenacity import retry, stop_after_attempt, wait_random
 
 
-@retry(wait=wait_random(min=5, max=10), stop=stop_after_attempt(6))
+@retry(wait=wait_random(min=5, max=10), stop=stop_after_attempt(3))
 def chat_completion_call(model, messages):
-    return openai.ChatCompletion.create(model=model, messages=messages)
+    return openai.ChatCompletion.create(model=model, messages=messages, timeout=120, request_timeout=120)
 
 
 class OpenAIChatRuntime(Runtime):
@@ -158,7 +159,26 @@ class OpenAIChatRuntime(Runtime):
             ]
 
         completion_text = self.execute(messages)
+
+        field_schema = field_schema or {}
+        if output_field_name in field_schema and field_schema[output_field_name]["type"] == "array":
+            # expected output is one item from the array
+            expected_items = field_schema[output_field_name]['items']['enum']
+            completion_text = self._match_items(completion_text, expected_items)
+
         return {output_field_name: completion_text}
+
+    def _match_items(self, query: str, items: List[str]) -> str:
+        # hard constraint: the item must be in the query
+        filtered_items = [item for item in items if item in query]
+        if not filtered_items:
+            # make the best guess - find the most similar item to the query
+            filtered_items = items
+
+        # soft constraint: find the most similar item to the query
+        scores = list(map(lambda item: difflib.SequenceMatcher(None, query, item).ratio(), filtered_items))
+        matched_item = filtered_items[scores.index(max(scores))]
+        return matched_item
 
 
 class OpenAIVisionRuntime(OpenAIChatRuntime):
