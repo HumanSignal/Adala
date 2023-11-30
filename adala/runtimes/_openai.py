@@ -35,7 +35,9 @@ from tenacity import retry, stop_after_attempt, wait_random
 
 @retry(wait=wait_random(min=5, max=10), stop=stop_after_attempt(3))
 def chat_completion_call(model, messages):
-    return openai.ChatCompletion.create(model=model, messages=messages, timeout=120, request_timeout=120)
+    return openai.ChatCompletion.create(
+        model=model, messages=messages, timeout=120, request_timeout=120
+    )
 
 
 class OpenAIChatRuntime(Runtime):
@@ -161,9 +163,12 @@ class OpenAIChatRuntime(Runtime):
         completion_text = self.execute(messages)
 
         field_schema = field_schema or {}
-        if output_field_name in field_schema and field_schema[output_field_name]["type"] == "array":
+        if (
+            output_field_name in field_schema
+            and field_schema[output_field_name]["type"] == "array"
+        ):
             # expected output is one item from the array
-            expected_items = field_schema[output_field_name]['items']['enum']
+            expected_items = field_schema[output_field_name]["items"]["enum"]
             completion_text = self._match_items(completion_text, expected_items)
 
         return {output_field_name: completion_text}
@@ -176,7 +181,12 @@ class OpenAIChatRuntime(Runtime):
             filtered_items = items
 
         # soft constraint: find the most similar item to the query
-        scores = list(map(lambda item: difflib.SequenceMatcher(None, query, item).ratio(), filtered_items))
+        scores = list(
+            map(
+                lambda item: difflib.SequenceMatcher(None, query, item).ratio(),
+                filtered_items,
+            )
+        )
         matched_item = filtered_items[scores.index(max(scores))]
         return matched_item
 
