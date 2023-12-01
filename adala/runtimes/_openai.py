@@ -55,6 +55,7 @@ class OpenAIChatRuntime(Runtime):
         default=os.getenv("OPENAI_API_KEY"), alias="api_key"
     )
     max_tokens: Optional[int] = 1000
+    splitter: Optional[str] = None
 
     _client: OpenAI = None
 
@@ -181,14 +182,24 @@ class OpenAIChatRuntime(Runtime):
             filtered_items = items
 
         # soft constraint: find the most similar item to the query
-        scores = list(
-            map(
-                lambda item: difflib.SequenceMatcher(None, query, item).ratio(),
-                filtered_items,
+        matched_items = []
+        # split query by self.splitter
+        if self.splitter:
+            qs = query.split(self.splitter)
+        else:
+            qs = [query]
+
+        for q in qs:
+            scores = list(
+                map(
+                    lambda item: difflib.SequenceMatcher(None, q, item).ratio(),
+                    filtered_items,
+                )
             )
-        )
-        matched_item = filtered_items[scores.index(max(scores))]
-        return matched_item
+            matched_items.append(filtered_items[scores.index(max(scores))])
+        if self.splitter:
+            return self.splitter.join(matched_items)
+        return matched_items[0]
 
 
 class OpenAIVisionRuntime(OpenAIChatRuntime):

@@ -16,7 +16,7 @@ class SummarizationSkill(TextGenerationSkill):
         prediction_field (str): Field name for the generated summary.
     """
 
-    name = "summarization"
+    name: str = "summarization"
     instructions: str = "Summarize the text."
     input_template: str = "Text: {text}"
     output_template: str = "Summary: {summary}"

@@ -15,7 +15,7 @@ class QuestionAnsweringSkill(TextGenerationSkill):
         output_template (str): Expected format of the LLM's answer.
     """
 
-    name = "question_answering"
+    name: str = "question_answering"
     instructions: str = "Answer the question."
     input_template: str = "Question: {question}"
     output_template: str = "Answer: {answer}"

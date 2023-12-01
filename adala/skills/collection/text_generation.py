@@ -12,7 +12,7 @@ class TextGenerationSkill(TransformSkill):
         instructions (str): Instruction to guide the LLM in text generation.
     """
 
-    name = "text_generation"
+    name: str = "text_generation"
     instructions: str = "Generate text based on the provided input."
     input_template: str = "Input: {text}"
     output_template: str = "Output: {generated_text}"
