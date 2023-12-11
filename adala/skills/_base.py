@@ -173,6 +173,7 @@ class TransformSkill(Skill):
         train_skill_output: str,
         feedback,
         runtime: Runtime,
+        add_cot: bool = False,
     ):
         """
         Improves the skill.
@@ -182,13 +183,14 @@ class TransformSkill(Skill):
             train_skill_output (str): The name of the output field of the skill.
             feedback (InternalDataFrame): The feedback provided by the user.
             runtime (Runtime): The runtime instance to be used for processing (CURRENTLY SUPPORTS ONLY `OpenAIChatRuntime`).
-
+            add_cot (bool): Flag indicating if the skill should be used the Chain-of-Thought strategy. Defaults to False.
         """
-        if (
-            feedback.match[train_skill_output].all()
-            and not feedback.match[train_skill_output].isna().all()
-        ):
-            # nothing to improve
+        if feedback.feedback[train_skill_output].isna().all():
+            # No feedback left - nothing to improve
+            return
+
+        if feedback.match[train_skill_output].all():
+            # all feedback is "correct" - nothing to improve
             return
 
         fb = feedback.feedback.rename(
@@ -296,15 +298,25 @@ Now please carefully review your reasoning in Step 1 and help with Step 2: refin
 
 1. The new prompt should should describe the task precisely, and address the points raised in the user feedback.
 
-2. The new prompt should be similar to the current instruction, and only differ in the parts that address the issues you identified in Step 1.
+2. The new prompt should be similar to the current prompt, and only differ in the parts that address the issues you identified in Step 1.
     Example:
-    - Current prompt: "The model should generate a summary of the input text."
-    - New prompt: "The model should generate a summary of the input text. Pay attention to the original style."
+    - Current prompt: "Generate a summary of the input text."
+    - New prompt: "Generate a summary of the input text. Pay attention to the original style."
 
-3. Reply only with the new prompt. Do not include input and output templates in the prompt.""",
+3. Reply only with the new prompt. Do not include input and output templates in the prompt.
+""",
             },
         ]
 
+        if add_cot:
+            cot_instructions = """
+
+4. In the new prompt, you should ask the model to perform step-by-step reasoning, and provide rationale or explanations for its prediction before giving the final answer. \
+Instruct the model to give the final answer at the end of the prompt, using the following template: "Final answer: <answer>".
+    Example:
+    - Current prompt: "Generate a summary of the input text."
+    - New prompt: "Generate a summary of the input text. Explain your reasoning step-by-step. Use the following template to give the final answer at the end of the prompt: "Final answer: <answer>"."""
+            messages[-1]["content"] += cot_instructions
         # display dialogue:
         for message in messages:
             print(f'"{{{message["role"]}}}":\n{message["content"]}')
