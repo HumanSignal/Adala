@@ -71,13 +71,14 @@ class BatchRuntime(Runtime):
             tmpl = f'{input_template}\n\n{instructions_template}\n\n'
 
         df_completions = InternalDataFrame()
+        options = options or {}
         for output_field in output_fields:
             if output_field['type'] == 'text':
                 tmpl += output_field['text']
             elif output_field['type'] == 'var':
                 output_name = output_field['text']
                 prompts = InternalDataFrameConcat((batch, df_completions), axis=1).apply(lambda r: tmpl.format(**r), axis=1)
-                completions = self.execute(prompts, options=options)
+                completions = self.execute(prompts, options=options.get(output_name))
 
                 df_completions = InternalDataFrameConcat(
                     (df_completions, InternalDataFrame(data=completions, index=batch.index, columns=[output_name])),
