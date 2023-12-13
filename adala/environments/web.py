@@ -61,7 +61,6 @@ class WebStaticEnvironment(StaticEnvironment):
                 progress.advance(task, 10)
                 time.sleep(10)
                 fb_records = self._get_fb_records()
-                print("ZZZZ", fb_records)
 
         if not fb_records:
             raise RuntimeError("No ground truth found.")
@@ -73,10 +72,6 @@ class WebStaticEnvironment(StaticEnvironment):
             match[f.prediction_column].append(f.fb_match)
             feedback[f.prediction_column].append(f.fb_message)
             index.append(f.prediction_id)
-
-        print(11111, match)
-        print(2222, feedback)
-        print(3333, fb_records)
 
         match = InternalDataFrame(match, index=index)
         feedback = InternalDataFrame(feedback, index=index)
