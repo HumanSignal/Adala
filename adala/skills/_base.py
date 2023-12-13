@@ -157,12 +157,18 @@ class TransformSkill(Skill):
             InternalDataFrame: The transformed data.
         """
 
+        field_schema = self.field_schema or {}
+        options = {}
+        for field, schema in field_schema.items():
+            if schema.get("type") == "array":
+                options[field] = schema.get("items", {}).get("enum", [])
+
         return runtime.batch_to_batch(
             input,
             input_template=self.input_template,
             output_template=self.output_template,
             instructions_template=self.instructions,
-            field_schema=self.field_schema,
+            options=options,
             extra_fields=self._get_extra_fields(),
             instructions_first=self.instructions_first,
         )
