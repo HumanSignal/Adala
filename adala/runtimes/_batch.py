@@ -8,6 +8,9 @@ try:
     _VLLM_AVAILABLE = True
 except ImportError:
     _VLLM_AVAILABLE = False
+    # print warning message
+    print("Warning: VLLM is not installed. Using vanilla OpenAI API instead.")
+
 from pydantic import Field
 from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.matching import match_options
@@ -60,9 +63,11 @@ class BatchRuntime(Runtime):
                     completions.append(completion_text)
             return completions
 
-        if not self._max_tokens:
-            self._max_tokens = max(map(lambda o: len(self._tokenizer.tokenize(o)), options))
-        params = SamplingParams(max_tokens=self._max_tokens)
+        if options:
+            max_tokens = max(map(lambda o: len(self._tokenizer.tokenize(o)), options))
+        else:
+            max_tokens = self._max_tokens
+        params = SamplingParams(max_tokens=max_tokens)
         prepared_prompts = map(self._convert, prompts)
         outputs = self._llm.generate(prepared_prompts, params)
         completions = []
