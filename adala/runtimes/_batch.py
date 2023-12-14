@@ -68,7 +68,7 @@ class BatchRuntime(Runtime):
         else:
             max_tokens = self._max_tokens
         params = SamplingParams(max_tokens=max_tokens)
-        prepared_prompts = map(self._convert, prompts)
+        prepared_prompts = list(map(self._convert, prompts))
         outputs = self._llm.generate(prepared_prompts, params)
         completions = []
         for output in outputs:
