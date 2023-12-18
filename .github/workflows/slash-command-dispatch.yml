@@ -52,6 +52,7 @@ jobs:
         uses: peter-evans/slash-command-dispatch@v3
         with:
           token: ${{ secrets.GIT_PAT }}
+          reaction-token: ${{ secrets.GIT_PAT }}
           issue-type: "issue"
           reactions: true
           commands: ${{ env.issue_commands_list }}
@@ -62,6 +63,7 @@ jobs:
         uses: peter-evans/slash-command-dispatch@v3
         with:
           token: ${{ secrets.GIT_PAT }}
+          reaction-token: ${{ secrets.GIT_PAT }}
           issue-type: "pull-request"
           reactions: true
           commands: ${{ env.commands_list }}
