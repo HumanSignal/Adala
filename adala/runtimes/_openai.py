@@ -116,7 +116,7 @@ class OpenAIChatRuntime(Runtime):
         instructions_template: str,
         output_template: str,
         extra_fields: Optional[Dict[str, str]] = None,
-        field_schema: Optional[Dict] = None,
+        options: Optional[Dict] = None,
         instructions_first: bool = False,
     ) -> Dict[str, str]:
         """

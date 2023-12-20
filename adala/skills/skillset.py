@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import List, Union, Dict, Any, Optional, Mapping
 from collections import OrderedDict
 from adala.runtimes.base import Runtime
-from adala.utils.logs import print_text
+from adala.utils.logs import print_text, print_dataframe
 from adala.utils.internal_data import (
     InternalDataFrame,
     InternalSeries,
@@ -186,6 +186,7 @@ class LinearSkillSet(SkillSet):
             # use input dataset for the first node in the pipeline
             print_text(f"Applying skill: {skill_name}")
             skill_output = skill.apply(skill_input, runtime)
+            print_dataframe(skill_output)
             if isinstance(skill, TransformSkill):
                 # Columns to drop from skill_input because they are also in skill_output
                 cols_to_drop = set(skill_output.columns) & set(skill_input.columns)

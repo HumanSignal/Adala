@@ -1,10 +1,11 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Any, Dict, Tuple, Union
 from abc import ABC, abstractmethod
-from adala.utils.internal_data import InternalDataFrame, InternalSeries
+from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat, InternalSeries
 from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.logs import print_dataframe, print_text
 from adala.runtimes.base import Runtime
+from tqdm import tqdm
 
 
 class Skill(BaseModel, ABC):
@@ -375,12 +376,14 @@ class AnalysisSkill(Skill):
     Analysis skill that analyzes a dataframe and returns a record (e.g. for data analysis purposes).
     See base class Skill for more information about the attributes.
     """
+    input_separator: str = "\n"
+    chunk_size: Optional[int] = None
 
     def apply(
         self,
         input: Union[InternalDataFrame, InternalSeries, Dict],
         runtime: Runtime,
-    ) -> InternalSeries:
+    ) -> InternalDataFrame:
         """
         Applies the skill to a dataframe and returns a record.
 
@@ -398,22 +401,31 @@ class AnalysisSkill(Skill):
 
         extra_fields = self._get_extra_fields()
 
-        aggregated_input = input.apply(
-            lambda row: self.input_template.format(**row, **extra_fields), axis=1
-        ).str.cat(sep="\n")
+        # if chunk_size is specified, split the input into chunks and process each chunk separately
+        if self.chunk_size is not None:
+            chunks = (
+                input.iloc[i : i + self.chunk_size]
+                for i in range(0, len(input), self.chunk_size)
+            )
+        else:
+            chunks = [input]
+        outputs = []
+        for chunk in tqdm(chunks):
+            agg_chunk = chunk.reset_index().apply(
+                lambda row: self.input_template.format(**row, **extra_fields, i=int(row.name) + 1), axis=1
+            ).str.cat(sep=self.input_separator)
+            output = runtime.record_to_record(
+                {"input": agg_chunk},
+                input_template="{input}",
+                output_template=self.output_template,
+                instructions_template=self.instructions,
+                extra_fields=extra_fields,
+                instructions_first=self.instructions_first,
+            )
+            outputs.append(InternalSeries(output))
+        output = InternalDataFrame(outputs)
 
-        output = runtime.record_to_record(
-            {"input": aggregated_input},
-            input_template="{input}",
-            output_template=self.output_template,
-            instructions_template=self.instructions,
-            field_schema=self.field_schema,
-            extra_fields=self._get_extra_fields(),
-            instructions_first=self.instructions_first,
-        )
-        # output['input'] = aggregated_input
-        # concatenate input and output and return dataframe
-        return InternalSeries(output)
+        return output
 
     def improve(self, **kwargs):
         """
