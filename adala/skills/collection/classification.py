@@ -17,6 +17,10 @@ class ClassificationSkill(TransformSkill):
     @model_validator(mode="after")
     def validate_labels(self):
         output_fields = self.get_output_fields()
+        if len(output_fields) != 1:
+            raise ValueError(
+                f"Classification skill only supports one output field, got {output_fields}"
+            )
         self.field_schema = {}
         for labels_field, labels in self.labels.items():
             if labels_field not in output_fields:
@@ -28,8 +32,6 @@ class ClassificationSkill(TransformSkill):
                 "type": "array",
                 "items": {"type": "string", "enum": labels},
             }
-            labels_list = '\n'.join(labels)
-            self.instructions += f"{labels_field}:\n\n{labels_list}\n\n"
 
         # add label list to instructions
         # TODO: doesn't work for multiple outputs

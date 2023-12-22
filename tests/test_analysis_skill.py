@@ -24,7 +24,7 @@ from utils import patching, PatchedCalls
     ],
 )
 def test_code_generation():
-    from adala.skills import AnalysisSkill, ParallelSkillSet  # type: ignore
+    from adala.skills import AnalysisSkill, LinearSkillSet  # type: ignore
     from adala.agents import Agent  # type: ignore
     from adala.environments import StaticEnvironment  # type: ignore
     import pandas as pd
@@ -35,7 +35,7 @@ def test_code_generation():
         )
     )
 
-    skillset = ParallelSkillSet(
+    skillset = LinearSkillSet(
         skills=[
             AnalysisSkill(
                 name="code_generation",
@@ -53,17 +53,8 @@ def test_code_generation():
         pd.DataFrame(
             [
                 {
-                    "payload": '{"a": 1, "b": 2}',
                     "code": "def convert(input_json):\npass",
-                },
-                {
-                    "payload": '{"a": 3, "b": 4}',
-                    "code": "def convert(input_json):\npass",
-                },
-                {
-                    "payload": '{"a": 5, "b": 6}',
-                    "code": "def convert(input_json):\npass",
-                },
+                }
             ]
         ),
     )

@@ -331,6 +331,27 @@ Instruct the model to give the final answer at the end of the prompt, using the 
         self.instructions = new_prompt
 
 
+class SampleTransformSkill(TransformSkill):
+    sample_size: int
+
+    def apply(
+        self,
+        input: InternalDataFrame,
+        runtime: Runtime,
+    ) -> InternalDataFrame:
+        """
+        Applies the skill to a dataframe and returns a dataframe.
+
+        Args:
+            input (InternalDataFrame): The input data to be processed.
+            runtime (Runtime): The runtime instance to be used for processing.
+
+        Returns:
+            InternalDataFrame: The processed data.
+        """
+        return super(SampleTransformSkill, self).apply(input.sample(self.sample_size), runtime)
+
+
 class SynthesisSkill(Skill):
     """
     Synthesis skill that synthesize a dataframe from a record (e.g. for dataset generation purposes).
@@ -410,7 +431,8 @@ class AnalysisSkill(Skill):
         else:
             chunks = [input]
         outputs = []
-        for chunk in tqdm(chunks):
+        total = input.shape[0] // self.chunk_size + 1 if self.chunk_size is not None else 1
+        for chunk in tqdm(chunks, desc="Processing chunks", total=total):
             agg_chunk = chunk.reset_index().apply(
                 lambda row: self.input_template.format(**row, **extra_fields, i=int(row.name) + 1), axis=1
             ).str.cat(sep=self.input_separator)

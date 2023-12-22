@@ -38,7 +38,7 @@ from utils import patching, PatchedCalls, OpenaiChatCompletionMock, mdict
             "input": {
                 "model": "gpt-3.5-turbo",
                 "messages": [
-                    {"role": "system", "content": "Recognize emotions from text."},
+                    {"role": "system", "content": "Recognize emotions from text.\n\nAssume the following output labels:\n\nhappy\nsad\nangry\nneutral\n\nDon't output anything else - only respond with one of the labels above."},
                     {
                         "role": "user",
                         "content": "Examples:\n\n\n\nNow recognize:\n\nText: I am happy\nEmotions: ",
@@ -51,7 +51,7 @@ from utils import patching, PatchedCalls, OpenaiChatCompletionMock, mdict
             "input": {
                 "model": "gpt-3.5-turbo",
                 "messages": [
-                    {"role": "system", "content": "Recognize emotions from text."},
+                    {"role": "system", "content": "Recognize emotions from text.\n\nAssume the following output labels:\n\nhappy\nsad\nangry\nneutral\n\nDon't output anything else - only respond with one of the labels above."},
                     {
                         "role": "user",
                         "content": "Examples:\n\n\n\nNow recognize:\n\nText: I am angry\nEmotions: ",
@@ -64,7 +64,7 @@ from utils import patching, PatchedCalls, OpenaiChatCompletionMock, mdict
             "input": {
                 "model": "gpt-3.5-turbo",
                 "messages": [
-                    {"role": "system", "content": "Recognize emotions from text."},
+                    {"role": "system", "content": "Recognize emotions from text.\n\nAssume the following output labels:\n\nhappy\nsad\nangry\nneutral\n\nDon't output anything else - only respond with one of the labels above."},
                     {
                         "role": "user",
                         "content": "Examples:\n\n\n\nNow recognize:\n\nText: I am sad\nEmotions: ",

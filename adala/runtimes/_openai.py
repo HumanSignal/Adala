@@ -136,6 +136,7 @@ class OpenAIChatRuntime(Runtime):
         """
 
         extra_fields = extra_fields or {}
+        options = options or {}
 
         output_fields = parse_template(
             partial_str_format(output_template, **extra_fields), include_texts=True
@@ -152,9 +153,12 @@ class OpenAIChatRuntime(Runtime):
                 else:
                     user_prompt = output_field['text']
             elif output_field['type'] == 'var':
+                name = output_field['text']
                 messages.append({"role": "user", "content": user_prompt})
                 completion_text = self.execute(messages)
-                outputs[output_field['text']] = completion_text
+                if name in options:
+                    completion_text = self._match_items(completion_text, options[name])
+                outputs[name] = completion_text
                 messages.append({"role": "assistant", "content": completion_text})
                 user_prompt = None
 

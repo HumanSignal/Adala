@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, SkipValidation, field_validator, model_va
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List, Dict, Union, Tuple
 from rich import print
+import yaml
 
 from adala.environments.base import Environment, StaticEnvironment, EnvironmentFeedback
 from adala.runtimes.base import Runtime
@@ -112,6 +113,8 @@ class Agent(BaseModel, ABC):
             return v
         elif isinstance(v, Skill):
             return LinearSkillSet(skills=[v])
+        elif isinstance(v, list):
+            return LinearSkillSet(skills=v)
         else:
             raise ValueError(f"skills must be of type SkillSet or Skill, not {type(v)}")
 
@@ -311,3 +314,34 @@ class Agent(BaseModel, ABC):
                     break
 
         print_text("Train is done!")
+
+
+def create_agent_from_dict(json_dict: Dict):
+    """
+    Creates an agent from a JSON dictionary.
+
+    Args:
+        json_dict (Dict): The JSON dictionary to create the agent from.
+
+    Returns:
+        Agent: The created agent.
+    """
+
+    agent = Agent(**json_dict)
+    return agent
+
+
+def create_agent_from_file(file_path: str):
+    """
+    Creates an agent from a YAML file.
+
+    Args:
+        file_path (str): The path to the YAML file to create the agent from.
+
+    Returns:
+        Agent: The created agent.
+    """
+
+    with open(file_path, "r") as file:
+        json_dict = yaml.safe_load(file)
+    return create_agent_from_dict(json_dict)
