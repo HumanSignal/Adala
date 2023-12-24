@@ -34,21 +34,23 @@ def print_error(text: str):
     error_console.print(text)
 
 
-def print_dataframe(dataframe: InternalDataFrame):
+def print_dataframe(dataframe: InternalDataFrame, num_rows: int = 5, print_index: bool = False):
     """
     Print dataframe to console.
     """
-    num_rows = 5
     table = Table(show_header=True, header_style="bold magenta")
-    # index_name = dataframe.index.name or 'index'
-    # table.add_column(index_name)
+    if print_index:
+        index_name = dataframe.index.name or 'index'
+        table.add_column(index_name)
 
     for column in dataframe.columns:
         table.add_column(str(column))
 
     for index, value_list in enumerate(dataframe.iloc[:num_rows].values.tolist()):
-        # row = [str(index)]
-        row = []
+        if print_index:
+            row = [str(dataframe.index[index])]
+        else:
+            row = []
         row += [str(x) for x in value_list]
         table.add_row(*row)
 
