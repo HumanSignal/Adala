@@ -305,6 +305,12 @@ class Agent(BaseModel, ABC):
                 if skill.frozen:
                     continue
 
+                if accuracy[skill_output] >= accuracy_threshold:
+                    print_text(
+                        f'Output {skill_output} of skill "{skill_name}" is already accurate enough ({accuracy[skill_output]}), skipping ...'
+                    )
+                    continue
+
                 print_text(
                     f'Skill output to improve: "{skill_output}" (Skill="{skill_name}")\n'
                     f"Accuracy = {accuracy[skill_output] * 100:0.2f}%",
