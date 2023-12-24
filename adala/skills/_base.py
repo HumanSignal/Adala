@@ -298,10 +298,12 @@ Now please carefully review your reasoning in Step 1 and help with Step 2: refin
 
 2. The new prompt should be similar to the current instruction, and only differ in the parts that address the issues you identified in Step 1.
     Example:
-    - Current prompt: "The model should generate a summary of the input text."
-    - New prompt: "The model should generate a summary of the input text. Pay attention to the original style."
+    - Current prompt: "Generate a summary of the input text."
+    - New prompt: "Generate a summary of the input text. Pay attention to the original style."
 
-3. Reply only with the new prompt. Do not include input and output templates in the prompt.""",
+3. Do not rephrase or change parts of the prompt that are not related to the issues identified in Step 1.
+
+4. Reply only with the new prompt. Do not include input and output templates in the prompt.""",
             },
         ]
 
