@@ -310,4 +310,4 @@ class Agent(BaseModel, ABC):
                 if skill_name == first_skill_with_errors:
                     break
 
-        print_text("Train is done!")
+        print_text("Training is done!")
