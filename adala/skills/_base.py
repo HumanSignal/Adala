@@ -206,7 +206,7 @@ class TransformSkill(Skill):
                 f"### Example #{i}\n\n"
                 f"{self.input_template.format(**row)}\n\n"
                 f"{self.output_template.format(**row)}\n\n"
-                f'User feedback: {row[f"{train_skill_output}__fb"]}\n\n'
+                f'User feedback for {train_skill_output}: {row[f"{train_skill_output}__fb"]}\n\n'
             )
 
         examples = "\n".join(examples)
