@@ -265,7 +265,7 @@ def test_rag_with_openai_chat_completion():
                 }
             ),
         ),
-        runtimes={"openai": OpenAIChatRuntime(model="gpt-3.5-turbo")},
+        runtimes={"default": OpenAIChatRuntime(model="gpt-3.5-turbo")},
         teacher_runtimes={"openai-teacher": OpenAIChatRuntime(model="gpt-4")},
         default_teacher_runtime="openai-teacher",
     )
