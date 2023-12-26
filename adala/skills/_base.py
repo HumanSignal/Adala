@@ -1,7 +1,11 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Any, Dict, Tuple, Union
 from abc import ABC, abstractmethod
-from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat, InternalSeries
+from adala.utils.internal_data import (
+    InternalDataFrame,
+    InternalDataFrameConcat,
+    InternalSeries,
+)
 from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.logs import print_dataframe, print_text
 from adala.runtimes.base import Runtime
@@ -349,7 +353,9 @@ class SampleTransformSkill(TransformSkill):
         Returns:
             InternalDataFrame: The processed data.
         """
-        return super(SampleTransformSkill, self).apply(input.sample(self.sample_size), runtime)
+        return super(SampleTransformSkill, self).apply(
+            input.sample(self.sample_size), runtime
+        )
 
 
 class SynthesisSkill(Skill):
@@ -397,6 +403,7 @@ class AnalysisSkill(Skill):
     Analysis skill that analyzes a dataframe and returns a record (e.g. for data analysis purposes).
     See base class Skill for more information about the attributes.
     """
+
     input_separator: str = "\n"
     chunk_size: Optional[int] = None
 
@@ -431,11 +438,20 @@ class AnalysisSkill(Skill):
         else:
             chunks = [input]
         outputs = []
-        total = input.shape[0] // self.chunk_size + 1 if self.chunk_size is not None else 1
+        total = (
+            input.shape[0] // self.chunk_size + 1 if self.chunk_size is not None else 1
+        )
         for chunk in tqdm(chunks, desc="Processing chunks", total=total):
-            agg_chunk = chunk.reset_index().apply(
-                lambda row: self.input_template.format(**row, **extra_fields, i=int(row.name) + 1), axis=1
-            ).str.cat(sep=self.input_separator)
+            agg_chunk = (
+                chunk.reset_index()
+                .apply(
+                    lambda row: self.input_template.format(
+                        **row, **extra_fields, i=int(row.name) + 1
+                    ),
+                    axis=1,
+                )
+                .str.cat(sep=self.input_separator)
+            )
             output = runtime.record_to_record(
                 {"input": agg_chunk},
                 input_template="{input}",

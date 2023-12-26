@@ -2,9 +2,11 @@ from tqdm import tqdm
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 from adala.runtimes.base import Runtime
 from typing import Optional, Dict, Any, List
+
 try:
     from vllm import LLM, SamplingParams
     from transformers import AutoTokenizer, AutoModelForCausalLM
+
     _VLLM_AVAILABLE = True
 except ImportError:
     _VLLM_AVAILABLE = False
@@ -18,8 +20,9 @@ from ._openai import chat_completion_call
 
 
 class BatchRuntime(Runtime):
-
-    runtime_model: str = Field(alias="model", default_factory=lambda: "mistralai/Mistral-7B-Instruct-v0.2")
+    runtime_model: str = Field(
+        alias="model", default_factory=lambda: "mistralai/Mistral-7B-Instruct-v0.2"
+    )
 
     _llm = None
     _tokenizer = None
@@ -40,26 +43,30 @@ class BatchRuntime(Runtime):
         pass
 
     def _convert(self, string):
-        return self._tokenizer.apply_chat_template([{'role': 'user', 'content': string}], tokenize=False)
+        return self._tokenizer.apply_chat_template(
+            [{"role": "user", "content": string}], tokenize=False
+        )
 
     def execute(self, prompts, options):
         if not _VLLM_AVAILABLE:
             # fallback to vanilla OpenAI API calls
             completions = []
             for prompt in tqdm(prompts):
-                messages = [{'role': 'user', 'content': prompt}]
+                messages = [{"role": "user", "content": prompt}]
                 if self.verbose:
-                    print(f'Prompt: {prompt}')
-                completion = chat_completion_call('gpt-4-1106-preview', messages)
+                    print(f"Prompt: {prompt}")
+                completion = chat_completion_call("gpt-4-1106-preview", messages)
                 completion_text = completion.choices[0].message.content
                 if options:
                     completion_option = match_options(completion_text, options)
                     if self.verbose:
-                        print(f'Completion text: {completion_text}, matched option: {completion_option}')
+                        print(
+                            f"Completion text: {completion_text}, matched option: {completion_option}"
+                        )
                     completions.append(completion_option)
                 else:
                     if self.verbose:
-                        print(f'Completion text: {completion_text}')
+                        print(f"Completion text: {completion_text}")
                     completions.append(completion_text)
             return completions
 
@@ -106,24 +113,31 @@ class BatchRuntime(Runtime):
         output_fields = parse_template(output_template, include_texts=True)
 
         if instructions_first:
-            tmpl = f'{instructions_template}\n\n{input_template}\n'
+            tmpl = f"{instructions_template}\n\n{input_template}\n"
         else:
-            tmpl = f'{input_template}\n\n{instructions_template}\n\n'
+            tmpl = f"{input_template}\n\n{instructions_template}\n\n"
 
         df_completions = InternalDataFrame()
         options = options or {}
         for output_field in output_fields:
-            if output_field['type'] == 'text':
-                tmpl += output_field['text']
-            elif output_field['type'] == 'var':
-                output_name = output_field['text']
-                prompts = InternalDataFrameConcat((batch, df_completions), axis=1).apply(lambda r: tmpl.format(**r), axis=1)
+            if output_field["type"] == "text":
+                tmpl += output_field["text"]
+            elif output_field["type"] == "var":
+                output_name = output_field["text"]
+                prompts = InternalDataFrameConcat(
+                    (batch, df_completions), axis=1
+                ).apply(lambda r: tmpl.format(**r), axis=1)
                 completions = self.execute(prompts, options=options.get(output_name))
 
                 df_completions = InternalDataFrameConcat(
-                    (df_completions, InternalDataFrame(data=completions, index=batch.index, columns=[output_name])),
-                    axis=1
+                    (
+                        df_completions,
+                        InternalDataFrame(
+                            data=completions, index=batch.index, columns=[output_name]
+                        ),
+                    ),
+                    axis=1,
                 )
-                tmpl += f'{{{output_name}}}'
+                tmpl += f"{{{output_name}}}"
 
         return df_completions

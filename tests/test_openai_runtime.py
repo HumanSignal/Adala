@@ -37,9 +37,7 @@ def test_process_batch():
         input_template="Input: {text} {comments}",
         output_template="Output: {output} {label}",
         instructions_template="This is a test.",
-        options={
-            "label": list('abc')
-        },
+        options={"label": list("abc")},
     )
     assert isinstance(result, InternalDataFrame)
     assert result.equals(

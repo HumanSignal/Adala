@@ -147,13 +147,13 @@ class OpenAIChatRuntime(Runtime):
 
         outputs = {}
         for output_field in output_fields:
-            if output_field['type'] == 'text':
+            if output_field["type"] == "text":
                 if user_prompt is not None:
                     user_prompt += f"\n{output_field['text']}"
                 else:
-                    user_prompt = output_field['text']
-            elif output_field['type'] == 'var':
-                name = output_field['text']
+                    user_prompt = output_field["text"]
+            elif output_field["type"] == "var":
+                name = output_field["text"]
                 messages.append({"role": "user", "content": user_prompt})
                 completion_text = self.execute(messages)
                 if name in options:

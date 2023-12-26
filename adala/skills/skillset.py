@@ -10,7 +10,13 @@ from adala.utils.internal_data import (
     InternalDataFrameConcat,
     Record,
 )
-from ._base import Skill, TransformSkill, SampleTransformSkill, AnalysisSkill, SynthesisSkill
+from ._base import (
+    Skill,
+    TransformSkill,
+    SampleTransformSkill,
+    AnalysisSkill,
+    SynthesisSkill,
+)
 from .collection.classification import ClassificationSkill
 
 
@@ -30,9 +36,7 @@ class SkillSet(BaseModel, ABC):
     skills: Dict[str, Skill]
 
     @field_validator("skills", mode="before")
-    def skills_validator(
-        cls, v: Union[List, Dict]
-    ) -> Dict[str, Skill]:
+    def skills_validator(cls, v: Union[List, Dict]) -> Dict[str, Skill]:
         """
         Validates and converts the skills attribute to a dictionary of skill names to BaseSkill instances.
 
