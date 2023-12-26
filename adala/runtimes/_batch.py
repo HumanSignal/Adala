@@ -23,13 +23,14 @@ class BatchRuntime(Runtime):
     runtime_model: str = Field(
         alias="model", default_factory=lambda: "mistralai/Mistral-7B-Instruct-v0.2"
     )
+    vanilla: bool = False
 
     _llm = None
     _tokenizer = None
     _max_tokens = None
 
     def init_runtime(self) -> "Runtime":
-        if _VLLM_AVAILABLE:
+        if _VLLM_AVAILABLE and not self.vanilla:
             self._init_vllm()
         else:
             self._init_vanilla()
@@ -48,7 +49,7 @@ class BatchRuntime(Runtime):
         )
 
     def execute(self, prompts, options):
-        if not _VLLM_AVAILABLE:
+        if not _VLLM_AVAILABLE or self.vanilla:
             # fallback to vanilla OpenAI API calls
             completions = []
             for prompt in tqdm(prompts):

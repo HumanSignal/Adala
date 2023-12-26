@@ -58,3 +58,6 @@ doc = [
     "mkdocs-material>=9.4.7",
     "mkdocstrings-python>=1.7.3",
 ]
+
+[tool.pdm.resolution.overrides]
+    pydantic = ">=2"
