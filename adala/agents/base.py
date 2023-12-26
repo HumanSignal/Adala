@@ -64,11 +64,11 @@ class Agent(BaseModel, ABC):
     )
     teacher_runtimes: Dict[str, Runtime] = Field(
         default_factory=lambda: {
-            "openai-gpt3": OpenAIChatRuntime(model="gpt-3.5-turbo"),
+            "default": OpenAIChatRuntime(model="gpt-3.5-turbo"),
             # 'openai-gpt4': OpenAIChatRuntime(model='gpt-4')
         }
     )
-    default_runtime: str = "openai"
+    default_runtime: str = "default"
     default_teacher_runtime: str = "openai-gpt3"
 
     class Config:
