@@ -25,7 +25,10 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
-# [project.optional-dependencies]
+[project.optional-dependencies]
+vllm = [
+    "vllm",
+]
 # label-studio = [
 #     "label-studio-sdk @ git+https://github.com/HumanSignal/label-studio-sdk.git@pd-support",
 # ]
