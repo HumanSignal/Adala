@@ -51,7 +51,7 @@ class Agent(BaseModel, ABC):
     memory: Memory = Field(default=None)
     runtimes: Dict[str, Runtime] = Field(
         default_factory=lambda: {
-            "openai": GuidanceRuntime()
+            "default": GuidanceRuntime()
             # 'openai': OpenAIChatRuntime(model='gpt-3.5-turbo'),
             # 'llama2': LLMRuntime(
             #     llm_runtime_type=LLMRuntimeModelType.Transformers,
@@ -69,7 +69,7 @@ class Agent(BaseModel, ABC):
         }
     )
     default_runtime: str = "default"
-    default_teacher_runtime: str = "openai-gpt3"
+    default_teacher_runtime: str = "default"
 
     class Config:
         arbitrary_types_allowed = True
