@@ -4,6 +4,7 @@ version = "0.0.4dev"
 description = "Adala: Autonomous Data Labeling Agent"
 authors = [
     {name = "HumanSignal", email = "hello@humansignal.com"},
+    {name = "nik", email = "nik@heartex.net"},
 ]
 dependencies = [
     "pandas",
@@ -14,9 +15,9 @@ dependencies = [
     "redis-om",
     "fastapi>=0.104.1",
     "aiosqlite>=0.19.0",
-    "ipython>=8.12.3",
     "chromadb>=0.4.18",
     "tenacity>=8.2.3",
+    "gspread>=5.12.3",
 ]
 requires-python = ">=3.8.8,<3.12"
 readme = "README.md"
@@ -55,3 +56,7 @@ doc = [
     "mkdocs-material>=9.4.7",
     "mkdocstrings-python>=1.7.3",
 ]
+dev = []
+
+[project.scripts]
+adala = "adala.cli:main"

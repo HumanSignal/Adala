@@ -344,4 +344,6 @@ def create_agent_from_file(file_path: str):
 
     with open(file_path, "r") as file:
         json_dict = yaml.safe_load(file)
+    if isinstance(json_dict, list):
+        json_dict = {'skills': json_dict}
     return create_agent_from_dict(json_dict)
