@@ -22,15 +22,24 @@ from adala.utils.matching import match_options
 from ._openai import chat_completion_call
 
 
+def cleanup():
+    from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
+    import gc
+    import torch
+    destroy_model_parallel()
+    gc.collect()
+    torch.cuda.empty_cache()
+
+
 class BatchRuntime(Runtime):
     runtime_model: str = Field(
         alias="model", default_factory=lambda: "mistralai/Mistral-7B-Instruct-v0.2"
     )
     vanilla: bool = False
+    max_tokens: int = 16
 
     _llm = None
     _tokenizer = None
-    _max_tokens = None
 
     def init_runtime(self) -> "Runtime":
         if _VLLM_AVAILABLE and not self.vanilla:
@@ -40,9 +49,6 @@ class BatchRuntime(Runtime):
         return self
 
     def _init_vllm(self):
-        destroy_model_parallel()
-        gc.collect()
-        torch.cuda.empty_cache()
         self._llm = LLM(model=self.runtime_model)
         self._tokenizer = AutoTokenizer.from_pretrained(self.runtime_model)
 
@@ -79,11 +85,7 @@ class BatchRuntime(Runtime):
             return completions
 
         print('Execute VLLM runtime...')
-        if options:
-            max_tokens = max(map(lambda o: len(self._tokenizer.tokenize(o)), options))
-        else:
-            max_tokens = self._max_tokens
-        params = SamplingParams(max_tokens=max_tokens)
+        params = SamplingParams(max_tokens=self.max_tokens)
         prepared_prompts = list(map(self._convert, prompts))
         outputs = self._llm.generate(prepared_prompts, params)
         completions = []
