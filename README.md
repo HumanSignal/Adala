@@ -96,6 +96,39 @@ export OPENAI_API_KEY='your-openai-api-key'
 
 ## 🎬 Quickstart
 
+1. Define agent reasoning workflow in `workflow.yml`:
+
+```yaml
+- name: reasoning
+  type: sample_transform
+  sample_size: 10
+  instructions: "Think step-by-step."
+  input_template: "Question: {question}"
+  output_template: "{reasoning}"
+
+- name: numeric_answer
+  type: transform
+  instructions: > 
+    Given math question and reasoning, provide only numeric answer after `Answer: `, for example:
+    Question: <math question>
+    Reasoning: <reasoning>
+    Answer: <your numerical answer>
+  input_template: >
+    Question: {question}
+    Reasoning: {reasoning}
+  output_template: >
+    Answer: {answer}
+```
+
+2. Run adala math reasoning workflow on the `gsm8k` dataset:
+
+```sh
+adala run --input gsm8k --dataset-config main --dataset-split test --workflow workflow.yml
+```
+
+
+### 🐍 Using Python API
+
 In this example we will use Adala as a standalone library directly inside Python notebook.
 
 Click [here](./examples/quickstart.ipynb) to see an extended quickstart example. 
@@ -164,7 +197,8 @@ print('\n => Test results:')
 print(predictions)
 ```
 
-### 👉 Available skills
+### 👉 Examples
+- [Throughput-optimized batch inference](https://colab.research.google.com/drive/1_X7q_rVIfPJruMOcLd5uuTMwzPO1apcw?usp=sharing) – Run inference on a large dataset with optimized throughput.
 - [ClassificationSkill](./examples/classification_skill.ipynb) – Classify text into a set of predefined labels.
 - [ClassificationSkillWithCoT](./examples/classification_skill_with_CoT.ipynb) – Classify text into a set of predefined labels, using Chain-of-Thoughts reasoning.
 - [SummarizationSkill](./examples/summarization_skill.ipynb) – Summarize text into a shorter text.

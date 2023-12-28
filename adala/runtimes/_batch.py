@@ -26,6 +26,7 @@ def cleanup():
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
     import gc
     import torch
+
     destroy_model_parallel()
     gc.collect()
     torch.cuda.empty_cache()
@@ -62,7 +63,7 @@ class BatchRuntime(Runtime):
 
     def execute(self, prompts, options):
         if not _VLLM_AVAILABLE or self.vanilla:
-            print(f'Execute vanilla batch runtime...')
+            print(f"Execute vanilla batch runtime...")
             # fallback to vanilla OpenAI API calls
             completions = []
             for prompt in tqdm(prompts):
@@ -84,7 +85,7 @@ class BatchRuntime(Runtime):
                     completions.append(completion_text)
             return completions
 
-        print('Execute VLLM runtime...')
+        print("Execute VLLM runtime...")
         params = SamplingParams(max_tokens=self.max_tokens)
         prepared_prompts = list(map(self._convert, prompts))
         outputs = self._llm.generate(prepared_prompts, params)
