@@ -4,8 +4,11 @@ from adala.runtimes.base import Runtime
 from typing import Optional, Dict, Any, List
 
 try:
+    import gc
+    import torch
     from vllm import LLM, SamplingParams
     from transformers import AutoTokenizer, AutoModelForCausalLM
+    from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 
     _VLLM_AVAILABLE = True
 except ImportError:
@@ -37,6 +40,9 @@ class BatchRuntime(Runtime):
         return self
 
     def _init_vllm(self):
+        destroy_model_parallel()
+        gc.collect()
+        torch.cuda.empty_cache()
         self._llm = LLM(model=self.runtime_model)
         self._tokenizer = AutoTokenizer.from_pretrained(self.runtime_model)
 

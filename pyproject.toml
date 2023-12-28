@@ -25,10 +25,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
-[project.optional-dependencies]
-vllm = [
-    "vllm",
-]
+# [project.optional-dependencies]
 # label-studio = [
 #     "label-studio-sdk @ git+https://github.com/HumanSignal/label-studio-sdk.git@pd-support",
 # ]
@@ -58,7 +55,3 @@ doc = [
     "mkdocs-material>=9.4.7",
     "mkdocstrings-python>=1.7.3",
 ]
-
-[tool.pdm.resolution.overrides]
-pydantic = ">=2"
-transformers = ">=4.36.2"
