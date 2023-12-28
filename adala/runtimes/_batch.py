@@ -56,6 +56,7 @@ class BatchRuntime(Runtime):
 
     def execute(self, prompts, options):
         if not _VLLM_AVAILABLE or self.vanilla:
+            print(f'Execute vanilla batch runtime...')
             # fallback to vanilla OpenAI API calls
             completions = []
             for prompt in tqdm(prompts):
@@ -77,6 +78,7 @@ class BatchRuntime(Runtime):
                     completions.append(completion_text)
             return completions
 
+        print('Execute VLLM runtime...')
         if options:
             max_tokens = max(map(lambda o: len(self._tokenizer.tokenize(o)), options))
         else:
