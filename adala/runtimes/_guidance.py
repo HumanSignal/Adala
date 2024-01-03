@@ -86,14 +86,11 @@ class GuidanceRuntime(Runtime):
         return input_template
 
     def _output_template_to_guidance(
-        self, output_template, program_input, output_fields, field_schema
+        self, output_template, program_input, output_fields, options
     ):
         for output_field in output_fields:
             field_name = output_field["text"]
-            if (
-                field_name in field_schema
-                and field_schema[field_name]["type"] == "array"
-            ):
+            if field_name in options:
                 # when runtime is called with a categorical field:
                 #    runtime.record_to_record(
                 #        ...,
@@ -102,9 +99,7 @@ class GuidanceRuntime(Runtime):
                 #    )
                 # replace {field_name} with {select 'field_name' options=field_name_options}
                 # and add "field_name_options" to program input
-                program_input[f"{field_name}_options"] = field_schema[field_name][
-                    "items"
-                ]["enum"]
+                program_input[f"{field_name}_options"] = options[field_name]
                 output_template = output_template.replace(
                     f"{{{field_name}}}",
                     f"{{{{select '{field_name}' options={field_name}_options}}}}",
@@ -123,7 +118,7 @@ class GuidanceRuntime(Runtime):
         instructions_template: str,
         output_template: str,
         extra_fields: Optional[Dict[str, Any]] = None,
-        field_schema: Optional[Dict] = None,
+        options: Optional[Dict] = None,
         instructions_first: bool = True,
     ) -> Dict[str, str]:
         """
@@ -143,7 +138,7 @@ class GuidanceRuntime(Runtime):
         """
 
         extra_fields = extra_fields or {}
-        field_schema = field_schema or {}
+        options = options or {}
 
         if not isinstance(record, dict):
             record = record.to_dict()
@@ -161,7 +156,7 @@ class GuidanceRuntime(Runtime):
             instructions_template, program_input
         )
         output_template = self._output_template_to_guidance(
-            output_template, program_input, output_fields, field_schema
+            output_template, program_input, output_fields, options
         )
 
         program_input["input_program"] = guidance(input_template, llm=self._llm)

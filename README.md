@@ -164,7 +164,8 @@ print('\n => Test results:')
 print(predictions)
 ```
 
-### 👉 Available skills
+### 👉 Examples
+- [Throughput-optimized batch inference](https://colab.research.google.com/drive/1_X7q_rVIfPJruMOcLd5uuTMwzPO1apcw?usp=sharing) – Run inference on a large dataset with optimized throughput.
 - [ClassificationSkill](./examples/classification_skill.ipynb) – Classify text into a set of predefined labels.
 - [ClassificationSkillWithCoT](./examples/classification_skill_with_CoT.ipynb) – Classify text into a set of predefined labels, using Chain-of-Thoughts reasoning.
 - [SummarizationSkill](./examples/summarization_skill.ipynb) – Summarize text into a shorter text.

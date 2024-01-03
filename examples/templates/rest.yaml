@@ -1,0 +1,68 @@
+# ReST multi-hop reasoning https://arxiv.org/pdf/2312.10003.pdf
+
+- name: decision
+  type: transform
+  instructions: >
+    """Implement an agent capable of answering complex queries by potentially search multiple
+    times.
+    """
+    import dataclasses
+    class Action:
+    """Base class for different actions."""
+    ...
+    @dataclasses.dataclass
+    class ActionWrapper:
+    """Encapsulates the reasoning as well as the selected action.
+    Attributes:
+    thoughts: Record your thoughts on why we should do this action.
+    action: The actually selected action.
+    """
+    thoughts: str
+    action: Action
+    @dataclasses.dataclass
+    class Search(Action):
+    """The Google search command.
+    Attributes:
+    query: The query to be sent to Google.
+    """
+    query: str
+    @dataclasses.dataclass
+    class Terminate(Action):
+    """Command to terminate the search sequence."""
+    ...
+    #########################
+    # Example 1:
+    #########################
+    ORIGINAL_QUESTION: str = ’I want to buy the Ikea Klippan loveseat, but I\’m not sure whether
+    it can fit into my 2019 Honda Odyssey. Could you check whether I need to fold down the
+    seat?’
+    PAST_ACTIONS: List[Action] = [
+    Search(query=’ikea klippan loveseat dimension’,
+    thoughts="To answer the ORIGINAL_QUESTION, we need to find the size of the Ikea Klippan
+    loveseat and the cargo size of the 2019 Honda Odyssey, and then compare them. Let’s start
+    by finding the size of the Ikea Klippan loveseat.",
+    ),
+    SelectLink(selected_links=[
+    ResultItem(link_id=1, link_text=’KLIPPAN Loveseat, Vissle gray - IKEA’,
+    snippet=’<lh> Measurements </lh> <ul> <li> Width: 70 7/8 &quot; </li> <li> Depth:
+    34 5/8 &quot; </li> <li> Height: 26 &quot; </li> <li> Height under
+    furniture: 4 3/8 &quot; </li> <li> Seat depth: 21 1/4 &quot; </li> <li> Seat
+    height: 16 7/8 &quot; </li> </ul>’),],
+    grounded_summarization=’According to [link_id=1] the dimension of the ikea klippan loveseat is
+    Width: 70 7/8"; Depth: 34 5/8"; Height: 26".’,
+    thoughts="We still need to find the cargo size of the 2019 Honda Odyssey to answer the
+    ORIGINAL_QUESTION.",
+    ),
+    ]
+    REMAINING_SEARCHES: int = 4
+    ORIGINAL_QUESTION: str = ’I want to buy the Ikea Klippan loveseat, but I\’m not sure whether
+    it can fit into my 2019 Honda Odyssey. Could you check whether I need to fold down the
+    seat?’
+    ACTION_SELECTED = ActionWrapper(thoughts="The past result gives us the dimension of the love
+    seat. We indeed need to find the cargo size of the 2019 Honda Odyssey.", action=Search(
+    query=’2019 Honda Odyssey cargo size’)) # [END]
+    #########################
+    # Example 2:
+    #########################
+  input_template: "Question: {question}"
+  output_template: "{action}"

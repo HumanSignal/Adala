@@ -1,6 +1,7 @@
 import pandas as pd
 import difflib
 from .internal_data import InternalSeries
+from typing import List, Optional
 
 
 # Function to apply fuzzy matching
@@ -23,3 +24,31 @@ def fuzzy_match(x: InternalSeries, y: InternalSeries, threshold=0.8) -> Internal
     """
     result = x.combine(y, lambda x, y: _fuzzy_match(x, y, threshold))
     return result
+
+
+def match_options(query: str, options: List[str], splitter: str = None) -> str:
+    # hard constraint: the item must be in the query
+    filtered_items = [item for item in options if item in query]
+    if not filtered_items:
+        # make the best guess - find the most similar item to the query
+        filtered_items = options
+
+    # soft constraint: find the most similar item to the query
+    matched_items = []
+    # split query by self.splitter
+    if splitter:
+        qs = query.split(splitter)
+    else:
+        qs = [query]
+
+    for q in qs:
+        scores = list(
+            map(
+                lambda item: difflib.SequenceMatcher(None, q, item).ratio(),
+                filtered_items,
+            )
+        )
+        matched_items.append(filtered_items[scores.index(max(scores))])
+    if splitter:
+        return splitter.join(matched_items)
+    return matched_items[0]

@@ -1,0 +1,20 @@
+# Chain of Thought for Math Questions
+- name: reasoning
+  type: sample_transform
+  sample_size: 10
+  instructions: "Let's think step-by-step."
+  input_template: "Question: {question}"
+  output_template: "{reasoning}"
+
+- name: numeric_answer
+  type: transform
+  instructions: > 
+    Given math question and reasoning, provide only numeric answer after `Answer: `, for example:
+    Question: <math question>
+    Reasoning: <reasoning>
+    Answer: <your numerical answer>
+  input_template: >
+    Question: {question}
+    Reasoning: {reasoning}
+  output_template: >
+    Answer: {answer}
