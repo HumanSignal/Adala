@@ -333,7 +333,36 @@ def create_agent_from_dict(json_dict: Dict):
 
 def create_agent_from_file(file_path: str):
     """
-    Creates an agent from a YAML file.
+    Creates an agent from a YAML file:
+    1. Define agent reasoning workflow in `workflow.yml`:
+
+    ```yaml
+    - name: reasoning
+      type: sample_transform
+      sample_size: 10
+      instructions: "Think step-by-step."
+      input_template: "Question: {question}"
+      output_template: "{reasoning}"
+
+    - name: numeric_answer
+      type: transform
+      instructions: >
+        Given math question and reasoning, provide only numeric answer after `Answer: `, for example:
+        Question: <math question>
+        Reasoning: <reasoning>
+        Answer: <your numerical answer>
+      input_template: >
+        Question: {question}
+        Reasoning: {reasoning}
+      output_template: >
+        Answer: {answer}
+    ```
+
+    2. Run adala math reasoning workflow on the `gsm8k` dataset:
+
+    ```sh
+    adala run --input gsm8k --dataset-config main --dataset-split test --workflow workflow.yml
+    ```
 
     Args:
         file_path (str): The path to the YAML file to create the agent from.
