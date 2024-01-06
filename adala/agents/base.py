@@ -259,10 +259,18 @@ class Agent(BaseModel, ABC):
         runtime = self.get_runtime(runtime=runtime)
         teacher_runtime = self.get_teacher_runtime(runtime=teacher_runtime)
 
-        for iteration in range(learning_iterations):
-            print_text(
-                f"\n\n=> Iteration #{iteration}: Getting feedback, analyzing and improving ..."
-            )
+        # We add 1 to the number of iterations to allow for evaluation of the accuracy of the skill we are training
+        # at the end of the last iteration. I.e. if we have 3 iterations, we will train 3 times and evaluate the
+        # accuracy of the skill we are training 4 times.
+        for iteration in range(learning_iterations+1):
+            if iteration == learning_iterations:
+                print_text(
+                    f"\n\n=> Final evaluation of the improved skills ..."
+                )
+            else:
+                print_text(
+                    f"\n\n=> Iteration #{iteration}: Getting feedback, analyzing and improving ..."
+                )
 
             inputs = self.environment.get_data_batch(batch_size=batch_size)
             predictions = self.skills.apply(inputs, runtime=runtime)
@@ -285,10 +293,22 @@ class Agent(BaseModel, ABC):
             first_skill_with_errors = skill_mismatch.any(axis=0).idxmax()
 
             accuracy = feedback.get_accuracy()
+
+            # End the loop with evaluation of the accuracy of the skill we are training
+            if iteration == learning_iterations:
+                print_text("Reached maximum number of iterations, stopping ...")
+                break
+
             # TODO: iterating over skill can be more complex, and we should take order into account
             for skill_output, skill_name in self.skills.get_skill_outputs().items():
                 skill = self.skills[skill_name]
                 if skill.frozen:
+                    continue
+
+                if accuracy[skill_output] >= accuracy_threshold:
+                    print_text(
+                        f'Output {skill_output} of skill "{skill_name}" is already accurate enough ({accuracy[skill_output]}), skipping ...'
+                    )
                     continue
 
                 print_text(
@@ -310,4 +330,4 @@ class Agent(BaseModel, ABC):
                 if skill_name == first_skill_with_errors:
                     break
 
-        print_text("Train is done!")
+        print_text("Training is done!")

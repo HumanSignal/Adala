@@ -207,9 +207,9 @@ class StaticEnvironment(Environment):
                 [gt_pred_match.rename("match"), gt], axis=1
             )
             pred_feedback[pred_column] = match_concat.apply(
-                lambda row: "Prediction is correct."
+                lambda row: f"Prediction for {gt_column} is correct."
                 if row["match"]
-                else f'Prediction is incorrect. Correct answer: "{row[gt_column]}"'
+                else f'Prediction for {gt_column} is incorrect. Correct answer: "{row[gt_column]}"'
                 if not pd.isna(row["match"])
                 else np.nan,
                 axis=1,
