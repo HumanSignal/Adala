@@ -102,5 +102,5 @@ def highlight_differences(text1, text2):
             if i[0] != "-"
         ]
     )
-    highlighted = highlighted.replace(" \n ", "<br>")
+    highlighted = highlighted.replace("\n", "<br/>")
     display(HTML(highlighted))
