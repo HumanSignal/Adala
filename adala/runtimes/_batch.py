@@ -14,7 +14,9 @@ try:
 except ImportError:
     _VLLM_AVAILABLE = False
     # print warning message
-    print("Warning: VLLM is not installed. Using vanilla OpenAI API instead.")
+    print("Warning: VLLM is not installed. Using vanilla OpenAI API instead.\n"
+          "If you want to use local optimized batch inference, install vllm library:\n"
+          "https://github.com/vllm-project/vllm")
 
 from pydantic import Field
 from adala.utils.parse import parse_template, partial_str_format

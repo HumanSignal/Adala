@@ -17,6 +17,7 @@ dependencies = [
     "chromadb>=0.4.18",
     "tenacity>=8.2.3",
     "gspread>=5.12.3",
+    "datasets>=2.16.1",
 ]
 requires-python = ">=3.8.8,<3.12"
 readme = "README.md"
@@ -55,7 +56,13 @@ doc = [
     "mkdocs-material>=9.4.7",
     "mkdocstrings-python>=1.7.3",
 ]
-dev = []
+dev = [
+    "ipykernel>=6.28.0",
+    "jupyter>=1.0.0",
+    "jupyterlab>=4.0.10",
+    "jupyter-client==8.4.0",
+    "matplotlib>=3.7.4",
+]
 
 [project.scripts]
 adala = "adala.cli:main"
