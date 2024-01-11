@@ -165,14 +165,16 @@ print(predictions)
 ```
 
 ### 👉 Examples
-- [Throughput-optimized batch inference](https://colab.research.google.com/drive/1_X7q_rVIfPJruMOcLd5uuTMwzPO1apcw?usp=sharing) – Run inference on a large dataset with optimized throughput.
-- [ClassificationSkill](./examples/classification_skill.ipynb) – Classify text into a set of predefined labels.
-- [ClassificationSkillWithCoT](./examples/classification_skill_with_CoT.ipynb) – Classify text into a set of predefined labels, using Chain-of-Thoughts reasoning.
-- [SummarizationSkill](./examples/summarization_skill.ipynb) – Summarize text into a shorter text.
-- [QuestionAnsweringSkill](./examples/question_answering_skill.ipynb) – Answer questions based on a given context.
-- [TranslationSkill](./examples/translation_skill.ipynb) – Translate text from one language to another.
-- [TextGenerationSkill](./examples/text_generation_skill.ipynb) – Generate text based on a given prompt.
-- [Skill Sets](././examples/skillsets_sequence_of_skills.ipynb) – Process complex tasks through a sequence of skills.
+| Skill                | Description | Colab |
+|----------------------| ------------- | ------------- |
+|  ClassificationSkill | Classify text into a set of predefined labels. | <a target="_blank" href="https://colab.research.google.com/github/HumanSignal/Adala/blob/master/examples/classification_skill.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>  |
+| ClassificationSkillWithCoT | Classify text into a set of predefined labels, using Chain-of-Thoughts reasoning. | <a target="_blank" href="https://colab.research.google.com/github/HumanSignal/Adala/blob/master/examples/classification_skill_with_CoT.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>  |
+| SummarizationSkill | Summarize text into a shorter text. | <a target="_blank" href="https://colab.research.google.com/github/HumanSignal/Adala/blob/master/examples/summarization_skill.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>  |
+| QuestionAnsweringSkill | Answer questions based on a given context. | <a target="_blank" href="https://colab.research.google.com/github/HumanSignal/Adala/blob/master/examples/question_answering_skill.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>  |
+| TranslationSkill | Translate text from one language to another. | <a target="_blank" href="https://colab.research.google.com/github/HumanSignal/Adala/blob/master/examples/translation_skill.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>  |
+| TextGenerationSkill | Generate text based on a given prompt. | <a target="_blank" href="https://colab.research.google.com/github/HumanSignal/Adala/blob/master/examples/text_generation_skill.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>  |
+| Skill sets |  Process complex tasks through a sequence of skills. | <a target="_blank" href="https://colab.research.google.com/github/HumanSignal/Adala/blob/master/examples/skillsets_sequence_of_skills.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>  |
+| OntologyCreator | Infer ontology from a set of text examples. | <a target="_blank" href="https://colab.research.google.com/github/HumanSignal/Adala/blob/master/examples/ontology_creator.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>  |
 
 ![Executing Agent Skill](./docs/src/img/executing-agents-skill.png "Executing Agent Skill")
 
