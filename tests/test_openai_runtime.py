@@ -1,4 +1,4 @@
-from utils import patching, PatchedCalls, mdict
+from .utils import patching, PatchedCalls, mdict
 
 
 @patching(
@@ -37,7 +37,12 @@ def test_process_batch():
         input_template="Input: {text} {comments}",
         output_template="Output: {output} {label}",
         instructions_template="This is a test.",
-        options={"label": list("abc")},
+        field_schema={"label": {
+            "type": "array",
+            "items": {
+                "enum": list("abc")
+            }}
+        }
     )
     assert isinstance(result, InternalDataFrame)
     assert result.equals(

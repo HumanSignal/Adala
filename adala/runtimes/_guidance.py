@@ -38,7 +38,7 @@ class GuidanceRuntime(Runtime):
     # {{>output_program}}'''
 
     # do not override this template
-    _llm_templates: Dict[str, str] = {
+    _llm_templates: Dict[bool, str] = {
         True: """\
 {{>instructions_program}}
 {{>input_program}}
@@ -118,7 +118,7 @@ class GuidanceRuntime(Runtime):
         instructions_template: str,
         output_template: str,
         extra_fields: Optional[Dict[str, Any]] = None,
-        options: Optional[Dict] = None,
+        field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
     ) -> Dict[str, str]:
         """
@@ -138,7 +138,12 @@ class GuidanceRuntime(Runtime):
         """
 
         extra_fields = extra_fields or {}
-        options = options or {}
+        field_schema = field_schema or {}
+
+        options = {}
+        for field, schema in field_schema.items():
+            if schema.get("type") == "array":
+                options[field] = schema.get("items", {}).get("enum", [])
 
         if not isinstance(record, dict):
             record = record.to_dict()

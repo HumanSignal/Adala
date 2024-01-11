@@ -1,6 +1,6 @@
 import pandas as pd
 
-from utils import patching, PatchedCalls, OpenaiChatCompletionMock, mdict
+from .utils import patching, PatchedCalls, OpenaiChatCompletionMock, mdict
 
 
 @patching(

@@ -116,7 +116,7 @@ class OpenAIChatRuntime(Runtime):
         instructions_template: str,
         output_template: str,
         extra_fields: Optional[Dict[str, str]] = None,
-        options: Optional[Dict] = None,
+        field_schema: Optional[Dict] = None,
         instructions_first: bool = False,
     ) -> Dict[str, str]:
         """
@@ -136,7 +136,12 @@ class OpenAIChatRuntime(Runtime):
         """
 
         extra_fields = extra_fields or {}
-        options = options or {}
+        field_schema = field_schema or {}
+
+        options = {}
+        for field, schema in field_schema.items():
+            if schema.get("type") == "array":
+                options[field] = schema.get("items", {}).get("enum", [])
 
         output_fields = parse_template(
             partial_str_format(output_template, **extra_fields), include_texts=True
@@ -163,37 +168,6 @@ class OpenAIChatRuntime(Runtime):
                 user_prompt = None
 
         return outputs
-
-        # output_field = output_fields[0]
-        # output_field_name = output_field["text"]
-        #
-        # # TODO: this truncates the suffix of the output template
-        # # for example, output template "Output: {answer} is correct" results in output_prefix "Output: "
-        # output_prefix = output_template[: output_field["start"]]
-        # if instructions_first:
-        #     user_prompt += f"\n{output_prefix}"
-        #     messages = [
-        #         {"role": "system", "content": system_prompt},
-        #         {"role": "user", "content": user_prompt},
-        #     ]
-        # else:
-        #     user_prompt = f"{user_prompt}\n\n{system_prompt}\n\n{output_prefix}"
-        #     messages = [
-        #         {"role": "user", "content": user_prompt},
-        #     ]
-        #
-        # completion_text = self.execute(messages)
-        #
-        # field_schema = field_schema or {}
-        # if (
-        #     output_field_name in field_schema
-        #     and field_schema[output_field_name]["type"] == "array"
-        # ):
-        #     # expected output is one item from the array
-        #     expected_items = field_schema[output_field_name]["items"]["enum"]
-        #     completion_text = self._match_items(completion_text, expected_items)
-        #
-        # return {output_field_name: completion_text}
 
     def _match_items(self, query: str, items: List[str]) -> str:
         # hard constraint: the item must be in the query

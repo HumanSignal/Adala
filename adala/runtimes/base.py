@@ -36,7 +36,7 @@ class Runtime(BaseModel, ABC):
         instructions_template: str,
         output_template: str,
         extra_fields: Optional[Dict[str, Any]] = None,
-        options: Optional[Dict] = None,
+        field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
     ) -> Dict[str, str]:
         """
@@ -63,7 +63,7 @@ class Runtime(BaseModel, ABC):
         instructions_template: str,
         output_template: str,
         extra_fields: Optional[Dict[str, str]] = None,
-        options: Optional[Dict] = None,
+        field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
     ) -> InternalDataFrame:
         """
@@ -90,7 +90,7 @@ class Runtime(BaseModel, ABC):
             instructions_template=instructions_template,
             output_template=output_template,
             extra_fields=extra_fields,
-            options=options,
+            field_schema=field_schema,
             instructions_first=instructions_first,
         )
         return output
@@ -103,7 +103,7 @@ class Runtime(BaseModel, ABC):
         output_template: str,
         output_batch_size: int = 1,
         extra_fields: Optional[Dict[str, str]] = None,
-        options: Optional[Dict] = None,
+        field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
     ) -> InternalDataFrame:
         """
@@ -130,6 +130,6 @@ class Runtime(BaseModel, ABC):
             instructions_template=instructions_template,
             output_template=output_template,
             extra_fields=extra_fields,
-            options=options,
+            field_schema=field_schema,
             instructions_first=instructions_first,
         )

@@ -14,9 +14,9 @@ try:
 except ImportError:
     _VLLM_AVAILABLE = False
     # print warning message
-    print("Warning: VLLM is not installed. Using vanilla OpenAI API instead.\n"
-          "If you want to use local optimized batch inference, install vllm library:\n"
-          "https://github.com/vllm-project/vllm")
+    # print("Warning: VLLM is not installed. Using vanilla OpenAI API instead.\n"
+    #       "If you want to use local optimized batch inference, install vllm library:\n"
+    #       "https://github.com/vllm-project/vllm")
 
 from pydantic import Field
 from adala.utils.parse import parse_template, partial_str_format
@@ -118,13 +118,20 @@ class BatchRuntime(Runtime):
         instructions_template: str,
         output_template: str,
         extra_fields: Optional[Dict[str, str]] = None,
-        options: Optional[Dict] = None,
+        field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
     ) -> InternalDataFrame:
         extra_fields = extra_fields or {}
+        field_schema = field_schema or {}
+
         input_template = partial_str_format(input_template, **extra_fields)
         output_template = partial_str_format(output_template, **extra_fields)
         output_fields = parse_template(output_template, include_texts=True)
+
+        options = {}
+        for field, schema in field_schema.items():
+            if schema.get("type") == "array":
+                options[field] = schema.get("items", {}).get("enum", [])
 
         if instructions_first:
             tmpl = f"{instructions_template}\n\n{input_template}\n"
