@@ -1,0 +1,71 @@
+# Chain of Thought for Math Questions with Self-consistency
+
+- name: reasoning
+  type: transform
+  sample_size: 10
+  instructions: "Let's think step-by-step."
+  input_template: "Question: {question}"
+  output_template: "{reasoning1}"
+
+- name: numeric_answer
+  type: transform
+  instructions: > 
+    Given math question and reasoning, provide only numeric answer after `Answer: `, for example:
+    Question: <math question>
+    Reasoning: <reasoning>
+    Answer: <your numerical answer>
+  input_template: >
+    Question: {question}
+    Reasoning: {reasoning1}
+  output_template: >
+    Answer: {answer1}
+
+- name: reasoning
+  type: transform
+  sample_size: 10
+  instructions: "Let's think step-by-step."
+  input_template: "Question: {question}"
+  output_template: "{reasoning2}"
+
+- name: numeric_answer
+  type: transform
+  instructions: > 
+    Given math question and reasoning, provide only numeric answer after `Answer: `, for example:
+    Question: <math question>
+    Reasoning: <reasoning>
+    Answer: <your numerical answer>
+  input_template: >
+    Question: {question}
+    Reasoning: {reasoning2}
+  output_template: >
+    Answer: {answer2}
+
+- name: reasoning
+  type: transform
+  sample_size: 10
+  instructions: "Let's think step-by-step."
+  input_template: "Question: {question}"
+  output_template: "{reasoning1}"
+
+- name: numeric_answer
+  type: transform
+  instructions: > 
+    Given math question and reasoning, provide only numeric answer after `Answer: `, for example:
+    Question: <math question>
+    Reasoning: <reasoning>
+    Answer: <your numerical answer>
+  input_template: >
+    Question: {question}
+    Reasoning: {reasoning3}
+  output_template: >
+    Answer: {answer3}
+
+- name: aggregate
+  type: transform
+  instructions: "Using the answers from the previous steps, aggregate them into a final answer by majority vote. Provide only the final answer in a numerical form, without any additional text."
+  input_template: >
+      Answer 1: {answer1}
+      Answer 2: {answer2}
+      Answer 3: {answer3}
+  output_template: >
+      Answer: {answer}

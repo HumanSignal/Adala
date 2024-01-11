@@ -104,6 +104,9 @@ class OpenAIChatRuntime(Runtime):
             # deprecated
             completion = chat_completion_call(self.openai_model, messages)
             completion_text = completion.choices[0]["message"]["content"]
+
+        if self.verbose:
+            print(f"OpenAI response: {completion_text}")
         return completion_text
 
     def record_to_record(
@@ -133,46 +136,38 @@ class OpenAIChatRuntime(Runtime):
         """
 
         extra_fields = extra_fields or {}
+        field_schema = field_schema or {}
+
+        options = {}
+        for field, schema in field_schema.items():
+            if schema.get("type") == "array":
+                options[field] = schema.get("items", {}).get("enum", [])
 
         output_fields = parse_template(
-            partial_str_format(output_template, **extra_fields), include_texts=False
+            partial_str_format(output_template, **extra_fields), include_texts=True
         )
-        if len(output_fields) > 1:
-            raise NotImplementedError(
-                f"{self.__class__.__name__} does not support multiple output fields. "
-                f"Found: {output_fields}"
-            )
-        output_field = output_fields[0]
-        output_field_name = output_field["text"]
         system_prompt = instructions_template
         user_prompt = input_template.format(**record, **extra_fields)
-        # TODO: this truncates the suffix of the output template
-        # for example, output template "Output: {answer} is correct" results in output_prefix "Output: "
-        output_prefix = output_template[: output_field["start"]]
-        if instructions_first:
-            user_prompt += f"\n{output_prefix}"
-            messages = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ]
-        else:
-            user_prompt = f"{user_prompt}\n\n{system_prompt}\n\n{output_prefix}"
-            messages = [
-                {"role": "user", "content": user_prompt},
-            ]
+        messages = [{"role": "system", "content": system_prompt}]
 
-        completion_text = self.execute(messages)
+        outputs = {}
+        for output_field in output_fields:
+            if output_field["type"] == "text":
+                if user_prompt is not None:
+                    user_prompt += f"\n{output_field['text']}"
+                else:
+                    user_prompt = output_field["text"]
+            elif output_field["type"] == "var":
+                name = output_field["text"]
+                messages.append({"role": "user", "content": user_prompt})
+                completion_text = self.execute(messages)
+                if name in options:
+                    completion_text = self._match_items(completion_text, options[name])
+                outputs[name] = completion_text
+                messages.append({"role": "assistant", "content": completion_text})
+                user_prompt = None
 
-        field_schema = field_schema or {}
-        if (
-            output_field_name in field_schema
-            and field_schema[output_field_name]["type"] == "array"
-        ):
-            # expected output is one item from the array
-            expected_items = field_schema[output_field_name]["items"]["enum"]
-            completion_text = self._match_items(completion_text, expected_items)
-
-        return {output_field_name: completion_text}
+        return outputs
 
     def _match_items(self, query: str, items: List[str]) -> str:
         # hard constraint: the item must be in the query

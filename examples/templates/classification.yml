@@ -1,0 +1,10 @@
+- name: classification
+  type: classification
+  instructions: "Classify input text."
+  input_template: 'Text: """\n{text}\n"""'
+  output_template: 'Classification result: {label}'
+  labels:
+    label:
+      - "positive"
+      - "negative"
+      - "neutral"

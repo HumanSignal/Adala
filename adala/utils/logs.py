@@ -8,7 +8,6 @@ from rich.console import Console
 from typing import Optional
 from .internal_data import InternalDataFrame, InternalSeries
 from difflib import ndiff
-from IPython.display import HTML, display
 
 console = Console()
 error_console = Console(stderr=True, style="bold red")
@@ -90,6 +89,8 @@ def is_running_in_jupyter():
 
 
 def highlight_differences(text1, text2):
+    from IPython.display import HTML, display
+
     diff = ndiff(text1, text2)
     highlighted = "".join(
         [

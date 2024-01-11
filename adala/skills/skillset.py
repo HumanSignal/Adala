@@ -1,16 +1,23 @@
 from pydantic import BaseModel, model_validator, field_validator
 from abc import ABC, abstractmethod
-from typing import List, Union, Dict, Any, Optional, Mapping
+from typing import List, Union, Dict, Any, Optional, Mapping, Type
 from collections import OrderedDict
 from adala.runtimes.base import Runtime
-from adala.utils.logs import print_text
+from adala.utils.logs import print_text, print_dataframe
 from adala.utils.internal_data import (
     InternalDataFrame,
     InternalSeries,
     InternalDataFrameConcat,
     Record,
 )
-from ._base import Skill, TransformSkill, AnalysisSkill, SynthesisSkill
+from ._base import (
+    Skill,
+    TransformSkill,
+    SampleTransformSkill,
+    AnalysisSkill,
+    SynthesisSkill,
+)
+from .collection.classification import ClassificationSkill
 
 
 class SkillSet(BaseModel, ABC):
@@ -29,9 +36,7 @@ class SkillSet(BaseModel, ABC):
     skills: Dict[str, Skill]
 
     @field_validator("skills", mode="before")
-    def skills_validator(
-        cls, v: Union[List[Skill], Dict[str, Skill]]
-    ) -> Dict[str, Skill]:
+    def skills_validator(cls, v: Union[List, Dict]) -> Dict[str, Skill]:
         """
         Validates and converts the skills attribute to a dictionary of skill names to BaseSkill instances.
 
@@ -45,10 +50,16 @@ class SkillSet(BaseModel, ABC):
         if not v:
             return skills
 
-        elif isinstance(v, list) and isinstance(v[0], Skill):
-            # convert list of skill names to dictionary
-            for skill in v:
-                skills[skill.name] = skill
+        elif isinstance(v, list):
+            if isinstance(v[0], Skill):
+                # convert list of skill names to dictionary
+                for skill in v:
+                    skills[skill.name] = skill
+            elif isinstance(v[0], dict):
+                # convert list of skill dictionaries to dictionary
+                for skill in v:
+                    skill_class = get_skill_class(skill["type"])
+                    skills[skill["name"]] = skill_class(**skill)
         elif isinstance(v, dict):
             skills = v
         else:
@@ -186,6 +197,7 @@ class LinearSkillSet(SkillSet):
             # use input dataset for the first node in the pipeline
             print_text(f"Applying skill: {skill_name}")
             skill_output = skill.apply(skill_input, runtime)
+            print_dataframe(skill_output)
             if isinstance(skill, TransformSkill):
                 # Columns to drop from skill_input because they are also in skill_output
                 cols_to_drop = set(skill_output.columns) & set(skill_input.columns)
@@ -284,3 +296,27 @@ class ParallelSkillSet(SkillSet):
                 )
             else:
                 raise ValueError(f"Unsupported output type: {type(skill_outputs[0])}")
+
+
+def get_skill_class(skill_type: str) -> Type[Skill]:
+    """
+    Returns the skill class based on the skill type.
+
+    Args:
+        skill_type (str): Skill type.
+
+    Returns:
+        Type[Skill]: Skill class.
+    """
+    if skill_type == "transform":
+        return TransformSkill
+    elif skill_type == "sample_transform":
+        return SampleTransformSkill
+    elif skill_type == "analysis":
+        return AnalysisSkill
+    elif skill_type == "synthesis":
+        return SynthesisSkill
+    elif skill_type == "classification":
+        return ClassificationSkill
+    else:
+        raise ValueError(f"Unsupported skill type: {skill_type}")

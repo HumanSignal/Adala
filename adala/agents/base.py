@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, SkipValidation, field_validator, model_va
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List, Dict, Union, Tuple
 from rich import print
+import yaml
 
 from adala.environments.base import Environment, StaticEnvironment, EnvironmentFeedback
 from adala.runtimes.base import Runtime
@@ -50,7 +51,7 @@ class Agent(BaseModel, ABC):
     memory: Memory = Field(default=None)
     runtimes: Dict[str, Runtime] = Field(
         default_factory=lambda: {
-            "openai": GuidanceRuntime()
+            "default": GuidanceRuntime()
             # 'openai': OpenAIChatRuntime(model='gpt-3.5-turbo'),
             # 'llama2': LLMRuntime(
             #     llm_runtime_type=LLMRuntimeModelType.Transformers,
@@ -63,12 +64,12 @@ class Agent(BaseModel, ABC):
     )
     teacher_runtimes: Dict[str, Runtime] = Field(
         default_factory=lambda: {
-            "openai-gpt3": OpenAIChatRuntime(model="gpt-3.5-turbo"),
+            "default": OpenAIChatRuntime(model="gpt-3.5-turbo"),
             # 'openai-gpt4': OpenAIChatRuntime(model='gpt-4')
         }
     )
-    default_runtime: str = "openai"
-    default_teacher_runtime: str = "openai-gpt3"
+    default_runtime: str = "default"
+    default_teacher_runtime: str = "default"
 
     class Config:
         arbitrary_types_allowed = True
@@ -112,6 +113,8 @@ class Agent(BaseModel, ABC):
             return v
         elif isinstance(v, Skill):
             return LinearSkillSet(skills=[v])
+        elif isinstance(v, list):
+            return LinearSkillSet(skills=v)
         else:
             raise ValueError(f"skills must be of type SkillSet or Skill, not {type(v)}")
 
@@ -311,3 +314,65 @@ class Agent(BaseModel, ABC):
                     break
 
         print_text("Train is done!")
+
+
+def create_agent_from_dict(json_dict: Dict):
+    """
+    Creates an agent from a JSON dictionary.
+
+    Args:
+        json_dict (Dict): The JSON dictionary to create the agent from.
+
+    Returns:
+        Agent: The created agent.
+    """
+
+    agent = Agent(**json_dict)
+    return agent
+
+
+def create_agent_from_file(file_path: str):
+    """
+    Creates an agent from a YAML file:
+    1. Define agent reasoning workflow in `workflow.yml`:
+
+    ```yaml
+    - name: reasoning
+      type: sample_transform
+      sample_size: 10
+      instructions: "Think step-by-step."
+      input_template: "Question: {question}"
+      output_template: "{reasoning}"
+
+    - name: numeric_answer
+      type: transform
+      instructions: >
+        Given math question and reasoning, provide only numeric answer after `Answer: `, for example:
+        Question: <math question>
+        Reasoning: <reasoning>
+        Answer: <your numerical answer>
+      input_template: >
+        Question: {question}
+        Reasoning: {reasoning}
+      output_template: >
+        Answer: {answer}
+    ```
+
+    2. Run adala math reasoning workflow on the `gsm8k` dataset:
+
+    ```sh
+    adala run --input gsm8k --dataset-config main --dataset-split test --workflow workflow.yml
+    ```
+
+    Args:
+        file_path (str): The path to the YAML file to create the agent from.
+
+    Returns:
+        Agent: The created agent.
+    """
+
+    with open(file_path, "r") as file:
+        json_dict = yaml.safe_load(file)
+    if isinstance(json_dict, list):
+        json_dict = {"skills": json_dict}
+    return create_agent_from_dict(json_dict)

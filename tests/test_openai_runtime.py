@@ -37,13 +37,7 @@ def test_process_batch():
         input_template="Input: {text} {comments}",
         output_template="Output: {output} {label}",
         instructions_template="This is a test.",
-        field_schema={
-            "output": {"type": "string"},
-            "label": {
-                "type": "array",
-                "items": {"type": "string", "enum": list("abc")},
-            },
-        },
+        field_schema={"label": {"type": "array", "items": {"enum": list("abc")}}},
     )
     assert isinstance(result, InternalDataFrame)
     assert result.equals(

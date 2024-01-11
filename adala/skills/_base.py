@@ -1,10 +1,15 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Any, Dict, Tuple, Union
 from abc import ABC, abstractmethod
-from adala.utils.internal_data import InternalDataFrame, InternalSeries
+from adala.utils.internal_data import (
+    InternalDataFrame,
+    InternalDataFrameConcat,
+    InternalSeries,
+)
 from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.logs import print_dataframe, print_text
 from adala.runtimes.base import Runtime
+from tqdm import tqdm
 
 
 class Skill(BaseModel, ABC):
@@ -173,6 +178,7 @@ class TransformSkill(Skill):
         train_skill_output: str,
         feedback,
         runtime: Runtime,
+        add_cot: bool = False,
     ):
         """
         Improves the skill.
@@ -182,13 +188,14 @@ class TransformSkill(Skill):
             train_skill_output (str): The name of the output field of the skill.
             feedback (InternalDataFrame): The feedback provided by the user.
             runtime (Runtime): The runtime instance to be used for processing (CURRENTLY SUPPORTS ONLY `OpenAIChatRuntime`).
-
+            add_cot (bool): Flag indicating if the skill should be used the Chain-of-Thought strategy. Defaults to False.
         """
-        if (
-            feedback.match[train_skill_output].all()
-            and not feedback.match[train_skill_output].isna().all()
-        ):
-            # nothing to improve
+        if feedback.feedback[train_skill_output].isna().all():
+            # No feedback left - nothing to improve
+            return
+
+        if feedback.match[train_skill_output].all():
+            # all feedback is "correct" - nothing to improve
             return
 
         fb = feedback.feedback.rename(
@@ -296,20 +303,53 @@ Now please carefully review your reasoning in Step 1 and help with Step 2: refin
 
 1. The new prompt should should describe the task precisely, and address the points raised in the user feedback.
 
-2. The new prompt should be similar to the current instruction, and only differ in the parts that address the issues you identified in Step 1.
+2. The new prompt should be similar to the current prompt, and only differ in the parts that address the issues you identified in Step 1.
     Example:
-    - Current prompt: "The model should generate a summary of the input text."
-    - New prompt: "The model should generate a summary of the input text. Pay attention to the original style."
+    - Current prompt: "Generate a summary of the input text."
+    - New prompt: "Generate a summary of the input text. Pay attention to the original style."
 
-3. Reply only with the new prompt. Do not include input and output templates in the prompt.""",
+3. Reply only with the new prompt. Do not include input and output templates in the prompt.
+""",
             },
         ]
 
+        if add_cot:
+            cot_instructions = """
+
+4. In the new prompt, you should ask the model to perform step-by-step reasoning, and provide rationale or explanations for its prediction before giving the final answer. \
+Instruct the model to give the final answer at the end of the prompt, using the following template: "Final answer: <answer>".
+    Example:
+    - Current prompt: "Generate a summary of the input text."
+    - New prompt: "Generate a summary of the input text. Explain your reasoning step-by-step. Use the following template to give the final answer at the end of the prompt: "Final answer: <answer>"."""
+            messages[-1]["content"] += cot_instructions
         # display dialogue:
         for message in messages:
             print(f'"{{{message["role"]}}}":\n{message["content"]}')
         new_prompt = runtime.execute(messages)
         self.instructions = new_prompt
+
+
+class SampleTransformSkill(TransformSkill):
+    sample_size: int
+
+    def apply(
+        self,
+        input: InternalDataFrame,
+        runtime: Runtime,
+    ) -> InternalDataFrame:
+        """
+        Applies the skill to a dataframe and returns a dataframe.
+
+        Args:
+            input (InternalDataFrame): The input data to be processed.
+            runtime (Runtime): The runtime instance to be used for processing.
+
+        Returns:
+            InternalDataFrame: The processed data.
+        """
+        return super(SampleTransformSkill, self).apply(
+            input.sample(self.sample_size), runtime
+        )
 
 
 class SynthesisSkill(Skill):
@@ -358,11 +398,14 @@ class AnalysisSkill(Skill):
     See base class Skill for more information about the attributes.
     """
 
+    input_separator: str = "\n"
+    chunk_size: Optional[int] = None
+
     def apply(
         self,
         input: Union[InternalDataFrame, InternalSeries, Dict],
         runtime: Runtime,
-    ) -> InternalSeries:
+    ) -> InternalDataFrame:
         """
         Applies the skill to a dataframe and returns a record.
 
@@ -380,22 +423,39 @@ class AnalysisSkill(Skill):
 
         extra_fields = self._get_extra_fields()
 
-        aggregated_input = input.apply(
-            lambda row: self.input_template.format(**row, **extra_fields), axis=1
-        ).str.cat(sep="\n")
+        # if chunk_size is specified, split the input into chunks and process each chunk separately
+        if self.chunk_size is not None:
+            chunks = (
+                input.iloc[i : i + self.chunk_size]
+                for i in range(0, len(input), self.chunk_size)
+            )
+        else:
+            chunks = [input]
+        outputs = []
+        total = input.shape[0] // self.chunk_size if self.chunk_size is not None else 1
+        for chunk in tqdm(chunks, desc="Processing chunks", total=total):
+            agg_chunk = (
+                chunk.reset_index()
+                .apply(
+                    lambda row: self.input_template.format(
+                        **row, **extra_fields, i=int(row.name) + 1
+                    ),
+                    axis=1,
+                )
+                .str.cat(sep=self.input_separator)
+            )
+            output = runtime.record_to_record(
+                {"input": agg_chunk},
+                input_template="{input}",
+                output_template=self.output_template,
+                instructions_template=self.instructions,
+                extra_fields=extra_fields,
+                instructions_first=self.instructions_first,
+            )
+            outputs.append(InternalSeries(output))
+        output = InternalDataFrame(outputs)
 
-        output = runtime.record_to_record(
-            {"input": aggregated_input},
-            input_template="{input}",
-            output_template=self.output_template,
-            instructions_template=self.instructions,
-            field_schema=self.field_schema,
-            extra_fields=self._get_extra_fields(),
-            instructions_first=self.instructions_first,
-        )
-        # output['input'] = aggregated_input
-        # concatenate input and output and return dataframe
-        return InternalSeries(output)
+        return output
 
     def improve(self, **kwargs):
         """
