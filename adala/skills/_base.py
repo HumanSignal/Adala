@@ -432,9 +432,7 @@ class AnalysisSkill(Skill):
         else:
             chunks = [input]
         outputs = []
-        total = (
-            input.shape[0] // self.chunk_size if self.chunk_size is not None else 1
-        )
+        total = input.shape[0] // self.chunk_size if self.chunk_size is not None else 1
         for chunk in tqdm(chunks, desc="Processing chunks", total=total):
             agg_chunk = (
                 chunk.reset_index()
