@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up PDM
-        uses: pdm-project/setup-pdm@v3
+        uses: pdm-project/setup-pdm@v4
         with:
           python-version: '3.9'
           cache: true
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up PDM
-        uses: pdm-project/setup-pdm@v3
+        uses: pdm-project/setup-pdm@v4
         with:
           python-version: "${{ matrix.python-version }}"
           cache: true
@@ -94,7 +94,7 @@ jobs:
           ref: ${{ inputs.head_sha }}
 
       - name: Set up PDM
-        uses: pdm-project/setup-pdm@v3
+        uses: pdm-project/setup-pdm@v4
         with:
           python-version: "${{ matrix.python-version }}"
           cache: true
