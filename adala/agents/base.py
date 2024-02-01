@@ -229,7 +229,9 @@ class Agent(BaseModel, ABC):
         print(f"Using runtime {type(runtime)}")
 
         if not isinstance(runtime, AsyncRuntime):
-            raise ValueError("When using asynchronous run with `agent.arun()`, the runtime must be an AsyncRuntime.")
+            raise ValueError(
+                "When using asynchronous run with `agent.arun()`, the runtime must be an AsyncRuntime."
+            )
         predictions = await self.skills.aapply(input, runtime=runtime)
         return predictions
 

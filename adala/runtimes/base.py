@@ -137,6 +137,7 @@ class Runtime(BaseModel, ABC):
 
 class AsyncRuntime(BaseModel, ABC):
     """Async version of runtime that uses asyncio to process batch of records."""
+
     verbose: bool = False
 
     @abstractmethod

@@ -43,7 +43,7 @@ def chat_completion_call(model, messages):
     )
 
 
-DEFAULT_CREATE_COMPLETION_URL = 'https://api.openai.com/v1/chat/completions'
+DEFAULT_CREATE_COMPLETION_URL = "https://api.openai.com/v1/chat/completions"
 
 
 @retry(wait=wait_random(min=5, max=10), stop=stop_after_attempt(3))
@@ -81,28 +81,28 @@ async def async_create_completion(
         semaphore = asyncio.Semaphore(1)
     if not session:
         session = aiohttp.ClientSession()
-    messages = [{'role': 'user', 'content': user_prompt}]
+    messages = [{"role": "user", "content": user_prompt}]
     if system_prompt:
         if instruction_first:
-            messages.insert(0, {'role': 'system', 'content': system_prompt})
+            messages.insert(0, {"role": "system", "content": system_prompt})
         else:
-            messages[0]['content'] += system_prompt
+            messages[0]["content"] += system_prompt
     async with semaphore:
         async with session.post(
             DEFAULT_CREATE_COMPLETION_URL,
-            headers={'Authorization': f'Bearer {os.getenv("OPENAI_API_KEY")}'},
+            headers={"Authorization": f'Bearer {os.getenv("OPENAI_API_KEY")}'},
             json={
-                'messages': messages,
-                'model': model,
-                'max_tokens': max_tokens,
-                'temperature': temperature,
-            }
+                "messages": messages,
+                "model": model,
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+            },
         ) as response:
             response_json = await response.json()
-            completion_text = response_json['choices'][0]['message']['content']
+            completion_text = response_json["choices"][0]["message"]["content"]
             return {
-                'text': completion_text,
-                'index': index,
+                "text": completion_text,
+                "index": index,
             }
 
 
@@ -300,23 +300,27 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                 )
         return self
 
-    async def _async_concurrent_create_completion(self, prompts, max_concurrent_requests, instruction_first):
+    async def _async_concurrent_create_completion(
+        self, prompts, max_concurrent_requests, instruction_first
+    ):
         semaphore = asyncio.Semaphore(max_concurrent_requests)
 
         async with aiohttp.ClientSession() as session:
             tasks = []
             for prompt in prompts:
-                task = asyncio.ensure_future(async_create_completion(
-                    user_prompt=prompt['user'],
-                    system_prompt=prompt['system'],
-                    semaphore=semaphore,
-                    session=session,
-                    model=self.openai_model,
-                    max_tokens=self.max_tokens,
-                    temperature=self.temperature,
-                    instruction_first=instruction_first,
-                    index=prompt['index'],
-                ))
+                task = asyncio.ensure_future(
+                    async_create_completion(
+                        user_prompt=prompt["user"],
+                        system_prompt=prompt["system"],
+                        semaphore=semaphore,
+                        session=session,
+                        model=self.openai_model,
+                        max_tokens=self.max_tokens,
+                        temperature=self.temperature,
+                        instruction_first=instruction_first,
+                        index=prompt["index"],
+                    )
+                )
                 tasks.append(task)
             responses = await asyncio.gather(*tasks)
             return responses
@@ -327,13 +331,13 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
         input_template: str,
         instructions_template: str,
         suffix: str,
-        extra_fields: dict
+        extra_fields: dict,
     ) -> Dict[str, str]:
         """Prepare input prompt for OpenAI API from the row of the dataframe"""
         return {
-            'index': row.name,
-            'system': instructions_template,
-            'user': input_template.format(**row, **extra_fields) + suffix,
+            "index": row.name,
+            "system": instructions_template,
+            "user": input_template.format(**row, **extra_fields) + suffix,
         }
 
     async def batch_to_batch(
@@ -363,7 +367,7 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
         if len(output_fields) > 2:
             raise NotImplementedError("Only one output field is supported")
 
-        suffix = ''
+        suffix = ""
         outputs = []
         for output_field in output_fields:
             if output_field["type"] == "text":
@@ -374,23 +378,21 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                 # prepare prompts
                 prompts = batch.apply(
                     lambda row: self._prepare_prompt(
-                        row,
-                        input_template,
-                        instructions_template,
-                        suffix,
-                        extra_fields),
-                    axis=1
+                        row, input_template, instructions_template, suffix, extra_fields
+                    ),
+                    axis=1,
                 ).tolist()
 
                 responses = await self._async_concurrent_create_completion(
-                    prompts, self.concurrent_clients, instructions_first)
+                    prompts, self.concurrent_clients, instructions_first
+                )
 
                 # parse responses, optionally match it with options
                 for response in responses:
-                    completion_text = response['text']
+                    completion_text = response["text"]
                     if name in options:
                         completion_text = match_options(completion_text, options[name])
-                    outputs.append({name: completion_text, 'index': response['index']})
+                    outputs.append({name: completion_text, "index": response["index"]})
 
         output_df = InternalDataFrame(outputs).set_index("index")
         # return output dataframe ordered as input batch.index
