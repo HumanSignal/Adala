@@ -27,6 +27,19 @@ def fuzzy_match(x: InternalSeries, y: InternalSeries, threshold=0.8) -> Internal
 
 
 def match_options(query: str, options: List[str], splitter: str = None) -> str:
+    """
+    Match a query to a list of options.
+    If splitter is not None, the query will be split by the splitter and each part will be matched separately, then joined by the splitter.
+
+    Args:
+        query (str): The query.
+        options (List[str]): The options.
+        splitter (str): The splitter. Defaults to None.
+
+    Returns:
+        str: The matched option.
+    """
+
     # hard constraint: the item must be in the query
     filtered_items = [item for item in options if item in query]
     if not filtered_items:

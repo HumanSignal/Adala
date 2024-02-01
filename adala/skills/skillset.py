@@ -2,7 +2,7 @@ from pydantic import BaseModel, model_validator, field_validator
 from abc import ABC, abstractmethod
 from typing import List, Union, Dict, Any, Optional, Mapping, Type
 from collections import OrderedDict
-from adala.runtimes.base import Runtime
+from adala.runtimes.base import Runtime, AsyncRuntime
 from adala.utils.logs import print_text, print_dataframe
 from adala.utils.internal_data import (
     InternalDataFrame,
@@ -175,7 +175,7 @@ class LinearSkillSet(SkillSet):
         improved_skill: Optional[str] = None,
     ) -> InternalDataFrame:
         """
-        Sequentially applies each skill on the dataset, enhancing the agent's experience.
+        Sequentially applies each skill on the dataset.
 
         Args:
             input (InternalDataFrame): Input dataset.
@@ -197,6 +197,52 @@ class LinearSkillSet(SkillSet):
             # use input dataset for the first node in the pipeline
             print_text(f"Applying skill: {skill_name}")
             skill_output = skill.apply(skill_input, runtime)
+            print_dataframe(skill_output)
+            if isinstance(skill, TransformSkill):
+                # Columns to drop from skill_input because they are also in skill_output
+                cols_to_drop = set(skill_output.columns) & set(skill_input.columns)
+                skill_input_reduced = skill_input.drop(columns=cols_to_drop)
+
+                skill_input = skill_input_reduced.merge(
+                    skill_output, left_index=True, right_index=True, how="inner"
+                )
+            elif isinstance(skill, (AnalysisSkill, SynthesisSkill)):
+                skill_input = skill_output
+            else:
+                raise ValueError(f"Unsupported skill type: {type(skill)}")
+        if isinstance(skill_input, InternalSeries):
+            skill_input = skill_input.to_frame().T
+        return skill_input
+
+    async def aapply(
+        self,
+        input: Union[Record, InternalDataFrame],
+        runtime: AsyncRuntime,
+        improved_skill: Optional[str] = None,
+    ) -> InternalDataFrame:
+        """
+        Sequentially and asynchronously applies each skill on the dataset.
+
+        Args:
+            input (InternalDataFrame): Input dataset.
+            runtime (AsyncRuntime): The runtime environment in which to apply the skills.
+            improved_skill (Optional[str], optional): Name of the skill to improve. Defaults to None.
+        Returns:
+            InternalDataFrame: Skill predictions.
+        """
+        if improved_skill:
+            # start from the specified skill, assuming previous skills have already been applied
+            skill_sequence = self.skill_sequence[
+                self.skill_sequence.index(improved_skill) :
+            ]
+        else:
+            skill_sequence = self.skill_sequence
+        skill_input = input
+        for i, skill_name in enumerate(skill_sequence):
+            skill = self.skills[skill_name]
+            # use input dataset for the first node in the pipeline
+            print_text(f"Applying skill: {skill_name}")
+            skill_output = await skill.aapply(skill_input, runtime)
             print_dataframe(skill_output)
             if isinstance(skill, TransformSkill):
                 # Columns to drop from skill_input because they are also in skill_output

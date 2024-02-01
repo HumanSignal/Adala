@@ -1,5 +1,5 @@
 from .base import Runtime
-from ._openai import OpenAIChatRuntime, OpenAIVisionRuntime
+from ._openai import OpenAIChatRuntime, OpenAIVisionRuntime, AsyncOpenAIChatRuntime
 from ._guidance import GuidanceRuntime, GuidanceModelType
 from ._batch import BatchRuntime
 
