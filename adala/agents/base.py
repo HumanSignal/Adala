@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, SkipValidation, field_validator, model_validator
 from abc import ABC, abstractmethod
-from typing import Any, Optional, List, Dict, Union, Tuple
+from typing import Any, Optional, List, Dict, Union, Tuple, Callable
 from rich import print
 
 from adala.environments.base import Environment, StaticEnvironment, EnvironmentFeedback
@@ -205,6 +205,7 @@ class Agent(BaseModel, ABC):
         predictions = self.skills.apply(input, runtime=runtime)
         return predictions
 
+
     def select_skill_to_train(
         self, feedback: EnvironmentFeedback, accuracy_threshold: float
     ) -> Tuple[str, str, float]:
@@ -234,6 +235,7 @@ class Agent(BaseModel, ABC):
 
         return train_skill_name, train_skill_output, acc_score
 
+    
     def learn(
         self,
         learning_iterations: int = 3,
@@ -243,6 +245,7 @@ class Agent(BaseModel, ABC):
         num_feedbacks: Optional[int] = None,
         runtime: Optional[str] = None,
         teacher_runtime: Optional[str] = None,
+        log_results_func: Optional[Callable[..., dict]] = None
     ):
         """
         Enables the agent to learn and improve its skills based on interactions with its environment.
@@ -290,7 +293,7 @@ class Agent(BaseModel, ABC):
                 skill = self.skills[skill_name]
                 if skill.frozen:
                     continue
-
+                
                 print_text(
                     f'Skill output to improve: "{skill_output}" (Skill="{skill_name}")\n'
                     f"Accuracy = {accuracy[skill_output] * 100:0.2f}%",
@@ -307,6 +310,10 @@ class Agent(BaseModel, ABC):
                 else:
                     print_text(skill.instructions, style="bold green")
 
+                log_results_func(learning_iterations=learning_iterations, current_iteration=iteration,
+                                 inputs=inputs, predictions=predictions, feedback=feedback, train_skill_name=skill_name,
+                                 messages=None, new_instructions=skill.instructions)
+                    
                 if skill_name == first_skill_with_errors:
                     break
 
