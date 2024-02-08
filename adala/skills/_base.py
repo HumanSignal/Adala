@@ -8,7 +8,7 @@ from adala.utils.internal_data import (
 )
 from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.logs import print_dataframe, print_text
-from adala.runtimes.base import Runtime
+from adala.runtimes.base import Runtime, AsyncRuntime
 from tqdm import tqdm
 
 
@@ -163,6 +163,32 @@ class TransformSkill(Skill):
         """
 
         return runtime.batch_to_batch(
+            input,
+            input_template=self.input_template,
+            output_template=self.output_template,
+            instructions_template=self.instructions,
+            field_schema=self.field_schema,
+            extra_fields=self._get_extra_fields(),
+            instructions_first=self.instructions_first,
+        )
+
+    async def aapply(
+        self,
+        input: InternalDataFrame,
+        runtime: AsyncRuntime,
+    ) -> InternalDataFrame:
+        """
+        Applies the skill to a dataframe and returns another dataframe.
+
+        Args:
+            input (InternalDataFrame): The input data to be processed.
+            runtime (Runtime): The runtime instance to be used for processing.
+
+        Returns:
+            InternalDataFrame: The transformed data.
+        """
+
+        return await runtime.batch_to_batch(
             input,
             input_template=self.input_template,
             output_template=self.output_template,
