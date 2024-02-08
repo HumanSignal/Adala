@@ -5,7 +5,7 @@ from rich import print
 import yaml
 
 from adala.environments.base import Environment, StaticEnvironment, EnvironmentFeedback
-from adala.runtimes.base import Runtime
+from adala.runtimes.base import Runtime, AsyncRuntime
 from adala.runtimes._openai import OpenAIChatRuntime
 from adala.runtimes import GuidanceRuntime
 from adala.skills._base import Skill, AnalysisSkill, TransformSkill, SynthesisSkill
@@ -49,7 +49,7 @@ class Agent(BaseModel, ABC):
     skills: SkillSet
 
     memory: Memory = Field(default=None)
-    runtimes: Dict[str, Runtime] = Field(
+    runtimes: Dict[str, Union[Runtime, AsyncRuntime]] = Field(
         default_factory=lambda: {
             "default": GuidanceRuntime()
             # 'openai': OpenAIChatRuntime(model='gpt-3.5-turbo'),
@@ -206,6 +206,33 @@ class Agent(BaseModel, ABC):
             input = self.environment.get_data_batch()
         runtime = self.get_runtime(runtime=runtime)
         predictions = self.skills.apply(input, runtime=runtime)
+        return predictions
+
+    async def arun(
+        self, input: InternalDataFrame = None, runtime: Optional[str] = None
+    ) -> InternalDataFrame:
+        """
+        Runs the agent on the specified dataset asynchronously.
+
+        Args:
+            input (InternalDataFrame): The dataset to run the agent on.
+            runtime (str, optional): The name of the runtime to use. Defaults to None, use the default runtime.
+
+        Returns:
+            InternalDataFrame: The dataset with the agent's predictions.
+        """
+        if input is None:
+            if self.environment is None:
+                raise ValueError("input is None and no environment is set.")
+            input = self.environment.get_data_batch()
+        runtime = self.get_runtime(runtime=runtime)
+        print(f"Using runtime {type(runtime)}")
+
+        if not isinstance(runtime, AsyncRuntime):
+            raise ValueError(
+                "When using asynchronous run with `agent.arun()`, the runtime must be an AsyncRuntime."
+            )
+        predictions = await self.skills.aapply(input, runtime=runtime)
         return predictions
 
     def select_skill_to_train(

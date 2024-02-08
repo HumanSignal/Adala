@@ -21,7 +21,7 @@ except ImportError:
 from pydantic import Field
 from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.matching import match_options
-from ._openai import chat_completion_call
+from ._openai import chat_completion_call, OpenAIChatRuntime
 
 
 def cleanup():
