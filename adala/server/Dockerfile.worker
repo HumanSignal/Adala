@@ -1,0 +1,17 @@
+# Use an official lightweight Python image
+FROM python:3.11-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy only the requirements file, to cache them in Docker layer
+COPY requirements.txt ./
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of your app's source code from your host to your image filesystem
+COPY . .
+
+# Command to run on container start
+CMD ["celery", "-A", "main.app", "worker", "--loglevel=info"]

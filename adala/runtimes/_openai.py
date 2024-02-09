@@ -106,6 +106,37 @@ async def async_create_completion(
             }
 
 
+async def async_concurrent_create_completion(
+    prompts,
+    max_concurrent_requests,
+    instruction_first,
+    openai_model,
+    max_tokens,
+    temperature,
+):
+    semaphore = asyncio.Semaphore(max_concurrent_requests)
+
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for prompt in prompts:
+            task = asyncio.ensure_future(
+                async_create_completion(
+                    user_prompt=prompt["user"],
+                    system_prompt=prompt["system"],
+                    semaphore=semaphore,
+                    session=session,
+                    model=openai_model,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    instruction_first=instruction_first,
+                    index=prompt["index"],
+                )
+            )
+            tasks.append(task)
+        responses = await asyncio.gather(*tasks)
+        return responses
+
+
 @retry(wait=wait_random(min=5, max=10), stop=stop_after_attempt(3))
 def chat_completion_call(model, messages):
     return openai.ChatCompletion.create(

@@ -4,7 +4,7 @@ from typing import Any, Optional, List, Dict, Union, Tuple
 from rich import print
 import yaml
 
-from adala.environments.base import Environment, StaticEnvironment, EnvironmentFeedback
+from adala.environments.base import Environment, AsyncEnvironment, StaticEnvironment, EnvironmentFeedback
 from adala.runtimes.base import Runtime, AsyncRuntime
 from adala.runtimes._openai import OpenAIChatRuntime
 from adala.runtimes import GuidanceRuntime
@@ -45,7 +45,7 @@ class Agent(BaseModel, ABC):
 
     """
 
-    environment: Optional[Environment] = None
+    environment: Optional[Union[Environment, AsyncEnvironment]] = None
     skills: SkillSet
 
     memory: Memory = Field(default=None)
@@ -203,16 +203,18 @@ class Agent(BaseModel, ABC):
         if input is None:
             if self.environment is None:
                 raise ValueError("input is None and no environment is set.")
-            input = self.environment.get_data_batch()
+            input = self.environment.get_data_batch(None)
         runtime = self.get_runtime(runtime=runtime)
         predictions = self.skills.apply(input, runtime=runtime)
         return predictions
 
     async def arun(
         self, input: InternalDataFrame = None, runtime: Optional[str] = None
-    ) -> InternalDataFrame:
+    ) -> Optional[InternalDataFrame]:
         """
-        Runs the agent on the specified dataset asynchronously.
+        Runs the agent on the specified input asynchronously.
+        If no input is specified, the agent will run on the environment until it is exhausted.
+        If input is specified, the agent will run on the input, ignoring the connected genvironment.
 
         Args:
             input (InternalDataFrame): The dataset to run the agent on.
@@ -221,19 +223,39 @@ class Agent(BaseModel, ABC):
         Returns:
             InternalDataFrame: The dataset with the agent's predictions.
         """
-        if input is None:
-            if self.environment is None:
-                raise ValueError("input is None and no environment is set.")
-            input = self.environment.get_data_batch()
-        runtime = self.get_runtime(runtime=runtime)
-        print(f"Using runtime {type(runtime)}")
 
+        runtime = self.get_runtime(runtime=runtime)
         if not isinstance(runtime, AsyncRuntime):
             raise ValueError(
                 "When using asynchronous run with `agent.arun()`, the runtime must be an AsyncRuntime."
             )
-        predictions = await self.skills.aapply(input, runtime=runtime)
-        return predictions
+        else:
+            print(f"Using runtime {type(runtime)}")
+
+        if not isinstance(self.environment, AsyncEnvironment):
+            raise ValueError(
+                "When using asynchronous run with `agent.arun()`, the environment must be an AsyncEnvironment."
+            )
+        if input is None:
+            if self.environment is None:
+                raise ValueError("input is None and no environment is set.")
+            # run on the environment until it is exhausted
+            while True:
+                try:
+                    data_batch = await self.environment.get_data_batch(batch_size=runtime.batch_size)
+                    if data_batch.empty:
+                        break
+                except Exception as e:
+                    # TODO: environment should raise a specific exception + log error
+                    print_error(f"Error getting data batch from environment: {e}")
+                    break
+                predictions = await self.skills.aapply(data_batch, runtime=runtime)
+                await self.environment.set_predictions(predictions)
+
+        else:
+            # single run on the input data
+            predictions = await self.skills.aapply(input, runtime=runtime)
+            return predictions
 
     def select_skill_to_train(
         self, feedback: EnvironmentFeedback, accuracy_threshold: float

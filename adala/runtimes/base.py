@@ -16,6 +16,7 @@ class Runtime(BaseModel, ABC):
     """
 
     verbose: bool = False
+    batch_size: Optional[int] = None
 
     @model_validator(mode="after")
     def init_runtime(self) -> "Runtime":
@@ -139,6 +140,7 @@ class AsyncRuntime(BaseModel, ABC):
     """Async version of runtime that uses asyncio to process batch of records."""
 
     verbose: bool = False
+    batch_size: int = 100
 
     @abstractmethod
     async def record_to_record(
@@ -207,3 +209,17 @@ class AsyncRuntime(BaseModel, ABC):
             instructions_first=instructions_first,
         )
         return output
+
+    async def get_next_batch(self, data_iterator, batch_size: Optional[int]) -> InternalDataFrame:
+        if batch_size is None:
+            batch_size = self.optimal_batch_size
+        batch = []
+        try:
+            for _ in range(batch_size):
+                data = await anext(data_iterator, None)
+                if data is None:  # This checks if the iterator is exhausted
+                    break
+                batch.append(data)
+        except StopAsyncIteration:
+            pass
+        return InternalDataFrame(batch)

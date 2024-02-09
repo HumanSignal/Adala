@@ -66,7 +66,7 @@ class Environment(BaseModel, ABC):
     """
 
     @abstractmethod
-    def get_data_batch(self, batch_size=None) -> InternalDataFrame:
+    def get_data_batch(self, batch_size: Optional[int]) -> InternalDataFrame:
         """
         Get a batch of data from data stream to be processed by the skill set.
 
@@ -106,6 +106,69 @@ class Environment(BaseModel, ABC):
 
     @abstractmethod
     def restore(self):
+        """
+        Restore the state of the BasicEnvironment.
+
+        Raises:
+            NotImplementedError: This method is not implemented for BasicEnvironment.
+        """
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class AsyncEnvironment(Environment, ABC):
+
+    @abstractmethod
+    async def get_data_batch(self, batch_size: Optional[int]) -> InternalDataFrame:
+        """
+        Get a batch of data from data stream to be processed by the skill set.
+
+        Args:
+            batch_size (Optional[int], optional): The size of the batch. Defaults to None
+
+        Returns:
+            InternalDataFrame: The data batch.
+        """
+
+    @abstractmethod
+    async def get_feedback(
+        self,
+        skills: SkillSet,
+        predictions: InternalDataFrame,
+        num_feedbacks: Optional[int] = None,
+    ) -> EnvironmentFeedback:
+        """
+        Request feedback for the predictions.
+
+        Args:
+            skills (SkillSet): The set of skills/models whose predictions are being evaluated.
+            predictions (InternalDataFrame): The predictions to compare with the ground truth.
+            num_feedbacks (Optional[int], optional): The number of feedbacks to request. Defaults to all predictions
+        Returns:
+            EnvironmentFeedback: The resulting ground truth signal, with matches and errors detailed.
+        """
+
+    @abstractmethod
+    async def set_predictions(self, predictions: InternalDataFrame):
+        """
+        Push predictions back to the environment.
+
+        Args:
+            predictions (InternalDataFrame): The predictions to push to the environment.
+        """
+
+    @abstractmethod
+    async def save(self):
+        """
+        Save the current state of the BasicEnvironment.
+
+        Raises:
+            NotImplementedError: This method is not implemented for BasicEnvironment.
+        """
+
+    @abstractmethod
+    async def restore(self):
         """
         Restore the state of the BasicEnvironment.
 

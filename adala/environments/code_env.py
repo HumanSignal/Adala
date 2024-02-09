@@ -2,7 +2,7 @@ import sys
 import io
 from contextlib import redirect_stdout, redirect_stderr
 from typing import Dict, Optional, List
-from .base import StaticEnvironment, EnvironmentFeedback
+from adala.environments.base import StaticEnvironment, EnvironmentFeedback
 from adala.skills import SkillSet
 from adala.utils.internal_data import InternalDataFrame
 
