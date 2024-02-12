@@ -223,3 +223,16 @@ class AsyncRuntime(BaseModel, ABC):
         except StopAsyncIteration:
             pass
         return InternalDataFrame(batch)
+
+
+_runtimes_register = {}
+
+
+def register_runtime(type_name, type_class):
+    global _runtimes_register
+
+    _runtimes_register[type_name] = type_class
+
+
+def create_runtime(name, **kwargs):
+    return _runtimes_register[name](**kwargs)

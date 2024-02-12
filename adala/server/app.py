@@ -51,10 +51,10 @@ class SubmitRequestModel(BaseModel):
 
 
 class SubmitRequestPrompt(BaseModel):
-    instruction: str
-    input_template: List[str]
-    output_template: List[str]
-    constraints: Optional[Dict] = None
+    instructions: str
+    input_template: str
+    output_template: str
+    constraints: List[str]
 
 
 class SubmitRequest(BaseModel):
@@ -72,8 +72,24 @@ def get_index():
 @app.post("/submit", response_model=Response[JobCreated])
 async def submit(request: SubmitRequest):
 
-    # TODO: convert submit request to serialized adala agent
-    serialized_agent = '...'
+    # TODO: @pakelley should we adopt the schema in the request or leave the conversion here?
+    serialized_agent = [{
+        'skills': [{
+            'name': 'text_classifier',
+            'type': 'classification',
+            'input_template': request.prompt.input_template,
+            'output_template': request.prompt.output_template,
+            'instructions': request.prompt.instructions,
+            'labels': request.prompt.constraints
+        }],
+        'runtimes': {
+            'default': {
+                'type': 'async-openai-chat',
+                'model': request.model.provider_model,
+                'api_key': request.model.api_key
+            }
+        }
+    }]
 
     result = process_file.delay(
         input_file=request.input.uri,

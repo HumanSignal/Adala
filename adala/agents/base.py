@@ -5,7 +5,7 @@ from rich import print
 import yaml
 
 from adala.environments.base import Environment, AsyncEnvironment, StaticEnvironment, EnvironmentFeedback
-from adala.runtimes.base import Runtime, AsyncRuntime
+from adala.runtimes.base import Runtime, AsyncRuntime, create_runtime
 from adala.runtimes._openai import OpenAIChatRuntime
 from adala.runtimes import GuidanceRuntime
 from adala.skills._base import Skill, AnalysisSkill, TransformSkill, SynthesisSkill
@@ -117,6 +117,18 @@ class Agent(BaseModel, ABC):
             return LinearSkillSet(skills=v)
         else:
             raise ValueError(f"skills must be of type SkillSet or Skill, not {type(v)}")
+
+    @field_validator('runtimes', mode='before')
+    def runtimes_validator(cls, v) -> Dict[str, Union[Runtime, AsyncRuntime]]:
+        """
+        Validates and creates runtimes
+        """
+        out = {}
+        for runtime_name, runtime_value in v.items():
+            if isinstance(runtime_value, dict):
+                runtime_value = create_runtime(runtime_value.pop('type'), **runtime_value)
+            out[runtime_name] = runtime_value
+        return out
 
     @model_validator(mode="after")
     def verify_input_parameters(self):

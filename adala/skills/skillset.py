@@ -16,6 +16,7 @@ from ._base import (
     SampleTransformSkill,
     AnalysisSkill,
     SynthesisSkill,
+    create_skill
 )
 from .collection.classification import ClassificationSkill
 
@@ -58,8 +59,7 @@ class SkillSet(BaseModel, ABC):
             elif isinstance(v[0], dict):
                 # convert list of skill dictionaries to dictionary
                 for skill in v:
-                    skill_class = get_skill_class(skill["type"])
-                    skills[skill["name"]] = skill_class(**skill)
+                    skills[skill["name"]] = create_skill(skill.pop("type"), **skill)
         elif isinstance(v, dict):
             skills = v
         else:
@@ -342,27 +342,3 @@ class ParallelSkillSet(SkillSet):
                 )
             else:
                 raise ValueError(f"Unsupported output type: {type(skill_outputs[0])}")
-
-
-def get_skill_class(skill_type: str) -> Type[Skill]:
-    """
-    Returns the skill class based on the skill type.
-
-    Args:
-        skill_type (str): Skill type.
-
-    Returns:
-        Type[Skill]: Skill class.
-    """
-    if skill_type == "transform":
-        return TransformSkill
-    elif skill_type == "sample_transform":
-        return SampleTransformSkill
-    elif skill_type == "analysis":
-        return AnalysisSkill
-    elif skill_type == "synthesis":
-        return SynthesisSkill
-    elif skill_type == "classification":
-        return ClassificationSkill
-    else:
-        raise ValueError(f"Unsupported skill type: {skill_type}")

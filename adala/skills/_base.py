@@ -488,3 +488,21 @@ class AnalysisSkill(Skill):
         Improves the skill.
         """
         raise NotImplementedError
+
+
+_skill_register = {}
+
+
+def register_skill(type_name, type_class):
+    global _skill_register
+    _skill_register[type_name] = type_class
+
+
+def create_skill(type_name, **kwargs):
+    return _skill_register[type_name](**kwargs)
+
+
+register_skill('transform', TransformSkill)
+register_skill('sample_transform', SampleTransformSkill)
+register_skill('analysis', AnalysisSkill)
+register_skill('synthesis', SynthesisSkill)
