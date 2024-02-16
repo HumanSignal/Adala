@@ -9,6 +9,7 @@ from io import StringIO
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from adala.utils.internal_data import InternalDataFrame
 from adala.environments import AsyncEnvironment, EnvironmentFeedback
+from adala.environments.base import register_environment
 from adala.skills import SkillSet
 from adala.utils.logs import print_text
 
@@ -77,6 +78,10 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
 
 
 class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
+    input_file: str
+    output_file: str
+    error_file: str
+    pass_through_columns: List[str]
 
     def _iter_csv_local(self, csv_file_path):
         """
@@ -101,12 +106,12 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
         for row in csv_reader:
             yield row
 
-    async def read_from_file(self, file_path: str):
+    async def initialize(self):
         # TODO: Add support for other file types except CSV, and also for other cloud storage services
-        if file_path.startswith("s3://"):
-            csv_reader = self._iter_csv_s3(file_path)
+        if self.input_file.startswith("s3://"):
+            csv_reader = self._iter_csv_s3(self.input_file)
         else:
-            csv_reader = self._iter_csv_local(file_path)
+            csv_reader = self._iter_csv_local(self.input_file)
 
         producer = AIOKafkaProducer(
             bootstrap_servers=self.kafka_bootstrap_servers,
@@ -115,7 +120,7 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
 
         await self.message_sender(producer, csv_reader, self.kafka_input_topic)
 
-    async def write_to_file(self, file_path: str, column_names: List[str]):
+    async def finalize(self):
         consumer = AIOKafkaConsumer(
             self.kafka_output_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
@@ -125,10 +130,10 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
 
         data_stream = self.message_receiver(consumer)
 
-        if file_path.startswith("s3://"):
-            await self._write_to_s3(file_path, data_stream, column_names)
+        if self.output_file.startswith("s3://"):
+            await self._write_to_s3(self.output_file, data_stream, self.pass_through_columns)
         else:
-            await self._write_to_local(file_path, data_stream, column_names)
+            await self._write_to_local(self.output_file, data_stream, self.pass_through_columns)
 
     async def _write_to_csv_fileobj(self, fileobj, data_stream, column_names):
         csv_writer = DictWriter(fileobj, fieldnames=column_names)
@@ -167,16 +172,5 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
         raise NotImplementedError("Save is not supported in Kafka environment")
 
 
-
-if __name__ == "__main__":
-    kafka_env = FileStreamAsyncKafkaEnvironment(
-        kafka_bootstrap_servers="localhost:9093",
-        kafka_input_topic="input",
-        kafka_output_topic="output"
-    )
-    filepath = '/Users/nik/PycharmProjects/label-studio-sandbox/issues.summary.gpt4.csv'
-    asyncio.run(kafka_env.read_from_file(filepath))
-    batch = asyncio.run(kafka_env.get_data_batch(10))
-
-    print(batch)
-    print('Done!')
+register_environment("kafka", AsyncKafkaEnvironment)
+register_environment("kafka_filestream", FileStreamAsyncKafkaEnvironment)

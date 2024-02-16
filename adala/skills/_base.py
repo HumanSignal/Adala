@@ -495,10 +495,17 @@ _skill_register = {}
 
 def register_skill(type_name, type_class):
     global _skill_register
+
+    if type_name in _skill_register:
+        raise ValueError(f"Skill type {type_name} is already registered. Available types: {list(_skill_register.keys())}")
+
     _skill_register[type_name] = type_class
 
 
 def create_skill(type_name, **kwargs):
+    if type_name not in _skill_register:
+        raise ValueError(f"Skill type {type_name} is not registered. Available types: {list(_skill_register.keys())}")
+
     return _skill_register[type_name](**kwargs)
 
 

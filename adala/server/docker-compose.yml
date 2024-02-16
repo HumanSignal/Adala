@@ -21,30 +21,26 @@ services:
       - KAFKA_CFG_NODE_ID=1
       - KAFKA_KRAFT_CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.app
     ports:
       - "30001:8000"
     depends_on:
       redis:
         condition: service_healthy
-      db:
-        condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9093
 
   worker:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
     depends_on:
       redis:
         condition: service_healthy
-      db:
-        condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9093
-      - KAFKA_INPUT_TOPIC=input
-      - KAFKA_OUTPUT_TOPIC=output
 
   redis:
     image: redis:alpine

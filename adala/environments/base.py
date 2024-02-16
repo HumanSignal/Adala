@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel, Field
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Union, Callable
+from typing import Optional, Dict, Union, Callable, Type
 from adala.utils.internal_data import (
     InternalDataFrame,
     InternalSeries,
@@ -118,6 +118,24 @@ class Environment(BaseModel, ABC):
 
 
 class AsyncEnvironment(Environment, ABC):
+
+    @abstractmethod
+    async def initialize(self):
+        """
+        Initialize the environment, e.g by connecting to a database, reading file to memory or starting a stream.
+
+        Raises:
+            NotImplementedError: This method is not implemented for BasicEnvironment.
+        """
+
+    @abstractmethod
+    async def finalize(self):
+        """
+        Finalize the environment, e.g by closing a database connection, closing a file or stopping a stream.
+
+        Raises:
+            NotImplementedError: This method is not implemented for BasicEnvironment.
+        """
 
     @abstractmethod
     async def get_data_batch(self, batch_size: Optional[int]) -> InternalDataFrame:
@@ -306,3 +324,42 @@ class StaticEnvironment(Environment):
         Restore the state of the StaticEnvironment.
         """
         raise NotImplementedError("StaticEnvironment does not support save/restore.")
+
+
+_environment_registry = {
+    "static": StaticEnvironment
+}
+
+
+def register_environment(name: str, environment: Type[Environment]):
+    """
+    Register a new environment type.
+
+    Args:
+        name (str): The name of the environment type.
+        environment (Type[Environment]): The environment class to register.
+    """
+    if name in _environment_registry:
+        raise ValueError(f"Environment {name} already registered.")
+
+    _environment_registry[name] = environment
+
+
+def create_environment(
+    name: str, *args, **kwargs
+) -> Environment:
+    """
+    Create an environment of the specified type.
+
+    Args:
+        name (str): The name of the environment type.
+        *args: The arguments to pass to the environment constructor.
+        **kwargs: The keyword arguments to pass to the environment constructor.
+
+    Returns:
+        Environment: The created environment.
+    """
+    if name not in _environment_registry:
+        raise ValueError(f"Unknown environment type {name}. Available types: {list(_environment_registry.keys())}")
+
+    return _environment_registry[name](*args, **kwargs)

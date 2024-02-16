@@ -231,8 +231,13 @@ _runtimes_register = {}
 def register_runtime(type_name, type_class):
     global _runtimes_register
 
+    if type_name in _runtimes_register:
+        raise ValueError(f"Runtime {type_name} already registered. Available runtimes: {list(_runtimes_register.keys())}")
+
     _runtimes_register[type_name] = type_class
 
 
-def create_runtime(name, **kwargs):
-    return _runtimes_register[name](**kwargs)
+def create_runtime(type_name, **kwargs):
+    if type_name not in _runtimes_register:
+        raise ValueError(f"Runtime {type_name} not found. Available runtimes: {list(_runtimes_register.keys())}")
+    return _runtimes_register[type_name](**kwargs)

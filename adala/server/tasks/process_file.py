@@ -21,6 +21,7 @@ def process_file(
     error_file: str,
     output_columns: List[str]
 ):
+    agent = json.loads(serialized_agent)
     env = FileStreamAsyncKafkaEnvironment(
         kafka_bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         kafka_input_topic=KAFKA_INPUT_TOPIC,

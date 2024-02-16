@@ -4,7 +4,7 @@ from typing import Any, Optional, List, Dict, Union, Tuple
 from rich import print
 import yaml
 
-from adala.environments.base import Environment, AsyncEnvironment, StaticEnvironment, EnvironmentFeedback
+from adala.environments.base import Environment, AsyncEnvironment, StaticEnvironment, EnvironmentFeedback, create_environment
 from adala.runtimes.base import Runtime, AsyncRuntime, create_runtime
 from adala.runtimes._openai import OpenAIChatRuntime
 from adala.runtimes import GuidanceRuntime
@@ -102,6 +102,8 @@ class Agent(BaseModel, ABC):
         """
         if isinstance(v, InternalDataFrame):
             v = StaticEnvironment(df=v)
+        elif isinstance(v, dict) and "type" in v:
+            v = create_environment(v.pop("type"), **v)
         return v
 
     @field_validator("skills", mode="before")
@@ -125,7 +127,7 @@ class Agent(BaseModel, ABC):
         """
         out = {}
         for runtime_name, runtime_value in v.items():
-            if isinstance(runtime_value, dict):
+            if isinstance(runtime_value, dict) and "type" in runtime_value:
                 runtime_value = create_runtime(runtime_value.pop('type'), **runtime_value)
             out[runtime_name] = runtime_value
         return out

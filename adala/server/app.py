@@ -1,8 +1,11 @@
 import fastapi
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Generic, TypeVar, Optional, List, Dict
+from typing import Generic, TypeVar, Optional, List, Dict, Any
+from typing_extensions import Annotated
 from pydantic import BaseModel
-from adala.server.tasks import process_file
+from pydantic.functional_validators import AfterValidator
+from adala.agents import Agent
+from adala.server.tasks.process_file import process_file
 
 
 app = fastapi.FastAPI()
@@ -33,35 +36,9 @@ class JobCreated(BaseModel):
     job_id: str
 
 
-class SubmitRequestInput(BaseModel):
-    uri: str
-    pass_through_columns: Optional[List] = None
-
-
-class SubmitRequestOutput(BaseModel):
-    result_uri: str
-    error_uri: Optional[str] = None
-
-
-class SubmitRequestModel(BaseModel):
-    type: str
-    provider: str
-    provider_model: str
-    api_key: str
-
-
-class SubmitRequestPrompt(BaseModel):
-    instructions: str
-    input_template: str
-    output_template: str
-    constraints: List[str]
-
-
 class SubmitRequest(BaseModel):
-    input: SubmitRequestInput
-    output: SubmitRequestOutput
-    model: SubmitRequestModel
-    prompt: SubmitRequestPrompt
+    agent: Agent
+    task_name: str = "process_file"
 
 
 @app.get("/")
@@ -71,33 +48,14 @@ def get_index():
 
 @app.post("/submit", response_model=Response[JobCreated])
 async def submit(request: SubmitRequest):
+    """
+    Submit a request to execute task in celery.
+    """
+    # TODO: get task by name, e.g. request.task_name
+    task = process_file
 
-    # TODO: @pakelley should we adopt the schema in the request or leave the conversion here?
-    serialized_agent = [{
-        'skills': [{
-            'name': 'text_classifier',
-            'type': 'classification',
-            'input_template': request.prompt.input_template,
-            'output_template': request.prompt.output_template,
-            'instructions': request.prompt.instructions,
-            'labels': request.prompt.constraints
-        }],
-        'runtimes': {
-            'default': {
-                'type': 'async-openai-chat',
-                'model': request.model.provider_model,
-                'api_key': request.model.api_key
-            }
-        }
-    }]
-
-    result = process_file.delay(
-        input_file=request.input.uri,
-        serialized_agent=serialized_agent,
-        output_file=request.output.result_uri,
-        error_file=request.output.error_uri,
-        output_columns=request.input.pass_through_columns)
-
+    serialized_agent = request.agent.model_dump_json()
+    result = task.delay(serialized_agent=serialized_agent)
     return Response[JobCreated](data=JobCreated(job_id=result.id))
 
 
