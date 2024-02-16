@@ -15,6 +15,16 @@ from adala.utils.logs import print_text
 
 
 class AsyncKafkaEnvironment(AsyncEnvironment):
+    """
+    Represents an asynchronous Kafka environment:
+    - agent can retrieve data batch by batch from the input topic
+    - agent can return its predictions to the output topic
+
+    Attributes:
+        kafka_bootstrap_servers (Union[str, List[str]]): The Kafka bootstrap servers.
+        kafka_input_topic (str): The Kafka input topic.
+        kafka_output_topic (str): The Kafka output topic.
+    """
 
     kafka_bootstrap_servers: Union[str, List[str]]
     kafka_input_topic: str
@@ -78,6 +88,15 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
 
 
 class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
+    """
+    Represents an asynchronous Kafka environment with file stream:
+    - agent can retrieve data batch by batch from the input topic
+    - agent can return its predictions to the output topic
+    - input data is read from `input_file`
+    - output data is stored to the `output_file`
+    - errors are saved to the `error_file`
+    """
+
     input_file: str
     output_file: str
     error_file: str
@@ -107,6 +126,10 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
             yield row
 
     async def initialize(self):
+        """
+        Initialize the environment: read data from the input file and push it to the kafka topic.
+        """
+
         # TODO: Add support for other file types except CSV, and also for other cloud storage services
         if self.input_file.startswith("s3://"):
             csv_reader = self._iter_csv_s3(self.input_file)
@@ -121,6 +144,10 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
         await self.message_sender(producer, csv_reader, self.kafka_input_topic)
 
     async def finalize(self):
+        """
+        Finalize the environment: read data from the output kafka topic and write it to the output file.
+        """
+
         consumer = AIOKafkaConsumer(
             self.kafka_output_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,

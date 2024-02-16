@@ -42,7 +42,6 @@ class Agent(BaseModel, ABC):
         >>> agent = Agent(skills=LinearSkillSet(skills=[TransformSkill()]), environment=StaticEnvironment())
         >>> agent.learn()  # starts the learning process
         >>> predictions = agent.run()  # runs the agent and returns the predictions
-
     """
 
     environment: Optional[Union[Environment, AsyncEnvironment]] = None

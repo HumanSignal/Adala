@@ -212,7 +212,7 @@ class AsyncRuntime(BaseModel, ABC):
 
     async def get_next_batch(self, data_iterator, batch_size: Optional[int]) -> InternalDataFrame:
         if batch_size is None:
-            batch_size = self.optimal_batch_size
+            batch_size = self.batch_size
         batch = []
         try:
             for _ in range(batch_size):
