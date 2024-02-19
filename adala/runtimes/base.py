@@ -208,17 +208,3 @@ class AsyncRuntime(Runtime):
             instructions_first=instructions_first,
         )
         return output
-
-    async def get_next_batch(self, data_iterator, batch_size: Optional[int]) -> InternalDataFrame:
-        if batch_size is None:
-            batch_size = self.batch_size
-        batch = []
-        try:
-            for _ in range(batch_size):
-                data = await anext(data_iterator, None)
-                if data is None:  # This checks if the iterator is exhausted
-                    break
-                batch.append(data)
-        except StopAsyncIteration:
-            pass
-        return InternalDataFrame(batch)

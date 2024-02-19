@@ -1,6 +1,9 @@
+import logging
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 from abc import ABC
+
+logger = logging.getLogger(__name__)
 
 _registry = {}
 
@@ -8,6 +11,12 @@ _registry = {}
 class BaseModelInRegistry(BaseModel, ABC):
 
     type: Optional[str] = None  # TODO: this is a workaround for the `type` being represented in OpenAPI schema. If you have a better idea, feel free to fix it
+
+    @field_serializer('type')
+    def serialize_type(self, v: str) -> str:
+        if v is None:
+            v = self.__class__.__name__
+        return v
 
     def __init_subclass__(cls, **kwargs):
         global _registry
@@ -27,4 +36,5 @@ class BaseModelInRegistry(BaseModel, ABC):
         if type not in _registry:
             raise ValueError(f"Class type '{type}' is not registered. "
                              f"Available types: {list(_registry.keys())}")
-        return _registry[type](type=type, **kwargs)
+        obj = _registry[type](type=type, **kwargs)
+        return obj

@@ -1,4 +1,6 @@
 import fastapi
+import logging
+import pickle
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Generic, TypeVar, Optional, List, Dict, Any
 from typing_extensions import Annotated
@@ -6,6 +8,9 @@ from pydantic import BaseModel
 from pydantic.functional_validators import AfterValidator
 from adala.agents import Agent
 from adala.server.tasks.process_file import process_file
+from log_middleware import LogMiddleware
+
+logger = logging.getLogger(__name__)
 
 
 app = fastapi.FastAPI()
@@ -18,6 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True
 )
+app.add_middleware(LogMiddleware)
 
 ResponseData = TypeVar("ResponseData")
 
@@ -90,8 +96,7 @@ async def submit(request: SubmitRequest):
     """
     # TODO: get task by name, e.g. request.task_name
     task = process_file
-
-    serialized_agent = request.agent.model_dump_json()
+    serialized_agent = pickle.dumps(request.agent)
     result = task.delay(serialized_agent=serialized_agent)
     return Response[JobCreated](data=JobCreated(job_id=result.id))
 

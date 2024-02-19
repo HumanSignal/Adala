@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field, SkipValidation, field_validator, model_validator
+import logging
+from pydantic import BaseModel, Field, SkipValidation, field_validator, model_validator, SerializeAsAny
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List, Dict, Union, Tuple
 from rich import print
@@ -20,6 +21,8 @@ from adala.utils.logs import (
     is_running_in_jupyter,
 )
 from adala.utils.internal_data import InternalDataFrame
+
+logger = logging.getLogger(__name__)
 
 
 class Agent(BaseModel, ABC):
@@ -45,11 +48,11 @@ class Agent(BaseModel, ABC):
         >>> predictions = agent.run()  # runs the agent and returns the predictions
     """
 
-    environment: Optional[Union[Environment, AsyncEnvironment]] = None
-    skills: SkillSet
+    environment: Optional[SerializeAsAny[Union[Environment, AsyncEnvironment]]] = None
+    skills: Union[Skill, SkillSet]
 
     memory: Memory = Field(default=None)
-    runtimes: Dict[str, Union[Runtime, AsyncRuntime]] = Field(
+    runtimes: Dict[str, SerializeAsAny[Union[Runtime, AsyncRuntime]]] = Field(
         default_factory=lambda: {
             "default": GuidanceRuntime()
             # 'openai': OpenAIChatRuntime(model='gpt-3.5-turbo'),
@@ -62,7 +65,7 @@ class Agent(BaseModel, ABC):
             # )
         }
     )
-    teacher_runtimes: Dict[str, Runtime] = Field(
+    teacher_runtimes: Dict[str, SerializeAsAny[Runtime]] = Field(
         default_factory=lambda: {
             "default": OpenAIChatRuntime(model="gpt-3.5-turbo"),
             # 'openai-gpt4': OpenAIChatRuntime(model='gpt-4')
@@ -100,6 +103,7 @@ class Agent(BaseModel, ABC):
         Validates and possibly transforms the environment attribute:
         if the environment is an InternalDataFrame, it is transformed into a StaticEnvironment.
         """
+        logger.debug(f"Validating environment attribute: {v}")
         if isinstance(v, InternalDataFrame):
             v = StaticEnvironment(df=v)
         elif isinstance(v, dict) and "type" in v:
@@ -118,7 +122,7 @@ class Agent(BaseModel, ABC):
         elif isinstance(v, list):
             return LinearSkillSet(skills=v)
         else:
-            raise ValueError(f"skills must be of type SkillSet or Skill, not {type(v)}")
+            raise ValueError(f"skills must be of type SkillSet or Skill, but received type {type(v)}")
 
     @field_validator('runtimes', mode='before')
     def runtimes_validator(cls, v) -> Dict[str, Union[Runtime, AsyncRuntime]]:
@@ -132,7 +136,8 @@ class Agent(BaseModel, ABC):
                     raise ValueError(
                         f"Runtime {runtime_name} must have a 'type' field to specify the runtime type."
                     )
-                runtime_value = Runtime.create_from_registry(runtime_value.pop('type'), **runtime_value)
+                type_name = runtime_value.pop("type")
+                runtime_value = Runtime.create_from_registry(type=type_name, **runtime_value)
             out[runtime_name] = runtime_value
         return out
 
@@ -262,6 +267,7 @@ class Agent(BaseModel, ABC):
                 try:
                     data_batch = await self.environment.get_data_batch(batch_size=runtime.batch_size)
                     if data_batch.empty:
+                        print_text("No more data in the environment. Exiting.")
                         break
                 except Exception as e:
                     # TODO: environment should raise a specific exception + log error

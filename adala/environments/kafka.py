@@ -1,3 +1,4 @@
+import logging
 import abc
 import boto3
 import json
@@ -70,7 +71,8 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             self.kafka_input_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_deserializer=lambda v: json.loads(v.decode('utf-8')),
-            auto_offset_reset='earliest'
+            auto_offset_reset='earliest',
+            group_id='adala-consumer-group'  # TODO: make it configurable based on the environment
         )
 
         data_stream = self.message_receiver(consumer)
@@ -82,8 +84,8 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode('utf-8')
         )
-
-        await self.message_sender(producer, predictions, self.kafka_output_topic)
+        predictions_iter = (r.to_dict() for _, r in predictions.iterrows())
+        await self.message_sender(producer, predictions_iter, self.kafka_output_topic)
 
 
 class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
@@ -167,7 +169,7 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
         while True:
             try:
                 record = await anext(data_stream)
-                csv_writer.writerow(record)
+                csv_writer.writerow({k: record.get(k, '') for k in column_names})
             except StopAsyncIteration:
                 break
 

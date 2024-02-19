@@ -1,10 +1,10 @@
 import asyncio
-import json
+import pickle
 import os
+import logging
 from celery import Celery
-from typing import List
-from adala.agents import Agent
-from adala.environments.kafka import FileStreamAsyncKafkaEnvironment
+
+logger = logging.getLogger(__name__)
 
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')
@@ -14,29 +14,15 @@ app = Celery('worker', broker=REDIS_URL, backend=REDIS_URL)
 
 
 @app.task(name='process_file')
-def process_file(
-    input_file: str,
-    serialized_agent: str,
-    output_file: str,
-    error_file: str,
-    output_columns: List[str]
-):
-    agent = json.loads(serialized_agent)
-    env = FileStreamAsyncKafkaEnvironment(
-        kafka_bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-        kafka_input_topic=KAFKA_INPUT_TOPIC,
-        kafka_output_topic=KAFKA_OUTPUT_TOPIC
-    )
-
-    # Define an agent
-    agent = Agent(**json.loads(serialized_agent))
-    agent.environment = env
-
-    # Read data from a file and send it to the Kafka input topic
-    asyncio.run(env.read_from_file(input_file))
+def process_file(serialized_agent: bytes):
+    # Load the agent
+    agent = pickle.loads(serialized_agent)
+    # # Read data from a file and send it to the Kafka input topic
+    asyncio.run(agent.environment.initialize())
 
     # run the agent
     asyncio.run(agent.arun())
-
+    #
     # dump the output to a file
-    asyncio.run(env.write_to_file(output_file, output_columns))
+    asyncio.run(agent.environment.finalize())
+

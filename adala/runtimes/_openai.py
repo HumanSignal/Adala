@@ -439,6 +439,7 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
     ) -> Dict[str, str]:
+
         raise NotImplementedError("record_to_record is not implemented")
 
 

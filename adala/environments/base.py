@@ -63,6 +63,24 @@ class Environment(BaseModelInRegistry):
     """
 
     @abstractmethod
+    def initialize(self):
+        """
+        Initialize the environment, e.g by connecting to a database, reading file to memory or starting a stream.
+
+        Raises:
+            NotImplementedError: This method is not implemented for BasicEnvironment.
+        """
+
+    @abstractmethod
+    def finalize(self):
+        """
+        Finalize the environment, e.g by closing a database connection, writing memory to file or stopping a stream.
+
+        Raises:
+            NotImplementedError: This method is not implemented for BasicEnvironment.
+        """
+
+    @abstractmethod
     def get_data_batch(self, batch_size: Optional[int]) -> InternalDataFrame:
         """
         Get a batch of data from data stream to be processed by the skill set.

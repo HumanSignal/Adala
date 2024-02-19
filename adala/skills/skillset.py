@@ -32,7 +32,7 @@ class SkillSet(BaseModel, ABC):
         skills (Dict[str, Skill]): A dictionary of skills in the skill set.
     """
 
-    skills: Dict[str, Skill]
+    skills: Union[List, Dict[str, Skill]]
 
     @field_validator("skills", mode="before")
     def skills_validator(cls, v: Union[List, Dict]) -> Dict[str, Skill]:
@@ -63,7 +63,7 @@ class SkillSet(BaseModel, ABC):
         elif isinstance(v, dict):
             skills = v
         else:
-            raise ValueError(f"skills must be a list or dictionary, not {type(skills)}")
+            raise ValueError(f"skills must be a list or dictionary, but received type {type(v)}")
         return skills
 
     @abstractmethod
