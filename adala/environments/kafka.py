@@ -13,6 +13,8 @@ from adala.environments import Environment, AsyncEnvironment, EnvironmentFeedbac
 from adala.skills import SkillSet
 from adala.utils.logs import print_text
 
+logger = logging.getLogger(__name__)
+
 
 class AsyncKafkaEnvironment(AsyncEnvironment):
     """
@@ -37,7 +39,6 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
                 try:
                     # Wait for the next message with a timeout
                     msg = await asyncio.wait_for(consumer.getone(), timeout=timeout)
-                    print_text(f"Received: {msg.value}")
                     yield msg.value
                 except asyncio.TimeoutError:
                     print_text(f"No message received within the timeout {timeout} seconds")
@@ -49,7 +50,6 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         await producer.start()
         try:
             for record in data:
-                print_text(f"Send: {record}")
                 await producer.send_and_wait(topic, value=record)
         finally:
             await producer.stop()
@@ -77,6 +77,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
 
         data_stream = self.message_receiver(consumer)
         batch = await self.get_next_batch(data_stream, batch_size)
+        logger.info(f"Received a batch of {len(batch)} records from Kafka topic {self.kafka_input_topic}")
         return InternalDataFrame(batch)
 
     async def set_predictions(self, predictions: InternalDataFrame):
@@ -153,7 +154,8 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
             self.kafka_output_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_deserializer=lambda v: json.loads(v.decode('utf-8')),
-            auto_offset_reset='earliest'
+            auto_offset_reset='earliest',
+            group_id='consumer-group-output-topic'  # TODO: make it configurable based on the environment
         )
 
         data_stream = self.message_receiver(consumer)

@@ -46,7 +46,7 @@ def chat_completion_call(model, messages):
 DEFAULT_CREATE_COMPLETION_URL = "https://api.openai.com/v1/chat/completions"
 
 
-@retry(wait=wait_random(min=5, max=10), stop=stop_after_attempt(3))
+@retry(wait=wait_random(min=0, max=1), stop=stop_after_attempt(3))
 async def async_create_completion(
     model: str,
     user_prompt: str,
