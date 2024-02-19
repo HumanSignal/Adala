@@ -4,11 +4,12 @@ from typing import Any, Optional, List, Dict, Union, Tuple
 from rich import print
 import yaml
 
-from adala.environments.base import Environment, AsyncEnvironment, StaticEnvironment, EnvironmentFeedback, create_environment
-from adala.runtimes.base import Runtime, AsyncRuntime, create_runtime
+from adala.environments.base import Environment, AsyncEnvironment, EnvironmentFeedback
+from adala.environments.static_env import StaticEnvironment
+from adala.runtimes.base import Runtime, AsyncRuntime
 from adala.runtimes._openai import OpenAIChatRuntime
 from adala.runtimes import GuidanceRuntime
-from adala.skills._base import Skill, AnalysisSkill, TransformSkill, SynthesisSkill
+from adala.skills._base import Skill
 from adala.memories.base import Memory
 from adala.skills.skillset import SkillSet, LinearSkillSet
 from adala.utils.logs import (
@@ -18,7 +19,7 @@ from adala.utils.logs import (
     highlight_differences,
     is_running_in_jupyter,
 )
-from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
+from adala.utils.internal_data import InternalDataFrame
 
 
 class Agent(BaseModel, ABC):
@@ -102,7 +103,7 @@ class Agent(BaseModel, ABC):
         if isinstance(v, InternalDataFrame):
             v = StaticEnvironment(df=v)
         elif isinstance(v, dict) and "type" in v:
-            v = create_environment(v.pop("type"), **v)
+            v = Environment.create_from_registry(v.pop("type"), **v)
         return v
 
     @field_validator("skills", mode="before")
@@ -126,8 +127,12 @@ class Agent(BaseModel, ABC):
         """
         out = {}
         for runtime_name, runtime_value in v.items():
-            if isinstance(runtime_value, dict) and "type" in runtime_value:
-                runtime_value = create_runtime(runtime_value.pop('type'), **runtime_value)
+            if isinstance(runtime_value, dict):
+                if "type" not in runtime_value:
+                    raise ValueError(
+                        f"Runtime {runtime_name} must have a 'type' field to specify the runtime type."
+                    )
+                runtime_value = Runtime.create_from_registry(runtime_value.pop('type'), **runtime_value)
             out[runtime_name] = runtime_value
         return out
 

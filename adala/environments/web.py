@@ -1,7 +1,8 @@
 import requests
 import time
 from typing import Optional
-from .base import StaticEnvironment, EnvironmentFeedback
+from .base import EnvironmentFeedback
+from .static_env import StaticEnvironment
 from .servers.base import Feedback
 from adala.skills import SkillSet
 from adala.utils.internal_data import InternalDataFrame, InternalSeries

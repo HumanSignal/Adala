@@ -15,10 +15,8 @@ from ._base import (
     TransformSkill,
     SampleTransformSkill,
     AnalysisSkill,
-    SynthesisSkill,
-    create_skill
+    SynthesisSkill
 )
-from .collection.classification import ClassificationSkill
 
 
 class SkillSet(BaseModel, ABC):
@@ -59,7 +57,9 @@ class SkillSet(BaseModel, ABC):
             elif isinstance(v[0], dict):
                 # convert list of skill dictionaries to dictionary
                 for skill in v:
-                    skills[skill["name"]] = create_skill(skill.pop("type"), **skill)
+                    if 'type' not in skill:
+                        raise ValueError("Skill dictionary must contain a 'type' key")
+                    skills[skill["name"]] = Skill.create_from_registry(skill.pop('type'), **skill)
         elif isinstance(v, dict):
             skills = v
         else:

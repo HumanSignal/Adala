@@ -8,8 +8,7 @@ from typing import Dict, Union, List, Optional, Iterable
 from io import StringIO
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from adala.utils.internal_data import InternalDataFrame
-from adala.environments import AsyncEnvironment, EnvironmentFeedback
-from adala.environments.base import register_environment
+from adala.environments import Environment, AsyncEnvironment, EnvironmentFeedback
 from adala.skills import SkillSet
 from adala.utils.logs import print_text
 
@@ -198,6 +197,3 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
     async def save(self):
         raise NotImplementedError("Save is not supported in Kafka environment")
 
-
-register_environment("kafka", AsyncKafkaEnvironment)
-register_environment("kafka_filestream", FileStreamAsyncKafkaEnvironment)

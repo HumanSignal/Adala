@@ -1,7 +1,6 @@
-from adala.skills._base import TransformSkill
+from adala.skills._base import Skill, TransformSkill
 from typing import List, Dict
 from pydantic import model_validator
-from adala.skills._base import register_skill
 
 
 class ClassificationSkill(TransformSkill):
@@ -42,6 +41,3 @@ class ClassificationSkill(TransformSkill):
         self.instructions += (
             "Don't output anything else - only respond with one of the labels above."
         )
-
-
-register_skill("classification", ClassificationSkill)

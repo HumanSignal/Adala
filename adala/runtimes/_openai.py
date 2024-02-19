@@ -28,7 +28,7 @@ else:
     OpenAI = Any
 
 from pydantic import model_validator, field_validator, ValidationInfo, Field
-from .base import Runtime, AsyncRuntime, register_runtime
+from .base import Runtime, AsyncRuntime
 from adala.utils.logs import print_error
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
 from adala.utils.parse import parse_template, partial_str_format
@@ -544,8 +544,3 @@ class OpenAIVisionRuntime(OpenAIChatRuntime):
 
         completion_text = completion.choices[0].message.content
         return {output_field_name: completion_text}
-
-
-register_runtime('openai-chat', OpenAIChatRuntime)
-register_runtime('async-openai-chat', AsyncOpenAIChatRuntime)
-register_runtime('openai-vision', OpenAIVisionRuntime)
