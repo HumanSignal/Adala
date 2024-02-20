@@ -439,14 +439,19 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                 )
 
                 # parse responses, optionally match it with options
-                for response in responses:
+                for prompt, response in zip(prompts, responses):
+
                     # check for errors - if any, append to outputs and continue
                     if response.get("error"):
                         outputs.append(response)
+                        if self.verbose:
+                            print_error(f"Prompt: {prompt}\nOpenAI API error: {response}")
                         continue
 
                     # otherwise, append the response to outputs
                     completion_text = response["text"]
+                    if self.verbose:
+                        print(f"Prompt: {prompt}\nOpenAI API response: {completion_text}")
                     if name in options:
                         completion_text = match_options(completion_text, options[name])
                     outputs.append({name: completion_text, "index": response["index"]})

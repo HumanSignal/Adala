@@ -61,11 +61,12 @@ export class Adala {
                 type: "AsyncOpenAIChatRuntime",
                 model: req.model,
                 api_key: req.apiKey,
-                max_tokens: 50,
+                max_tokens: 10,
                 temperature: 0,
                 concurrent_clients: 100,
                 batch_size: 100,
-                timeout: 1
+                timeout: 10,
+                verbose: false
               }
             }
           },
