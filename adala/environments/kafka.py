@@ -102,7 +102,7 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
     input_file: str
     output_file: str
     error_file: str
-    pass_through_columns: List[str]
+    pass_through_columns: Optional[List[str]] = None
 
     def _iter_csv_local(self, csv_file_path):
         """

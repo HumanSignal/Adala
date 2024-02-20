@@ -5,6 +5,7 @@ interface AdalaSubmitInterface {
   inputFile: string;
   outputFile: string;
   errorFile: string;
+  passThroughColumns: string[];
   instructions: string;
   labels: string[];
   model: string;
@@ -35,13 +36,14 @@ export class Adala {
           agent: {
             environment: {
               type: "FileStreamAsyncKafkaEnvironment",
-              kafka_bootstrap_servers: "kafka:9093",
+              // kafka_bootstrap_servers: "kafka:9093",
+              kafka_bootstrap_servers: "localhost:9093",
               kafka_input_topic: "adala-input",
               kafka_output_topic: "adala-output",
               input_file: req.inputFile,
               output_file: req.outputFile,
               error_file: req.errorFile,
-              pass_through_columns: null
+              pass_through_columns: req.passThroughColumns
             },
             skills: [{
               type: "ClassificationSkill",
@@ -78,7 +80,7 @@ export class Adala {
   // Example method for getting the status
   async getStatus(req: AdalaGetStatusInterface): Promise<any> {
     try {
-      const response = await this.apiClientInstance.default.getStatusGetStatusGet({
+      const response = await this.apiClientInstance.default.getStatusGetStatusPost({
         requestBody: {
           job_id: req.jobId
         }

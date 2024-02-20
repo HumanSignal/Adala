@@ -118,10 +118,10 @@ class JobStatusResponse(BaseModel):
             Example: [10, 100] means 10% of the completeness.
     """
     status: str
-    processed_total: List[int] = Annotated[List[int], AfterValidator(lambda x: len(x) == 2)]
+    # processed_total: List[int] = Annotated[List[int], AfterValidator(lambda x: len(x) == 2)]
 
 
-@app.get('/get-status')
+@app.post('/get-status')
 def get_status(request: JobStatusRequest):
     """
     Get the status of a job.
@@ -133,7 +133,14 @@ def get_status(request: JobStatusRequest):
         JobStatusResponse: The response model for getting the status of a job.
     """
     job = process_file.AsyncResult(request.job_id)
-    return Response[JobStatusResponse](data=JobStatusResponse(status=job.status))
+    try:
+        status = job.status
+    except Exception as e:
+        logger.error(f"Error getting job status: {e}")
+        status = 'FAILURE'
+    else:
+        logger.info(f"Job {request.job_id} status: {status}")
+    return Response[JobStatusResponse](data=JobStatusResponse(status=status))
 
 
 class JobCancelRequest(BaseModel):

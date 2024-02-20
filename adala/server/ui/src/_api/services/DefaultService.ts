@@ -60,13 +60,13 @@ export class DefaultService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public getStatusGetStatusGet({
+    public getStatusGetStatusPost({
         requestBody,
     }: {
         requestBody: JobStatusRequest,
     }): CancelablePromise<any> {
         return this.httpRequest.request({
-            method: 'GET',
+            method: 'POST',
             url: '/get-status',
             body: requestBody,
             mediaType: 'application/json',
