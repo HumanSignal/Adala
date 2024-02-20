@@ -64,7 +64,8 @@ export class Adala {
                 max_tokens: 50,
                 temperature: 0,
                 concurrent_clients: 100,
-                batch_size: 100
+                batch_size: 100,
+                timeout: 1
               }
             }
           },
