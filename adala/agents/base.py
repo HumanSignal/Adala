@@ -67,8 +67,7 @@ class Agent(BaseModel, ABC):
     )
     teacher_runtimes: Dict[str, SerializeAsAny[Runtime]] = Field(
         default_factory=lambda: {
-            "default": OpenAIChatRuntime(model="gpt-3.5-turbo"),
-            # 'openai-gpt4': OpenAIChatRuntime(model='gpt-4')
+            "default": None
         }
     )
     default_runtime: str = "default"
@@ -208,7 +207,11 @@ class Agent(BaseModel, ABC):
             runtime = self.default_teacher_runtime
         if runtime not in self.teacher_runtimes:
             raise ValueError(f'Teacher Runtime "{runtime}" not found.')
-        return self.teacher_runtimes[runtime]
+        runtime = self.teacher_runtimes[runtime]
+        if not runtime:
+            raise ValueError(f"Teacher Runtime is requested, but it was not set."
+                             f"Please provide a teacher runtime in the agent's constructor explicitly:"
+                             f"agent = Agent(..., teacher_runtimes={{'default': OpenAIChatRuntime(model='gpt-4')}})")
 
     def run(
         self, input: InternalDataFrame = None, runtime: Optional[str] = None
