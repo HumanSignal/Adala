@@ -11,7 +11,6 @@ type FormData = {
   labels: string[]; // Explicitly typing labels as an array of strings
   model: string;
   apiKey: string;
-  passThroughColumns: string[];
 };
 
 const App = () => {
@@ -53,7 +52,7 @@ const App = () => {
     setFormData(prevState => ({
       ...prevState,
       // for list based fields (labels, passThroughColumns), split the value by comma and trim each item
-      [name]: name === "labels" || name === "passThroughColumns" ? value.split(",").map(item => item.trim()) : value,
+      [name]: name === "labels" ? value.split(",").map(item => item.trim()) : value,
     }));
   };
 
@@ -62,7 +61,7 @@ const App = () => {
       <div className="left-panel">
         {/* Text inputs for each field */}
         {Object.entries(formData).map(([key, value]) => {
-          if ((key !== "labels") && (key !== "passThroughColumns"))
+          if (key !== "labels")
           {
             return (
               <input

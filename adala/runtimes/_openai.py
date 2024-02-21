@@ -123,11 +123,12 @@ async def async_create_completion(
             "details": str(e),
             "index": index,
         }
-    except asyncio.TimeoutError:
+    except asyncio.TimeoutError as e:
         # Handle timeout errors
         return {
             "error": True,
             "message": "Request timed out",
+            "details": str(e),
             "index": index,
         }
     except Exception as e:

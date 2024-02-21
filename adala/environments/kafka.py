@@ -85,7 +85,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode('utf-8')
         )
-        predictions_iter = (r.to_dict() for _, r in predictions.iterrows())
+        predictions_iter = (r.to_dict() for _, r in predictions.reset_index().iterrows())
         await self.message_sender(producer, predictions_iter, self.kafka_output_topic)
 
 
@@ -161,31 +161,44 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
         data_stream = self.message_receiver(consumer)
 
         if self.output_file.startswith("s3://"):
-            await self._write_to_s3(self.output_file, data_stream, self.pass_through_columns)
+            await self._write_to_s3(self.output_file, self.error_file, data_stream, self.pass_through_columns)
         else:
-            await self._write_to_local(self.output_file, data_stream, self.pass_through_columns)
+            await self._write_to_local(self.output_file, self.error_file, data_stream, self.pass_through_columns)
 
-    async def _write_to_csv_fileobj(self, fileobj, data_stream, column_names):
-        csv_writer = DictWriter(fileobj, fieldnames=column_names)
-        csv_writer.writeheader()
+    async def _write_to_csv_fileobj(self, fileobj, error_fileobj, data_stream, column_names):
+        csv_writer, error_csv_writer = None, None
+        error_columns = ['index', 'message', 'details']
         while True:
             try:
                 record = await anext(data_stream)
-                csv_writer.writerow({k: record.get(k, '') for k in column_names})
+                if record.get('error') == True:
+                    logger.error(f"Error occurred while processing record {record['index']}: {record}")
+                    if error_csv_writer is None:
+                        error_csv_writer = DictWriter(error_fileobj, fieldnames=error_columns)
+                        error_csv_writer.writeheader()
+                    error_csv_writer.writerow({k: record.get(k, '') for k in error_columns})
+                else:
+                    if csv_writer is None:
+                        if column_names is None:
+                            column_names = list(record.keys())
+                        csv_writer = DictWriter(fileobj, fieldnames=column_names)
+                        csv_writer.writeheader()
+                    csv_writer.writerow({k: record.get(k, '') for k in column_names})
             except StopAsyncIteration:
                 break
 
-    async def _write_to_local(self, file_path: str, data_stream, column_names):
-        with open(file_path, 'w') as csv_file:
-            await self._write_to_csv_fileobj(csv_file, data_stream, column_names)
+    async def _write_to_local(self, file_path: str, error_file_path: str, data_stream, column_names):
+        with open(file_path, 'w') as csv_file, open(error_file_path, 'w') as error_file:
+            await self._write_to_csv_fileobj(csv_file, error_file, data_stream, column_names)
 
-    async def _write_to_s3(self, s3_uri: str, data_stream, column_names):
+    async def _write_to_s3(self, s3_uri: str, s3_uri_errors: str, data_stream, column_names):
         # Assuming s3_uri format is "s3://bucket-name/path/to/file.csv"
         bucket_name, key = s3_uri.replace("s3://", "").split("/", 1)
         s3 = boto3.client('s3')
-        with StringIO() as csv_file:
-            await self._write_to_csv_fileobj(csv_file, data_stream, column_names)
+        with StringIO() as csv_file, StringIO() as error_file:
+            await self._write_to_csv_fileobj(csv_file, error_file, data_stream, column_names)
             s3.put_object(Bucket=bucket_name, Key=key, Body=csv_file.getvalue())
+            # TODO: Add support for writing errors to S3
 
     async def get_feedback(
         self,

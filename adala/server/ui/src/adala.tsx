@@ -5,7 +5,6 @@ interface AdalaSubmitInterface {
   inputFile: string;
   outputFile: string;
   errorFile: string;
-  passThroughColumns: string[];
   instructions: string;
   labels: string[];
   model: string;
@@ -43,10 +42,11 @@ export class Adala {
               input_file: req.inputFile,
               output_file: req.outputFile,
               error_file: req.errorFile,
-              pass_through_columns: req.passThroughColumns
+              pass_through_columns: null
             },
             skills: [{
               type: "ClassificationSkill",
+              // type: "TransformSkill",
               name: "text_classifier",
               // In the first version, we don't use the instructions (all prompts go to the input_template). Consider using it for the efficient prefill phase in the future.
               instructions: "",
