@@ -50,7 +50,6 @@ DEFAULT_CREATE_COMPLETION_URL = "https://api.openai.com/v1/chat/completions"
 async def async_create_completion(
     model: str,
     user_prompt: str,
-    index: int = 0,
     system_prompt: str = None,
     instruction_first: bool = True,
     semaphore: asyncio.Semaphore = None,
@@ -65,7 +64,6 @@ async def async_create_completion(
     Args:
         model: OpenAI model name.
         user_prompt: User prompt.
-        index: Index of the record.
         system_prompt: System prompt.
         instruction_first: Whether to put instructions first.
         semaphore: Semaphore to limit concurrent requests.
@@ -105,7 +103,6 @@ async def async_create_completion(
                 completion_text = response_json["choices"][0]["message"]["content"]
                 return {
                     "text": completion_text,
-                    "index": index,
                 }
     except aiohttp.ClientResponseError as e:
         # Handle HTTP errors
@@ -113,7 +110,6 @@ async def async_create_completion(
             "error": True,
             "message": f"HTTP error: {e.status}",
             "details": str(e),
-            "index": index,
         }
     except aiohttp.ClientError as e:
         # Handle other aiohttp specific errors
@@ -121,7 +117,6 @@ async def async_create_completion(
             "error": True,
             "message": "Client error",
             "details": str(e),
-            "index": index,
         }
     except asyncio.TimeoutError as e:
         # Handle timeout errors
@@ -129,7 +124,6 @@ async def async_create_completion(
             "error": True,
             "message": "Request timed out",
             "details": str(e),
-            "index": index,
         }
     except Exception as e:
         # Handle other exceptions
@@ -137,7 +131,6 @@ async def async_create_completion(
             "error": True,
             "message": "Unknown error",
             "details": str(e),
-            "index": index,
         }
 
 
@@ -167,7 +160,6 @@ async def async_concurrent_create_completion(
                     max_tokens=max_tokens,
                     temperature=temperature,
                     instruction_first=instruction_first,
-                    index=prompt["index"],
                     default_timeout=timeout,
                 )
             )
@@ -381,7 +373,6 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
     ) -> Dict[str, str]:
         """Prepare input prompt for OpenAI API from the row of the dataframe"""
         return {
-            "index": row.name,
             "system": instructions_template,
             "user": input_template.format(**row, **extra_fields) + suffix,
         }
@@ -455,11 +446,12 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                         print(f"Prompt: {prompt}\nOpenAI API response: {completion_text}")
                     if name in options:
                         completion_text = match_options(completion_text, options[name])
-                    outputs.append({name: completion_text, "index": response["index"]})
+                    outputs.append({name: completion_text})
 
-        output_df = InternalDataFrame(outputs).set_index("index")
-        # return output dataframe ordered as input batch.index
-        return output_df.reindex(batch.index)
+        # TODO: note that this doesn't work for multiple output fields e.g. `Output {output1} and Output {output2}`
+        output_df = InternalDataFrame(outputs)
+        # return output dataframe indexed as input batch.index, assuming outputs are in the same order as inputs
+        return output_df.set_index(batch.index)
 
     async def record_to_record(
         self,

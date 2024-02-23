@@ -85,7 +85,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode('utf-8')
         )
-        predictions_iter = (r.to_dict() for _, r in predictions.reset_index().iterrows())
+        predictions_iter = (r.to_dict() for _, r in predictions.iterrows())
         await self.message_sender(producer, predictions_iter, self.kafka_output_topic)
 
 
@@ -172,7 +172,7 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
             try:
                 record = await anext(data_stream)
                 if record.get('error') == True:
-                    logger.error(f"Error occurred while processing record {record['index']}: {record}")
+                    logger.error(f"Error occurred while processing record: {record}")
                     if error_csv_writer is None:
                         error_csv_writer = DictWriter(error_fileobj, fieldnames=error_columns)
                         error_csv_writer.writeheader()
