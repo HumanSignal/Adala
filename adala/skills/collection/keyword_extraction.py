@@ -16,7 +16,7 @@ class KeywordExtractionSkill(TransformSkill):
         instruction: str  # instruction on how to use this label
 
     name: str = "keyword_extraction"
-    instructions: str = '''
+    instructions: str = """
 ## LABELS    
     
 ## Instructions:
@@ -32,7 +32,7 @@ class KeywordExtractionSkill(TransformSkill):
 9. Label Format: LABELS can include per-label instructions on how to use this label in format: <number_of_label>. "<label_name>" - <instructions>. 
 10. If no label is assigned to a keyword, you don't need to list this keyword. 
 11. If two or more keywords go together, you can stack them to keyword phrase and label together.  
-'''
+"""
     input_template: str = 'Input:\n"""\n{text}\n"""'
     output_template: str = "Output:\n{keywords}"
     labels: Optional[Dict[str, List[LabelItem]]]
@@ -54,12 +54,19 @@ class KeywordExtractionSkill(TransformSkill):
 
         # add label list to instructions
         labels = self.labels[output_fields[0]]
-        labels_list = "\n".join([
-            f'{i}. "{label.name}"' +
-            (" - " + label.instruction + '.') if label.instruction else ''
-            for i, label in enumerate(labels)
-        ])
-        self.instructions = self.instructions.replace('## LABELS', '## LABELS\n' + labels_list)
+        labels_list = "\n".join(
+            [
+                (
+                    f'{i}. "{label.name}"' + (" - " + label.instruction + ".")
+                    if label.instruction
+                    else ""
+                )
+                for i, label in enumerate(labels)
+            ]
+        )
+        self.instructions = self.instructions.replace(
+            "## LABELS", "## LABELS\n" + labels_list
+        )
 
     def _postprocess_output(self, row, output_field: str) -> list:
         labels = [label.name for label in self.labels[output_field]]
@@ -72,29 +79,35 @@ class KeywordExtractionSkill(TransformSkill):
         output = []
         # print('==>', text, '\n', output_string)
 
-        for line in output_string.split('\n'):
+        for line in output_string.split("\n"):
             if not line:
                 continue
 
-            split = line.split('//')
+            split = line.split("//")
             if len(split) != 3:
                 print_error(f"Keyword and label couldn't be parsed: {line}")
                 continue
 
-            keyword, label, explain = split[0].strip(), split[1].strip(), split[2].strip()
+            keyword, label, explain = (
+                split[0].strip(),
+                split[1].strip(),
+                split[2].strip(),
+            )
             if label not in labels:
                 print_error(f"Label '{label}' not in provided labels: {labels}")
                 continue
 
             index = text.find(keyword, start_index)
             if index != -1:
-                output.append({
-                    'start': index,
-                    'end': index + len(keyword),
-                    'labels': [label],
-                    'text': keyword,
-                    'explain': explain
-                })
+                output.append(
+                    {
+                        "start": index,
+                        "end": index + len(keyword),
+                        "labels": [label],
+                        "text": keyword,
+                        "explain": explain,
+                    }
+                )
                 start_index = index + len(keyword)
             else:
                 print_error(f"Keyword '{keyword}' not found in text: {text}")
@@ -114,10 +127,7 @@ class KeywordExtractionSkill(TransformSkill):
         # apply postprocessing with keyword extraction from output
         for output_field in self.get_output_fields():
             batch[output_field] = input_batch.apply(
-                self._postprocess_output,
-                output_field=output_field,
-                axis=1
+                self._postprocess_output, output_field=output_field, axis=1
             )
 
         return batch
-
