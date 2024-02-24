@@ -3,7 +3,6 @@ from typing import List, Dict, Optional
 from pydantic import model_validator, BaseModel
 from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
 from adala.runtimes import Runtime
-from adala.utils.parse import parse_template
 from adala.utils.logs import print_error
 
 
@@ -71,7 +70,7 @@ class KeywordExtractionSkill(TransformSkill):
 
         start_index = 0
         output = []
-        print('==>', text, '\n', output_string)
+        # print('==>', text, '\n', output_string)
 
         for line in output_string.split('\n'):
             if not line:
