@@ -45,8 +45,8 @@ export class Adala {
               pass_through_columns: null
             },
             skills: [{
-              // type: "ClassificationSkill",
-              type: "TransformSkill",
+              type: "ClassificationSkill",
+              // type: "TransformSkill",
               name: "text_classifier",
               // In the first version, we don't use the instructions (all prompts go to the input_template). Consider using it for the efficient prefill phase in the future.
               instructions: "",

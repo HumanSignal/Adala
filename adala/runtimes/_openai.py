@@ -51,6 +51,7 @@ async def async_create_completion(
     model: str,
     user_prompt: str,
     system_prompt: str = None,
+    openai_api_key: str = None,
     instruction_first: bool = True,
     semaphore: asyncio.Semaphore = None,
     max_tokens: int = 1000,
@@ -65,6 +66,7 @@ async def async_create_completion(
         model: OpenAI model name.
         user_prompt: User prompt.
         system_prompt: System prompt.
+        openai_api_key: OpenAI API key (if not set, will use OPENAI_API_KEY environment variable).
         instruction_first: Whether to put instructions first.
         semaphore: Semaphore to limit concurrent requests.
         max_tokens: Maximum tokens to generate.
@@ -75,6 +77,7 @@ async def async_create_completion(
     Returns:
         Dict[str, Any]: OpenAI response or error message.
     """
+    openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
     if not semaphore:
         semaphore = asyncio.Semaphore(1)
     if not session:
@@ -89,7 +92,7 @@ async def async_create_completion(
     try:
         async with semaphore, session.post(
             DEFAULT_CREATE_COMPLETION_URL,
-            headers={"Authorization": f'Bearer {os.getenv("OPENAI_API_KEY")}'},
+            headers={"Authorization": f'Bearer {openai_api_key}'},
             json={
                 "messages": messages,
                 "model": model,
@@ -139,6 +142,7 @@ async def async_concurrent_create_completion(
     max_concurrent_requests,
     instruction_first,
     openai_model,
+    openai_api_key,
     max_tokens,
     temperature,
     timeout=10,
@@ -161,6 +165,7 @@ async def async_concurrent_create_completion(
                     temperature=temperature,
                     instruction_first=instruction_first,
                     default_timeout=timeout,
+                    openai_api_key=openai_api_key,
                 )
             )
             tasks.append(task)
@@ -428,6 +433,7 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                     max_tokens=self.max_tokens,
                     temperature=self.temperature,
                     openai_model=self.openai_model,
+                    openai_api_key=self.openai_api_key,
                 )
 
                 # parse responses, optionally match it with options
