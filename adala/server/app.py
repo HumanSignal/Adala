@@ -97,7 +97,9 @@ async def submit(request: SubmitRequest):
     # TODO: get task by name, e.g. request.task_name
     task = process_file
     serialized_agent = pickle.dumps(request.agent)
+    logger.debug(f"Submitting task {task.name} with agent {serialized_agent}")
     result = task.delay(serialized_agent=serialized_agent)
+    logger.debug(f"Task {task.name} submitted with job_id {result.id}")
     return Response[JobCreated](data=JobCreated(job_id=result.id))
 
 

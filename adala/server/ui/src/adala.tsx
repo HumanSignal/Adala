@@ -35,8 +35,8 @@ export class Adala {
           agent: {
             environment: {
               type: "FileStreamAsyncKafkaEnvironment",
-              // kafka_bootstrap_servers: "kafka:9093",
-              kafka_bootstrap_servers: "localhost:9093",
+              kafka_bootstrap_servers: "kafka:9093",
+              // kafka_bootstrap_servers: "localhost:9093",
               kafka_input_topic: "adala-input",
               kafka_output_topic: "adala-output",
               input_file: req.inputFile,
