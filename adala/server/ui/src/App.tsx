@@ -1,7 +1,20 @@
 import React, { useState } from "react";
 import "./App.css";
 import { Adala } from "./adala";
-import testData from "./testData";
+// import testData from "./testData";
+
+const testData = {
+  inputFile: "s3://hs-sandbox-pub/sales_5samples.csv",
+  outputFile: "s3://hs-sandbox-pub/sales_5samples_output.csv",
+  errorFile: "s3://hs-sandbox-pub/sales_5samples_error.csv",
+  instructions: `
+  Given a brief account of a lost sales deal, classify the reason for loss into one of the following categories:
+   Feature Lack, Price, Integration Issues, Usability Concerns, or Competitor Advantage. 
+  `,
+  labels: ["Feature Lack", "Price", "Integration Issues", "Usability Concerns", "Competitor Advantage"],
+  model: "gpt-3.5-turbo-0125",
+  apiKey: "sk-...",
+}
 
 type FormData = {
   inputFile: string;
