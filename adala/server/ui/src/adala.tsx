@@ -1,5 +1,5 @@
 import React from 'react';
-import { AdalaAPI, SubmitRequest} from "./_api";
+import {AdalaAPI, SubmitRequest} from "./_api";
 
 interface AdalaSubmitInterface {
   inputFile: string;
@@ -19,11 +19,18 @@ interface AdalaCancelInterface {
   jobId: string;
 }
 
+interface AdalaGetPredictionStreamInterface {
+  jobId: string;
+  token: string;
+  topic: string;
+}
 
 export class Adala {
+  private url: string;
   private apiClientInstance: any;
 
   constructor(url: string) {
+    this.url = url;
     this.apiClientInstance = new AdalaAPI({BASE: url});
   }
 
@@ -35,8 +42,8 @@ export class Adala {
           agent: {
             environment: {
               type: "FileStreamAsyncKafkaEnvironment",
-              kafka_bootstrap_servers: "kafka:9093",
-              // kafka_bootstrap_servers: "localhost:9093",
+              // kafka_bootstrap_servers: "kafka:9093",
+              kafka_bootstrap_servers: "localhost:9093",
               kafka_input_topic: "adala-input",
               kafka_output_topic: "adala-output",
               input_file: req.inputFile,
@@ -107,6 +114,35 @@ export class Adala {
       throw error;
     }
   }
+
+  // method for reading data from /prediction-steam endpoint using EventSource and SSE
+  // query args: job_id, token, topic
+  async getPredictionStream(
+    req: AdalaGetPredictionStreamInterface,
+    onReceive: (data: any) => void,
+  ): Promise<any> {
+    const url = `${this.url}/prediction-stream?job_id=${encodeURIComponent(req.jobId)}&token=${req.token}&topic=${req.topic}`;
+    const eventSource = new EventSource(url);
+    console.log("Prediction stream URL:", url);
+
+    eventSource.onopen = (e) => {
+      console.log('Connection is established: ', e);
+    }
+
+    eventSource.onerror = (e) => {
+      // console.log error message
+      console.error('EventSource failed:', e);
+      eventSource.close();
+    }
+
+    eventSource.onmessage = (e: MessageEvent) => {
+      console.log("Received data from prediction stream:", e.data);
+      onReceive(e.data);
+    }
+
+    return eventSource;
+  }
+
 }
 
 export default Adala;

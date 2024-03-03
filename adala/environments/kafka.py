@@ -1,5 +1,7 @@
 import logging
 import abc
+import time
+
 import boto3
 import json
 import asyncio
@@ -14,6 +16,52 @@ from adala.skills import SkillSet
 from adala.utils.logs import print_text
 
 logger = logging.getLogger(__name__)
+
+async def get_data_stream(
+    input_topic,
+    bootstrap_servers,
+    group_id,
+    timeout=3,
+    auto_offset_reset='earliest',
+    value_deserializer=lambda v: json.loads(v.decode('utf-8'))
+):
+    consumer = AIOKafkaConsumer(
+        input_topic,
+        bootstrap_servers=bootstrap_servers,
+        value_deserializer=value_deserializer,
+        auto_offset_reset=auto_offset_reset,
+        group_id=group_id
+    )
+    await consumer.start()
+    try:
+        while True:
+            try:
+                # Wait for the next message with a timeout
+                msg = await asyncio.wait_for(consumer.getone(), timeout=timeout)
+                yield msg.value
+            except asyncio.TimeoutError:
+                print_text(f"No message received within the timeout {timeout} seconds")
+                break
+    finally:
+        await consumer.stop()
+
+
+async def create_data_stream(
+    output_topic,
+    bootstrap_servers,
+    records,
+    value_serializer=lambda v: json.dumps(v).encode('utf-8')
+):
+    producer = AIOKafkaProducer(
+        bootstrap_servers=bootstrap_servers,
+        value_serializer=value_serializer
+    )
+    await producer.start()
+    try:
+        for record in records:
+            await producer.send_and_wait(output_topic, value=record)
+    finally:
+        await producer.stop()
 
 
 class AsyncKafkaEnvironment(AsyncEnvironment):
@@ -32,28 +80,6 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     kafka_input_topic: str
     kafka_output_topic: str
 
-    async def message_receiver(self, consumer: AIOKafkaConsumer, timeout: int = 3):
-        await consumer.start()
-        try:
-            while True:
-                try:
-                    # Wait for the next message with a timeout
-                    msg = await asyncio.wait_for(consumer.getone(), timeout=timeout)
-                    yield msg.value
-                except asyncio.TimeoutError:
-                    print_text(f"No message received within the timeout {timeout} seconds")
-                    break
-        finally:
-            await consumer.stop()
-
-    async def message_sender(self, producer: AIOKafkaProducer, data: Iterable, topic: str):
-        await producer.start()
-        try:
-            for record in data:
-                await producer.send_and_wait(topic, value=record)
-        finally:
-            await producer.stop()
-
     async def get_next_batch(self, data_iterator, batch_size: int) -> List[Dict]:
         batch = []
         try:
@@ -67,26 +93,22 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         return batch
 
     async def get_data_batch(self, batch_size: Optional[int]) -> InternalDataFrame:
-        consumer = AIOKafkaConsumer(
-            self.kafka_input_topic,
+        data_stream = get_data_stream(
+            input_topic=self.kafka_input_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
-            value_deserializer=lambda v: json.loads(v.decode('utf-8')),
-            auto_offset_reset='earliest',
-            group_id='adala-consumer-group'  # TODO: make it configurable based on the environment
+            # TODO: make it configurable based on the environment
+            group_id='adala-consumer-group'
         )
-
-        data_stream = self.message_receiver(consumer)
         batch = await self.get_next_batch(data_stream, batch_size)
         logger.info(f"Received a batch of {len(batch)} records from Kafka topic {self.kafka_input_topic}")
         return InternalDataFrame(batch)
 
     async def set_predictions(self, predictions: InternalDataFrame):
-        producer = AIOKafkaProducer(
+        await create_data_stream(
+            output_topic=self.kafka_output_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode('utf-8')
+            records=predictions.to_dict(orient='records')
         )
-        predictions_iter = (r.to_dict() for _, r in predictions.iterrows())
-        await self.message_sender(producer, predictions_iter, self.kafka_output_topic)
 
 
 class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
@@ -138,27 +160,22 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
         else:
             csv_reader = self._iter_csv_local(self.input_file)
 
-        producer = AIOKafkaProducer(
+        await create_data_stream(
+            output_topic=self.kafka_input_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode('utf-8')
+            records=csv_reader
         )
-
-        await self.message_sender(producer, csv_reader, self.kafka_input_topic)
 
     async def finalize(self):
         """
         Finalize the environment: read data from the output kafka topic and write it to the output file.
         """
-
-        consumer = AIOKafkaConsumer(
-            self.kafka_output_topic,
+        data_stream = get_data_stream(
+            input_topic=self.kafka_output_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
-            value_deserializer=lambda v: json.loads(v.decode('utf-8')),
-            auto_offset_reset='earliest',
-            group_id='consumer-group-output-topic'  # TODO: make it configurable based on the environment
+            # TODO: make it configurable based on the environment
+            group_id='consumer-group-output-topic'
         )
-
-        data_stream = self.message_receiver(consumer)
 
         if self.output_file.startswith("s3://"):
             await self._write_to_s3(self.output_file, self.error_file, data_stream, self.pass_through_columns)

@@ -199,6 +199,18 @@ class OpenAIChatRuntime(Runtime):
 
     _client: OpenAI = None
 
+    def __getstate__(self):
+        state = super().__getstate__()
+        # Remove the unpicklable entries.
+        state['__dict__']['_client'] = None
+        return state
+
+    def __setstate__(self, state):
+        # Recreate the _client
+        if check_if_new_openai_version():
+            state['__dict__']['_client'] = OpenAI(api_key=self.openai_api_key)
+        super().__setstate__(state)
+
     def init_runtime(self) -> "Runtime":
         # check openai package version
         if check_if_new_openai_version():
