@@ -42,8 +42,9 @@ services:
         condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379/0
-      # - AWS_ACCESS_KEY_ID=
-      # - AWS_SECRET_ACCESS_KEY=
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
 
   redis:
     image: redis:alpine
