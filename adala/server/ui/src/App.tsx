@@ -10,6 +10,8 @@ const testData = {
   instructions: `
   Given a brief account of a lost sales deal, classify the reason for loss into one of the following categories:
    Feature Lack, Price, Integration Issues, Usability Concerns, or Competitor Advantage. 
+   Text:
+   {record}
   `,
   labels: ["Feature Lack", "Price", "Integration Issues", "Usability Concerns", "Competitor Advantage"],
   model: "gpt-3.5-turbo-0125",
