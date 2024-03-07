@@ -7,7 +7,7 @@ from typing_extensions import Annotated
 from pydantic import BaseModel
 from pydantic.functional_validators import AfterValidator
 from adala.agents import Agent
-from adala.server.tasks.process_file import process_file
+from tasks.process_file import process_file
 from log_middleware import LogMiddleware
 
 logger = logging.getLogger(__name__)

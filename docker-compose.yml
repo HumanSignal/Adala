@@ -7,7 +7,7 @@ services:
     ports:
       - "9093:9093"
     volumes:
-      - "./kafka-data:/bitnami"
+      - "./server/kafka-data:/bitnami"
     environment:
       - KAFKA_ENABLE_KRAFT=yes
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
