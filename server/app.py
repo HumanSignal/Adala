@@ -1,6 +1,7 @@
 import fastapi
 import logging
 import pickle
+from enum import Enum
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Generic, TypeVar, Optional, List, Dict, Any
 from typing_extensions import Annotated
@@ -110,6 +111,14 @@ class JobStatusRequest(BaseModel):
     job_id: str
 
 
+class Status(Enum):
+    PENDING = 'Pending'
+    INPROGRESS = 'InProgress'
+    COMPLETED = 'Completed'
+    FAILED = 'Failed'
+    CANCELED = 'Canceled'
+
+
 class JobStatusResponse(BaseModel):
     """
     Response model for getting the status of a job.
@@ -119,8 +128,11 @@ class JobStatusResponse(BaseModel):
         processed_total (List[int]): The total number of processed records and the total number of records in job.
             Example: [10, 100] means 10% of the completeness.
     """
-    status: str
+    status: Status
     # processed_total: List[int] = Annotated[List[int], AfterValidator(lambda x: len(x) == 2)]
+
+    class Config:
+        use_enum_values = True
 
 
 @app.post('/get-status')
@@ -134,12 +146,20 @@ def get_status(request: JobStatusRequest):
     Returns:
         JobStatusResponse: The response model for getting the status of a job.
     """
+    celery_status_map = {
+        'PENDING': Status.PENDING,
+        'STARTED': Status.INPROGRESS,
+        'SUCCESS': Status.COMPLETED,
+        'FAILURE': Status.FAILED,
+        'REVOKED': Status.CANCELED,
+        'RETRY': Status.INPROGRESS
+    }
     job = process_file.AsyncResult(request.job_id)
     try:
-        status = job.status
+        status: Status = celery_status_map[job.status]
     except Exception as e:
         logger.error(f"Error getting job status: {e}")
-        status = 'FAILURE'
+        status = Status.FAILED
     else:
         logger.info(f"Job {request.job_id} status: {status}")
     return Response[JobStatusResponse](data=JobStatusResponse(status=status))
