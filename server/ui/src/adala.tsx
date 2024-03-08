@@ -82,10 +82,8 @@ export class Adala {
   // Example method for getting the status
   async getStatus(req: AdalaGetStatusInterface): Promise<any> {
     try {
-      const response = await this.apiClientInstance.default.getStatusGetStatusPost({
-        requestBody: {
-          job_id: req.jobId
-        }
+      const response = await this.apiClientInstance.default.getStatusJobsJobIdGet({
+        jobId: req.jobId
       });
       return response.data;
     } catch (error) {

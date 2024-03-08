@@ -104,13 +104,6 @@ async def submit(request: SubmitRequest):
     return Response[JobCreated](data=JobCreated(job_id=result.id))
 
 
-class JobStatusRequest(BaseModel):
-    """
-    Request model for getting the status of a job.
-    """
-    job_id: str
-
-
 class Status(Enum):
     PENDING = 'Pending'
     INPROGRESS = 'InProgress'
@@ -135,8 +128,8 @@ class JobStatusResponse(BaseModel):
         use_enum_values = True
 
 
-@app.post('/get-status')
-def get_status(request: JobStatusRequest):
+@app.get('/jobs/{job_id}', response_model=Response[JobStatusResponse])
+def get_status(job_id):
     """
     Get the status of a job.
 
@@ -154,14 +147,14 @@ def get_status(request: JobStatusRequest):
         'REVOKED': Status.CANCELED,
         'RETRY': Status.INPROGRESS
     }
-    job = process_file.AsyncResult(request.job_id)
+    job = process_file.AsyncResult(job_id)
     try:
         status: Status = celery_status_map[job.status]
     except Exception as e:
         logger.error(f"Error getting job status: {e}")
         status = Status.FAILED
     else:
-        logger.info(f"Job {request.job_id} status: {status}")
+        logger.info(f"Job {job_id} status: {status}")
     return Response[JobStatusResponse](data=JobStatusResponse(status=status))
 
 
