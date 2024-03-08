@@ -17,18 +17,15 @@ WORKDIR /usr/src/app
 
 COPY pyproject.toml poetry.lock ./
 
-# Install dependencies and install adala editable
+# Install dependencies
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi --no-root
 
 COPY . .
 
-# Install the app
+# Install adala and the app
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
 
 # Set the working directory in the container to where the app will be run from
 WORKDIR /usr/src/app/server
-
-# Command to run on container start
-CMD ["poetry", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
