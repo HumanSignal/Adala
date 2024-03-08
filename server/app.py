@@ -84,7 +84,7 @@ def get_index():
     return {"status": "ok"}
 
 
-@app.post("/submit", response_model=Response[JobCreated])
+@app.post("/jobs/submit", response_model=Response[JobCreated])
 async def submit(request: SubmitRequest):
     """
     Submit a request to execute task `request.task_name` in celery.

@@ -33,14 +33,14 @@ export class DefaultService {
      * @returns Response_JobCreated_ Successful Response
      * @throws ApiError
      */
-    public submitSubmitPost({
+    public submitJobsSubmitPost({
         requestBody,
     }: {
         requestBody: SubmitRequest,
     }): CancelablePromise<Response_JobCreated_> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/submit',
+            url: '/jobs/submit',
             body: requestBody,
             mediaType: 'application/json',
             errors: {

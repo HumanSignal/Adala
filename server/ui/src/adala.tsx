@@ -30,7 +30,7 @@ export class Adala {
   // submit should accept an input of type Submit
   async submit(req: AdalaSubmitInterface): Promise<any> {
     try {
-      const response = await this.apiClientInstance.default.submitSubmitPost({
+      const response = await this.apiClientInstance.default.submitJobsSubmitPost({
         requestBody: {
           agent: {
             environment: {
