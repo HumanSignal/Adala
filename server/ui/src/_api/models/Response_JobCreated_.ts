@@ -5,7 +5,7 @@
 import type { JobCreated } from './JobCreated';
 export type Response_JobCreated_ = {
     success: boolean;
-    data: (JobCreated | null);
+    data: JobCreated;
     message: (string | null);
     errors: null;
 };

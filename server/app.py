@@ -3,7 +3,7 @@ import logging
 import pickle
 from enum import Enum
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Generic, TypeVar, Optional, List, Dict, Any
+from typing import Generic, TypeVar, Optional, List, Dict, Any, Literal
 from typing_extensions import Annotated
 from pydantic import BaseModel
 from pydantic.functional_validators import AfterValidator
@@ -31,7 +31,7 @@ ResponseData = TypeVar("ResponseData")
 
 class Response(BaseModel, Generic[ResponseData]):
     success: bool = True
-    data: Optional[ResponseData] = None
+    data: ResponseData
     message: Optional[str] = None
     errors: Optional[list] = None
 
@@ -158,22 +158,15 @@ def get_status(job_id):
     return Response[JobStatusResponse](data=JobStatusResponse(status=status))
 
 
-class JobCancelRequest(BaseModel):
-    """
-    Request model for cancelling a job.
-    """
-    job_id: str
-
-
 class JobCancelResponse(BaseModel):
     """
     Response model for cancelling a job.
     """
-    status: str
+    status: Literal['cancelled']
 
 
-@app.post('/cancel')
-def cancel_job(request: JobCancelRequest):
+@app.delete('/jobs/{job_id}', response_model=Response[JobCancelResponse])
+def cancel_job(job_id):
     """
     Cancel a job.
 
@@ -183,6 +176,6 @@ def cancel_job(request: JobCancelRequest):
     Returns:
         JobCancelResponse: The response model for cancelling a job.
     """
-    job = process_file.AsyncResult(request.job_id)
+    job = process_file.AsyncResult(job_id)
     job.revoke()
-    return Response[JobCancelResponse](data=JobCancelResponse(status='cancelled'))
+    return Response[JobCancelResponse]()

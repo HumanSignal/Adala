@@ -94,14 +94,12 @@ export class Adala {
 
   async cancel(req: AdalaCancelInterface): Promise<any> {
     try {
-      const response = await this.apiClientInstance.default.cancelJobCancelPost({
-        requestBody: {
-          job_id: req.jobId
-        }
+      const response = await this.apiClientInstance.default.cancelJobJobsJobIdDelete({
+        job_id: req.jobId
       });
       return response.data;
     } catch (error) {
-      console.error('Error getting status:', error);
+      console.error('Error canceling job:', error);
       throw error;
     }
   }

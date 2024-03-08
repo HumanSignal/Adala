@@ -4,10 +4,10 @@
 /* eslint-disable */
 /**
  *
- * Request model for cancelling a job.
+ * Response model for cancelling a job.
  *
  */
-export type JobCancelRequest = {
-    job_id: string;
+export type JobCancelResponse = {
+    status: any;
 };
 

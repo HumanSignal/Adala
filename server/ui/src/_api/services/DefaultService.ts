@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { JobCancelRequest } from '../models/JobCancelRequest';
+import type { Response_JobCancelResponse_ } from '../models/Response_JobCancelResponse_';
 import type { Response_JobCreated_ } from '../models/Response_JobCreated_';
 import type { Response_JobStatusResponse_ } from '../models/Response_JobStatusResponse_';
 import type { SubmitRequest } from '../models/SubmitRequest';
@@ -85,19 +85,20 @@ export class DefaultService {
      *
      * Returns:
      * JobCancelResponse: The response model for cancelling a job.
-     * @returns any Successful Response
+     * @returns Response_JobCancelResponse_ Successful Response
      * @throws ApiError
      */
-    public cancelJobCancelPost({
-        requestBody,
+    public cancelJobJobsJobIdDelete({
+        jobId,
     }: {
-        requestBody: JobCancelRequest,
-    }): CancelablePromise<any> {
+        jobId: any,
+    }): CancelablePromise<Response_JobCancelResponse_> {
         return this.httpRequest.request({
-            method: 'POST',
-            url: '/cancel',
-            body: requestBody,
-            mediaType: 'application/json',
+            method: 'DELETE',
+            url: '/jobs/{job_id}',
+            path: {
+                'job_id': jobId,
+            },
             errors: {
                 422: `Validation Error`,
             },
