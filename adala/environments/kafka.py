@@ -194,11 +194,12 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
     async def _write_to_s3(self, s3_uri: str, s3_uri_errors: str, data_stream, column_names):
         # Assuming s3_uri format is "s3://bucket-name/path/to/file.csv"
         bucket_name, key = s3_uri.replace("s3://", "").split("/", 1)
+        error_bucket_name, error_key = s3_uri_errors.replace("s3://", "").split("/", 1)
         s3 = boto3.client('s3')
         with StringIO() as csv_file, StringIO() as error_file:
             await self._write_to_csv_fileobj(csv_file, error_file, data_stream, column_names)
             s3.put_object(Bucket=bucket_name, Key=key, Body=csv_file.getvalue())
-            # TODO: Add support for writing errors to S3
+            s3.put_object(Bucket=error_bucket_name, Key=error_key, Body=error_file.getvalue())
 
     async def get_feedback(
         self,
