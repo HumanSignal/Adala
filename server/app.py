@@ -1,13 +1,14 @@
 import fastapi
 import logging
 import pickle
+from enum import Enum
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Generic, TypeVar, Optional, List, Dict, Any
+from typing import Generic, TypeVar, Optional, List, Dict, Any, Literal
 from typing_extensions import Annotated
 from pydantic import BaseModel
 from pydantic.functional_validators import AfterValidator
 from adala.agents import Agent
-from adala.server.tasks.process_file import process_file
+from tasks.process_file import process_file
 from log_middleware import LogMiddleware
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ ResponseData = TypeVar("ResponseData")
 
 class Response(BaseModel, Generic[ResponseData]):
     success: bool = True
-    data: Optional[ResponseData] = None
+    data: ResponseData
     message: Optional[str] = None
     errors: Optional[list] = None
 
@@ -83,7 +84,7 @@ def get_index():
     return {"status": "ok"}
 
 
-@app.post("/submit", response_model=Response[JobCreated])
+@app.post("/jobs/submit", response_model=Response[JobCreated])
 async def submit(request: SubmitRequest):
     """
     Submit a request to execute task `request.task_name` in celery.
@@ -103,11 +104,12 @@ async def submit(request: SubmitRequest):
     return Response[JobCreated](data=JobCreated(job_id=result.id))
 
 
-class JobStatusRequest(BaseModel):
-    """
-    Request model for getting the status of a job.
-    """
-    job_id: str
+class Status(Enum):
+    PENDING = 'Pending'
+    INPROGRESS = 'InProgress'
+    COMPLETED = 'Completed'
+    FAILED = 'Failed'
+    CANCELED = 'Canceled'
 
 
 class JobStatusResponse(BaseModel):
@@ -119,57 +121,56 @@ class JobStatusResponse(BaseModel):
         processed_total (List[int]): The total number of processed records and the total number of records in job.
             Example: [10, 100] means 10% of the completeness.
     """
-    status: str
+    status: Status
     # processed_total: List[int] = Annotated[List[int], AfterValidator(lambda x: len(x) == 2)]
 
+    class Config:
+        use_enum_values = True
 
-@app.post('/get-status')
-def get_status(request: JobStatusRequest):
+
+@app.get('/jobs/{job_id}', response_model=Response[JobStatusResponse])
+def get_status(job_id):
     """
     Get the status of a job.
 
     Args:
-        request (JobStatusRequest): The request model for getting the status of a job.
+        job_id (str)
 
     Returns:
         JobStatusResponse: The response model for getting the status of a job.
     """
-    job = process_file.AsyncResult(request.job_id)
+    celery_status_map = {
+        'PENDING': Status.PENDING,
+        'STARTED': Status.INPROGRESS,
+        'SUCCESS': Status.COMPLETED,
+        'FAILURE': Status.FAILED,
+        'REVOKED': Status.CANCELED,
+        'RETRY': Status.INPROGRESS
+    }
+    job = process_file.AsyncResult(job_id)
     try:
-        status = job.status
+        status: Status = celery_status_map[job.status]
     except Exception as e:
         logger.error(f"Error getting job status: {e}")
-        status = 'FAILURE'
+        status = Status.FAILED
     else:
-        logger.info(f"Job {request.job_id} status: {status}")
+        logger.info(f"Job {job_id} status: {status}")
     return Response[JobStatusResponse](data=JobStatusResponse(status=status))
 
 
-class JobCancelRequest(BaseModel):
-    """
-    Request model for cancelling a job.
-    """
-    job_id: str
-
-
-class JobCancelResponse(BaseModel):
-    """
-    Response model for cancelling a job.
-    """
-    status: str
-
-
-@app.post('/cancel')
-def cancel_job(request: JobCancelRequest):
+@app.delete('/jobs/{job_id}', response_model=Response[JobStatusResponse])
+def cancel_job(job_id):
     """
     Cancel a job.
 
     Args:
-        request (JobCancelRequest): The request model for cancelling a job.
+        job_id (str)
 
     Returns:
-        JobCancelResponse: The response model for cancelling a job.
+        JobStatusResponse[status.CANCELED]
     """
-    job = process_file.AsyncResult(request.job_id)
+    job = process_file.AsyncResult(job_id)
     job.revoke()
-    return Response[JobCancelResponse](data=JobCancelResponse(status='cancelled'))
+    return Response[JobStatusResponse](
+        data=JobStatusResponse(status=Status.CANCELED)
+    )

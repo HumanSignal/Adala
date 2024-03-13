@@ -2,12 +2,4 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-/**
- *
- * Request model for cancelling a job.
- *
- */
-export type JobCancelRequest = {
-    job_id: string;
-};
-
+export type Status = 'Pending' | 'InProgress' | 'Completed' | 'Failed' | 'Canceled';

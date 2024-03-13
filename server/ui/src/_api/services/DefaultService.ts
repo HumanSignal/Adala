@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { JobCancelRequest } from '../models/JobCancelRequest';
-import type { JobStatusRequest } from '../models/JobStatusRequest';
+import type { Response_JobCancelResponse_ } from '../models/Response_JobCancelResponse_';
 import type { Response_JobCreated_ } from '../models/Response_JobCreated_';
+import type { Response_JobStatusResponse_ } from '../models/Response_JobStatusResponse_';
 import type { SubmitRequest } from '../models/SubmitRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
@@ -33,14 +33,14 @@ export class DefaultService {
      * @returns Response_JobCreated_ Successful Response
      * @throws ApiError
      */
-    public submitSubmitPost({
+    public submitJobsSubmitPost({
         requestBody,
     }: {
         requestBody: SubmitRequest,
     }): CancelablePromise<Response_JobCreated_> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/submit',
+            url: '/jobs/submit',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -57,19 +57,20 @@ export class DefaultService {
      *
      * Returns:
      * JobStatusResponse: The response model for getting the status of a job.
-     * @returns any Successful Response
+     * @returns Response_JobStatusResponse_ Successful Response
      * @throws ApiError
      */
-    public getStatusGetStatusPost({
-        requestBody,
+    public getStatusJobsJobIdGet({
+        jobId,
     }: {
-        requestBody: JobStatusRequest,
-    }): CancelablePromise<any> {
+        jobId: any,
+    }): CancelablePromise<Response_JobStatusResponse_> {
         return this.httpRequest.request({
-            method: 'POST',
-            url: '/get-status',
-            body: requestBody,
-            mediaType: 'application/json',
+            method: 'GET',
+            url: '/jobs/{job_id}',
+            path: {
+                'job_id': jobId,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -84,19 +85,20 @@ export class DefaultService {
      *
      * Returns:
      * JobCancelResponse: The response model for cancelling a job.
-     * @returns any Successful Response
+     * @returns Response_JobCancelResponse_ Successful Response
      * @throws ApiError
      */
-    public cancelJobCancelPost({
-        requestBody,
+    public cancelJobJobsJobIdDelete({
+        jobId,
     }: {
-        requestBody: JobCancelRequest,
-    }): CancelablePromise<any> {
+        jobId: any,
+    }): CancelablePromise<Response_JobCancelResponse_> {
         return this.httpRequest.request({
-            method: 'POST',
-            url: '/cancel',
-            body: requestBody,
-            mediaType: 'application/json',
+            method: 'DELETE',
+            url: '/jobs/{job_id}',
+            path: {
+                'job_id': jobId,
+            },
             errors: {
                 422: `Validation Error`,
             },

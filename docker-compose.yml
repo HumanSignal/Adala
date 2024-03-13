@@ -7,7 +7,7 @@ services:
     ports:
       - "9093:9093"
     volumes:
-      - "./kafka-data:/bitnami"
+      - "./server/kafka-data:/bitnami"
     environment:
       - KAFKA_ENABLE_KRAFT=yes
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
@@ -32,19 +32,23 @@ services:
         condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379/0
-
+    command:
+      ["poetry", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
   worker:
     build:
       context: .
-      dockerfile: Dockerfile.worker
+      dockerfile: Dockerfile.app
     depends_on:
       redis:
         condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379/0
-      # - AWS_ACCESS_KEY_ID=
-      # - AWS_SECRET_ACCESS_KEY=
-
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - MODULE_NAME=process_file.app
+    command:
+      'sh -c "cd tasks && poetry run celery -A $$MODULE_NAME worker --loglevel=info"'
   redis:
     image: redis:alpine
     ports:

@@ -30,7 +30,7 @@ export class Adala {
   // submit should accept an input of type Submit
   async submit(req: AdalaSubmitInterface): Promise<any> {
     try {
-      const response = await this.apiClientInstance.default.submitSubmitPost({
+      const response = await this.apiClientInstance.default.submitJobsSubmitPost({
         requestBody: {
           agent: {
             environment: {
@@ -82,10 +82,8 @@ export class Adala {
   // Example method for getting the status
   async getStatus(req: AdalaGetStatusInterface): Promise<any> {
     try {
-      const response = await this.apiClientInstance.default.getStatusGetStatusPost({
-        requestBody: {
-          job_id: req.jobId
-        }
+      const response = await this.apiClientInstance.default.getStatusJobsJobIdGet({
+        jobId: req.jobId
       });
       return response.data;
     } catch (error) {
@@ -96,14 +94,12 @@ export class Adala {
 
   async cancel(req: AdalaCancelInterface): Promise<any> {
     try {
-      const response = await this.apiClientInstance.default.cancelJobCancelPost({
-        requestBody: {
-          job_id: req.jobId
-        }
+      const response = await this.apiClientInstance.default.cancelJobJobsJobIdDelete({
+        job_id: req.jobId
       });
       return response.data;
     } catch (error) {
-      console.error('Error getting status:', error);
+      console.error('Error canceling job:', error);
       throw error;
     }
   }

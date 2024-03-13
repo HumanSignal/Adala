@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { JobCreated } from './JobCreated';
-export type Response_JobCreated_ = {
+import type { JobStatusResponse } from './JobStatusResponse';
+export type Response_JobStatusResponse_ = {
     success: boolean;
-    data: (JobCreated | null);
+    data: JobStatusResponse;
     message: (string | null);
     errors: null;
 };
