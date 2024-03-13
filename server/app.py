@@ -134,7 +134,7 @@ def get_status(job_id):
     Get the status of a job.
 
     Args:
-        request (JobStatusRequest): The request model for getting the status of a job.
+        job_id (str)
 
     Returns:
         JobStatusResponse: The response model for getting the status of a job.
@@ -158,24 +158,19 @@ def get_status(job_id):
     return Response[JobStatusResponse](data=JobStatusResponse(status=status))
 
 
-class JobCancelResponse(BaseModel):
-    """
-    Response model for cancelling a job.
-    """
-    status: Literal['cancelled']
-
-
-@app.delete('/jobs/{job_id}', response_model=Response[JobCancelResponse])
+@app.delete('/jobs/{job_id}', response_model=Response[JobStatusResponse])
 def cancel_job(job_id):
     """
     Cancel a job.
 
     Args:
-        request (JobCancelRequest): The request model for cancelling a job.
+        job_id (str)
 
     Returns:
-        JobCancelResponse: The response model for cancelling a job.
+        JobStatusResponse[status.CANCELED]
     """
     job = process_file.AsyncResult(job_id)
     job.revoke()
-    return Response[JobCancelResponse]()
+    return Response[JobStatusResponse](
+        data=JobStatusResponse(status=Status.CANCELED)
+    )
