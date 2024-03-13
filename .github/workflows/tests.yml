@@ -31,19 +31,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up PDM
-        uses: pdm-project/setup-pdm@v4
+      - name: Set up poetry
+        uses: snok/install-poetry@v1
         with:
           python-version: '3.9'
           cache: true
 
       - name: Install Python dependencies
         run: |
-          pdm sync -G test
+          poetry install
 
       - name: Run black
         run: |
-          pdm run pytest --black .
+          poetry run pytest --black .
 
   run_pytest_ubuntu:
     name: Ubuntu
@@ -60,20 +60,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up PDM
-        uses: pdm-project/setup-pdm@v4
+      - name: Set up poetry
+        uses: snok/install-poetry@v1
         with:
           python-version: "${{ matrix.python-version }}"
           cache: true
 
       - name: Install Python dependencies
         run: |
-          pdm sync -G test
+          poetry install
 
       - name: Run functional tests
         run: |
           cd tests/
-          pdm run pytest --junitxml report.xml --cov=. -vv 
+          poetry run pytest --junitxml report.xml --cov=. -vv 
 
   run_pytests_windows:
     name: Windows
@@ -93,16 +93,16 @@ jobs:
         with:
           ref: ${{ inputs.head_sha }}
 
-      - name: Set up PDM
-        uses: pdm-project/setup-pdm@v4
+      - name: Set up poetry
+        uses: snok/install-poetry@v1
         with:
           python-version: "${{ matrix.python-version }}"
           cache: true
 
       - name: Install Python dependencies
         run: |
-          pdm sync -G test
+          poetry install
 
       - name: Test with pytest
         run: |
-          pdm run pytest -vv
+          poetry run pytest -vv

@@ -62,25 +62,25 @@ jobs:
           version=$(sed "s/^v//g" <<< ${PROVIDED_VERSION})
           sed -i "s/^version[ ]*=.*/version = \"${version}\"/g" ${{ env.PYTHON_VERSION_FILE }}
 
-      - name: Set up PDM
-        uses: pdm-project/setup-pdm@v4
+      - name: Set up poetry
+        uses: snok/install-poetry@v1
         with:
           python-version: '3.11'
           cache: true
 
       - name: Install dependencies
         run: |
-          pdm install --prod
+          poetry install --without dev
 
       - name: Package
-        run: pdm build
+        run: poetry build
 
       - name: Upload to PYPI
         if: inputs.upload_to_pypi
         env:
-          PDM_PUBLISH_USERNAME: __token__
-          PDM_PUBLISH_PASSWORD: ${{ secrets.PYPI_APIKEY }}
-        run: pdm publish --no-build
+          POETRY_PYPI_TOKEN_ADALA: ${{ secrets.PYPI_APIKEY }}
+        run: |
+          poetry publish
 
       - name: Attach artifacts to release
         if: inputs.release-id
