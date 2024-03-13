@@ -2,10 +2,9 @@
 
 ## set environment variables
 
-- OpenAI API key
 - AWS creds:
 ```bash
-eval "$(aws configure export-credentials --profile sandbox_dev --format env)"
+eval "$(aws configure export-credentials --profile <YOUR_PROFILE> --format env)"
 ```
 
 ## run
