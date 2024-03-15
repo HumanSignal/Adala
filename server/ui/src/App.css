@@ -1,0 +1,37 @@
+.app-container {
+  display: flex;
+  height: 100vh;
+}
+
+.left-panel, .right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.left-panel {
+  border-right: 2px solid #ddd;
+  padding: 20px;
+}
+
+/* Adjust the input to take full height minus some margin for the button */
+.left-panel input {
+  width: 100%;
+  height: calc(100% - 60px); /* Adjust based on your button size and desired spacing */
+  margin-bottom: 20px; /* Spacing between input and button */
+}
+
+.left-panel button {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.right-panel {
+  padding: 20px;
+}
+
+.right-panel textarea {
+  width: 100%;
+  height: 100%;
+  resize: none;
+}

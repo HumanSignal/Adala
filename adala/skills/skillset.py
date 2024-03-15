@@ -15,9 +15,8 @@ from ._base import (
     TransformSkill,
     SampleTransformSkill,
     AnalysisSkill,
-    SynthesisSkill,
+    SynthesisSkill
 )
-from .collection.classification import ClassificationSkill
 
 
 class SkillSet(BaseModel, ABC):
@@ -33,7 +32,7 @@ class SkillSet(BaseModel, ABC):
         skills (Dict[str, Skill]): A dictionary of skills in the skill set.
     """
 
-    skills: Dict[str, Skill]
+    skills: Union[List, Dict[str, Skill]]
 
     @field_validator("skills", mode="before")
     def skills_validator(cls, v: Union[List, Dict]) -> Dict[str, Skill]:
@@ -58,12 +57,13 @@ class SkillSet(BaseModel, ABC):
             elif isinstance(v[0], dict):
                 # convert list of skill dictionaries to dictionary
                 for skill in v:
-                    skill_class = get_skill_class(skill["type"])
-                    skills[skill["name"]] = skill_class(**skill)
+                    if 'type' not in skill:
+                        raise ValueError("Skill dictionary must contain a 'type' key")
+                    skills[skill["name"]] = Skill.create_from_registry(skill.pop('type'), **skill)
         elif isinstance(v, dict):
             skills = v
         else:
-            raise ValueError(f"skills must be a list or dictionary, not {type(skills)}")
+            raise ValueError(f"skills must be a list or dictionary, but received type {type(v)}")
         return skills
 
     @abstractmethod
@@ -342,27 +342,3 @@ class ParallelSkillSet(SkillSet):
                 )
             else:
                 raise ValueError(f"Unsupported output type: {type(skill_outputs[0])}")
-
-
-def get_skill_class(skill_type: str) -> Type[Skill]:
-    """
-    Returns the skill class based on the skill type.
-
-    Args:
-        skill_type (str): Skill type.
-
-    Returns:
-        Type[Skill]: Skill class.
-    """
-    if skill_type == "transform":
-        return TransformSkill
-    elif skill_type == "sample_transform":
-        return SampleTransformSkill
-    elif skill_type == "analysis":
-        return AnalysisSkill
-    elif skill_type == "synthesis":
-        return SynthesisSkill
-    elif skill_type == "classification":
-        return ClassificationSkill
-    else:
-        raise ValueError(f"Unsupported skill type: {skill_type}")

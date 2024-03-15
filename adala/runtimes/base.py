@@ -1,21 +1,24 @@
 from tqdm import tqdm
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, model_validator
-from typing import List, Dict, Optional, Tuple, Any, Callable
+from typing import List, Dict, Optional, Tuple, Any, Callable, ClassVar
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
+from adala.utils.registry import BaseModelInRegistry
 
 tqdm.pandas()
 
 
-class Runtime(BaseModel, ABC):
+class Runtime(BaseModelInRegistry):
     """
     Base class representing a generic runtime environment.
 
     Attributes:
         verbose (bool): Flag indicating if runtime outputs should be verbose. Defaults to False.
+        batch_size (Optional[int]): The batch size to use for processing records. Defaults to None.
     """
 
     verbose: bool = False
+    batch_size: Optional[int] = None
 
     @model_validator(mode="after")
     def init_runtime(self) -> "Runtime":
@@ -135,10 +138,8 @@ class Runtime(BaseModel, ABC):
         )
 
 
-class AsyncRuntime(BaseModel, ABC):
+class AsyncRuntime(Runtime):
     """Async version of runtime that uses asyncio to process batch of records."""
-
-    verbose: bool = False
 
     @abstractmethod
     async def record_to_record(

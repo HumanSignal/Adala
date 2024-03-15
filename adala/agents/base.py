@@ -1,14 +1,16 @@
-from pydantic import BaseModel, Field, SkipValidation, field_validator, model_validator
+import logging
+from pydantic import BaseModel, Field, SkipValidation, field_validator, model_validator, SerializeAsAny
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List, Dict, Union, Tuple
 from rich import print
 import yaml
 
-from adala.environments.base import Environment, StaticEnvironment, EnvironmentFeedback
+from adala.environments.base import Environment, AsyncEnvironment, EnvironmentFeedback
+from adala.environments.static_env import StaticEnvironment
 from adala.runtimes.base import Runtime, AsyncRuntime
 from adala.runtimes._openai import OpenAIChatRuntime
 from adala.runtimes import GuidanceRuntime
-from adala.skills._base import Skill, AnalysisSkill, TransformSkill, SynthesisSkill
+from adala.skills._base import Skill
 from adala.memories.base import Memory
 from adala.skills.skillset import SkillSet, LinearSkillSet
 from adala.utils.logs import (
@@ -18,7 +20,9 @@ from adala.utils.logs import (
     highlight_differences,
     is_running_in_jupyter,
 )
-from adala.utils.internal_data import InternalDataFrame, InternalDataFrameConcat
+from adala.utils.internal_data import InternalDataFrame
+
+logger = logging.getLogger(__name__)
 
 
 class Agent(BaseModel, ABC):
@@ -42,14 +46,13 @@ class Agent(BaseModel, ABC):
         >>> agent = Agent(skills=LinearSkillSet(skills=[TransformSkill()]), environment=StaticEnvironment())
         >>> agent.learn()  # starts the learning process
         >>> predictions = agent.run()  # runs the agent and returns the predictions
-
     """
 
-    environment: Optional[Environment] = None
-    skills: SkillSet
+    environment: Optional[SerializeAsAny[Union[Environment, AsyncEnvironment]]] = None
+    skills: Union[Skill, SkillSet]
 
     memory: Memory = Field(default=None)
-    runtimes: Dict[str, Union[Runtime, AsyncRuntime]] = Field(
+    runtimes: Dict[str, SerializeAsAny[Union[Runtime, AsyncRuntime]]] = Field(
         default_factory=lambda: {
             "default": GuidanceRuntime()
             # 'openai': OpenAIChatRuntime(model='gpt-3.5-turbo'),
@@ -62,10 +65,9 @@ class Agent(BaseModel, ABC):
             # )
         }
     )
-    teacher_runtimes: Dict[str, Runtime] = Field(
+    teacher_runtimes: Dict[str, SerializeAsAny[Runtime]] = Field(
         default_factory=lambda: {
-            "default": OpenAIChatRuntime(model="gpt-3.5-turbo"),
-            # 'openai-gpt4': OpenAIChatRuntime(model='gpt-4')
+            "default": None
         }
     )
     default_runtime: str = "default"
@@ -100,8 +102,11 @@ class Agent(BaseModel, ABC):
         Validates and possibly transforms the environment attribute:
         if the environment is an InternalDataFrame, it is transformed into a StaticEnvironment.
         """
+        logger.debug(f"Validating environment attribute: {v}")
         if isinstance(v, InternalDataFrame):
             v = StaticEnvironment(df=v)
+        elif isinstance(v, dict) and "type" in v:
+            v = Environment.create_from_registry(v.pop("type"), **v)
         return v
 
     @field_validator("skills", mode="before")
@@ -116,7 +121,24 @@ class Agent(BaseModel, ABC):
         elif isinstance(v, list):
             return LinearSkillSet(skills=v)
         else:
-            raise ValueError(f"skills must be of type SkillSet or Skill, not {type(v)}")
+            raise ValueError(f"skills must be of type SkillSet or Skill, but received type {type(v)}")
+
+    @field_validator('runtimes', mode='before')
+    def runtimes_validator(cls, v) -> Dict[str, Union[Runtime, AsyncRuntime]]:
+        """
+        Validates and creates runtimes
+        """
+        out = {}
+        for runtime_name, runtime_value in v.items():
+            if isinstance(runtime_value, dict):
+                if "type" not in runtime_value:
+                    raise ValueError(
+                        f"Runtime {runtime_name} must have a 'type' field to specify the runtime type."
+                    )
+                type_name = runtime_value.pop("type")
+                runtime_value = Runtime.create_from_registry(type=type_name, **runtime_value)
+            out[runtime_name] = runtime_value
+        return out
 
     @model_validator(mode="after")
     def verify_input_parameters(self):
@@ -185,7 +207,11 @@ class Agent(BaseModel, ABC):
             runtime = self.default_teacher_runtime
         if runtime not in self.teacher_runtimes:
             raise ValueError(f'Teacher Runtime "{runtime}" not found.')
-        return self.teacher_runtimes[runtime]
+        runtime = self.teacher_runtimes[runtime]
+        if not runtime:
+            raise ValueError(f"Teacher Runtime is requested, but it was not set."
+                             f"Please provide a teacher runtime in the agent's constructor explicitly:"
+                             f"agent = Agent(..., teacher_runtimes={{'default': OpenAIChatRuntime(model='gpt-4')}})")
 
     def run(
         self, input: InternalDataFrame = None, runtime: Optional[str] = None
@@ -203,16 +229,18 @@ class Agent(BaseModel, ABC):
         if input is None:
             if self.environment is None:
                 raise ValueError("input is None and no environment is set.")
-            input = self.environment.get_data_batch()
+            input = self.environment.get_data_batch(None)
         runtime = self.get_runtime(runtime=runtime)
         predictions = self.skills.apply(input, runtime=runtime)
         return predictions
 
     async def arun(
         self, input: InternalDataFrame = None, runtime: Optional[str] = None
-    ) -> InternalDataFrame:
+    ) -> Optional[InternalDataFrame]:
         """
-        Runs the agent on the specified dataset asynchronously.
+        Runs the agent on the specified input asynchronously.
+        If no input is specified, the agent will run on the environment until it is exhausted.
+        If input is specified, the agent will run on the input, ignoring the connected genvironment.
 
         Args:
             input (InternalDataFrame): The dataset to run the agent on.
@@ -221,19 +249,40 @@ class Agent(BaseModel, ABC):
         Returns:
             InternalDataFrame: The dataset with the agent's predictions.
         """
-        if input is None:
-            if self.environment is None:
-                raise ValueError("input is None and no environment is set.")
-            input = self.environment.get_data_batch()
-        runtime = self.get_runtime(runtime=runtime)
-        print(f"Using runtime {type(runtime)}")
 
+        runtime = self.get_runtime(runtime=runtime)
         if not isinstance(runtime, AsyncRuntime):
             raise ValueError(
                 "When using asynchronous run with `agent.arun()`, the runtime must be an AsyncRuntime."
             )
-        predictions = await self.skills.aapply(input, runtime=runtime)
-        return predictions
+        else:
+            print(f"Using runtime {type(runtime)}")
+
+        if not isinstance(self.environment, AsyncEnvironment):
+            raise ValueError(
+                "When using asynchronous run with `agent.arun()`, the environment must be an AsyncEnvironment."
+            )
+        if input is None:
+            if self.environment is None:
+                raise ValueError("input is None and no environment is set.")
+            # run on the environment until it is exhausted
+            while True:
+                try:
+                    data_batch = await self.environment.get_data_batch(batch_size=runtime.batch_size)
+                    if data_batch.empty:
+                        print_text("No more data in the environment. Exiting.")
+                        break
+                except Exception as e:
+                    # TODO: environment should raise a specific exception + log error
+                    print_error(f"Error getting data batch from environment: {e}")
+                    break
+                predictions = await self.skills.aapply(data_batch, runtime=runtime)
+                await self.environment.set_predictions(predictions)
+
+        else:
+            # single run on the input data
+            predictions = await self.skills.aapply(input, runtime=runtime)
+            return predictions
 
     def select_skill_to_train(
         self, feedback: EnvironmentFeedback, accuracy_threshold: float

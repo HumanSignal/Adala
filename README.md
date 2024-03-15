@@ -77,6 +77,13 @@ Adala frequently releases updates. In order to ensure that you are using the mos
 pip install git+https://github.com/HumanSignal/Adala.git
 ```
 
+Developer installation:
+```sh
+git clone https://github.com/HumanSignal/Adala.git
+cd Adala/
+poetry install
+```
+
 <!--
 If you're planning to use human-in-the-loop labeling, or need a labeling tool to produce ground truth datasets, we
 suggest installing Label Studio. Adala supports Label Studio format out of the box.

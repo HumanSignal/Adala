@@ -1,4 +1,4 @@
-from .base import Runtime
+from .base import Runtime, AsyncRuntime
 from ._openai import OpenAIChatRuntime, OpenAIVisionRuntime, AsyncOpenAIChatRuntime
 from ._guidance import GuidanceRuntime, GuidanceModelType
 from ._batch import BatchRuntime
