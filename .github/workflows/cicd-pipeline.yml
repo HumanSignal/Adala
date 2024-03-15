@@ -1,0 +1,31 @@
+name: "CI/CD Pipeline"
+
+on:
+  push:
+    branches:
+      - master
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    branches:
+      - master
+
+concurrency:
+  group: CI/CD Pipeline-${{ github.event.pull_request.number || github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+
+  build:
+    name: "Build"
+    uses: ./.github/workflows/docker-build.yml
+    permissions:
+      contents: read
+      checks: write
+    with:
+      sha: ${{ github.event.pull_request.head.sha || github.event.after }}
+      branch_name: ${{ github.event.pull_request.head.ref || github.ref_name }}
+    secrets: inherit
