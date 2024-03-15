@@ -21,20 +21,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up PDM
-        uses: pdm-project/setup-pdm@v4
+      - name: Set up poetry
+        uses: snok/install-poetry@v1
         with:
           python-version: "3.11"
           cache: true
 
       - name: Install Python dependencies
         run: |
-          pdm sync -G doc
+          poetry install --sync
 
       - name: Build MkDocs site
         run: |
           cd docs/
-          pdm run mkdocs build
+          poetry run mkdocs build
 
   upload:
     name: "Upload"
@@ -45,17 +45,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up PDM
-        uses: pdm-project/setup-pdm@v4
+      - name: Set up poetry
+        uses: snok/install-poetry@v1
         with:
           python-version: "3.11"
           cache: true
 
       - name: Install Python dependencies
         run: |
-          pdm sync -G doc
+          poetry install --sync
 
       - name: Deploy docs
         run: |
           cd docs/
-          pdm run mkdocs gh-deploy --force
+          poetry run mkdocs gh-deploy --force

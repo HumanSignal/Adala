@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, field_validator
-from typing import List, Optional, Any, Dict, Tuple, Union
+from typing import List, Optional, Any, Dict, Tuple, Union, ClassVar
 from abc import ABC, abstractmethod
 from adala.utils.internal_data import (
     InternalDataFrame,
@@ -8,11 +8,12 @@ from adala.utils.internal_data import (
 )
 from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.logs import print_dataframe, print_text
+from adala.utils.registry import BaseModelInRegistry
 from adala.runtimes.base import Runtime, AsyncRuntime
 from tqdm import tqdm
 
 
-class Skill(BaseModel, ABC):
+class Skill(BaseModelInRegistry):
     """
     Abstract base class representing a skill.
 
@@ -29,6 +30,8 @@ class Skill(BaseModel, ABC):
         extra_fields (Optional[Dict[str, str]]): Extra fields to use in the templates. Defaults to None.
         instructions_first (bool): Flag indicating if instructions should be executed before input. Defaults to True.
         verbose (bool): Flag indicating if runtime outputs should be verbose. Defaults to False.
+        frozen (bool): Flag indicating if the skill is frozen. Defaults to False.
+        type (ClassVar[str]): Type of the skill.
     """
 
     name: str = Field(

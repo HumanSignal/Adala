@@ -1,4 +1,4 @@
-from adala.skills._base import TransformSkill
+from adala.skills._base import Skill, TransformSkill
 from typing import List, Dict
 from pydantic import model_validator
 
