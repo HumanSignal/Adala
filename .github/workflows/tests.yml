@@ -74,7 +74,7 @@ jobs:
         run: ${{ matrix.test-command }}
 
       - name: Upload to Codecov
-        if: matrix.os == 'ubuntu-latest && python-version == '3.11'
+        if: matrix.os == 'ubuntu-latest && matrix.python-version == '3.11'
         uses: codecov/codecov-action@v4.1.0
         with:
           files: tests/coverage.xml
