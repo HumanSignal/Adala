@@ -34,28 +34,28 @@ jobs:
       - name: Set up poetry
         uses: snok/install-poetry@v1
         with:
-          python-version: '3.9'
+          python-version: '3.11'
           cache: true
 
       - name: Install Python dependencies
-        run: |
-          poetry install
+        run: poetry install
 
       - name: Run black
-        run: |
-          poetry run pytest --black .
+        run: poetry run pytest --black .
 
-  run_pytest_ubuntu:
-    name: Ubuntu
-    runs-on: ubuntu-latest
+  run_pytest:
+    name: Pytest ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version:
-          - '3.8'
-          - '3.9'
-          - '3.10'
-          - '3.11'
+        include:
+          - os: ubuntu-latest
+            python-version: ['3.8', '3.9', '3.10', '3.11']
+            test-command: poetry run pytest --junitxml report.xml --cov=. -vv
+          - os: windows-latest
+            python-version: ['3.8', '3.9', '3.10', '3.11']
+            test-command: poetry run pytest -vv
 
     steps:
       - uses: actions/checkout@v4
@@ -63,46 +63,20 @@ jobs:
       - name: Set up poetry
         uses: snok/install-poetry@v1
         with:
-          python-version: "${{ matrix.python-version }}"
+          python-version: ${{ matrix.python-version }}
           cache: true
 
       - name: Install Python dependencies
-        run: |
-          poetry install
+        run: poetry install
 
-      - name: Run functional tests
-        run: |
-          cd tests/
-          poetry run pytest --junitxml report.xml --cov=. -vv 
+      - name: Run tests
+        working-directory: tests/
+        run: ${{ matrix.test-command }}
 
-  run_pytests_windows:
-    name: Windows
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version:
-          - '3.8'
-          - '3.9'
-          - '3.10'
-          - '3.11'
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Upload to Codecov
+        if: matrix.os == 'ubuntu-latest && python-version == '3.11'
+        uses: codecov/codecov-action@v4.1.0
         with:
-          ref: ${{ inputs.head_sha }}
-
-      - name: Set up poetry
-        uses: snok/install-poetry@v1
-        with:
-          python-version: "${{ matrix.python-version }}"
-          cache: true
-
-      - name: Install Python dependencies
-        run: |
-          poetry install
-
-      - name: Test with pytest
-        run: |
-          poetry run pytest -vv
+          files: tests/coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
