@@ -44,8 +44,11 @@ jobs:
         run: poetry run pytest --black .
 
   run_pytest:
-    name: "pytest ${{ matrix.os }} | python ${{ matrix.os }}"
+    name: "pytest ${{ matrix.os }} | ${{ matrix.python-version }}"
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -55,24 +58,43 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.python-version }}"
+
       - name: Set up poetry
         uses: snok/install-poetry@v1
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: true
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
-      - name: Install Python dependencies
-        run: poetry install
+      - name: Load cached venv
+        id: cached-pip-wheels
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Install app
+        run: poetry install --no-interaction
 
       - name: Run tests without coverage
         if: ${{ matrix.os != 'ubuntu-latest' && matrix.python-version != '3.11' }}
-        working-directory: tests/
-        run: poetry run pytest --junitxml report.xml --cov=. -vv
+        run: |
+          source .venv/bin/activate 
+          cd tests/
+          poetry run pytest --junitxml report.xml --cov=. -vv
 
       - name: Run tests with coverage
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' }}
-        working-directory: tests/
-        run: poetry run pytest --junitxml report.xml --cov=. -vv
+        run: |
+          source .venv/bin/activate
+          cd tests/
+          poetry run pytest --junitxml report.xml --cov=. -vv
 
       - name: Upload to Codecov
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' }}
