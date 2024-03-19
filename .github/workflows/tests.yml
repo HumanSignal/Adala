@@ -49,13 +49,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-latest
-            python-version: ['3.8', '3.9', '3.10', '3.11']
-            test-command: poetry run pytest --junitxml report.xml --cov=. -vv
-          - os: windows-latest
-            python-version: ['3.8', '3.9', '3.10', '3.11']
-            test-command: poetry run pytest -vv
+        os: [ ubuntu-latest, windows-latest ]
+        version: ['3.8', '3.9', '3.10', '3.11']
 
     steps:
       - uses: actions/checkout@v4
@@ -69,12 +64,18 @@ jobs:
       - name: Install Python dependencies
         run: poetry install
 
-      - name: Run tests
+      - name: Run tests without coverage
+        if: ${{ matrix.os != 'ubuntu-latest' && matrix.python-version != '3.11' }}
         working-directory: tests/
-        run: ${{ matrix.test-command }}
+        run: poetry run pytest --junitxml report.xml --cov=. -vv
+
+      - name: Run tests with coverage
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' }}
+        working-directory: tests/
+        run: poetry run pytest --junitxml report.xml --cov=. -vv
 
       - name: Upload to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' }}
         uses: codecov/codecov-action@v4.1.0
         with:
           files: tests/coverage.xml
