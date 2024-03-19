@@ -83,7 +83,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Run tests without coverage
-        if: ${{ matrix.os != 'ubuntu-latest' && matrix.python-version != '3.11' }}
+        if: ${{ matrix.os != 'ubuntu-latest' || matrix.python-version != '3.11' }}
         run: |
           source $VENV
           cd tests/
