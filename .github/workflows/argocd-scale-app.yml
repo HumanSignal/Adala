@@ -33,7 +33,7 @@ env:
   DOMAIN: "dev.heartex.com"
   TEMPLATE_DIR: "vars/aws/dev.heartex.com/k8s/prompt/templates/adala"
   APPS_DIR: "vars/aws/dev.heartex.com/k8s/prompt"
-  REPLICA_COUNT_VALUES_YAML_KEY: ".app.deployment.replicaCount"
+  REPLICA_COUNT_VALUES_YAML_KEY: ".*.deployment.replicaCount"
 
 jobs:
 

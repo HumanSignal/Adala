@@ -27,8 +27,8 @@ env:
   DOMAIN: "dev.heartex.com"
   TEMPLATE_DIR: "vars/aws/dev.heartex.com/k8s/prompt/templates/adala"
   APPS_DIR: "vars/aws/dev.heartex.com/k8s/prompt"
-  DOCKER_IMAGE_VALUES_YAML_KEY: ".app.deployment.image.tag"
-  REPLICA_COUNT_VALUES_YAML_KEY: ".app.deployment.replicaCount"
+  DOCKER_IMAGE_VALUES_YAML_KEY: ".*.deployment.image.tag"
+  REPLICA_COUNT_VALUES_YAML_KEY: ".*.deployment.replicaCount"
 
 jobs:
 
