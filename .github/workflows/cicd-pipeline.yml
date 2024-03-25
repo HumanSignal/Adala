@@ -29,3 +29,14 @@ jobs:
       sha: ${{ github.event.pull_request.head.sha || github.event.after }}
       branch_name: ${{ github.event.pull_request.head.ref || github.ref_name }}
     secrets: inherit
+
+  deploy:
+    name: "Deploy"
+    if: github.event_name == 'pull_request_target'
+    uses: ./.github/workflows/argocd-create-app.yml
+    needs:
+      - build
+    with:
+      docker_image_version: ${{ needs.build.outputs.image_version }}
+      branch_name: ${{ github.event.pull_request.head.ref || github.ref_name }}
+    secrets: inherit
