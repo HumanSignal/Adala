@@ -212,6 +212,7 @@ class Agent(BaseModel, ABC):
             raise ValueError(f"Teacher Runtime is requested, but it was not set."
                              f"Please provide a teacher runtime in the agent's constructor explicitly:"
                              f"agent = Agent(..., teacher_runtimes={{'default': OpenAIChatRuntime(model='gpt-4')}})")
+        return runtime
 
     def run(
         self, input: InternalDataFrame = None, runtime: Optional[str] = None
