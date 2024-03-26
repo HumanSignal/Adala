@@ -2,15 +2,17 @@ import logging
 import pickle
 from enum import Enum
 from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar
+import os
 
 import fastapi
 from adala.agents import Agent
-from aiokafka import AIOKafkaClient
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pydantic.functional_validators import AfterValidator
 from typing_extensions import Annotated
+import uvicorn
+from redis import Redis
 
 from log_middleware import LogMiddleware
 from tasks.process_file import app as celery_app
@@ -196,27 +198,21 @@ async def ready():
     """
     Check if the app is ready to serve requests.
 
-    See if we can reach kafka. If not, raise a 500 error. Else, return 200.
+    See if we can reach redis. If not, raise a 500 error. Else, return 200.
     """
     try:
-        kafka_client = AIOKafkaClient()
-        # node_id = kafka_client.get_random_node()
-        # kafka_is_ready = await kafka_client.ready(node_id)
-
-        # await kafka_client.bootstrap()
-        kafka_is_ready = any(
-            [conn.connected() for conn in kafka_client._conns]
-        )
-
-        # NOTE: leaving some things I tried above, but currently it doesn't
-        #       seem there's a simple way to check whether kafka is ready
-        kafka_is_ready = True
+        redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+        redis_conn = Redis.from_url(redis_url, socket_connect_timeout=1)
+        redis_conn.ping()
     except Exception as exception:
         raise HTTPException(
             status_code=500,
-            detail=f'Error when checking Kafka connection: {exception}',
+            detail=f'Error when checking Redis connection: {exception}',
         )
-    if not kafka_is_ready:
-        raise HTTPException(status_code=500, detail='No connection to Kafka')
 
     return {'status': 'ok'}
+
+
+if __name__ == '__main__':
+    # for debugging
+    uvicorn.run("app:app", host='0.0.0.0', port=30001)
