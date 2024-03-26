@@ -139,3 +139,14 @@ class StaticEnvironment(Environment):
         """
         raise NotImplementedError("StaticEnvironment does not support save/restore.")
 
+    def initialize(self):
+        """
+        Initialize the StaticEnvironment.
+        """
+        pass
+
+    def finalize(self):
+        """
+        Finalize the StaticEnvironment.
+        """
+        pass
