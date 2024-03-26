@@ -196,18 +196,8 @@ async def ready():
     """
     Check if the app is ready to serve requests.
 
-    See if we can reach kafka and celery. If not, raise a 500 error. Else, return 200.
+    See if we can reach kafka. If not, raise a 500 error. Else, return 200.
     """
-    try:
-        insp = celery_app.control.inspect()
-        celery_is_ready = insp.ping()
-    except Exception as exception:
-        raise HTTPException(
-            status_code=500,
-            detail=f'Error when checking Celery connection: {exception}',
-        )
-    if not celery_is_ready:
-        raise HTTPException(status_code=500, detail='No connection to Celery')
     try:
         kafka_client = AIOKafkaClient()
         # node_id = kafka_client.get_random_node()
