@@ -1,15 +1,20 @@
-import fastapi
 import logging
 import pickle
 from enum import Enum
+from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar
+
+import fastapi
+from adala.agents import Agent
+from aiokafka import AIOKafkaClient
+from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Generic, TypeVar, Optional, List, Dict, Any, Literal
-from typing_extensions import Annotated
 from pydantic import BaseModel
 from pydantic.functional_validators import AfterValidator
-from adala.agents import Agent
-from tasks.process_file import process_file
+from typing_extensions import Annotated
+
 from log_middleware import LogMiddleware
+from tasks.process_file import app as celery_app
+from tasks.process_file import process_file
 
 logger = logging.getLogger(__name__)
 
@@ -174,3 +179,54 @@ def cancel_job(job_id):
     return Response[JobStatusResponse](
         data=JobStatusResponse(status=Status.CANCELED)
     )
+
+
+@app.get('/health')
+async def health():
+    """
+    Check if the app is alive.
+
+    If app is alive (e.g. started), returns status code 200.
+    """
+    return {'status': 'ok'}
+
+
+@app.get('/ready')
+async def ready():
+    """
+    Check if the app is ready to serve requests.
+
+    See if we can reach kafka and celery. If not, raise a 500 error. Else, return 200.
+    """
+    try:
+        insp = celery_app.control.inspect()
+        celery_is_ready = insp.ping()
+    except Exception as exception:
+        raise HTTPException(
+            status_code=500,
+            detail=f'Error when checking Celery connection: {exception}',
+        )
+    if not celery_is_ready:
+        raise HTTPException(status_code=500, detail='No connection to Celery')
+    try:
+        kafka_client = AIOKafkaClient()
+        # node_id = kafka_client.get_random_node()
+        # kafka_is_ready = await kafka_client.ready(node_id)
+
+        # await kafka_client.bootstrap()
+        kafka_is_ready = any(
+            [conn.connected() for conn in kafka_client._conns]
+        )
+
+        # NOTE: leaving some things I tried above, but currently it doesn't
+        #       seem there's a simple way to check whether kafka is ready
+        kafka_is_ready = True
+    except Exception as exception:
+        raise HTTPException(
+            status_code=500,
+            detail=f'Error when checking Kafka connection: {exception}',
+        )
+    if not kafka_is_ready:
+        raise HTTPException(status_code=500, detail='No connection to Kafka')
+
+    return {'status': 'ok'}
