@@ -1,15 +1,22 @@
-import fastapi
 import logging
 import pickle
 from enum import Enum
+from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar
+import os
+
+import fastapi
+from adala.agents import Agent
+from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Generic, TypeVar, Optional, List, Dict, Any, Literal
-from typing_extensions import Annotated
 from pydantic import BaseModel
 from pydantic.functional_validators import AfterValidator
-from adala.agents import Agent
-from tasks.process_file import process_file
+from typing_extensions import Annotated
+import uvicorn
+from redis import Redis
+
 from log_middleware import LogMiddleware
+from tasks.process_file import app as celery_app
+from tasks.process_file import process_file
 
 logger = logging.getLogger(__name__)
 
@@ -174,3 +181,38 @@ def cancel_job(job_id):
     return Response[JobStatusResponse](
         data=JobStatusResponse(status=Status.CANCELED)
     )
+
+
+@app.get('/health')
+async def health():
+    """
+    Check if the app is alive.
+
+    If app is alive (e.g. started), returns status code 200.
+    """
+    return {'status': 'ok'}
+
+
+@app.get('/ready')
+async def ready():
+    """
+    Check if the app is ready to serve requests.
+
+    See if we can reach redis. If not, raise a 500 error. Else, return 200.
+    """
+    try:
+        redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+        redis_conn = Redis.from_url(redis_url, socket_connect_timeout=1)
+        redis_conn.ping()
+    except Exception as exception:
+        raise HTTPException(
+            status_code=500,
+            detail=f'Error when checking Redis connection: {exception}',
+        )
+
+    return {'status': 'ok'}
+
+
+if __name__ == '__main__':
+    # for debugging
+    uvicorn.run("app:app", host='0.0.0.0', port=30001)
