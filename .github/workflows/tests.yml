@@ -87,14 +87,14 @@ jobs:
         run: |
           source $VENV
           cd tests/
-          poetry run pytest --junitxml coverage.xml --cov=. -vv
+          poetry run pytest -vv
 
       - name: Run tests with coverage
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' }}
         run: |
           source $VENV
           cd tests/
-          poetry run pytest --junitxml coverage.xml --cov=. -vv
+          poetry run pytest --cov=. --cov-report=xml -vv
 
       - name: Upload to Codecov
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' }}
