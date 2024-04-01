@@ -5,28 +5,7 @@ import aiohttp
 from rich import print
 
 from typing import Optional, Dict, Any, List
-
-
-def check_if_new_openai_version():
-    # check openai package version
-    from openai import __version__ as openai_version
-    from packaging import version
-
-    if version.parse(openai_version) >= version.parse("1.0.0"):
-        return True
-    else:
-        return False
-
-
-# if version is higher than 1.0.0, then import OpenAI class
-if check_if_new_openai_version():
-    from openai import OpenAI, NotFoundError
-# otherwise, use old style API
-else:
-    import openai
-
-    OpenAI = Any
-
+from openai import OpenAI, NotFoundError
 from pydantic import model_validator, field_validator, ValidationInfo, Field
 from .base import Runtime, AsyncRuntime
 from adala.utils.logs import print_error
@@ -34,13 +13,6 @@ from adala.utils.internal_data import InternalDataFrame, InternalSeries
 from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.matching import match_options
 from tenacity import retry, stop_after_attempt, wait_random
-
-
-@retry(wait=wait_random(min=5, max=10), stop=stop_after_attempt(3))
-def chat_completion_call(model, messages):
-    return openai.ChatCompletion.create(
-        model=model, messages=messages, timeout=120, request_timeout=120
-    )
 
 
 DEFAULT_CREATE_COMPLETION_URL = "https://api.openai.com/v1/chat/completions"
@@ -172,14 +144,6 @@ async def async_concurrent_create_completion(
         responses = await asyncio.gather(*tasks)
         return responses
 
-
-@retry(wait=wait_random(min=5, max=10), stop=stop_after_attempt(3))
-def chat_completion_call(model, messages):
-    return openai.ChatCompletion.create(
-        model=model, messages=messages, timeout=120, request_timeout=120
-    )
-
-
 class OpenAIChatRuntime(Runtime):
     """
     Runtime that uses [OpenAI API](https://openai.com/) and chat completion models to perform the skill.
@@ -200,32 +164,16 @@ class OpenAIChatRuntime(Runtime):
     _client: OpenAI = None
 
     def init_runtime(self) -> "Runtime":
-        # check openai package version
-        if check_if_new_openai_version():
-            if self._client is None:
-                self._client = OpenAI(api_key=self.openai_api_key)
+        if self._client is None:
+            self._client = OpenAI(api_key=self.openai_api_key)
 
-            # check model availability
-            try:
-                self._client.models.retrieve(self.openai_model)
-            except NotFoundError:
-                raise ValueError(
-                    f'Requested model "{self.openai_model}" is not available in your OpenAI account.'
-                )
-        else:
-            # deprecated
-            models = openai.Model.list(api_key=self.openai_api_key)
-            models = set(model["id"] for model in models["data"])
-            if self.openai_model not in models:
-                print_error(
-                    f'Requested model "{self.openai_model}" is not available in your OpenAI account. '
-                    f"Available models are: {models}\n\n"
-                    f"Try to change the runtime settings for {self.__class__.__name__}, for example:\n\n"
-                    f'{self.__class__.__name__}(..., model="gpt-3.5-turbo")\n\n'
-                )
-                raise ValueError(
-                    f"Requested model {self.openai_model} is not available in your OpenAI account."
-                )
+        # check model availability
+        try:
+            self._client.models.retrieve(self.openai_model)
+        except NotFoundError:
+            raise ValueError(
+                f'Requested model "{self.openai_model}" is not available in your OpenAI account.'
+            )
         return self
 
     def execute(self, messages: List):
@@ -235,15 +183,10 @@ class OpenAIChatRuntime(Runtime):
         if self.verbose:
             print(f"OpenAI request: {messages}")
 
-        if check_if_new_openai_version():
-            completion = self._client.chat.completions.create(
-                model=self.openai_model, messages=messages
-            )
-            completion_text = completion.choices[0].message.content
-        else:
-            # deprecated
-            completion = chat_completion_call(self.openai_model, messages)
-            completion_text = completion.choices[0]["message"]["content"]
+        completion = self._client.chat.completions.create(
+            model=self.openai_model, messages=messages
+        )
+        completion_text = completion.choices[0].message.content
 
         if self.verbose:
             print(f"OpenAI response: {completion_text}")
@@ -340,32 +283,16 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
     _client: OpenAI = None
 
     def init_runtime(self) -> "Runtime":
-        # check openai package version
-        if check_if_new_openai_version():
-            if self._client is None:
-                self._client = OpenAI(api_key=self.openai_api_key)
+        if self._client is None:
+            self._client = OpenAI(api_key=self.openai_api_key)
 
-            # check model availability
-            try:
-                self._client.models.retrieve(self.openai_model)
-            except NotFoundError:
-                raise ValueError(
-                    f'Requested model "{self.openai_model}" is not available in your OpenAI account.'
-                )
-        else:
-            # deprecated
-            models = openai.Model.list(api_key=self.openai_api_key)
-            models = set(model["id"] for model in models["data"])
-            if self.openai_model not in models:
-                print_error(
-                    f'Requested model "{self.openai_model}" is not available in your OpenAI account. '
-                    f"Available models are: {models}\n\n"
-                    f"Try to change the runtime settings for {self.__class__.__name__}, for example:\n\n"
-                    f'{self.__class__.__name__}(..., model="gpt-3.5-turbo")\n\n'
-                )
-                raise ValueError(
-                    f"Requested model {self.openai_model} is not available in your OpenAI account."
-                )
+        # check model availability
+        try:
+            self._client.models.retrieve(self.openai_model)
+        except NotFoundError:
+            raise ValueError(
+                f'Requested model "{self.openai_model}" is not available in your OpenAI account.'
+            )
         return self
 
     def _prepare_prompt(

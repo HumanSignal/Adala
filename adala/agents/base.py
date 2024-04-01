@@ -9,7 +9,6 @@ from adala.environments.base import Environment, AsyncEnvironment, EnvironmentFe
 from adala.environments.static_env import StaticEnvironment
 from adala.runtimes.base import Runtime, AsyncRuntime
 from adala.runtimes._openai import OpenAIChatRuntime
-from adala.runtimes import GuidanceRuntime
 from adala.skills._base import Skill
 from adala.memories.base import Memory
 from adala.skills.skillset import SkillSet, LinearSkillSet
@@ -54,23 +53,15 @@ class Agent(BaseModel, ABC):
     memory: Memory = Field(default=None)
     runtimes: Dict[str, SerializeAsAny[Union[Runtime, AsyncRuntime]]] = Field(
         default_factory=lambda: {
-            "default": GuidanceRuntime()
-            # 'openai': OpenAIChatRuntime(model='gpt-3.5-turbo'),
-            # 'llama2': LLMRuntime(
-            #     llm_runtime_type=LLMRuntimeModelType.Transformers,
-            #     llm_params={
-            #         'model': 'meta-llama/Llama-2-7b',
-            #         'device': 'cuda:0',
-            #     }
-            # )
+            "default": OpenAIChatRuntime(model='gpt-3.5-turbo')
         }
     )
+    default_runtime: str = "default"
     teacher_runtimes: Dict[str, SerializeAsAny[Runtime]] = Field(
         default_factory=lambda: {
             "default": None
         }
     )
-    default_runtime: str = "default"
     default_teacher_runtime: str = "default"
 
     class Config:

@@ -25,7 +25,7 @@ class BaseModelInRegistry(BaseModel, ABC):
         type = cls.__name__
 
         if type in _registry:
-            raise ValueError(f"Class type '{type}' is already registered. "
+            logger.warning(f"Class type '{type}' is already registered. "
                              f"Available types: {list(_registry.keys())}")
 
         _registry[type] = cls

@@ -1,25 +1,25 @@
-from utils import patching, PatchedCalls
+from utils import patching, PatchedCalls, OpenaiChatCompletionMock
 
 
 @patching(
-    target_function=PatchedCalls.OPENAI_MODEL_LIST.value,
-    data=[
-        {
-            "input": {},
-            "output": {
-                "data": [{"id": "gpt-3.5-turbo"}, {"id": "gpt-3.5-turbo-instruct"}]
-            },
-        }
-    ],
+    target_function=PatchedCalls.OPENAI_MODEL_RETRIEVE.value,
+    data=[{"input": {}, "output": {}}],
 )
 @patching(
-    target_function=PatchedCalls.GUIDANCE.value,
+    target_function=PatchedCalls.OPENAI_CHAT_COMPLETION.value,
     data=[
         {
             "input": {
-                "input": 'Input JSON format: {"a": 1, "b": 2}\nInput JSON format: {"a": 3, "b": 4}\nInput JSON format: {"a": 5, "b": 6}'
+                "model": "gpt-3.5-turbo",
+                "messages": [
+                    {'role': 'system', 'content': 'Generate Python code that takes the input JSON and returns the output JSON'},
+                    {'role': 'user', 'content': 'Input JSON format: {"a": 1, "b": 2}\n'
+                                                'Input JSON format: {"a": 3, "b": 4}\n'
+                                                'Input JSON format: {"a": 5, "b": 6}\n'
+                                                'Code: '},
+                ],
             },
-            "output": {"code": "def convert(input_json):\npass"},
+            "output": OpenaiChatCompletionMock("def convert(input_json):\npass"),
         }
     ],
 )

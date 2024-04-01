@@ -13,6 +13,8 @@ class VectorDBMemory(Memory):
     """
 
     db_name: str = ""
+    openai_api_key: str
+    openai_embedding_model: str = "text-embedding-ada-002"
     _client = None
     _collection = None
     _embedding_function = None
@@ -21,7 +23,8 @@ class VectorDBMemory(Memory):
     def init_database(self):
         self._client = chromadb.Client()
         self._embedding_function = embedding_functions.OpenAIEmbeddingFunction(
-            model_name="text-embedding-ada-002"
+            model_name=self.openai_embedding_model,
+            api_key=self.openai_api_key
         )
         self._collection = self._client.get_or_create_collection(
             name=self.db_name, embedding_function=self._embedding_function
