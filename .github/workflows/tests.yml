@@ -86,15 +86,13 @@ jobs:
         if: ${{ matrix.os != 'ubuntu-latest' || matrix.python-version != '3.11' }}
         run: |
           source $VENV
-          cd tests/
-          poetry run pytest -vv
+          poetry run pytest tests/ -vv
 
       - name: Run tests with coverage
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' }}
         run: |
           source $VENV
-          cd tests/
-          poetry run pytest --cov=. --cov-report=xml -vv
+          poetry run pytest tests/ --cov=. --cov-report=xml -vv
 
       - name: Upload to Codecov
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' }}
