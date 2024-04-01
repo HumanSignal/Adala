@@ -8,6 +8,7 @@ on:
       - 'tests/**'
       - '.github/workflows/tests.yml'
       - '**/requirements**'
+      - 'codecov.yml'
     tags-ignore:
       - '**'
   pull_request:
