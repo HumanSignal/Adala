@@ -41,12 +41,16 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
                     msg = await asyncio.wait_for(consumer.getone(), timeout=timeout)
                     yield msg.value
                 except asyncio.TimeoutError:
-                    print_text(f"No message received within the timeout {timeout} seconds")
+                    print_text(
+                        f"No message received within the timeout {timeout} seconds"
+                    )
                     break
         finally:
             await consumer.stop()
 
-    async def message_sender(self, producer: AIOKafkaProducer, data: Iterable, topic: str):
+    async def message_sender(
+        self, producer: AIOKafkaProducer, data: Iterable, topic: str
+    ):
         await producer.start()
         try:
             for record in data:
@@ -70,20 +74,22 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         consumer = AIOKafkaConsumer(
             self.kafka_input_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
-            value_deserializer=lambda v: json.loads(v.decode('utf-8')),
-            auto_offset_reset='earliest',
-            group_id='adala-consumer-group'  # TODO: make it configurable based on the environment
+            value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+            auto_offset_reset="earliest",
+            group_id="adala-consumer-group",  # TODO: make it configurable based on the environment
         )
 
         data_stream = self.message_receiver(consumer)
         batch = await self.get_next_batch(data_stream, batch_size)
-        logger.info(f"Received a batch of {len(batch)} records from Kafka topic {self.kafka_input_topic}")
+        logger.info(
+            f"Received a batch of {len(batch)} records from Kafka topic {self.kafka_input_topic}"
+        )
         return InternalDataFrame(batch)
 
     async def set_predictions(self, predictions: InternalDataFrame):
         producer = AIOKafkaProducer(
             bootstrap_servers=self.kafka_bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode('utf-8')
+            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
         )
         predictions_iter = (r.to_dict() for _, r in predictions.iterrows())
         await self.message_sender(producer, predictions_iter, self.kafka_output_topic)
@@ -109,7 +115,7 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
         Read data from the CSV file and push it to the kafka topic.
         """
 
-        with open(csv_file_path, 'r') as csv_file:
+        with open(csv_file_path, "r") as csv_file:
             csv_reader = DictReader(csv_file)
             for row in csv_reader:
                 yield row
@@ -120,9 +126,9 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
         """
         # Assuming s3_uri format is "s3://bucket-name/path/to/file.csv"
         bucket_name, key = s3_uri.replace("s3://", "").split("/", 1)
-        s3 = boto3.client('s3')
+        s3 = boto3.client("s3")
         obj = s3.get_object(Bucket=bucket_name, Key=key)
-        data = obj['Body'].read().decode('utf-8')
+        data = obj["Body"].read().decode("utf-8")
         csv_reader = DictReader(StringIO(data))
         for row in csv_reader:
             yield row
@@ -140,7 +146,7 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
 
         producer = AIOKafkaProducer(
             bootstrap_servers=self.kafka_bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode('utf-8')
+            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
         )
 
         await self.message_sender(producer, csv_reader, self.kafka_input_topic)
@@ -153,53 +159,79 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
         consumer = AIOKafkaConsumer(
             self.kafka_output_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
-            value_deserializer=lambda v: json.loads(v.decode('utf-8')),
-            auto_offset_reset='earliest',
-            group_id='consumer-group-output-topic'  # TODO: make it configurable based on the environment
+            value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+            auto_offset_reset="earliest",
+            group_id="consumer-group-output-topic",  # TODO: make it configurable based on the environment
         )
 
         data_stream = self.message_receiver(consumer)
 
         if self.output_file.startswith("s3://"):
-            await self._write_to_s3(self.output_file, self.error_file, data_stream, self.pass_through_columns)
+            await self._write_to_s3(
+                self.output_file,
+                self.error_file,
+                data_stream,
+                self.pass_through_columns,
+            )
         else:
-            await self._write_to_local(self.output_file, self.error_file, data_stream, self.pass_through_columns)
+            await self._write_to_local(
+                self.output_file,
+                self.error_file,
+                data_stream,
+                self.pass_through_columns,
+            )
 
-    async def _write_to_csv_fileobj(self, fileobj, error_fileobj, data_stream, column_names):
+    async def _write_to_csv_fileobj(
+        self, fileobj, error_fileobj, data_stream, column_names
+    ):
         csv_writer, error_csv_writer = None, None
-        error_columns = ['index', 'message', 'details']
+        error_columns = ["index", "message", "details"]
         while True:
             try:
                 record = await anext(data_stream)
-                if record.get('error') == True:
+                if record.get("error") == True:
                     logger.error(f"Error occurred while processing record: {record}")
                     if error_csv_writer is None:
-                        error_csv_writer = DictWriter(error_fileobj, fieldnames=error_columns)
+                        error_csv_writer = DictWriter(
+                            error_fileobj, fieldnames=error_columns
+                        )
                         error_csv_writer.writeheader()
-                    error_csv_writer.writerow({k: record.get(k, '') for k in error_columns})
+                    error_csv_writer.writerow(
+                        {k: record.get(k, "") for k in error_columns}
+                    )
                 else:
                     if csv_writer is None:
                         if column_names is None:
                             column_names = list(record.keys())
                         csv_writer = DictWriter(fileobj, fieldnames=column_names)
                         csv_writer.writeheader()
-                    csv_writer.writerow({k: record.get(k, '') for k in column_names})
+                    csv_writer.writerow({k: record.get(k, "") for k in column_names})
             except StopAsyncIteration:
                 break
 
-    async def _write_to_local(self, file_path: str, error_file_path: str, data_stream, column_names):
-        with open(file_path, 'w') as csv_file, open(error_file_path, 'w') as error_file:
-            await self._write_to_csv_fileobj(csv_file, error_file, data_stream, column_names)
+    async def _write_to_local(
+        self, file_path: str, error_file_path: str, data_stream, column_names
+    ):
+        with open(file_path, "w") as csv_file, open(error_file_path, "w") as error_file:
+            await self._write_to_csv_fileobj(
+                csv_file, error_file, data_stream, column_names
+            )
 
-    async def _write_to_s3(self, s3_uri: str, s3_uri_errors: str, data_stream, column_names):
+    async def _write_to_s3(
+        self, s3_uri: str, s3_uri_errors: str, data_stream, column_names
+    ):
         # Assuming s3_uri format is "s3://bucket-name/path/to/file.csv"
         bucket_name, key = s3_uri.replace("s3://", "").split("/", 1)
         error_bucket_name, error_key = s3_uri_errors.replace("s3://", "").split("/", 1)
-        s3 = boto3.client('s3')
+        s3 = boto3.client("s3")
         with StringIO() as csv_file, StringIO() as error_file:
-            await self._write_to_csv_fileobj(csv_file, error_file, data_stream, column_names)
+            await self._write_to_csv_fileobj(
+                csv_file, error_file, data_stream, column_names
+            )
             s3.put_object(Bucket=bucket_name, Key=key, Body=csv_file.getvalue())
-            s3.put_object(Bucket=error_bucket_name, Key=error_key, Body=error_file.getvalue())
+            s3.put_object(
+                Bucket=error_bucket_name, Key=error_key, Body=error_file.getvalue()
+            )
 
     async def get_feedback(
         self,
@@ -214,4 +246,3 @@ class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
 
     async def save(self):
         raise NotImplementedError("Save is not supported in Kafka environment")
-

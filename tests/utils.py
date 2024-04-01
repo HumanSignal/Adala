@@ -1,24 +1,42 @@
 import enum
+from dataclasses import dataclass
 from unittest.mock import patch
+from typing import List
+from pydantic import field_validator
 
 
 class PatchedCalls(enum.Enum):
     GUIDANCE = "guidance._program.Program.__call__"
     # OPENAI_MODEL_LIST = 'openai.models.list'
-    OPENAI_MODEL_LIST = "openai.api_resources.model.Model.list"
-    OPENAI_CHAT_COMPLETION = (
-        "openai.api_resources.chat_completion.ChatCompletion.create"
-    )
-    OPENAI_EMBEDDING_CREATE = "openai.Embedding.create"
+    OPENAI_MODEL_RETRIEVE = "openai.resources.models.Models.retrieve"
+    OPENAI_CHAT_COMPLETION = "openai.resources.chat.completions.Completions.create"
+    OPENAI_EMBEDDING_CREATE = "openai.resources.embeddings.Embeddings.create"
+
+
+@dataclass
+class OpenaiChatCompletionMessageMock(object):
+    content: str
+
+
+@dataclass
+class OpenaiChatCompletionChoiceMock(object):
+    message: OpenaiChatCompletionMessageMock
 
 
 class OpenaiChatCompletionMock(object):
-    def __init__(self, content):
-        self.content = content
+    """
+    Currently, OpenAI python client expects the following API response structure:
 
-    def __getattr__(self, item):
-        if item == "choices":
-            return [{"message": {"content": self.content}}]
+    completion.choices[0].message.content
+
+    """
+
+    def __init__(self, content):
+        self.choices = [
+            OpenaiChatCompletionChoiceMock(
+                message=OpenaiChatCompletionMessageMock(content=content)
+            )
+        ]
 
 
 def patching(target_function, data, strict=False):

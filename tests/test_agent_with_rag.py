@@ -1,32 +1,21 @@
 import pandas as pd
 
 from utils import patching, PatchedCalls, OpenaiChatCompletionMock, mdict
+from openai.types import CreateEmbeddingResponse, Embedding
 
 
 @patching(
-    target_function=PatchedCalls.OPENAI_MODEL_LIST.value,
+    target_function=PatchedCalls.OPENAI_MODEL_RETRIEVE.value,
     data=[
         # calling API model list for the student runtime
         {
             "input": {},
-            "output": {
-                "data": [
-                    {"id": "gpt-3.5-turbo-instruct"},
-                    {"id": "gpt-3.5-turbo"},
-                    {"id": "gpt-4"},
-                ]
-            },
+            "output": {},
         },
         # calling API model list for the teacher runtime
         {
             "input": {},
-            "output": {
-                "data": [
-                    {"id": "gpt-3.5-turbo-instruct"},
-                    {"id": "gpt-3.5-turbo"},
-                    {"id": "gpt-4"},
-                ]
-            },
+            "output": {},
         },
     ],
 )
@@ -48,7 +37,7 @@ from utils import patching, PatchedCalls, OpenaiChatCompletionMock, mdict
                     },
                 ],
             },
-            "output": OpenaiChatCompletionMock(content="happy"),
+            "output": OpenaiChatCompletionMock("happy"),
         },
         {
             "input": {
@@ -64,7 +53,7 @@ from utils import patching, PatchedCalls, OpenaiChatCompletionMock, mdict
                     },
                 ],
             },
-            "output": OpenaiChatCompletionMock(content="sad"),  # wrong prediction
+            "output": OpenaiChatCompletionMock("sad"),  # wrong prediction
         },
         {
             "input": {
@@ -80,16 +69,16 @@ from utils import patching, PatchedCalls, OpenaiChatCompletionMock, mdict
                     },
                 ],
             },
-            "output": OpenaiChatCompletionMock(content="neutral"),  # wrong prediction
+            "output": OpenaiChatCompletionMock("neutral"),  # wrong prediction
         },
         # Backward pass for the student runtime
         {
             "input": {"model": "gpt-4"},
-            "output": OpenaiChatCompletionMock(content="Reasoning..."),
+            "output": OpenaiChatCompletionMock("Reasoning..."),
         },
         {
             "input": {"model": "gpt-4"},
-            "output": OpenaiChatCompletionMock(content="IMPROVED INSTRUCTION!"),
+            "output": OpenaiChatCompletionMock("IMPROVED INSTRUCTION!"),
         },
         # Forward pass for the student runtime, 2nd iteration, RAG is now updated
         {
@@ -115,7 +104,7 @@ Emotions: """,
                     },
                 ],
             },
-            "output": OpenaiChatCompletionMock(content="happy"),
+            "output": OpenaiChatCompletionMock("happy"),
         },
         {
             "input": {
@@ -166,7 +155,7 @@ Emotions: """,
                     },
                 ],
             },
-            "output": OpenaiChatCompletionMock(content="sad"),
+            "output": OpenaiChatCompletionMock("sad"),
         },
     ],
     strict=False,
@@ -180,16 +169,17 @@ Emotions: """,
                 "model": "text-embedding-ada-002",
                 "input": ["Text: I am happy", "Text: I am angry", "Text: I am sad"],
             },
-            "output": {
-                "data": [
-                    {"index": 0, "embedding": [1, 0, 0]},
-                    {
-                        "index": 1,
-                        "embedding": [1, 1, 0],
-                    },  # assume angry is closer to happy than sad
-                    {"index": 2, "embedding": [0, 0, 1]},
-                ]
-            },
+            "output": CreateEmbeddingResponse(
+                data=[
+                    Embedding(index=0, embedding=[1, 0, 0], object="embedding"),
+                    Embedding(index=1, embedding=[1, 1, 0], object="embedding"),
+                    # assume angry is closer to happy than sad
+                    Embedding(index=2, embedding=[0, 0, 1], object="embedding"),
+                ],
+                model="text-embedding-ada-002",
+                object="list",
+                usage={"prompt_tokens": 0, "total_tokens": 0},
+            ),
         },
         # calculate embedding on error example while improving RAG skill
         {
@@ -200,12 +190,16 @@ Emotions: """,
                     "Text: I am sad",  # error example
                 ],
             },
-            "output": {
-                "data": [
-                    {"index": 0, "embedding": [1, 1, 0]},
-                    {"index": 1, "embedding": [0, 0, 1]},
-                ]
-            },
+            "output": CreateEmbeddingResponse(
+                data=[
+                    Embedding(index=1, embedding=[1, 1, 0], object="embedding"),
+                    # assume angry is closer to happy than sad
+                    Embedding(index=2, embedding=[0, 0, 1], object="embedding"),
+                ],
+                model="text-embedding-ada-002",
+                object="list",
+                usage={"prompt_tokens": 0, "total_tokens": 0},
+            ),
         },
         # calculate embeddings on 2nd forward pass for the student runtime
         {
@@ -213,13 +207,17 @@ Emotions: """,
                 "model": "text-embedding-ada-002",
                 "input": ["Text: I am happy", "Text: I am angry", "Text: I am sad"],
             },
-            "output": {
-                "data": [
-                    {"index": 0, "embedding": [1, 0, 0]},
-                    {"index": 1, "embedding": [1, 1, 0]},
-                    {"index": 2, "embedding": [0, 0, 1]},
-                ]
-            },
+            "output": CreateEmbeddingResponse(
+                data=[
+                    Embedding(index=0, embedding=[1, 0, 0], object="embedding"),
+                    Embedding(index=1, embedding=[1, 1, 0], object="embedding"),
+                    # assume angry is closer to happy than sad
+                    Embedding(index=2, embedding=[0, 0, 1], object="embedding"),
+                ],
+                model="text-embedding-ada-002",
+                object="list",
+                usage={"prompt_tokens": 0, "total_tokens": 0},
+            ),
         },
     ],
 )
@@ -228,6 +226,9 @@ def test_rag_with_openai_chat_completion():
     from adala.skills import LinearSkillSet, ClassificationSkill, RAGSkill  # type: ignore
     from adala.environments import StaticEnvironment  # type: ignore
     from adala.runtimes import OpenAIChatRuntime  # type: ignore
+    from adala.memories import VectorDBMemory  # type: ignore
+
+    memory = VectorDBMemory(db_name="emotions", openai_api_key="abcde")
 
     agent = Agent(
         skills=LinearSkillSet(
@@ -238,6 +239,7 @@ def test_rag_with_openai_chat_completion():
                     output_template="{examples}",
                     rag_input_template="Text: {text}\nEmotions: {emotions}",
                     num_results=2,
+                    memory=memory,
                 ),
                 ClassificationSkill(
                     name="emotions",

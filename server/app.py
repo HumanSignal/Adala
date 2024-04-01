@@ -29,7 +29,7 @@ app.add_middleware(
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_credentials=True
+    allow_credentials=True,
 )
 app.add_middleware(LogMiddleware)
 
@@ -52,6 +52,7 @@ class JobCreated(BaseModel):
     """
     Response model for a job created.
     """
+
     job_id: str
 
 
@@ -82,6 +83,7 @@ class SubmitRequest(BaseModel):
             }
         task_name (str): The name of the task to be executed by the agent.
     """
+
     agent: Agent
     task_name: str = "process_file"
 
@@ -112,11 +114,11 @@ async def submit(request: SubmitRequest):
 
 
 class Status(Enum):
-    PENDING = 'Pending'
-    INPROGRESS = 'InProgress'
-    COMPLETED = 'Completed'
-    FAILED = 'Failed'
-    CANCELED = 'Canceled'
+    PENDING = "Pending"
+    INPROGRESS = "InProgress"
+    COMPLETED = "Completed"
+    FAILED = "Failed"
+    CANCELED = "Canceled"
 
 
 class JobStatusResponse(BaseModel):
@@ -128,6 +130,7 @@ class JobStatusResponse(BaseModel):
         processed_total (List[int]): The total number of processed records and the total number of records in job.
             Example: [10, 100] means 10% of the completeness.
     """
+
     status: Status
     # processed_total: List[int] = Annotated[List[int], AfterValidator(lambda x: len(x) == 2)]
 
@@ -135,7 +138,7 @@ class JobStatusResponse(BaseModel):
         use_enum_values = True
 
 
-@app.get('/jobs/{job_id}', response_model=Response[JobStatusResponse])
+@app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])
 def get_status(job_id):
     """
     Get the status of a job.
@@ -147,12 +150,12 @@ def get_status(job_id):
         JobStatusResponse: The response model for getting the status of a job.
     """
     celery_status_map = {
-        'PENDING': Status.PENDING,
-        'STARTED': Status.INPROGRESS,
-        'SUCCESS': Status.COMPLETED,
-        'FAILURE': Status.FAILED,
-        'REVOKED': Status.CANCELED,
-        'RETRY': Status.INPROGRESS
+        "PENDING": Status.PENDING,
+        "STARTED": Status.INPROGRESS,
+        "SUCCESS": Status.COMPLETED,
+        "FAILURE": Status.FAILED,
+        "REVOKED": Status.CANCELED,
+        "RETRY": Status.INPROGRESS,
     }
     job = process_file.AsyncResult(job_id)
     try:
@@ -165,7 +168,7 @@ def get_status(job_id):
     return Response[JobStatusResponse](data=JobStatusResponse(status=status))
 
 
-@app.delete('/jobs/{job_id}', response_model=Response[JobStatusResponse])
+@app.delete("/jobs/{job_id}", response_model=Response[JobStatusResponse])
 def cancel_job(job_id):
     """
     Cancel a job.
@@ -178,22 +181,20 @@ def cancel_job(job_id):
     """
     job = process_file.AsyncResult(job_id)
     job.revoke()
-    return Response[JobStatusResponse](
-        data=JobStatusResponse(status=Status.CANCELED)
-    )
+    return Response[JobStatusResponse](data=JobStatusResponse(status=Status.CANCELED))
 
 
-@app.get('/health')
+@app.get("/health")
 async def health():
     """
     Check if the app is alive.
 
     If app is alive (e.g. started), returns status code 200.
     """
-    return {'status': 'ok'}
+    return {"status": "ok"}
 
 
-@app.get('/ready')
+@app.get("/ready")
 async def ready():
     """
     Check if the app is ready to serve requests.
@@ -201,18 +202,18 @@ async def ready():
     See if we can reach redis. If not, raise a 500 error. Else, return 200.
     """
     try:
-        redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+        redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
         redis_conn = Redis.from_url(redis_url, socket_connect_timeout=1)
         redis_conn.ping()
     except Exception as exception:
         raise HTTPException(
             status_code=500,
-            detail=f'Error when checking Redis connection: {exception}',
+            detail=f"Error when checking Redis connection: {exception}",
         )
 
-    return {'status': 'ok'}
+    return {"status": "ok"}
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # for debugging
-    uvicorn.run("app:app", host='0.0.0.0', port=30001)
+    uvicorn.run("app:app", host="0.0.0.0", port=30001)

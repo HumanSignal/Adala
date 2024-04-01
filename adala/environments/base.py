@@ -133,7 +133,6 @@ class Environment(BaseModelInRegistry):
 
 
 class AsyncEnvironment(Environment, ABC):
-
     @abstractmethod
     async def initialize(self):
         """

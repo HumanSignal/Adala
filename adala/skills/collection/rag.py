@@ -45,14 +45,8 @@ class RAGSkill(TransformSkill):
     instructions: str = ""
     output_template: str = "{rag}"
     num_results: int = 1
-    memory: Memory = None
+    memory: Memory
     only_errors: bool = True
-
-    @model_validator(mode="after")
-    def init_memory(self):
-        if self.memory is None:
-            self.memory = VectorDBMemory(db_name=self.name)
-        return self
 
     def apply(
         self,

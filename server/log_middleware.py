@@ -36,7 +36,7 @@ class LogMiddleware(BaseHTTPMiddleware):
             extra={
                 "method": request.method,
                 "url": str(request.url),
-                "status_code": response.status_code
+                "status_code": response.status_code,
             },
         )
         return response
