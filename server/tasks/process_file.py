@@ -6,11 +6,11 @@ from celery import Celery
 
 logger = logging.getLogger(__name__)
 
-REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
-app = Celery('worker', broker=REDIS_URL, backend=REDIS_URL)
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+app = Celery("worker", broker=REDIS_URL, backend=REDIS_URL)
 
 
-@app.task(name='process_file', track_started=True)
+@app.task(name="process_file", track_started=True)
 def process_file(serialized_agent: bytes):
     # Load the agent
     agent = pickle.loads(serialized_agent)
@@ -22,4 +22,3 @@ def process_file(serialized_agent: bytes):
     #
     # dump the output to a file
     asyncio.run(agent.environment.finalize())
-

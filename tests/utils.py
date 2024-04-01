@@ -9,18 +9,19 @@ class PatchedCalls(enum.Enum):
     GUIDANCE = "guidance._program.Program.__call__"
     # OPENAI_MODEL_LIST = 'openai.models.list'
     OPENAI_MODEL_RETRIEVE = "openai.resources.models.Models.retrieve"
-    OPENAI_CHAT_COMPLETION = (
-        "openai.resources.chat.completions.Completions.create"
-    )
+    OPENAI_CHAT_COMPLETION = "openai.resources.chat.completions.Completions.create"
     OPENAI_EMBEDDING_CREATE = "openai.resources.embeddings.Embeddings.create"
+
 
 @dataclass
 class OpenaiChatCompletionMessageMock(object):
     content: str
 
+
 @dataclass
 class OpenaiChatCompletionChoiceMock(object):
     message: OpenaiChatCompletionMessageMock
+
 
 class OpenaiChatCompletionMock(object):
     """
@@ -31,7 +32,11 @@ class OpenaiChatCompletionMock(object):
     """
 
     def __init__(self, content):
-        self.choices = [OpenaiChatCompletionChoiceMock(message=OpenaiChatCompletionMessageMock(content=content))]
+        self.choices = [
+            OpenaiChatCompletionChoiceMock(
+                message=OpenaiChatCompletionMessageMock(content=content)
+            )
+        ]
 
 
 def patching(target_function, data, strict=False):

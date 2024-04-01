@@ -15,7 +15,7 @@ from ._base import (
     TransformSkill,
     SampleTransformSkill,
     AnalysisSkill,
-    SynthesisSkill
+    SynthesisSkill,
 )
 
 
@@ -57,13 +57,17 @@ class SkillSet(BaseModel, ABC):
             elif isinstance(v[0], dict):
                 # convert list of skill dictionaries to dictionary
                 for skill in v:
-                    if 'type' not in skill:
+                    if "type" not in skill:
                         raise ValueError("Skill dictionary must contain a 'type' key")
-                    skills[skill["name"]] = Skill.create_from_registry(skill.pop('type'), **skill)
+                    skills[skill["name"]] = Skill.create_from_registry(
+                        skill.pop("type"), **skill
+                    )
         elif isinstance(v, dict):
             skills = v
         else:
-            raise ValueError(f"skills must be a list or dictionary, but received type {type(v)}")
+            raise ValueError(
+                f"skills must be a list or dictionary, but received type {type(v)}"
+            )
         return skills
 
     @abstractmethod

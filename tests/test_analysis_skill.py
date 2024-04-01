@@ -12,11 +12,17 @@ from utils import patching, PatchedCalls, OpenaiChatCompletionMock
             "input": {
                 "model": "gpt-3.5-turbo",
                 "messages": [
-                    {'role': 'system', 'content': 'Generate Python code that takes the input JSON and returns the output JSON'},
-                    {'role': 'user', 'content': 'Input JSON format: {"a": 1, "b": 2}\n'
-                                                'Input JSON format: {"a": 3, "b": 4}\n'
-                                                'Input JSON format: {"a": 5, "b": 6}\n'
-                                                'Code: '},
+                    {
+                        "role": "system",
+                        "content": "Generate Python code that takes the input JSON and returns the output JSON",
+                    },
+                    {
+                        "role": "user",
+                        "content": 'Input JSON format: {"a": 1, "b": 2}\n'
+                        'Input JSON format: {"a": 3, "b": 4}\n'
+                        'Input JSON format: {"a": 5, "b": 6}\n'
+                        "Code: ",
+                    },
                 ],
             },
             "output": OpenaiChatCompletionMock("def convert(input_json):\npass"),

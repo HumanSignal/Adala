@@ -53,7 +53,9 @@ async def async_create_completion(
     if not semaphore:
         semaphore = asyncio.Semaphore(1)
     if not session:
-        session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=default_timeout))
+        session = aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=default_timeout)
+        )
     messages = [{"role": "user", "content": user_prompt}]
     if system_prompt:
         if instruction_first:
@@ -64,21 +66,20 @@ async def async_create_completion(
     try:
         async with semaphore, session.post(
             DEFAULT_CREATE_COMPLETION_URL,
-            headers={"Authorization": f'Bearer {openai_api_key}'},
+            headers={"Authorization": f"Bearer {openai_api_key}"},
             json={
                 "messages": messages,
                 "model": model,
                 "max_tokens": max_tokens,
                 "temperature": temperature,
-            }
+            },
         ) as response:
-
-                response.raise_for_status()
-                response_json = await response.json()
-                completion_text = response_json["choices"][0]["message"]["content"]
-                return {
-                    "text": completion_text,
-                }
+            response.raise_for_status()
+            response_json = await response.json()
+            completion_text = response_json["choices"][0]["message"]["content"]
+            return {
+                "text": completion_text,
+            }
     except aiohttp.ClientResponseError as e:
         # Handle HTTP errors
         return {
@@ -143,6 +144,7 @@ async def async_concurrent_create_completion(
             tasks.append(task)
         responses = await asyncio.gather(*tasks)
         return responses
+
 
 class OpenAIChatRuntime(Runtime):
     """
@@ -365,18 +367,21 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
 
                 # parse responses, optionally match it with options
                 for prompt, response in zip(prompts, responses):
-
                     # check for errors - if any, append to outputs and continue
                     if response.get("error"):
                         outputs.append(response)
                         if self.verbose:
-                            print_error(f"Prompt: {prompt}\nOpenAI API error: {response}")
+                            print_error(
+                                f"Prompt: {prompt}\nOpenAI API error: {response}"
+                            )
                         continue
 
                     # otherwise, append the response to outputs
                     completion_text = response["text"]
                     if self.verbose:
-                        print(f"Prompt: {prompt}\nOpenAI API response: {completion_text}")
+                        print(
+                            f"Prompt: {prompt}\nOpenAI API response: {completion_text}"
+                        )
                     if name in options:
                         completion_text = match_options(completion_text, options[name])
                     outputs.append({name: completion_text})
@@ -396,7 +401,6 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
     ) -> Dict[str, str]:
-
         raise NotImplementedError("record_to_record is not implemented")
 
 
