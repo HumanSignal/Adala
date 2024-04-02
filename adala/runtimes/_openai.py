@@ -7,11 +7,9 @@ from rich import print
 from typing import Optional, Dict, Any, List
 from openai import OpenAI, NotFoundError
 from pydantic import (
-    model_validator,
-    field_validator,
-    ValidationInfo,
     Field,
     computed_field,
+    ConfigDict
 )
 from .base import Runtime, AsyncRuntime
 from adala.utils.logs import print_error
@@ -162,8 +160,7 @@ class OpenAIChatRuntime(Runtime):
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
     """
 
-    class Config:
-        arbitrary_types_allowed = True  # for @computed_field
+    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
 
     openai_model: str = Field(alias="model")
     openai_api_key: Optional[str] = Field(
