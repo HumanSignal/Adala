@@ -6,7 +6,7 @@ from rich import print
 
 from typing import Optional, Dict, Any, List
 from openai import OpenAI, NotFoundError
-from pydantic import model_validator, field_validator, ValidationInfo, Field
+from pydantic import Field, computed_field, ConfigDict
 from .base import Runtime, AsyncRuntime
 from adala.utils.logs import print_error
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
@@ -156,6 +156,8 @@ class OpenAIChatRuntime(Runtime):
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
     """
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
+
     openai_model: str = Field(alias="model")
     openai_api_key: Optional[str] = Field(
         default=os.getenv("OPENAI_API_KEY"), alias="api_key"
@@ -163,12 +165,11 @@ class OpenAIChatRuntime(Runtime):
     max_tokens: Optional[int] = 1000
     splitter: Optional[str] = None
 
-    _client: OpenAI = None
+    @computed_field
+    def _client(self) -> OpenAI:
+        return OpenAI(api_key=self.openai_api_key)
 
     def init_runtime(self) -> "Runtime":
-        if self._client is None:
-            self._client = OpenAI(api_key=self.openai_api_key)
-
         # check model availability
         try:
             self._client.models.retrieve(self.openai_model)
@@ -282,15 +283,11 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
     concurrent_clients: Optional[int] = 10
     timeout: Optional[int] = 10
 
-    _client: OpenAI = None
-
     def init_runtime(self) -> "Runtime":
-        if self._client is None:
-            self._client = OpenAI(api_key=self.openai_api_key)
-
         # check model availability
         try:
-            self._client.models.retrieve(self.openai_model)
+            _client = OpenAI(api_key=self.openai_api_key)
+            _client.models.retrieve(self.openai_model)
         except NotFoundError:
             raise ValueError(
                 f'Requested model "{self.openai_model}" is not available in your OpenAI account.'
