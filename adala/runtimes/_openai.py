@@ -6,11 +6,7 @@ from rich import print
 
 from typing import Optional, Dict, Any, List
 from openai import OpenAI, NotFoundError
-from pydantic import (
-    Field,
-    computed_field,
-    ConfigDict
-)
+from pydantic import Field, computed_field, ConfigDict
 from .base import Runtime, AsyncRuntime
 from adala.utils.logs import print_error
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
@@ -288,7 +284,6 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
     timeout: Optional[int] = 10
 
     def init_runtime(self) -> "Runtime":
-
         # check model availability
         try:
             _client = OpenAI(api_key=self.openai_api_key)
