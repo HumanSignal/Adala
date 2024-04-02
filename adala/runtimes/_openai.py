@@ -170,9 +170,6 @@ class OpenAIChatRuntime(Runtime):
         return OpenAI(api_key=self.openai_api_key)
 
     def init_runtime(self) -> "Runtime":
-        if self._client is None:
-            self._client = OpenAI(api_key=self.openai_api_key)
-
         # check model availability
         try:
             self._client.models.retrieve(self.openai_model)
@@ -286,15 +283,12 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
     concurrent_clients: Optional[int] = 10
     timeout: Optional[int] = 10
 
-    _client: OpenAI = None
-
     def init_runtime(self) -> "Runtime":
-        if self._client is None:
-            self._client = OpenAI(api_key=self.openai_api_key)
 
         # check model availability
         try:
-            self._client.models.retrieve(self.openai_model)
+            _client = OpenAI(api_key=self.openai_api_key)
+            _client.models.retrieve(self.openai_model)
         except NotFoundError:
             raise ValueError(
                 f'Requested model "{self.openai_model}" is not available in your OpenAI account.'
