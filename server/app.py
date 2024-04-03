@@ -208,8 +208,8 @@ async def submit_batch(batch: BatchData):
 
     topic = f"adala-input-{batch.job_id}"
     producer = AIOKafkaProducer(
-            bootstrap_servers="kafka:9093", # TODO
-            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+        bootstrap_servers="kafka:9093",  # TODO
+        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
     )
     await producer.start()
 
@@ -217,7 +217,7 @@ async def submit_batch(batch: BatchData):
         for record in batch.data:
             await producer.send_and_wait(topic, value=record)
     finally:
-            await producer.stop()
+        await producer.stop()
 
     return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
