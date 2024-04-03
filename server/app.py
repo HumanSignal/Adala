@@ -3,9 +3,11 @@ import pickle
 from enum import Enum
 from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar
 import os
+import json
 
 import fastapi
 from adala.agents import Agent
+from aiokafka import AIOKafkaProducer
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -16,7 +18,7 @@ from redis import Redis
 
 from log_middleware import LogMiddleware
 from tasks.process_file import app as celery_app
-from tasks.process_file import process_file
+from tasks.process_file import process_file, process_file_streaming
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +58,39 @@ class JobCreated(BaseModel):
     job_id: str
 
 
+class BatchSubmitted(BaseModel):
+    """
+    Response model for a batch submitted.
+    """
+
+    job_id: str
+
+
+class Status(Enum):
+    PENDING = "Pending"
+    INPROGRESS = "InProgress"
+    COMPLETED = "Completed"
+    FAILED = "Failed"
+    CANCELED = "Canceled"
+
+
+class JobStatusResponse(BaseModel):
+    """
+    Response model for getting the status of a job.
+
+    Attributes:
+        status (str): The status of the job.
+        processed_total (List[int]): The total number of processed records and the total number of records in job.
+            Example: [10, 100] means 10% of the completeness.
+    """
+
+    status: Status
+    # processed_total: List[int] = Annotated[List[int], AfterValidator(lambda x: len(x) == 2)]
+
+    class Config:
+        use_enum_values = True
+
+
 class SubmitRequest(BaseModel):
     """
     Request model for submitting a job.
@@ -88,6 +123,25 @@ class SubmitRequest(BaseModel):
     task_name: str = "process_file"
 
 
+class SubmitStreamingRequest(BaseModel):
+    """
+    Request model for submitting a streaming job.
+    Only difference from SubmitRequest is the task_name
+    """
+
+    agent: Agent
+    task_name: str = "process_file_streaming"
+
+
+class BatchData(BaseModel):
+    """
+    Model for a batch of data submitted to a streaming job
+    """
+
+    job_id: str
+    data: List[dict]
+
+
 @app.get("/")
 def get_index():
     return {"status": "ok"}
@@ -104,38 +158,68 @@ async def submit(request: SubmitRequest):
     Returns:
         Response[JobCreated]: The response model for a job created.
     """
+
     # TODO: get task by name, e.g. request.task_name
     task = process_file
     serialized_agent = pickle.dumps(request.agent)
+
     logger.debug(f"Submitting task {task.name} with agent {serialized_agent}")
     result = task.delay(serialized_agent=serialized_agent)
     logger.debug(f"Task {task.name} submitted with job_id {result.id}")
+
     return Response[JobCreated](data=JobCreated(job_id=result.id))
 
 
-class Status(Enum):
-    PENDING = "Pending"
-    INPROGRESS = "InProgress"
-    COMPLETED = "Completed"
-    FAILED = "Failed"
-    CANCELED = "Canceled"
-
-
-class JobStatusResponse(BaseModel):
+@app.post("/jobs/submit-streaming", response_model=Response[JobCreated])
+async def submit_streaming(request: SubmitStreamingRequest):
     """
-    Response model for getting the status of a job.
+    Submit a request to execute task `request.task_name` in celery.
 
-    Attributes:
-        status (str): The status of the job.
-        processed_total (List[int]): The total number of processed records and the total number of records in job.
-            Example: [10, 100] means 10% of the completeness.
+    Args:
+        request (SubmitStreamingRequest): The request model for submitting a job.
+
+    Returns:
+        Response[JobCreated]: The response model for a job created.
     """
 
-    status: Status
-    # processed_total: List[int] = Annotated[List[int], AfterValidator(lambda x: len(x) == 2)]
+    # TODO: get task by name, e.g. request.task_name
+    task = process_file_streaming
+    serialized_agent = pickle.dumps(request.agent)
 
-    class Config:
-        use_enum_values = True
+    logger.debug(f"Submitting task {task.name} with agent {serialized_agent}")
+    result = task.delay(serialized_agent=serialized_agent)
+    logger.debug(f"Task {task.name} submitted with job_id {result.id}")
+
+    return Response[JobCreated](data=JobCreated(job_id=result.id))
+
+
+@app.post("/jobs/submit-batch", response_model=Response)
+async def submit_batch(batch: BatchData):
+    """
+    Submits a batch of data to an existing streaming job.
+    Will push the batch of data into Kafka in a topic specific to the job ID
+
+    Args:
+        batch (BatchData): The data to push to Kafka queue to be processed by agent.arun()
+
+    Returns:
+        Response: Generic response indicating status of request
+    """
+
+    topic = f"adala-input-{batch.job_id}"
+    producer = AIOKafkaProducer(
+            bootstrap_servers="kafka:9093", # TODO
+            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+    )
+    await producer.start()
+
+    try:
+        for record in batch.data:
+            await producer.send_and_wait(topic, value=record)
+    finally:
+            await producer.stop()
+
+    return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
 
 @app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])

@@ -22,3 +22,17 @@ def process_file(serialized_agent: bytes):
     #
     # dump the output to a file
     asyncio.run(agent.environment.finalize())
+
+
+@app.task(name="process_file_streaming", track_started=True, bind=True)
+def process_file_streaming(self, serialized_agent: bytes):
+    # Load the agent
+    agent = pickle.loads(serialized_agent)
+
+    # Get own job ID to set Consumer topic accordingly
+    job_id = self.request.id
+    agent.environment.kafka_input_topic = f"adala-input-{job_id}"
+    agent.environment.kafka_output_topic = f"adala-output-{job_id}"
+
+    # Run the agent
+    asyncio.run(agent.arun())
