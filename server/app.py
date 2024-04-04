@@ -1,13 +1,13 @@
 import logging
 import pickle
 from enum import Enum
-from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union, Callable
 import os
 import json
 
 import fastapi
 from adala.agents import Agent
-from aiokafka import AIOKafkaProducer
+from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -16,6 +16,7 @@ from pydantic.functional_validators import AfterValidator
 from typing_extensions import Annotated
 import uvicorn
 from redis import Redis
+from contextlib import asynccontextmanager
 
 from log_middleware import LogMiddleware
 from tasks.process_file import app as celery_app
@@ -35,7 +36,17 @@ class Settings(BaseSettings):
     )
 settings = Settings()
 
-app = fastapi.FastAPI()
+@asynccontextmanager
+async def lifespan(app: fastapi.FastAPI):
+    # startup events happen here - spawn reusable kafka topics/groups/partitions
+    # https://stackoverflow.com/a/65183219
+    # https://fastapi.tiangolo.com/advanced/events/#lifespan-function
+
+    yield
+
+    # shutdown events happen here
+
+app = fastapi.FastAPI(lifespan=lifespan)
 
 # TODO: add a correct middleware policy to handle CORS
 app.add_middleware(
@@ -175,15 +186,48 @@ async def submit(request: SubmitRequest):
     task = process_file
     serialized_agent = pickle.dumps(request.agent)
 
-    logger.debug(f"Submitting task {task.name} with agent {serialized_agent}")
+    logger.info(f"Submitting task {task.name} with agent {serialized_agent}")
     result = task.delay(serialized_agent=serialized_agent)
-    logger.debug(f"Task {task.name} submitted with job_id {result.id}")
+    logger.info(f"Task {task.name} submitted with job_id {result.id}")
 
     return Response[JobCreated](data=JobCreated(job_id=result.id))
 
 
+async def poll_for_streaming_results(job_id: str, batch_size: int, handler: Callable[List[dict], None]):
+    """
+    Poll for results in the kafka output topic and handle them.
+    """
+    logger.info(f"Polling for results {job_id=}")
+
+    consumer = AIOKafkaConsumer(
+        f"adala-output-{job_id}",
+        bootstrap_servers=settings.kafka_bootstrap_servers,
+        value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+        auto_offset_reset="earliest",
+        # group_id="adala-consumer-group",
+    )
+    await consumer.start()
+    logger.info(f"consumer started {job_id=}")
+
+    try:
+        data = await consumer.getmany(timeout_ms=30_000, max_records=batch_size)
+        logger.info(f"got batch {data=}")
+        for tp, messages in data.items():
+            assert tp.topic == f"adala-output-{job_id}", f"Unexpected topic: {tp.topic}"
+            if messages:
+                handler(messages)
+            else:
+                logger.info(f"No messages in topic {tp.topic}")
+            if len(messages) > batch_size:
+                # assume we're done
+                logger.info(f"End of stream in topic {tp.topic}")
+                break
+    finally:
+        await consumer.stop()
+
+
 @app.post("/jobs/submit-streaming", response_model=Response[JobCreated])
-async def submit_streaming(request: SubmitStreamingRequest):
+async def submit_streaming(request: SubmitStreamingRequest, background_tasks: fastapi.BackgroundTasks):
     """
     Submit a request to execute task `request.task_name` in celery.
 
@@ -198,9 +242,13 @@ async def submit_streaming(request: SubmitStreamingRequest):
     task = process_file_streaming
     serialized_agent = pickle.dumps(request.agent)
 
-    logger.debug(f"Submitting task {task.name} with agent {serialized_agent}")
+    logger.info(f"Submitting task {task.name} with agent {serialized_agent}")
     result = task.delay(serialized_agent=serialized_agent)
-    logger.debug(f"Task {task.name} submitted with job_id {result.id}")
+    # TODO pass batch size in request?
+    # TODO pass handler in request
+    dummy_handler = lambda batch: logger.info(f"Batch: {batch}")
+    background_tasks.add_task(poll_for_streaming_results, job_id=result.id, batch_size=2, handler=dummy_handler)
+    logger.info(f"Task {task.name} submitted with job_id {result.id}")
 
     return Response[JobCreated](data=JobCreated(job_id=result.id))
 
