@@ -24,7 +24,11 @@ from tasks.process_file import process_file, process_file_streaming
 logger = logging.getLogger(__name__)
 
 class Settings(BaseSettings):
-    kafka_bootstraps_servers: Union[str, List[str]]
+    '''
+    Can hardcode settings here, read from env file, or pass as env vars
+    https://docs.pydantic.dev/latest/concepts/pydantic_settings/#field-value-priority
+    '''
+    kafka_bootstrap_servers: Union[str, List[str]]
 
     model_config = SettingsConfigDict(
         env_file='.env',
@@ -216,7 +220,7 @@ async def submit_batch(batch: BatchData):
 
     topic = f"adala-input-{batch.job_id}"
     producer = AIOKafkaProducer(
-        bootstrap_servers=settings.kafka_bootstraps_servers,
+        bootstrap_servers=settings.kafka_bootstrap_servers,
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
     )
     await producer.start()
