@@ -1,7 +1,7 @@
 import logging
 import pickle
 from enum import Enum
-from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar
+from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 import os
 import json
 
@@ -11,6 +11,7 @@ from aiokafka import AIOKafkaProducer
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic.functional_validators import AfterValidator
 from typing_extensions import Annotated
 import uvicorn
@@ -22,6 +23,13 @@ from tasks.process_file import process_file, process_file_streaming
 
 logger = logging.getLogger(__name__)
 
+class Settings(BaseSettings):
+    kafka_bootstraps_servers: Union[str, List[str]]
+
+    model_config = SettingsConfigDict(
+        env_file='.env',
+    )
+settings = Settings()
 
 app = fastapi.FastAPI()
 
@@ -208,7 +216,7 @@ async def submit_batch(batch: BatchData):
 
     topic = f"adala-input-{batch.job_id}"
     producer = AIOKafkaProducer(
-        bootstrap_servers="kafka:9093",  # TODO
+        bootstrap_servers=settings.kafka_bootstraps_servers,
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
     )
     await producer.start()
