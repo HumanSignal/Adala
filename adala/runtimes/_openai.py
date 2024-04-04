@@ -167,7 +167,10 @@ class OpenAIChatRuntime(Runtime):
 
     @computed_field
     def _client(self) -> OpenAI:
-        return OpenAI(api_key=self.openai_api_key)
+        return OpenAI(
+            api_key=self.openai_api_key,
+            base_url=DEFAULT_CREATE_COMPLETION_URL
+        )
 
     def init_runtime(self) -> "Runtime":
         # check model availability
@@ -286,7 +289,10 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
     def init_runtime(self) -> "Runtime":
         # check model availability
         try:
-            _client = OpenAI(api_key=self.openai_api_key)
+            _client = OpenAI(
+                api_key=self.openai_api_key,
+                base_url=DEFAULT_CREATE_COMPLETION_URL
+            )
             _client.models.retrieve(self.openai_model)
         except NotFoundError:
             raise ValueError(
