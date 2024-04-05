@@ -82,7 +82,7 @@ jobs:
           channel-id: 'C02LMULF4NA'
           payload: '{ "type": "mrkdwn", "text": "${{ env.SLACK_MESSAGE }}" }'
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_LSE_BOT_TOKEN }}
           SLACK_MESSAGE: >-
             *Drafted PR's*\n
             ${{ steps.mutation_step.outputs.pr_list }}
