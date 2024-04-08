@@ -54,7 +54,7 @@ async def async_process_streaming_output(job_id: str, batch_size: int):
         topic,
         bootstrap_servers=settings.kafka_bootstrap_servers,
         value_deserializer=lambda v: json.loads(v.decode("utf-8")),
-        auto_offset_reset="earliest"
+        auto_offset_reset="earliest",
     )
     await consumer.start()
     logger.info(f"consumer started {job_id=}")

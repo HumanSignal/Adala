@@ -19,12 +19,15 @@ from redis import Redis
 
 from log_middleware import LogMiddleware
 from tasks.process_file import app as celery_app
-from tasks.process_file import process_file, process_file_streaming, process_streaming_output
+from tasks.process_file import (
+    process_file,
+    process_file_streaming,
+    process_streaming_output,
+)
 from utils import dummy_handler, get_input_topic, Settings
 
 
 logger = logging.getLogger(__name__)
-
 
 
 class Settings(BaseSettings):
