@@ -11,6 +11,7 @@ from aiokafka import AIOKafkaProducer
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic.functional_validators import AfterValidator
 from typing_extensions import Annotated
 import uvicorn
@@ -21,7 +22,22 @@ from tasks.process_file import app as celery_app
 from tasks.process_file import process_file, process_file_streaming, process_streaming_output
 from utils import dummy_handler, get_input_topic, Settings
 
+
 logger = logging.getLogger(__name__)
+
+
+
+class Settings(BaseSettings):
+    """
+    Can hardcode settings here, read from env file, or pass as env vars
+    https://docs.pydantic.dev/latest/concepts/pydantic_settings/#field-value-priority
+    """
+
+    kafka_bootstrap_servers: Union[str, List[str]]
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+    )
 
 
 settings = Settings()

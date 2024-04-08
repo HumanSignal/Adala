@@ -1,0 +1,88 @@
+name: "Convert stale PR's to drafts"
+
+on:
+  schedule:
+    - cron:  '0 */1 * * *' # At minute 0 past every hour.
+  workflow_dispatch:
+
+env:
+  DRAFT_PROTECT_LABEL: "draft-protect"
+
+jobs:
+  convert_stale_prs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: hmarr/debug-action@v3.0.0
+
+      - id: get_timestamp
+        name: Get timestamp
+        shell: bash
+        run: echo "ts=$(date -d '10 hours ago' +"%Y-%m-%dT%H:%M:%S")" >> $GITHUB_OUTPUT
+
+      - uses: octokit/graphql-action@v2.3.0
+        name: Get PR older than 10 hours
+        id: get_stale_prs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_PAT }}
+        with:
+          query: |
+            {
+              search(query: "repo:${{ github.repository }} is:pr is:open draft:false -label:${{ env.DRAFT_PROTECT_LABEL }} updated:<=${{ steps.get_timestamp.outputs.ts }}", type: ISSUE, first: 100) {
+                issueCount
+                edges {
+                  node {
+                    ... on PullRequest {
+                      number
+                      url
+                      id
+                      updatedAt
+                    }
+                  }
+                }
+              }
+            }
+
+      - name: Stale PRs data
+        run: "echo '${{ steps.get_stale_prs.outputs.data }}'"
+
+      - name: Convert to draft
+        id: mutation_step
+        shell: bash
+        env:
+          GIT_PAT: ${{ secrets.GIT_PAT }}
+        run: |
+          set -eux
+          echo '${{ steps.get_stale_prs.outputs.data }}' > /tmp/stale_pr.json
+          _pr_list=$(jq -r '.search.edges | map(.node.url) | join("\\n")' < /tmp/stale_pr.json)
+          if [ -n "$_pr_list" ]; then
+            echo "pr_list=$_pr_list" >> $GITHUB_OUTPUT
+            echo "exec=true" >> $GITHUB_OUTPUT
+            echo "$GIT_PAT" | gh auth login --with-token
+            for pr_id in $(jq -r '.search.edges[].node.id' < /tmp/stale_pr.json); do
+              gh api graphql -F id="${pr_id}" -f query='
+                mutation($id: ID!) {
+                  convertPullRequestToDraft(input: { pullRequestId: $id }) {
+                    pullRequest {
+                      id
+                      number
+                      isDraft
+                    }
+                  }
+                }
+              '
+            done
+          fi
+
+      - name: Post to a Slack channel
+        id: slack
+        if: ${{ steps.mutation_step.outputs.exec == 'true' }}
+        uses: slackapi/slack-github-action@v1.25
+        with:
+          channel-id: 'C02LMULF4NA'
+          payload: '{ "type": "mrkdwn", "text": "${{ env.SLACK_MESSAGE }}" }'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_LSE_BOT_TOKEN }}
+          SLACK_MESSAGE: >-
+            *Drafted PR's*\n
+            ${{ steps.mutation_step.outputs.pr_list }}
