@@ -55,7 +55,7 @@ jobs:
 
   deploy:
     name: "Deploy"
-    if: github.event_name == 'pull_request_target' && needs.details.outputs.membership
+    if: github.event_name == 'pull_request' && needs.details.outputs.membership
     uses: ./.github/workflows/argocd-create-app.yml
     needs:
       - details
