@@ -34,6 +34,7 @@ redis-om = "*"
 fastapi = "^0.104.1"
 celery = {version = "^5.3.6", extras = ["redis"]}
 uvicorn = "*"
+pydantic-settings = "^2.2.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.3"

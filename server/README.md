@@ -1,5 +1,11 @@
 # run in Docker
 
+## setup config
+
+```bash
+cp .env.example .env
+```
+
 ## set environment variables
 
 - AWS creds:
