@@ -32,7 +32,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     kafka_input_topic: str
     kafka_output_topic: str
 
-    async def message_receiver(self, consumer: AIOKafkaConsumer, timeout: int = 3):
+    async def message_receiver(self, consumer: AIOKafkaConsumer, timeout: int = 30):
         await consumer.start()
         try:
             while True:

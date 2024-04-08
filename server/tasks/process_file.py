@@ -1,9 +1,13 @@
 import asyncio
+import json
 import pickle
 import os
 import logging
+
+from aiokafka import AIOKafkaConsumer
 from celery import Celery
-from server.utils import get_input_topic, get_output_topic
+from server.utils import dummy_handler, get_input_topic, get_output_topic, Settings
+from typing import Callable
 
 
 logger = logging.getLogger(__name__)
@@ -38,3 +42,35 @@ def process_file_streaming(self, serialized_agent: bytes):
 
     # Run the agent
     asyncio.run(agent.arun())
+
+
+async def async_process_streaming_output(job_id: str, batch_size: int):
+    logger.info(f"Polling for results {job_id=}")
+
+    topic = get_output_topic(job_id)
+    settings = Settings()
+
+    consumer = AIOKafkaConsumer(
+        topic,
+        bootstrap_servers=settings.kafka_bootstrap_servers,
+        value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+        auto_offset_reset="earliest"
+    )
+    await consumer.start()
+    logger.info(f"consumer started {job_id=}")
+
+    try:
+        data = await consumer.getmany(timeout_ms=30_000, max_records=batch_size)
+        logger.info(f"got batch {data=}")
+        for tp, messages in data.items():
+            if messages:
+                dummy_handler(messages)
+            else:
+                logger.info(f"No messages in topic {tp.topic}")
+    finally:
+        await consumer.stop()
+
+
+@app.task(name="process_streaming_output", track_started=True)
+def process_streaming_output(job_id: str, batch_size: int = 2):
+    asyncio.run(async_process_streaming_output(job_id, batch_size))
