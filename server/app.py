@@ -1,14 +1,13 @@
 import logging
 import pickle
 from enum import Enum
-from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union, Callable
+from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 import os
 import json
-import asyncio
 
 import fastapi
 from adala.agents import Agent
-from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
+from aiokafka import AIOKafkaProducer
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -17,20 +16,13 @@ from pydantic.functional_validators import AfterValidator
 from typing_extensions import Annotated
 import uvicorn
 from redis import Redis
-from contextlib import asynccontextmanager
-from fastapi.concurrency import run_in_threadpool
 
 from log_middleware import LogMiddleware
 from tasks.process_file import app as celery_app
 from tasks.process_file import process_file, process_file_streaming
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logging.basicConfig(
-    level='DEBUG',
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-)
+
 
 class Settings(BaseSettings):
     '''
@@ -42,20 +34,10 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file='.env',
     )
+
 settings = Settings()
 
-# this function is a no-op right now, just a demo for future work to reuse kafka topics.
-@asynccontextmanager
-async def lifespan(app: fastapi.FastAPI):
-    # startup events happen here - spawn reusable kafka topics/groups/partitions
-    # https://stackoverflow.com/a/65183219
-    # https://fastapi.tiangolo.com/advanced/events/#lifespan-function
-
-    yield
-
-    # shutdown events happen here
-
-app = fastapi.FastAPI(lifespan=lifespan)
+app = fastapi.FastAPI()
 
 # TODO: add a correct middleware policy to handle CORS
 app.add_middleware(
@@ -202,67 +184,8 @@ async def submit(request: SubmitRequest):
     return Response[JobCreated](data=JobCreated(job_id=result.id))
 
 
-async def poll_for_streaming_results(job_id: str, batch_size: int, handler: Callable[List[dict], None]):
-    """
-    Poll for results in the kafka output topic and handle them.
-    """
-    print(f"Polling for results {job_id=}", flush=True)
-
-    # have a startup time which is different from the poll interval to let the Runtime start producing results, since this function is called immediately from /submit_streaming
-    startup_time_sec = 1
-    poll_interval_sec = 1
-
-    consumer = AIOKafkaConsumer(
-        f"adala-output-{job_id}",
-        bootstrap_servers=settings.kafka_bootstrap_servers,
-        value_deserializer=lambda v: json.loads(v.decode("utf-8")),
-        auto_offset_reset="earliest",
-        # group_id="adala-consumer-group",
-    )
-    await consumer.start()
-    print(f"consumer started {job_id=}", flush=True)
-
-    await asyncio.sleep(startup_time_sec)
-
-    try:
-        finished = False
-        while not finished:
-            # getmany has a timeout_ms param which in theory should be able to replace this whole manual loop, but during testing, it was blocking handling of the next request for some reason, even though it's called await internally. Could be an aiokafka bug, could be incorrect usage.
-            data = await consumer.getmany(max_records=batch_size)
-            print(f"got batch {data=}", flush=True)
-            # should be only one topic_partition, the one we passed to AIOKafkaConsumer()
-            for topic_partition, messages in data.items():
-                if messages:
-
-                    # callback/handler/connector (pick a name) executes here for each batch
-                    handler(messages)
-
-                else:
-                    print(f"No messages for {job_id=}", flush=True)
-                if len(messages) < batch_size:
-                    # assume we're done if we get a partial batch. Not totally sold on this logic. Could try exponential backoff, etc.
-                    print(f"End of stream for {job_id=}", flush=True)
-                    finished = True
-
-            await asyncio.sleep(poll_interval_sec)
-
-    finally:
-        await consumer.stop()
-
-
-def poll_for_streaming_results_sync(job_id: str, batch_size: int, handler: Callable[List[dict], None]):
-    # wrapper for poll_for_streaming_results to be run in a threadpool to unblock the main thread
-    # this shouldn't be necessary, but there's still some problem with poll_for_streaming_results
-    asyncio.run(poll_for_streaming_results(job_id, batch_size, handler))
-
-
-# should probably stick all these in a separate file
-def dummy_handler(batch):
-    print(f"Batch: {batch}", flush=True)
-
-
 @app.post("/jobs/submit-streaming", response_model=Response[JobCreated])
-async def submit_streaming(request: SubmitStreamingRequest, background_tasks: fastapi.BackgroundTasks):
+async def submit_streaming(request: SubmitStreamingRequest):
     """
     Submit a request to execute task `request.task_name` in celery.
 
@@ -277,18 +200,8 @@ async def submit_streaming(request: SubmitStreamingRequest, background_tasks: fa
     task = process_file_streaming
     serialized_agent = pickle.dumps(request.agent)
 
-    # none of these logs are printing, even with `disable_existing_loggers: False` in the uvicorn log config. No idea why. print() works at least.
-    print(f"\n\n\n\n\n\nSubmitting task {task.name}", flush=True)
-    logger.info(f"\n\n\n\n\n\n2Submitting task {task.name} with agent {serialized_agent}")
-    logger.debug(f"\n\n\n\n\n\n3Submitting task {task.name} with agent {serialized_agent}")
-    logger.critical(f"\n\n\n\n\n\n4Submitting task {task.name} with agent {serialized_agent}")
-
+    logger.info(f"Submitting task {task.name} with agent {serialized_agent}")
     result = task.delay(serialized_agent=serialized_agent)
-    # TODO pass batch size in request?
-    # TODO pass handler (and params for it) in request
-    # background_tasks.add_task(poll_for_streaming_results, job_id=result.id, batch_size=2, handler=dummy_handler)
-    # the invocation below should run in a threadpool instead of in the main thread, because the function is not async, but this is still blocking the main thread??
-    background_tasks.add_task(poll_for_streaming_results_sync, job_id=result.id, batch_size=2, handler=dummy_handler)
     print(f"Task {task.name} submitted with job_id {result.id}")
 
     return Response[JobCreated](data=JobCreated(job_id=result.id))
