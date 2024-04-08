@@ -20,20 +20,23 @@ from redis import Redis
 from log_middleware import LogMiddleware
 from tasks.process_file import app as celery_app
 from tasks.process_file import process_file, process_file_streaming
+from utils import get_input_topic
 
 logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
-    '''
+    """
     Can hardcode settings here, read from env file, or pass as env vars
     https://docs.pydantic.dev/latest/concepts/pydantic_settings/#field-value-priority
-    '''
+    """
+
     kafka_bootstrap_servers: Union[str, List[str]]
 
     model_config = SettingsConfigDict(
-        env_file='.env',
+        env_file=".env",
     )
+
 
 settings = Settings()
 
@@ -220,7 +223,7 @@ async def submit_batch(batch: BatchData):
         Response: Generic response indicating status of request
     """
 
-    topic = f"adala-input-{batch.job_id}"
+    topic = get_input_topic(batch.job_id)
     producer = AIOKafkaProducer(
         bootstrap_servers=settings.kafka_bootstrap_servers,
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
