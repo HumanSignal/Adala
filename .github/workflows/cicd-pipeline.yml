@@ -32,7 +32,7 @@ jobs:
 
   deploy:
     name: "Deploy"
-    if: github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request_target' && !github.event.pull_request.head.repo.fork
     uses: ./.github/workflows/argocd-create-app.yml
     needs:
       - build
