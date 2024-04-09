@@ -3,7 +3,7 @@ import pickle
 import os
 import logging
 from celery import Celery
-from utils import get_input_topic, get_output_topic
+from server.utils import get_input_topic, get_output_topic
 
 
 logger = logging.getLogger(__name__)
