@@ -33,7 +33,6 @@ services:
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9093
       - REDIS_URL=redis://redis:6379/0
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9093
     command:
       ["poetry", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
   worker:
