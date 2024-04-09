@@ -39,4 +39,3 @@ def get_input_topic(job_id: str):
 
 def get_output_topic(job_id: str):
     return f"adala-output-{job_id}"
-
