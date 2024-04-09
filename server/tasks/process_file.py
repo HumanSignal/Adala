@@ -44,7 +44,9 @@ def process_file_streaming(self, serialized_agent: bytes):
     asyncio.run(agent.arun())
 
 
-async def async_process_streaming_output(input_job_id: str, result_handler: str, batch_size: int):
+async def async_process_streaming_output(
+    input_job_id: str, result_handler: str, batch_size: int
+):
     logger.info(f"Polling for results {input_job_id=}")
 
     try:
@@ -77,7 +79,7 @@ async def async_process_streaming_output(input_job_id: str, result_handler: str,
                     logger.info(f"No messages in topic {tp.topic}")
         finally:
             job = process_file_streaming.AsyncResult(input_job_id)
-            if job.status in ['SUCCESS', 'FAILURE', 'REVOKED']:
+            if job.status in ["SUCCESS", "FAILURE", "REVOKED"]:
                 input_job_running = False
                 logger.info(f"Input job done, stopping output job")
             else:
@@ -87,7 +89,9 @@ async def async_process_streaming_output(input_job_id: str, result_handler: str,
 
 
 @app.task(name="process_streaming_output", track_started=True, bind=True)
-def process_streaming_output(self, job_id: str, result_handler: str, batch_size: int = 2):
+def process_streaming_output(
+    self, job_id: str, result_handler: str, batch_size: int = 2
+):
     try:
         asyncio.run(async_process_streaming_output(job_id, result_handler, batch_size))
     except KeyError:

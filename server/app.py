@@ -216,7 +216,9 @@ async def submit_streaming(request: SubmitStreamingRequest):
 
     task = process_streaming_output
     logger.info(f"Submitting task {task.name}")
-    output_result = task.delay(job_id=input_job_id, result_handler=request.result_handler)
+    output_result = task.delay(
+        job_id=input_job_id, result_handler=request.result_handler
+    )
     output_job_id = output_result.id
     logger.info(f"Task {task.name} submitted with job_id {output_job_id}")
 
