@@ -24,7 +24,7 @@ from tasks.process_file import (
     process_file_streaming,
     process_streaming_output,
 )
-from utils import dummy_handler, get_input_topic, Settings
+from utils import get_input_topic, ResultHandler, Settings
 
 
 logger = logging.getLogger(__name__)
@@ -152,6 +152,7 @@ class SubmitStreamingRequest(BaseModel):
     """
 
     agent: Agent
+    result_handler: str
     task_name: str = "process_file_streaming"
 
 
@@ -215,7 +216,7 @@ async def submit_streaming(request: SubmitStreamingRequest):
 
     task = process_streaming_output
     logger.info(f"Submitting task {task.name}")
-    output_result = task.delay(job_id=input_job_id)
+    output_result = task.delay(job_id=input_job_id, result_handler=request.result_handler)
     output_job_id = output_result.id
     logger.info(f"Task {task.name} submitted with job_id {output_job_id}")
 
