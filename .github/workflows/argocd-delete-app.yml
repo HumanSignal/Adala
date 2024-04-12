@@ -29,8 +29,10 @@ env:
   APPS_DIR: "vars/aws/dev.heartex.com/k8s/prompt"
 
 jobs:
-
   destroy:
+    permissions:
+      contents: read
+      deployments: write
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
