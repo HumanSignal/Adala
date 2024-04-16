@@ -45,14 +45,17 @@ def process_file_streaming(self, serialized_agent: bytes):
 
 
 async def async_process_streaming_output(
-    input_job_id: str, result_handler: str, batch_size: int
+    input_job_id: str, serialized_result_handler: bytes, batch_size: int
 ):
     logger.info(f"Polling for results {input_job_id=}")
 
     try:
-        result_handler = ResultHandler.__dict__[result_handler]
-    except KeyError as e:
-        logger.error(f"{result_handler} is not a valid ResultHandler")
+        # result_handler = ResultHandler.__dict__[result_handler]
+        result_handler = pickle.loads(serialized_result_handler)
+        assert isinstance(result_handler, ResultHandler)
+    except Exception as e:
+        # logger.error(f"{result_handler} is not a valid ResultHandler")
+        logger.error(f"not a valid ResultHandler")
         raise e
 
     topic = get_output_topic(input_job_id)
@@ -90,11 +93,11 @@ async def async_process_streaming_output(
 
 @app.task(name="process_streaming_output", track_started=True, bind=True)
 def process_streaming_output(
-    self, job_id: str, result_handler: str, batch_size: int = 2
+    self, job_id: str, serialized_result_handler: bytes, batch_size: int = 2
 ):
     try:
-        asyncio.run(async_process_streaming_output(job_id, result_handler, batch_size))
-    except KeyError:
+        asyncio.run(async_process_streaming_output(job_id, serialized_result_handler, batch_size))
+    except Exception as e:
         # Set own status to failure
         self.update_state(state=states.FAILURE)
 
