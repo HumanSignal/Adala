@@ -3,9 +3,11 @@ import json
 
 # from enum import Enum
 from abc import abstractmethod
-from pydantic import BaseModel, computed_field, ConfigDict, model_validator
+from pydantic import BaseModel, computed_field, ConfigDict, model_validator, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Union
+
+from adala.utils.registry import BaseModelInRegistry
 
 from label_studio_sdk import Client
 
@@ -26,7 +28,7 @@ class Settings(BaseSettings):
     )
 
 
-class ResultHandler(BaseModel):
+class ResultHandler(BaseModelInRegistry):
 
     @abstractmethod
     def __call__(self, batch):

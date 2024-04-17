@@ -10,7 +10,7 @@ from adala.agents import Agent
 from aiokafka import AIOKafkaProducer
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, SerializeAsAny, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic.functional_validators import AfterValidator
 from typing_extensions import Annotated
@@ -148,12 +148,22 @@ class SubmitRequest(BaseModel):
 class SubmitStreamingRequest(BaseModel):
     """
     Request model for submitting a streaming job.
-    Only difference from SubmitRequest is the task_name
     """
 
     agent: Agent
-    result_handler: ResultHandler
+    # SerializeAsAny is for allowing subclasses of ResultHandler
+    result_handler: SerializeAsAny[ResultHandler]
     task_name: str = "process_file_streaming"
+
+    @field_validator("result_handler", mode="before")
+    def validate_result_handler(cls, value: Dict) -> ResultHandler:
+        '''
+        Allows polymorphism for ResultHandlers created from a dict; same implementation as the Skills, Environment, and Runtime within an Agent
+        '''
+        if "type" not in value:
+            raise HTTPException(status_code=400, detail="Missing type in result_handler")
+        result_handler = ResultHandler.create_from_registry(value.pop("type"), **value)
+        return result_handler
 
 
 class BatchData(BaseModel):

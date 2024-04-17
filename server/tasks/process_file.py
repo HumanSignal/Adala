@@ -49,11 +49,15 @@ async def async_process_streaming_output(
 ):
     logger.info(f"Polling for results {input_job_id=}")
 
+
     try:
+        import server.utils as utils
         # result_handler = ResultHandler.__dict__[result_handler]
         result_handler = pickle.loads(serialized_result_handler)
-        assert isinstance(result_handler, ResultHandler)
+        # assert isinstance(result_handler, ResultHandler)
     except Exception as e:
+        from celery.contrib import rdb
+        rdb.set_trace()
         # logger.error(f"{result_handler} is not a valid ResultHandler")
         logger.error(f"not a valid ResultHandler")
         raise e
