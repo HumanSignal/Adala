@@ -1,4 +1,3 @@
-
 import logging
 import json
 from abc import abstractmethod
@@ -12,12 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 class ResultHandler(BaseModelInRegistry):
-
     @abstractmethod
     def __call__(self, batch):
-        '''
+        """
         Callable to do something with a batch of results.
-        '''
+        """
+
 
 class DummyHandler(ResultHandler):
     """
@@ -33,6 +32,7 @@ class LSEHandler(ResultHandler):
     """
     Handler to use the Label Studio SDK to load a batch of results back into a Label Studio project
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
 
     api_key: str
@@ -51,8 +51,8 @@ class LSEHandler(ResultHandler):
         # Need this to make POST requests using the SDK client
         self.client.headers.update(
             {
-                'accept': 'application/json',
-                'Content-Type': 'application/json',
+                "accept": "application/json",
+                "Content-Type": "application/json",
             }
         )
 
@@ -67,13 +67,8 @@ class LSEHandler(ResultHandler):
             "/api/model-run/batch-predictions",
             data=json.dumps(
                 {
-                    'job_id': self.job_id,
-                    'results': batch,
+                    "job_id": self.job_id,
+                    "results": batch,
                 }
             ),
         )
-
-
-# class ResultHandler(Enum):
-    # DUMMY = dummy_handler
-    # LSE = LSEHandler

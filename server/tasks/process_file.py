@@ -16,12 +16,13 @@ from server.handlers.result_handlers import ResultHandler
 logger = logging.getLogger(__name__)
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-app = Celery("worker", broker=REDIS_URL, backend=REDIS_URL, accept_content=["json", "pickle"])
+app = Celery(
+    "worker", broker=REDIS_URL, backend=REDIS_URL, accept_content=["json", "pickle"]
+)
 
 
-@app.task(name="process_file", track_started=True, serializer='pickle')
+@app.task(name="process_file", track_started=True, serializer="pickle")
 def process_file(agent: Agent):
-
     # # Read data from a file and send it to the Kafka input topic
     asyncio.run(agent.environment.initialize())
 
@@ -32,9 +33,10 @@ def process_file(agent: Agent):
     asyncio.run(agent.environment.finalize())
 
 
-@app.task(name="process_file_streaming", track_started=True, bind=True, serializer='pickle')
+@app.task(
+    name="process_file_streaming", track_started=True, bind=True, serializer="pickle"
+)
 def process_file_streaming(self, agent: Agent):
-
     # Get own job ID to set Consumer topic accordingly
     job_id = self.request.id
     agent.environment.kafka_input_topic = get_input_topic(job_id)
@@ -48,19 +50,6 @@ async def async_process_streaming_output(
     input_job_id: str, result_handler: ResultHandler, batch_size: int
 ):
     logger.info(f"Polling for results {input_job_id=}")
-
-
-    # try:
-        # import server.utils as utils
-        # # result_handler = ResultHandler.__dict__[result_handler]
-        # result_handler = pickle.loads(serialized_result_handler)
-        # # assert isinstance(result_handler, ResultHandler)
-    # except Exception as e:
-    # from celery.contrib import rdb
-    # rdb.set_trace()
-        # # logger.error(f"{result_handler} is not a valid ResultHandler")
-        # logger.error(f"not a valid ResultHandler")
-        # raise e
 
     topic = get_output_topic(input_job_id)
     settings = Settings()
@@ -98,7 +87,9 @@ async def async_process_streaming_output(
     await consumer.stop()
 
 
-@app.task(name="process_streaming_output", track_started=True, bind=True, serializer='pickle')
+@app.task(
+    name="process_streaming_output", track_started=True, bind=True, serializer="pickle"
+)
 def process_streaming_output(
     self, job_id: str, result_handler: ResultHandler, batch_size: int = 2
 ):

@@ -158,11 +158,13 @@ class SubmitStreamingRequest(BaseModel):
 
     @field_validator("result_handler", mode="before")
     def validate_result_handler(cls, value: Dict) -> ResultHandler:
-        '''
+        """
         Allows polymorphism for ResultHandlers created from a dict; same implementation as the Skills, Environment, and Runtime within an Agent
-        '''
+        """
         if "type" not in value:
-            raise HTTPException(status_code=400, detail="Missing type in result_handler")
+            raise HTTPException(
+                status_code=400, detail="Missing type in result_handler"
+            )
         result_handler = ResultHandler.create_from_registry(value.pop("type"), **value)
         return result_handler
 
@@ -227,9 +229,7 @@ async def submit_streaming(request: SubmitStreamingRequest):
 
     task = process_streaming_output
     logger.info(f"Submitting task {task.name}")
-    # serialized_result_handler = pickle.dumps(request.result_handler)
     output_result = task.delay(
-        # job_id=input_job_id, serialized_result_handler=serialized_result_handler
         job_id=input_job_id, result_handler=request.result_handler
     )
     output_job_id = output_result.id
