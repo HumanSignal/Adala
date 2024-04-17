@@ -24,7 +24,8 @@ from tasks.process_file import (
     process_file_streaming,
     process_streaming_output,
 )
-from utils import get_input_topic, ResultHandler, Settings
+from utils import get_input_topic, Settings
+from server.handlers.result_handlers import ResultHandler
 
 
 logger = logging.getLogger(__name__)
@@ -194,10 +195,10 @@ async def submit(request: SubmitRequest):
 
     # TODO: get task by name, e.g. request.task_name
     task = process_file
-    serialized_agent = pickle.dumps(request.agent)
+    agent = request.agent
 
-    logger.debug(f"Submitting task {task.name} with agent {serialized_agent}")
-    result = task.delay(serialized_agent=serialized_agent)
+    logger.debug(f"Submitting task {task.name} with agent {agent}")
+    result = task.delay(agent=agent)
     logger.debug(f"Task {task.name} submitted with job_id {result.id}")
 
     return Response[JobCreated](data=JobCreated(job_id=result.id))
@@ -217,18 +218,19 @@ async def submit_streaming(request: SubmitStreamingRequest):
 
     # TODO: get task by name, e.g. request.task_name
     task = process_file_streaming
-    serialized_agent = pickle.dumps(request.agent)
+    agent = request.agent
 
-    logger.info(f"Submitting task {task.name} with agent {serialized_agent}")
-    input_result = task.delay(serialized_agent=serialized_agent)
+    logger.info(f"Submitting task {task.name} with agent {agent}")
+    input_result = task.delay(agent=agent)
     input_job_id = input_result.id
     logger.info(f"Task {task.name} submitted with job_id {input_job_id}")
 
     task = process_streaming_output
     logger.info(f"Submitting task {task.name}")
-    serialized_result_handler = pickle.dumps(request.result_handler)
+    # serialized_result_handler = pickle.dumps(request.result_handler)
     output_result = task.delay(
-        job_id=input_job_id, serialized_result_handler=serialized_result_handler
+        # job_id=input_job_id, serialized_result_handler=serialized_result_handler
+        job_id=input_job_id, result_handler=request.result_handler
     )
     output_job_id = output_result.id
     logger.info(f"Task {task.name} submitted with job_id {output_job_id}")
