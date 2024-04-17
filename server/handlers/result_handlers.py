@@ -1,3 +1,4 @@
+from typing import Optional
 import logging
 import json
 from abc import abstractmethod
@@ -37,7 +38,7 @@ class LSEHandler(ResultHandler):
 
     api_key: str
     url: str
-    job_id: str
+    job_id: Optional[str] = None
 
     @computed_field
     def client(self) -> Client:
@@ -45,6 +46,9 @@ class LSEHandler(ResultHandler):
             api_key=self.api_key,
             url=self.url,
         )
+
+    def set_job_id(self, job_id):
+        self.job_id = job_id
 
     @model_validator(mode="after")
     def ready(self):
