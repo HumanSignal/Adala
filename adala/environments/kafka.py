@@ -32,7 +32,29 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     kafka_input_topic: str
     kafka_output_topic: str
 
-    async def message_receiver(self, consumer: AIOKafkaConsumer, timeout: int = 3):
+    async def initialize(self):
+        # claim kafka topic from shared pool here?
+        pass
+
+    async def finalize(self):
+        # release kafka topic to shared pool here?
+        pass
+
+    async def get_feedback(
+        self,
+        skills: SkillSet,
+        predictions: InternalDataFrame,
+        num_feedbacks: Optional[int] = None,
+    ) -> EnvironmentFeedback:
+        raise NotImplementedError("Feedback is not supported in Kafka environment")
+
+    async def restore(self):
+        raise NotImplementedError("Restore is not supported in Kafka environment")
+
+    async def save(self):
+        raise NotImplementedError("Save is not supported in Kafka environment")
+
+    async def message_receiver(self, consumer: AIOKafkaConsumer, timeout: int = 30):
         await consumer.start()
         try:
             while True:
