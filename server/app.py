@@ -31,19 +31,6 @@ from server.handlers.result_handlers import ResultHandler
 logger = logging.getLogger(__name__)
 
 
-class Settings(BaseSettings):
-    """
-    Can hardcode settings here, read from env file, or pass as env vars
-    https://docs.pydantic.dev/latest/concepts/pydantic_settings/#field-value-priority
-    """
-
-    kafka_bootstrap_servers: Union[str, List[str]]
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-    )
-
-
 settings = Settings()
 
 app = fastapi.FastAPI()
