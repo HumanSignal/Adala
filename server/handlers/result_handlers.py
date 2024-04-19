@@ -61,9 +61,8 @@ class LSEHandler(ResultHandler):
 
     @model_validator(mode="after")
     def ready(self):
-
         conn = self.client.check_connection()
-        assert conn['status'] == 'UP', 'Label Studio is not available'
+        assert conn["status"] == "UP", "Label Studio is not available"
 
         return self
 
