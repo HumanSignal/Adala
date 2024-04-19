@@ -51,9 +51,6 @@ async def async_process_streaming_output(
 ):
     logger.info(f"Polling for results {input_job_id=}")
 
-    # FIXME switch to model_run_id or find a way to pass this in
-    result_handler.set_job_id(input_job_id)
-
     topic = get_output_topic(input_job_id)
     settings = Settings()
 

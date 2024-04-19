@@ -38,7 +38,7 @@ class LSEHandler(ResultHandler):
 
     api_key: str
     url: str
-    job_id: Optional[str] = None
+    modelrun_id: int
 
     @computed_field
     def client(self) -> Client:
@@ -56,9 +56,6 @@ class LSEHandler(ResultHandler):
         )
         return _client
 
-    def set_job_id(self, job_id):
-        self.job_id = job_id
-
     @model_validator(mode="after")
     def ready(self):
         conn = self.client.check_connection()
@@ -73,7 +70,7 @@ class LSEHandler(ResultHandler):
             "/api/model-run/batch-predictions",
             data=json.dumps(
                 {
-                    "job_id": self.job_id,
+                    "modelrun_id": self.modelrun_id,
                     "results": batch,
                 }
             ),
