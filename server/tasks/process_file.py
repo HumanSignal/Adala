@@ -73,7 +73,9 @@ async def async_process_streaming_output(
             data = await consumer.getmany(timeout_ms=3000, max_records=batch_size)
             for tp, messages in data.items():
                 if messages:
-                    result_handler(messages)
+                    logger.info(f"Handling {messages=} in topic {tp.topic}")
+                    data = [msg.value for msg in messages]
+                    result_handler(data)
                     logger.info(f"Handled {len(messages)} messages in topic {tp.topic}")
                 else:
                     logger.info(f"No messages in topic {tp.topic}")
