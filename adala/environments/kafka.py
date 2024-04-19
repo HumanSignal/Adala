@@ -54,13 +54,14 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     async def save(self):
         raise NotImplementedError("Save is not supported in Kafka environment")
 
-    async def message_receiver(self, consumer: AIOKafkaConsumer, timeout: int = 30):
+    async def message_receiver(self, consumer: AIOKafkaConsumer, timeout: int = 3):
         await consumer.start()
         try:
             while True:
                 try:
                     # Wait for the next message with a timeout
                     msg = await asyncio.wait_for(consumer.getone(), timeout=timeout)
+                    print_text(f"Received message: {msg.value}")
                     yield msg.value
                 except asyncio.TimeoutError:
                     print_text(
@@ -77,8 +78,10 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         try:
             for record in data:
                 await producer.send_and_wait(topic, value=record)
+                print_text(f"Sent message: {record} to {topic=}")
         finally:
             await producer.stop()
+            print_text(f"No more messages for {topic=}")
 
     async def get_next_batch(self, data_iterator, batch_size: int) -> List[Dict]:
         batch = []
