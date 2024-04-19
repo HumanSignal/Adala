@@ -42,25 +42,28 @@ class LSEHandler(ResultHandler):
 
     @computed_field
     def client(self) -> Client:
-        return Client(
+        _client = Client(
             api_key=self.api_key,
             url=self.url,
         )
+        # Need this to make POST requests using the SDK client
+        # TODO headers can only be set in this function, since client is a computed field. Need to rethink approach if we make non-POST requests, should probably just make a PR in label_studio_sdk to allow setting this in make_request()
+        _client.headers.update(
+            {
+                "accept": "application/json",
+                "Content-Type": "application/json",
+            }
+        )
+        return _client
 
     def set_job_id(self, job_id):
         self.job_id = job_id
 
     @model_validator(mode="after")
     def ready(self):
-        # Need this to make POST requests using the SDK client
-        self.client.headers.update(
-            {
-                "accept": "application/json",
-                "Content-Type": "application/json",
-            }
-        )
 
-        self.client.check_connection()
+        conn = self.client.check_connection()
+        assert conn['status'] == 'UP', 'Label Studio is not available'
 
         return self
 
