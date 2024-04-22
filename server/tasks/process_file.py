@@ -43,22 +43,24 @@ def streaming_parent_task(
     # Parent job ID is used for input/output topic names
     parent_job_id = self.request.id
 
-    task = process_file_streaming
-    logger.info(f"Submitting task {task.name} with agent {agent}")
-    input_result = task.delay(agent=agent, parent_job_id=parent_job_id)
+    inference_task = process_file_streaming
+    logger.info(f"Submitting task {inference_task.name} with agent {agent}")
+    input_result = inference_task.delay(agent=agent, parent_job_id=parent_job_id)
     input_job_id = input_result.id
-    logger.info(f"Task {task.name} submitted with job_id {input_job_id}")
+    logger.info(f"Task {inference_task.name} submitted with job_id {input_job_id}")
 
-    task = process_streaming_output
-    logger.info(f"Submitting task {task.name}")
-    output_result = task.delay(
+    result_handler_task = process_streaming_output
+    logger.info(f"Submitting task {result_handler_task.name}")
+    output_result = result_handler_task.delay(
         input_job_id=input_job_id,
         parent_job_id=parent_job_id,
         result_handler=result_handler,
         batch_size=batch_size,
     )
     output_job_id = output_result.id
-    logger.info(f"Task {task.name} submitted with job_id {output_job_id}")
+    logger.info(
+        f"Task {result_handler_task.name} submitted with job_id {output_job_id}"
+    )
 
     # Store input and output job IDs in parent task metadata
     # Need to pass state as well otherwise its overwritten to None
