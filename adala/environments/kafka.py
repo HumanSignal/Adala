@@ -32,6 +32,28 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     kafka_input_topic: str
     kafka_output_topic: str
 
+    async def initialize(self):
+        # claim kafka topic from shared pool here?
+        pass
+
+    async def finalize(self):
+        # release kafka topic to shared pool here?
+        pass
+
+    async def get_feedback(
+        self,
+        skills: SkillSet,
+        predictions: InternalDataFrame,
+        num_feedbacks: Optional[int] = None,
+    ) -> EnvironmentFeedback:
+        raise NotImplementedError("Feedback is not supported in Kafka environment")
+
+    async def restore(self):
+        raise NotImplementedError("Restore is not supported in Kafka environment")
+
+    async def save(self):
+        raise NotImplementedError("Save is not supported in Kafka environment")
+
     async def message_receiver(self, consumer: AIOKafkaConsumer, timeout: int = 3):
         await consumer.start()
         try:
@@ -39,6 +61,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
                 try:
                     # Wait for the next message with a timeout
                     msg = await asyncio.wait_for(consumer.getone(), timeout=timeout)
+                    print_text(f"Received message: {msg.value}")
                     yield msg.value
                 except asyncio.TimeoutError:
                     print_text(
@@ -55,8 +78,10 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         try:
             for record in data:
                 await producer.send_and_wait(topic, value=record)
+                print_text(f"Sent message: {record} to {topic=}")
         finally:
             await producer.stop()
+            print_text(f"No more messages for {topic=}")
 
     async def get_next_batch(self, data_iterator, batch_size: int) -> List[Dict]:
         batch = []

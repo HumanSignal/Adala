@@ -1,3 +1,4 @@
+from typing import Optional
 import logging
 import json
 from abc import abstractmethod
@@ -37,26 +38,28 @@ class LSEHandler(ResultHandler):
 
     api_key: str
     url: str
-    job_id: str
+    modelrun_id: int
 
     @computed_field
     def client(self) -> Client:
-        return Client(
+        _client = Client(
             api_key=self.api_key,
             url=self.url,
         )
-
-    @model_validator(mode="after")
-    def ready(self):
         # Need this to make POST requests using the SDK client
-        self.client.headers.update(
+        # TODO headers can only be set in this function, since client is a computed field. Need to rethink approach if we make non-POST requests, should probably just make a PR in label_studio_sdk to allow setting this in make_request()
+        _client.headers.update(
             {
                 "accept": "application/json",
                 "Content-Type": "application/json",
             }
         )
+        return _client
 
-        self.client.check_connection()
+    @model_validator(mode="after")
+    def ready(self):
+        conn = self.client.check_connection()
+        assert conn["status"] == "UP", "Label Studio is not available"
 
         return self
 
@@ -67,7 +70,7 @@ class LSEHandler(ResultHandler):
             "/api/model-run/batch-predictions",
             data=json.dumps(
                 {
-                    "job_id": self.job_id,
+                    "modelrun_id": self.modelrun_id,
                     "results": batch,
                 }
             ),
