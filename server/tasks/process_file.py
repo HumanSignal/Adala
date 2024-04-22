@@ -40,6 +40,12 @@ def process_file(agent: Agent):
 def streaming_parent_task(
     self, agent: Agent, result_handler: ResultHandler, batch_size: int = 2
 ):
+    """
+    This task is used to launch the two tasks that are doing the real work, so that
+    we store those two job IDs as metadata of this parent task, and be able to get
+    the status of the entire job from one task ID
+    """
+
     # Parent job ID is used for input/output topic names
     parent_job_id = self.request.id
 
