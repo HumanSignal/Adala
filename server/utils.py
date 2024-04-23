@@ -1,10 +1,6 @@
-import logging
-
-from enum import Enum
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Union
-
-logger = logging.getLogger(__name__)
+from pathlib import Path
 
 
 class Settings(BaseSettings):
@@ -16,21 +12,9 @@ class Settings(BaseSettings):
     kafka_bootstrap_servers: Union[str, List[str]]
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        # have to use an absolute path here so celery workers can find it
+        env_file=(Path(__file__).parent / ".env"),
     )
-
-
-def dummy_handler(batch):
-    """
-    Dummy handler to test streaming output flow
-    Can delete once we have a real handler
-    """
-
-    logger.info(f"\n\nHandler received batch: {batch}\n\n")
-
-
-class ResultHandler(Enum):
-    DUMMY = dummy_handler
 
 
 def get_input_topic(job_id: str):

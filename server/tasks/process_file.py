@@ -4,22 +4,25 @@ import pickle
 import os
 import logging
 
+from adala.agents import Agent
+
 from aiokafka import AIOKafkaConsumer
 from celery import Celery, states
 from celery.exceptions import Ignore
-from server.utils import get_input_topic, get_output_topic, ResultHandler, Settings
+from server.utils import get_input_topic, get_output_topic, Settings
+from server.handlers.result_handlers import ResultHandler
 
 
 logger = logging.getLogger(__name__)
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-app = Celery("worker", broker=REDIS_URL, backend=REDIS_URL)
+app = Celery(
+    "worker", broker=REDIS_URL, backend=REDIS_URL, accept_content=["json", "pickle"]
+)
 
 
-@app.task(name="process_file", track_started=True)
-def process_file(serialized_agent: bytes):
-    # Load the agent
-    agent = pickle.loads(serialized_agent)
+@app.task(name="process_file", track_started=True, serializer="pickle")
+def process_file(agent: Agent):
     # # Read data from a file and send it to the Kafka input topic
     asyncio.run(agent.environment.initialize())
 
@@ -30,11 +33,10 @@ def process_file(serialized_agent: bytes):
     asyncio.run(agent.environment.finalize())
 
 
-@app.task(name="process_file_streaming", track_started=True, bind=True)
-def process_file_streaming(self, serialized_agent: bytes):
-    # Load the agent
-    agent = pickle.loads(serialized_agent)
-
+@app.task(
+    name="process_file_streaming", track_started=True, bind=True, serializer="pickle"
+)
+def process_file_streaming(self, agent: Agent):
     # Get own job ID to set Consumer topic accordingly
     job_id = self.request.id
     agent.environment.kafka_input_topic = get_input_topic(job_id)
@@ -45,15 +47,9 @@ def process_file_streaming(self, serialized_agent: bytes):
 
 
 async def async_process_streaming_output(
-    input_job_id: str, result_handler: str, batch_size: int
+    input_job_id: str, result_handler: ResultHandler, batch_size: int
 ):
     logger.info(f"Polling for results {input_job_id=}")
-
-    try:
-        result_handler = ResultHandler.__dict__[result_handler]
-    except KeyError as e:
-        logger.error(f"{result_handler} is not a valid ResultHandler")
-        raise e
 
     topic = get_output_topic(input_job_id)
     settings = Settings()
@@ -74,11 +70,19 @@ async def async_process_streaming_output(
             data = await consumer.getmany(timeout_ms=3000, max_records=batch_size)
             for tp, messages in data.items():
                 if messages:
-                    result_handler(messages)
+                    logger.debug(f"Handling {messages=} in topic {tp.topic}")
+                    data = [msg.value for msg in messages]
+                    result_handler(data)
+                    logger.debug(
+                        f"Handled {len(messages)} messages in topic {tp.topic}"
+                    )
                 else:
-                    logger.info(f"No messages in topic {tp.topic}")
+                    logger.debug(f"No messages in topic {tp.topic}")
+            if not data:
+                logger.info(f"No messages in any topic")
         finally:
             job = process_file_streaming.AsyncResult(input_job_id)
+            # TODO no way to recover here if connection to main app is lost, job will be stuck at "PENDING" so this will loop forever
             if job.status in ["SUCCESS", "FAILURE", "REVOKED"]:
                 input_job_running = False
                 logger.info(f"Input job done, stopping output job")
@@ -88,15 +92,19 @@ async def async_process_streaming_output(
     await consumer.stop()
 
 
-@app.task(name="process_streaming_output", track_started=True, bind=True)
+@app.task(
+    name="process_streaming_output", track_started=True, bind=True, serializer="pickle"
+)
 def process_streaming_output(
-    self, job_id: str, result_handler: str, batch_size: int = 2
+    self, job_id: str, result_handler: ResultHandler, batch_size: int = 2
 ):
     try:
         asyncio.run(async_process_streaming_output(job_id, result_handler, batch_size))
-    except KeyError:
+    except Exception as e:
         # Set own status to failure
         self.update_state(state=states.FAILURE)
+
+        logger.error(msg=e)
 
         # Ignore the task so no other state is recorded
         # TODO check if this updates state to Ignored, or keeps Failed

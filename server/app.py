@@ -10,7 +10,7 @@ from adala.agents import Agent
 from aiokafka import AIOKafkaProducer
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, SerializeAsAny, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic.functional_validators import AfterValidator
 from typing_extensions import Annotated
@@ -24,23 +24,11 @@ from tasks.process_file import (
     process_file_streaming,
     process_streaming_output,
 )
-from utils import get_input_topic, ResultHandler, Settings
+from utils import get_input_topic, Settings
+from server.handlers.result_handlers import ResultHandler
 
 
 logger = logging.getLogger(__name__)
-
-
-class Settings(BaseSettings):
-    """
-    Can hardcode settings here, read from env file, or pass as env vars
-    https://docs.pydantic.dev/latest/concepts/pydantic_settings/#field-value-priority
-    """
-
-    kafka_bootstrap_servers: Union[str, List[str]]
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-    )
 
 
 settings = Settings()
@@ -148,12 +136,26 @@ class SubmitRequest(BaseModel):
 class SubmitStreamingRequest(BaseModel):
     """
     Request model for submitting a streaming job.
-    Only difference from SubmitRequest is the task_name
     """
 
     agent: Agent
-    result_handler: str
+    # SerializeAsAny allows for subclasses of ResultHandler
+    result_handler: SerializeAsAny[ResultHandler]
     task_name: str = "process_file_streaming"
+
+    @field_validator("result_handler", mode="before")
+    def validate_result_handler(cls, value: Dict) -> ResultHandler:
+        """
+        Allows polymorphism for ResultHandlers created from a dict; same implementation as the Skills, Environment, and Runtime within an Agent
+        "type" is the name of the subclass of ResultHandler being used. Currently available subclasses: LSEHandler, DummyHandler
+        Look in server/handlers/result_handlers.py for available subclasses
+        """
+        if "type" not in value:
+            raise HTTPException(
+                status_code=400, detail="Missing type in result_handler"
+            )
+        result_handler = ResultHandler.create_from_registry(value.pop("type"), **value)
+        return result_handler
 
 
 class BatchData(BaseModel):
@@ -184,10 +186,10 @@ async def submit(request: SubmitRequest):
 
     # TODO: get task by name, e.g. request.task_name
     task = process_file
-    serialized_agent = pickle.dumps(request.agent)
+    agent = request.agent
 
-    logger.debug(f"Submitting task {task.name} with agent {serialized_agent}")
-    result = task.delay(serialized_agent=serialized_agent)
+    logger.info(f"Submitting task {task.name} with agent {agent}")
+    result = task.delay(agent=agent)
     logger.debug(f"Task {task.name} submitted with job_id {result.id}")
 
     return Response[JobCreated](data=JobCreated(job_id=result.id))
@@ -207,20 +209,20 @@ async def submit_streaming(request: SubmitStreamingRequest):
 
     # TODO: get task by name, e.g. request.task_name
     task = process_file_streaming
-    serialized_agent = pickle.dumps(request.agent)
+    agent = request.agent
 
-    logger.info(f"Submitting task {task.name} with agent {serialized_agent}")
-    input_result = task.delay(serialized_agent=serialized_agent)
+    logger.info(f"Submitting task {task.name} with agent {agent}")
+    input_result = task.delay(agent=agent)
     input_job_id = input_result.id
-    logger.info(f"Task {task.name} submitted with job_id {input_job_id}")
+    logger.debug(f"Task {task.name} submitted with job_id {input_job_id}")
 
     task = process_streaming_output
-    logger.info(f"Submitting task {task.name}")
+    logger.debug(f"Submitting task {task.name}")
     output_result = task.delay(
         job_id=input_job_id, result_handler=request.result_handler
     )
     output_job_id = output_result.id
-    logger.info(f"Task {task.name} submitted with job_id {output_job_id}")
+    logger.debug(f"Task {task.name} submitted with job_id {output_job_id}")
 
     return Response[JobCreated](data=JobCreated(job_id=input_job_id))
 
