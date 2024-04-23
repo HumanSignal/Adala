@@ -316,7 +316,7 @@ def get_status_streaming(job_id):
     logger.info(f"\n\nParent task meta : {job.info}\n\n")
 
     # If parent task meta does not contain input/output job IDs - return FAILED
-    if "input_job_id" not in job.info or "output_job_id" not in job.info:
+    if job.info is None or "input_job_id" not in job.info or "output_job_id" not in job.info:
         logger.error(
             "Parent task does not contain input job ID and/or output_job_id - unable to return proper status"
         )
