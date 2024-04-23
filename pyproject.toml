@@ -35,7 +35,6 @@ fastapi = "^0.104.1"
 celery = {version = "^5.3.6", extras = ["redis"]}
 uvicorn = "*"
 pydantic-settings = "^2.2.1"
-label-studio-sdk = "^0.0.32"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.3"
@@ -51,6 +50,9 @@ jupyter = "^1.0.0"
 jupyterlab = "^4.0.10"
 jupyter-client = "8.4.0"
 matplotlib = "^3.7.4"
+
+[tool.poetry.group.label-studio.dependencies]
+label-studio-sdk = "^0.0.32"
 
 [tool.poetry.scripts]
 adala = "adala.cli:main"

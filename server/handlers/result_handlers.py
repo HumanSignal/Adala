@@ -5,10 +5,17 @@ from abc import abstractmethod
 from pydantic import computed_field, ConfigDict, model_validator
 
 from adala.utils.registry import BaseModelInRegistry
-from label_studio_sdk import Client
 
 
 logger = logging.getLogger(__name__)
+
+try:
+    from label_studio_sdk import Client as LSEClient
+except ImportError:
+    logger.warning("Label Studio SDK not found. LSEHandler will not be available.")
+    class LSEClient:
+        def __init__(self, *args, **kwargs):
+            logger.error("Label Studio SDK not found. LSEHandler is not available.")
 
 
 class ResultHandler(BaseModelInRegistry):
@@ -59,8 +66,8 @@ class LSEHandler(ResultHandler):
     modelrun_id: int
 
     @computed_field
-    def client(self) -> Client:
-        _client = Client(
+    def client(self) -> LSEClient:
+        _client = LSEClient(
             api_key=self.api_key,
             url=self.url,
         )
