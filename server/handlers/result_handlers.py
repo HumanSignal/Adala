@@ -20,7 +20,7 @@ class ResultHandler(BaseModelInRegistry):
 
     Subclasses must implement the `__call__` method.
 
-    BaseModelInRegistry is a utility class that allows polymorphic instantiation of ResultHandlers through passing in the class name as the "type" field in the request, for example:
+    The BaseModelInRegistry base class implements a factory pattern, allowing the "type" parameter to specify which subclass of ResultHandler to instantiate. For example:
     ```json
     result_handler: {
         "type": "DummyHandler",
