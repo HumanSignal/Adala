@@ -29,6 +29,7 @@ class ResultHandler(BaseModelInRegistry):
     }
     ```
     """
+
     @abstractmethod
     def __call__(self, result_batch: list[dict]) -> None:
         """
