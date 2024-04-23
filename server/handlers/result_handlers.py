@@ -12,10 +12,10 @@ logger = logging.getLogger(__name__)
 try:
     from label_studio_sdk import Client as LSEClient
 except ImportError:
-    logger.warning("Label Studio SDK not found. LSEHandler will not be available.")
+    logger.warning("Label Studio SDK not found. LSEHandler will not be available. Run `poetry install --with label-studio` to fix")
     class LSEClient:
         def __init__(self, *args, **kwargs):
-            logger.error("Label Studio SDK not found. LSEHandler is not available.")
+            logger.error("Label Studio SDK not found. LSEHandler is not available. Run `poetry install --with label-studio` to fix")
 
 
 class ResultHandler(BaseModelInRegistry):
