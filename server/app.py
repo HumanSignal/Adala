@@ -139,7 +139,7 @@ class SubmitStreamingRequest(BaseModel):
     """
 
     agent: Agent
-    # SerializeAsAny is for allowing subclasses of ResultHandler
+    # SerializeAsAny allows for subclasses of ResultHandler
     result_handler: SerializeAsAny[ResultHandler]
     task_name: str = "process_file_streaming"
 
@@ -147,6 +147,8 @@ class SubmitStreamingRequest(BaseModel):
     def validate_result_handler(cls, value: Dict) -> ResultHandler:
         """
         Allows polymorphism for ResultHandlers created from a dict; same implementation as the Skills, Environment, and Runtime within an Agent
+        "type" is the name of the subclass of ResultHandler being used. Currently available subclasses: LSEHandler, DummyHandler
+        Look in server/handlers/result_handlers.py for available subclasses
         """
         if "type" not in value:
             raise HTTPException(
@@ -186,7 +188,7 @@ async def submit(request: SubmitRequest):
     task = process_file
     agent = request.agent
 
-    logger.debug(f"Submitting task {task.name} with agent {agent}")
+    logger.info(f"Submitting task {task.name} with agent {agent}")
     result = task.delay(agent=agent)
     logger.debug(f"Task {task.name} submitted with job_id {result.id}")
 
@@ -212,15 +214,15 @@ async def submit_streaming(request: SubmitStreamingRequest):
     logger.info(f"Submitting task {task.name} with agent {agent}")
     input_result = task.delay(agent=agent)
     input_job_id = input_result.id
-    logger.info(f"Task {task.name} submitted with job_id {input_job_id}")
+    logger.debug(f"Task {task.name} submitted with job_id {input_job_id}")
 
     task = process_streaming_output
-    logger.info(f"Submitting task {task.name}")
+    logger.debug(f"Submitting task {task.name}")
     output_result = task.delay(
         job_id=input_job_id, result_handler=request.result_handler
     )
     output_job_id = output_result.id
-    logger.info(f"Task {task.name} submitted with job_id {output_job_id}")
+    logger.debug(f"Task {task.name} submitted with job_id {output_job_id}")
 
     return Response[JobCreated](data=JobCreated(job_id=input_job_id))
 

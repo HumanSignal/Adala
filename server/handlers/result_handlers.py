@@ -12,17 +12,34 @@ logger = logging.getLogger(__name__)
 
 
 class ResultHandler(BaseModelInRegistry):
+    """
+    Abstract base class for a result handler.
+    This is a callable that is instantiated in `/submit-streaming` with any arguments that are needed, and then is called on each batch of results when it is finished being processed by the Agent (it consumes from the Kafka topic that the Agent produces to).
+
+    It can be used as a connector to load results into a file or external service. If a ResultHandler is not used, the results will be discarded.
+
+    Subclasses must implement the `__call__` method.
+
+    BaseModelInRegistry is a utility class that allows polymorphic instantiation of ResultHandlers through passing in the class name as the "type" field in the request, for example:
+    ```json
+    result_handler: {
+        "type": "DummyHandler",
+        "other_model_field": "other_model_value",
+        ...
+    }
+    ```
+    """
     @abstractmethod
-    def __call__(self, batch):
+    def __call__(self, result_batch: list[dict]) -> None:
         """
         Callable to do something with a batch of results.
         """
+        pass
 
 
 class DummyHandler(ResultHandler):
     """
     Dummy handler to test streaming output flow
-    Can delete once we have a real handler
     """
 
     def __call__(self, batch):
@@ -63,15 +80,15 @@ class LSEHandler(ResultHandler):
 
         return self
 
-    def __call__(self, batch):
-        logger.info(f"\n\nHandler received batch: {batch}\n\n")
+    def __call__(self, result_batch):
+        logger.info(f"\n\nHandler received batch: {result_batch}\n\n")
         self.client.make_request(
             "POST",
             "/api/model-run/batch-predictions",
             data=json.dumps(
                 {
                     "modelrun_id": self.modelrun_id,
-                    "results": batch,
+                    "results": result_batch,
                 }
             ),
         )
