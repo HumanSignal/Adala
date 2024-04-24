@@ -7,6 +7,8 @@ import time
 
 from adala.agents import Agent
 
+from adala.agents import Agent
+
 from aiokafka import AIOKafkaConsumer
 from celery import Celery, states
 from celery.exceptions import Ignore
@@ -35,6 +37,7 @@ def process_file(agent: Agent):
 
 
 @app.task(
+<<<<<<< HEAD
     name="streaming_parent_task", track_started=True, bind=True, serializer="pickle"
 )
 def streaming_parent_task(
@@ -110,6 +113,7 @@ def process_file_streaming(self, agent: Agent, parent_job_id: str):
 
 
 async def async_process_streaming_output(
+<<<<<<< HEAD
     input_job_id: str,
     parent_job_id: str,
     result_handler: ResultHandler,
@@ -118,6 +122,7 @@ async def async_process_streaming_output(
     logger.info(f"Polling for results {parent_job_id=}")
 
     topic = get_output_topic(parent_job_id)
+
     settings = Settings()
 
     consumer = AIOKafkaConsumer(
@@ -142,6 +147,7 @@ async def async_process_streaming_output(
                     logger.info(f"Handled {len(messages)} messages in topic {tp.topic}")
                 else:
                     logger.info(f"No messages in topic {tp.topic}")
+
             if not data:
                 logger.info(f"No messages in any topic")
         finally:

@@ -52,6 +52,12 @@ jupyterlab = "^4.0.10"
 jupyter-client = "8.4.0"
 matplotlib = "^3.7.4"
 
+[tool.poetry.group.label-studio]
+optional = true
+
+[tool.poetry.group.label-studio.dependencies]
+label-studio-sdk = "^0.0.32"
+
 [tool.poetry.scripts]
 adala = "adala.cli:main"
 
