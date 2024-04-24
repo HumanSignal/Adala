@@ -245,36 +245,6 @@ async def submit_batch(batch: BatchData):
     return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
 
-@app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])
-def get_status(job_id):
-    """
-    Get the status of a job.
-
-    Args:
-        job_id (str)
-
-    Returns:
-        JobStatusResponse: The response model for getting the status of a job.
-    """
-    celery_status_map = {
-        "PENDING": Status.PENDING,
-        "STARTED": Status.INPROGRESS,
-        "SUCCESS": Status.COMPLETED,
-        "FAILURE": Status.FAILED,
-        "REVOKED": Status.CANCELED,
-        "RETRY": Status.INPROGRESS,
-    }
-    job = process_file.AsyncResult(job_id)
-    try:
-        status: Status = celery_status_map[job.status]
-    except Exception as e:
-        logger.error(f"Error getting job status: {e}")
-        status = Status.FAILED
-    else:
-        logger.info(f"Job {job_id} status: {status}")
-    return Response[JobStatusResponse](data=JobStatusResponse(status=status))
-
-
 def aggregate_statuses(input_job_id: str, output_job_id: str):
     input_job_status = process_file_streaming.AsyncResult(input_job_id).status
     output_job_status = process_streaming_output.AsyncResult(output_job_id).status
@@ -293,8 +263,8 @@ def aggregate_statuses(input_job_id: str, output_job_id: str):
     return "SUCCESS"
 
 
-@app.get("/streaming-jobs/{job_id}", response_model=Response[JobStatusResponse])
-def get_status_streaming(job_id):
+@app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])
+def get_status(job_id):
     """
     Get the status of a job.
 
