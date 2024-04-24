@@ -144,9 +144,12 @@ async def async_process_streaming_output(
             )
             await consumer.start()
             logger.info(f"consumer started {parent_job_id=}")
+            break
         except UnknownTopicOrPartitionError as e:
             logger.error(msg=e)
             logger.info(f"Retrying to create consumer with topic {topic}")
+
+            await consumer.stop()
             retries -= 1
             time.sleep(1)
 
