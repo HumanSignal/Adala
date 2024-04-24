@@ -113,7 +113,6 @@ def process_file_streaming(self, agent: Agent, parent_job_id: str):
 
 
 async def async_process_streaming_output(
-<<<<<<< HEAD
     input_job_id: str,
     parent_job_id: str,
     result_handler: ResultHandler,
