@@ -49,7 +49,7 @@ services:
       - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - MODULE_NAME=process_file.app
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9093
-      - C_FORCE_ROOT=true # needed when using pickle serializer + running as root - remove when we dont run as root
+      - C_FORCE_ROOT=true # needed when using pickle serializer in celery + running as root - remove when we dont run as root
     command:
       'sh -c "cd tasks && poetry run celery -A $$MODULE_NAME worker --loglevel=info"'
   redis:
