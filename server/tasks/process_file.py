@@ -8,6 +8,7 @@ import time
 from adala.agents import Agent
 
 from aiokafka import AIOKafkaConsumer
+from aiokafka.errors import UnknownTopicOrPartitionError
 from celery import Celery, states
 from celery.exceptions import Ignore
 from server.utils import get_input_topic, get_output_topic, Settings
@@ -129,17 +130,25 @@ async def async_process_streaming_output(
     logger.info(f"Polling for results {parent_job_id=}")
 
     topic = get_output_topic(parent_job_id)
-
     settings = Settings()
 
-    consumer = AIOKafkaConsumer(
-        topic,
-        bootstrap_servers=settings.kafka_bootstrap_servers,
-        value_deserializer=lambda v: json.loads(v.decode("utf-8")),
-        auto_offset_reset="earliest",
-    )
-    await consumer.start()
-    logger.info(f"consumer started {parent_job_id=}")
+    # Retry to workaround race condition of topic creation
+    retries = 5
+    while retries > 0:
+        try:
+            consumer = AIOKafkaConsumer(
+                topic,
+                bootstrap_servers=settings.kafka_bootstrap_servers,
+                value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+                auto_offset_reset="earliest",
+            )
+            await consumer.start()
+            logger.info(f"consumer started {parent_job_id=}")
+        except UnknownTopicOrPartitionError as e:
+            logger.error(msg=e)
+            logger.info(f"Retrying to create consumer with topic {topic}")
+            retries -= 1
+            time.sleep(1)
 
     input_job_running = True
 
