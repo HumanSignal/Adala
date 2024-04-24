@@ -94,6 +94,9 @@ def streaming_parent_task(
         state=states.SUCCESS,
         meta={"input_job_id": input_job_id, "output_job_id": output_job_id},
     )
+
+    # This makes it so Celery doesnt update the tasks state again, which would wipe out the custom metadata we added
+    # It will retain that state we set above
     raise Ignore()
 
 
@@ -140,7 +143,9 @@ async def async_process_streaming_output(
                     logger.debug(f"Handling {messages=} in topic {tp.topic}")
                     data = [msg.value for msg in messages]
                     result_handler(data)
-                    logger.debug(f"Handled {len(messages)} messages in topic {tp.topic}")
+                    logger.debug(
+                        f"Handled {len(messages)} messages in topic {tp.topic}"
+                    )
                 else:
                     logger.debug(f"No messages in topic {tp.topic}")
 
