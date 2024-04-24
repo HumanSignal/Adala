@@ -24,6 +24,10 @@ app = Celery(
 
 @app.task(name="process_file", track_started=True, serializer="pickle")
 def process_file(agent: Agent):
+    # Override kafka_bootstrap_servers with value from settings
+    settings = Settings()
+    agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
+
     # # Read data from a file and send it to the Kafka input topic
     asyncio.run(agent.environment.initialize())
 
@@ -48,6 +52,10 @@ def streaming_parent_task(
 
     # Parent job ID is used for input/output topic names
     parent_job_id = self.request.id
+
+    # Override kafka_bootstrap_servers with value from settings
+    settings = Settings()
+    agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
 
     inference_task = process_file_streaming
     logger.info(f"Submitting task {inference_task.name} with agent {agent}")
