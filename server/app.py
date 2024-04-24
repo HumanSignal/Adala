@@ -23,6 +23,7 @@ from tasks.process_file import (
     process_file,
     process_file_streaming,
     process_streaming_output,
+    streaming_parent_task,
 )
 from utils import get_input_topic, Settings
 from server.handlers.result_handlers import ResultHandler
@@ -207,24 +208,13 @@ async def submit_streaming(request: SubmitStreamingRequest):
         Response[JobCreated]: The response model for a job created.
     """
 
-    # TODO: get task by name, e.g. request.task_name
-    task = process_file_streaming
-    agent = request.agent
-
-    logger.info(f"Submitting task {task.name} with agent {agent}")
-    input_result = task.delay(agent=agent)
-    input_job_id = input_result.id
-    logger.debug(f"Task {task.name} submitted with job_id {input_job_id}")
-
-    task = process_streaming_output
-    logger.debug(f"Submitting task {task.name}")
-    output_result = task.delay(
-        job_id=input_job_id, result_handler=request.result_handler
+    task = streaming_parent_task
+    result = task.apply_async(
+        kwargs={"agent": request.agent, "result_handler": request.result_handler}
     )
-    output_job_id = output_result.id
-    logger.debug(f"Task {task.name} submitted with job_id {output_job_id}")
+    logger.info(f"Submitted {task.name} with ID {result.id}")
 
-    return Response[JobCreated](data=JobCreated(job_id=input_job_id))
+    return Response[JobCreated](data=JobCreated(job_id=result.id))
 
 
 @app.post("/jobs/submit-batch", response_model=Response)
@@ -256,6 +246,24 @@ async def submit_batch(batch: BatchData):
     return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
 
+def aggregate_statuses(input_job_id: str, output_job_id: str):
+    input_job_status = process_file_streaming.AsyncResult(input_job_id).status
+    output_job_status = process_streaming_output.AsyncResult(output_job_id).status
+
+    statuses = [input_job_status, output_job_status]
+
+    if "PENDING" in statuses:
+        return "PENDING"
+    if "FAILURE" in statuses:
+        return "FAILURE"
+    if "REVOKED" in statuses:
+        return "REVOKED"
+    if "STARTED" in statuses or "RETRY" in statuses:
+        return "STARTED"
+
+    return "SUCCESS"
+
+
 @app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])
 def get_status(job_id):
     """
@@ -275,9 +283,27 @@ def get_status(job_id):
         "REVOKED": Status.CANCELED,
         "RETRY": Status.INPROGRESS,
     }
-    job = process_file.AsyncResult(job_id)
+    job = streaming_parent_task.AsyncResult(job_id)
+    logger.info(f"\n\nParent task meta : {job.info}\n\n")
+
+    # If parent task meta does not contain input/output job IDs - return FAILED
+    if (
+        job.info is None
+        or "input_job_id" not in job.info
+        or "output_job_id" not in job.info
+    ):
+        logger.error(
+            "Parent task does not contain input job ID and/or output_job_id - unable to return proper status"
+        )
+        return Response[JobStatusResponse](data=JobStatusResponse(status=Status.FAILED))
+
+    input_job_id = job.info["input_job_id"]
+    output_job_id = job.info["output_job_id"]
+
     try:
-        status: Status = celery_status_map[job.status]
+        status: Status = celery_status_map[
+            aggregate_statuses(input_job_id, output_job_id)
+        ]
     except Exception as e:
         logger.error(f"Error getting job status: {e}")
         status = Status.FAILED
