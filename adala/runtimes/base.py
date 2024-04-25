@@ -2,7 +2,7 @@ import logging
 
 from tqdm import tqdm
 from abc import ABC, abstractmethod
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, Field
 from typing import List, Dict, Optional, Tuple, Any, Callable, ClassVar
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
 from adala.utils.registry import BaseModelInRegistry
@@ -25,7 +25,7 @@ class Runtime(BaseModelInRegistry):
 
     verbose: bool = False
     batch_size: Optional[int] = None
-    concurrency: Optional[int] = -1
+    concurrency: Optional[int] = Field(default=-1, alias='concurrent_clients')
 
     @model_validator(mode="after")
     def init_runtime(self) -> "Runtime":
