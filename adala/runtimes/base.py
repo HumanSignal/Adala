@@ -4,7 +4,9 @@ from pydantic import BaseModel, model_validator
 from typing import List, Dict, Optional, Tuple, Any, Callable, ClassVar
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
 from adala.utils.registry import BaseModelInRegistry
+from pandarallel import pandarallel
 
+pandarallel.initialize(progress_bar=True)
 tqdm.pandas()
 
 
@@ -68,6 +70,7 @@ class Runtime(BaseModelInRegistry):
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
+        run_parallel: bool = True,
     ) -> InternalDataFrame:
         """
         Processes a record.
@@ -81,11 +84,18 @@ class Runtime(BaseModelInRegistry):
             field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
                 i.e. analogous to {"field_n": {"type": "string"}}.
             instructions_first (bool): Whether to put instructions first. Defaults to True.
-
+            run_parallel (bool): Whether to run batch processing in parallel. Defaults to True.
         Returns:
             InternalDataFrame: The processed batch.
         """
-        output = batch.progress_apply(
+        if run_parallel:
+            # run batch processing each row in a parallel way, using all available CPUs
+            apply_func = batch.parallel_apply
+        else:
+            # run batch processing each row in a sequential way
+            apply_func = batch.progress_apply
+
+        output = apply_func(
             self.record_to_record,
             axis=1,
             result_type="expand",
