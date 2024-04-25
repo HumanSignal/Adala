@@ -6,7 +6,7 @@ from rich import print
 
 from typing import Optional, Dict, Any, List
 from openai import OpenAI, NotFoundError
-from pydantic import Field, computed_field, ConfigDict
+from pydantic import Field, computed_field, ConfigDict, field_validator
 from .base import Runtime, AsyncRuntime
 from adala.utils.logs import print_error
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
@@ -154,6 +154,8 @@ class OpenAIChatRuntime(Runtime):
         openai_model: OpenAI model name.
         openai_api_key: OpenAI API key. If not provided, will be taken from OPENAI_API_KEY environment variable.
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
+        splitter: Splitter to use for splitting input into multiple messages. Defaults to None.
+        run_parallel: Whether to run requests in parallel. Defaults to True.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
@@ -164,6 +166,7 @@ class OpenAIChatRuntime(Runtime):
     )
     max_tokens: Optional[int] = 1000
     splitter: Optional[str] = None
+    run_parallel: Optional[bool] = True
 
     @computed_field
     def _client(self) -> OpenAI:
@@ -268,9 +271,6 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
         temperature: Temperature for sampling, between 0 and 1. Higher values means the model will take more risks.
             Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.
             Defaults to 0.0.
-
-        concurrent_clients: Number of concurrent clients to OpenAI API. More clients means more parallel requests, but
-            also more money spent and more chances to hit the rate limit. Defaults to 10.
     """
 
     openai_model: str = Field(alias="model")
@@ -280,7 +280,6 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
     max_tokens: Optional[int] = 1000
     temperature: Optional[float] = 0.0
     splitter: Optional[str] = None
-    concurrent_clients: Optional[int] = 10
     timeout: Optional[int] = 10
 
     def init_runtime(self) -> "Runtime":
@@ -293,6 +292,15 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                 f'Requested model "{self.openai_model}" is not available in your OpenAI account.'
             )
         return self
+
+    @field_validator("concurrency", mode="before")
+    def check_concurrency(cls, value) -> int:
+        value = value or -1
+        if value < 1:
+            raise NotImplementedError(
+                "Concurrency must be greater than 0 for AsyncOpenAIChatRuntime. "
+                "Set `AsyncOpenAIChatRuntime(concurrency=10, ...)` or any other positive integer. ")
+        return value
 
     def _prepare_prompt(
         self,
@@ -353,7 +361,7 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
 
                 responses = await async_concurrent_create_completion(
                     prompts=prompts,
-                    max_concurrent_requests=self.concurrent_clients,
+                    max_concurrent_requests=self.concurrency,
                     instruction_first=instructions_first,
                     timeout=self.timeout,
                     max_tokens=self.max_tokens,

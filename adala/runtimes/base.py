@@ -1,3 +1,5 @@
+import logging
+
 from tqdm import tqdm
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, model_validator
@@ -6,6 +8,7 @@ from adala.utils.internal_data import InternalDataFrame, InternalSeries
 from adala.utils.registry import BaseModelInRegistry
 from pandarallel import pandarallel
 
+logger = logging.getLogger(__name__)
 pandarallel.initialize(progress_bar=True)
 tqdm.pandas()
 
@@ -17,10 +20,12 @@ class Runtime(BaseModelInRegistry):
     Attributes:
         verbose (bool): Flag indicating if runtime outputs should be verbose. Defaults to False.
         batch_size (Optional[int]): The batch size to use for processing records. Defaults to None.
+        concurrency (Optional[int]): The number of parallel processes to use for processing records. Defaults to -1 (utilize as many CPUs as available).
     """
 
     verbose: bool = False
     batch_size: Optional[int] = None
+    concurrency: Optional[int] = -1
 
     @model_validator(mode="after")
     def init_runtime(self) -> "Runtime":
@@ -69,8 +74,7 @@ class Runtime(BaseModelInRegistry):
         output_template: str,
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
-        instructions_first: bool = True,
-        run_parallel: bool = True,
+        instructions_first: bool = True
     ) -> InternalDataFrame:
         """
         Processes a record.
@@ -88,12 +92,21 @@ class Runtime(BaseModelInRegistry):
         Returns:
             InternalDataFrame: The processed batch.
         """
-        if run_parallel:
+        if self.concurrency == -1:
             # run batch processing each row in a parallel way, using all available CPUs
+            logger.info("Running batch processing in parallel using all available CPUs")
+            apply_func = batch.parallel_apply
+        elif self.concurrency == 1:
+            # run batch processing each row in a sequential way
+            logger.info("Running batch processing sequentially")
+            apply_func = batch.progress_apply
+        elif self.concurrency > 1:
+            # run batch processing each row in a parallel way, using a fixed number of CPUs
+            logger.warning(f'Setting exact number of CPUs for parallel processing is not supported yet. '
+                           f'Running in parallel using all available CPUs.')
             apply_func = batch.parallel_apply
         else:
-            # run batch processing each row in a sequential way
-            apply_func = batch.progress_apply
+            raise ValueError(f"Invalid concurrency value: {self.concurrency}")
 
         output = apply_func(
             self.record_to_record,

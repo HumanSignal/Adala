@@ -215,7 +215,8 @@ class Agent(BaseModel, ABC):
         return runtime
 
     def run(
-        self, input: InternalDataFrame = None, runtime: Optional[str] = None
+        self, input: InternalDataFrame = None, runtime: Optional[str] = None,
+        **kwargs
     ) -> InternalDataFrame:
         """
         Runs the agent on the specified dataset.
@@ -223,7 +224,7 @@ class Agent(BaseModel, ABC):
         Args:
             input (InternalDataFrame): The dataset to run the agent on.
             runtime (str, optional): The name of the runtime to use. Defaults to None, use the default runtime.
-
+            kwargs: Additional keyword arguments to pass to the runtime.
         Returns:
             InternalDataFrame: The dataset with the agent's predictions.
         """
