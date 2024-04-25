@@ -9,7 +9,6 @@ from adala.utils.registry import BaseModelInRegistry
 from pandarallel import pandarallel
 
 logger = logging.getLogger(__name__)
-pandarallel.initialize(progress_bar=True)
 tqdm.pandas()
 
 
@@ -21,6 +20,7 @@ class Runtime(BaseModelInRegistry):
         verbose (bool): Flag indicating if runtime outputs should be verbose. Defaults to False.
         batch_size (Optional[int]): The batch size to use for processing records. Defaults to None.
         concurrency (Optional[int]): The number of parallel processes to use for processing records. Defaults to -1 (utilize as many CPUs as available).
+                                    Note that when parallel processing is used, the memory footprint will be doubled compared to sequential processing.
     """
 
     verbose: bool = False
@@ -78,32 +78,40 @@ class Runtime(BaseModelInRegistry):
     ) -> InternalDataFrame:
         """
         Processes a record.
+        It supports parallel processing of the batch:
+         - when the `concurrency` is set to -1 (using all available CPUs),
+         - when the `concurrency` is set to 1 (sequential processing),
+         - when the `concurrency` is set to a fixed number of CPUs.
+        Please note that parallel processing doubles the memory footprint compared to sequential processing.
 
         Args:
             batch (InternalDataFrame): The batch to process.
             input_template (str): The input template.
-            instructions_template (str): The instructions template.
+            instructions_template (str): The instructions' template.
             output_template (str): The output template.
             extra_fields (Optional[Dict[str, str]]): Extra fields to use in the templates. Defaults to None.
             field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
                 i.e. analogous to {"field_n": {"type": "string"}}.
             instructions_first (bool): Whether to put instructions first. Defaults to True.
-            run_parallel (bool): Whether to run batch processing in parallel. Defaults to True.
         Returns:
             InternalDataFrame: The processed batch.
         """
         if self.concurrency == -1:
             # run batch processing each row in a parallel way, using all available CPUs
             logger.info("Running batch processing in parallel using all available CPUs")
+            pandarallel.initialize(progress_bar=self.verbose)
             apply_func = batch.parallel_apply
         elif self.concurrency == 1:
             # run batch processing each row in a sequential way
             logger.info("Running batch processing sequentially")
-            apply_func = batch.progress_apply
+            if self.verbose:
+                apply_func = batch.progress_apply
+            else:
+                apply_func = batch.apply
         elif self.concurrency > 1:
             # run batch processing each row in a parallel way, using a fixed number of CPUs
-            logger.warning(f'Setting exact number of CPUs for parallel processing is not supported yet. '
-                           f'Running in parallel using all available CPUs.')
+            logger.info(f"Running batch processing in parallel using {self.concurrency} CPUs")
+            pandarallel.initialize(nb_workers=self.concurrency, progress_bar=self.verbose)
             apply_func = batch.parallel_apply
         else:
             raise ValueError(f"Invalid concurrency value: {self.concurrency}")

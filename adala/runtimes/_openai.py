@@ -298,7 +298,7 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
         value = value or -1
         if value < 1:
             raise NotImplementedError(
-                "Concurrency must be greater than 0 for AsyncOpenAIChatRuntime. "
+                "You must explicitly specify the number of concurrent clients for AsyncOpenAIChatRuntime. "
                 "Set `AsyncOpenAIChatRuntime(concurrency=10, ...)` or any other positive integer. ")
         return value
 
