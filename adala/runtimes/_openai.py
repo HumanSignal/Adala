@@ -363,7 +363,6 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                 )
 
                 # parse responses, optionally match it with options
-                index = []
                 for prompt, response, idx in zip(prompts, responses, batch.index):
                     # check for errors - if any, append to outputs and continue
                     if response.get("error"):
@@ -372,6 +371,8 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                             # ---------------------------
                             # output1 nan    nan      nan
                             # nan     true   message2 details2
+                        # we are not going to send the error response to lse
+                        # outputs.append(response)
                         if self.verbose:
                             print_error(
                                 f"Prompt: {prompt}\nOpenAI API error: {response}"
@@ -386,13 +387,11 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                         )
                     if name in options:
                         completion_text = match_options(completion_text, options[name])
-                    outputs.append({name: completion_text})
-                    index.append(idx)
+                    outputs.append({name: completion_text, "index": idx})
 
         # TODO: note that this doesn't work for multiple output fields e.g. `Output {output1} and Output {output2}`
         output_df = InternalDataFrame(outputs)
         # return output dataframe indexed as input batch.index, assuming outputs are in the same order as inputs
-        output_df['index'] = index
         return output_df.set_index('index')
 
     async def record_to_record(
