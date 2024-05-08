@@ -154,6 +154,7 @@ async def async_process_streaming_output(
             time.sleep(1)
 
     input_job_running = True
+
     data = await consumer.getmany(timeout_ms=3000, max_records=batch_size)
 
     while input_job_running:
@@ -170,6 +171,7 @@ async def async_process_streaming_output(
             logger.info(f"No messages in any topic")
 
         job = process_file_streaming.AsyncResult(input_job_id)
+        # we are getting packets from the output topic here to check if its empty and continue processing if its not
         data = await consumer.getmany(timeout_ms=3000, max_records=batch_size)
         # TODO no way to recover here if connection to main app is lost, job will be stuck at "PENDING" so this will loop forever
         if job.status in ["SUCCESS", "FAILURE", "REVOKED"] and len(data.items()) == 0:
