@@ -105,7 +105,7 @@ jobs:
           export DOCKER_IMAGE_TAG="${DOCKER_IMAGE_VERSION}"
           echo "DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG}" >> $GITHUB_OUTPUT
           BASE_DOMAIN_LENGTH=$(echo -${APP_BASE_NAME} | awk '{print length}')
-          export RELEASE_NAME=$(echo "${pretty_branch_name}" | cut -c1-$((60 - BASE_DOMAIN_LENGTH)))
+          export RELEASE_NAME=$(echo "${pretty_branch_name}" | cut -c1-25)
           echo "RELEASE_NAME=${RELEASE_NAME}" >> $GITHUB_OUTPUT
           export HOSTNAME="${RELEASE_NAME}-${APP_BASE_NAME}.${NAMESPACE}.${DOMAIN}"
           echo "HOSTNAME=${HOSTNAME}" >> $GITHUB_OUTPUT
