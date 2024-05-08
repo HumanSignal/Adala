@@ -23,27 +23,7 @@ class Settings(BaseSettings):
 def get_input_topic(job_id: str):
     topic_name = f"adala-input-{job_id}"
 
-    # same logic as get_output_topic
-
-    settings = Settings()
-    bootstrap_servers = settings.kafka_bootstrap_servers
-    retention_ms = settings.kafka_retention_ms
-
-    admin_client = KafkaAdminClient(
-        bootstrap_servers=bootstrap_servers, client_id="topic_creator"
-    )
-
-    topic = NewTopic(
-        name=topic_name,
-        num_partitions=1,
-        replication_factor=1,
-        topic_configs={"retention.ms": str(retention_ms)},
-    )
-
-    try:
-        admin_client.create_topics(new_topics=[topic])
-    except TopicAlreadyExistsError:
-        pass
+    ensure_topic(topic_name)
 
     return topic_name
 
@@ -51,8 +31,12 @@ def get_input_topic(job_id: str):
 def get_output_topic(job_id: str):
     topic_name = f"adala-output-{job_id}"
 
-    # same logic as get_input_topic
+    ensure_topic(topic_name)
 
+    return topic_name
+
+
+def ensure_topic(topic_name: str):
     settings = Settings()
     bootstrap_servers = settings.kafka_bootstrap_servers
     retention_ms = settings.kafka_retention_ms
@@ -71,9 +55,8 @@ def get_output_topic(job_id: str):
     try:
         admin_client.create_topics(new_topics=[topic])
     except TopicAlreadyExistsError:
+        # we shouldn't hit this case when KAFKA_CFG_AUTO_CREATE_TOPICS=false unless there is a legitimate name collision, so should raise here after testing
         pass
-
-    return topic_name
 
 
 def delete_topic(topic_name: str):
