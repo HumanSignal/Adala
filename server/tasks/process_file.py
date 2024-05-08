@@ -43,7 +43,7 @@ def process_file(agent: Agent):
     name="streaming_parent_task", track_started=True, bind=True, serializer="pickle"
 )
 def streaming_parent_task(
-    self, agent: Agent, result_handler: ResultHandler, batch_size: int = 2
+    self, agent: Agent, result_handler: ResultHandler, batch_size: int = 10
 ):
     """
     This task is used to launch the two tasks that are doing the real work, so that
@@ -154,31 +154,33 @@ async def async_process_streaming_output(
             time.sleep(1)
 
     input_job_running = True
+    data = await consumer.getmany(timeout_ms=3000, max_records=batch_size)
 
     while input_job_running:
-        try:
-            data = await consumer.getmany(timeout_ms=3000, max_records=batch_size)
-            for tp, messages in data.items():
-                if messages:
-                    logger.debug(f"Handling {messages=} in topic {tp.topic}")
-                    data = [msg.value for msg in messages]
-                    result_handler(data)
-                    logger.debug(
-                        f"Handled {len(messages)} messages in topic {tp.topic}"
-                    )
-                else:
-                    logger.debug(f"No messages in topic {tp.topic}")
-
-            if not data:
-                logger.info(f"No messages in any topic")
-        finally:
-            job = process_file_streaming.AsyncResult(input_job_id)
-            # TODO no way to recover here if connection to main app is lost, job will be stuck at "PENDING" so this will loop forever
-            if job.status in ["SUCCESS", "FAILURE", "REVOKED"]:
-                input_job_running = False
-                logger.info(f"Input job done, stopping output job")
+       
+           
+        for tp, messages in data.items():
+            if messages:
+                logger.debug(f"Handling {messages=} in topic {tp.topic}")
+                data = [msg.value for msg in messages]
+                result_handler(data)
+                logger.debug(
+                    f"Handled {len(messages)} messages in topic {tp.topic}"
+                )
             else:
-                logger.info(f"Input job still running, keeping output job running")
+                logger.debug(f"No messages in topic {tp.topic}")
+
+        if not data:
+            logger.info(f"No messages in any topic")
+    
+        job = process_file_streaming.AsyncResult(input_job_id)
+        data = await consumer.getmany(timeout_ms=3000, max_records=batch_size)
+        # TODO no way to recover here if connection to main app is lost, job will be stuck at "PENDING" so this will loop forever
+        if job.status in ["SUCCESS", "FAILURE", "REVOKED"] and len(data.items())==0:
+            input_job_running = False
+            logger.info(f"Input job done, stopping output job")
+        else:
+            logger.info(f"Input job still running, keeping output job running")
 
     await consumer.stop()
 
