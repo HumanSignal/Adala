@@ -367,10 +367,10 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                     # check for errors - if any, append to outputs and continue
                     if response.get("error"):
                         # FIXME if we collect failed and succeeded outputs in the same list -> df, we end up with an awkward schema like this:
-                        # output error message details
-                        # ---------------------------
-                        # output1 nan    nan      nan
-                        # nan     true   message2 details2
+                            # output error message details
+                            # ---------------------------
+                            # output1 nan    nan      nan
+                            # nan     true   message2 details2
                         # we are not going to send the error response to lse
                         # outputs.append(response)
                         if self.verbose:
@@ -392,7 +392,7 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
         # TODO: note that this doesn't work for multiple output fields e.g. `Output {output1} and Output {output2}`
         output_df = InternalDataFrame(outputs)
         # return output dataframe indexed as input batch.index, assuming outputs are in the same order as inputs
-        return output_df.set_index("index")
+        return output_df.set_index('index')
 
     async def record_to_record(
         self,
