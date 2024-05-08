@@ -60,7 +60,6 @@ def ensure_topic(topic_name: str):
 
 
 def delete_topic(topic_name: str):
-    # unused for now
     settings = Settings()
     bootstrap_servers = settings.kafka_bootstrap_servers
 

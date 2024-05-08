@@ -11,7 +11,7 @@ from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import UnknownTopicOrPartitionError
 from celery import Celery, states
 from celery.exceptions import Ignore
-from server.utils import get_input_topic, get_output_topic, Settings
+from server.utils import get_input_topic, get_output_topic, delete_topic, Settings
 from server.handlers.result_handlers import ResultHandler
 
 
@@ -116,12 +116,16 @@ def process_file_streaming(self, agent: Agent, parent_job_id: str):
     # Set input and output topics using parent job ID
     agent.environment.kafka_input_topic = get_input_topic(parent_job_id)
     agent.environment.kafka_output_topic = get_output_topic(parent_job_id)
-    import time
 
-    time.sleep(5)
+    # import time
+    # time.sleep(5)
 
     # Run the agent
     asyncio.run(agent.arun())
+
+    # manually cleanup these topics
+    delete_topic(agent.environment.kafka_input_topic)
+    delete_topic(agent.environment.kafka_output_topic)
 
 
 async def async_process_streaming_output(
