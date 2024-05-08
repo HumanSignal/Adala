@@ -117,9 +117,6 @@ def process_file_streaming(self, agent: Agent, parent_job_id: str):
     agent.environment.kafka_input_topic = get_input_topic(parent_job_id)
     agent.environment.kafka_output_topic = get_output_topic(parent_job_id)
 
-    # import time
-    # time.sleep(5)
-
     # Run the agent
     asyncio.run(agent.arun())
 
