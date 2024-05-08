@@ -61,12 +61,12 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
                 try:
                     # Wait for the next message with a timeout
                     msg = await asyncio.wait_for(consumer.getone(), timeout=timeout)
-                    # print_text(f"Received message: {msg.value}")
+                    print_text(f"Received message: {msg.value}")
                     yield msg.value
                 except asyncio.TimeoutError:
-                    # print_text(
-                    # f"No message received within the timeout {timeout} seconds"
-                    # )
+                    print_text(
+                        f"No message received within the timeout {timeout} seconds"
+                    )
                     break
         finally:
             await consumer.stop()
@@ -78,10 +78,10 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         try:
             for record in data:
                 await producer.send_and_wait(topic, value=record)
-                # print_text(f"Sent message: {record} to {topic=}")
+                print_text(f"Sent message: {record} to {topic=}")
         finally:
             await producer.stop()
-            # print_text(f"No more messages for {topic=}")
+            print_text(f"No more messages for {topic=}")
 
     async def get_next_batch(self, data_iterator, batch_size: int) -> List[Dict]:
         batch = []

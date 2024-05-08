@@ -30,15 +30,14 @@ def get_input_topic(job_id: str):
     retention_ms = settings.kafka_retention_ms
 
     admin_client = KafkaAdminClient(
-        bootstrap_servers=bootstrap_servers,
-        client_id='topic_creator'
+        bootstrap_servers=bootstrap_servers, client_id="topic_creator"
     )
 
     topic = NewTopic(
         name=topic_name,
         num_partitions=1,
         replication_factor=1,
-        topic_configs={"retention.ms": str(retention_ms)}
+        topic_configs={"retention.ms": str(retention_ms)},
     )
 
     try:
@@ -59,15 +58,14 @@ def get_output_topic(job_id: str):
     retention_ms = settings.kafka_retention_ms
 
     admin_client = KafkaAdminClient(
-        bootstrap_servers=bootstrap_servers,
-        client_id='topic_creator'
+        bootstrap_servers=bootstrap_servers, client_id="topic_creator"
     )
 
     topic = NewTopic(
         name=topic_name,
         num_partitions=1,
         replication_factor=1,
-        topic_configs={"retention.ms": str(retention_ms)}
+        topic_configs={"retention.ms": str(retention_ms)},
     )
 
     try:
@@ -84,8 +82,7 @@ def delete_topic(topic_name: str):
     bootstrap_servers = settings.kafka_bootstrap_servers
 
     admin_client = KafkaAdminClient(
-        bootstrap_servers=bootstrap_servers,
-        client_id='topic_deleter'
+        bootstrap_servers=bootstrap_servers, client_id="topic_deleter"
     )
 
     admin_client.delete_topics(topics=[topic_name])
