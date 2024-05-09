@@ -65,7 +65,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
                     yield msg.value
                 except asyncio.TimeoutError:
                     # print_text(
-                        # f"No message received within the timeout {timeout} seconds"
+                    # f"No message received within the timeout {timeout} seconds"
                     # )
                     break
         finally:
