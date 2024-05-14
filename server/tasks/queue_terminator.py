@@ -1,3 +1,33 @@
+"""
+Script to stop consumer connections from Celery workers.
+
+This script is used to stop the consumer connections for specified Celery queues. If no queues are
+specified, the script will stop consumer connections for all active queues. The script ensures that
+all running jobs are completed before exiting.
+
+Usage:
+    python script_name.py [queue1 queue2 ...]
+
+Arguments:
+    queues (optional): Names of queues to stop consumer connections for. If not provided, all active
+                       queues will be considered.
+
+Functions:
+    stop_consumer_for_queues(queues):
+        Stops the consumer connections for the specified Celery queues. If no queues are specified,
+        it inspects the Celery workers to find all active queues and stops the consumer connections
+        for them. Waits until all running jobs are finished before exiting.
+
+    main():
+        Main function to parse command-line arguments and invoke the stop_consumer_for_queues function.
+        Accepts a list of queue names as arguments. If no queue names are provided, it stops consumer
+        connections for all active queues.
+
+Entry Point:
+    The script is intended to be run as a standalone program. The entry point calls the main function
+    to parse arguments and stop consumer connections for queues.
+"""
+
 import time
 import argparse
 import logging
