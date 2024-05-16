@@ -1,4 +1,5 @@
 # docker-compose.yml
+# see server/README.md for usage details
 services:
   kafka:
     restart: always
@@ -13,6 +14,7 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9093,CONTROLLER://:2181
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      #  note this difference from docker-compose.yml
       #- KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9093
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9093
       - KAFKA_BROKER_ID=1
