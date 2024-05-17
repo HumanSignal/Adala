@@ -1,34 +1,54 @@
-# run in Docker
+# how to use
 
-## setup config
+Once running, see `http://localhost:30001/docs` for API documentation.
+
+# run natively
+
+Run `poetry install` first if you have not already done so.
+
+## start kafka and redis
 
 ```bash
-cp .env.example .env
+cd ..
+docker-compose -f docker-compose.native.yml up
 ```
 
-## set environment variables
+## start app
 
-- AWS creds:
 ```bash
+# set env vars
+cp .env.example .env
+# set AWS creds (only if S3 access needed)
+eval "$(aws configure export-credentials --profile <YOUR_PROFILE> --format env)"
+# start app
+poetry run uvicorn app:app --host 0.0.0.0 --port 30001
+```
+
+## start celery workers
+
+```bash
+# set AWS creds (only if S3 access needed)
+eval "$(aws configure export-credentials --profile <YOUR_PROFILE> --format env)"
+# start celery workers
+cd tasks/
+poetry run celery -A process_file worker --loglevel=info
+```
+
+# run in Docker
+
+```bash
+# set AWS creds (only if S3 access needed)
 eval "$(aws configure export-credentials --profile <YOUR_PROFILE> --format env)"
 ```
 
-## run
+Edit the env variables in `docker-compose.yml` if needed - the defaults should be ok. There should be differences from the `.env` file for native use.
 
 ```bash
 # from repo root
 docker-compose up
 ```
 
-
-## rebuild and run on code change
-
-```bash
-# from repo root
-docker-compose up --build
-```
-
-## run client
+# run client (unused, for dev convenience only)
 
 ```bash
 cd ui/
@@ -36,6 +56,16 @@ yarn start
 ```
 
 # development
+
+## rebuild on code change
+
+```bash
+# from repo root
+docker-compose up --build
+# if dependencies have changed, or to get to a clean state:
+docker-compose build --no-cache
+docker-compose up
+```
 
 ## edit client on API change
 
