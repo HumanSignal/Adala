@@ -324,6 +324,12 @@ def cancel_job(job_id):
         JobStatusResponse[status.CANCELED]
     """
     job = process_file.AsyncResult(job_id)
+    input_job_id = job.info["input_job_id"]
+    output_job_id = job.info["output_job_id"]
+    input_job = process_file_streaming.AsyncResult(input_job_id)
+    output_job = process_streaming_output.AsyncResult(output_job_id)
+    input_job.revoke()
+    output_job.revoke()
     job.revoke()
     return Response[JobStatusResponse](data=JobStatusResponse(status=Status.CANCELED))
 
