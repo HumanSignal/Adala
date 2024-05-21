@@ -11,7 +11,13 @@ from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import UnknownTopicOrPartitionError
 from celery import Celery, states
 from celery.exceptions import Ignore
-from server.utils import get_input_topic_name, get_output_topic_name, ensure_topic, delete_topic, Settings
+from server.utils import (
+    get_input_topic_name,
+    get_output_topic_name,
+    ensure_topic,
+    delete_topic,
+    Settings,
+)
 from server.handlers.result_handlers import ResultHandler
 
 
@@ -121,9 +127,7 @@ def streaming_parent_task(
     raise Ignore()
 
 
-@app.task(
-    name="process_file_streaming", track_started=True, serializer="pickle"
-)
+@app.task(name="process_file_streaming", track_started=True, serializer="pickle")
 def process_file_streaming(agent: Agent):
     # agent's kafka_bootstrap servers and kafka topics should be set in parent task
 
@@ -192,9 +196,7 @@ async def async_process_streaming_output(
     await consumer.stop()
 
 
-@app.task(
-    name="process_streaming_output", track_started=True, serializer="pickle"
-)
+@app.task(name="process_streaming_output", track_started=True, serializer="pickle")
 def process_streaming_output(
     input_job_id: str,
     output_topic_name: str,
