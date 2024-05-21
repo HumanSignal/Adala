@@ -20,18 +20,14 @@ class Settings(BaseSettings):
     )
 
 
-def get_input_topic(job_id: str):
+def get_input_topic_name(job_id: str):
     topic_name = f"adala-input-{job_id}"
-
-    ensure_topic(topic_name)
 
     return topic_name
 
 
-def get_output_topic(job_id: str):
+def get_output_topic_name(job_id: str):
     topic_name = f"adala-output-{job_id}"
-
-    ensure_topic(topic_name)
 
     return topic_name
 
