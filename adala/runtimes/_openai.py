@@ -346,6 +346,7 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                             )
                     if name in options and completion_text is not None:
                         completion_text = match_options(completion_text, options[name])
+                        # TODO check for key collision between name and "error", "message", "details" - or use reserved names for them
                         response[name] = completion_text
                     outputs.append(response)
 

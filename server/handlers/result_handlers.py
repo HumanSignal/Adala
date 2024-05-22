@@ -98,6 +98,7 @@ class LSEHandler(ResultHandler):
         self.client.make_request(
             "POST",
             "/api/model-run/batch-predictions",
+            # TODO take only result_batch['output'] for now to get this to run with LSE, or wait until DIA-1122 (LSE side ticket) is merged to merge this branch
             data=json.dumps(
                 {
                     "modelrun_id": self.modelrun_id,
