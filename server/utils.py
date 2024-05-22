@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     """
 
     kafka_bootstrap_servers: Union[str, List[str]]
-    kafka_retention_ms: int
+    kafka_retention_ms: int = 180000  # 30 minutes
 
     model_config = SettingsConfigDict(
         # have to use an absolute path here so celery workers can find it
