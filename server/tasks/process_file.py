@@ -133,8 +133,16 @@ def streaming_parent_task(
 def process_file_streaming(agent: Agent):
     # agent's kafka_bootstrap servers and kafka topics should be set in parent task
 
-    # Run the agent
-    asyncio.run(agent.arun())
+    # need to keep these in the same event loop
+    async def run_fn():
+        # start up kaka producer and consumer
+        await agent.environment.initialize()
+        # Run the agent
+        await agent.arun()
+        # shut down kaka producer and consumer
+        await agent.environment.finalize()
+
+    asyncio.run(run_fn())
 
 
 async def async_process_streaming_output(
