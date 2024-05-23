@@ -63,17 +63,17 @@ async def async_create_completion(
         completion_text = completion.choices[0].message.content
         return {
             "text": completion_text,
-            "error": False,
-            "message": None,
-            "details": None,
+            "__adala_error__": False,
+            "__adala_message__": None,
+            "__adala_details__": None,
         }
     except Exception as e:
         # Handle other exceptions
         return {
             "text": None,
-            "error": True,
-            "message": "Unknown error",
-            "details": str(e),
+            "__adala_error__": True,
+            "__adala_message__": "Unknown error",
+            "__adala_details__": str(e),
         }
 
 
@@ -346,7 +346,7 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                             )
                     if name in options and completion_text is not None:
                         completion_text = match_options(completion_text, options[name])
-                        # TODO check for key collision between name and "error", "message", "details" - or use reserved names for them
+                        # still technically possible to have a name collision here with the error, message, details fields
                         response[name] = completion_text
                     outputs.append(response)
 
