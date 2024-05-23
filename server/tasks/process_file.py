@@ -72,7 +72,7 @@ def streaming_parent_task(
     agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
     agent.environment.kafka_input_topic = input_topic_name
     agent.environment.kafka_output_topic = output_topic_name
-    agent.environment.timeout_sec = settings.kafka_input_consumer_timeout_sec
+    agent.environment.timeout_ms = settings.kafka_input_consumer_timeout_ms
 
     inference_task = process_file_streaming
     logger.info(f"Submitting task {inference_task.name} with agent {agent}")

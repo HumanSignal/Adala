@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     kafka_bootstrap_servers: Union[str, List[str]]
     kafka_retention_ms: int = 180000  # 30 minutes
-    kafka_input_consumer_timeout_sec: int = 3  # 3 seconds
+    kafka_input_consumer_timeout_ms: int = 3000  # 3 seconds
     kafka_output_consumer_timeout_ms: int = 3000  # 3 seconds
 
     model_config = SettingsConfigDict(

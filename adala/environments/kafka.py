@@ -31,7 +31,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     kafka_bootstrap_servers: Union[str, List[str]]
     kafka_input_topic: str
     kafka_output_topic: str
-    timeout_sec: int = 3
+    timeout_ms: int
 
     async def initialize(self):
         # claim kafka topic from shared pool here?
@@ -55,24 +55,6 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     async def save(self):
         raise NotImplementedError("Save is not supported in Kafka environment")
 
-    async def message_receiver(self, consumer: AIOKafkaConsumer):
-        timeout = self.timeout_sec
-        await consumer.start()
-        try:
-            while True:
-                try:
-                    # Wait for the next message with a timeout
-                    msg = await asyncio.wait_for(consumer.getone(), timeout=timeout)
-                    # print_text(f"Received message: {msg.value}")
-                    yield msg.value
-                except asyncio.TimeoutError:
-                    # print_text(
-                    # f"No message received within the timeout {timeout} seconds"
-                    # )
-                    break
-        finally:
-            await consumer.stop()
-
     async def message_sender(
         self, producer: AIOKafkaProducer, data: Iterable, topic: str
     ):
@@ -85,18 +67,6 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             await producer.stop()
             # print_text(f"No more messages for {topic=}")
 
-    async def get_next_batch(self, data_iterator, batch_size: int) -> List[Dict]:
-        batch = []
-        try:
-            for _ in range(batch_size):
-                data = await anext(data_iterator, None)
-                if data is None:  # This checks if the iterator is exhausted
-                    break
-                batch.append(data)
-        except StopAsyncIteration:
-            pass
-        return batch
-
     async def get_data_batch(self, batch_size: Optional[int]) -> InternalDataFrame:
         consumer = AIOKafkaConsumer(
             self.kafka_input_topic,
@@ -105,13 +75,26 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             auto_offset_reset="earliest",
             group_id="adala-consumer-group",  # TODO: make it configurable based on the environment
         )
+        await consumer.start()
 
-        data_stream = self.message_receiver(consumer)
-        batch = await self.get_next_batch(data_stream, batch_size)
-        logger.info(
-            f"Received a batch of {len(batch)} records from Kafka topic {self.kafka_input_topic}"
-        )
-        return InternalDataFrame(batch)
+        batch = await consumer.getmany(timeout_ms=self.timeout_ms, max_records=batch_size)
+        await consumer.stop()
+
+        if len(batch) == 0:
+            batch_data = []
+        elif len(batch) > 1:
+            logger.error(
+                f"consumer should be subscribed to only one topic and partition, not {list(batch.keys())}"
+            )
+            batch_data = []
+        else:
+            for topic_partition, messages in batch.items():
+                batch_data = [msg.value for msg in messages]
+
+            logger.info(
+                f"Received a batch of {len(batch_data)} records from Kafka topic {self.kafka_input_topic}"
+            )
+        return InternalDataFrame(batch_data)
 
     async def set_predictions(self, predictions: InternalDataFrame):
         producer = AIOKafkaProducer(
