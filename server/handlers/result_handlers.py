@@ -95,10 +95,31 @@ class LSEHandler(ResultHandler):
 
     def __call__(self, result_batch):
         logger.info(f"\n\nHandler received batch: {result_batch}\n\n")
+
+        # omit failed tasks for now
+        # TODO handle in DIA-1122
+        result_batch = [
+            record for record in result_batch if not record["__adala_error__"]
+        ]
+
+        # only keep the parts of the record we know how to handle
+        known_keys = [
+            # 'text',  # should always be omitted
+            "task_id",
+            "output",
+            # TODO in DIA-1122
+            # '__adala_error__',
+            # '__adala_message__',
+            # '__adala_details__',
+        ]
+        result_batch = [
+            {k: v for k, v in record.items() if k in known_keys}
+            for record in result_batch
+        ]
+
         self.client.make_request(
             "POST",
             "/api/model-run/batch-predictions",
-            # TODO take only result_batch['output'] for now to get this to run with LSE, or wait until DIA-1122 (LSE side ticket) is merged to merge this branch
             data=json.dumps(
                 {
                     "modelrun_id": self.modelrun_id,

@@ -207,7 +207,9 @@ async def async_process_streaming_output(
     await consumer.stop()
 
 
-@app.task(name="process_streaming_output", track_started=True, bind=True, serializer="pickle")
+@app.task(
+    name="process_streaming_output", track_started=True, bind=True, serializer="pickle"
+)
 def process_streaming_output(
     self,
     input_job_id: str,

@@ -54,7 +54,6 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         )
         await self.consumer.start()
 
-
         self.producer = AIOKafkaProducer(
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
@@ -62,7 +61,6 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         await self.producer.start()
 
     async def finalize(self):
-
         await self.consumer.stop()
         await self.producer.stop()
 
@@ -94,8 +92,9 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             # print_text(f"No more messages for {topic=}")
 
     async def get_data_batch(self, batch_size: Optional[int]) -> InternalDataFrame:
-
-        batch = await self.consumer.getmany(timeout_ms=self.timeout_ms, max_records=batch_size)
+        batch = await self.consumer.getmany(
+            timeout_ms=self.timeout_ms, max_records=batch_size
+        )
 
         if len(batch) == 0:
             batch_data = []
@@ -115,7 +114,9 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
 
     async def set_predictions(self, predictions: InternalDataFrame):
         predictions_iter = (r.to_dict() for _, r in predictions.iterrows())
-        await self.message_sender(self.producer, predictions_iter, self.kafka_output_topic)
+        await self.message_sender(
+            self.producer, predictions_iter, self.kafka_output_topic
+        )
 
 
 class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
