@@ -31,6 +31,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     kafka_bootstrap_servers: Union[str, List[str]]
     kafka_input_topic: str
     kafka_output_topic: str
+    timeout_sec: int = 3
 
     async def initialize(self):
         # claim kafka topic from shared pool here?
@@ -54,7 +55,8 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     async def save(self):
         raise NotImplementedError("Save is not supported in Kafka environment")
 
-    async def message_receiver(self, consumer: AIOKafkaConsumer, timeout: int = 3):
+    async def message_receiver(self, consumer: AIOKafkaConsumer):
+        timeout = self.timeout_sec
         await consumer.start()
         try:
             while True:
