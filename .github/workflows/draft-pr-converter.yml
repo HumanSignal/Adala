@@ -20,7 +20,7 @@ jobs:
         shell: bash
         run: echo "ts=$(date -d '10 hours ago' +"%Y-%m-%dT%H:%M:%S")" >> $GITHUB_OUTPUT
 
-      - uses: octokit/graphql-action@v2.3.1
+      - uses: octokit/graphql-action@v2.3.2
         name: Get PR older than 10 hours
         id: get_stale_prs
         env:
