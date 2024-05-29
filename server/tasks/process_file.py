@@ -67,7 +67,6 @@ def streaming_parent_task(
     ensure_topic(output_topic_name)
 
     # Override default agent kafka settings
-    # TODO put these in agent.initialize() actually, so we don't have to pass dummy values
     settings = Settings()
     agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
     agent.environment.kafka_input_topic = input_topic_name
