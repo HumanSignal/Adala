@@ -85,9 +85,8 @@ async def async_concurrent_create_completion(
     max_tokens,
     temperature,
 ):
-    tasks = []
-    for prompt in prompts:
-        task = asyncio.ensure_future(
+    tasks = [
+        asyncio.ensure_future(
             async_create_completion(
                 client=client,
                 user_prompt=prompt["user"],
@@ -98,7 +97,8 @@ async def async_concurrent_create_completion(
                 instruction_first=instruction_first,
             )
         )
-        tasks.append(task)
+        for prompt in prompts
+    ]
     responses = await asyncio.gather(*tasks)
     return responses
 
