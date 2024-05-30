@@ -63,17 +63,17 @@ async def async_create_completion(
         completion_text = completion.choices[0].message.content
         return {
             "text": completion_text,
-            "__adala_error__": False,
-            "__adala_message__": None,
-            "__adala_details__": None,
+            "_adala_error": False,
+            "_adala_message": None,
+            "_adala_details": None,
         }
     except Exception as e:
         # Handle other exceptions
         return {
             "text": None,
-            "__adala_error__": True,
-            "__adala_message__": "Unknown error",
-            "__adala_details__": str(e),
+            "_adala_error": True,
+            "_adala_message": "Unknown error",
+            "_adala_details": str(e),
         }
 
 

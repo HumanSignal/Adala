@@ -99,7 +99,7 @@ class LSEHandler(ResultHandler):
         # omit failed tasks for now
         # TODO handle in DIA-1122
         result_batch = [
-            record for record in result_batch if not record["__adala_error__"]
+            record for record in result_batch if not record["_adala_error"]
         ]
 
         # only keep the parts of the record we know how to handle
@@ -108,9 +108,9 @@ class LSEHandler(ResultHandler):
             "task_id",
             "output",
             # TODO in DIA-1122
-            # '__adala_error__',
-            # '__adala_message__',
-            # '__adala_details__',
+            # '_adala_error',
+            # '_adala_message',
+            # '_adala_details',
         ]
         result_batch = [
             {k: v for k, v in record.items() if k in known_keys}
