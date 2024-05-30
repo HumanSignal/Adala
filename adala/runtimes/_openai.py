@@ -72,7 +72,7 @@ async def async_create_completion(
         return {
             "text": None,
             "_adala_error": True,
-            "_adala_message": "Unknown error",
+            "_adala_message": type(e).__name__,
             "_adala_details": str(e),
         }
 
