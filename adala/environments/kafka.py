@@ -40,10 +40,10 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     producer: Optional[AIOKafkaProducer] = None
 
     async def initialize(self):
-        assert self.kafka_bootstrap_servers is not None, "missing initialization"
-        assert self.kafka_input_topic is not None, "missing initialization"
-        assert self.kafka_output_topic is not None, "missing initialization"
-        assert self.timeout_ms is not None, "missing initialization"
+        assert self.kafka_bootstrap_servers is not None, "missing initialization for kafka_bootstrap_servers"
+        assert self.kafka_input_topic is not None, "missing initialization for kafka_input_topic"
+        assert self.kafka_output_topic is not None, "missing initialization for kafka_output_topic"
+        assert self.timeout_ms is not None, "missing initialization for timeout_ms"
 
         self.consumer = AIOKafkaConsumer(
             self.kafka_input_topic,
