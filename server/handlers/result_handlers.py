@@ -62,11 +62,11 @@ class DummyHandler(ResultHandler):
 class LSEBatchItem(BaseModel):
     """
     The output for a single Task in an LSE Project.
-    A batch of these consumed from the kafka output queue is the expected input for LSEHandler.__call__
+    A batch of these consumed from the kafka output topic is the expected input for LSEHandler.__call__
     """
 
     model_config = ConfigDict(
-        # omit fields from the input task besides task_id, the LSE /submit-batch endpoint doesn't use these and it'd be a waste of network bandwidth since they can be large
+        # omit fields from the input task besides task_id, the LSE /batch-predictions endpoint doesn't use these and it'd be a waste of network bandwidth since they can be large
         extra="ignore",
         # guard against name collisions with other input fields
         allow_population_by_field_name=False,
