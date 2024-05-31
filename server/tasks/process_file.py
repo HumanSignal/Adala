@@ -71,6 +71,7 @@ def streaming_parent_task(
     agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
     agent.environment.kafka_input_topic = input_topic_name
     agent.environment.kafka_output_topic = output_topic_name
+    agent.environment.timeout_ms = settings.kafka_input_consumer_timeout_ms
 
     inference_task = process_file_streaming
     logger.info(f"Submitting task {inference_task.name} with agent {agent}")
@@ -131,8 +132,16 @@ def streaming_parent_task(
 def process_file_streaming(agent: Agent):
     # agent's kafka_bootstrap servers and kafka topics should be set in parent task
 
-    # Run the agent
-    asyncio.run(agent.arun())
+    # need to keep these in the same event loop
+    async def run_fn():
+        # start up kaka producer and consumer
+        await agent.environment.initialize()
+        # Run the agent
+        await agent.arun()
+        # shut down kaka producer and consumer
+        await agent.environment.finalize()
+
+    asyncio.run(run_fn())
 
 
 async def async_process_streaming_output(
@@ -144,6 +153,7 @@ async def async_process_streaming_output(
     logger.info(f"Polling for results {output_topic_name=}")
 
     settings = Settings()
+    timeout_ms = settings.kafka_output_consumer_timeout_ms
 
     # Retry to workaround race condition of topic creation
     retries = 5
@@ -168,7 +178,7 @@ async def async_process_streaming_output(
 
     input_job_running = True
 
-    data = await consumer.getmany(timeout_ms=3000, max_records=batch_size)
+    data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
 
     while input_job_running:
         for tp, messages in data.items():
@@ -185,7 +195,7 @@ async def async_process_streaming_output(
 
         job = process_file_streaming.AsyncResult(input_job_id)
         # we are getting packets from the output topic here to check if its empty and continue processing if its not
-        data = await consumer.getmany(timeout_ms=3000, max_records=batch_size)
+        data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
         # TODO no way to recover here if connection to main app is lost, job will be stuck at "PENDING" so this will loop forever
         if job.status in ["SUCCESS", "FAILURE", "REVOKED"] and len(data.items()) == 0:
             input_job_running = False
@@ -196,8 +206,11 @@ async def async_process_streaming_output(
     await consumer.stop()
 
 
-@app.task(name="process_streaming_output", track_started=True, serializer="pickle")
+@app.task(
+    name="process_streaming_output", track_started=True, bind=True, serializer="pickle"
+)
 def process_streaming_output(
+    self,
     input_job_id: str,
     output_topic_name: str,
     result_handler: ResultHandler,

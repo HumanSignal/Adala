@@ -26,19 +26,49 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         kafka_bootstrap_servers (Union[str, List[str]]): The Kafka bootstrap servers.
         kafka_input_topic (str): The Kafka input topic.
         kafka_output_topic (str): The Kafka output topic.
+        timeout_ms (int): The timeout for the Kafka consumer.
     """
 
-    kafka_bootstrap_servers: Union[str, List[str]]
-    kafka_input_topic: str
-    kafka_output_topic: str
+    # these are mandatory, but should be set by server
+    kafka_bootstrap_servers: Optional[Union[str, List[str]]] = None
+    kafka_input_topic: Optional[str] = None
+    kafka_output_topic: Optional[str] = None
+    timeout_ms: Optional[int] = None
+
+    # these are set in initialize()
+    consumer: Optional[AIOKafkaConsumer] = None
+    producer: Optional[AIOKafkaProducer] = None
 
     async def initialize(self):
-        # claim kafka topic from shared pool here?
-        pass
+        assert (
+            self.kafka_bootstrap_servers is not None
+        ), "missing initialization for kafka_bootstrap_servers"
+        assert (
+            self.kafka_input_topic is not None
+        ), "missing initialization for kafka_input_topic"
+        assert (
+            self.kafka_output_topic is not None
+        ), "missing initialization for kafka_output_topic"
+        assert self.timeout_ms is not None, "missing initialization for timeout_ms"
+
+        self.consumer = AIOKafkaConsumer(
+            self.kafka_input_topic,
+            bootstrap_servers=self.kafka_bootstrap_servers,
+            value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+            auto_offset_reset="earliest",
+            group_id="adala-consumer-group",  # TODO: make it configurable based on the environment
+        )
+        await self.consumer.start()
+
+        self.producer = AIOKafkaProducer(
+            bootstrap_servers=self.kafka_bootstrap_servers,
+            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+        )
+        await self.producer.start()
 
     async def finalize(self):
-        # release kafka topic to shared pool here?
-        pass
+        await self.consumer.stop()
+        await self.producer.stop()
 
     async def get_feedback(
         self,
@@ -54,70 +84,45 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     async def save(self):
         raise NotImplementedError("Save is not supported in Kafka environment")
 
-    async def message_receiver(self, consumer: AIOKafkaConsumer, timeout: int = 3):
-        await consumer.start()
-        try:
-            while True:
-                try:
-                    # Wait for the next message with a timeout
-                    msg = await asyncio.wait_for(consumer.getone(), timeout=timeout)
-                    # print_text(f"Received message: {msg.value}")
-                    yield msg.value
-                except asyncio.TimeoutError:
-                    # print_text(
-                    # f"No message received within the timeout {timeout} seconds"
-                    # )
-                    break
-        finally:
-            await consumer.stop()
-
+    # TODO replace this with
+    # https://aiokafka.readthedocs.io/en/stable/api.html#aiokafka.AIOKafkaProducer.send_batch
     async def message_sender(
         self, producer: AIOKafkaProducer, data: Iterable, topic: str
     ):
-        await producer.start()
         try:
             for record in data:
                 await producer.send_and_wait(topic, value=record)
                 # print_text(f"Sent message: {record} to {topic=}")
         finally:
-            await producer.stop()
+            pass
             # print_text(f"No more messages for {topic=}")
 
-    async def get_next_batch(self, data_iterator, batch_size: int) -> List[Dict]:
-        batch = []
-        try:
-            for _ in range(batch_size):
-                data = await anext(data_iterator, None)
-                if data is None:  # This checks if the iterator is exhausted
-                    break
-                batch.append(data)
-        except StopAsyncIteration:
-            pass
-        return batch
-
     async def get_data_batch(self, batch_size: Optional[int]) -> InternalDataFrame:
-        consumer = AIOKafkaConsumer(
-            self.kafka_input_topic,
-            bootstrap_servers=self.kafka_bootstrap_servers,
-            value_deserializer=lambda v: json.loads(v.decode("utf-8")),
-            auto_offset_reset="earliest",
-            group_id="adala-consumer-group",  # TODO: make it configurable based on the environment
+        batch = await self.consumer.getmany(
+            timeout_ms=self.timeout_ms, max_records=batch_size
         )
 
-        data_stream = self.message_receiver(consumer)
-        batch = await self.get_next_batch(data_stream, batch_size)
-        logger.info(
-            f"Received a batch of {len(batch)} records from Kafka topic {self.kafka_input_topic}"
-        )
-        return InternalDataFrame(batch)
+        if len(batch) == 0:
+            batch_data = []
+        elif len(batch) > 1:
+            logger.error(
+                f"consumer should be subscribed to only one topic and partition, not {list(batch.keys())}"
+            )
+            batch_data = []
+        else:
+            for topic_partition, messages in batch.items():
+                batch_data = [msg.value for msg in messages]
+
+            logger.info(
+                f"Received a batch of {len(batch_data)} records from Kafka topic {self.kafka_input_topic}"
+            )
+        return InternalDataFrame(batch_data)
 
     async def set_predictions(self, predictions: InternalDataFrame):
-        producer = AIOKafkaProducer(
-            bootstrap_servers=self.kafka_bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-        )
         predictions_iter = (r.to_dict() for _, r in predictions.iterrows())
-        await self.message_sender(producer, predictions_iter, self.kafka_output_topic)
+        await self.message_sender(
+            self.producer, predictions_iter, self.kafka_output_topic
+        )
 
 
 class FileStreamAsyncKafkaEnvironment(AsyncKafkaEnvironment):
