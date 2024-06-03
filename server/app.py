@@ -323,22 +323,23 @@ def cancel_job(job_id):
     Returns:
         JobStatusResponse[status.CANCELED]
     """
-    job = process_file.AsyncResult(job_id)
+    job = streaming_parent_task.AsyncResult(job_id)
     input_job_id = job.info.get("input_job_id", None)
     output_job_id = job.info.get("output_job_id")
-    job_flag = {}
     if input_job_id:
         input_job = process_file_streaming.AsyncResult(input_job_id)
         input_job.revoke()
-        job_flag["input"]=True
     else:
-        logger.debug(f"Input job id: {input_job_id} unavailable to cancel for parent job: {job_id}")
+        logger.debug(
+            f"Input job id: {input_job_id} unavailable to cancel for parent job: {job_id}"
+        )
     if output_job_id:
         output_job = process_streaming_output.AsyncResult(output_job_id)
         output_job.revoke()
-        job_flag["output"]=True
     else:
-        logger.debug(f"output job id: {input_job_id} unavailable to cancel for parent job: {job_id}")
+        logger.debug(
+            f"output job id: {input_job_id} unavailable to cancel for parent job: {job_id}"
+        )
     job.revoke()
     return Response[JobStatusResponse](data=JobStatusResponse(status=Status.CANCELED))
 
