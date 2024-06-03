@@ -325,7 +325,7 @@ def cancel_job(job_id):
     """
     job = streaming_parent_task.AsyncResult(job_id)
     input_job_id = job.info.get("input_job_id", None)
-    output_job_id = job.info.get("output_job_id")
+    output_job_id = job.info.get("output_job_id", None)
     if input_job_id:
         input_job = process_file_streaming.AsyncResult(input_job_id)
         input_job.revoke()
