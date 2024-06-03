@@ -346,8 +346,9 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
                             )
                     if name in options and completion_text is not None:
                         completion_text = match_options(completion_text, options[name])
-                        # still technically possible to have a name collision here with the error, message, details fields
-                        response[name] = completion_text
+                    # still technically possible to have a name collision here with the error, message, details fields
+                    # `name in options` is only `True` for categorical variables, but is never `True` for freeform text generation
+                    response[name] = completion_text
                     outputs.append(response)
 
         # TODO: note that this doesn't work for multiple output fields e.g. `Output {output1} and Output {output2}`
