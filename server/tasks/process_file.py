@@ -11,7 +11,13 @@ from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import UnknownTopicOrPartitionError
 from celery import Celery, states
 from celery.exceptions import Ignore
-from server.utils import get_input_topic, get_output_topic, Settings
+from server.utils import (
+    get_input_topic_name,
+    get_output_topic_name,
+    ensure_topic,
+    delete_topic,
+    Settings,
+)
 from server.handlers.result_handlers import ResultHandler
 
 
@@ -54,13 +60,22 @@ def streaming_parent_task(
     # Parent job ID is used for input/output topic names
     parent_job_id = self.request.id
 
-    # Override kafka_bootstrap_servers with value from settings
+    # create kafka topics
+    input_topic_name = get_input_topic_name(parent_job_id)
+    ensure_topic(input_topic_name)
+    output_topic_name = get_output_topic_name(parent_job_id)
+    ensure_topic(output_topic_name)
+
+    # Override default agent kafka settings
     settings = Settings()
     agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
+    agent.environment.kafka_input_topic = input_topic_name
+    agent.environment.kafka_output_topic = output_topic_name
+    agent.environment.timeout_ms = settings.kafka_input_consumer_timeout_ms
 
     inference_task = process_file_streaming
     logger.info(f"Submitting task {inference_task.name} with agent {agent}")
-    input_result = inference_task.delay(agent=agent, parent_job_id=parent_job_id)
+    input_result = inference_task.delay(agent=agent)
     input_job_id = input_result.id
     logger.info(f"Task {inference_task.name} submitted with job_id {input_job_id}")
 
@@ -68,7 +83,7 @@ def streaming_parent_task(
     logger.info(f"Submitting task {result_handler_task.name}")
     output_result = result_handler_task.delay(
         input_job_id=input_job_id,
-        parent_job_id=parent_job_id,
+        output_topic_name=output_topic_name,
         result_handler=result_handler,
         batch_size=batch_size,
     )
@@ -95,6 +110,10 @@ def streaming_parent_task(
     ):
         time.sleep(1)
 
+    # clean up kafka topics
+    delete_topic(input_topic_name)
+    delete_topic(output_topic_name)
+
     logger.info("Both input and output jobs complete")
 
     # Update parent task status to SUCCESS and pass metadata again
@@ -109,45 +128,49 @@ def streaming_parent_task(
     raise Ignore()
 
 
-@app.task(
-    name="process_file_streaming", track_started=True, bind=True, serializer="pickle"
-)
-def process_file_streaming(self, agent: Agent, parent_job_id: str):
-    # Set input and output topics using parent job ID
-    agent.environment.kafka_input_topic = get_input_topic(parent_job_id)
-    agent.environment.kafka_output_topic = get_output_topic(parent_job_id)
+@app.task(name="process_file_streaming", track_started=True, serializer="pickle")
+def process_file_streaming(agent: Agent):
+    # agent's kafka_bootstrap servers and kafka topics should be set in parent task
 
-    # Run the agent
-    asyncio.run(agent.arun())
+    # need to keep these in the same event loop
+    async def run_fn():
+        # start up kaka producer and consumer
+        await agent.environment.initialize()
+        # Run the agent
+        await agent.arun()
+        # shut down kaka producer and consumer
+        await agent.environment.finalize()
+
+    asyncio.run(run_fn())
 
 
 async def async_process_streaming_output(
     input_job_id: str,
-    parent_job_id: str,
+    output_topic_name,
     result_handler: ResultHandler,
     batch_size: int,
 ):
-    logger.info(f"Polling for results {parent_job_id=}")
+    logger.info(f"Polling for results {output_topic_name=}")
 
-    topic = get_output_topic(parent_job_id)
     settings = Settings()
+    timeout_ms = settings.kafka_output_consumer_timeout_ms
 
     # Retry to workaround race condition of topic creation
     retries = 5
     while retries > 0:
         try:
             consumer = AIOKafkaConsumer(
-                topic,
+                output_topic_name,
                 bootstrap_servers=settings.kafka_bootstrap_servers,
                 value_deserializer=lambda v: json.loads(v.decode("utf-8")),
                 auto_offset_reset="earliest",
             )
             await consumer.start()
-            logger.info(f"consumer started {parent_job_id=}")
+            logger.info(f"consumer started {output_topic_name=}")
             break
         except UnknownTopicOrPartitionError as e:
             logger.error(msg=e)
-            logger.info(f"Retrying to create consumer with topic {topic}")
+            logger.info(f"Retrying to create consumer with topic {output_topic_name}")
 
             await consumer.stop()
             retries -= 1
@@ -155,7 +178,7 @@ async def async_process_streaming_output(
 
     input_job_running = True
 
-    data = await consumer.getmany(timeout_ms=3000, max_records=batch_size)
+    data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
 
     while input_job_running:
         for tp, messages in data.items():
@@ -172,7 +195,7 @@ async def async_process_streaming_output(
 
         job = process_file_streaming.AsyncResult(input_job_id)
         # we are getting packets from the output topic here to check if its empty and continue processing if its not
-        data = await consumer.getmany(timeout_ms=3000, max_records=batch_size)
+        data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
         # TODO no way to recover here if connection to main app is lost, job will be stuck at "PENDING" so this will loop forever
         if job.status in ["SUCCESS", "FAILURE", "REVOKED"] and len(data.items()) == 0:
             input_job_running = False
@@ -189,14 +212,14 @@ async def async_process_streaming_output(
 def process_streaming_output(
     self,
     input_job_id: str,
-    parent_job_id: str,
+    output_topic_name: str,
     result_handler: ResultHandler,
     batch_size: int,
 ):
     try:
         asyncio.run(
             async_process_streaming_output(
-                input_job_id, parent_job_id, result_handler, batch_size
+                input_job_id, output_topic_name, result_handler, batch_size
             )
         )
     except Exception as e:

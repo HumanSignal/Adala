@@ -25,7 +25,7 @@ from tasks.process_file import (
     process_streaming_output,
     streaming_parent_task,
 )
-from utils import get_input_topic, Settings
+from utils import get_input_topic_name, Settings
 from server.handlers.result_handlers import ResultHandler
 
 
@@ -230,7 +230,7 @@ async def submit_batch(batch: BatchData):
         Response: Generic response indicating status of request
     """
 
-    topic = get_input_topic(batch.job_id)
+    topic = get_input_topic_name(batch.job_id)
     producer = AIOKafkaProducer(
         bootstrap_servers=settings.kafka_bootstrap_servers,
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
