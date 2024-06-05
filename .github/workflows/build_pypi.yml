@@ -78,9 +78,10 @@ jobs:
       - name: Upload to PYPI
         if: inputs.upload_to_pypi
         env:
-          POETRY_PYPI_TOKEN_ADALA: ${{ secrets.PYPI_APIKEY }}
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_APIKEY }}
         run: |
-          poetry publish
+          poetry config pypi-token.pypi "${POETRY_PYPI_TOKEN_PYPI}"
+          poetry publish --no-interaction
 
       - name: Attach artifacts to release
         if: inputs.release-id
