@@ -29,6 +29,39 @@ app = Celery(
 )
 
 
+def parent_job_error_handler(self, exc, task_id, args, kwargs, einfo):
+    """
+    This function will be called if streaming_parent_task fails, to ensure that we cleanup any left over
+    Kafka topics.
+
+    Also attempts to stop input/output jobs if their IDs are available
+    """
+    parent_job_id = task_id
+    input_topic_name = get_input_topic_name(parent_job_id)
+    output_topic_name = get_output_topic_name(parent_job_id)
+    delete_topic(input_topic_name)
+    delete_topic(output_topic_name)
+
+    parent_job = streaming_parent_task.AsyncResult(parent_job_id)
+    if (
+        parent_job.info is None
+        or type(parent_job.info)
+        != dict  # In some failure cases e.g. an exception is thrown, job.info will be a string, causing the next line to crash
+        or "input_job_id" not in parent_job.info
+        or "output_job_id" not in parent_job.info
+    ):
+        logger.warning(
+            "Parent task does not contain input job ID and/or output_job_id - unable to stop input/output jobs"
+        )
+    else:
+        input_job_id = parent_job.info["input_job_id"]
+        output_job_id = parent_job.info["output_job_id"]
+        input_job = process_file_streaming.AsyncResult(input_job_id)
+        output_job = process_streaming_output.AsyncResult(output_job_id)
+        input_job.revoke()
+        output_job.revoke()
+
+
 @app.task(name="process_file", track_started=True, serializer="pickle")
 def process_file(agent: Agent):
     # Override kafka_bootstrap_servers with value from settings
@@ -46,7 +79,11 @@ def process_file(agent: Agent):
 
 
 @app.task(
-    name="streaming_parent_task", track_started=True, bind=True, serializer="pickle"
+    name="streaming_parent_task",
+    track_started=True,
+    bind=True,
+    serializer="pickle",
+    on_failure=parent_job_error_handler,
 )
 def streaming_parent_task(
     self, agent: Agent, result_handler: ResultHandler, batch_size: int = 10

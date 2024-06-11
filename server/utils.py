@@ -65,4 +65,12 @@ def delete_topic(topic_name: str):
         bootstrap_servers=bootstrap_servers, client_id="topic_deleter"
     )
 
-    admin_client.delete_topics(topics=[topic_name])
+    fs = admin_client.delete_topics(topics=[topic_name])
+    print(fs)
+    # print(fs.__dict__)
+    # for topic, f in fs.items():
+    #     try:
+    #         f.result()
+    #         print("Topic {} deleted".format(topic))
+    #     except Exception as e:
+    #         print("Failed to delete topic {} {}".format(topic_name, e))
