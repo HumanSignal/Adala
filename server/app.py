@@ -25,7 +25,7 @@ from tasks.process_file import (
     process_streaming_output,
     streaming_parent_task,
 )
-from utils import get_input_topic_name, Settings
+from utils import get_input_topic_name, get_output_topic_name, Settings
 from server.handlers.result_handlers import ResultHandler
 
 
@@ -284,11 +284,13 @@ def get_status(job_id):
         "RETRY": Status.INPROGRESS,
     }
     job = streaming_parent_task.AsyncResult(job_id)
-    logger.info(f"\n\nParent task meta : {job.info}\n\n")
+    logger.info(f"Parent task meta : {job.info}")
 
     # If parent task meta does not contain input/output job IDs - return FAILED
     if (
         job.info is None
+        or type(job.info)
+        != dict  # In some failure cases e.g. an exception is thrown, job.info will be a string, causing the next line to crash
         or "input_job_id" not in job.info
         or "output_job_id" not in job.info
     ):
@@ -341,6 +343,13 @@ def cancel_job(job_id):
             f"output job id: {input_job_id} unavailable to cancel for parent job: {job_id}"
         )
     job.revoke()
+
+    # Delete Kafka topics
+    input_topic_name = get_input_topic_name(job_id)
+    output_topic_name = get_output_topic_name(job_id)
+    delete_topic(input_topic_name)
+    delete_topic(output_topic_name)
+
     return Response[JobStatusResponse](data=JobStatusResponse(status=Status.CANCELED))
 
 
