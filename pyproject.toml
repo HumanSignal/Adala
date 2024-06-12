@@ -31,7 +31,7 @@ aiokafka = "^0.10.0"
 # https://github.com/python-poetry/poetry/issues/834
 # they also can't be installed as a `group`, because those are for dev dependencies only and could not be included if this package was pip-installed
 redis-om = "*"
-fastapi = "^0.104.1"
+fastapi = ">=0.104.1,<0.110.0"
 celery = {version = "^5.3.6", extras = ["redis"]}
 uvicorn = "*"
 pydantic-settings = "^2.2.1"
