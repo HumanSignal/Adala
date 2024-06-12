@@ -83,20 +83,17 @@ jobs:
       - name: Install app
         run: poetry install --no-interaction
 
-      - name: Run tests without coverage
-        if: ${{ matrix.os != 'ubuntu-latest' || matrix.python-version != '3.11' }}
-        run: |
-          source $VENV
-          poetry run pytest tests/ -vv
-
       - name: Run tests with coverage
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' }}
+        if: matrix.os == 'ubuntu-latest'
         run: |
           source $VENV
-          poetry run pytest tests/ --cov=. --cov-report=xml -vv
+          poetry run pytest tests/ -vv ${{ matrix.python-version == '3.11' && '--cov=. --cov-report=xml' || '' }}
 
       - name: Upload to Codecov
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' }}
+        if: |
+          matrix.os == 'ubuntu-latest' &&
+          matrix.python-version == '3.11' &&
+          github.event.pull_request.user.login != 'dependabot[bot]'
         uses: codecov/codecov-action@v4.4.1
         with:
           files: tests/coverage.xml
