@@ -28,6 +28,7 @@ app = Celery(
     "worker", broker=REDIS_URL, backend=REDIS_URL, accept_content=["json", "pickle"]
 )
 
+settings = Settings()
 
 def parent_job_error_handler(self, exc, task_id, args, kwargs, einfo):
     """
@@ -62,10 +63,9 @@ def parent_job_error_handler(self, exc, task_id, args, kwargs, einfo):
         output_job.revoke()
 
 
-@app.task(name="process_file", track_started=True, serializer="pickle")
+@app.task(name="process_file", track_started=True, serializer="pickle", task_time_limit=settings.task_time_limit_sec)
 def process_file(agent: Agent):
     # Override kafka_bootstrap_servers with value from settings
-    settings = Settings()
     agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
 
     # # Read data from a file and send it to the Kafka input topic
@@ -84,6 +84,7 @@ def process_file(agent: Agent):
     bind=True,
     serializer="pickle",
     on_failure=parent_job_error_handler,
+    task_time_limit=settings.task_time_limit_sec,
 )
 def streaming_parent_task(
     self, agent: Agent, result_handler: ResultHandler, batch_size: int = 10
@@ -104,7 +105,6 @@ def streaming_parent_task(
     ensure_topic(output_topic_name)
 
     # Override default agent kafka settings
-    settings = Settings()
     agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
     agent.environment.kafka_input_topic = input_topic_name
     agent.environment.kafka_output_topic = output_topic_name
@@ -165,7 +165,7 @@ def streaming_parent_task(
     raise Ignore()
 
 
-@app.task(name="process_file_streaming", track_started=True, serializer="pickle")
+@app.task(name="process_file_streaming", track_started=True, serializer="pickle", task_time_limit=settings.task_time_limit_sec)
 def process_file_streaming(agent: Agent):
     # agent's kafka_bootstrap servers and kafka topics should be set in parent task
 
@@ -189,7 +189,6 @@ async def async_process_streaming_output(
 ):
     logger.info(f"Polling for results {output_topic_name=}")
 
-    settings = Settings()
     timeout_ms = settings.kafka_output_consumer_timeout_ms
 
     # Retry to workaround race condition of topic creation
@@ -244,7 +243,7 @@ async def async_process_streaming_output(
 
 
 @app.task(
-    name="process_streaming_output", track_started=True, bind=True, serializer="pickle"
+    name="process_streaming_output", track_started=True, bind=True, serializer="pickle", task_time_limit=settings.task_time_limit_sec
 )
 def process_streaming_output(
     self,

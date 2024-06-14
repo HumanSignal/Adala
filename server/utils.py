@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     kafka_retention_ms: int = 180000  # 30 minutes
     kafka_input_consumer_timeout_ms: int = 3000  # 3 seconds
     kafka_output_consumer_timeout_ms: int = 3000  # 3 seconds
+    task_time_limit_sec: int = 60 * 60 * 24  # 1 day
 
     model_config = SettingsConfigDict(
         # have to use an absolute path here so celery workers can find it
