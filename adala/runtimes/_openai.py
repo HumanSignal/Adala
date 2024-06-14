@@ -155,7 +155,7 @@ class OpenAIChatRuntime(Runtime):
         openai_api_key: OpenAI API key. If not provided, will be taken from OPENAI_API_KEY environment variable.
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
         splitter: Splitter to use for splitting input into multiple messages. Defaults to None.
-        run_parallel: Whether to run requests in parallel. Defaults to True.
+        logprobs: Whether to include logprobs in the response. Defaults to False.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
@@ -166,7 +166,7 @@ class OpenAIChatRuntime(Runtime):
     )
     max_tokens: Optional[int] = 1000
     splitter: Optional[str] = None
-    run_parallel: Optional[bool] = True
+    logprobs: Optional[bool] = False
 
     @computed_field
     def _client(self) -> OpenAI:
@@ -182,7 +182,7 @@ class OpenAIChatRuntime(Runtime):
             )
         return self
 
-    def execute(self, messages: List):
+    def execute(self, messages: List) -> Dict[str, str]:
         """
         Execute OpenAI request given list of messages in OpenAI API format
         """
@@ -190,13 +190,20 @@ class OpenAIChatRuntime(Runtime):
             print(f"OpenAI request: {messages}")
 
         completion = self._client.chat.completions.create(
-            model=self.openai_model, messages=messages
+            model=self.openai_model,
+            messages=messages,
+            logprobs=self.logprobs,
         )
         completion_text = completion.choices[0].message.content
+        if self.logprobs:
+            logprobs = [item.logprob for item in completion.choices[0].logprobs.content]
+            mean_logprobs = sum(logprobs) / len(logprobs)
+        else:
+            mean_logprobs = None
 
         if self.verbose:
             print(f"OpenAI response: {completion_text}")
-        return completion_text
+        return {'text': completion_text, 'logprobs': mean_logprobs}
 
     def record_to_record(
         self,
@@ -249,10 +256,14 @@ class OpenAIChatRuntime(Runtime):
             elif output_field["type"] == "var":
                 name = output_field["text"]
                 messages.append({"role": "user", "content": user_prompt})
-                completion_text = self.execute(messages)
+                completion = self.execute(messages)
                 if name in options:
-                    completion_text = match_options(completion_text, options[name])
+                    completion_text = match_options(completion['text'], options[name])
+                else:
+                    completion_text = completion['text']
                 outputs[name] = completion_text
+                if self.logprobs:
+                    outputs[f"{name}__logprobs"] = completion['logprobs']
                 messages.append({"role": "assistant", "content": completion_text})
                 user_prompt = None
 
