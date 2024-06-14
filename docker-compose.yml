@@ -20,6 +20,7 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_CFG_NODE_ID=1
       - KAFKA_KRAFT_CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
   app:
     build:
       context: .
@@ -30,8 +31,9 @@ services:
       redis:
         condition: service_healthy
     environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9093
       - REDIS_URL=redis://redis:6379/0
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9093 # TODO pull from .env
+      - KAFKA_RETENTION_MS=180000  # TODO pull from .env
     command:
       ["poetry", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
   worker:

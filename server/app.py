@@ -25,7 +25,7 @@ from tasks.process_file import (
     process_streaming_output,
     streaming_parent_task,
 )
-from utils import get_input_topic, Settings
+from utils import get_input_topic_name, get_output_topic_name, Settings
 from server.handlers.result_handlers import ResultHandler
 
 
@@ -230,7 +230,7 @@ async def submit_batch(batch: BatchData):
         Response: Generic response indicating status of request
     """
 
-    topic = get_input_topic(batch.job_id)
+    topic = get_input_topic_name(batch.job_id)
     producer = AIOKafkaProducer(
         bootstrap_servers=settings.kafka_bootstrap_servers,
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
@@ -284,11 +284,13 @@ def get_status(job_id):
         "RETRY": Status.INPROGRESS,
     }
     job = streaming_parent_task.AsyncResult(job_id)
-    logger.info(f"\n\nParent task meta : {job.info}\n\n")
+    logger.info(f"Parent task meta : {job.info}")
 
     # If parent task meta does not contain input/output job IDs - return FAILED
     if (
         job.info is None
+        or type(job.info)
+        != dict  # In some failure cases e.g. an exception is thrown, job.info will be a string, causing the next line to crash
         or "input_job_id" not in job.info
         or "output_job_id" not in job.info
     ):
@@ -323,8 +325,31 @@ def cancel_job(job_id):
     Returns:
         JobStatusResponse[status.CANCELED]
     """
-    job = process_file.AsyncResult(job_id)
+    job = streaming_parent_task.AsyncResult(job_id)
+    input_job_id = job.info.get("input_job_id", None)
+    output_job_id = job.info.get("output_job_id", None)
+    if input_job_id:
+        input_job = process_file_streaming.AsyncResult(input_job_id)
+        input_job.revoke()
+    else:
+        logger.debug(
+            f"Input job id: {input_job_id} unavailable to cancel for parent job: {job_id}"
+        )
+    if output_job_id:
+        output_job = process_streaming_output.AsyncResult(output_job_id)
+        output_job.revoke()
+    else:
+        logger.debug(
+            f"output job id: {input_job_id} unavailable to cancel for parent job: {job_id}"
+        )
     job.revoke()
+
+    # Delete Kafka topics
+    input_topic_name = get_input_topic_name(job_id)
+    output_topic_name = get_output_topic_name(job_id)
+    delete_topic(input_topic_name)
+    delete_topic(output_topic_name)
+
     return Response[JobStatusResponse](data=JobStatusResponse(status=Status.CANCELED))
 
 

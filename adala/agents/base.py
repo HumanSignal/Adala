@@ -260,13 +260,13 @@ class Agent(BaseModel, ABC):
         else:
             print(f"Using runtime {type(runtime)}")
 
-        if not isinstance(self.environment, AsyncEnvironment):
-            raise ValueError(
-                "When using asynchronous run with `agent.arun()`, the environment must be an AsyncEnvironment."
-            )
         if input is None:
             if self.environment is None:
                 raise ValueError("input is None and no environment is set.")
+            if not isinstance(self.environment, AsyncEnvironment):
+                raise ValueError(
+                    "When using asynchronous run with `agent.arun()` and noe input, the environment must be an AsyncEnvironment."
+                )
             # run on the environment until it is exhausted
             while True:
                 try:

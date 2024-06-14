@@ -1,35 +1,34 @@
 import os
 import difflib
 import asyncio
-import aiohttp
 from rich import print
 
 from typing import Optional, Dict, Any, List
-from openai import OpenAI, NotFoundError
-from pydantic import Field, computed_field, ConfigDict, field_validator
+from pydantic import field_validator
+from openai import OpenAI, NotFoundError, AsyncOpenAI
+from pydantic import Field, computed_field, ConfigDict
 from .base import Runtime, AsyncRuntime
 from adala.utils.logs import print_error
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
 from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.matching import match_options
-from tenacity import retry, stop_after_attempt, wait_random
+from tenacity import retry, stop_after_attempt, wait_random_exponential
+import httpx
 
 
 DEFAULT_CREATE_COMPLETION_URL = "https://api.openai.com/v1/chat/completions"
 
 
-# @retry(wait=wait_random(min=0, max=1), stop=stop_after_attempt(3))
+@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 async def async_create_completion(
     model: str,
     user_prompt: str,
+    client: AsyncOpenAI,
     system_prompt: str = None,
     openai_api_key: str = None,
     instruction_first: bool = True,
-    semaphore: asyncio.Semaphore = None,
     max_tokens: int = 1000,
     temperature: float = 0.0,
-    session: aiohttp.ClientSession = None,
-    default_timeout: int = 10,
 ) -> Dict[str, Any]:
     """
     Async version of create_completion function with error handling and session timeout.
@@ -37,25 +36,17 @@ async def async_create_completion(
     Args:
         model: OpenAI model name.
         user_prompt: User prompt.
+        client: Async OpenAI client.
         system_prompt: System prompt.
         openai_api_key: OpenAI API key (if not set, will use OPENAI_API_KEY environment variable).
         instruction_first: Whether to put instructions first.
-        semaphore: Semaphore to limit concurrent requests.
         max_tokens: Maximum tokens to generate.
         temperature: Temperature for sampling.
-        session: aiohttp session to use for requests.
-        default_timeout: Default timeout for the session.
 
     Returns:
         Dict[str, Any]: OpenAI response or error message.
     """
     openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
-    if not semaphore:
-        semaphore = asyncio.Semaphore(1)
-    if not session:
-        session = aiohttp.ClientSession(
-            timeout=aiohttp.ClientTimeout(total=default_timeout)
-        )
     messages = [{"role": "user", "content": user_prompt}]
     if system_prompt:
         if instruction_first:
@@ -64,86 +55,53 @@ async def async_create_completion(
             messages[0]["content"] += system_prompt
 
     try:
-        async with semaphore, session.post(
-            DEFAULT_CREATE_COMPLETION_URL,
-            headers={"Authorization": f"Bearer {openai_api_key}"},
-            json={
-                "messages": messages,
-                "model": model,
-                "max_tokens": max_tokens,
-                "temperature": temperature,
-            },
-        ) as response:
-            response.raise_for_status()
-            response_json = await response.json()
-            completion_text = response_json["choices"][0]["message"]["content"]
-            return {
-                "text": completion_text,
-            }
-    except aiohttp.ClientResponseError as e:
-        # Handle HTTP errors
+        completion = await client.chat.completions.create(
+            model=model,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
+        completion_text = completion.choices[0].message.content
         return {
-            "error": True,
-            "message": f"HTTP error: {e.status}",
-            "details": str(e),
-        }
-    except aiohttp.ClientError as e:
-        # Handle other aiohttp specific errors
-        return {
-            "error": True,
-            "message": "Client error",
-            "details": str(e),
-        }
-    except asyncio.TimeoutError as e:
-        # Handle timeout errors
-        return {
-            "error": True,
-            "message": "Request timed out",
-            "details": str(e),
+            "text": completion_text,
+            "_adala_error": False,
+            "_adala_message": None,
+            "_adala_details": None,
         }
     except Exception as e:
         # Handle other exceptions
         return {
-            "error": True,
-            "message": "Unknown error",
-            "details": str(e),
+            "text": None,
+            "_adala_error": True,
+            "_adala_message": type(e).__name__,
+            "_adala_details": str(e),
         }
 
 
 async def async_concurrent_create_completion(
     prompts,
-    max_concurrent_requests,
+    client,
     instruction_first,
     openai_model,
-    openai_api_key,
     max_tokens,
     temperature,
-    timeout=10,
 ):
-    semaphore = asyncio.Semaphore(max_concurrent_requests)
-
-    async with aiohttp.ClientSession(
-        timeout=aiohttp.ClientTimeout(total=timeout),
-    ) as session:
-        tasks = []
-        for prompt in prompts:
-            task = asyncio.ensure_future(
-                async_create_completion(
-                    user_prompt=prompt["user"],
-                    system_prompt=prompt["system"],
-                    semaphore=semaphore,
-                    session=session,
-                    model=openai_model,
-                    max_tokens=max_tokens,
-                    temperature=temperature,
-                    instruction_first=instruction_first,
-                    default_timeout=timeout,
-                    openai_api_key=openai_api_key,
-                )
+    tasks = [
+        asyncio.ensure_future(
+            async_create_completion(
+                client=client,
+                user_prompt=prompt["user"],
+                system_prompt=prompt["system"],
+                model=openai_model,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                instruction_first=instruction_first,
             )
-            tasks.append(task)
-        responses = await asyncio.gather(*tasks)
-        return responses
+        )
+        for prompt in prompts
+    ]
+    responses = await asyncio.gather(*tasks)
+    return responses
 
 
 class OpenAIChatRuntime(Runtime):
@@ -284,6 +242,8 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
             Defaults to 0.0.
     """
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
+
     openai_model: str = Field(alias="model")
     openai_api_key: Optional[str] = Field(
         default=os.getenv("OPENAI_API_KEY"), alias="api_key"
@@ -292,6 +252,19 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
     temperature: Optional[float] = 0.0
     splitter: Optional[str] = None
     timeout: Optional[int] = 10
+
+    @computed_field
+    def _client(self) -> AsyncOpenAI:
+        return AsyncOpenAI(
+            api_key=self.openai_api_key,
+            http_client=httpx.AsyncClient(
+                limits=httpx.Limits(
+                    max_connections=self.concurrent_clients,
+                    max_keepalive_connections=self.concurrent_clients,
+                ),
+                timeout=self.timeout,
+            ),
+        )
 
     def init_runtime(self) -> "Runtime":
         # check model availability
@@ -372,39 +345,34 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
 
                 responses = await async_concurrent_create_completion(
                     prompts=prompts,
-                    max_concurrent_requests=self.concurrency,
+                    client=self._client,
                     instruction_first=instructions_first,
-                    timeout=self.timeout,
                     max_tokens=self.max_tokens,
                     temperature=self.temperature,
                     openai_model=self.openai_model,
-                    openai_api_key=self.openai_api_key,
                 )
 
                 # parse responses, optionally match it with options
                 for prompt, response in zip(prompts, responses):
-                    # check for errors - if any, append to outputs and continue
-                    if response.get("error"):
-                        outputs.append(response)
-                        if self.verbose:
+                    completion_text = response.pop("text")
+                    if self.verbose:
+                        if response["error"] is not None:
                             print_error(
                                 f"Prompt: {prompt}\nOpenAI API error: {response}"
                             )
-                        continue
-
-                    # otherwise, append the response to outputs
-                    completion_text = response["text"]
-                    if self.verbose:
-                        print(
-                            f"Prompt: {prompt}\nOpenAI API response: {completion_text}"
-                        )
-                    if name in options:
+                        else:
+                            print(
+                                f"Prompt: {prompt}\nOpenAI API response: {completion_text}"
+                            )
+                    if name in options and completion_text is not None:
                         completion_text = match_options(completion_text, options[name])
-                    outputs.append({name: completion_text})
+                    # still technically possible to have a name collision here with the error, message, details fields
+                    # `name in options` is only `True` for categorical variables, but is never `True` for freeform text generation
+                    response[name] = completion_text
+                    outputs.append(response)
 
         # TODO: note that this doesn't work for multiple output fields e.g. `Output {output1} and Output {output2}`
         output_df = InternalDataFrame(outputs)
-        # return output dataframe indexed as input batch.index, assuming outputs are in the same order as inputs
         return output_df.set_index(batch.index)
 
     async def record_to_record(

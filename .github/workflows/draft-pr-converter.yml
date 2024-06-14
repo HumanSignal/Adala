@@ -20,7 +20,7 @@ jobs:
         shell: bash
         run: echo "ts=$(date -d '10 hours ago' +"%Y-%m-%dT%H:%M:%S")" >> $GITHUB_OUTPUT
 
-      - uses: octokit/graphql-action@v2.3.0
+      - uses: octokit/graphql-action@v2.3.2
         name: Get PR older than 10 hours
         id: get_stale_prs
         env:
@@ -77,7 +77,7 @@ jobs:
       - name: Post to a Slack channel
         id: slack
         if: ${{ steps.mutation_step.outputs.exec == 'true' }}
-        uses: slackapi/slack-github-action@v1.25
+        uses: slackapi/slack-github-action@v1.26
         with:
           channel-id: 'C02LMULF4NA'
           payload: '{ "type": "mrkdwn", "text": "${{ env.SLACK_MESSAGE }}" }'

@@ -2,7 +2,7 @@ from typing import Optional
 import logging
 import json
 from abc import abstractmethod
-from pydantic import computed_field, ConfigDict, model_validator
+from pydantic import BaseModel, Field, computed_field, ConfigDict, model_validator
 
 from adala.utils.registry import BaseModelInRegistry
 
@@ -59,6 +59,43 @@ class DummyHandler(ResultHandler):
         logger.info(f"\n\nHandler received batch: {batch}\n\n")
 
 
+class LSEBatchItem(BaseModel):
+    """
+    The output for a single Task in an LSE Project.
+    A batch of these consumed from the kafka output topic is the expected input for LSEHandler.__call__
+    """
+
+    model_config = ConfigDict(
+        # omit fields from the input task besides task_id, the LSE /batch-predictions endpoint doesn't use these and it'd be a waste of network bandwidth since they can be large
+        extra="ignore",
+        # guard against name collisions with other input fields
+        allow_population_by_field_name=False,
+    )
+
+    task_id: int
+    output: str
+    # TODO handle in DIA-1122
+    # we don't need to use reserved names anymore here because they're not in a DataFrame, but a structure with proper typing available
+    error: bool = Field(False, alias="_adala_error")
+    message: Optional[str] = Field(None, alias="_adala_message")
+    details: Optional[str] = Field(None, alias="_adala_details")
+
+    @model_validator(mode="after")
+    def check_error_consistency(self):
+        has_error = self.error
+        message = self.message
+        details = self.details
+
+        if has_error and (message is None or details is None):
+            raise ValueError("_adala_error is set, but has no error message or details")
+        elif not has_error and (message is not None or details is not None):
+            raise ValueError(
+                "_adala_error is unset, but has an error message or details"
+            )
+
+        return self
+
+
 class LSEHandler(ResultHandler):
     """
     Handler to use the Label Studio SDK to load a batch of results back into a Label Studio project
@@ -93,8 +130,19 @@ class LSEHandler(ResultHandler):
 
         return self
 
-    def __call__(self, result_batch):
+    def __call__(self, result_batch: list[LSEBatchItem]):
         logger.info(f"\n\nHandler received batch: {result_batch}\n\n")
+
+        # coerce dicts to LSEBatchItems for validation
+        result_batch = [LSEBatchItem(**record) for record in result_batch]
+
+        # omit failed tasks for now
+        # TODO handle in DIA-1122
+        result_batch = [record for record in result_batch if not record.error]
+
+        # coerce back to dicts for sending
+        result_batch = [record.dict() for record in result_batch]
+
         self.client.make_request(
             "POST",
             "/api/model-run/batch-predictions",
