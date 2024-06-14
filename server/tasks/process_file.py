@@ -30,6 +30,7 @@ app = Celery(
 
 settings = Settings()
 
+
 def parent_job_error_handler(self, exc, task_id, args, kwargs, einfo):
     """
     This function will be called if streaming_parent_task fails, to ensure that we cleanup any left over
@@ -63,7 +64,12 @@ def parent_job_error_handler(self, exc, task_id, args, kwargs, einfo):
         output_job.revoke()
 
 
-@app.task(name="process_file", track_started=True, serializer="pickle", task_time_limit=settings.task_time_limit_sec)
+@app.task(
+    name="process_file",
+    track_started=True,
+    serializer="pickle",
+    task_time_limit=settings.task_time_limit_sec,
+)
 def process_file(agent: Agent):
     # Override kafka_bootstrap_servers with value from settings
     agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
@@ -165,7 +171,12 @@ def streaming_parent_task(
     raise Ignore()
 
 
-@app.task(name="process_file_streaming", track_started=True, serializer="pickle", task_time_limit=settings.task_time_limit_sec)
+@app.task(
+    name="process_file_streaming",
+    track_started=True,
+    serializer="pickle",
+    task_time_limit=settings.task_time_limit_sec,
+)
 def process_file_streaming(agent: Agent):
     # agent's kafka_bootstrap servers and kafka topics should be set in parent task
 
@@ -243,7 +254,11 @@ async def async_process_streaming_output(
 
 
 @app.task(
-    name="process_streaming_output", track_started=True, bind=True, serializer="pickle", task_time_limit=settings.task_time_limit_sec
+    name="process_streaming_output",
+    track_started=True,
+    bind=True,
+    serializer="pickle",
+    task_time_limit=settings.task_time_limit_sec,
 )
 def process_streaming_output(
     self,
