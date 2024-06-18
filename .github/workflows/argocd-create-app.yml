@@ -27,8 +27,6 @@ env:
   DOMAIN: "dev.heartex.com"
   TEMPLATE_DIR: "vars/aws/dev.heartex.com/k8s/prompt/templates/adala"
   APPS_DIR: "vars/aws/dev.heartex.com/k8s/prompt"
-  DOCKER_IMAGE_VALUES_YAML_KEY: ".*.deployment.image.tag"
-  REPLICA_COUNT_VALUES_YAML_KEY: ".*.deployment.replicaCount"
 
 jobs:
 
@@ -100,27 +98,23 @@ jobs:
           
           APP_NAME="${pretty_branch_name}-${APP_BASE_NAME}"
           APP_DIR="${APPS_DIR}/${APP_NAME}"
-          APP_VALUES_FILE="${APP_DIR}/values.yaml"
           
           export DOCKER_IMAGE_TAG="${DOCKER_IMAGE_VERSION}"
           echo "DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG}" >> $GITHUB_OUTPUT
-          BASE_DOMAIN_LENGTH=$(echo -${APP_BASE_NAME} | awk '{print length}')
           export RELEASE_NAME=$(echo "${pretty_branch_name}" | cut -c1-25)
           echo "RELEASE_NAME=${RELEASE_NAME}" >> $GITHUB_OUTPUT
           export HOSTNAME="${RELEASE_NAME}-${APP_BASE_NAME}.${NAMESPACE}.${DOMAIN}"
           echo "HOSTNAME=${HOSTNAME}" >> $GITHUB_OUTPUT
           
-          if [ -f "${APP_VALUES_FILE}" ]; then
-            yq e --inplace "${DOCKER_IMAGE_VALUES_YAML_KEY} |= \"${DOCKER_IMAGE_TAG}\"" "${APP_VALUES_FILE}"
-          else
-            mkdir -p "${APP_DIR}"
-            for template_file_name in $(ls "${TEMPLATE_DIR}"); do
-              file_name="${template_file_name%.template}"
-              envsubst < "${TEMPLATE_DIR}/${template_file_name}" > "${APP_DIR}/${file_name}"
-            done
+          if [ -d "${TEMPLATE_DIR}-${BRANCH_NAME}" ]; then
+            export TEMPLATE_DIR="${TEMPLATE_DIR}-${BRANCH_NAME}"
           fi
           
-          yq e --inplace "${REPLICA_COUNT_VALUES_YAML_KEY} |= 1" "${APP_VALUES_FILE}"
+          mkdir -p "${APP_DIR}" | true
+          for template_file_name in $(ls "${TEMPLATE_DIR}"); do
+            file_name="${template_file_name%.template}"
+            envsubst < "${TEMPLATE_DIR}/${template_file_name}" > "${APP_DIR}/${file_name}"
+          done
           
           git add "${APP_DIR}"
           git status
