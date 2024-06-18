@@ -45,9 +45,6 @@ services:
         condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - MODULE_NAME=process_file.app
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9093
       - C_FORCE_ROOT=true # needed when using pickle serializer in celery + running as root - remove when we dont run as root
