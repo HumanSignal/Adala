@@ -5,6 +5,8 @@ import os
 import asyncio
 from fastapi.testclient import TestClient
 from server.app import app
+import openai_responses
+from openai_responses import OpenAIMock
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 LS_API_KEY = os.getenv("LS_API_KEY")
@@ -127,7 +129,22 @@ def test_ready_endpoint(redis_mock):
 # def test_streaming():
 # @pytest.mark.asyncio
 # def test_streaming(redis_mock, celery_app_mock, celery_session_worker):
-def test_streaming(redis_mock, celery_app_mock, celery_worker):
+@openai_responses.mock()
+def test_streaming(redis_mock, celery_app_mock, openai_mock, openai_key_mock):
+
+    payload["agent"]["runtimes"]["default"]["api_key"] = openai_key_mock
+    # openai_mock.router.post(url="https://api.myweatherapi.com").pass_through()
+    # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
+    openai_mock.chat.completions.create.response = {
+        "choices": [
+            {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {"content": "mocked openai chat response", "role": "assistant"},
+            }
+        ]
+    }
+
     test_client = TestClient(app)
     resp = test_client.post("/jobs/submit-streaming", json=payload)
     job_id = resp.json()["data"]["job_id"]

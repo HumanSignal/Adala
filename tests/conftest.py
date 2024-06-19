@@ -1,3 +1,4 @@
+import os
 import pytest
 from unittest import mock
 from fakeredis import FakeStrictRedis
@@ -15,3 +16,10 @@ def redis_mock(monkeypatch):
 def celery_app_mock(monkeypatch, celery_app):
     monkeypatch.setattr("server.tasks.process_file.app", celery_app)
     return celery_app
+
+
+@pytest.fixture
+def openai_key_mock():
+    key = "mocked"
+    os.environ["OPENAI_API_KEY"] = key
+    return key
