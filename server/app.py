@@ -13,16 +13,16 @@ from pydantic import BaseModel, SerializeAsAny, field_validator
 import uvicorn
 from redis import Redis
 
-from .log_middleware import LogMiddleware
-from .tasks.process_file import (
+from server.log_middleware import LogMiddleware
+from server.tasks.process_file import (
     process_file,
     process_file_streaming,
     process_streaming_output,
     streaming_parent_task,
     delete_topic,
 )
-from .utils import get_input_topic_name, get_output_topic_name, Settings
-from .handlers.result_handlers import ResultHandler
+from server.utils import get_input_topic_name, get_output_topic_name, Settings
+from server.handlers.result_handlers import ResultHandler
 
 
 logger = logging.getLogger(__name__)
