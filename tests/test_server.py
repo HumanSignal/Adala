@@ -1,9 +1,10 @@
 import time
-import json
 import requests
 import httpx
 import os
 import asyncio
+from fastapi.testclient import TestClient
+from server.app import app
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 LS_API_KEY = os.getenv("LS_API_KEY")
@@ -106,13 +107,6 @@ async def arun_n_jobs(n: int):
 
 # r = asyncio.run(arun_n_jobs(3))
 
-from unittest import mock
-from fastapi.testclient import TestClient
-
-
-from server.app import app
-
-
 def test_health_endpoint():
     test_client = TestClient(app)
     resp = test_client.get("/health")
@@ -121,3 +115,9 @@ def test_health_endpoint():
     assert result == "ok", f"Expected status = ok, but instead returned {result}."
 
 
+def test_ready_endpoint(redis_mock):
+    test_client = TestClient(app)
+    resp = test_client.get("/ready")
+
+    result = resp.json()["status"]
+    assert result == "ok", f"Expected status = ok, but instead returned {result}."
