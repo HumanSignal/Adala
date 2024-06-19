@@ -1,7 +1,6 @@
 import logging
-import pickle
 from enum import Enum
-from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, List, Optional, TypeVar
 import os
 import json
 
@@ -11,19 +10,16 @@ from aiokafka import AIOKafkaProducer
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, SerializeAsAny, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic.functional_validators import AfterValidator
-from typing_extensions import Annotated
 import uvicorn
 from redis import Redis
 
 from .log_middleware import LogMiddleware
-from .tasks.process_file import app as celery_app
 from .tasks.process_file import (
     process_file,
     process_file_streaming,
     process_streaming_output,
     streaming_parent_task,
+    delete_topic,
 )
 from .utils import get_input_topic_name, get_output_topic_name, Settings
 from .handlers.result_handlers import ResultHandler
