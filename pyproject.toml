@@ -37,6 +37,8 @@ uvicorn = "*"
 pydantic-settings = "^2.2.1"
 label-studio-sdk = "^0.0.32"
 kafka-python = "^2.0.2"
+# https://github.com/geerlingguy/ansible-role-docker/issues/462#issuecomment-2144121102
+requests = "2.31.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.3"
@@ -54,6 +56,8 @@ jupyter-client = "8.4.0"
 matplotlib = "^3.7.4"
 fakeredis = "^2.23.2"
 flower = "^2.0.1"
+pytest-asyncio = "^0.23.7"
+celery = {extras = ["pytest"], version = "^5.4.0"}
 
 [tool.poetry.group.label-studio]
 optional = true
