@@ -201,9 +201,6 @@ files = [
     {file = "annotated_types-0.6.0.tar.gz", hash = "sha256:563339e807e53ffd9c267e99fc6d9ea23eb8443c08f112651963e24e22f84a5d"},
 ]
 
-[package.dependencies]
-typing-extensions = {version = ">=4.0.0", markers = "python_version < \"3.9\""}
-
 [[package]]
 name = "anyio"
 version = "3.7.1"
@@ -359,21 +356,6 @@ astroid = ["astroid (>=1,<2)", "astroid (>=2,<4)"]
 test = ["astroid (>=1,<2)", "astroid (>=2,<4)", "pytest"]
 
 [[package]]
-name = "astunparse"
-version = "1.6.3"
-description = "An AST unparser for Python"
-optional = false
-python-versions = "*"
-files = [
-    {file = "astunparse-1.6.3-py2.py3-none-any.whl", hash = "sha256:c2652417f2c8b5bb325c885ae329bdf3f86424075c4fd1a128674bc6fba4b8e8"},
-    {file = "astunparse-1.6.3.tar.gz", hash = "sha256:5ad93a8456f0d084c3456d059fd9a92cce667963232cbf763eac3bc5b7940872"},
-]
-
-[package.dependencies]
-six = ">=1.6.1,<2.0"
-wheel = ">=0.23.0,<1.0"
-
-[[package]]
 name = "async-lru"
 version = "2.0.4"
 description = "Simple LRU cache for asyncio"
@@ -428,9 +410,6 @@ files = [
     {file = "Babel-2.14.0.tar.gz", hash = "sha256:6919867db036398ba21eb5c7a0f6b28ab8cbc3ae7a73a44ebe34ae74a4e7d363"},
 ]
 
-[package.dependencies]
-pytz = {version = ">=2015.7", markers = "python_version < \"3.9\""}
-
 [package.extras]
 dev = ["freezegun (>=1.0,<2.0)", "pytest (>=6.0)", "pytest-cov"]
 
@@ -455,37 +434,6 @@ files = [
     {file = "backoff-2.2.1-py3-none-any.whl", hash = "sha256:63579f9a0628e06278f7e47b7d7d5b6ce20dc65c5e96a6f3ca99a6adca0396e8"},
     {file = "backoff-2.2.1.tar.gz", hash = "sha256:03f829f5bb1923180821643f8753b0502c3b682293992485b0eef2807afa5cba"},
 ]
-
-[[package]]
-name = "backports-zoneinfo"
-version = "0.2.1"
-description = "Backport of the standard library zoneinfo module"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "backports.zoneinfo-0.2.1-cp36-cp36m-macosx_10_14_x86_64.whl", hash = "sha256:da6013fd84a690242c310d77ddb8441a559e9cb3d3d59ebac9aca1a57b2e18bc"},
-    {file = "backports.zoneinfo-0.2.1-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:89a48c0d158a3cc3f654da4c2de1ceba85263fafb861b98b59040a5086259722"},
-    {file = "backports.zoneinfo-0.2.1-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:1c5742112073a563c81f786e77514969acb58649bcdf6cdf0b4ed31a348d4546"},
-    {file = "backports.zoneinfo-0.2.1-cp36-cp36m-win32.whl", hash = "sha256:e8236383a20872c0cdf5a62b554b27538db7fa1bbec52429d8d106effbaeca08"},
-    {file = "backports.zoneinfo-0.2.1-cp36-cp36m-win_amd64.whl", hash = "sha256:8439c030a11780786a2002261569bdf362264f605dfa4d65090b64b05c9f79a7"},
-    {file = "backports.zoneinfo-0.2.1-cp37-cp37m-macosx_10_14_x86_64.whl", hash = "sha256:f04e857b59d9d1ccc39ce2da1021d196e47234873820cbeaad210724b1ee28ac"},
-    {file = "backports.zoneinfo-0.2.1-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:17746bd546106fa389c51dbea67c8b7c8f0d14b5526a579ca6ccf5ed72c526cf"},
-    {file = "backports.zoneinfo-0.2.1-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:5c144945a7752ca544b4b78c8c41544cdfaf9786f25fe5ffb10e838e19a27570"},
-    {file = "backports.zoneinfo-0.2.1-cp37-cp37m-win32.whl", hash = "sha256:e55b384612d93be96506932a786bbcde5a2db7a9e6a4bb4bffe8b733f5b9036b"},
-    {file = "backports.zoneinfo-0.2.1-cp37-cp37m-win_amd64.whl", hash = "sha256:a76b38c52400b762e48131494ba26be363491ac4f9a04c1b7e92483d169f6582"},
-    {file = "backports.zoneinfo-0.2.1-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:8961c0f32cd0336fb8e8ead11a1f8cd99ec07145ec2931122faaac1c8f7fd987"},
-    {file = "backports.zoneinfo-0.2.1-cp38-cp38-manylinux1_i686.whl", hash = "sha256:e81b76cace8eda1fca50e345242ba977f9be6ae3945af8d46326d776b4cf78d1"},
-    {file = "backports.zoneinfo-0.2.1-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:7b0a64cda4145548fed9efc10322770f929b944ce5cee6c0dfe0c87bf4c0c8c9"},
-    {file = "backports.zoneinfo-0.2.1-cp38-cp38-win32.whl", hash = "sha256:1b13e654a55cd45672cb54ed12148cd33628f672548f373963b0bff67b217328"},
-    {file = "backports.zoneinfo-0.2.1-cp38-cp38-win_amd64.whl", hash = "sha256:4a0f800587060bf8880f954dbef70de6c11bbe59c673c3d818921f042f9954a6"},
-    {file = "backports.zoneinfo-0.2.1.tar.gz", hash = "sha256:fadbfe37f74051d024037f223b8e001611eac868b5c5b06144ef4d8b799862f2"},
-]
-
-[package.dependencies]
-tzdata = {version = "*", optional = true, markers = "extra == \"tzdata\""}
-
-[package.extras]
-tzdata = ["tzdata"]
 
 [[package]]
 name = "bcrypt"
@@ -711,7 +659,6 @@ files = [
 ]
 
 [package.dependencies]
-"backports.zoneinfo" = {version = ">=0.2.1", markers = "python_version < \"3.9\""}
 billiard = ">=4.2.0,<5.0"
 click = ">=8.1.2,<9.0"
 click-didyoumean = ">=0.3.0"
@@ -985,7 +932,6 @@ bcrypt = ">=4.0.1"
 build = ">=1.0.3"
 chroma-hnswlib = "0.7.3"
 fastapi = ">=0.95.2"
-graphlib-backport = {version = ">=1.0.3", markers = "python_version < \"3.9\""}
 grpcio = ">=1.58.0"
 importlib-resources = "*"
 kubernetes = ">=28.1.0"
@@ -1118,6 +1064,57 @@ traitlets = ">=4"
 
 [package.extras]
 test = ["pytest"]
+
+[[package]]
+name = "confluent-kafka"
+version = "2.4.0"
+description = "Confluent's Python client for Apache Kafka"
+optional = false
+python-versions = "*"
+files = [
+    {file = "confluent-kafka-2.4.0.tar.gz", hash = "sha256:201c6182304c5864c8a1b1aae2f99bf51fa332017abbec05a3a1fb2ff242c41d"},
+    {file = "confluent_kafka-2.4.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:827820321e0ac6a7f75f119f7ab4dcbbbd59c95d7807f6eb79f03a4cb6b9ab25"},
+    {file = "confluent_kafka-2.4.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:4c74a06a658f72dd0f6df9b0fbfc5b1b483b3263fde6abd925bba512879995cc"},
+    {file = "confluent_kafka-2.4.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:108bc30e1153734cd36d88a299c7cf0c69fe6c95d67f4cce9f9180adaefef839"},
+    {file = "confluent_kafka-2.4.0-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:cbe32df72b9d7fee198cf12eb3770270d99b122613b0e3abfb55a13294f6a54a"},
+    {file = "confluent_kafka-2.4.0-cp310-cp310-win_amd64.whl", hash = "sha256:c2e9e1dd2238e5b55cf541c9dbd3e665531418e0cc965e6143f593f64a3f79a5"},
+    {file = "confluent_kafka-2.4.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:a28bf5b59f28e3357d113cc8c50ba09389dcc3327ca13cc502e9c3228f2ab5dc"},
+    {file = "confluent_kafka-2.4.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:506c867d987ab78494fc94ec6a966ddcb3ce3cb75809e098060d654d280281e0"},
+    {file = "confluent_kafka-2.4.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3b02cd0eb338a8dc5db0ea07243bbf457670655a3846732f81a091b8e3d5d456"},
+    {file = "confluent_kafka-2.4.0-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:15d356dd1c7699ed332f262bf0aa825a177c50f7debca0f1ec14873531603b2d"},
+    {file = "confluent_kafka-2.4.0-cp311-cp311-win_amd64.whl", hash = "sha256:0c1b89e1bd790dd82b64a4dd746e7a0ce3ebed7f17b0642d488c1bb0056ba763"},
+    {file = "confluent_kafka-2.4.0-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:a11acfd79f0448095c6492d2ea34cd3df4864d78d72326bed0859d875eb7a62d"},
+    {file = "confluent_kafka-2.4.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:dd53d58a6648e4d5e435ff5178248b91af050a4478ed51a95b2b0eaedddafdb1"},
+    {file = "confluent_kafka-2.4.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8a5e9cc9fff71c70f1520ab917f33cf66181b29c46cf9940da1af6a52cc086a6"},
+    {file = "confluent_kafka-2.4.0-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:b0d5a2d7563b9ca9bef09668d6aae6e360f1e9455672dc0886d78d76ced682c9"},
+    {file = "confluent_kafka-2.4.0-cp312-cp312-win_amd64.whl", hash = "sha256:d09aa0c67532c47ec6cd08c50feaa8338e77d18fc83181c46e5a5cb88a5b25ce"},
+    {file = "confluent_kafka-2.4.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:f2e39794270088157f65e5b2b5ba7e0217759412de20088f5873bdb176084ab3"},
+    {file = "confluent_kafka-2.4.0-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0591645e709ea8392f8d41b9ff752f1cdb57c71730c9be2deae3184303d3efaf"},
+    {file = "confluent_kafka-2.4.0-cp36-cp36m-manylinux_2_28_aarch64.whl", hash = "sha256:07f38339da116527d9516a0b1899b499ebfe5f906ef54c0780a309ebee585c12"},
+    {file = "confluent_kafka-2.4.0-cp36-cp36m-win_amd64.whl", hash = "sha256:c661f4c014f78ee478667a5018fb62ec2a4b61322410a9be314bdbf6ead481d7"},
+    {file = "confluent_kafka-2.4.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:a8b440684a22d9239b857d1be065ea2844537ff20bb675c75e7a9e2adbd5ce9a"},
+    {file = "confluent_kafka-2.4.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9ac7120919a4189018120a40da8d9c05bd6e024f60638901483bb6a46c45a115"},
+    {file = "confluent_kafka-2.4.0-cp37-cp37m-manylinux_2_28_aarch64.whl", hash = "sha256:6a2b81902b0c824549f85f49774535285242b1472e52ab0a18260526840a8ecf"},
+    {file = "confluent_kafka-2.4.0-cp37-cp37m-win_amd64.whl", hash = "sha256:78f6776aca06c81308c8be66c754a3b8281a20dd9af697b2cfcb5c2272878df9"},
+    {file = "confluent_kafka-2.4.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:2858fb428f29086df2a50554d9093d176ec4b1f76240a62efe136acc493f7fb6"},
+    {file = "confluent_kafka-2.4.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:9608b8b1145a0b41e6c6949ac9ec974e74f1ed2d065b26eae73e208668fa20cf"},
+    {file = "confluent_kafka-2.4.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:baaf1022972bd213bf20cfccb1b13b613d7ab13ebcafacd65220bd5908f5e460"},
+    {file = "confluent_kafka-2.4.0-cp38-cp38-manylinux_2_28_aarch64.whl", hash = "sha256:16be3360f040b5d17dcb7e1b66a170b72f428c98d0978705b0a3081de756b2c7"},
+    {file = "confluent_kafka-2.4.0-cp38-cp38-win_amd64.whl", hash = "sha256:45e6f719f6bd95210e0451b50cd19f33a44d7b16be560217240caa71f165420d"},
+    {file = "confluent_kafka-2.4.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:3cf1b40ae59569e50ba15da1dc0030bac904b74d8aff82f02a16df3bb9b87e53"},
+    {file = "confluent_kafka-2.4.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:5b5dd225596325159eee928caba47e0cf3f03ce3c8244371457a1823d7c66c22"},
+    {file = "confluent_kafka-2.4.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d338e8189f5836b916c632e0f2db9a197352c199db7323ca3f2bd1785cb9a747"},
+    {file = "confluent_kafka-2.4.0-cp39-cp39-manylinux_2_28_aarch64.whl", hash = "sha256:40d18f1bd1bac6d2cf8dbf47da11cdb82d077b26a81ea551136515a1079ec532"},
+    {file = "confluent_kafka-2.4.0-cp39-cp39-win_amd64.whl", hash = "sha256:52f937ab1cde9aacb01288293d374bf09da728b79cf907504dec8f3c4f82030e"},
+]
+
+[package.extras]
+avro = ["avro (>=1.11.1,<2)", "fastavro (>=0.23.0,<1.0)", "fastavro (>=1.0)", "requests"]
+dev = ["avro (>=1.11.1,<2)", "fastavro (>=0.23.0,<1.0)", "fastavro (>=1.0)", "flake8", "pytest", "pytest (==4.6.4)", "pytest-timeout", "requests"]
+doc = ["avro (>=1.11.1,<2)", "fastavro (>=0.23.0,<1.0)", "fastavro (>=1.0)", "requests", "sphinx", "sphinx-rtd-theme"]
+json = ["jsonschema", "pyrsistent", "pyrsistent (==0.16.1)", "requests"]
+protobuf = ["protobuf", "requests"]
+schema-registry = ["requests"]
 
 [[package]]
 name = "contourpy"
@@ -1528,6 +1525,34 @@ files = [
 tests = ["asttokens (>=2.1.0)", "coverage", "coverage-enable-subprocess", "ipython", "littleutils", "pytest", "rich"]
 
 [[package]]
+name = "faker"
+version = "24.14.1"
+description = "Faker is a Python package that generates fake data for you."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "Faker-24.14.1-py3-none-any.whl", hash = "sha256:a5edba3aa17a1d689c8907e5b0cd1653079c2466a4807f083aa7b5f80a00225d"},
+    {file = "Faker-24.14.1.tar.gz", hash = "sha256:380a3697e696ae4fcf50a93a3d9e0286fab7dfbf05a9caa4421fa4727c6b1e89"},
+]
+
+[package.dependencies]
+python-dateutil = ">=2.4"
+
+[[package]]
+name = "faker-openai-api-provider"
+version = "0.2.0"
+description = "Generate fake data that resembles fields in OpenAI API responses"
+optional = false
+python-versions = "<4.0,>=3.9"
+files = [
+    {file = "faker_openai_api_provider-0.2.0-py3-none-any.whl", hash = "sha256:67d46f159810cd02e5c4fad6f3714b9f83188c3ee74a126e3aaf013f88f7a2e0"},
+    {file = "faker_openai_api_provider-0.2.0.tar.gz", hash = "sha256:168ecfd4ad06113ad64de9ee095e5e88593b575145efd4e8b84cba602e73c7d3"},
+]
+
+[package.dependencies]
+faker = ">=24.2.0,<25.0.0"
+
+[[package]]
 name = "fakeredis"
 version = "2.23.2"
 description = "Python implementation of redis API, can be used for testing purposes."
@@ -1920,17 +1945,6 @@ numpy = "*"
 requests = "*"
 
 [[package]]
-name = "graphlib-backport"
-version = "1.1.0"
-description = "Backport of the Python 3.9 graphlib module for Python 3.6+"
-optional = false
-python-versions = ">=3.6,<4.0"
-files = [
-    {file = "graphlib_backport-1.1.0-py3-none-any.whl", hash = "sha256:eccacf9f2126cdf89ce32a6018c88e1ecd3e4898a07568add6e1907a439055ba"},
-    {file = "graphlib_backport-1.1.0.tar.gz", hash = "sha256:00a7888b21e5393064a133209cb5d3b3ef0a2096cf023914c9d778dff5644125"},
-]
-
-[[package]]
 name = "griffe"
 version = "0.41.3"
 description = "Signatures for entire Python programs. Extract the structure, the frame, the skeleton of your project, to generate API documentation or find breaking changes in your API."
@@ -1942,7 +1956,6 @@ files = [
 ]
 
 [package.dependencies]
-astunparse = {version = ">=1.6", markers = "python_version < \"3.9\""}
 colorama = ">=0.4"
 
 [[package]]
@@ -2591,11 +2604,9 @@ files = [
 attrs = ">=22.2.0"
 fqdn = {version = "*", optional = true, markers = "extra == \"format-nongpl\""}
 idna = {version = "*", optional = true, markers = "extra == \"format-nongpl\""}
-importlib-resources = {version = ">=1.4.0", markers = "python_version < \"3.9\""}
 isoduration = {version = "*", optional = true, markers = "extra == \"format-nongpl\""}
 jsonpointer = {version = ">1.13", optional = true, markers = "extra == \"format-nongpl\""}
 jsonschema-specifications = ">=2023.03.6"
-pkgutil-resolve-name = {version = ">=1.3.10", markers = "python_version < \"3.9\""}
 referencing = ">=0.28.4"
 rfc3339-validator = {version = "*", optional = true, markers = "extra == \"format-nongpl\""}
 rfc3986-validator = {version = ">0.1.0", optional = true, markers = "extra == \"format-nongpl\""}
@@ -2619,7 +2630,6 @@ files = [
 ]
 
 [package.dependencies]
-importlib-resources = {version = ">=1.4.0", markers = "python_version < \"3.9\""}
 referencing = ">=0.31.0"
 
 [[package]]
@@ -2819,7 +2829,6 @@ files = [
 async-lru = ">=1.0.0"
 httpx = ">=0.25.0"
 importlib-metadata = {version = ">=4.8.3", markers = "python_version < \"3.10\""}
-importlib-resources = {version = ">=1.4", markers = "python_version < \"3.9\""}
 ipykernel = "*"
 jinja2 = ">=3.0.3"
 jupyter-core = "*"
@@ -3055,7 +3064,6 @@ files = [
 
 [package.dependencies]
 amqp = ">=5.1.1,<6.0.0"
-"backports.zoneinfo" = {version = ">=0.2.1", extras = ["tzdata"], markers = "python_version < \"3.9\""}
 typing-extensions = {version = "*", markers = "python_version < \"3.10\""}
 vine = "*"
 
@@ -3795,6 +3803,24 @@ files = [
 test = ["mypy (>=1.0)", "pytest (>=7.0.0)"]
 
 [[package]]
+name = "mockafka-py"
+version = "0.1.57"
+description = "A mock library for confluent kafka"
+optional = false
+python-versions = "<4.0,>=3.8"
+files = [
+    {file = "mockafka_py-0.1.57-py3-none-any.whl", hash = "sha256:db23a304808165b9e0f42a09f7c06d90e918825fc7d759c0f8da2f074cb24ae5"},
+    {file = "mockafka_py-0.1.57.tar.gz", hash = "sha256:01c552422903950c12332f24148338a78d4b6e3677bd0332625d79429b16b4ca"},
+]
+
+[package.dependencies]
+aiokafka = ">=0.10.0,<0.11.0"
+confluent-kafka = ">=1.9.2"
+parameterized = ">=0.9.0,<0.10.0"
+pytest-asyncio = ">=0.23.5,<0.24.0"
+pytest-cov = ">=4.1,<6.0"
+
+[[package]]
 name = "monotonic"
 version = "1.6"
 description = "An implementation of time.monotonic() for Python 2 & < 3.3"
@@ -4215,13 +4241,13 @@ sympy = "*"
 
 [[package]]
 name = "openai"
-version = "1.30.1"
+version = "1.34.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.7.1"
 files = [
-    {file = "openai-1.30.1-py3-none-any.whl", hash = "sha256:c9fb3c3545c118bbce8deb824397b9433a66d0d0ede6a96f7009c95b76de4a46"},
-    {file = "openai-1.30.1.tar.gz", hash = "sha256:4f85190e577cba0b066e1950b8eb9b11d25bc7ebcc43a86b326ce1bfa564ec74"},
+    {file = "openai-1.34.0-py3-none-any.whl", hash = "sha256:018623c2f795424044675c6230fa3bfbf98d9e0aab45d8fd116f2efb2cfb6b7e"},
+    {file = "openai-1.34.0.tar.gz", hash = "sha256:95c8e2da4acd6958e626186957d656597613587195abd0fb2527566a93e76770"},
 ]
 
 [package.dependencies]
@@ -4235,6 +4261,24 @@ typing-extensions = ">=4.7,<5"
 
 [package.extras]
 datalib = ["numpy (>=1)", "pandas (>=1.2.3)", "pandas-stubs (>=1.1.0.11)"]
+
+[[package]]
+name = "openai-responses"
+version = "0.8.0"
+description = "🧪🤖 Pytest plugin for automatically mocking OpenAI requests"
+optional = false
+python-versions = "<4.0,>=3.9"
+files = [
+    {file = "openai_responses-0.8.0-py3-none-any.whl", hash = "sha256:ed9ed798ce8dab80a68d740a70d135b029e7fcc3552444bbb521081fd2fcc48e"},
+    {file = "openai_responses-0.8.0.tar.gz", hash = "sha256:f1841def73fa34e319561f24f4d4b8f50be11641cb527349003e2d62def24f4d"},
+]
+
+[package.dependencies]
+faker = ">=24.2.0,<25.0.0"
+faker-openai-api-provider = "0.2.0"
+openai = ">=1.32,<1.35"
+requests-toolbelt = ">=1.0.0,<2.0.0"
+respx = ">=0.20.2,<0.21.0"
 
 [[package]]
 name = "opentelemetry-api"
@@ -4570,6 +4614,20 @@ files = [
 ]
 
 [[package]]
+name = "parameterized"
+version = "0.9.0"
+description = "Parameterized testing with any Python test framework"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "parameterized-0.9.0-py2.py3-none-any.whl", hash = "sha256:4e0758e3d41bea3bbd05ec14fc2c24736723f243b28d702081aef438c9372b1b"},
+    {file = "parameterized-0.9.0.tar.gz", hash = "sha256:7fc905272cefa4f364c1a3429cbbe9c0f98b793988efb5bf90aac80f08db09b1"},
+]
+
+[package.extras]
+dev = ["jinja2"]
+
+[[package]]
 name = "parso"
 version = "0.8.3"
 description = "A Python Parser"
@@ -4705,17 +4763,6 @@ mic = ["olefile"]
 tests = ["check-manifest", "coverage", "defusedxml", "markdown2", "olefile", "packaging", "pyroma", "pytest", "pytest-cov", "pytest-timeout"]
 typing = ["typing-extensions"]
 xmp = ["defusedxml"]
-
-[[package]]
-name = "pkgutil-resolve-name"
-version = "1.3.10"
-description = "Resolve a name to an object."
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "pkgutil_resolve_name-1.3.10-py3-none-any.whl", hash = "sha256:ca27cc078d25c5ad71a9de0a7a330146c4e014c2462d9af19c6b828280649c5e"},
-    {file = "pkgutil_resolve_name-1.3.10.tar.gz", hash = "sha256:357d6c9e6a755653cfd78893817c0853af365dd51ec97f3d358a819373bbd174"},
-]
 
 [[package]]
 name = "platformdirs"
@@ -5935,6 +5982,34 @@ requests = ">=2.0.0"
 rsa = ["oauthlib[signedtoken] (>=3.0.0)"]
 
 [[package]]
+name = "requests-toolbelt"
+version = "1.0.0"
+description = "A utility belt for advanced users of python-requests"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+files = [
+    {file = "requests-toolbelt-1.0.0.tar.gz", hash = "sha256:7681a0a3d047012b5bdc0ee37d7f8f07ebe76ab08caeccfc3921ce23c88d5bc6"},
+    {file = "requests_toolbelt-1.0.0-py2.py3-none-any.whl", hash = "sha256:cccfdd665f0a24fcf4726e690f65639d272bb0637b9b92dfd91a5568ccf6bd06"},
+]
+
+[package.dependencies]
+requests = ">=2.0.1,<3.0.0"
+
+[[package]]
+name = "respx"
+version = "0.20.2"
+description = "A utility for mocking out the Python HTTPX and HTTP Core libraries."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "respx-0.20.2-py2.py3-none-any.whl", hash = "sha256:ab8e1cf6da28a5b2dd883ea617f8130f77f676736e6e9e4a25817ad116a172c9"},
+    {file = "respx-0.20.2.tar.gz", hash = "sha256:07cf4108b1c88b82010f67d3c831dae33a375c7b436e54d87737c7f9f99be643"},
+]
+
+[package.dependencies]
+httpx = ">=0.21.0"
+
+[[package]]
 name = "retry"
 version = "0.9.2"
 description = "Easy to use retry decorator."
@@ -5988,7 +6063,6 @@ files = [
 [package.dependencies]
 markdown-it-py = ">=2.2.0"
 pygments = ">=2.13.0,<3.0.0"
-typing-extensions = {version = ">=4.0.0,<5.0", markers = "python_version < \"3.9\""}
 
 [package.extras]
 jupyter = ["ipywidgets (>=7.5.1,<9)"]
@@ -7025,20 +7099,6 @@ files = [
 ]
 
 [[package]]
-name = "wheel"
-version = "0.42.0"
-description = "A built-package format for Python"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "wheel-0.42.0-py3-none-any.whl", hash = "sha256:177f9c9b0d45c47873b619f5b650346d632cdc35fb5e4d25058e09c9e581433d"},
-    {file = "wheel-0.42.0.tar.gz", hash = "sha256:c45be39f7882c9d34243236f2d63cbd58039e360f85d0913425fbd7ceea617a8"},
-]
-
-[package.extras]
-test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
-
-[[package]]
 name = "widgetsnbextension"
 version = "4.0.10"
 description = "Jupyter interactive widgets for Jupyter Notebook"
@@ -7365,5 +7425,5 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.8.8,<3.12"
-content-hash = "543dd15605ed6a258b75befe0ba5b98545c3a505dabfa519bdb3c21a5b8826de"
+python-versions = ">=3.9,<3.12"
+content-hash = "e675e9345144103423b40832799f60f4a33829feeea9f6725d02528da8a6a241"
