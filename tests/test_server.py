@@ -121,3 +121,21 @@ def test_ready_endpoint(redis_mock):
 
     result = resp.json()["status"]
     assert result == "ok", f"Expected status = ok, but instead returned {result}."
+
+
+# to run with the real app, just don't pass the fixtures
+# def test_streaming():
+# @pytest.mark.asyncio
+# def test_streaming(redis_mock, celery_app_mock, celery_session_worker):
+def test_streaming(redis_mock, celery_app_mock, celery_worker):
+    test_client = TestClient(app)
+    resp = test_client.post("/jobs/submit-streaming", json=payload)
+    job_id = resp.json()["data"]["job_id"]
+
+    batch_payload = {
+        "job_id": job_id,
+        "data": [{"text": "anytexthere"}, {"text": "othertexthere"}],
+    }
+    resp = test_client.post("/jobs/submit-batch", json=batch_payload)
+    time.sleep(1)
+    resp = test_client.post("/jobs/submit-batch", json=batch_payload)
