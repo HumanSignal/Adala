@@ -359,6 +359,15 @@ async def health():
     return {"status": "ok"}
 
 
+async def _get_redis_conn():
+    """
+    needs to be in a separate function to allow dependency injection for testing
+    """
+    redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+    redis_conn = Redis.from_url(redis_url, socket_connect_timeout=1)
+    return redis_conn
+
+
 @app.get("/ready")
 async def ready():
     """
@@ -367,8 +376,7 @@ async def ready():
     See if we can reach redis. If not, raise a 500 error. Else, return 200.
     """
     try:
-        redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-        redis_conn = Redis.from_url(redis_url, socket_connect_timeout=1)
+        redis_conn = await _get_redis_conn()
         redis_conn.ping()
     except Exception as exception:
         raise HTTPException(
