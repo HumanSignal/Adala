@@ -9,7 +9,7 @@ from adala.agents import Agent
 
 from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import UnknownTopicOrPartitionError
-from celery import Celery, states, shared_task
+from celery import Celery, states
 from celery.exceptions import Ignore
 from server.utils import (
     get_input_topic_name,
@@ -64,8 +64,7 @@ def parent_job_error_handler(self, exc, task_id, args, kwargs, einfo):
         output_job.revoke()
 
 
-# @app.task(
-@shared_task(
+@app.task(
     name="process_file",
     track_started=True,
     serializer="pickle",
@@ -85,8 +84,7 @@ def process_file(agent: Agent):
     asyncio.run(agent.environment.finalize())
 
 
-# @app.task(
-@shared_task(
+@app.task(
     name="streaming_parent_task",
     track_started=True,
     bind=True,
@@ -173,8 +171,7 @@ def streaming_parent_task(
     raise Ignore()
 
 
-# @app.task(
-@shared_task(
+@app.task(
     name="process_file_streaming",
     track_started=True,
     serializer="pickle",
@@ -256,8 +253,7 @@ async def async_process_streaming_output(
     await consumer.stop()
 
 
-# @app.task(
-@shared_task(
+@app.task(
     name="process_streaming_output",
     track_started=True,
     bind=True,

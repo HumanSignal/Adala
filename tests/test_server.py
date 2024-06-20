@@ -126,6 +126,22 @@ def test_ready_endpoint(redis_mock):
     assert result == "ok", f"Expected status = ok, but instead returned {result}."
 
 
+def _build_openai_response(completion: str):
+    # can extend this to handle failures, multiple completions, etc
+    return {
+        "choices": [
+            {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                    "content": completion,
+                    "role": "assistant",
+                },
+            }
+        ]
+    }
+
+
 # to run with the real app, just don't pass the fixtures
 # def test_streaming():
 # @pytest.mark.asyncio
@@ -133,7 +149,8 @@ def test_ready_endpoint(redis_mock):
 # @openai_responses.mock()
 # @pytest.mark.usefixtures('celery_session_app')
 # @pytest.mark.usefixtures('celery_session_worker')
-def test_streaming(
+# @pytest.mark.skip('wip')
+def not_a_test_streaming(
     # redis_mock, celery_app_mock, celery_worker, openai_mock_magic, openai_key_mock
     celery_app_mock, redis_mock, # openai_mock_magic,
 ):
@@ -155,6 +172,32 @@ def test_streaming(
             # }
         # ]
     # }
+
+    test_client = TestClient(app)
+    resp = test_client.post("/jobs/submit-streaming", json=payload)
+    job_id = resp.json()["data"]["job_id"]
+
+    batch_payload = {
+        "job_id": job_id,
+        "data": [{"text": "anytexthere"}, {"text": "othertexthere"}],
+    }
+    resp = test_client.post("/jobs/submit-batch", json=batch_payload)
+    time.sleep(1)
+    resp = test_client.post("/jobs/submit-batch", json=batch_payload)
+
+
+
+# @openai_responses.mock()
+# def test_streaming_real(openai_mock):
+def test_streaming_real():
+
+    # openai_mock.router.route(host="localhost").pass_through()
+    # openai_mock.router.route(host="127.0.0.1").pass_through()
+    # # # breakpoint()
+    # # # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
+    # openai_mock.chat.completions.create.response = _build_openai_response(
+        # "mocked openai chat response"
+    # )
 
     test_client = TestClient(app)
     resp = test_client.post("/jobs/submit-streaming", json=payload)
