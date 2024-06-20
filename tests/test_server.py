@@ -1,4 +1,5 @@
 import time
+import json
 import requests
 import httpx
 import os
@@ -149,8 +150,8 @@ def _build_openai_response(completion: str):
 # @openai_responses.mock()
 # @pytest.mark.usefixtures('celery_session_app')
 # @pytest.mark.usefixtures('celery_session_worker')
-# @pytest.mark.skip('wip')
-def not_a_test_streaming(
+@pytest.mark.skip('wip')
+def test_streaming(
     # redis_mock, celery_app_mock, celery_worker, openai_mock_magic, openai_key_mock
     celery_app_mock, redis_mock, # openai_mock_magic,
 ):
@@ -187,17 +188,17 @@ def not_a_test_streaming(
 
 
 
-# @openai_responses.mock()
-# def test_streaming_real(openai_mock):
-def test_streaming_real():
+@pytest.mark.skip('wip')
+@openai_responses.mock()
+def test_streaming_real(openai_mock):
 
-    # openai_mock.router.route(host="localhost").pass_through()
-    # openai_mock.router.route(host="127.0.0.1").pass_through()
-    # # # breakpoint()
-    # # # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
-    # openai_mock.chat.completions.create.response = _build_openai_response(
-        # "mocked openai chat response"
-    # )
+    openai_mock.router.route(host="localhost").pass_through()
+    openai_mock.router.route(host="127.0.0.1").pass_through()
+    # # breakpoint()
+    # # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
+    openai_mock.chat.completions.create.response = _build_openai_response(
+        "mocked openai chat response"
+    )
 
     test_client = TestClient(app)
     resp = test_client.post("/jobs/submit-streaming", json=payload)
@@ -210,3 +211,57 @@ def test_streaming_real():
     resp = test_client.post("/jobs/submit-batch", json=batch_payload)
     time.sleep(1)
     resp = test_client.post("/jobs/submit-batch", json=batch_payload)
+
+
+@pytest.mark.asyncio
+@openai_responses.mock()
+async def test_streaming_celery_only(openai_mock, celery_app, celery_worker):
+
+    # from server.tasks.process_file import app as celery_app
+    from server.tasks.process_file import streaming_parent_task
+
+    openai_mock.router.route(host="localhost").pass_through()
+    openai_mock.router.route(host="127.0.0.1").pass_through()
+    # # breakpoint()
+    # # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
+    openai_mock.chat.completions.create.response = _build_openai_response(
+        "mocked openai chat response"
+    )
+
+    from adala.agents import Agent
+    from server.handlers.result_handlers import ResultHandler
+
+    agent = Agent(**payload['agent'])
+    handler = ResultHandler.create_from_registry(
+        payload['result_handler'].pop('type'),
+        **payload['result_handler']
+    )
+    result = streaming_parent_task.apply_async(
+        kwargs={
+            'agent': agent,
+            'result_handler': handler,
+        }
+    )
+    job_id = result.id
+
+    batch_payload = {
+        "job_id": job_id,
+        "data": [{"text": "anytexthere"}, {"text": "othertexthere"}],
+    }
+
+    from server.utils import get_input_topic_name
+    from aiokafka import AIOKafkaProducer
+
+    topic = get_input_topic_name(job_id)
+    producer = AIOKafkaProducer(
+        bootstrap_servers="localhost:9093",
+        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+    )
+    await producer.start()
+
+    try:
+        for record in batch_payload['data']:
+            await producer.send_and_wait(topic, value=record)
+    finally:
+        await producer.stop()
+
