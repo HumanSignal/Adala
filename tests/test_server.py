@@ -5,6 +5,7 @@ import httpx
 import os
 import asyncio
 import pytest
+from unittest import mock
 from fastapi.testclient import TestClient
 from server.app import app
 import openai_responses
@@ -213,9 +214,22 @@ def test_streaming_real(openai_mock):
     resp = test_client.post("/jobs/submit-batch", json=batch_payload)
 
 
+def _dummy_response():
+    print("\n\n\nMOCKING\n\n\n", flush=True)
+    breakpoint()
+    return {
+        'text': 'mocked openai chat response',
+        '_adala_error': False,
+        '_adala_message': None,
+        '_adala_details': None
+    }
+
+
+# @mock.patch("adala.runtimes._openai.async_create_completion")
 @pytest.mark.asyncio
 @openai_responses.mock()
-async def test_streaming_celery_only(openai_mock, celery_app, celery_worker):
+async def test_streaming_celery_only(monkeypatch, openai_mock, celery_app, celery_worker):
+    monkeypatch.setattr("adala.runtimes._openai.async_create_completion", lambda *args, **kwargs: _dummy_response())
 
     # from server.tasks.process_file import app as celery_app
     from server.tasks.process_file import streaming_parent_task
@@ -236,8 +250,12 @@ async def test_streaming_celery_only(openai_mock, celery_app, celery_worker):
         payload['result_handler'].pop('type'),
         **payload['result_handler']
     )
-    result = streaming_parent_task.apply_async(
-        kwargs={
+
+    # with mock.patch('server.tasks.process_file.process_file_streaming'):
+    # result = streaming_parent_task.apply_async(
+        # kwargs={
+    result = streaming_parent_task.s(
+        **{
             'agent': agent,
             'result_handler': handler,
         }
@@ -265,3 +283,35 @@ async def test_streaming_celery_only(openai_mock, celery_app, celery_worker):
     finally:
         await producer.stop()
 
+
+@pytest.mark.asyncio
+@openai_responses.mock()
+async def test_streaming_openai_only(openai_mock):
+
+    openai_mock.router.route(host="localhost").pass_through()
+    openai_mock.router.route(host="127.0.0.1").pass_through()
+    # # breakpoint()
+    # # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
+    openai_mock.chat.completions.create.response = _build_openai_response(
+        "mocked openai chat response"
+    )
+
+    from adala.runtimes._openai import async_create_completion
+    from openai import AsyncOpenAI
+
+    openai = AsyncOpenAI(
+        api_key=OPENAI_API_KEY,
+    )
+
+    result = await async_create_completion(
+        model='gpt-3.5-turbo',
+        user_prompt="return the word banana",
+        client=openai,
+    )
+
+    assert result == {
+        'text': 'mocked openai chat response',
+        '_adala_error': False,
+        '_adala_message': None,
+        '_adala_details': None
+    }
