@@ -42,26 +42,6 @@ def parent_job_error_handler(self, exc, task_id, args, kwargs, einfo):
 
 
 @app.task(
-    name="process_file",
-    track_started=True,
-    serializer="pickle",
-    task_time_limit=settings.task_time_limit_sec,
-)
-def process_file(agent: Agent):
-    # Override kafka_bootstrap_servers with value from settings
-    agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
-
-    # # Read data from a file and send it to the Kafka input topic
-    asyncio.run(agent.environment.initialize())
-
-    # run the agent
-    asyncio.run(agent.arun())
-    #
-    # dump the output to a file
-    asyncio.run(agent.environment.finalize())
-
-
-@app.task(
     name="streaming_parent_task",
     track_started=True,
     bind=True,
