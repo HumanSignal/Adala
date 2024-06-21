@@ -236,6 +236,7 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
     openai_api_key: Optional[str] = Field(
         default=os.getenv("OPENAI_API_KEY"), alias="api_key"
     )
+    base_url: Optional[str] = None
     max_tokens: Optional[int] = 1000
     temperature: Optional[float] = 0.0
     splitter: Optional[str] = None
