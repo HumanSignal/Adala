@@ -20,7 +20,7 @@ from redis import Redis
 from log_middleware import LogMiddleware
 from tasks.process_file import app as celery_app
 from tasks.process_file import process_file, streaming_parent_task
-from utils import get_input_topic_name, get_output_topic_name, Settings
+from utils import get_input_topic_name, get_output_topic_name, Settings, delete_topic
 from server.handlers.result_handlers import ResultHandler
 
 
@@ -241,24 +241,6 @@ async def submit_batch(batch: BatchData):
     return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
 
-def aggregate_statuses(input_job_id: str, output_job_id: str):
-    input_job_status = process_file_streaming.AsyncResult(input_job_id).status
-    output_job_status = process_streaming_output.AsyncResult(output_job_id).status
-
-    statuses = [input_job_status, output_job_status]
-
-    if "PENDING" in statuses:
-        return "PENDING"
-    if "FAILURE" in statuses:
-        return "FAILURE"
-    if "REVOKED" in statuses:
-        return "REVOKED"
-    if "STARTED" in statuses or "RETRY" in statuses:
-        return "STARTED"
-
-    return "SUCCESS"
-
-
 @app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])
 def get_status(job_id):
     """
@@ -279,28 +261,8 @@ def get_status(job_id):
         "RETRY": Status.INPROGRESS,
     }
     job = streaming_parent_task.AsyncResult(job_id)
-    logger.info(f"Parent task meta : {job.info}")
-
-    # If parent task meta does not contain input/output job IDs - return FAILED
-    if (
-        job.info is None
-        or type(job.info)
-        != dict  # In some failure cases e.g. an exception is thrown, job.info will be a string, causing the next line to crash
-        or "input_job_id" not in job.info
-        or "output_job_id" not in job.info
-    ):
-        logger.error(
-            "Parent task does not contain input job ID and/or output_job_id - unable to return proper status"
-        )
-        return Response[JobStatusResponse](data=JobStatusResponse(status=Status.FAILED))
-
-    input_job_id = job.info["input_job_id"]
-    output_job_id = job.info["output_job_id"]
-
     try:
-        status: Status = celery_status_map[
-            aggregate_statuses(input_job_id, output_job_id)
-        ]
+        status: Status = celery_status_map[job.status]
     except Exception as e:
         logger.error(f"Error getting job status: {e}")
         status = Status.FAILED
@@ -321,25 +283,10 @@ def cancel_job(job_id):
         JobStatusResponse[status.CANCELED]
     """
     job = streaming_parent_task.AsyncResult(job_id)
-    input_job_id = job.info.get("input_job_id", None)
-    output_job_id = job.info.get("output_job_id", None)
-    if input_job_id:
-        input_job = process_file_streaming.AsyncResult(input_job_id)
-        input_job.revoke()
-    else:
-        logger.debug(
-            f"Input job id: {input_job_id} unavailable to cancel for parent job: {job_id}"
-        )
-    if output_job_id:
-        output_job = process_streaming_output.AsyncResult(output_job_id)
-        output_job.revoke()
-    else:
-        logger.debug(
-            f"output job id: {input_job_id} unavailable to cancel for parent job: {job_id}"
-        )
     job.revoke()
 
     # Delete Kafka topics
+    # TODO check this doesn't conflict with parent_job_error_handler
     input_topic_name = get_input_topic_name(job_id)
     output_topic_name = get_output_topic_name(job_id)
     delete_topic(input_topic_name)
