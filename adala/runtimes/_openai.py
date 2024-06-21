@@ -15,9 +15,6 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 import httpx
 
 
-DEFAULT_CREATE_COMPLETION_URL = "https://api.openai.com/v1/chat/completions"
-
-
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 async def async_create_completion(
     model: str,
