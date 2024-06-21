@@ -93,8 +93,6 @@ def streaming_parent_task(
     agent.environment.kafka_output_topic = output_topic_name
     agent.environment.timeout_ms = settings.kafka_input_consumer_timeout_ms
 
-    print(f"\n\n\nDOING SOMETHING WACK {parent_job_id}\n\n\n", flush=True)
-
     async def run_streaming():
         input_task_done = asyncio.Event()
         async with asyncio.TaskGroup() as task_group:
