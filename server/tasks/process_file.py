@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 app = Celery(
-    "worker", broker=REDIS_URL, backend=REDIS_URL, accept_content=["json", "pickle"]
+    "worker", broker=REDIS_URL, backend=REDIS_URL, accept_content=["json", "pickle"], broker_connection_retry_on_startup=True
 )
 
 settings = Settings()

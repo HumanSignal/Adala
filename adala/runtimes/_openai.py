@@ -15,9 +15,6 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 import httpx
 
 
-DEFAULT_CREATE_COMPLETION_URL = "https://api.openai.com/v1/chat/completions"
-
-
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 async def async_create_completion(
     model: str,
@@ -110,6 +107,7 @@ class OpenAIChatRuntime(Runtime):
     Attributes:
         openai_model: OpenAI model name.
         openai_api_key: OpenAI API key. If not provided, will be taken from OPENAI_API_KEY environment variable.
+        base_url: Can point to any implementation of the OpenAI API. Defaults to OpenAI's.
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
     """
 
@@ -119,12 +117,13 @@ class OpenAIChatRuntime(Runtime):
     openai_api_key: Optional[str] = Field(
         default=os.getenv("OPENAI_API_KEY"), alias="api_key"
     )
+    base_url: Optional[str] = None
     max_tokens: Optional[int] = 1000
     splitter: Optional[str] = None
 
     @computed_field
     def _client(self) -> OpenAI:
-        return OpenAI(api_key=self.openai_api_key)
+        return OpenAI(api_key=self.openai_api_key, base_url=self.base_url)
 
     def init_runtime(self) -> "Runtime":
         # check model availability
@@ -221,6 +220,7 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
     Attributes:
         openai_model: OpenAI model name.
         openai_api_key: OpenAI API key. If not provided, will be taken from OPENAI_API_KEY environment variable.
+        base_url: Can point to any implementation of the OpenAI API. Defaults to OpenAI's.
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
         temperature: Temperature for sampling, between 0 and 1. Higher values means the model will take more risks.
             Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.
@@ -236,6 +236,7 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
     openai_api_key: Optional[str] = Field(
         default=os.getenv("OPENAI_API_KEY"), alias="api_key"
     )
+    base_url: Optional[str] = None
     max_tokens: Optional[int] = 1000
     temperature: Optional[float] = 0.0
     splitter: Optional[str] = None
@@ -246,6 +247,7 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
     def _client(self) -> AsyncOpenAI:
         return AsyncOpenAI(
             api_key=self.openai_api_key,
+            base_url=self.base_url,
             http_client=httpx.AsyncClient(
                 limits=httpx.Limits(
                     max_connections=self.concurrent_clients,
