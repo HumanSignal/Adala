@@ -69,7 +69,7 @@ class LSEBatchItem(BaseModel):
         # omit fields from the input task besides task_id, the LSE /batch-predictions endpoint doesn't use these and it'd be a waste of network bandwidth since they can be large
         extra="ignore",
         # guard against name collisions with other input fields
-        allow_population_by_field_name=False,
+        populate_by_name=False,
     )
 
     task_id: int
