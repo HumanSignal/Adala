@@ -121,7 +121,6 @@ async def async_process_streaming_input(input_task_done: asyncio.Event, agent: A
         # start up kaka producer and consumer
         await agent.environment.initialize()
         # Run the agent
-        # raise RuntimeError("fake error input")
         await agent.arun()
         input_task_done.set()
         # shut down kaka producer and consumer
@@ -165,7 +164,6 @@ async def async_process_streaming_output(
     data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
 
     try:
-        # while 1:
         while not input_done.is_set():
             for tp, messages in data.items():
                 if messages:
@@ -177,10 +175,6 @@ async def async_process_streaming_output(
                     )
                 else:
                     logger.debug(f"No messages in topic {tp.topic}")
-
-            # print("crashing", flush=True)
-            # raise RuntimeError("fake error output")
-            # print("crashed", flush=True)
 
             if not data:
                 logger.info(f"No messages in any topic")
