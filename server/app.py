@@ -19,7 +19,7 @@ from redis import Redis
 
 from log_middleware import LogMiddleware
 from tasks.process_file import app as celery_app
-from tasks.process_file import process_file, streaming_parent_task
+from tasks.process_file import streaming_parent_task
 from utils import get_input_topic_name, get_output_topic_name, Settings, delete_topic
 from server.handlers.result_handlers import ResultHandler
 
@@ -97,38 +97,6 @@ class JobStatusResponse(BaseModel):
         use_enum_values = True
 
 
-class SubmitRequest(BaseModel):
-    """
-    Request model for submitting a job.
-
-    Attributes:
-        agent (Agent): The agent to be used for the task. Example of serialized agent:
-            {
-                "skills": [{
-                    "type": "classification",
-                    "name": "text_classifier",
-                    "instructions": "Classify the text.",
-                    "input_template": "Text: {text}",
-                    "output_template": "Classification result: {label}",
-                    "labels": {
-                        "label": ['label1', 'label2', 'label3']
-                    }
-                }],
-                "runtimes": {
-                    "default": {
-                        "type": "openai-chat",
-                        "model": "gpt-3.5-turbo",
-                        "api_key": "..."
-                    }
-                }
-            }
-        task_name (str): The name of the task to be executed by the agent.
-    """
-
-    agent: Agent
-    task_name: str = "process_file"
-
-
 class SubmitStreamingRequest(BaseModel):
     """
     Request model for submitting a streaming job.
@@ -166,29 +134,6 @@ class BatchData(BaseModel):
 @app.get("/")
 def get_index():
     return {"status": "ok"}
-
-
-@app.post("/jobs/submit", response_model=Response[JobCreated])
-async def submit(request: SubmitRequest):
-    """
-    Submit a request to execute task `request.task_name` in celery.
-
-    Args:
-        request (SubmitRequest): The request model for submitting a job.
-
-    Returns:
-        Response[JobCreated]: The response model for a job created.
-    """
-
-    # TODO: get task by name, e.g. request.task_name
-    task = process_file
-    agent = request.agent
-
-    logger.info(f"Submitting task {task.name} with agent {agent}")
-    result = task.delay(agent=agent)
-    logger.debug(f"Task {task.name} submitted with job_id {result.id}")
-
-    return Response[JobCreated](data=JobCreated(job_id=result.id))
 
 
 @app.post("/jobs/submit-streaming", response_model=Response[JobCreated])
