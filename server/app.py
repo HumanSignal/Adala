@@ -19,12 +19,7 @@ from redis import Redis
 
 from log_middleware import LogMiddleware
 from tasks.process_file import app as celery_app
-from tasks.process_file import (
-    process_file,
-    process_file_streaming,
-    process_streaming_output,
-    streaming_parent_task,
-)
+from tasks.process_file import process_file, streaming_parent_task
 from utils import get_input_topic_name, get_output_topic_name, Settings
 from server.handlers.result_handlers import ResultHandler
 
@@ -142,7 +137,7 @@ class SubmitStreamingRequest(BaseModel):
     agent: Agent
     # SerializeAsAny allows for subclasses of ResultHandler
     result_handler: SerializeAsAny[ResultHandler]
-    task_name: str = "process_file_streaming"
+    task_name: str = "streaming_parent_task"
 
     @field_validator("result_handler", mode="before")
     def validate_result_handler(cls, value: Dict) -> ResultHandler:
