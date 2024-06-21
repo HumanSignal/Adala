@@ -139,10 +139,9 @@ async def async_process_streaming_output(
             retries -= 1
             time.sleep(1)
 
-    data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
-
     try:
         while not input_done.is_set():
+            data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
             for tp, messages in data.items():
                 if messages:
                     logger.debug(f"Handling {messages=} in topic {tp.topic}")
@@ -156,9 +155,6 @@ async def async_process_streaming_output(
 
             if not data:
                 logger.info(f"No messages in any topic")
-
-            # we are getting packets from the output topic here to check if its empty and continue processing if its not
-            data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
 
     except asyncio.CancelledError as e:
         await consumer.stop()
