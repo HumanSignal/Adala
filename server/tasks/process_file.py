@@ -1,7 +1,16 @@
+import os
+
+if os.getenv('EXECUTION_POOL') == 'gevent':
+    # gevent monkeypatching should run as one of the first thing when app is started.
+    # This allows gevent to patch networking and other system libraries to make them
+    # gevent-compatible before anything else patches them (for example boto)
+    from gevent.monkey import patch_all
+
+    patch_all()
+
 import asyncio
 import json
 import pickle
-import os
 import logging
 import time
 
@@ -19,7 +28,6 @@ from server.utils import (
     Settings,
 )
 from server.handlers.result_handlers import ResultHandler
-
 
 logger = logging.getLogger(__name__)
 

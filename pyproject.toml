@@ -37,6 +37,7 @@ uvicorn = "*"
 pydantic-settings = "^2.2.1"
 label-studio-sdk = "^0.0.32"
 kafka-python = "^2.0.2"
+gevent = "^24.2.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.3"

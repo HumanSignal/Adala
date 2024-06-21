@@ -48,8 +48,10 @@ services:
       - MODULE_NAME=process_file.app
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9093
       - C_FORCE_ROOT=true # needed when using pickle serializer in celery + running as root - remove when we dont run as root
+      - LOG_LEVEL=INFO
+      - EXECUTION_POOL=gevent
     command:
-      'sh -c "cd tasks && poetry run celery -A $$MODULE_NAME worker --loglevel=info"'
+      'sh -c "cd tasks && poetry run celery -A $$MODULE_NAME worker --pool=$$EXECUTION_POOL --concurrency=10 --loglevel=$$LOG_LEVEL --events"'
   redis:
     image: redis:alpine
     ports:
