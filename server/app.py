@@ -183,7 +183,9 @@ async def submit_batch(batch: BatchData):
             await producer.send_and_wait(topic, value=record)
     except UnknownTopicOrPartitionError:
         await producer.stop()
-        raise HTTPException(status_code=500, detail=f"{topic=} for job {batch.job_id} not found")
+        raise HTTPException(
+            status_code=500, detail=f"{topic=} for job {batch.job_id} not found"
+        )
     finally:
         await producer.stop()
 
@@ -235,7 +237,6 @@ def cancel_job(job_id):
     # try using wait=True? then what kind of timeout is acceptable? currently we don't know if we've failed to cancel a job, this always returns success
     # should use SIGTERM or SIGINT in theory, but there is some unhandled kafka cleanup that causes the celery worker to report a bunch of errors on those, will fix in a later PR
     job.revoke(terminate=True, signal="SIGKILL")
-
 
     # Delete Kafka topics
     # TODO check this doesn't conflict with parent_job_error_handler

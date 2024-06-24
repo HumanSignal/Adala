@@ -151,9 +151,7 @@ async def async_process_streaming_output(
                     logger.debug(f"Handling {messages=} in {topic=}")
                     data = [msg.value for msg in messages]
                     result_handler(data)
-                    logger.debug(
-                        f"Handled {len(messages)} messages in {topic=}"
-                    )
+                    logger.debug(f"Handled {len(messages)} messages in {topic=}")
                 else:
                     logger.debug(f"No messages in topic {topic=}")
 
