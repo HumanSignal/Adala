@@ -103,7 +103,8 @@ async def async_process_streaming_input(input_task_done: asyncio.Event, agent: A
         input_task_done.set()
         # shut down kaka producer and consumer
         await agent.environment.finalize()
-    except asyncio.CancelledError as e:
+    # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_output
+    finally:
         await agent.environment.finalize()
         raise e
 
@@ -156,9 +157,6 @@ async def async_process_streaming_output(
             if not data:
                 logger.info(f"No messages in any topic")
 
-    except asyncio.CancelledError as e:
-        await consumer.stop()
-        raise e
-
+    # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_input
     finally:
         await consumer.stop()
