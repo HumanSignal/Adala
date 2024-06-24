@@ -121,7 +121,7 @@ def streaming_parent_task(
     agent.environment.timeout_ms = settings.kafka_input_consumer_timeout_ms
 
     inference_task = process_file_streaming
-    logger.info(f"Submitting task {inference_task.name} with agent {agent}")
+    logger.info(f'Submitting task {inference_task.name}')
     input_result = inference_task.delay(agent=agent)
     input_job_id = input_result.id
     logger.info(f"Task {inference_task.name} submitted with job_id {input_job_id}")
