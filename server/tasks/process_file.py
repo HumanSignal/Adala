@@ -31,8 +31,7 @@ settings = Settings()
 
 def parent_job_error_handler(self, exc, task_id, args, kwargs, einfo):
     """
-    This function will be called if streaming_parent_task fails, to ensure that we cleanup any left over
-    Kafka topics.
+    This function will be called if streaming_parent_task fails, to ensure that we cleanup any left over Kafka topics.
     """
     parent_job_id = task_id
     input_topic_name = get_input_topic_name(parent_job_id)
@@ -106,7 +105,6 @@ async def async_process_streaming_input(input_task_done: asyncio.Event, agent: A
     # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_output
     finally:
         await agent.environment.finalize()
-        raise e
 
 
 async def async_process_streaming_output(
