@@ -6,6 +6,33 @@ import openai_responses
 from openai_responses import OpenAIMock
 
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--use-openai", action="store_true", default=False, help="run tests that require OpenAI key"
+    )
+    parser.addoption(
+        "--use-server", action="store_true", default=False, help="run tests that require running adala server"
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "use_openai: mark test as requiring OpenAI key")
+    config.addinivalue_line("markers", "use_server: mark test as requiring running adala server")
+
+def pytest_collection_modifyitems(config, items):
+    if not config.getoption("--use-openai"):
+        skip_openai = pytest.mark.skip(reason="need OpenAI key to run")
+        for item in items:
+            if "use_openai" in item.keywords:
+                item.add_marker(skip_openai)
+
+    if not config.getoption("--use-server"):
+        skip_server = pytest.mark.skip(reason="need live server to run")
+        for item in items:
+            if "use_server" in item.keywords:
+                item.add_marker(skip_server)
+
+
 @pytest.fixture
 def redis_mock(monkeypatch):
     fake_redis = FakeStrictRedis()
@@ -16,25 +43,26 @@ def redis_mock(monkeypatch):
     # return fake_redis
     # import redis
     # with (
-        # mock.patch.object(redis, 'StrictRedis', new=lambda *args, **kwargs: fake_strict_redis) as mocked_strict_redis,
-        # mock.patch.object(redis, 'Redis', new=lambda *args, **kwargs: fake_redis) as mocked_redis,
+    # mock.patch.object(redis, 'StrictRedis', new=lambda *args, **kwargs: fake_strict_redis) as mocked_strict_redis,
+    # mock.patch.object(redis, 'Redis', new=lambda *args, **kwargs: fake_redis) as mocked_redis,
     # ):
-        # yield mocked_strict_redis, mocked_redis
+    # yield mocked_strict_redis, mocked_redis
+    return fake_redis
 
 
 @pytest.fixture()
 def celery_config():
     return {
-        'broker_url': 'memory://',
-        'result_backend': 'redis://',
-        'accept_content': ['json', 'pickle'],
+        "broker_url": "memory://",
+        "result_backend": "redis://",
+        "accept_content": ["json", "pickle"],
     }
 
 
 # @pytest.fixture(scope='session')
 # def celery_worker_parameters():
-    # return {
-    # }
+# return {
+# }
 
 
 @pytest.fixture

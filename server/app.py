@@ -7,7 +7,7 @@ import json
 import fastapi
 from adala.agents import Agent
 from aiokafka import AIOKafkaProducer
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, SerializeAsAny, field_validator
 import uvicorn
@@ -369,14 +369,13 @@ async def _get_redis_conn():
 
 
 @app.get("/ready")
-async def ready():
+async def ready(redis_conn: Redis = Depends(_get_redis_conn)):
     """
     Check if the app is ready to serve requests.
 
     See if we can reach redis. If not, raise a 500 error. Else, return 200.
     """
     try:
-        redis_conn = await _get_redis_conn()
         redis_conn.ping()
     except Exception as exception:
         raise HTTPException(

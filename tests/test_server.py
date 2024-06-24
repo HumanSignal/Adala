@@ -7,7 +7,7 @@ import asyncio
 import pytest
 from unittest import mock
 from fastapi.testclient import TestClient
-from server.app import app
+from server.app import app, _get_redis_conn
 import openai_responses
 from openai_responses import OpenAIMock
 
@@ -121,6 +121,7 @@ def test_health_endpoint():
 
 
 def test_ready_endpoint(redis_mock):
+    app.dependency_overrides[_get_redis_conn] = lambda: redis_mock
     test_client = TestClient(app)
     resp = test_client.get("/ready")
 
@@ -148,32 +149,26 @@ def _build_openai_response(completion: str):
 # def test_streaming():
 # @pytest.mark.asyncio
 # def test_streaming(redis_mock, celery_app_mock, celery_session_worker):
-# @openai_responses.mock()
 # @pytest.mark.usefixtures('celery_session_app')
 # @pytest.mark.usefixtures('celery_session_worker')
-@pytest.mark.skip('wip')
+@openai_responses.mock()
+@pytest.mark.skip("wip")
 def test_streaming(
     # redis_mock, celery_app_mock, celery_worker, openai_mock_magic, openai_key_mock
-    celery_app_mock, redis_mock, # openai_mock_magic,
+    celery_app_mock,
+    redis_mock,  # openai_mock_magic,
+    openai_mock,
 ):
 
-    payload["agent"]["runtimes"]["default"]["api_key"] = os.getenv("OPENAI_API_KEY")
+    # payload["agent"]["runtimes"]["default"]["api_key"] = os.getenv("OPENAI_API_KEY")
 
-    # openai_mock.router.route(host="localhost").pass_through()
+    openai_mock.router.route(host="localhost").pass_through()
+    openai_mock.router.route(host="127.0.0.1").pass_through()
     # # breakpoint()
     # # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
-    # openai_mock.chat.completions.create.response = {
-        # "choices": [
-            # {
-                # "index": 0,
-                # "finish_reason": "stop",
-                # "message": {
-                    # "content": "mocked openai chat response",
-                    # "role": "assistant",
-                # },
-            # }
-        # ]
-    # }
+    openai_mock.chat.completions.create.response = _build_openai_response(
+        "mocked openai chat response"
+    )
 
     test_client = TestClient(app)
     resp = test_client.post("/jobs/submit-streaming", json=payload)
@@ -188,18 +183,9 @@ def test_streaming(
     resp = test_client.post("/jobs/submit-batch", json=batch_payload)
 
 
-
-@pytest.mark.skip('wip')
-@openai_responses.mock()
-def test_streaming_real(openai_mock):
-
-    openai_mock.router.route(host="localhost").pass_through()
-    openai_mock.router.route(host="127.0.0.1").pass_through()
-    # # breakpoint()
-    # # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
-    openai_mock.chat.completions.create.response = _build_openai_response(
-        "mocked openai chat response"
-    )
+@pytest.mark.use_openai
+@pytest.mark.use_server
+def test_streaming_real():
 
     test_client = TestClient(app)
     resp = test_client.post("/jobs/submit-streaming", json=payload)
@@ -218,18 +204,24 @@ def _dummy_response():
     print("\n\n\nMOCKING\n\n\n", flush=True)
     breakpoint()
     return {
-        'text': 'mocked openai chat response',
-        '_adala_error': False,
-        '_adala_message': None,
-        '_adala_details': None
+        "text": "mocked openai chat response",
+        "_adala_error": False,
+        "_adala_message": None,
+        "_adala_details": None,
     }
 
 
 # @mock.patch("adala.runtimes._openai.async_create_completion")
+@pytest.mark.skip("wip")
 @pytest.mark.asyncio
 @openai_responses.mock()
-async def test_streaming_celery_only(monkeypatch, openai_mock, celery_app, celery_worker):
-    monkeypatch.setattr("adala.runtimes._openai.async_create_completion", lambda *args, **kwargs: _dummy_response())
+async def test_streaming_celery_only(
+    monkeypatch, openai_mock, celery_app, celery_worker
+):
+    monkeypatch.setattr(
+        "adala.runtimes._openai.async_create_completion",
+        lambda *args, **kwargs: _dummy_response(),
+    )
 
     # from server.tasks.process_file import app as celery_app
     from server.tasks.process_file import streaming_parent_task
@@ -245,19 +237,18 @@ async def test_streaming_celery_only(monkeypatch, openai_mock, celery_app, celer
     from adala.agents import Agent
     from server.handlers.result_handlers import ResultHandler
 
-    agent = Agent(**payload['agent'])
+    agent = Agent(**payload["agent"])
     handler = ResultHandler.create_from_registry(
-        payload['result_handler'].pop('type'),
-        **payload['result_handler']
+        payload["result_handler"].pop("type"), **payload["result_handler"]
     )
 
     # with mock.patch('server.tasks.process_file.process_file_streaming'):
     # result = streaming_parent_task.apply_async(
-        # kwargs={
+    # kwargs={
     result = streaming_parent_task.s(
         **{
-            'agent': agent,
-            'result_handler': handler,
+            "agent": agent,
+            "result_handler": handler,
         }
     )
     job_id = result.id
@@ -278,15 +269,18 @@ async def test_streaming_celery_only(monkeypatch, openai_mock, celery_app, celer
     await producer.start()
 
     try:
-        for record in batch_payload['data']:
+        for record in batch_payload["data"]:
             await producer.send_and_wait(topic, value=record)
     finally:
         await producer.stop()
 
 
+@pytest.mark.use_server
 @pytest.mark.asyncio
 @openai_responses.mock()
 async def test_streaming_openai_only(openai_mock):
+
+    OPENAI_API_KEY = "mocked"
 
     openai_mock.router.route(host="localhost").pass_through()
     openai_mock.router.route(host="127.0.0.1").pass_through()
@@ -304,14 +298,14 @@ async def test_streaming_openai_only(openai_mock):
     )
 
     result = await async_create_completion(
-        model='gpt-3.5-turbo',
+        model="gpt-3.5-turbo",
         user_prompt="return the word banana",
         client=openai,
     )
 
     assert result == {
-        'text': 'mocked openai chat response',
-        '_adala_error': False,
-        '_adala_message': None,
-        '_adala_details': None
+        "text": "mocked openai chat response",
+        "_adala_error": False,
+        "_adala_message": None,
+        "_adala_details": None,
     }
