@@ -8,6 +8,7 @@ import json
 import fastapi
 from adala.agents import Agent
 from aiokafka import AIOKafkaProducer
+from aiokafka.errors import UnknownTopicOrPartitionError
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, SerializeAsAny, field_validator
@@ -231,7 +232,10 @@ def cancel_job(job_id):
         JobStatusResponse[status.CANCELED]
     """
     job = streaming_parent_task.AsyncResult(job_id)
-    job.revoke()
+    # try using wait=True? then what kind of timeout is acceptable? currently we don't know if we've failed to cancel a job, this always returns success
+    # should use SIGTERM or SIGINT in theory, but there is some unhandled kafka cleanup that causes the celery worker to report a bunch of errors on those, will fix in a later PR
+    job.revoke(terminate=True, signal="SIGKILL")
+
 
     # Delete Kafka topics
     # TODO check this doesn't conflict with parent_job_error_handler
