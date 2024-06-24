@@ -29,8 +29,11 @@ env:
   APPS_DIR: "vars/aws/dev.heartex.com/k8s/prompt"
 
 jobs:
-
   deploy:
+    if: github.event.pull_request.head.repo.fork == false
+    permissions:
+      contents: read
+      deployments: write
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
