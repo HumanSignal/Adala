@@ -189,7 +189,7 @@ async def submit(request: SubmitRequest):
     task = process_file
     agent = request.agent
 
-    logger.info(f"Submitting task {task.name} with agent {agent}")
+    logger.info(f'Submitting task {task.name}')
     result = task.delay(agent=agent)
     logger.debug(f"Task {task.name} submitted with job_id {result.id}")
 
