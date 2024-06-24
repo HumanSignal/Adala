@@ -7,6 +7,7 @@ import json
 import fastapi
 from adala.agents import Agent
 from aiokafka import AIOKafkaProducer
+from aiokafka.errors import UnknownTopicOrPartitionError
 from fastapi import HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, SerializeAsAny, field_validator
@@ -14,14 +15,9 @@ import uvicorn
 from redis import Redis
 
 from server.log_middleware import LogMiddleware
-from server.tasks.process_file import (
-    process_file,
-    process_file_streaming,
-    process_streaming_output,
-    streaming_parent_task,
-    delete_topic,
-)
-from server.utils import get_input_topic_name, get_output_topic_name, Settings
+from server.tasks.process_file import app as celery_app
+from server.tasks.process_file import streaming_parent_task
+from server.utils import get_input_topic_name, get_output_topic_name, Settings, delete_topic
 from server.handlers.result_handlers import ResultHandler
 
 
@@ -98,38 +94,6 @@ class JobStatusResponse(BaseModel):
         use_enum_values = True
 
 
-class SubmitRequest(BaseModel):
-    """
-    Request model for submitting a job.
-
-    Attributes:
-        agent (Agent): The agent to be used for the task. Example of serialized agent:
-            {
-                "skills": [{
-                    "type": "classification",
-                    "name": "text_classifier",
-                    "instructions": "Classify the text.",
-                    "input_template": "Text: {text}",
-                    "output_template": "Classification result: {label}",
-                    "labels": {
-                        "label": ['label1', 'label2', 'label3']
-                    }
-                }],
-                "runtimes": {
-                    "default": {
-                        "type": "openai-chat",
-                        "model": "gpt-3.5-turbo",
-                        "api_key": "..."
-                    }
-                }
-            }
-        task_name (str): The name of the task to be executed by the agent.
-    """
-
-    agent: Agent
-    task_name: str = "process_file"
-
-
 class SubmitStreamingRequest(BaseModel):
     """
     Request model for submitting a streaming job.
@@ -138,7 +102,7 @@ class SubmitStreamingRequest(BaseModel):
     agent: Agent
     # SerializeAsAny allows for subclasses of ResultHandler
     result_handler: SerializeAsAny[ResultHandler]
-    task_name: str = "process_file_streaming"
+    task_name: str = "streaming_parent_task"
 
     @field_validator("result_handler", mode="before")
     def validate_result_handler(cls, value: Dict) -> ResultHandler:
@@ -167,29 +131,6 @@ class BatchData(BaseModel):
 @app.get("/")
 def get_index():
     return {"status": "ok"}
-
-
-@app.post("/jobs/submit", response_model=Response[JobCreated])
-async def submit(request: SubmitRequest):
-    """
-    Submit a request to execute task `request.task_name` in celery.
-
-    Args:
-        request (SubmitRequest): The request model for submitting a job.
-
-    Returns:
-        Response[JobCreated]: The response model for a job created.
-    """
-
-    # TODO: get task by name, e.g. request.task_name
-    task = process_file
-    agent = request.agent
-
-    logger.info(f"Submitting task {task.name} with agent {agent}")
-    result = task.delay(agent=agent)
-    logger.debug(f"Task {task.name} submitted with job_id {result.id}")
-
-    return Response[JobCreated](data=JobCreated(job_id=result.id))
 
 
 @app.post("/jobs/submit-streaming", response_model=Response[JobCreated])
@@ -236,28 +177,15 @@ async def submit_batch(batch: BatchData):
     try:
         for record in batch.data:
             await producer.send_and_wait(topic, value=record)
+    except UnknownTopicOrPartitionError:
+        await producer.stop()
+        raise HTTPException(
+            status_code=500, detail=f"{topic=} for job {batch.job_id} not found"
+        )
     finally:
         await producer.stop()
 
     return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
-
-
-def aggregate_statuses(input_job_id: str, output_job_id: str):
-    input_job_status = process_file_streaming.AsyncResult(input_job_id).status
-    output_job_status = process_streaming_output.AsyncResult(output_job_id).status
-
-    statuses = [input_job_status, output_job_status]
-
-    if "PENDING" in statuses:
-        return "PENDING"
-    if "FAILURE" in statuses:
-        return "FAILURE"
-    if "REVOKED" in statuses:
-        return "REVOKED"
-    if "STARTED" in statuses or "RETRY" in statuses:
-        return "STARTED"
-
-    return "SUCCESS"
 
 
 @app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])
@@ -280,28 +208,8 @@ def get_status(job_id):
         "RETRY": Status.INPROGRESS,
     }
     job = streaming_parent_task.AsyncResult(job_id)
-    logger.info(f"Parent task meta : {job.info}")
-
-    # If parent task meta does not contain input/output job IDs - return FAILED
-    if (
-        job.info is None
-        or type(job.info)
-        != dict  # In some failure cases e.g. an exception is thrown, job.info will be a string, causing the next line to crash
-        or "input_job_id" not in job.info
-        or "output_job_id" not in job.info
-    ):
-        logger.error(
-            "Parent task does not contain input job ID and/or output_job_id - unable to return proper status"
-        )
-        return Response[JobStatusResponse](data=JobStatusResponse(status=Status.FAILED))
-
-    input_job_id = job.info["input_job_id"]
-    output_job_id = job.info["output_job_id"]
-
     try:
-        status: Status = celery_status_map[
-            aggregate_statuses(input_job_id, output_job_id)
-        ]
+        status: Status = celery_status_map[job.status]
     except Exception as e:
         logger.error(f"Error getting job status: {e}")
         status = Status.FAILED
@@ -322,25 +230,12 @@ def cancel_job(job_id):
         JobStatusResponse[status.CANCELED]
     """
     job = streaming_parent_task.AsyncResult(job_id)
-    input_job_id = job.info.get("input_job_id", None)
-    output_job_id = job.info.get("output_job_id", None)
-    if input_job_id:
-        input_job = process_file_streaming.AsyncResult(input_job_id)
-        input_job.revoke()
-    else:
-        logger.debug(
-            f"Input job id: {input_job_id} unavailable to cancel for parent job: {job_id}"
-        )
-    if output_job_id:
-        output_job = process_streaming_output.AsyncResult(output_job_id)
-        output_job.revoke()
-    else:
-        logger.debug(
-            f"output job id: {input_job_id} unavailable to cancel for parent job: {job_id}"
-        )
-    job.revoke()
+    # try using wait=True? then what kind of timeout is acceptable? currently we don't know if we've failed to cancel a job, this always returns success
+    # should use SIGTERM or SIGINT in theory, but there is some unhandled kafka cleanup that causes the celery worker to report a bunch of errors on those, will fix in a later PR
+    job.revoke(terminate=True, signal="SIGKILL")
 
     # Delete Kafka topics
+    # TODO check this doesn't conflict with parent_job_error_handler
     input_topic_name = get_input_topic_name(job_id)
     output_topic_name = get_output_topic_name(job_id)
     delete_topic(input_topic_name)

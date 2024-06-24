@@ -67,8 +67,10 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         await self.producer.start()
 
     async def finalize(self):
-        await self.consumer.stop()
-        await self.producer.stop()
+        if self.consumer:
+            await self.consumer.stop()
+        if self.producer:
+            await self.producer.stop()
 
     async def get_feedback(
         self,
