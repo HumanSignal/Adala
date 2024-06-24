@@ -180,6 +180,9 @@ async def submit_batch(batch: BatchData):
     try:
         for record in batch.data:
             await producer.send_and_wait(topic, value=record)
+    except UnknownTopicOrPartitionError:
+        await producer.stop()
+        raise HTTPException(status_code=500, detail=f"{topic=} for job {batch.job_id} not found")
     finally:
         await producer.stop()
 
