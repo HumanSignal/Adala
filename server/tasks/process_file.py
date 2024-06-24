@@ -143,19 +143,20 @@ async def async_process_streaming_output(
     try:
         while not input_done.is_set():
             data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
-            for tp, messages in data.items():
+            for topic_partition, messages in data.items():
+                topic = topic_partition.topic
                 if messages:
-                    logger.debug(f"Handling {messages=} in topic {tp.topic}")
+                    logger.debug(f"Handling {messages=} in {topic=}")
                     data = [msg.value for msg in messages]
                     result_handler(data)
                     logger.debug(
-                        f"Handled {len(messages)} messages in topic {tp.topic}"
+                        f"Handled {len(messages)} messages in {topic=}"
                     )
                 else:
-                    logger.debug(f"No messages in topic {tp.topic}")
+                    logger.debug(f"No messages in topic {topic=}")
 
             if not data:
-                logger.info(f"No messages in any topic")
+                logger.info("No messages in any topic")
 
     # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_input
     finally:
