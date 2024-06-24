@@ -1,6 +1,5 @@
 import asyncio
 import json
-import pickle
 import os
 import logging
 import time
@@ -9,8 +8,7 @@ from adala.agents import Agent
 
 from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import UnknownTopicOrPartitionError
-from celery import Celery, states
-from celery.exceptions import Ignore
+from celery import Celery
 from server.utils import (
     get_input_topic_name,
     get_output_topic_name,
@@ -37,55 +35,13 @@ settings = Settings()
 
 def parent_job_error_handler(self, exc, task_id, args, kwargs, einfo):
     """
-    This function will be called if streaming_parent_task fails, to ensure that we cleanup any left over
-    Kafka topics.
-
-    Also attempts to stop input/output jobs if their IDs are available
+    This function will be called if streaming_parent_task fails, to ensure that we cleanup any left over Kafka topics.
     """
     parent_job_id = task_id
     input_topic_name = get_input_topic_name(parent_job_id)
     output_topic_name = get_output_topic_name(parent_job_id)
     delete_topic(input_topic_name)
     delete_topic(output_topic_name)
-
-    parent_job = streaming_parent_task.AsyncResult(parent_job_id)
-    if (
-        parent_job.info is None
-        or type(parent_job.info)
-        != dict  # In some failure cases e.g. an exception is thrown, job.info will be a string, causing the next line to crash
-        or "input_job_id" not in parent_job.info
-        or "output_job_id" not in parent_job.info
-    ):
-        logger.warning(
-            "Parent task does not contain input job ID and/or output_job_id - unable to stop input/output jobs"
-        )
-    else:
-        input_job_id = parent_job.info["input_job_id"]
-        output_job_id = parent_job.info["output_job_id"]
-        input_job = process_file_streaming.AsyncResult(input_job_id)
-        output_job = process_streaming_output.AsyncResult(output_job_id)
-        input_job.revoke()
-        output_job.revoke()
-
-
-@app.task(
-    name="process_file",
-    track_started=True,
-    serializer="pickle",
-    task_time_limit=settings.task_time_limit_sec,
-)
-def process_file(agent: Agent):
-    # Override kafka_bootstrap_servers with value from settings
-    agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
-
-    # # Read data from a file and send it to the Kafka input topic
-    asyncio.run(agent.environment.initialize())
-
-    # run the agent
-    asyncio.run(agent.arun())
-    #
-    # dump the output to a file
-    asyncio.run(agent.environment.finalize())
 
 
 @app.task(
@@ -120,42 +76,19 @@ def streaming_parent_task(
     agent.environment.kafka_output_topic = output_topic_name
     agent.environment.timeout_ms = settings.kafka_input_consumer_timeout_ms
 
-    inference_task = process_file_streaming
-    logger.info(f'Submitting task {inference_task.name}')
-    input_result = inference_task.delay(agent=agent)
-    input_job_id = input_result.id
-    logger.info(f"Task {inference_task.name} submitted with job_id {input_job_id}")
+    async def run_streaming():
+        input_task_done = asyncio.Event()
+        async with asyncio.TaskGroup() as task_group:
+            task_group.create_task(
+                async_process_streaming_input(input_task_done, agent)
+            )
+            task_group.create_task(
+                async_process_streaming_output(
+                    input_task_done, output_topic_name, result_handler, batch_size
+                )
+            )
 
-    result_handler_task = process_streaming_output
-    logger.info(f"Submitting task {result_handler_task.name}")
-    output_result = result_handler_task.delay(
-        input_job_id=input_job_id,
-        output_topic_name=output_topic_name,
-        result_handler=result_handler,
-        batch_size=batch_size,
-    )
-    output_job_id = output_result.id
-    logger.info(
-        f"Task {result_handler_task.name} submitted with job_id {output_job_id}"
-    )
-
-    # Store input and output job IDs in parent task metadata
-    # Need to pass state as well otherwise its overwritten to None
-    self.update_state(
-        state=states.STARTED,
-        meta={"input_job_id": input_job_id, "output_job_id": output_job_id},
-    )
-
-    input_job = process_file_streaming.AsyncResult(input_job_id)
-    output_job = process_streaming_output.AsyncResult(output_job_id)
-
-    terminal_statuses = ["SUCCESS", "FAILURE", "REVOKED"]
-
-    while (
-        input_job.status not in terminal_statuses
-        or output_job.status not in terminal_statuses
-    ):
-        time.sleep(1)
+    asyncio.run(run_streaming())
 
     # clean up kafka topics
     delete_topic(input_topic_name)
@@ -163,41 +96,23 @@ def streaming_parent_task(
 
     logger.info("Both input and output jobs complete")
 
-    # Update parent task status to SUCCESS and pass metadata again
-    # otherwise its overwritten to None
-    self.update_state(
-        state=states.SUCCESS,
-        meta={"input_job_id": input_job_id, "output_job_id": output_job_id},
-    )
 
-    # This makes it so Celery doesnt update the tasks state again, which would wipe out the custom metadata we added
-    # It will retain that state we set above
-    raise Ignore()
-
-
-@app.task(
-    name="process_file_streaming",
-    track_started=True,
-    serializer="pickle",
-    task_time_limit=settings.task_time_limit_sec,
-)
-def process_file_streaming(agent: Agent):
-    # agent's kafka_bootstrap servers and kafka topics should be set in parent task
-
-    # need to keep these in the same event loop
-    async def run_fn():
+async def async_process_streaming_input(input_task_done: asyncio.Event, agent: Agent):
+    try:
         # start up kaka producer and consumer
         await agent.environment.initialize()
         # Run the agent
         await agent.arun()
+        input_task_done.set()
         # shut down kaka producer and consumer
         await agent.environment.finalize()
-
-    asyncio.run(run_fn())
+    # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_output
+    finally:
+        await agent.environment.finalize()
 
 
 async def async_process_streaming_output(
-    input_job_id: str,
+    input_done: asyncio.Event,
     output_topic_name,
     result_handler: ResultHandler,
     batch_size: int,
@@ -227,61 +142,22 @@ async def async_process_streaming_output(
             retries -= 1
             time.sleep(1)
 
-    input_job_running = True
-
-    data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
-
-    while input_job_running:
-        for tp, messages in data.items():
-            if messages:
-                logger.debug(f"Handling {messages=} in topic {tp.topic}")
-                data = [msg.value for msg in messages]
-                result_handler(data)
-                logger.debug(f"Handled {len(messages)} messages in topic {tp.topic}")
-            else:
-                logger.debug(f"No messages in topic {tp.topic}")
-
-        if not data:
-            logger.info(f"No messages in any topic")
-
-        job = process_file_streaming.AsyncResult(input_job_id)
-        # we are getting packets from the output topic here to check if its empty and continue processing if its not
-        data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
-        # TODO no way to recover here if connection to main app is lost, job will be stuck at "PENDING" so this will loop forever
-        if job.status in ["SUCCESS", "FAILURE", "REVOKED"] and len(data.items()) == 0:
-            input_job_running = False
-            logger.info(f"Input job done, stopping output job")
-        else:
-            logger.info(f"Input job still running, keeping output job running")
-
-    await consumer.stop()
-
-
-@app.task(
-    name="process_streaming_output",
-    track_started=True,
-    bind=True,
-    serializer="pickle",
-    task_time_limit=settings.task_time_limit_sec,
-)
-def process_streaming_output(
-    self,
-    input_job_id: str,
-    output_topic_name: str,
-    result_handler: ResultHandler,
-    batch_size: int,
-):
     try:
-        asyncio.run(
-            async_process_streaming_output(
-                input_job_id, output_topic_name, result_handler, batch_size
-            )
-        )
-    except Exception as e:
-        # Set own status to failure
-        self.update_state(state=states.FAILURE)
+        while not input_done.is_set():
+            data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
+            for topic_partition, messages in data.items():
+                topic = topic_partition.topic
+                if messages:
+                    logger.debug(f"Handling {messages=} in {topic=}")
+                    data = [msg.value for msg in messages]
+                    result_handler(data)
+                    logger.debug(f"Handled {len(messages)} messages in {topic=}")
+                else:
+                    logger.debug(f"No messages in topic {topic=}")
 
-        logger.error(msg=e)
+            if not data:
+                logger.info("No messages in any topic")
 
-        # Ignore the task so no other state is recorded
-        raise Ignore()
+    # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_input
+    finally:
+        await consumer.stop()
