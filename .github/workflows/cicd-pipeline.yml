@@ -60,6 +60,9 @@ jobs:
     needs:
       - details
       - build
+    permissions:
+      contents: read
+      deployments: write
     with:
       docker_image_version: ${{ needs.build.outputs.image_version }}
       branch_name: ${{ github.event.pull_request.head.ref || github.ref_name }}

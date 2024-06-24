@@ -30,6 +30,7 @@ env:
 
 jobs:
   destroy:
+    if: github.event.pull_request.head.repo.fork == false
     permissions:
       contents: read
       deployments: write
