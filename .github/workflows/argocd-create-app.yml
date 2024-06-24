@@ -109,14 +109,15 @@ jobs:
           export HOSTNAME="${RELEASE_NAME}-${APP_BASE_NAME}.${NAMESPACE}.${DOMAIN}"
           echo "HOSTNAME=${HOSTNAME}" >> $GITHUB_OUTPUT
           
-          if [ -d "${TEMPLATE_DIR}-${BRANCH_NAME}" ]; then
-            export TEMPLATE_DIR="${TEMPLATE_DIR}-${BRANCH_NAME}"
-          fi
-          
-          mkdir -p "${APP_DIR}" | true
+          mkdir -p "${APP_DIR}" || true
           for template_file_name in $(ls "${TEMPLATE_DIR}"); do
             file_name="${template_file_name%.template}"
-            envsubst < "${TEMPLATE_DIR}/${template_file_name}" > "${APP_DIR}/${file_name}"
+            file_dest_path="${APP_DIR}/${file_name}"
+            if [[ "${template_file_name}" == *".override."* ]] && [[ -f "${file_dest_path}" ]]; then
+              echo "::notice::Skipping ${file_dest_path} templating"
+            else
+              envsubst < "${TEMPLATE_DIR}/${template_file_name}" > "${file_dest_path}"
+            fi
           done
           
           git add "${APP_DIR}"
