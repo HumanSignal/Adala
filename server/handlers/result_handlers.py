@@ -3,6 +3,8 @@ import logging
 import json
 from abc import abstractmethod
 from pydantic import BaseModel, Field, computed_field, ConfigDict, model_validator
+from pathlib import Path
+import csv
 
 from adala.utils.registry import BaseModelInRegistry
 
@@ -56,7 +58,7 @@ class DummyHandler(ResultHandler):
     """
 
     def __call__(self, batch):
-        logger.info(f"\n\nHandler received batch: {batch}\n\n")
+        logger.debug(f"\n\nHandler received batch: {batch}\n\n")
 
 
 class LSEBatchItem(BaseModel):
@@ -131,7 +133,7 @@ class LSEHandler(ResultHandler):
         return self
 
     def __call__(self, result_batch: list[LSEBatchItem]):
-        logger.info(f"\n\nHandler received batch: {result_batch}\n\n")
+        logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
 
         # coerce dicts to LSEBatchItems for validation
         result_batch = [LSEBatchItem(**record) for record in result_batch]
@@ -153,3 +155,34 @@ class LSEHandler(ResultHandler):
                 }
             ),
         )
+
+
+class CSVHandler(ResultHandler):
+    """
+    Handler to write a batch of results to a CSV file
+    """
+
+    output_path: str
+    columns: Optional[list[str]] = None
+
+    @model_validator(mode="after")
+    def write_header(self):
+        if self.columns is None:
+            self.columns = list(LSEBatchItem.model_fields.keys())
+
+        with open(self.output_path, "w") as f:
+            writer = csv.DictWriter(f, fieldnames=self.columns)
+            writer.writeheader()
+
+        return self
+
+    def __call__(self, result_batch: list[LSEBatchItem]):
+        logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
+
+        # coerce dicts to LSEBatchItems for validation
+        result_batch = [LSEBatchItem(**record) for record in result_batch]
+
+        # open and write to file
+        with open(self.output_path, "a") as f:
+            writer = csv.DictWriter(f, fieldnames=self.columns)
+            writer.writerows([record.dict() for record in result_batch])

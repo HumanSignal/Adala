@@ -4,6 +4,7 @@ from unittest import mock
 from fakeredis import FakeStrictRedis
 import openai_responses
 from openai_responses import OpenAIMock
+from fastapi.testclient import TestClient
 
 
 def pytest_addoption(parser):
@@ -32,6 +33,13 @@ def pytest_collection_modifyitems(config, items):
             if "use_server" in item.keywords:
                 item.add_marker(skip_server)
 
+
+@pytest.fixture
+def client():
+    from server.app import app
+
+    with TestClient(app) as client:
+        yield client
 
 @pytest.fixture
 def redis_mock(monkeypatch):
