@@ -1,17 +1,11 @@
 import time
-import json
 import requests
 import httpx
 import os
 import asyncio
 import pytest
-from unittest import mock
-from fastapi.testclient import TestClient
-from server.app import app, _get_redis_conn
 import openai_responses
-from openai_responses import OpenAIMock
 from tempfile import NamedTemporaryFile
-import csv
 import pandas as pd
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -61,58 +55,79 @@ payload = {
     "result_handler": {"type": "DummyHandler"},
 }
 
-if 0:
-    payload["result_handler"] = {
-        "type": "LSEHandler",
-        "api_key": LS_API_KEY,
-        "url": "http://localhost:8000",
-        "modelrun_id": 184,
-    }
 
-
-def run_job():
-    resp = requests.post("http://localhost:30001/jobs/submit-streaming", json=payload)
-    job_id = resp.json()["data"]["job_id"]
-
-    batch_payload = {
-        "job_id": job_id,
-        "data": [{"text": "anytexthere"}, {"text": "othertexthere"}],
-    }
-    resp = requests.post("http://localhost:30001/jobs/submit-batch", json=batch_payload)
-    time.sleep(1)
-    resp = requests.post("http://localhost:30001/jobs/submit-batch", json=batch_payload)
-
-
-async def arun_job(client: httpx.AsyncClient):
-    resp = await client.post(
-        "http://localhost:30001/jobs/submit-streaming", json=payload
+async def arun_job(
+    client: httpx.AsyncClient,
+    streaming_payload: dict,
+    batch_payload_datas: list[list[dict]],
+):
+    streaming_response = await client.post(
+        "/jobs/submit-streaming", json=streaming_payload
     )
-    job_id = resp.json()["data"]["job_id"]
+    streaming_response.raise_for_status()
 
-    batch_payload = {
-        "job_id": job_id,
-        "data": [{"text": "anytexthere"}, {"text": "othertexthere"}],
-    }
-    time.sleep(10)
-    resp2 = await client.post(
-        "http://localhost:30001/jobs/submit-batch", json=batch_payload
-    )
-    resp3 = await client.post(
-        "http://localhost:30001/jobs/submit-batch", json=batch_payload
-    )
-    return resp, resp2, resp3
+    job_id = streaming_response.json()["data"]["job_id"]
+
+    batch_responses = []
+    for batch_payload_data in batch_payload_datas:
+        await asyncio.sleep(1)
+        batch_payload = {
+            "job_id": job_id,
+            "data": batch_payload_data,
+        }
+        resp = await client.post("/jobs/submit-batch", json=batch_payload)
+        resp.raise_for_status()
+        batch_responses.append(resp)
+
+    return streaming_response, batch_responses
+
+
+async def await_for_terminal_status(client, job_id, timeout_sec, poll_interval_sec):
+    terminal_statuses = ["Completed", "Failed", "Canceled"]
+    for _ in range(int(timeout_sec / poll_interval_sec)):
+        resp = await client.get(f"/jobs/{job_id}")
+        status = resp.json()["data"]["status"]
+        if status in terminal_statuses:
+            break
+        print(f"polling {job_id=} ", status, flush=True)
+        await asyncio.sleep(poll_interval_sec)
+    return status
+
+
+async def arun_job_and_get_output(
+    client: httpx.AsyncClient,
+    streaming_payload_agent: dict,
+    batch_payload_datas: list[list[dict]],
+    timeout_sec=10,
+    poll_interval_sec=1,
+) -> pd.DataFrame:
+
+    with NamedTemporaryFile(mode="r") as f:
+
+        streaming_payload = {
+            "agent": streaming_payload_agent,
+            "result_handler": {"type": "CSVHandler", "output_path": f.name},
+        }
+
+        resp, _ = await arun_job(client, streaming_payload, batch_payload_datas)
+        job_id = resp.json()["data"]["job_id"]
+
+        status = await await_for_terminal_status(
+            client, job_id, timeout_sec, poll_interval_sec
+        )
+        assert status == "Completed", status
+
+        output = pd.read_csv(f.name).set_index("task_id")
+
+    return output
 
 
 async def arun_n_jobs(n: int):
-    async with httpx.AsyncClient(timeout=10) as client:
+    async with httpx.AsyncClient(
+        timeout=10, base_url="http://localhost:30001"
+    ) as client:
         response_groups = await asyncio.gather(*[arun_job(client) for _ in range(n)])
-    for resps in response_groups:
-        for resp in resps:
-            resp.raise_for_status()
     return response_groups
-
-
-# r = asyncio.run(arun_n_jobs(3))
 
 
 def test_health_endpoint(client):
@@ -123,12 +138,179 @@ def test_health_endpoint(client):
 
 
 def test_ready_endpoint(client, redis_mock):
-    # this might not work now bc client is already instantiated
-    app.dependency_overrides[_get_redis_conn] = lambda: redis_mock
     resp = client.get("/ready")
 
     result = resp.json()["status"]
     assert result == "ok", f"Expected status = ok, but instead returned {result}."
+
+
+@pytest.mark.use_openai
+@pytest.mark.use_server
+def test_streaming(client):
+
+    data = pd.DataFrame.from_records(
+        [
+            {"task_id": 1, "text": "anytexthere", "output": "Feature Lack"},
+            {"task_id": 2, "text": "othertexthere", "output": "Feature Lack"},
+            {"task_id": 3, "text": "anytexthere", "output": "Feature Lack"},
+            {"task_id": 4, "text": "othertexthere", "output": "Feature Lack"},
+        ]
+    )
+    batch_data = data.drop("output", axis=1).to_dict(orient="records")
+    expected_output = data.set_index("task_id")["output"]
+
+    with NamedTemporaryFile(mode="r") as f:
+
+        payload["result_handler"] = {
+            "type": "CSVHandler",
+            "output_path": f.name,
+        }
+
+        resp = client.post("/jobs/submit-streaming", json=payload)
+        resp.raise_for_status()
+        job_id = resp.json()["data"]["job_id"]
+
+        batch_payload = {
+            "job_id": job_id,
+            "data": batch_data[:2],
+        }
+        resp = client.post("/jobs/submit-batch", json=batch_payload)
+        resp.raise_for_status()
+        time.sleep(1)
+        batch_payload = {
+            "job_id": job_id,
+            "data": batch_data[2:],
+        }
+        resp = client.post("/jobs/submit-batch", json=batch_payload)
+        resp.raise_for_status()
+
+        timeout_sec = 10
+        poll_interval_sec = 1
+        terminal_statuses = ["Completed", "Failed", "Canceled"]
+        for _ in range(int(timeout_sec / poll_interval_sec)):
+            resp = client.get(f"/jobs/{job_id}")
+            status = resp.json()["data"]["status"]
+            if status in terminal_statuses:
+                break
+            print("polling ", status)
+            time.sleep(poll_interval_sec)
+        assert status == "Completed", status
+
+        output = pd.read_csv(f.name).set_index("task_id")
+        assert not output["error"].any(), "adala returned errors"
+        assert (
+            output["output"] == expected_output
+        ).all(), "adala did not return expected output"
+
+
+@pytest.mark.use_openai
+@pytest.mark.use_server
+@pytest.mark.asyncio
+async def test_streaming_n_concurrent_requests(async_client):
+    client = async_client
+
+    # TODO test with n_requests > number of celery workers
+    n_requests = 3
+
+    data = pd.DataFrame.from_records(
+        [
+            {"task_id": 1, "text": "anytexthere", "output": "Feature Lack"},
+            {"task_id": 2, "text": "othertexthere", "output": "Feature Lack"},
+            {"task_id": 3, "text": "anytexthere", "output": "Feature Lack"},
+            {"task_id": 4, "text": "othertexthere", "output": "Feature Lack"},
+        ]
+    )
+    batch_payload_data = data.drop("output", axis=1).to_dict(orient="records")
+    batch_payload_datas = [batch_payload_data[:2], batch_payload_data[2:]]
+    expected_output = data.set_index("task_id")["output"]
+
+    outputs = await asyncio.gather(
+        *[
+            arun_job_and_get_output(client, payload["agent"], batch_payload_datas)
+            for _ in range(n_requests)
+        ]
+    )
+
+    for output in outputs:
+        assert not output["error"].any(), "adala returned errors"
+        assert (
+            output["output"] == expected_output
+        ).all(), "adala did not return expected output"
+
+
+@pytest.mark.use_openai
+@pytest.mark.use_server
+@pytest.mark.asyncio
+async def test_streaming_submit_edge_cases(client, async_client):
+
+    job_id = "nonexistent"
+
+    # get status
+    # TODO should fail, but that's a long way away
+    resp = client.get(f"/jobs/{job_id}")
+    resp.raise_for_status()
+    assert resp.json()["data"]["status"] == "Pending"
+
+    # send a full batch
+    # TODO should return 400?
+    batch_payload = {
+        "job_id": job_id,
+        "data": [
+            {"task_id": 1, "text": "anytexthere"},
+        ],
+    }
+    resp = client.post("/jobs/submit-batch", json=batch_payload)
+    assert resp.status_code == 500
+    assert resp.json() == {
+        "detail": f"topic='adala-input-{job_id}' for job {job_id} not found"
+    }
+
+    # start a job
+    resp = client.post("/jobs/submit-streaming", json=payload)
+    resp.raise_for_status()
+    job_id = resp.json()["data"]["job_id"]
+
+    # send a full batch
+    batch_payload = {
+        "job_id": job_id,
+        "data": [
+            {"task_id": 1, "text": "anytexthere"},
+        ],
+    }
+    resp = client.post("/jobs/submit-batch", json=batch_payload)
+    resp.raise_for_status()
+
+    # send a batch with no task id
+    # TODO will fail in result handler, but should that make this request fail?
+    batch_payload = {
+        "job_id": job_id,
+        "data": [
+            {"text": "anytexthere"},
+        ],
+    }
+    resp = client.post("/jobs/submit-batch", json=batch_payload)
+    resp.raise_for_status()
+
+    # send a batch with invalid task id
+    # TODO will fail in result handler, but should that make this request fail?
+    batch_payload = {
+        "job_id": job_id,
+        "data": [
+            {"task_id": "not a task id", "text": "anytexthere"},
+        ],
+    }
+    resp = client.post("/jobs/submit-batch", json=batch_payload)
+    resp.raise_for_status()
+
+    status = await await_for_terminal_status(
+        async_client, job_id, timeout_sec=10, poll_interval_sec=1
+    )
+    assert status == "Failed", status
+
+    # TODO test max batch size (1MB)
+    # TODO test max number of records in batch
+    # TODO test sending lots of batches at once
+    # TODO test startup race condition for simultaneous submit-streaming and submit-batch
 
 
 def _build_openai_response(completion: str):
@@ -147,216 +329,17 @@ def _build_openai_response(completion: str):
     }
 
 
-# to run with the real app, just don't pass the fixtures
-# def test_streaming():
-# @pytest.mark.asyncio
-# def test_streaming(redis_mock, celery_app_mock, celery_session_worker):
-# @pytest.mark.usefixtures('celery_session_app')
-# @pytest.mark.usefixtures('celery_session_worker')
-@openai_responses.mock()
-@pytest.mark.skip("wip")
-def test_streaming(
-    # redis_mock, celery_app_mock, celery_worker, openai_mock_magic, openai_key_mock
-    client,
-    celery_app_mock,
-    redis_mock,  # openai_mock_magic,
-    openai_mock,
-):
-
-    # payload["agent"]["runtimes"]["default"]["api_key"] = os.getenv("OPENAI_API_KEY")
-
-    openai_mock.router.route(host="localhost").pass_through()
-    openai_mock.router.route(host="127.0.0.1").pass_through()
-    # # breakpoint()
-    # # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
-    openai_mock.chat.completions.create.response = _build_openai_response(
-        "mocked openai chat response"
-    )
-
-    # client = TestClient(app)
-    resp = client.post("/jobs/submit-streaming", json=payload)
-    job_id = resp.json()["data"]["job_id"]
-
-    batch_payload = {
-        "job_id": job_id,
-        "data": [{"text": "anytexthere"}, {"text": "othertexthere"}],
-    }
-    resp = client.post("/jobs/submit-batch", json=batch_payload)
-    time.sleep(1)
-    resp = client.post("/jobs/submit-batch", json=batch_payload)
-
-
-@pytest.mark.use_openai
-@pytest.mark.use_server
-def test_streaming_real(client, monkeypatch):
-
-    data = pd.DataFrame.from_records([
-        {"task_id": 1, "text": "anytexthere", "output": "Feature Lack"},
-        {"task_id": 2, "text": "othertexthere", "output": "Feature Lack"},
-        {"task_id": 3, "text": "anytexthere", "output": "Feature Lack"},
-        {"task_id": 4, "text": "othertexthere", "output": "Feature Lack"},
-    ])
-
-    monkeypatch.setattr(
-        "adala.runtimes._openai.async_create_completion",
-        lambda *args, **kwargs: _dummy_response(),
-    )
-
-    with NamedTemporaryFile(mode="r", delete=False) as f:
-
-        payload["result_handler"] = {
-            "type": "CSVHandler",
-            "output_path": f.name,
-        }
-
-        resp = client.post("/jobs/submit-streaming", json=payload)
-        resp.raise_for_status()
-        job_id = resp.json()["data"]["job_id"]
-
-        batch_payload = {
-            "job_id": job_id,
-            "data": data[:2].to_dict(orient="records"),
-        }
-        resp = client.post("/jobs/submit-batch", json=batch_payload)
-        resp.raise_for_status()
-        time.sleep(1)
-        batch_payload = {
-            "job_id": job_id,
-            "data": data[2:].to_dict(orient="records"),
-        }
-        resp = client.post("/jobs/submit-batch", json=batch_payload)
-        resp.raise_for_status()
-
-        timeout_sec = 10
-        poll_interval_sec = 1
-        terminal_statuses = ["Completed", "Failed", "Canceled"]
-        for _ in range(int(timeout_sec / poll_interval_sec)):
-            resp = client.get(f"/jobs/{job_id}")
-            status = resp.json()["data"]["status"]
-            if status in terminal_statuses:
-                break
-            print('polling ', status)
-            time.sleep(poll_interval_sec)
-        assert status == 'Completed', status
-
-        # breakpoint()
-        output = pd.read_csv(f.name).set_index('task_id')
-        assert not output['error'].any()
-        expected_output = data.set_index('task_id')['output']
-        assert (output['output'] == expected_output).all()
-        os.remove(f.name)
-
-
-def _dummy_response():
-    print("\n\n\nMOCKING\n\n\n", flush=True)
-    breakpoint()
-    return {
-        "text": "mocked openai chat response",
-        "_adala_error": False,
-        "_adala_message": None,
-        "_adala_details": None,
-    }
-
-
-# @mock.patch("adala.runtimes._openai.async_create_completion")
-# @pytest.mark.skip("wip")
-@pytest.mark.asyncio
-@openai_responses.mock()
-async def test_streaming_celery_only(
-    monkeypatch, openai_mock, #celery_app, celery_worker
-):
-    monkeypatch.setattr(
-        "adala.runtimes._openai.async_create_completion",
-        lambda *args, **kwargs: _dummy_response(),
-    )
-
-    # from server.tasks.process_file import app as celery_app
-    from server.tasks.process_file import streaming_parent_task
-
-    # openai_mock.router.route(host="localhost").pass_through()
-    # openai_mock.router.route(host="127.0.0.1").pass_through()
-    # # breakpoint()
-    # # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
-    openai_mock.chat.completions.create.response = _build_openai_response(
-        "mocked openai chat response"
-    )
-
-    from adala.agents import Agent
-    from server.handlers.result_handlers import ResultHandler
-
-    with NamedTemporaryFile() as f:
-
-        payload["handler"] = {
-            "type": "CSVHandler",
-            "output_path": f.name,
-        }
-
-        agent = Agent(**payload["agent"])
-        handler = ResultHandler.create_from_registry(
-            payload["result_handler"].pop("type"), **payload["result_handler"]
-        )
-
-        # with mock.patch('server.tasks.process_file.process_file_streaming'):
-        result = streaming_parent_task.apply_async(
-        kwargs={
-        # result = streaming_parent_task.s(
-            # **{
-                "agent": agent,
-                "result_handler": handler,
-            }
-        )
-        job_id = result.id
-
-        data = pd.DataFrame.from_records([
-            {"task_id": 1, "text": "anytexthere", "output": "Feature Lack"},
-            {"task_id": 2, "text": "othertexthere", "output": "Feature Lack"},
-        ])
-
-        batch_payload = {
-            "job_id": job_id,
-            "data": data[['task_id', 'text']].to_dict(orient="records"),
-        }
-
-        from server.utils import get_input_topic_name
-        from aiokafka import AIOKafkaProducer
-
-        topic = get_input_topic_name(job_id)
-        producer = AIOKafkaProducer(
-            bootstrap_servers="localhost:9093",
-            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-        )
-        await producer.start()
-
-        try:
-            for record in batch_payload["data"]:
-                await producer.send_and_wait(topic, value=record)
-        finally:
-            await producer.stop()
-
-        # wait until file has content and is closed
-        # timeout_sec = 10
-        # step_sec = 0.1
-        # for _ in range(int(timeout_sec / step_sec)):
-            # if os.path.getsize(f.name) > 0 and f.closed:
-               # break
-            # time.sleep(0.1)
-
-        # output = pd.read_csv(f.name).set_index('task_id')
-        # expected_output = data.set_index('task_id')['output']
-        # assert (output == expected_output).all()
-
-
-
-@pytest.mark.use_server
 @pytest.mark.asyncio
 @openai_responses.mock()
 async def test_streaming_openai_only(openai_mock):
+    """
+    Example of using openai_responses for mocking. Not possible to combine with Celery at this time.
+    """
 
     OPENAI_API_KEY = "mocked"
 
     openai_mock.router.route(host="localhost").pass_through()
     openai_mock.router.route(host="127.0.0.1").pass_through()
-    # # breakpoint()
     # # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
     openai_mock.chat.completions.create.response = _build_openai_response(
         "mocked openai chat response"
