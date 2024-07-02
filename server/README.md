@@ -6,6 +6,8 @@ Once running, see `http://localhost:30001/docs` for API documentation.
 
 Run `poetry install` first if you have not already done so.
 
+The default settings in `server.utils.Settings` should be ok for native use. Override any you want in a `server/.env` file or by setting them as environment variables in the shells where the app and workers are running.
+
 ## start kafka and redis
 
 ```bash
@@ -16,32 +18,20 @@ docker-compose -f docker-compose.native.yml up
 ## start app
 
 ```bash
-# set env vars
-cp .env.example .env
-# set AWS creds (only if S3 access needed)
-eval "$(aws configure export-credentials --profile <YOUR_PROFILE> --format env)"
-# start app
 poetry run uvicorn app:app --host 0.0.0.0 --port 30001
 ```
 
 ## start celery workers
 
 ```bash
-# set AWS creds (only if S3 access needed)
-eval "$(aws configure export-credentials --profile <YOUR_PROFILE> --format env)"
-# start celery workers
 cd tasks/
 poetry run celery -A process_file worker --loglevel=info
 ```
 
 # run in Docker
 
-```bash
-# set AWS creds (only if S3 access needed)
-eval "$(aws configure export-credentials --profile <YOUR_PROFILE> --format env)"
-```
 
-Edit the env variables in `docker-compose.yml` if needed - the defaults should be ok. There should be differences from the `.env` file for native use.
+Edit the env variables in `docker-compose.yml` if needed - the defaults should be ok. There should be differences from the defaults in `server.utils.Settings` for native use.
 
 ```bash
 # from repo root
@@ -54,6 +44,12 @@ docker-compose up
 cd ui/
 yarn start
 ```
+
+## hosted instances
+
+settings are configured here: https://github.com/HumanSignal/infra/blob/master/base/charts/humansignal/adala/values.yaml
+
+The only significant difference from local as of now is that kafka topic autocreation is enabled as a backup.
 
 # development
 
