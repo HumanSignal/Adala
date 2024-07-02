@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     https://docs.pydantic.dev/latest/concepts/pydantic_settings/#field-value-priority
     """
 
-    kafka_bootstrap_servers: Union[str, List[str]]
+    kafka_bootstrap_servers: Union[str, List[str]] = "localhost:9092"
     kafka_retention_ms: int = 180000  # 30 minutes
     kafka_input_consumer_timeout_ms: int = 1500  # 1.5 seconds
     kafka_output_consumer_timeout_ms: int = 1500  # 1.5 seconds
