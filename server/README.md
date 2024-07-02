@@ -53,6 +53,14 @@ The only significant difference from local as of now is that kafka topic autocre
 
 # development
 
+
+## testing
+
+Server pytests in `test/test_server.py` rely on a running server (kafka, redis, and celery, but not app) behind the `--use-server` flag, and a real openai key available in the `OPENAI_API_KEY` env var behind the `--use-openai` flag. These tests are not run by default. To run them, use:
+```bash
+poetry run pytest --use-server --use-openai
+```
+
 ## rebuild on code change
 
 ```bash
