@@ -32,7 +32,7 @@ services:
         condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9093 # TODO pull from .env
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9093
       - KAFKA_RETENTION_MS=180000  # TODO pull from .env
     command:
       ["poetry", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
