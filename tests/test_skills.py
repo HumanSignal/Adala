@@ -113,10 +113,11 @@ def test_analysis_skill():
 
     env = SimpleCodeValidationEnvironment(df=df, code_fields={"code": "payload"})
 
-    agent = Agent(skills=skillset, environment=env,
-
+    agent = Agent(
+        skills=skillset,
+        environment=env,
         teacher_runtimes={"default": OpenAIChatRuntime(model="gpt-4")},
-                 )
+    )
     # AnalysisSkill.improve not implemented
     # agent.learn(learning_iterations=1, num_feedbacks=1, batch_size=3)
     predictions = agent.run()

@@ -11,7 +11,9 @@ def test_rag_with_openai_chat_completion():
     from adala.runtimes import OpenAIChatRuntime  # type: ignore
     from adala.memories import VectorDBMemory  # type: ignore
 
-    memory = VectorDBMemory(db_name="emotions", openai_api_key=os.environ.get("OPENAI_API_KEY"))
+    memory = VectorDBMemory(
+        db_name="emotions", openai_api_key=os.environ.get("OPENAI_API_KEY")
+    )
 
     agent = Agent(
         skills=LinearSkillSet(

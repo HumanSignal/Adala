@@ -37,6 +37,7 @@ def test_agent_quickstart_single_skill():
     # seems the teacher prompt is in this field instead of the student prompt
     # assert agent.skills["0_to_1"].instructions == 'Refine the prompt to address the issues raised in the user feedback:\nApply the calculation rule to each number in the set as follows: add 1 to the first and third numbers while keeping the second number unchanged. If no specific rule is provided, use the default rule mentioned.'
 
+
 @pytest.mark.vcr
 def test_agent_quickstart_two_skills():
     from adala.agents import Agent
@@ -74,5 +75,11 @@ def test_agent_quickstart_two_skills():
     agent.learn()
 
     # assert final instruction
-    assert agent.skills["0->1"].instructions == "For each sequence of numbers provided in the text, transform the input by changing each '0' to a '1'. Leave all other numbers unchanged. Generate the transformed sequence as the output."
-    assert agent.skills["1->2"].instructions == 'For each given sequence of numbers, increment each number by 1 and provide the resulting sequence. Ensure to process each input according to this rule precisely, incrementing each numeric value by exactly one, and output the upgraded sequence accordingly. Double-check the results to ensure accuracy and adherence to the instruction, considering each number in the input as independent and incrementing it by 1.'
+    assert (
+        agent.skills["0->1"].instructions
+        == "For each sequence of numbers provided in the text, transform the input by changing each '0' to a '1'. Leave all other numbers unchanged. Generate the transformed sequence as the output."
+    )
+    assert (
+        agent.skills["1->2"].instructions
+        == "For each given sequence of numbers, increment each number by 1 and provide the resulting sequence. Ensure to process each input according to this rule precisely, incrementing each numeric value by exactly one, and output the upgraded sequence accordingly. Double-check the results to ensure accuracy and adherence to the instruction, considering each number in the input as independent and incrementing it by 1."
+    )

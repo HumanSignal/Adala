@@ -32,7 +32,7 @@ def test_code_generation():
         pd.DataFrame(
             [
                 {
-                    "code":'```python\nimport json\n\n# Input JSON\ninput_json = [\n    {"a": 1, "b": 2},\n    {"a": 3, "b": 4},\n    {"a": 5, "b": 6}\n]\n\n# Output JSON\noutput_json = json.dumps(input_json)\n\nprint(output_json)\n```' 
+                    "code": '```python\nimport json\n\n# Input JSON\ninput_json = [\n    {"a": 1, "b": 2},\n    {"a": 3, "b": 4},\n    {"a": 5, "b": 6}\n]\n\n# Output JSON\noutput_json = json.dumps(input_json)\n\nprint(output_json)\n```'
                 }
             ]
         ),

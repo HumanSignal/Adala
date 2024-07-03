@@ -226,7 +226,9 @@ async def test_streaming_n_concurrent_requests(async_client):
 
     outputs = await asyncio.gather(
         *[
-            arun_job_and_get_output(client, SUBMIT_PAYLOAD["agent"], batch_payload_datas)
+            arun_job_and_get_output(
+                client, SUBMIT_PAYLOAD["agent"], batch_payload_datas
+            )
             for _ in range(n_requests)
         ]
     )
