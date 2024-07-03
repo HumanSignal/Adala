@@ -39,8 +39,6 @@ label-studio-sdk = "^0.0.32"
 kafka-python = "^2.0.2"
 # https://github.com/geerlingguy/ansible-role-docker/issues/462#issuecomment-2144121102
 requests = "2.31.0"
-openai-responses = "^0.8.1"
-pytest-recording = "^0.13.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.3"
@@ -60,7 +58,8 @@ fakeredis = "^2.23.2"
 flower = "^2.0.1"
 pytest-asyncio = "^0.23.7"
 celery = {extras = ["pytest"], version = "^5.4.0"}
-openai-responses = "^0.8.0"
+openai-responses = "^0.8.1"
+pytest-recording = "^0.13.1"
 mockafka-py = "^0.1.57"
 
 [tool.poetry.group.label-studio]
