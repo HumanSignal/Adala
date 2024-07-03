@@ -1,0 +1,2208 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: GET
+    uri: https://api.openai.com/v1/models/gpt-4-turbo-preview
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6rmUlBQykxRslJQSi8o0TXRLSktSsrXLShKLctMLVfSAUnnJ2WlJpeAlOTmp6Tm
+        QASTi1ITS1JBGg3NDcwMjM3Nzc0hqsvzUlPikypB6osri0tSc5W4arkAAAAA//8DADEPRvhoAAAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d80434da0a1f46-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:47:51 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=UD2F_W54Og8bblC6RIo4PYrE_mPnhVFORc7ns3Oibf0-1720021671-1.0.1.1-FlKdc4cOgkLM76jcdhEb4IiZ2T.91.7R6GGIBsvfzHBKuggWwt5tmGZv8mbzbmKbOdvBtcQzezrALYKeA57Vdg;
+        path=/; expires=Wed, 03-Jul-24 16:17:51 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=KRZjXXIUMW9DdxqWILWrVwC_8IeNAfHa6nXYQHpKrDQ-1720021671281-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      access-control-allow-origin:
+      - '*'
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '25'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15724800; includeSubDomains
+      x-request-id:
+      - req_5e2caaea9ede7f18eea65e075900b292
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: GET
+    uri: https://api.openai.com/v1/models/gpt-3.5-turbo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6rmUlBQykxRslJQSi8o0TXWM9UtKS1KylfSAUnkJ2WlJpeAJHPzU1JzIILJRamJ
+        JakgLYZm5uZmhgZmBkYQ1eV5qSnxSZUg9fkFqXmJmUpctVwAAAAA//8DAA4WdMNiAAAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d80435ff981f32-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:47:51 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=oCT3u7N19pAXJq5lZ3UwlzdSZVcquQFylJLOsRj89IE-1720021671-1.0.1.1-kZRjZ48RK74PyuT_UqdCn0s_pt3GgYZULNnlcm9BadkLG8w_xtmSpvyRN0X0j_eozNJj4jPCKIUbztkZqH5_pg;
+        path=/; expires=Wed, 03-Jul-24 16:17:51 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=HtjZOwcl7b8..WMJDlXfJmsFTYw_T1I8EbJUS_9ylSc-1720021671434-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      access-control-allow-origin:
+      - '*'
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '23'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15724800; includeSubDomains
+      x-request-id:
+      - req_e5b63cde60616f1ed201793f58f97497
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Text: 0 5 0\nOutput: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '132'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQzW7CMBCE73mK1Z4JSgIhao6Vqh4q9dIfDqVCIVkSt4nXsjeFFvHulUOA9mJZ
+        M57Zb30IAFBVmAOWTSFlZ9rwpt697NNqudhlN7PX5c/d/cNj1pun24hNhxOf4M0HlXJOTUvuTEui
+        WJ/s0lIh5FvjLImiJF5k8WB0XFHrY7WRcDZNQ+nthsMoTtIx2bAqyWEObwEAwGE4PaOuaI85RJOz
+        0pFzRU2YXx4BoOXWK1g4p5wUWnByNUvWQnrAfm4IuBfTC2zZgjQExvKXqqgCob3ACiNIIVohKJfD
+        cMex6XhBaLk2ljceV/dte9G3SivXrC0VjrUf54TNKX4MAN6HVft/9Ggsd0bWwp+kfWEyP9Xh9XP/
+        mPFoCkvRXvV5Gox86L6dULfeKl2TNVYNe3vK4Bj8AgAA//8DAI8naTz2AQAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d80437afb95344-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:47:52 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=2r5kEd3YpK4f7NFI1fh_mszpR1317mrkGsdolMgF82M-1720021672-1.0.1.1-45cWevMvchMMwfLdN8Dj63Qbeum2KowikCERd_QTK2I_UaLcxaBpJwMu._atuvwAzhvAY2mxJJaXHFcnvVBSsQ;
+        path=/; expires=Wed, 03-Jul-24 16:17:52 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=FM0q5Zw1vQdzc7Ai6y5VDsRWDxPw7slqZxIj1DRfTYM-1720021672169-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '449'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999975'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_0a770162bf53d821c70324b9e914efd3
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Text: 0 0 0\nOutput: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '132'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA2xRQW7bMBC86xUDnm1DUm0H8bVogJ6aQ3tqCoOWVhJjikuQqypq4L8XlBUbBXrh
+        YWZnOTP7ngHK1OoAVXVaqt7b9WM7/pi2Z36i0XTFn+LzNDxPu69m/634QmqVFHx6pUo+VJuKe29J
+        DLsrXQXSQmlr8VDmeVnsH8qZ6Lkmm2Stl/WnzW4tQzjxOi/K3aLs2FQU1QE/MwB4n9/k0dX0pg7I
+        Vx9ITzHqltThNgSowDYhSsdoomgnanUnK3ZCbrb9vSPwIH4QNBwgHUHoTfCicuTIXxRMhGNB9FSZ
+        xlC9wbMlHQk+8G9TE3oOBOMaDr1O0cEOY6cFEw8YebA1rDkTeoIwasZopPvvTw4cagpprCVHQQtB
+        u8XfRi0BLrfkllsf+JRacoO1N7wxzsTuGEhHdillFPZX+SUDfs0ND/+Upnzg3stR+EwuLSy313Xq
+        ftM7ud0tpLBoe8f3j9niT8UpCvXHxriWgg9mrju5zC7ZXwAAAP//AwBP98HBbQIAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d8043b7e897b00-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:47:53 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=jFlES6x3w0u90xViCyA7eug13VtECZZtnBX.8mcuolc-1720021673-1.0.1.1-DQTTuAacJkOQuFrxU9VBcbmfIWsnEFtZiUbkMbMC.bBlkfrg_ilnAnP_p7yTh1QQmCVad.sVDR5X6rg4rrz2_g;
+        path=/; expires=Wed, 03-Jul-24 16:17:53 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=fcN40GmlEer40JRcY42IiQ5Syo5C5nIWNHkuYVkPYAc-1720021673481-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '911'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999976'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_ad4dd71cb355f2f24e9d1eb1828d6b9a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Text: The output for the provided text \"0 5 0\" is: 0 5 0\nOutput: "}], "model":
+      "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '179'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQS2/CMBCE7/kVK58JSoKAkmMPvVS9gdQHFcpjSdzaXsveAC3iv1cOgagXy5rx
+        zH7rcwQgZC1yEFVbcKWtilfNcfO7ftRPeuPLxh31y3OWPeDb67s+kJiEBJVfWPEtNa1IW4UsyVzt
+        ymHBGFrTZZYkWbpYznpDU40qxBrL8Ww6j7lzJcVJms2HZEuyQi9y+IgAAM79GRhNjSeRQzK5KRq9
+        LxoU+f0RgHCkgiIK76XnwrCYjGZFhtH02OsWgTq2HcOeHHCLYB0dZI01MJ4YtiKBOSRbAdLn0N/F
+        0HS5IyhqrKMy4JpOqbu+l0b6duew8GTCOM9kr/FLBPDZr9r9oxfWkba8Y/pGEwpnq2udGD93NLN0
+        MJm4UKO+SKKBT/gfz6h3e2kadNbJfu9AGV2iPwAAAP//AwDDIaGI9gEAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d80443bbff533f-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:47:54 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=JngXyTAgCvefxWtwKjPd1rCazZf60BUTcPhpdnzZ69U-1720021674-1.0.1.1-q6DSD8vMlE4MqbvV6oxU8RcuZs1.F4xm0yuU2Q4uEoVT4Z2CtinAqWY7Z3TFMPwxUkcvlvpNT8vf_aYfuV9gIg;
+        path=/; expires=Wed, 03-Jul-24 16:17:54 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=inf0u4Ba.ANpNEOrS1oPFG9s0oyE2NQ.MIH2tRCWDOk-1720021674080-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '354'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999965'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_fe9f1f0f74b1f6b546db6084196c7925
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Text: The output for the text \"0 0 0\" is not specified. Please provide more
+      information on what you would like me to do with the text \"0 0 0\" in order
+      to generate an output.\nOutput: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '298'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1RSwW4aMRC98xUjnyFaSICGSw6V+gVVqrap0OCdXZzYHsses6Ao/17NAqG9WPK8
+        ec/veeZ9AmBcazZg7B7FhuRnj/3w3OyOr8f59/kXPiyX4cfDYlgNz78QezNVBu9eycqVdWc5JE/i
+        OJ5hmwmFVHW+XjTNYr5aP4xA4Ja80voks/u75Uxq3vGsmS+WF+aenaViNvB7AgDwPp7qMbZ0NBto
+        ptdKoFKwJ7P5bAIwmb1WDJbiimAUM72BlqNQHG1/5epbOHGF5AkLgfWYXXeCYY8CJZF1nbOAVkMB
+        Z5CMsXScA44VZQ6jhndvBIFAGBJl7QCOIHsCoaPAi2mggebFgFOdlrJ29hQpoxBgBK6SqjzBN85A
+        R9SfnF609ZV/9C3HA2UBJ3pDaF3XUaYocDY2hYDRpepVWR3EGnaUiz5dOBAMeJpqmKtRBIvear9m
+        qsXFXnmF4IC+UnmCn1wz9NW1GC3B4LyHPfmkhlLmg2sJEAJnAkHnOVMLGFtAa+uY7xxO/WmYO3MZ
+        xsfnFD33KfNOJx6r95/1zkVX9ttMWDjqxIpwOtM/JgB/xm2p/y2ASZlDkq3wG0UVXC3Ocua2nzdw
+        vb6AwoL+Vp/fP04uBk05FaGw7VzsKafsxt1Rm5OPyV8AAAD//wMAf5Qq7joDAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d804478e6479a3-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:47:55 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=53pghClRQ3bpBb1wi4hYY7p6chESpHKrb6cSAvSJUqo-1720021675-1.0.1.1-vJ52voiE7DQVcOT0YYpZc7OfPBw5bOuEaPJdTJbwVqcEjJEXgcJ8MpjjykGqIeKJR.ykJ5zr0Zw.FN1c0BIrug;
+        path=/; expires=Wed, 03-Jul-24 16:17:55 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=bM2vwLICqH_SbV.dvgqJ29apnBActKBnEHQXJaktMx0-1720021675682-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '1411'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999934'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_e6fde42fc52fe703cef2573b474e6520
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
+      expected actions and instructs the large language model (LLM) to generate a
+      specific output. This prompt is concatenated with the input text, and the model
+      then creates the required output.\nThis describes the full template how the
+      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nText:
+      {input}\nOutput: {0->1}\n```\n\nHere:\n- \"Text: {input}\" is input template,\n-
+      \"{prompt}\" is the LLM prompt,\n- \"Output: {0->1}\" is the output template.\n\nModel
+      can produce erroneous output if a prompt is not well defined. In our collaboration,
+      we\u2019ll work together to refine a prompt. The process consists of two main
+      steps:\n\n## Step 1\nI will provide you with the current prompt along with prediction
+      examples. Each example contains the input text, the final prediction produced
+      by the model, and the user feedback. User feedback indicates whether the model
+      prediction is correct or not. Your task is to analyze the examples and user
+      feedback, determining whether the existing instruction is describing the task
+      reflected by these examples precisely, and suggests changes to the prompt to
+      address the incorrect predictions.\n\n## Step 2\nNext, you will carefully review
+      your reasoning in step 1, integrate the insights to refine the prompt, and provide
+      me with the new prompt that improves the model\u2019s performance."}, {"role":
+      "assistant", "content": "Sure, I\u2019d be happy to help you with this prompt
+      engineering problem. Please provide me with the current prompt and the examples
+      with user feedback."}, {"role": "user", "content": "\n## Current prompt\n...\n\n##
+      Examples\n### Example #0\n\nText: 0 5 0\n\nOutput: The output for the provided
+      text \"0 5 0\" is: 0 5 0\n\nUser feedback: Prediction is incorrect. Correct
+      answer: \"1 5 1\"\n\n\n### Example #1\n\nText: 0 0 0\n\nOutput: The output for
+      the text \"0 0 0\" is not specified. Please provide more information on what
+      you would like me to do with the text \"0 0 0\" in order to generate an output.\n\nUser
+      feedback: Prediction is incorrect. Correct answer: \"1 1 1\"\n\n\n\nSummarize
+      your analysis about incorrect predictions and suggest changes to the prompt."}],
+      "model": "gpt-4-turbo-preview"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '2351'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA5xWwXLbNhC9+yt26IMSD60h3ThpdHPTpMlMMk2TtIdWHQsCV+TaIMAAoGg2k3/v
+        LEBSouMc2otHJrDA2/feLvbLCUBCRbKCRFbCy7pR58/L7o+LZ+1We6F+vnj7W/6u3GZ/3tz99CF7
+        /UOScoTZ3qD0Y9RSmrpR6MnouCwtCo98av7sIssu8qfPnoaF2hSoOKxs/PmT8yy/uDxvLO4JuyGy
+        MiTRJSv46wQA4Ev4yxh1gXfJCrJ0/FKjc6LEZDVtAkisUfwlEc6R80L7JD0sSqM96gD7F9qjBl8h
+        4J1g8A6ELqB1aGGHWGyFvIXetIs9gquExSIF8iCaBoV1HGhx4UBATa4WXlawRd/hcKZsrUXtobGm
+        bjyQdt62kvlx8KirSFYgLII2YcueCiweh/sjoAalxwJM65vWw87YWngwFrwV2sV/yfBNwoeIgJoc
+        KGNuSZccsYSPDUrakRRK9QG7Q6zdYX+8hlO4d6zZhU2k+XLd1lu0DoSUxhZ8uDcgQKL1gjTYVmHE
+        QU4vPEiFwsLOmvohHoyd2F7CW/RMoBaq/wfD7ol3ZqKwouOLjJaqdWT0aq3X+vT0FK44xJFjoC+H
+        48LiOZydDR/gNFudna01wDm84URWsMngErJN/PaOfQi/BoJXsPlU4RHbAcyoC3i887BOQvQ6AXIr
+        OD7pd+by1YB8BW+0NNai9Et4EX+A0K5Du4JNDpeQD2FjEivgu0NZgKO6UT1YbEL1HKnQka9MG+yn
+        ehZB6P6ebEt4bTrco03nJprvSudCjmZIR3MYIC0t1iwaL26yTfi6yTcOtq0HhWKPDgwXwGSOR5vL
+        TQrEjiQHUjh8DK2WldAlFstvpMkfkCb7D9JMimSDIqGQXPQ7Fkt4r1C4SUKojWUijxyuoWPP9qaF
+        zrSqAEW3CDVyqoUJdD94kwZjC7S8rUSNVngEoQd8y//jiPwBR1yVgnSUMRpjJ0ixlCYaIKxolNz/
+        bP+NwkEETzXvwUnp1moQSkVFSQ+aLsei+tiWJbrYoZjn97FiXwQNY3mxEtYYD1K0Dg9tYkgPGosF
+        DU1u6pMGtggCFJe12YFUwpLvo1dw3hgtliI6sxsbW0yf3JGd5wLNmtQSPhkY0TAL6VjJnIqrgtJ4
+        1yiS5FUPzrN+Qed5BwxdzVgQ8tBnmcspn6ZRFME8AOKNnjeQseWlh947VVsn9HGms/pDISuW60AW
+        XxOFS6GrSGEoR2ZsXo/z2rtiKI1xWIAoblrHNA6c1FRW/DxJ1RY49NCXA0FzcYyGynQh45GrB3Ln
+        +KvhESiIdaD98D6M2CJSXwkdchtUsVjzc3IMnCsiqCX0ULXT6zF67/57aMAZRQXtemh1gZYHADZU
+        oOHs7APuiVmI3g5NaK3XyafvJwTb/iAI8xw0WWQLvmuRL/gVE3sMhfU9CeAVA+e446PB4ecWtcR0
+        qmly0Xj8+k3dZZbmYSYYo5frJJYmB2NnyXvU9xwfam7X33sWhLudGmowXxqHmi0/QEUrg6ssoKKa
+        WABuI8HVuCfTOp57ZhwH2IdmEHG6ZTJMX1+nsU2ZsrFmyyOebpWavu9Ik6uuLQpnNI9ozpsmhn89
+        Afg7jIftbOJLYqLX3tyi5gOfPH8Sz0sOE+lh9TL/cVj1xgt1WMiz/OJkwJi43nmsr3ekS7SNpTAv
+        MtKTryf/AgAA//8DACQinaEuCwAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d8045188b77b1e-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:48:24 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=G83.IZCAgOQk4I_wL3X05gow4pFkwjoBHhuD3jM0zhY-1720021704-1.0.1.1-2tVL9Of3YVWWhjulg2.U44DvNoOu3nFYeeagChdRtqTBbYfyfJmHrWcZojh50mtv2Eryom0jHHxuzXQN.3FmwA;
+        path=/; expires=Wed, 03-Jul-24 16:18:24 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=s9PRYUemee7H2_kHPXFrNIfJzJ1VKO6pyQfBcy9JTlo-1720021704661-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '28672'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '1999455'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 16ms
+      x-request-id:
+      - req_2aa2c554a58dda74c4d2643ce640ff65
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
+      expected actions and instructs the large language model (LLM) to generate a
+      specific output. This prompt is concatenated with the input text, and the model
+      then creates the required output.\nThis describes the full template how the
+      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nText:
+      {input}\nOutput: {0->1}\n```\n\nHere:\n- \"Text: {input}\" is input template,\n-
+      \"{prompt}\" is the LLM prompt,\n- \"Output: {0->1}\" is the output template.\n\nModel
+      can produce erroneous output if a prompt is not well defined. In our collaboration,
+      we\u2019ll work together to refine a prompt. The process consists of two main
+      steps:\n\n## Step 1\nI will provide you with the current prompt along with prediction
+      examples. Each example contains the input text, the final prediction produced
+      by the model, and the user feedback. User feedback indicates whether the model
+      prediction is correct or not. Your task is to analyze the examples and user
+      feedback, determining whether the existing instruction is describing the task
+      reflected by these examples precisely, and suggests changes to the prompt to
+      address the incorrect predictions.\n\n## Step 2\nNext, you will carefully review
+      your reasoning in step 1, integrate the insights to refine the prompt, and provide
+      me with the new prompt that improves the model\u2019s performance."}, {"role":
+      "assistant", "content": "Sure, I\u2019d be happy to help you with this prompt
+      engineering problem. Please provide me with the current prompt and the examples
+      with user feedback."}, {"role": "user", "content": "\n## Current prompt\n...\n\n##
+      Examples\n### Example #0\n\nText: 0 5 0\n\nOutput: The output for the provided
+      text \"0 5 0\" is: 0 5 0\n\nUser feedback: Prediction is incorrect. Correct
+      answer: \"1 5 1\"\n\n\n### Example #1\n\nText: 0 0 0\n\nOutput: The output for
+      the text \"0 0 0\" is not specified. Please provide more information on what
+      you would like me to do with the text \"0 0 0\" in order to generate an output.\n\nUser
+      feedback: Prediction is incorrect. Correct answer: \"1 1 1\"\n\n\n\nSummarize
+      your analysis about incorrect predictions and suggest changes to the prompt."},
+      {"role": "assistant", "content": "Given the examples and user feedback you''ve
+      shared, it appears there''s a mismatch between the current prompt instructions
+      (which are not provided) and the expected output format or transformation that
+      the user is looking for. Specifically, it seems the user expects a transformation
+      of the input numbers according to a certain rule that isn''t clear from the
+      current prompt or examples. Let''s analyze the feedback and draw a conclusion:\n\n###
+      Analysis of Examples:\n\n- **Example #0:**\n  - Input: `0 5 0`\n  - Model Output:
+      `The output for the provided text \"0 5 0\" is: 0 5 0`\n  - User Feedback: Incorrect.
+      Correct answer: `1 5 1`\n  - Analysis: The model simply repeated the input without
+      applying any transformation. However, the expected transformation, according
+      to the user, seems to increment the `0`s to `1`s but leaves other numbers (`5`,
+      in this case) unchanged.\n\n- **Example #1:**\n  - Input: `0 0 0`\n  - Model
+      Output: `The output for the text \"0 0 0\" is not specified. Please provide
+      more information on what you would like me to do with the text \"0 0 0\" in
+      order to generate an output.`\n  - User Feedback: Incorrect. Correct answer:
+      `1 1 1`\n  - Analysis: Again, the model failed to apply the necessary transformation,
+      this time needing to turn all `0`s into `1`s.\n\n### Suggestions for Prompt
+      Changes:\n\nThe root cause of the incorrect predictions appears to be a lack
+      of clarity in the instructions regarding what the model is expected to do with
+      the input numbers. To correct this, the prompt should explicitly state the transformation
+      rule or action that needs to be applied to the input numbers. In the provided
+      examples, the user seems to want the model to increment each `0` in the input
+      to `1`, while leaving other numbers unchanged.\n\nA proposed adjusted prompt
+      might include:\n\n- Explicit instructions on how to transform the input numbers.\n-
+      A clear directive that numbers other than `0` should remain unchanged.\n- An
+      explanation or example of the transformation to solidify understanding.\n\n**Revised
+      Prompt:**\n\n\"Transform the input numbers by incrementing each ''0'' to ''1''.
+      Leave all other numbers unchanged. For each input number sequence, apply this
+      rule and generate the transformed output sequence.\"\n\nThis rewritten prompt
+      should clarify the expected task for the model, thereby reducing or eliminating
+      the previous misunderstanding and incorrect outputs."}, {"role": "user", "content":
+      "\nNow please carefully review your reasoning in Step 1 and help with Step 2:
+      refining the prompt.\n\n## Current prompt\n...\n\n## Follow this guidance to
+      refine the prompt:\n\n1. The new prompt should should describe the task precisely,
+      and address the points raised in the user feedback.\n\n2. The new prompt should
+      be similar to the current prompt, and only differ in the parts that address
+      the issues you identified in Step 1.\n    Example:\n    - Current prompt: \"Generate
+      a summary of the input text.\"\n    - New prompt: \"Generate a summary of the
+      input text. Pay attention to the original style.\"\n\n3. Reply only with the
+      new prompt. Do not include input and output templates in the prompt.\n"}], "model":
+      "gpt-4-turbo-preview"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '5533'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1RRTW8TMRC9768Y+ZJLEnlDk0KOLQKpQhwQREgIRY53smvwzrj2OG2p8t+Rd/MB
+        Fx/e83vz5s1rBaBco9agbGfE9sHP3rVPm82XJb//nOPD/eqrvsv6+4bkz+O3B6emRcG7X2jlrJpb
+        7oNHcUwjbSMaweJa3y60XtS3ejkQPTfoi6wNMruZ6XqxnIWIB4dPJ2XHzmJSa/hRAQC8Dm/JSA0+
+        qzXo6RnpMSXTolpfPgGoyL4gyqTkkhgSNb2SlkmQhtgfOAIa20HCx4xkEXgPlPsdxgQh8sE12IAj
+        kA5B8FmmINFQ2nPsB8xRyAK7F7CdodZRO9pN9ASEwcCknszhE5oDgvEeWDqMlwGZBhU2c/iIhNEI
+        joPOI7C5BjNp4DhLyDJXp3WOlx48tyHyrnRG2fsLvnfkUreNaBJT2TkJh1F+rAB+Dn3n/ypUIXIf
+        ZCv8G6kY1vVqNRqq642v9Ju3J1JYjP9HttA31SmjSi9JsN/uHbUYQ3TDAUrS6lj9BQAA//8DAHtH
+        esF/AgAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d8050699fb1f49-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:48:27 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=_MjzJ4fvzYD2accejEjGJ2xk_cDI1PA3WkomK4R3BCg-1720021707-1.0.1.1-zVDxRgKh5pGhuy_a3YPjU2ns06NDeGbfsLjeRLZMmv_J5xQhTnJU6fmQ1iynYcvnDwEPQQuy8RozU3vZc.nqOA;
+        path=/; expires=Wed, 03-Jul-24 16:18:27 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=R06tqhD5BZEom0LgFfdyy.jijtXuyM_Z2ibZtzTywpE-1720021707190-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '2154'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '1998690'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 39ms
+      x-request-id:
+      - req_50e6867720fcd5562a237c74d7510cfe
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "For each sequence of numbers
+      provided in the text, transform the input by changing each ''0'' to a ''1''.
+      Leave all other numbers unchanged. Generate the transformed sequence as the
+      output."}, {"role": "user", "content": "Text: 0 5 0\nOutput: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '314'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQy07DMBBF9/mK0aybKilKK7IEJFihskEVCFWuM00Mjseyp+JR9d+R07SFjRdz
+        fa7PeJ8BoGmwBtSdEt17m1+3n88ro5qHF7165OZpefeznHe3Lbn79gYnieDNO2k5UVPNvbckht0x
+        1oGUUGotF7OimJWLYjEEPTdkE9Z6ya+mVS67sOG8KGfVSHZsNEWs4TUDANgPZ3J0DX1hDcXkNOkp
+        RtUS1udLABjYpgmqGE0U5QQnl1CzE3KDdgkVlDhGh3On5dYH3qT33c7a83xrnIndOpCK7BIfhf0R
+        P2QAb4P77p8O+sC9l7XwB7lUOC+PdXj5rUtYjZmwKPuHmWejHsbvKNSvt8a1FHwwwx5JMjtkvwAA
+        AP//AwCA5MmtxgEAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d805167a5251e8-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:48:27 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=ADAM_k3hq5gz6zPAsGrHU4eJ1_H6eaSathb_l8FGL1c-1720021707-1.0.1.1-9M9FC3x4Ql5Z9U.Rnq4N3O6mrv4EinN8rc4nEXR15HoDPs1Amed8PpWXpMoflRgz0sprkaMqBbAkEJL9zJU6IA;
+        path=/; expires=Wed, 03-Jul-24 16:18:27 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=Lab0jMhBUSv4gG.e8IXWpC3tzoo1NB4RRSffa6LpyH0-1720021707664-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '180'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999930'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_8909b39b77b1990e2815fbdaa53b5cd8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "For each sequence of numbers
+      provided in the text, transform the input by changing each ''0'' to a ''1''.
+      Leave all other numbers unchanged. Generate the transformed sequence as the
+      output."}, {"role": "user", "content": "Text: 0 0 0\nOutput: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '314'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQsW7CMBCG9zzFyTNBcVqImrVDpVadKtGiqkLGOYKL4zP2oYIQ7145BGgXD/f7
+        +/2djxmAMI2oQei1Yt15mz+0P7OP+eb9afbMxI/biso397LZ7l8P93MxSgQtv1HzhRpr6rxFNuTO
+        sQ6oGFOrrMqiKGVVVH3QUYM2Ya3n/G48yXkXlpQXspwM5JqMxihq+MwAAI79mRxdg3tRQzG6TDqM
+        UbUo6uslABHIpolQMZrIyrEY3UJNjtH12hIkSDFEp2unpdYHWqb33c7a63xlnInrRUAVySU+Mvkz
+        fsoAvnr33T8d4QN1nhdMG3SpcCrPdeL2W7dwMmRMrOwfZpoNeiIeImO3WBnXYvDB9HskyeyU/QIA
+        AP//AwBBDScFxgEAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d805194a7f1f42-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:48:28 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=l6pgZbGw1sYXvrgqmo66LNsQdK2fqZj6Pmu33Svu5gE-1720021708-1.0.1.1-yD4MOXqiS3MKkxWg361J8T_iLZuZzVn9tPFx5kb0pn7jzMtp41snrDMV9C..OVXZsp1GWMEVtbyD2V1DPUjPdQ;
+        path=/; expires=Wed, 03-Jul-24 16:18:28 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=NNXlwSXoa9aegeciCm1_c6tm0ZPeoyk62yw23pqOxBQ-1720021708064-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '197'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999929'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_493faa32e5da3155fa97861870d3c628
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Text: 1 5 1\nOutput: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '132'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA2xSTWsbMRC9768YdLbNrhPHrS+hLe2hBAppKJSmGK003lUjaVRpNhsT/N+L5LVN
+        IRcd5n3Mmxm9VgDCaLEBoXrJygU7f9+NP37ef6Uv3z587uWVvhvrm4e7j/fpWf/9LmZZQe0fVHxS
+        LRS5YJEN+SOsIkrG7Nqsl3W9bNb1uwI40mizrAs8v1qs5jzEluZ1s1xNyp6MwiQ28KsCAHgtb87o
+        Nb6IDdSzU8VhSrJDsTmTAEQkmytCpmQSS89idgEVeUZfYj/0CDRwGBh2FOFRNLCC5lHASIPVwPtg
+        lLR2DxoDeg3kgXuE4vDCQBGMTxwHlYdOECI9G416AZ+Kfk8DBIsy4QkCRxHB+B1FJ7MoW4695MI9
+        drXmCUubKRkTtJh79TS+RfODazGmiRciKUwJ9a2YRj6cd2WpC5HavFc/WHuu74w3qd9GlIl83kti
+        Ckf5oQL4XW4y/LdmESK5wFumJ/TZcHl9tBOXX3ABr28mkImlvdTXdTXlE2mfGN12Z3yHMURTDpRT
+        VofqHwAAAP//AwAf7hg4nwIAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d8051c0a617c20-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:48:29 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=h93leevDnCCj_TBIfm7Ed_GprzNxf608sn6EK0OWee8-1720021709-1.0.1.1-P.Nl6jyKBZBtxUEXw23X53HVrX.fTMmrRA4KVDkjRLNHIUJMeM87niRbC1k7eSccBja_yRU741iKIckfgIW3MA;
+        path=/; expires=Wed, 03-Jul-24 16:18:29 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=w7rjd38pATfvHBRQeHhnFl3uOHFqWX1_QHJJgxdhsNw-1720021709216-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '843'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999975'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_9e75d45a6bcbddc67765adfaa55759a9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Text: 1 1 1\nOutput: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '132'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA2xTwU4bMRC95yuefE6ibCgFcqOncukBoVZqUyGvd7Jr8HqMZ5aAEP9eeRMSEL3s
+        Yd685zdvZl8mgPGNWcG4zqrrU5hdtNufv3+l67uby+ah/Xb+9XKg+6fzkx/19ffWTAuD6zty+saa
+        O+5TIPUcd7DLZJWKanW2XCyW1dniYgR6bigUWpt0djI/nemQa54tquXpntmxdyRmhT8TAHgZv8Vj
+        bOjJrLCYvlV6ErEtmdWhCTCZQ6kYK+JFbVQzPYKOo1Icbd90BB40DYotD6FBQ4liA47QjiCJnN94
+        h5HypOAMtXIP7ayOHWN1bSpUqNYGXlCTjy0GoQYbznOs4zpeRbQUKdswxdZrx4PCxudP+tN3Um70
+        UxN8VMopk1IDK7AQehgoOgJvoF2m0tL4R98MNiAOfU1ZIJRsLumjLu9YRzLHu3E5H4VtWdlOzctR
+        fufg0ebnfSxlsH0yb4H4iG3nXQevH4efj3MXScpUIHucdoyQMx4GkvHpTGG0qvyfUKdIgawQUuZH
+        3xB6zoSG1PogEMYVnC32N5Rhd+jhqUySOArNzX7/r4fDCdymzHU5sjiEcKhvfPTS3WaywrEciSin
+        Hf11AvwdD3T4cHMmZe6T3irfUyyCyy87OXP8JY5gtTjbo8pqwzvgpJrsHRp5FqX+duNjW5bkx3st
+        Pievk38AAAD//wMAvEhNRK4DAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d8052309df5211-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:48:30 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=5r4vmp6gJJVl9Koc8TPtigwUibQ4HiEGbTnyodBNpCY-1720021710-1.0.1.1-flYJo_X5PvEFx9Q0V.aftQq_AoO19udzTjiXvaGTJVsz8Pu24rSxiRons5r.iKFO85Uxwi3cOcKBApUQMJM1Ug;
+        path=/; expires=Wed, 03-Jul-24 16:18:30 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=hNt0_u8Ivi4KFqEfYN.Acv3BDPotP40hn7OGGIIYogQ-1720021710939-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '1432'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999975'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_aab59627a83af7c7460b241cfa2b96a6
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
+      expected actions and instructs the large language model (LLM) to generate a
+      specific output. This prompt is concatenated with the input text, and the model
+      then creates the required output.\nThis describes the full template how the
+      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nText:
+      {0->1}\nOutput: {1->2}\n```\n\nHere:\n- \"Text: {0->1}\" is input template,\n-
+      \"{prompt}\" is the LLM prompt,\n- \"Output: {1->2}\" is the output template.\n\nModel
+      can produce erroneous output if a prompt is not well defined. In our collaboration,
+      we\u2019ll work together to refine a prompt. The process consists of two main
+      steps:\n\n## Step 1\nI will provide you with the current prompt along with prediction
+      examples. Each example contains the input text, the final prediction produced
+      by the model, and the user feedback. User feedback indicates whether the model
+      prediction is correct or not. Your task is to analyze the examples and user
+      feedback, determining whether the existing instruction is describing the task
+      reflected by these examples precisely, and suggests changes to the prompt to
+      address the incorrect predictions.\n\n## Step 2\nNext, you will carefully review
+      your reasoning in step 1, integrate the insights to refine the prompt, and provide
+      me with the new prompt that improves the model\u2019s performance."}, {"role":
+      "assistant", "content": "Sure, I\u2019d be happy to help you with this prompt
+      engineering problem. Please provide me with the current prompt and the examples
+      with user feedback."}, {"role": "user", "content": "\n## Current prompt\n...\n\n##
+      Examples\n### Example #0\n\nText: 1 5 1\n\nOutput: The output for \"1 5 1\"
+      would typically depend on the context or instructions provided. Could you please
+      provide more information on what you would like the output to be or how you
+      would like the numbers to be processed?\n\nUser feedback: Prediction is incorrect.
+      Correct answer: \"2 5 2\"\n\n\n### Example #1\n\nText: 1 1 1\n\nOutput: The
+      output would depend on the specific context or task that the text \"1 1 1\"
+      is being used for. \n\nIn general, without any specific context, \"1 1 1\" could
+      be interpreted as a sequence of three individual numbers separated by spaces.
+      The output or interpretation of this sequence could vary depending on the context
+      in which it is being used.\n\nIf there is a specific task or question related
+      to the text \"1 1 1\", please provide more details so I can offer a more specific
+      response.\n\nUser feedback: Prediction is incorrect. Correct answer: \"2 2 2\"\n\n\n\nSummarize
+      your analysis about incorrect predictions and suggest changes to the prompt."}],
+      "model": "gpt-4-turbo-preview"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '2837'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA4RW32/bNhB+z19xUB+6BY5hO8m6GliBbGtfhq5Fm23YlqGlqZN0C0WqPMqOEeR/
+        H46kJLtLtxcD1pH34/u+u+P9CUBBZbGGQjcq6LYzZ8/r3a+b5+8//f7y6ps/Ls/Pf9SXZvXT/v35
+        onvbFDO54TZ/ow7Drbl2bWcwkLPJrD2qgOJ1+Wy1WKyWz5bLaGhdiUau1V04uzhbLFeXZ53HLeEu
+        32wcaeRiDX+eAADcx1/J0ZZ4V6xhMRu+tMisaizW4yGAwjsjXwrFTByUDcVsMmpnA9qY9veKsQRn
+        ITQIeKckf4bOuy2VWIKyZbT0jB4qxHKj9O0sfrrFPbgNo98qKZjjWWWV2TMxKI+gGCpnjNvx+sbe
+        2CdPnsCbgwvrG7ucw+npzyr0HsFV0e214tv16SlcNwhB8S0wYssQHJDdOrNFCF5ZrpxvydaggPFT
+        j1ZHB7ZvN+gZNkNVCnxvEJwHxiAn5C+DdQHwrjOkKZg9lFiRxRIowaB779EGQaHtwjymQrbrQyqL
+        SUAa4/JB4NkIGN51qIMk0Qe5ORM0tFGeKsISNvvPIY2eR5e7Bj0CKt1k10AMZLXHFm1IDpZzQXUl
+        EL4WOcE75M5ZRh7wiyp7yuAHA5AtSauAAowE4wCV89A6jxBVcRd6ZYCs4BtpEuQ79PJfwO5QU0Ua
+        lI7GLJyIzpR+hIzxIG5DdWOobgIoC6rdUN1T2A+AR57JcvC9TlraUWhoECVxEKoTHRHIMBQnsDDi
+        rdgzuloNmTVuF7P3TiOnS6Owbd+iJ63MQdYC57nA+YtQ8ypTM4A5UAUledQim+wsedbOy2dQlndR
+        CbuGdJPEsh+1O1IoCR/Rm4odxRz5hetGaG87QzlKRGrU1mY/Nafz0wEVoBEh5qgsxAWvBP/K+Z3y
+        JbTKUtebjFX1RTykaa9yU69v7HWqFIGYewSDqpRKYncOCHQeS8o8UkrbCG6uGnvuEcb/o/cS06XL
+        jduorehXG1Q+k0FbPCB8rC02/jgujgA+7NqDccdJynP4jULj+mlKHCU7OxBgiZXqTYgTalBibKeD
+        HhrEQKmA1DEBrYTcYKO25HzswyB8CzYj9u/7ukYWsn9olK0xxhEHbyNAQokDVZZ+UPjjPMTZbKi2
+        U+ZPOc+m2GwHQyuPc4+VSTLL1DyyAxJLYBHLmNhGen5LMnyTJExf4uMY5nqzYl31v61xPGNyg1xJ
+        Cp2TgK0rp+7XrjeCbVw8Hz9+vLGvcrjH1sW/+J9N2RylIkEjlhk5ceiRexOTHlzP4VVce9GcRDCF
+        oM9WbXCAlmUBKq17L6LNAyuutylWjRZ9rC6K42VyIALAu7CG+8XZi+UDfPcCrjqZOFkLuYi4BSXU
+        l0fO/Ma+iZHWcL88e7GKvt4lERx7w3JCUbFshwSExCiRtacNlvOMu8wM4lEWWTGxecfNy8crM++W
+        r76oCKHh64gNY8jTrdfyiighYNvF1hd9Jc1MIM6gc/LyIWXMHjyWvY4ojwtJjtY9paE29nhwMjN5
+        pCAbh0bLBKlpvR6P5qFn5kV+gj2Mbzfj6s67jbzzbG/M+L0iS9x88KjYWXmncXBduv5wAvBXfCP2
+        R8++IkH7IbhbtOLw8tuL5K+YnqWT9eLiPFuDC8pMhuVi9ewk51jwngO2HyqyNfrOU3w0SqYnDyf/
+        AAAA//8DAI7tHGozCwAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d8052e08655206-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:48:48 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=m0TfzeD6yEeQfRfqcN5wm8Gm3RDpSqvBbpmkX7xvoFg-1720021728-1.0.1.1-UKtJmf0hCv_hBrcVKjBlO_304OqYLVRGrEMBh3Lri1QhjXZ3NbfmYSfKgNnJCuW7XFslLJjZEevgmkA4YDBTCA;
+        path=/; expires=Wed, 03-Jul-24 16:18:48 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=6YhDl75jfsf3pItW7gzIHklI6qixfNHBg7m0VklpqCo-1720021728998-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '17707'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '1999336'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 19ms
+      x-request-id:
+      - req_f1a51cfd7cc4d6f9e00783874da54e7f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
+      expected actions and instructs the large language model (LLM) to generate a
+      specific output. This prompt is concatenated with the input text, and the model
+      then creates the required output.\nThis describes the full template how the
+      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nText:
+      {0->1}\nOutput: {1->2}\n```\n\nHere:\n- \"Text: {0->1}\" is input template,\n-
+      \"{prompt}\" is the LLM prompt,\n- \"Output: {1->2}\" is the output template.\n\nModel
+      can produce erroneous output if a prompt is not well defined. In our collaboration,
+      we\u2019ll work together to refine a prompt. The process consists of two main
+      steps:\n\n## Step 1\nI will provide you with the current prompt along with prediction
+      examples. Each example contains the input text, the final prediction produced
+      by the model, and the user feedback. User feedback indicates whether the model
+      prediction is correct or not. Your task is to analyze the examples and user
+      feedback, determining whether the existing instruction is describing the task
+      reflected by these examples precisely, and suggests changes to the prompt to
+      address the incorrect predictions.\n\n## Step 2\nNext, you will carefully review
+      your reasoning in step 1, integrate the insights to refine the prompt, and provide
+      me with the new prompt that improves the model\u2019s performance."}, {"role":
+      "assistant", "content": "Sure, I\u2019d be happy to help you with this prompt
+      engineering problem. Please provide me with the current prompt and the examples
+      with user feedback."}, {"role": "user", "content": "\n## Current prompt\n...\n\n##
+      Examples\n### Example #0\n\nText: 1 5 1\n\nOutput: The output for \"1 5 1\"
+      would typically depend on the context or instructions provided. Could you please
+      provide more information on what you would like the output to be or how you
+      would like the numbers to be processed?\n\nUser feedback: Prediction is incorrect.
+      Correct answer: \"2 5 2\"\n\n\n### Example #1\n\nText: 1 1 1\n\nOutput: The
+      output would depend on the specific context or task that the text \"1 1 1\"
+      is being used for. \n\nIn general, without any specific context, \"1 1 1\" could
+      be interpreted as a sequence of three individual numbers separated by spaces.
+      The output or interpretation of this sequence could vary depending on the context
+      in which it is being used.\n\nIf there is a specific task or question related
+      to the text \"1 1 1\", please provide more details so I can offer a more specific
+      response.\n\nUser feedback: Prediction is incorrect. Correct answer: \"2 2 2\"\n\n\n\nSummarize
+      your analysis about incorrect predictions and suggest changes to the prompt."},
+      {"role": "assistant", "content": "Based on the examples provided and the user
+      feedback, the key observations and analysis are as follows:\n\n### Observations:\n1.
+      **Nature of the Task:** The task seems to involve transforming a sequence of
+      numbers based on a rule or set of rules not explicitly defined in the current
+      prompt. The inputs are simple sequences of numbers, and the expected outputs,
+      as clarified by user feedback, are sequences where each number is incremented
+      by 1.\n\n2. **Model Responses:** The model''s responses indicate a request for
+      more contextual information to perform a specific action on the input sequences.
+      These responses highlight an ambiguity in the task instructions within the existing
+      prompt, as the model is seeking clarification on how to process the provided
+      numerical sequences.\n\n3. **User Feedback:** The feedback directly provides
+      the correct answers, which simply involve incrementing each number in the sequence
+      by 1. This implies the task expected by the user or the task at hand involves
+      a straightforward manipulation of numerical sequences.\n\n### Analysis:\nThe
+      core issue leading to incorrect predictions is the lack of explicit task instructions
+      in the current prompt. The model does not have a clear directive on how to manipulate
+      or transform the sequences of numbers provided as input. Without explicit instructions,
+      the model defaults to seeking more information, which is not the intended behavior
+      for this task.\n\n### Suggested Changes to the Prompt:\nTo address the incorrect
+      predictions and align the model''s output with the expectations reflected in
+      the user feedback, the prompt needs to be revised to include explicit instructions
+      for the task of incrementing each number in the input sequence by 1. A proposed
+      modification could be:\n\n```\nFor the sequence of numbers provided as input,
+      increment each number by 1 and output the resulting sequence. Follow the format
+      provided in the examples to ensure accurate processing and output generation.\n\nExample:\nText:
+      {0->1} => Apply the increment rule to each number in the sequence.\nOutput:
+      {1->2} => Reflect the incremented sequence as per the rule described.\n```\n\nThis
+      revised prompt clearly defines the expected action (incrementing each number
+      by 1) and sets a structured template for input and output, potentially reducing
+      ambiguity and guiding the model towards generating the correct output as indicated
+      by the user feedback."}, {"role": "user", "content": "\nNow please carefully
+      review your reasoning in Step 1 and help with Step 2: refining the prompt.\n\n##
+      Current prompt\n...\n\n## Follow this guidance to refine the prompt:\n\n1. The
+      new prompt should should describe the task precisely, and address the points
+      raised in the user feedback.\n\n2. The new prompt should be similar to the current
+      prompt, and only differ in the parts that address the issues you identified
+      in Step 1.\n    Example:\n    - Current prompt: \"Generate a summary of the
+      input text.\"\n    - New prompt: \"Generate a summary of the input text. Pay
+      attention to the original style.\"\n\n3. Reply only with the new prompt. Do
+      not include input and output templates in the prompt.\n"}], "model": "gpt-4-turbo-preview"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '6024'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1RRTY/TMBC951eMfG6rJguU7REJhEBoJSQQAq0q15kkLs6M8Uxawqr/HTnptnDx
+        Yd7HPL95KgCMr80WjOusuj6G5X17+qq+vms+jQ/Nn88f3h8OH+v45c33bw/H2iyygvcHdPqsWjnu
+        Y0D1TDPsElrF7FpuqvW6KjfV/QT0XGPIsjbq8sVyXVYvlzHh0ePpouzYOxSzhR8FAMDT9OaMVONv
+        s4X14nnSo4ht0WyvJACTOOSJsSJe1JKaxQ10TIo0xX7HCdC6Dlp/RALBXwOSQ+AGaOj3mGQBnlzC
+        Hkln5jyH/QglWKohJj76GkE7hIQyBPXUXp1W8JZkSAjKmelQZLbxFAcF6xynOguUQTsvkIaAEBM6
+        LxjGaQMPmrl5AeHpFvIqDuPKXL53vvYSuI2J97lDGkK4zhtPXrpdQitMuQNRjrP8XAA8Tv0P/1Vq
+        YuI+6k75J1I2LMvX5Wxobje/wXevLqCy2vCPrCo3xSWjkVEU+13jqcUUk58OkpMW5+IvAAAA//8D
+        ACOzAhOPAgAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d8059e9f0f5186-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:48:51 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=ZIY6x_OG6ZUYIi0qFyyzeq1cL7gN6hCSXAMyQ.nsT04-1720021731-1.0.1.1-oiZPpl5nsIY1yPYmtIWGo3kh_k6NokVBKSd9ztw1rYyC_Ut_JqRXTk.eIjYaZabN2DhBnA1CzVApJc9hL.741A;
+        path=/; expires=Wed, 03-Jul-24 16:18:51 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=pe9d1IemiBcmqHqbhAikGcOelY_l9w6GHEvN6.jmNa8-1720021731402-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '2107'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '1998565'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 43ms
+      x-request-id:
+      - req_d9215c47f8fef4b353f1505c64e52e4e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "For each sequence of numbers
+      provided in the text, transform the input by changing each ''0'' to a ''1''.
+      Leave all other numbers unchanged. Generate the transformed sequence as the
+      output."}, {"role": "user", "content": "Text: 0 5 0\nOutput: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '314'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQQW7CMBBF9znFyGuCYlBAzQ0qVIlFVVWqKmTMkBgcj2VPSFvE3SuHAO3Gi/l+
+        3298zgCE2YkKhG4U69bb/Knu307rl9eTNN1qtVrr977v6/3xEJ7pR0wSQdsDar5RU02tt8iG3DXW
+        ARVjapXLWVHM5HIuh6ClHdqE1Z7z+bTMuQtbygs5K0eyIaMxigo+MgCA83AmR7fDL1FBMblNWoxR
+        1Siq+yUAEcimiVAxmsjKsZg8Qk2O0Q3aEkqQYowu905LtQ+0Te+7ztr7fG+cic0moIrkEh+Z/BW/
+        ZACfg3v3T0f4QK3nDdMRXSpcyGudePzWIyzHjImV/cMsslFPxO/I2G72xtUYfDDDHkkyu2S/AAAA
+        //8DAKJb3pLGAQAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d805ae2da151e9-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:48:51 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=WtQ4PZHmRkO7f7vN8yNx7TElSXbND_LPq4OlQxn0rdc-1720021731-1.0.1.1-SNuaPnsCGwFkLYQovL4K3BNaKnchDVINvWq7bfrmUCXbFMYm3vqozmjDrhfECeNO3YicHVup2qaChuIKRrq5_w;
+        path=/; expires=Wed, 03-Jul-24 16:18:51 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=IuCJH5g7rN7334YHWJfYk8cfpYBZAc66Qr7FtK.HvOI-1720021731908-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '160'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999929'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_c28fd45c9104d60d121b2e36a31fc273
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "For each sequence of numbers
+      provided in the text, transform the input by changing each ''0'' to a ''1''.
+      Leave all other numbers unchanged. Generate the transformed sequence as the
+      output."}, {"role": "user", "content": "Text: 0 0 0\nOutput: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '314'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQwU4CMRCG7/sUkzmzZLsIxD161BCNMcbEGLJbylJoO007BJHw7qa7C+ilh/n7
+        /f2mpwwA9QorQLmpWVpv8vv28H5Y2OZx92x18Xq0Dx9PPy/+bbG9I4OjRFCzVZIv1FiS9UaxJtfH
+        MqiaVWoV87IoSjGflF1gaaVMwlrP+WQ8zXkfGsoLUU4HckNaqogVfGYAAKfuTI5upb6xgmJ0mVgV
+        Y90qrK6XADCQSROsY9SRa8c4uoWSHCvXaQsQIHCIztdOQ60P1KT33d6Y63ytnY6bZVB1JJf4yOR7
+        /JwBfHXu+3866ANZz0umnXKpcCb6Orz91i2cDhkT1+YPM8sGPYzHyMou19q1Kviguz2SZHbOfgEA
+        AP//AwCxBThJxgEAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d805b0d9267c1a-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:48:52 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=l9ew03TheEL7MTqlAF7AWXi9HIYDJTOJQKcPuSFBEEQ-1720021732-1.0.1.1-kUrcA9Wf.4SwDBnR6wCwhaSHXQYhP14QzAxQGniUvKAe9A_9Uf0bfYG7u.jQ05Z7Dhd0o6ahjegxHJ1Gpqu0oA;
+        path=/; expires=Wed, 03-Jul-24 16:18:52 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=5_UzPyN_hAdIJtQm0VU_RvzpdLEhRcrXEst9jFTvKuY-1720021732295-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '204'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999929'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_9f2c127593c2e1cb0c857703c20c316a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "For each given sequence of
+      numbers, increment each number by 1 and provide the resulting sequence. Ensure
+      to process each input according to this rule precisely and output the new sequence
+      accordingly."}, {"role": "user", "content": "Text: 1 5 1\nOutput: "}], "model":
+      "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '330'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQy07DMBBF9/mK0aybKnH6zJYNUAmEhNggVDmumxocj2VPVVDVf0dO0xY2Xtyb
+        c32cYwaAZoM1oNpJVp23+bI9vB1W94vXiiZm8dTcrYx4eIlV+/g88ThKBDWfWvGFGivqvNVsyJ1r
+        FbRknVbLuSgKUc4r0RcdbbRNWOs5r8bTnPehobwoxXQgd2SUjljDewYAcOzP5Og2+htrKEaXpNMx
+        ylZjff0IAAPZlKCM0USWjnF0KxU51q7XFjADgUN1um5aan2gJt3v9tZe861xJu7WQctILvGRyZ/x
+        Uwbw0bvv/+mgD9R5XjN9aZcGp8vzHN7+1p9y6JhY2ls8m2SDHsafyLpbb41rdfDB9O9Iktkp+wUA
+        AP//AwAubDPtxgEAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d805b37b8b1f3d-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:48:52 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=espZX7YVj0NT5Y5TqCsNt6hzG.H0iQ2l6M9bci05cfI-1720021732-1.0.1.1-aUqSLDkV3J5OxLuMEf6Dw9kxKDJUDCUCdRvPkbWQkDUMN_5sPHdjG40MWYP_R2bmlOKFYnP09eBRHwu.n16vow;
+        path=/; expires=Wed, 03-Jul-24 16:18:52 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=usvmaf0zX24t9_s69wmmnII5rNC8_05Bpako_NTF4Xg-1720021732716-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '207'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999926'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_3f6997471f19b77907003a62c76d9de0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "For each given sequence of
+      numbers, increment each number by 1 and provide the resulting sequence. Ensure
+      to process each input according to this rule precisely and output the new sequence
+      accordingly."}, {"role": "user", "content": "Text: 1 1 1\nOutput: "}], "model":
+      "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '330'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQQW7CMBBF9znFyGuCgoFSsmx7gHTTTVUh4wyJi+2x7KG0Qty9cgjQbrz4P+/7
+        OacCQJhW1CB0r1i7YMt1d3w77vv2i1XTvD49N6paGDl33Dy+NGKSCdp+ouYrNdXkgkU25C+1jqgY
+        8+psJatKzlZzORSOWrQZ6wKX8+my5EPcUlnN5HIkezIak6jhvQAAOA1ndvQtfosaqsk1cZiS6lDU
+        t48ARCSbE6FSMomVZzG5l5o8ox+0JUiQYqzOt01LXYi0zff7g7W3fGe8Sf0mokrkM5+YwgU/FwAf
+        g/vhn44IkVzgDdMefR5cri9z4v63/pRjx8TK3uOHRTHqifSTGN1mZ3yHMUQzvCNLFufiFwAA//8D
+        AO24UqLGAQAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d805b5ebb81f45-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:48:53 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=7xe76UEPBFw6.nNV9XoGeNHFrLswsMzPLT1Ytc2SR9Q-1720021733-1.0.1.1-QpjICgDmTCCWpIJ04hfl6b0WccCw5xdJBRj6Pg3mAVoZBL9ppwT375B0MfiXkXobrMdmlhi85obhKNfLphMEnA;
+        path=/; expires=Wed, 03-Jul-24 16:18:53 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=DVl8_nyvvxmwzLFiIYodfrp9onWY8q8dOoxV4jIZ1XI-1720021733060-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '178'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999926'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_2ec8c78066804a9811cccdafd5146c0a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
+      expected actions and instructs the large language model (LLM) to generate a
+      specific output. This prompt is concatenated with the input text, and the model
+      then creates the required output.\nThis describes the full template how the
+      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nText:
+      {0->1}\nOutput: {1->2}\n```\n\nHere:\n- \"Text: {0->1}\" is input template,\n-
+      \"{prompt}\" is the LLM prompt,\n- \"Output: {1->2}\" is the output template.\n\nModel
+      can produce erroneous output if a prompt is not well defined. In our collaboration,
+      we\u2019ll work together to refine a prompt. The process consists of two main
+      steps:\n\n## Step 1\nI will provide you with the current prompt along with prediction
+      examples. Each example contains the input text, the final prediction produced
+      by the model, and the user feedback. User feedback indicates whether the model
+      prediction is correct or not. Your task is to analyze the examples and user
+      feedback, determining whether the existing instruction is describing the task
+      reflected by these examples precisely, and suggests changes to the prompt to
+      address the incorrect predictions.\n\n## Step 2\nNext, you will carefully review
+      your reasoning in step 1, integrate the insights to refine the prompt, and provide
+      me with the new prompt that improves the model\u2019s performance."}, {"role":
+      "assistant", "content": "Sure, I\u2019d be happy to help you with this prompt
+      engineering problem. Please provide me with the current prompt and the examples
+      with user feedback."}, {"role": "user", "content": "\n## Current prompt\nFor
+      each given sequence of numbers, increment each number by 1 and provide the resulting
+      sequence. Ensure to process each input according to this rule precisely and
+      output the new sequence accordingly.\n\n## Examples\n### Example #0\n\nText:
+      1 5 1\n\nOutput: 2 6 2\n\nUser feedback: Prediction is incorrect. Correct answer:
+      \"2 5 2\"\n\n\n### Example #1\n\nText: 1 1 1\n\nOutput: 2 2 2\n\nUser feedback:
+      Prediction is correct.\n\n\n\nSummarize your analysis about incorrect predictions
+      and suggest changes to the prompt."}], "model": "gpt-4-turbo-preview"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '2306'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA3RWzW7cNhC++ykG6sGAIS+8dhI3vtVG0hYoirRpC7TdIpglRxJrilQ4pNdKEKCv
+        0dfrkxRDStpdp73owOH8ffPNJ348AaiMrm6gUh1G1Q/2/GW7++Xx7W/xh1+77Xh3q/T3258vvn1t
+        7/i72x+rWjz89k9ScfZaKd8PlqLxrphVIIwkUdfXlxcXl+vrq6ts6L0mK27tEM+fnV+sL5+fD4Ee
+        DO0mz84bRVzdwO8nAAAf81dqdJoeqxu4qOeTnpixpepmuQRQBW/lpEJmwxFdrOq9UXkXyeWyv3Jo
+        xw/GtRA7gsQUoCHSW1T3gE7nU3pEaYthCP7BaNI1mAhM1LPYA8EOGRB6w8lpCpJPS0jjwLhIYQgU
+        5xRL9MYHeFUiwxcXK7hFJg3e5VsqhUAuSsZ+iGAcx5CUAAvRw6YyTgXq5Qah6sClfksBtiOs602V
+        I2SEQfkQSEU7QgzouPGhp9KUcUOSJt4ncopgU63hOazFWeJfwgu43FQSEXXuZS2Gg2Qr+OkzwKSl
+        2BmeEQPj9gVwFCpA7DCWFosF0PGOAnDnk9WwpZz9OVxKI7vOqA5kXAG1UTHjPYFyyoewsNRj5Egb
+        hZGmeUS8lyo+H24NzsfZkrE6ZQjEg3dMkPs4SKQsBhNHCNRi0PMoI/I9YIQOnV5t3MZ9bR7IFQRQ
+        eMWG64kh2hO708IaQXJLgA4McyLYmdhB53cHc1tos0xr3yk0wfcH9ZVJZL9//vpbWEqClXDlmGOA
+        1rSOS76lAZ+iNY70DEYJWoOm3ktWXKg7wzRPrkmupDGSyVq/m2/OiwIhWQLfwMJXufGUsisQ8M7O
+        3qa2JZaW7zp0LbEAJeHe5JJuzs7k3p13bDSFo6pK4xSE4Ch8Ng4CWZw3Zt/YEZTCAlBTMgwEjpSo
+        SRjFCbUOxLxn8QG0XAPywcCm3NO4MrB76m8PV9u4XGSurBXClPnlfTz3KcpazvsjCnS8Yguy2k8M
+        LnwHBG1YBRrQqfEpsY9lyQfAYbDiJ0X4Jt+VUTHwQMo05ikdVvCN39EDhVqAGbzIp0FrZSV0UvS5
+        9vkgZwuPS6rtmNvhGkafoDdtF2W78zxnocGybc1cnvOxrMhRQYBbnyIoDNSkUof8PDK9HgdSwiKf
+        ovI98TH+MhvZdWl3Ba99yIwQ0twIvTaVHGWK5unsJdI3E2m5hv/X3zyzaUoFV+JkM+/nSCt45TgF
+        ylAGL4wrYYomo1J+EhlfxCRv0RBIGSY75gwTUSSBo92+yMXZjit4YwmZJmjy3QUSZX2OJaI+FdPR
+        WBRiEQimJ9uCfNTvNJEl+c5YK8pGj5h5v4bkTASLoSVRVFG8WAQq75kPq00loGfplvnniVM/dMjm
+        A/FCzCPCSv/klE8B897OLJgb9c2eAw8UODGgignt0n4NW/n5xWDKr2kgvDeurQtGwbTGoT0W3Z2o
+        uLKE4b/+AoHeJ1MYwatqeml8Wp4o1rdD8Ft5zrhk7XLeGGe4excI2Tt5jnD0Q3H/dALwR34KpaPX
+        TVX4/y76e3IS8Nn19BSq9q+vvfXq5dVkjT6i3Ru+fHF1MpVY8ciR+neNca1sq8lPIyn05NPJvwAA
+        AP//AwA4dUZ5GQoAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d805b88f8b1f4a-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:49:12 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=rabMRXvjjU2dIBLBYkqeNJrSg6cZvFovc84SPTJImb4-1720021752-1.0.1.1-VbjEsi0QGKPEu5FtAquVuLfS2UmVPcxALfJ0j.NIdZl9AwoDexJehglJFGI5MY5X2DCXIJ8cmPINKUvEmLE4Xw;
+        path=/; expires=Wed, 03-Jul-24 16:19:12 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=PJE1uTKlp7yOVpur4tkzY3Rn47TvoHdAXxa0UIhentQ-1720021752021-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '18491'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '1999464'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 16ms
+      x-request-id:
+      - req_daa0fac39ccbb8a12831f4b6d82b8f5b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
+      expected actions and instructs the large language model (LLM) to generate a
+      specific output. This prompt is concatenated with the input text, and the model
+      then creates the required output.\nThis describes the full template how the
+      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nText:
+      {0->1}\nOutput: {1->2}\n```\n\nHere:\n- \"Text: {0->1}\" is input template,\n-
+      \"{prompt}\" is the LLM prompt,\n- \"Output: {1->2}\" is the output template.\n\nModel
+      can produce erroneous output if a prompt is not well defined. In our collaboration,
+      we\u2019ll work together to refine a prompt. The process consists of two main
+      steps:\n\n## Step 1\nI will provide you with the current prompt along with prediction
+      examples. Each example contains the input text, the final prediction produced
+      by the model, and the user feedback. User feedback indicates whether the model
+      prediction is correct or not. Your task is to analyze the examples and user
+      feedback, determining whether the existing instruction is describing the task
+      reflected by these examples precisely, and suggests changes to the prompt to
+      address the incorrect predictions.\n\n## Step 2\nNext, you will carefully review
+      your reasoning in step 1, integrate the insights to refine the prompt, and provide
+      me with the new prompt that improves the model\u2019s performance."}, {"role":
+      "assistant", "content": "Sure, I\u2019d be happy to help you with this prompt
+      engineering problem. Please provide me with the current prompt and the examples
+      with user feedback."}, {"role": "user", "content": "\n## Current prompt\nFor
+      each given sequence of numbers, increment each number by 1 and provide the resulting
+      sequence. Ensure to process each input according to this rule precisely and
+      output the new sequence accordingly.\n\n## Examples\n### Example #0\n\nText:
+      1 5 1\n\nOutput: 2 6 2\n\nUser feedback: Prediction is incorrect. Correct answer:
+      \"2 5 2\"\n\n\n### Example #1\n\nText: 1 1 1\n\nOutput: 2 2 2\n\nUser feedback:
+      Prediction is correct.\n\n\n\nSummarize your analysis about incorrect predictions
+      and suggest changes to the prompt."}, {"role": "assistant", "content": "Analyzing
+      the user feedback and the examples provided, it seems there was a misunderstanding
+      in interpreting the feedback for Example #0. Based on the current prompt instruction
+      to \"increment each number by 1,\" the model correctly transformed the input
+      sequence \"1 5 1\" to \"2 6 2\" by adding 1 to each number. The user feedback
+      for this example incorrectly stated that the correct answer should be \"2 5
+      2,\" which contradicts the prompt''s instructions. This indicates a mistake
+      in the user feedback, not in the model''s response or the prompt''s clarity
+      regarding the task at hand.\n\nGiven this analysis, there doesn''t seem to be
+      an issue with how the model interpreted the instructions from the prompt. The
+      model\u2019s prediction for Example #0 aligns with the task outlined in the
+      prompt, demonstrating the model''s correct function in following the provided
+      rule of incrementing each number by 1. \n\n**Suggested Changes to the Prompt:**\n\nConsidering
+      the model\u2019s performance in relation to the prompt instructions, no changes
+      are necessary to address incorrect predictions, as the model performed the task
+      correctly based on the information given. The input-output example and user
+      feedback provided do not indicate a discrepancy in the model''s understanding
+      or application of the rules specified in the prompt. However, to potentially
+      reduce misunderstanding or misinterpretation by users, you might consider adding
+      a clarification note within the prompt about carefully reviewing expected outcomes
+      based on the task''s rules. For instance:\n\n\"For each given sequence of numbers,
+      increment each number by 1 and provide the resulting sequence. Ensure to process
+      each input according to this rule precisely and output the new sequence accordingly.
+      Please review the outcomes closely to ensure they align with these instructions,
+      as each number in the sequence will be exactly 1 unit larger than its predecessor.\"\n\nThis
+      addition emphasizes the rule application and encourages a careful review of
+      expected versus actual outcomes, but strictly speaking, the original instructions
+      were clear regarding the task requirements."}, {"role": "user", "content": "\nNow
+      please carefully review your reasoning in Step 1 and help with Step 2: refining
+      the prompt.\n\n## Current prompt\nFor each given sequence of numbers, increment
+      each number by 1 and provide the resulting sequence. Ensure to process each
+      input according to this rule precisely and output the new sequence accordingly.\n\n##
+      Follow this guidance to refine the prompt:\n\n1. The new prompt should should
+      describe the task precisely, and address the points raised in the user feedback.\n\n2.
+      The new prompt should be similar to the current prompt, and only differ in the
+      parts that address the issues you identified in Step 1.\n    Example:\n    -
+      Current prompt: \"Generate a summary of the input text.\"\n    - New prompt:
+      \"Generate a summary of the input text. Pay attention to the original style.\"\n\n3.
+      Reply only with the new prompt. Do not include input and output templates in
+      the prompt.\n"}], "model": "gpt-4-turbo-preview"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '5416'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SST4vbMBDF7/4Ug85OiEND2NzKplvopRRKylJKUOSJra48o0oj75ol373Izr+9
+        +DAz7/k3mvdeAChbqw0o02oxnXezh+b119fd50dx/e77t/CQ0tPuR2+3z8P2+acqs4IPf9HIRTU3
+        3HmHYpmmtgmoBbNrtV4uFstqvVqOjY5rdFnWeJl9mi2q5WrmA/YWX8/Klq3BqDbwuwAAeB+/mZFq
+        fFMbWJSXSocx6gbV5joEoAK7XFE6RhtFk6jy1jRMgjRiP3EA1KaFxvZIEPFfQjIIfARK3QFDLMGS
+        CdghyTQ51eEwQAWaavCBe1sjSIsQMCYnlpqr0xy+UEwBQThPGoxxsrHkk4A2hkOdBcIgrY0QkkPw
+        AY2N6Ia7v+ehCwAGa6DXLmHmwDdtxA3AhOWIxEmyeSZKvgm6xvq22vWXbpjDltPB4cy0aF7uNogZ
+        BydwbUwK2gyjs65bDKPNyItgKUpIJt+8BMMUbY3hHjW/laXz7LhyhHxEj1TnN82uH3a0Mr7tXJ0P
+        drpe2nHjAx9yKig5d60fLdnY7gPqyJSvGoX9JD8VAH/GRKUPIVE+cOdlL/yClA2rxRTNMR6XFN/a
+        69W5KSza3cmq5bo4M6o4RMFuf7TUYPDBjhHLpMWp+A8AAP//AwARraPkYQMAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d8062effee7b26-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:49:17 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=8hLv4._HCr89Cc2sVXo2vEawD_tABo4hsfDZ338KGa0-1720021757-1.0.1.1-V4TZtReX34EivzzdCBouI0VxcDRCdke8icts9ig608mIXL_ZY3AqdWptqpYEtilHxjwKPP.OCP4LiNwfgiYfVw;
+        path=/; expires=Wed, 03-Jul-24 16:19:17 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=a2Mx3d70sd7vvfVHWHQrp437HcLxeR3tJEAVg5Rej.E-1720021757283-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '4895'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '1998714'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 38ms
+      x-request-id:
+      - req_1d453293365bbe3679e49ba1e8fa9785
+    status:
+      code: 200
+      message: OK
+version: 1

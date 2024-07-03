@@ -1,34 +1,7 @@
-from utils import patching, PatchedCalls, OpenaiChatCompletionMock
+import pytest
 
 
-@patching(
-    target_function=PatchedCalls.OPENAI_MODEL_RETRIEVE.value,
-    data=[{"input": {}, "output": {}}],
-)
-@patching(
-    target_function=PatchedCalls.OPENAI_CHAT_COMPLETION.value,
-    data=[
-        {
-            "input": {
-                "model": "gpt-3.5-turbo",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "Generate Python code that takes the input JSON and returns the output JSON",
-                    },
-                    {
-                        "role": "user",
-                        "content": 'Input JSON format: {"a": 1, "b": 2}\n'
-                        'Input JSON format: {"a": 3, "b": 4}\n'
-                        'Input JSON format: {"a": 5, "b": 6}\n'
-                        "Code: ",
-                    },
-                ],
-            },
-            "output": OpenaiChatCompletionMock("def convert(input_json):\npass"),
-        }
-    ],
-)
+@pytest.mark.vcr
 def test_code_generation():
     from adala.skills import AnalysisSkill, LinearSkillSet  # type: ignore
     from adala.agents import Agent  # type: ignore
@@ -59,7 +32,7 @@ def test_code_generation():
         pd.DataFrame(
             [
                 {
-                    "code": "def convert(input_json):\npass",
+                    "code":'```python\nimport json\n\n# Input JSON\ninput_json = [\n    {"a": 1, "b": 2},\n    {"a": 3, "b": 4},\n    {"a": 5, "b": 6}\n]\n\n# Output JSON\noutput_json = json.dumps(input_json)\n\nprint(output_json)\n```' 
                 }
             ]
         ),
