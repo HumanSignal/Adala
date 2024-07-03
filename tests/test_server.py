@@ -11,7 +11,7 @@ import pandas as pd
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 LS_API_KEY = os.getenv("LS_API_KEY")
 
-payload = {
+SUBMIT_PAYLOAD = {
     "agent": {
         "environment": {
             "type": "AsyncKafkaEnvironment",
@@ -161,12 +161,12 @@ def test_streaming(client):
 
     with NamedTemporaryFile(mode="r") as f:
 
-        payload["result_handler"] = {
+        SUBMIT_PAYLOAD["result_handler"] = {
             "type": "CSVHandler",
             "output_path": f.name,
         }
 
-        resp = client.post("/jobs/submit-streaming", json=payload)
+        resp = client.post("/jobs/submit-streaming", json=SUBMIT_PAYLOAD)
         resp.raise_for_status()
         job_id = resp.json()["data"]["job_id"]
 
@@ -226,7 +226,7 @@ async def test_streaming_n_concurrent_requests(async_client):
 
     outputs = await asyncio.gather(
         *[
-            arun_job_and_get_output(client, payload["agent"], batch_payload_datas)
+            arun_job_and_get_output(client, SUBMIT_PAYLOAD["agent"], batch_payload_datas)
             for _ in range(n_requests)
         ]
     )
