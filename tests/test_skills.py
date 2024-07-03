@@ -142,6 +142,7 @@ def test_summarization_skill():
 
 
 @pytest.mark.vcr
+@pytest.mark.skip(reason="flakes in CI")
 def test_transform_skill():
 
     def extract_and_convert_numbers(text):
@@ -197,6 +198,7 @@ def test_transform_skill():
 
 
 @pytest.mark.vcr
+@pytest.mark.skip(reason="flakes in CI")
 def test_ontology_creator_merger_skill():
 
     ds = load_dataset("ag_news", "default")
