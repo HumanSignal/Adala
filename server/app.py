@@ -1,7 +1,6 @@
 import logging
-import pickle
 from enum import Enum
-from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, List, Optional, TypeVar
 import os
 import json
 
@@ -9,19 +8,16 @@ import fastapi
 from adala.agents import Agent
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import UnknownTopicOrPartitionError
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, SerializeAsAny, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic.functional_validators import AfterValidator
-from typing_extensions import Annotated
 import uvicorn
 from redis import Redis
 
-from log_middleware import LogMiddleware
-from tasks.process_file import app as celery_app
-from tasks.process_file import streaming_parent_task
-from utils import get_input_topic_name, get_output_topic_name, Settings, delete_topic
+from server.log_middleware import LogMiddleware
+from server.tasks.process_file import app as celery_app
+from server.tasks.process_file import streaming_parent_task
+from server.utils import get_input_topic_name, get_output_topic_name, Settings, delete_topic
 from server.handlers.result_handlers import ResultHandler
 
 
@@ -258,16 +254,23 @@ async def health():
     return {"status": "ok"}
 
 
+async def _get_redis_conn():
+    """
+    needs to be in a separate function to allow dependency injection for testing
+    """
+    redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+    redis_conn = Redis.from_url(redis_url, socket_connect_timeout=1)
+    return redis_conn
+
+
 @app.get("/ready")
-async def ready():
+async def ready(redis_conn: Redis = Depends(_get_redis_conn)):
     """
     Check if the app is ready to serve requests.
 
     See if we can reach redis. If not, raise a 500 error. Else, return 200.
     """
     try:
-        redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-        redis_conn = Redis.from_url(redis_url, socket_connect_timeout=1)
         redis_conn.ping()
     except Exception as exception:
         raise HTTPException(

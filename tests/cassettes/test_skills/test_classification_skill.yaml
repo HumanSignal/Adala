@@ -1,0 +1,1594 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: GET
+    uri: https://api.openai.com/v1/models/gpt-4
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6rmUlBQykxRslJQSi8o0TVR0gEJ5CdlpSaXgARz81NScyCCyUWpiSWpIKWGZhbm
+        FhZGJoaGENXleakp8UmVIPX5Bal5iZlKXLVcAAAAAP//AwCF+4fvWgAAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d82fe3c9b25209-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:40 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=RWSc3PRBX9XzJ9OyR5kvJ5JpR2HYAI1QjqRsF0zkP4c-1720023460-1.0.1.1-LQULvgTj2ISiP9kRly8_nSxxkLA_jLEbA1Vac.P4z3ewpTrVxtjp3WqOdM.OLP15xKk2i8CsApEiRbco9intSA;
+        path=/; expires=Wed, 03-Jul-24 16:47:40 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=qNDJtOnMFvwz2lKsV8.Mhczs2j8Gq.PCNoE4qTIO9Fs-1720023460565-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      access-control-allow-origin:
+      - '*'
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '49'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15724800; includeSubDomains
+      x-request-id:
+      - req_22e52f867ae5ffbc53d9bb374fdc9a71
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: GET
+    uri: https://api.openai.com/v1/models/gpt-3.5-turbo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6rmUlBQykxRslJQSi8o0TXWM9UtKS1KylfSAUnkJ2WlJpeAJHPzU1JzIILJRamJ
+        JakgLYZm5uZmhgZmBkYQ1eV5qSnxSZUg9fkFqXmJmUpctVwAAAAA//8DAA4WdMNiAAAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d82fe51f067c26-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:40 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=Bop90NMDmiv7uoab4nfcofZGQmcZ26GrU1M5SAspARI-1720023460-1.0.1.1-9awwRosO_pifHs0NlC4lfPyzWfajdKw..bpgXki3dvfEQsHQds8TUY9I0yiHZGPzOjZf0j.8R8CC_xHEZidukQ;
+        path=/; expires=Wed, 03-Jul-24 16:47:40 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=UBa5tulqjkI2RjWpRzjLEulQZb0Ou4YicqUJs1TnTsA-1720023460735-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      access-control-allow-origin:
+      - '*'
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '22'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15724800; includeSubDomains
+      x-request-id:
+      - req_567940cb23dce47854cff2847cba46ae
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Apple product
+      with a sleek design.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '388'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQTW/CMAyG7/0Vkc8UlVJA63kfEtp1p2lCIbghI42j2GhMiP8+pXSwXXLw6+fV
+        45wLpcDtoFVg9lpMH335YL9OVBtr528vcd2R8Ktb14+H5jk2DJNM0PYTjfxSU0N99CiOwjU2CbVg
+        bp2t6qqq582yGoKedugzZqOU8+milGPaUlnN6sVI7skZZGjVe6GUUufhzY5hhydo1dAzTHpk1hah
+        vS0pBYl8noBmdiw6CEzuoaEgGAbtJ49GEgVnGMaFy63Zk42JttkiHL2/zTsXHO83CTVTyC0sFK/4
+        pVDqY7jg+E8KYqI+ykbogCEXrpprHdz/7B7WYyYk2v9hlsWoB/zNgv2mc8FiiskN12TJ4lL8AAAA
+        //8DAPe0pPvMAQAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d82fe5fd9f7984-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:41 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=iOlweG6nxUsTXFIBgY2q85URNM3Q29qBvLPGM2cK62A-1720023461-1.0.1.1-gwCqLAy2gbK69FOx_LysJyqaSSBAltUhNos2MS0YadVphCVkPmLQ_pLJ9cEWIZvGLPto6.Wfo5pRHXrBuN7oOw;
+        path=/; expires=Wed, 03-Jul-24 16:47:41 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=tAFC3S_4eP7RotoGzBatm32gyZE0O4x18sOZ.NlAbt8-1720023461029-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '111'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999914'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_939457edcd3392b35e16958f7a248bbd
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Laptop stand
+      for the kitchen.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '383'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQQU8CMRCF7/srJj2zuCyshL2ZEMVEYoLxoMaQUoal2u007WyEEP676bKAXnp4
+        b97rN3NIAIReixKE2kpWtTPppPrZuUVe5PP9++J2dDd9e3yZFE/z/cPz7FX0YoJWX6j4nOorqp1B
+        1mRPtvIoGWPrYJxnWT4c3Q5ao6Y1mhirHKfDfpFy41eUZoO86JJb0gqDKOEjAQA4tG9ktGvciRKy
+        3lmpMQRZoSgvQwDCk4mKkCHowNKy6F1NRZbRttj3jbeaG483M6oRpqjIi27yePnCUOU8rSKObYy5
+        6BttddguPcpANtYFJneKHxOAz3aV5h+dcJ5qx0umb7SxcDw81Ynr8a7mqPOYWJo/mXHS4YmwD4z1
+        cqNthd553a4VIZNj8gsAAP//AwDeC/H/1QEAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d82fe7e8f95182-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:41 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=EznW7foF9bVOQauxDBR02Q8nSDksLu.dj0kvVdaK56M-1720023461-1.0.1.1-xkE39h_IOlP2krnlf3qyayhWNUEyYnXIlFtEwlNwRAjJe8Kgfrl8jnneD7MaW4W9EzaPEQX2GVEREMCfKBqVdg;
+        path=/; expires=Wed, 03-Jul-24 16:47:41 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=1Tx8NoQidIjh5K14mZTSvx5F17fC5RkcG2gT_By.DX4-1720023461473-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '147'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999915'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_1783a2a7da66a619fe8d85575682c3f4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Chocolate leather
+      boots.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '378'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQPW/CMBCG9/wK62ZCk9BQkbUfQxlQl0pVVSHHHIkbx2fZh6BC/PfKIUC7eLj3
+        nlfP+ZgIAXoDlQDVSla9M+mi2R9cR8uPbvXc1UX31rDdrxazZfn6/gSTSFD9jYov1FRR7wyyJnuO
+        lUfJGFvzhyLLitn9PB+CnjZoItY4TmfTMuWdrynN8qIcyZa0wgCV+EyEEOI4vNHRbvAAlcgml0mP
+        IcgGobouCQGeTJyADEEHlpZhcgsVWUY7aL8Q8R6lv3s0xK22DYxrp2u/ocZ5qqOL3RlznW+11aFd
+        e5SBbOwKTO6MnxIhvoY7dv/UwHnqHa+ZOrSx8CE/18Ht525hOWZMLM0fZp6MehB+AmO/3mrboHde
+        DzdFyeSU/AIAAP//AwCL8tcX0gEAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d82feaac887b1e-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:41 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=TGzuez98WvCY1g9C4DBuhhbgaU5dqeIC_.pfC3uZlIQ-1720023461-1.0.1.1-x0JnKbd_yA3_yw6.jwlr9urcLZ.mXoFA4hoSVfeUuiOwcKTgr57PDEUzic5nuSO1N1r0gxyB3KTQM4M2Pa4zkA;
+        path=/; expires=Wed, 03-Jul-24 16:47:41 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=OteK9b3xEvy3XStE6MiI448ppAfv1kKck6XCi2K6z3k-1720023461946-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '294'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999916'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_dd39e58173ba5ce219425adf58099fd0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Wooden cream
+      for surfaces.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '380'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQS2/CMBCE7/kV1p4JDeHV5ly1SFXvVasKGbMEF9tr7I2AIv575RAevfgwszP+
+        do+ZEKCXUAlQa8nKepM/1bv9drt7fN3o3yCb989ZiBNb19J8HN6glxK0+EHFl1RfkfUGWZM72yqg
+        ZEytg2lZFOVwNClbw9ISTYrVnvNhf5xzExaUF4Ny3CXXpBVGqMRXJoQQx/ZNjG6Je6hE0bsoFmOU
+        NUJ1HRICApmkgIxRR5aOoXczFTlG12K/NMFpbgI+zMiieEZFAbrJ0/ULQ7UPtEg4rjHmqq+003E9
+        DygjuVQXmfw5fsqE+G5Xaf7RgQ9kPc+ZNuhS4bQ818HteDdz1HlMLM1dZpJ1eBAPkdHOV9rVGHzQ
+        7VoJMjtlfwAAAP//AwD6soi71QEAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d82fedce9a7c32-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:42 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=6WAFlH611d68WaKucyZGg6ENe4u6vTmt9Qcoo65LW78-1720023462-1.0.1.1-7QjXgpLGVz2DKJe8QQ3ARND4FHxwulr.K7riAG4bzvHPZ8hlTmm0annhm0Ub3zvCvuoRgLRVRCKpTUxV7KBoFw;
+        path=/; expires=Wed, 03-Jul-24 16:47:42 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=qc8D9KC1wt6ME9pxQvk5kZNIEsSZFY772m3JdRfvIZw-1720023462366-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '159'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999915'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_a6e32001b9ce94c2a1fc73e4e4611c03
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Natural finish
+      for your lips.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '383'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQwU7DMBBE7/mKlc9NSdOWlBwBgcSlICEuCFWus00MjtfYG9Gq6r8jp2kLFx9m
+        dsZvd58ACF2JEoRqJKvWmfSm/tl+uwcd2qfqpbhevGXL16V8XDR4byZiFBO0/kTFp9RYUesMsiZ7
+        tJVHyRhbJ0WeZfl0dp33RksVmhirHafT8Tzlzq8pzSb5fEg2pBUGUcJ7AgCw79/IaCvcihKy0Ulp
+        MQRZoyjPQwDCk4mKkCHowNKyGF1MRZbR9ti3KDveXT2jD2SlgTvpUQyTh/MXhmrnaR1xbGfMWd9o
+        q0Oz8igD2VgXmNwxfkgAPvpVun90wnlqHa+YvtDGwmJ6rBOX413M2eAxsTR/MkUy4ImwC4ztaqNt
+        jd553a8VIZND8gsAAP//AwBpkpdH1QEAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d82ff04ef35211-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:42 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=YgM_4KFDNSLPnhUTO33jrgVwQRWpeOTIOgyAUH4uOyU-1720023462-1.0.1.1-3e8Usk1LZjtC7rDAPKiZSNK7tubO60ynEdKnRE5WAFsUJCrVawP1KBSfZ6iQHCSzGzrxmeRb_SYtooBb5AclOA;
+        path=/; expires=Wed, 03-Jul-24 16:47:42 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=6SUCDVn_BBOHK5Af4NG7CSUSxty8vkwUikFFtUP6VR8-1720023462805-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '148'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999915'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_26127300076a4fb5245aa6065e40ead3
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Apple product
+      with a sleek design.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '388'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQy27CMBBF9/kKa9YEhfBSs0Ri1deyi6pCjhkSg+Ox7IkAIf69cghJu/Fi7pyr
+        M74lQoDeQyFA1ZJV40z6Up0vvpYfZnOUi/a1rN627ddV4elTnd9hEgkqj6j4SU0VNc4ga7KPWHmU
+        jLF1ts6zLJ8vVvMuaGiPJmKV43Q+Xabc+pLSbJYve7ImrTBAIb4TIYS4dW90tHu8QCGyyXPSYAiy
+        QiiGJSHAk4kTkCHowNIyTMZQkWW0nfbWoGJPVqsA/cJ9aDZUOU9ltLCtMcP8oK0O9c6jDGRjS2By
+        D/yeCPHTXdD+kwLnqXG8YzqhjYXrxaMOxj8bw7zPmFiaP8wq6fUgXANjsztoW6F3XnfXRMnknvwC
+        AAD//wMA71GvUcwBAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d82ff31efa1f2d-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:43 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=Eb42sMOIGxXHnztsDeEJ7oIXPa1R8Rs5fyitR1lEqXs-1720023463-1.0.1.1-fTa0uQviPq.h7Ww98mHRFlhO_RPJAk2VAri.lzCGcVESaI5z8_GlKT8F.k9OLNRCLQDyjUAKa6t_ea0g6c.dxg;
+        path=/; expires=Wed, 03-Jul-24 16:47:43 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=14FCsBmJMltc5VxL4zr4q5_.f0dvLC3XtrYeJd7ze0I-1720023463232-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '115'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999914'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_62e9d0aa210872e3d1dbc85dbde56af7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Laptop stand
+      for the kitchen.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '383'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQwW7CMBBE7/kKa8+EhgSKmmOFUA+V+gFVhYyzSdzaXsveCFrEv1cOAdqLDzM7
+        47d7yoQA3UAtQPWSlfUmf+oOx7BYbRqikqtDv30rfvRzW7HB1wCzlKD9Jyq+puaKrDfImtzFVgEl
+        Y2pdrMuiKKvlYzUalho0KdZ5zqv5Kuch7CkvFuVqSvakFUaoxXsmhBCn8U2MrsEj1KKYXRWLMcoO
+        ob4NCQGBTFJAxqgjS8cwu5uKHKMbsbdDcJqHgA8vZFFsUFGAafJ8+8JQ5wPtE44bjLnprXY69ruA
+        MpJLdZHJX+LnTIiPcZXhHx34QNbzjukLXSpcV5c6uB/vbi4nj4ml+ZNZZxMexO/IaHetdh0GH/S4
+        VoLMztkvAAAA//8DAPMbAULVAQAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d82ff5ae0b51ef-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:43 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=eXvJtQ4PmEUuw6i5y5PAJ2CITMos8ETifTrmOHC8O1g-1720023463-1.0.1.1-K6PHGuKGUGLUz3Kz.f1wrhHFr4oxeGD6k36gbSHqg0gEEVcaBmxqioiEl_rnN0KkjiFvYzC.uTyAL4l1Mu_oLg;
+        path=/; expires=Wed, 03-Jul-24 16:47:43 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=.Ve2Ze9EfNSPH4nZ.Q.dpPEv_UzmpdDgWBNiwraFegU-1720023463596-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '185'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999915'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_379039853ea0e9659ef4c09ded07a4a6
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Chocolate leather
+      boots.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '378'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQwW7CMAyG732KyGfKShmg9bppR7RxmjRNKKSmDUviKHFVJsS7TykFtksO/v39
+        +pxTJgToGioBqpWsrDf5U9MfQ9y80XLdlX3ovXPusFYv9n3DHzBJBO0OqPhKTRVZb5A1uUusAkrG
+        1DpblUVRzh+X8yGwVKNJWOM5n08XOXdhR3kxKxcj2ZJWGKESn5kQQpyGNzm6Go9QiWJynViMUTYI
+        1W1JCAhk0gRkjDqydAyTe6jIMbpB+5WIe5Th4dkQt9o1MK6db/2GGh9ol1xcZ8xtvtdOx3YbUEZy
+        qSsy+Qt+zoT4Gu7o/qmBD2Q9b5m+0aXC1exSB/efu4eLMWNiaf4wy2zUg/gTGe12r12DwQc93JQk
+        s3P2CwAA//8DAAN4xZXSAQAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d82ff80e217b0c-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:44 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=Y2GT5JM8zaK.aUXSQsqWOiLtoe1rLSztGty.nRLbL1U-1720023464-1.0.1.1-aIzWNuC3Vfw6R5JlH9fgLVpD_dhCfdQyvSUNpfT3xExNI9fYMQ.sqPs0WfxH8cZsus7nloMOSfsWoFkWTYAlOw;
+        path=/; expires=Wed, 03-Jul-24 16:47:44 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=pVnUasW8Q3sW13NJHM0BdL5JjzL8qP.ZYbfupmppOic-1720023464018-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '237'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999917'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_22d1c7614c39113da996eb06b063a6b0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Wooden cream
+      for surfaces.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '380'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQzW7CMBCE73kKa89AQ/hrc6xQRQ+cqlaqqgo5ZgkmtteyNyoV4t0rhxTaiw8z
+        O+Nv95QJAXoLpQC1l6ysN8OH+usY14t3S6/Ph+alYumbx+V9teZV8waDlKDqgIp/UyNF1htkTe5i
+        q4CSMbWOF0WeF5PpfNoZlrZoUqz2PJyMZkNuQ0XDfFzM+uSetMIIpfjIhBDi1L2J0W3xCKXIB7+K
+        xRhljVBeh4SAQCYpIGPUkaVjGNxMRY7RddhPbXCa24B3K7IolqgoQD95vn5hqPaBqoTjWmOu+k47
+        HfebgDKSS3WRyV/i50yIz26V9h8d+EDW84apQZcKF8WlDm7Hu5nT3mNiaf5k5lmPB/E7MtrNTrsa
+        gw+6WytBZufsBwAA//8DANJxr7/VAQAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d82ffa9d951f45-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:44 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=h46ZnZFzx8w_49toFJThRzmiouNu839sdkTxXpl4J4Y-1720023464-1.0.1.1-x8lyWh_0MrulePn97OPN3mP961Hn7gVle01wdsE674u2RrDyHyve8gz..ydqssGJRQVOVGW2LkwX3wB2b27oew;
+        path=/; expires=Wed, 03-Jul-24 16:47:44 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=RUpZHOibnf6NMzQT3Mp8BLxhSLWnJQpGDPilseYopNM-1720023464424-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '192'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999915'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_f5ef0af480185e145fe2d79b8baa4082
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Natural finish
+      for your lips.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '383'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQS0/DMBCE7/kVK5+bkr5FjuUlxKVClRAgFDnuNjU4XmNvRKuq/x05TVu4+DCz
+        M/529wmA0CuRg1Abyap2Jr2ufrbhfjH/Vs3z7eN6slzu3p5epg935fa1FL2YoPITFZ9SfUW1M8ia
+        7NFWHiVjbB3Mhlk2HI2n49aoaYUmxirH6ag/SbnxJaXZYDjpkhvSCoPI4T0BANi3b2S0K9yKHLLe
+        SakxBFmhyM9DAMKTiYqQIejA0rLoXUxFltG22HOUDe+uFugDWWngRnoU3eTh/IWhynkqI45tjDnr
+        a2112BQeZSAb6wKTO8YPCcBHu0rzj044T7XjgukLbSycjY514nK8iznuPCaW5k9mlnR4IuwCY12s
+        ta3QO6/btSJkckh+AQAA//8DAES4tHbVAQAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d82ffd6a6a538a-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:45 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=nSQiXKKsUlI0FNRGR0aFLl2p_Hc3nkPkKnM1Aya5WfA-1720023465-1.0.1.1-Qe6dgPrkXea62P57puFnBqYRQ9v4ckvkzI9gwUzozrGqPNeSOADn223A59rlDTpo6q9WM1lNh.WOZktdAGJXvw;
+        path=/; expires=Wed, 03-Jul-24 16:47:45 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=UQk5yxSjkf4jXaewJWPoyn1gqKYnS9EVkC1QNzJQUig-1720023465101-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '267'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999915'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_5ae3d024be872788353fd7296f88105e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Apple product
+      with a sleek design.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '388'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQwW7CMAyG732KyGeKSilU9IjEldOkaZsmVIIp2ZI4is3GhHj3KaXAdsnBv79f
+        n3POlAKzg0aBPrSiXbD5ovs+yXpdP/PTKk6rF7881Y4X1Wtd+y8YJYK2H6jlRo01uWBRDPlrrCO2
+        gql1UpdFUU6r+awPHO3QJqwLkk/Hs1yOcUt5MSlnA3kgo5GhUW+ZUkqd+zc5+h2eoFHF6DZxyNx2
+        CM19SSmIZNMEWmbD0nqB0SPU5AV9r72yqCWSN5phWLjcmy11IdI2Wfijtff53njDh03ElsmnFhYK
+        V/ySKfXeX3D8JwUhkguyEfpEnwrr6loHjz97hOWQCUlr/zDzbNAD/mFBt9kb32EM0fTXJMnskv0C
+        AAD//wMA+VSpnswBAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d830018b991f48-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:45 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=bSxdjGqRUOCJXBrypBkRgPyOKg67XYaAqpzh5mBN5OY-1720023465-1.0.1.1-d.g4pSG2UPrtTzAYRaRGtOJoLV.T98k4Cc..RTpCkFUqtOy8X2kjFtrLuTOroHUws.x9j1WKl_eCx2OX.FH9sg;
+        path=/; expires=Wed, 03-Jul-24 16:47:45 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=C.UdkYWRF2CEoQ9IobXycAh.b6ul6dfRTwBa7fIEiv4-1720023465555-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '222'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999914'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_a58378ae04b19e26f91a5897b7d10678
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Laptop stand
+      for the kitchen.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '383'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQT0sDMRDF7/spwpy7dfvPxb2JrYoUFIQiiCxpOt2mZjMhmaWV0u8u2W5bveTw
+        3ryX38whEQL0CgoBaiNZ1c6kd9Vuz7MFvubvT/f25WE6n29p9/axCFM9g15M0HKLis+pvqLaGWRN
+        9mQrj5Ixtg7yYZYNR+PbSWvUtEITY5XjdNSfpNz4JaXZYDjpkhvSCgMU4jMRQohD+0ZGu8I9FCLr
+        nZUaQ5AVQnEZEgI8maiADEEHlpahdzUVWUbbYj823mpuPN48U41iioo8dJPHyxeGKudpGXFsY8xF
+        X2urw6b0KAPZWBeY3Cl+TIT4aldp/tGB81Q7Lpm+0cbCfHSqg+vxrua485hYmj+ZPOnwIPwExrpc
+        a1uhd163a0XI5Jj8AgAA//8DALJamNjVAQAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d830041c51533b-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:46 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=8nm3OYc8lb3PeID3MWpAHhDQ.VyHjBtx8PstBA5dLDU-1720023466-1.0.1.1-VOb.VUcYMAD899fOeNziVsMAFaGAyp72da0_KP10bsHYf_AkSDMudgWieb0uDURD9CtSB_rUUht6L4xhQQMFgw;
+        path=/; expires=Wed, 03-Jul-24 16:47:46 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=HgfWuALFyX9xApYk9Evi2zfhTQsqcjcVQvw7EtcJwtA-1720023466110-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '312'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999915'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_8aef2a842ce073a707d7cf157d015a1e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Chocolate leather
+      boots.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '378'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQwW7CMAyG732KyGfKSoFO63USV7TTmKYJpcGkYWkcJa5gQrz7lFJgu+Tg39+v
+        zzlnQoDZQS1AtZJV523+oo+nfn3oddlsNuHtuH7/WGhTOWydWsEkEdQcUPGNmirqvEU25K6xCigZ
+        U+vsuSyKcr6oqiHoaIc2YdpzPp8uc+5DQ3kxK5cj2ZJRGKEWn5kQQpyHNzm6HZ6gFsXkNukwRqkR
+        6vuSEBDIpgnIGE1k6Rgmj1CRY3SD9oqIjyjD06slbo3TMK5d7v2WtA/UJBfXW3uf740zsd0GlJFc
+        6opM/opfMiG+hjv6f2rgA3Wet0zf6FLh8+xaB4+fe4TLMWNiaf8wVTbqQfyJjN12b5zG4IMZbkqS
+        2SX7BQAA//8DAPbAr3bSAQAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d83007991d533e-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:46 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=X0tlgxJSyrZ3nbzlV12aDWykV9xncJyL4Sg5o6aup0Y-1720023466-1.0.1.1-02D5idz44Z9o.x9R7EAFGWaJ6MTiexNESrRt4vaQ9nUJQrNPmbZ19bH8dm2Vn5G8cA90xpfx7kcw.DND8oIq2g;
+        path=/; expires=Wed, 03-Jul-24 16:47:46 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=DLaBMMrabdaNEGoiIO3zzBOtEeXaTquauva6Kpq_BO8-1720023466495-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '213'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999916'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_9dd534f377fbb833a589271cc9a04cda
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Wooden cream
+      for surfaces.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '380'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQS0/DMBCE7/kVK5+bkqYPRG5VASHBgVuREKoSd5sabK+xN31Q9b8jp2kLFx9m
+        dsbf7iEBEGopChByXbI0Tqd39XbXbN10Ov/ehOrtZf/zup3Pnh9mm1k9FL2YoOoTJZ9TfUnGaWRF
+        9mRLjyVjbB3c5lmWD0eTSWsYWqKOsdpxOuyPU258RWk2yMddck1KYhAFvCcAAIf2jYx2iTtRQNY7
+        KwZDKGsUxWUIQHjSURFlCCpwaVn0rqYky2hb7MfGW8WNx5snMgj3KMmLbvJ4+UJT7TxVEcc2Wl/0
+        lbIqrBcey0A21gUmd4ofE4CPdpXmH51wnozjBdMX2lh4m5/qxPV4V3PUeUxc6j+ZSdLhibAPjGax
+        UrZG77xq14qQyTH5BQAA//8DAI/X3pTVAQAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d8300a8a327c34-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:47 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=85piZTsbG97v8BwiuLUB7xANGl.lqOehpGOs6mJm398-1720023467-1.0.1.1-WgqelMoieOXHJ54Pyk_O8oVMiTy.NKzd7pxP1TLUTjIn0_vOhlhnGl9jhfBrBFjwsLHGip2_WMD.9YiusFQYwg;
+        path=/; expires=Wed, 03-Jul-24 16:47:47 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=LPtpHfdm9pEYnQZ5PrXkXY7kP3jA0Rv4L3au1Zk1tMY-1720023467031-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '148'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999915'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_a4a2e2f5a927db536bfb4ea7794b384a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text.\n\nAssume
+      the following output labels:\n\nFootwear/Clothing\nElectronics\nFood/Beverages\nFurniture/Home
+      Decor\nBeauty/Personal Care\n\nDon''t output anything else - only respond with
+      one of the labels above."}, {"role": "user", "content": "Text: Natural finish
+      for your lips.\nCategory: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '383'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQzW7CMBCE73kKy2dCQ4BGzbFVf46oSFWlqkKOswRT22vZm5aAePfKIUB78WFm
+        Z/ztHhLGuKp5ybjcCJLG6fSu+dl9d0tTPe7fX/Nl9/xW76uXhUBrtk98FBNYbUHSOTWWaJwGUmhP
+        tvQgCGLrpMizLJ/OboveMFiDjrHGUTodz1NqfYVpNsnnQ3KDSkLgJftIGGPs0L+R0daw4yXLRmfF
+        QAiiAV5ehhjjHnVUuAhBBRKW+OhqSrQEtse+B9FSd7MAH9AKzR6EBz5MHi9faGycxyri2Fbri75W
+        VoXNyoMIaGNdIHSn+DFh7LNfpf1Hx51H42hF+AU2FhbTUx2/Hu9qzgaPkIT+kymSAY+HLhCY1VrZ
+        Brzzql8rQibH5BcAAP//AwCaWtpg1QEAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d8300d7e6b51df-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:17:47 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=b70d6n2ir4jFe5nfFNAhTSsDN_2KxaFT7BUFi1SAP2U-1720023467-1.0.1.1-dhe_l6ZaCQmD.p4dAjOpZs3_CcEMrEbuGqB19Yk4GSv6t58VpSArE4ig9bAEmWbPOqyoWSElXldQBQNrf_Cs9w;
+        path=/; expires=Wed, 03-Jul-24 16:47:47 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=2SfSBlgACem28Xb4U30mTcwntOtwuo4GQRdI7n7VoB0-1720023467632-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '308'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999915'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_e8051508f94e67b8e8f582a1482a05b4
+    status:
+      code: 200
+      message: OK
+version: 1
