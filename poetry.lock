@@ -4264,19 +4264,19 @@ datalib = ["numpy (>=1)", "pandas (>=1.2.3)", "pandas-stubs (>=1.1.0.11)"]
 
 [[package]]
 name = "openai-responses"
-version = "0.8.0"
+version = "0.8.1"
 description = "🧪🤖 Pytest plugin for automatically mocking OpenAI requests"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "openai_responses-0.8.0-py3-none-any.whl", hash = "sha256:ed9ed798ce8dab80a68d740a70d135b029e7fcc3552444bbb521081fd2fcc48e"},
-    {file = "openai_responses-0.8.0.tar.gz", hash = "sha256:f1841def73fa34e319561f24f4d4b8f50be11641cb527349003e2d62def24f4d"},
+    {file = "openai_responses-0.8.1-py3-none-any.whl", hash = "sha256:8c4f5cc72aea11d01d20d6081f75136f85c39c55909a7384e601fc353191723d"},
+    {file = "openai_responses-0.8.1.tar.gz", hash = "sha256:a80a3efc9f6eb7a7a4c44ee8106511b1a4594dcdd2bfdc3ee3f25db54a9f42f7"},
 ]
 
 [package.dependencies]
 faker = ">=24.2.0,<25.0.0"
 faker-openai-api-provider = "0.2.0"
-openai = ">=1.32,<1.35"
+openai = ">=1.32,<1.36"
 requests-toolbelt = ">=1.0.0,<2.0.0"
 respx = ">=0.20.2,<0.21.0"
 
@@ -5454,6 +5454,25 @@ files = [
 [package.dependencies]
 docker = ">=4.3.1"
 pytest = ">=6.0.1"
+
+[[package]]
+name = "pytest-recording"
+version = "0.13.1"
+description = "A pytest plugin that allows you recording of network interactions via VCR.py"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pytest_recording-0.13.1-py3-none-any.whl", hash = "sha256:e5c75feb2593eb4ed9362182c6640bfe19004204bf9a6082d62c91b5fdb50a3e"},
+    {file = "pytest_recording-0.13.1.tar.gz", hash = "sha256:1265d679f39263f115968ec01c2a3bfed250170fd1b0d9e288970b2e4a13737a"},
+]
+
+[package.dependencies]
+pytest = ">=3.5.0"
+vcrpy = ">=2.0.1"
+
+[package.extras]
+dev = ["pytest-recording[tests]"]
+tests = ["pytest-httpbin", "pytest-mock", "requests", "werkzeug (==3.0.1)"]
 
 [[package]]
 name = "python-dateutil"
@@ -6826,6 +6845,25 @@ docs = ["Sphinx (>=4.1.2,<4.2.0)", "sphinx-rtd-theme (>=0.5.2,<0.6.0)", "sphinxc
 test = ["Cython (>=0.29.36,<0.30.0)", "aiohttp (==3.9.0b0)", "aiohttp (>=3.8.1)", "flake8 (>=5.0,<6.0)", "mypy (>=0.800)", "psutil", "pyOpenSSL (>=23.0.0,<23.1.0)", "pycodestyle (>=2.9.0,<2.10.0)"]
 
 [[package]]
+name = "vcrpy"
+version = "6.0.1"
+description = "Automatically mock your HTTP interactions to simplify and speed up testing"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "vcrpy-6.0.1.tar.gz", hash = "sha256:9e023fee7f892baa0bbda2f7da7c8ac51165c1c6e38ff8688683a12a4bde9278"},
+]
+
+[package.dependencies]
+PyYAML = "*"
+urllib3 = {version = "<2", markers = "platform_python_implementation == \"PyPy\" or python_version < \"3.10\""}
+wrapt = "*"
+yarl = "*"
+
+[package.extras]
+tests = ["Werkzeug (==2.0.3)", "aiohttp", "boto3", "httplib2", "httpx", "pytest", "pytest-aiohttp", "pytest-asyncio", "pytest-cov", "pytest-httpbin", "requests (>=2.22.0)", "tornado", "urllib3"]
+
+[[package]]
 name = "vine"
 version = "5.1.0"
 description = "Python promises."
@@ -7426,4 +7464,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "e675e9345144103423b40832799f60f4a33829feeea9f6725d02528da8a6a241"
+content-hash = "afc1c4b526d500583f15b0ef5a6652821fce45999bbd472c5f7f72796bc2c688"

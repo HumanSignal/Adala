@@ -1,0 +1,303 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: GET
+    uri: https://api.openai.com/v1/models/gpt-4
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6rmUlBQykxRslJQSi8o0TVR0gEJ5CdlpSaXgARz81NScyCCyUWpiSWpIKWGZhbm
+        FhZGJoaGENXleakp8UmVIPX5Bal5iZlKXLVcAAAAAP//AwCF+4fvWgAAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d7dd6ebdf45197-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:21:23 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=2Sdo73.zeUFCkiM9HERDvi8nBawS3AT_Za7BfIJ743E-1720020083-1.0.1.1-e30OLzZW5pYAXnjtBoiHni8_Lc69v0SKB3REcBa3rmPpD7CM490xMBcOyLO2ZYZT6O2Cl0ZK7XJl.fK4mKH2vQ;
+        path=/; expires=Wed, 03-Jul-24 15:51:23 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=YzaRE6p1vdns2tQgwM_KwclyNuLf2XL7V0YBmBW_dD4-1720020083150-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      access-control-allow-origin:
+      - '*'
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '25'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15724800; includeSubDomains
+      x-request-id:
+      - req_8a694c95851c90accb6b4b0dec7f1f91
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: GET
+    uri: https://api.openai.com/v1/models/gpt-3.5-turbo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6rmUlBQykxRslJQSi8o0TXWM9UtKS1KylfSAUnkJ2WlJpeAJHPzU1JzIILJRamJ
+        JakgLYZm5uZmhgZmBkYQ1eV5qSnxSZUg9fkFqXmJmUpctVwAAAAA//8DAA4WdMNiAAAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d7dd7019025346-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:21:23 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=bNe6GoUaaMxohm4irdIiRCxkoAeTyIpX0a.t7uMv.hg-1720020083-1.0.1.1-fHRMuPrPQ8zKSUW0_SE4uT_vGQiDqPCJ.76hXLQbgfzoSP3ATbj6xHzIU91j8k9tsXulqIMQvmqHFjhYMNyMNw;
+        path=/; expires=Wed, 03-Jul-24 15:51:23 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=2AGvpkvPPcAb9BgKvlxwPY8uWMmFDrvswQMtK_.VaeA-1720020083304-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      access-control-allow-origin:
+      - '*'
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '24'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15724800; includeSubDomains
+      x-request-id:
+      - req_d97463dd7f33f580d9de08361e6081a7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "\n    Format description:
+      \n    id - Identifier for the labeling task from the dataset.\n    data - Data
+      dict copied from the input data task format.\n    project - Identifier for a
+      specific project in Label Studio.\n    predictions - Array containing the labeling
+      results for the task.\n    predictions.id - Identifier for the completed task.\n    predictions.lead_time
+      - Time in seconds to label the task.\n    predictions.result - Array containing
+      the results of the labeling or annotation task.\n    result.id - Identifier
+      for the specific annotation result for this task.\n    result.from_name - Name
+      of the tag used to label the region. See control tags.\n    result.to_name\t-
+      Name of the object tag that provided the region to be labeled. See object tags.\n    result.type\t-
+      Type of tag used to annotate the task.\n    result.value - Tag-specific value
+      that includes details of the result of labeling the task. The value - structure
+      depends on the tag for the label. For more information, see Explore each tag.\n    predictions.score
+      - The overall score of the result, based on the probabilistic output, confidence
+      level, or other.\n\n    Following the target JSON format provided, write a minimal
+      python code that transform input json to this format.     Assume the input data
+      will be read from the standard input (stdin), and the output generated will
+      be directed to the standard output (stdout)."}, {"role": "user", "content":
+      "Input JSON: {\"outputs\": [{\"entity_group\": \"ORG\", \"score\": 0.9994323253631592,
+      \"word\": \"Apple Inc\", \"start\": 0, \"end\": 9}, {\"entity_group\": \"MISC\",
+      \"score\": 0.997283935546875, \"word\": \"iPhone 14\", \"start\": 24, \"end\":
+      33}], \"inputs\": \"Apple Inc. released the iPhone 14 in September 2022, featuring
+      satellite connectivity.\"}\nInput JSON: {\"outputs\": [{\"entity_group\": \"MISC\",
+      \"score\": 0.9428057670593262, \"word\": \"Ubuntu\", \"start\": 26, \"end\":
+      32}, {\"entity_group\": \"MISC\", \"score\": 0.962793231010437, \"word\": \"Ubuntu\",
+      \"start\": 51, \"end\": 57}, {\"entity_group\": \"ORG\", \"score\": 0.998673677444458,
+      \"word\": \"Canonical Ltd\", \"start\": 87, \"end\": 100}], \"inputs\": \"The
+      latest version of the Ubuntu operating system, Ubuntu 22.04, was made available
+      by Canonical Ltd. in April.\"}\nInput JSON: {\"outputs\": [{\"entity_group\":
+      \"ORG\", \"score\": 0.979661226272583, \"word\": \"Tesla\", \"start\": 0, \"end\":
+      5}, {\"entity_group\": \"ORG\", \"score\": 0.8453200459480286, \"word\": \"Cybertru\",
+      \"start\": 12, \"end\": 20}, {\"entity_group\": \"MISC\", \"score\": 0.7452507019042969,
+      \"word\": \"##ck\", \"start\": 20, \"end\": 22}, {\"entity_group\": \"PER\",
+      \"score\": 0.9728273153305054, \"word\": \"El\", \"start\": 78, \"end\": 80},
+      {\"entity_group\": \"PER\", \"score\": 0.9739447236061096, \"word\": \"##on
+      Musk\", \"start\": 80, \"end\": 87}], \"inputs\": \"Tesla''s new Cybertruck
+      is set to hit the roads in late 2023, according to CEO Elon Musk.\"}\nInput
+      JSON: {\"outputs\": [{\"entity_group\": \"ORG\", \"score\": 0.9987253546714783,
+      \"word\": \"Google\", \"start\": 0, \"end\": 6}, {\"entity_group\": \"ORG\",
+      \"score\": 0.9994670748710632, \"word\": \"Alphabet Inc\", \"start\": 25, \"end\":
+      37}, {\"entity_group\": \"MISC\", \"score\": 0.9959796667098999, \"word\": \"Pixel
+      6\", \"start\": 91, \"end\": 98}], \"inputs\": \"Google''s parent company, Alphabet
+      Inc., saw a rise in stock prices after the launch of the Pixel 6.\"}\nInput
+      JSON: {\"outputs\": [{\"entity_group\": \"ORG\", \"score\": 0.999211311340332,
+      \"word\": \"Samsung Electronics\", \"start\": 0, \"end\": 19}, {\"entity_group\":
+      \"ORG\", \"score\": 0.9967896342277527, \"word\": \"LG Display\", \"start\":
+      38, \"end\": 48}, {\"entity_group\": \"MISC\", \"score\": 0.47527530789375305,
+      \"word\": \"O\", \"start\": 56, \"end\": 57}, {\"entity_group\": \"MISC\", \"score\":
+      0.5774009227752686, \"word\": \"##D\", \"start\": 59, \"end\": 60}], \"inputs\":
+      \"Samsung Electronics is competing with LG Display in the OLED market.\"}\nCode:
+      "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '4102'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA5xUTW/bMAy951cQ6qUFksBJV2wL0Etv++zQYhiwOAgUm0nUyqQg0W3TIv99kOU0
+        TjsMQ3OwTfHx6ZEh+dQDUKZUE1DFWktROTv4uLo/+/rl+idfLC5+f7u+JZbMP15VK+MuRfVjBC9u
+        sJBd1LDgylkUw5TchUctGFlH78dZNs6yD6eNo+ISbQxbORmcDs8GUvsFD7LR+KyNXLMpMKgJTHsA
+        AE/NM2qkEh/UBLL+7qTCEPQK1eQZBKA823iidAgmiKakt3UWTILUyDaVYy9wE5hyao2wCTnldARX
+        qEsw5GqBz9eX32HpuYLIVmrfOnJqXvNSi4bzhmdoWZfHYROGQUpDJ4nrExkx2ppHBE2AlZMNWBME
+        hCEIewRZI4jXFJbsKyyBa4k3R+ackrG7ZjqLpEv2jRcMwV7FNFcJHHI1m+QUM/YYaitwDk/Jjr9c
+        mTJXE2hjkMTIZr7yXLtczfpdYMx7TrrCiH8JPUAKd3B7TS9RG9dCrF6gDS/cd9rWjb+jNnkOb/4P
+        7Snsnn031WS+hgXRXjq41n4NRDqsXGTbY7bps32lp/NYmiIORnjzv2BRl3MxqbpZH+AIflhd4Jpt
+        iR6aqvVBF1JrCxEMEQyFJlggLI21WIJZgr7TxuqFxS556pDIPE2fh3eHgj12S5Ps2V9S7XTqUDuH
+        VB6/Ld/UOLELlOBDo+2gyxsjNvn2IKxT6iadjr2T247kL2/kn2OXZrMd93SeUzPiZV25406mfWjn
+        nWvpQ9xRJOfjEwDVbp3t87qyvHKeF3G1UW3t8/nSkAnruUcdmOJqCsIuhW97ALNmLdYHm045z5WT
+        ufAtUiQcjUajRKj2q3jvHr9rt6YSFm07cadno14rUoVNEKzmS0Mr9M6bZlFGqb1t7w8AAAD//wMA
+        SOwyKycGAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d7dd710b1e7afe-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:21:27 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=KqrxE2lmkdE24Kr3QvVqF0zR.submD0THyikTGjFGR8-1720020087-1.0.1.1-mreo2PHR.Z4dQDfaa7HbpaW6Gr07MJg1YmthhVeK5X7JzvrVcX4I8uLhwr38i9AqAte6v6kuDZ6spEAHWoir.Q;
+        path=/; expires=Wed, 03-Jul-24 15:51:27 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=zZN384WEzka_72EzgaA.5.HPC613Z80jYoRnvoDb3OA-1720020087165-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '3603'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999055'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 11ms
+      x-request-id:
+      - req_019c70861fef1fe59b62e4c163cfbe85
+    status:
+      code: 200
+      message: OK
+version: 1

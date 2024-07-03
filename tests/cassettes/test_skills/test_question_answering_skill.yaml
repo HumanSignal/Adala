@@ -1,0 +1,557 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: GET
+    uri: https://api.openai.com/v1/models/gpt-3.5-turbo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6rmUlBQykxRslJQSi8o0TXWM9UtKS1KylfSAUnkJ2WlJpeAJHPzU1JzIILJRamJ
+        JakgLYZm5uZmhgZmBkYQ1eV5qSnxSZUg9fkFqXmJmUpctVwAAAAA//8DAA4WdMNiAAAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d7deaf5d9e7b1a-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:22:14 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=ZoXHNUCGsT59b2lE9IF7IfxgR9Td5toqihcueEb0gE4-1720020134-1.0.1.1-pSG2o5K3hZXvW4NIS0rnJ3iFbT.cBpzBrYseRaDVUH0ojNuKo16dncmj7QLJkERtiNH3vAi5r3ZMeW23L4IStQ;
+        path=/; expires=Wed, 03-Jul-24 15:52:14 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=xykWlQNrwa9q7NlcNCHoyannoYAdAFyb0Pr0fjmhpTI-1720020134394-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      access-control-allow-origin:
+      - '*'
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '27'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15724800; includeSubDomains
+      x-request-id:
+      - req_08b9d58d0240b6b18d2d6ea9b3c81a6a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Answer the question."}, {"role":
+      "user", "content": "Question: In quantum mechanics, what principle asserts that
+      it''s impossible to simultaneously know the exact position and momentum of a
+      particle?\nAnswer: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '283'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1RRXWsbQQx8v18h9qUvtjmfnYT6LaHQ0tC0hRb6QTF7a/lu611pWemSmOD/Xvbs
+        2PRFDzOaYTR6qQCM35gVGNdbdTGF6dvu6fr286/du8eH5vbHp7v3D/T14/394+JndxfMpCi4/YtO
+        X1UzxzEFVM90pF1Gq1hc5zdNXTf1fLEcicgbDEXWJZ0uZldTHXLL03reXJ2UPXuHYlbwuwIAeBln
+        yUgbfDYrqCevSEQR26FZnZcATOZQEGNFvKglNZML6ZgUaYz9rUf4gF6QWswdfCeHWa0n3cOX7Mn5
+        FBCsCGYV0N4qeH0j4GNiEd8GBGUQH4eglpAHCXvYET+B9gj4bJ1CYvGlErC0gcgRSYcIvAULyWb1
+        LuDMnMIdzlcF7lLmtjRAQwhnfOvJS7/OaIWpXCDK6Sg/VAB/xvaG/woxKXNMulbeIRXD5eJoZy7/
+        upDN8kQqqw0X/PqmOuUzshfFuN566jCn7McqS8rqUP0DAAD//wMAV1DD9kkCAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d7deb07fce7b26-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:22:15 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=45zmjJy_Oamr6_9NPR9K9Iwglm3x.otklvEryhepxX4-1720020135-1.0.1.1-i2ghhV15ha_6zQsleTOH06oUGS3ZD.CXTHFoTS7a78_2WPcUncTEddDJp3eaiZEa0IzvUsBX7PTBiqnuXjG_sA;
+        path=/; expires=Wed, 03-Jul-24 15:52:15 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=ES5O04lz_ioVuy8VO7RZI6wmMpOg84Y__pLhueGF6js-1720020135205-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '534'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999938'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_7d17f35c89b768c34e39f66f6dc03e1e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Answer the question."}, {"role":
+      "user", "content": "Question: Which famous poet wrote ''The Love Song of J.
+      Alfred Prufrock''?\nAnswer: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '210'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SRT08CMRDF7/spJr1wgc0CAspNDR78k2ggMcYYUsrsbqXbadpZV0L47qYLgl56
+        eG/e5PemuwRA6LWYglClZFU507sqmvHNW3Y3R/WalcXczYp68PDyRJIvbkU3Jmj1iYp/U6miyhlk
+        TfZgK4+SMW7tTwZZNsj6w1FrVLRGE2OF494wHfW49ivqZf3B6JgsSSsMYgrvCQDArn0jo13jt5hC
+        1v1VKgxBFiimpyEA4clERcgQdGBpWXTPpiLLaFvszqJEeKQvhDnZAiiH+xSuTe5xDc++zj2pTQca
+        GaDxmhktrLawSOcpzIwm7oKEXFZUB3CEDBtLjYWcPJQ6QGzprQ4MDflNSMURYX9iN1Q4T6vY09bG
+        nPRcWx3KpUcZyEbOwOQO8X0C8NHeqP5XWzhPleMl0wZtXDicHNaJ86/8MftHk4mlOevjy+TIJ8I2
+        MFbLXNsCvfO6PVikTPbJDwAAAP//AwAgASqPLwIAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d7deb56f771f45-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:22:15 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=wGVeLaDdhAY0jVkkGO5VOuwvusBr30zSB.aRARE1d60-1720020135-1.0.1.1-42lNAhQG7hU6plQFTJiW15VW2uZbSkprPwe9V3GcQ5xrpfklP9a.X32G7PZ0Nrfwg73FJPh4HCdl01YkxdpyNw;
+        path=/; expires=Wed, 03-Jul-24 15:52:15 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=YjZX6pvypX6vgzULiZSVSHxCdSl7wksVdqSZl_IjhT4-1720020135969-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '483'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999955'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_fd4de12ea598993b0ed241be0ceff8f4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Answer the question."}, {"role":
+      "user", "content": "Question: What mathematical theorem states that in any right-angled
+      triangle, the area of the square whose side is the hypotenuse is equal to the
+      sum of the areas of the squares whose sides are the two legs?\nAnswer: "}],
+      "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '345'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SQQUvDQBCF7/kVw56bkqRN1dxEEARBrZ4UKZt0ulnd7Cy7E7SU/nfZNG3wsof3
+        5r39Zg4JgNBbUYFoWslN50x6o35Wd0/rV1T3eL0sw/v6trb24XGpa/kiZjFB9Rc2fE7NG+qcQdZk
+        T3bjUTLG1vyqyLIiyxerwehoiybGlON0MS9T7n1NaZYX5ZhsSTcYRAUfCQDAYXgjo93ir6ggm52V
+        DkOQCkV1GQIQnkxUhAxBB5aWxWwyG7KMdsB+axG4RfLYwZ56kB7B4w6911YBE+gQfXjecysVeZT2
+        PD8XY+PxgmJIOU91xLa9MRd9p60O7cajDGTjt4HJneLHBOBzWLn/t4VwnjrHG6ZvtLFwVZzqxHTk
+        ycwXo8nE0kz6VZmMfCLsA2O32Wmr0Duvh/0jZXJM/gAAAP//AwAXsE6s/gEAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d7deba5c9c79a4-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:22:16 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=HNDgkCyzQ87ViuWRBv5gjdb.LcBw3za2_CHKRPDzPb4-1720020136-1.0.1.1-xasR1gnx.LzkKPJzIl3Lt_1.9dvJglojlPZsvywmRGRKTxKXlkC.AmVOF3Upw4YC_QpdcXErA0Rkz3ppYmb4ZQ;
+        path=/; expires=Wed, 03-Jul-24 15:52:16 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=bEU2gMkcSTbsyEz9AvjIy2i9aSRRfKotKYHbpu1Lj1k-1720020136594-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '346'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999922'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_5017fc1de380e93af48e26ef5c1e306f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Answer the question."}, {"role":
+      "user", "content": "Question: Which philosophical paradox involves a ship where
+      all of its wooden parts are replaced with metal parts?\nAnswer: "}], "model":
+      "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '252'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1RRy24iMRC8z1e0fAY0gCCE426k1WpX2gNcoihCxtMzdvC4LXcPwyri3yMPL+XS
+        hypXdXX5swBQrlJrUMZqMW304+emX/78t4k61avu+a/9/bpy218vJ9z8sT/UKCto/4FGbqqJoTZ6
+        FEfhQpuEWjC7Tp9mZTkrp/PlQLRUoc+yJsp4PlmMpUt7GpfT2eKqtOQMslrDWwEA8DnMnDFUeFJr
+        KEc3pEVm3aBa3x8BqEQ+I0ozOxYdRI0epKEgGIbYW4sQrfPEFK0z2kPUSVd0AheO5I8uNKCBrYvQ
+        W0wI2nugGpww9EQVhiwQBp0QEkavDVbQO7HQolzshMExHAL1ATSDWIRNNqQathYZO74tnahryPP9
+        Ok9NTLTPTYTO+zteu+DY7hJqppAvYaF4kZ8LgPehxe5bMSomaqPshA4YsuF8dbFTj397kLOnKykk
+        2j/w5aK45lP8nwXbXe1CgykmN1SaUxbn4gsAAP//AwB46NJtUQIAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d7debe2f637c28-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:22:17 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=PpbKhCd8_HQ_n9KSL6BMxSajyUv7VHvWxnvoXh3ei5g-1720020137-1.0.1.1-MZxnC8LycJlYbMgZxC6OpHLYTlHZ7UX2m_j5HS_jV.nlSKscXkbcRikHCLyDYIYeRWd1sqjNd5DI5Zt.7.QQAw;
+        path=/; expires=Wed, 03-Jul-24 15:52:17 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=W8IttJ0rdnfCHit9IxTrbZ3wyQ6VHzB.NwmA5Dg_e7Q-1720020137463-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '639'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999946'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_20b421a8307ad29e3d9a19081a3d45c4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Answer the question."}, {"role":
+      "user", "content": "Question: In the world of programming, what is the design
+      principle that suggests a system should be open for extension but closed for
+      modification?\nAnswer: "}], "model": "gpt-3.5-turbo"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '286'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1RRwU7jMBC95ytGPrclaWlhe0MgcYKyYm8rVDn2NDE4HsszESDUf185SVvtxYf3
+        5j2/efNTAChn1RaUabWYLvr5r+Zz83Bvdh/+8en1d2tvq0rsc29f72S3UbOsoPodjZxUC0Nd9CiO
+        wkibhFowu1Y3y7JcltXqZiA6suizrIkyXy3Wc+lTTfOyWq4nZUvOIKst/C0AAH6GN2cMFr/UFsrZ
+        CemQWTeotuchAJXIZ0RpZseig6jZhTQUBMMQ+0+LYJFdEyAmF4yLHkFaLcB90yALgwb+ZsEOuKXe
+        W6gRKGKAAyXAL8HAjgLUvYDxxGgHoiPrDs7o3AU4BmkRdhHD1f0483L6bKGmXMfzQp6amKjOy4fe
+        +zN+cMFxu0+omUIOz0JxlB8LgLehuP6/LlRM1EXZC31gyIbX69FOXU51IZeriRQS7S/45raY8qmx
+        iv3BhQZTbkymlMWx+AcAAP//AwBySNUgRAIAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d7dec389bf7b09-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 15:22:18 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=gMwY6XAXdC1oFaTpzNqeAKElXgEkawH7a94ud18sodg-1720020138-1.0.1.1-Gd5g9_6WMZQVtGxKHeuJ7oX.UAFWymbXid01zhYvMN_Sf_zY3AdnYY.LoE2pRBUsdN0MnuQ9B1_8FU.94LycjA;
+        path=/; expires=Wed, 03-Jul-24 15:52:18 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=OQsYKHDyXa1je9sfxdLjbpxly3ZD89A2_uuPVQi3htM-1720020138252-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '593'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '5000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '4999936'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_1f6f0201e08508efd5584e43330eb6e3
+    status:
+      code: 200
+      message: OK
+version: 1
