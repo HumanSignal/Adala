@@ -27,6 +27,14 @@ ENV PYTHONUNBUFFERED=1 \
 
 ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
+RUN --mount=type=cache,target="/var/cache/apt",sharing=locked \
+    --mount=type=cache,target="/var/lib/apt/lists",sharing=locked \
+    set -eux; \
+    apt-get update; \
+    apt-get upgrade -y; \
+    apt-get install --no-install-recommends -y procps; \
+    apt-get autoremove -y
+
 RUN --mount=type=cache,target=${PIP_CACHE_DIR},sharing=locked \
     pip install poetry==${POETRY_VERSION}
 
@@ -38,7 +46,6 @@ RUN --mount=type=cache,target="/var/cache/apt",sharing=locked \
     --mount=type=cache,target="/var/lib/apt/lists",sharing=locked \
     set -eux; \
     apt-get update; \
-    apt-get upgrade -y; \
     apt-get install --no-install-recommends -y git gcc python3-dev; \
     apt-get autoremove -y
 

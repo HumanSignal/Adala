@@ -11,10 +11,11 @@ class Settings(BaseSettings):
     https://docs.pydantic.dev/latest/concepts/pydantic_settings/#field-value-priority
     """
 
-    kafka_bootstrap_servers: Union[str, List[str]]
+    kafka_bootstrap_servers: Union[str, List[str]] = "localhost:9092"
     kafka_retention_ms: int = 180000  # 30 minutes
-    kafka_input_consumer_timeout_ms: int = 3000  # 3 seconds
-    kafka_output_consumer_timeout_ms: int = 3000  # 3 seconds
+    kafka_input_consumer_timeout_ms: int = 1500  # 1.5 seconds
+    kafka_output_consumer_timeout_ms: int = 1500  # 1.5 seconds
+    task_time_limit_sec: int = 60 * 60 * 6  # 6 hours
 
     model_config = SettingsConfigDict(
         # have to use an absolute path here so celery workers can find it
@@ -40,7 +41,9 @@ def ensure_topic(topic_name: str):
     retention_ms = settings.kafka_retention_ms
 
     admin_client = KafkaAdminClient(
-        bootstrap_servers=bootstrap_servers, client_id="topic_creator"
+        bootstrap_servers=bootstrap_servers,
+        client_id="topic_creator",
+        api_version=(2, 5, 0),
     )
 
     topic = NewTopic(
@@ -62,7 +65,9 @@ def delete_topic(topic_name: str):
     bootstrap_servers = settings.kafka_bootstrap_servers
 
     admin_client = KafkaAdminClient(
-        bootstrap_servers=bootstrap_servers, client_id="topic_deleter"
+        bootstrap_servers=bootstrap_servers,
+        client_id="topic_deleter",
+        api_version=(2, 5, 0),
     )
 
     admin_client.delete_topics(topics=[topic_name])

@@ -1,0 +1,3180 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      X-Amzn-Trace-Id:
+      - 20f1e1cd-1f5f-4d0b-9705-4d1496e1365e
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: GET
+    uri: https://huggingface.co/api/datasets/ag_news
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '65'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:35 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - PyVECz2j7aSizjeGK5csXbrQ7lrsuJoIfpfOJZw6wrhgovxIITO4SQ==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579db-25074ea669951be9010c13fd;20f1e1cd-1f5f-4d0b-9705-4d1496e1365e
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      X-Amzn-Trace-Id:
+      - 20f1e1cd-1f5f-4d0b-9705-4d1496e1365e
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: GET
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news
+  response:
+    body:
+      string: "{\"_id\":\"621ffdd236468d709f181d5d\",\"id\":\"fancyzhx/ag_news\",\"author\":\"fancyzhx\",\"sha\":\"eb185aade064a813bc0b7f42de02595523103ca4\",\"lastModified\":\"2024-03-07T12:02:37.000Z\",\"private\":false,\"gated\":false,\"disabled\":false,\"tags\":[\"task_categories:text-classification\",\"task_ids:topic-classification\",\"annotations_creators:found\",\"language_creators:found\",\"multilinguality:monolingual\",\"source_datasets:original\",\"language:en\",\"license:unknown\",\"size_categories:100K<n<1M\",\"parquet\",\"text\",\"datasets\",\"pandas\",\"mlcroissant\",\"region:us\",\"croissant\"],\"description\":\"\\n\\t\\n\\t\\t\\n\\t\\n\\t\\n\\t\\tDataset
+        Card for \\\"ag_news\\\"\\n\\t\\n\\n\\n\\t\\n\\t\\t\\n\\t\\n\\t\\n\\t\\tDataset
+        Summary\\n\\t\\n\\nAG is a collection of more than 1 million news articles.
+        News articles have been\\ngathered from more than 2000 news sources by ComeToMyHead
+        in more than 1 year of\\nactivity. ComeToMyHead is an academic news search
+        engine which has been running\\nsince July, 2004. The dataset is provided
+        by the academic comunity for research\\npurposes in data mining (clustering,
+        classification, etc), information retrieval\\n(ranking, search, etc)\u2026
+        See the full description on the dataset page: https://huggingface.co/datasets/fancyzhx/ag_news.\",\"paperswithcode_id\":\"ag-news\",\"downloads\":3614,\"likes\":116,\"cardData\":{\"annotations_creators\":[\"found\"],\"language_creators\":[\"found\"],\"language\":[\"en\"],\"license\":[\"unknown\"],\"multilinguality\":[\"monolingual\"],\"size_categories\":[\"100K<n<1M\"],\"source_datasets\":[\"original\"],\"task_categories\":[\"text-classification\"],\"task_ids\":[\"topic-classification\"],\"paperswithcode_id\":\"ag-news\",\"pretty_name\":\"AG\u2019s
+        News Corpus\",\"dataset_info\":{\"features\":[{\"name\":\"text\",\"dtype\":\"string\"},{\"name\":\"label\",\"dtype\":{\"class_label\":{\"names\":{\"0\":\"World\",\"1\":\"Sports\",\"2\":\"Business\",\"3\":\"Sci/Tech\"}}}}],\"splits\":[{\"name\":\"train\",\"num_bytes\":29817303,\"num_examples\":120000},{\"name\":\"test\",\"num_bytes\":1879474,\"num_examples\":7600}],\"download_size\":19820267,\"dataset_size\":31696777},\"configs\":[{\"config_name\":\"default\",\"data_files\":[{\"split\":\"train\",\"path\":\"data/train-*\"},{\"split\":\"test\",\"path\":\"data/test-*\"}]}],\"train-eval-index\":[{\"config\":\"default\",\"task\":\"text-classification\",\"task_id\":\"multi_class_classification\",\"splits\":{\"train_split\":\"train\",\"eval_split\":\"test\"},\"col_mapping\":{\"text\":\"text\",\"label\":\"target\"},\"metrics\":[{\"type\":\"accuracy\",\"name\":\"Accuracy\"},{\"type\":\"f1\",\"name\":\"F1
+        macro\",\"args\":{\"average\":\"macro\"}},{\"type\":\"f1\",\"name\":\"F1 micro\",\"args\":{\"average\":\"micro\"}},{\"type\":\"f1\",\"name\":\"F1
+        weighted\",\"args\":{\"average\":\"weighted\"}},{\"type\":\"precision\",\"name\":\"Precision
+        macro\",\"args\":{\"average\":\"macro\"}},{\"type\":\"precision\",\"name\":\"Precision
+        micro\",\"args\":{\"average\":\"micro\"}},{\"type\":\"precision\",\"name\":\"Precision
+        weighted\",\"args\":{\"average\":\"weighted\"}},{\"type\":\"recall\",\"name\":\"Recall
+        macro\",\"args\":{\"average\":\"macro\"}},{\"type\":\"recall\",\"name\":\"Recall
+        micro\",\"args\":{\"average\":\"micro\"}},{\"type\":\"recall\",\"name\":\"Recall
+        weighted\",\"args\":{\"average\":\"weighted\"}}]}]},\"siblings\":[{\"rfilename\":\".gitattributes\"},{\"rfilename\":\"README.md\"},{\"rfilename\":\"data/test-00000-of-00001.parquet\"},{\"rfilename\":\"data/train-00000-of-00001.parquet\"}],\"createdAt\":\"2022-03-02T23:29:22.000Z\"}"
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3171'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:36 GMT
+      ETag:
+      - W/"c63-/c11dkNoxjpj8JnWoclkRrYfFCM"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - NYyP6M7ig2JKUSMSjDNu2sd-VbQJHtMI6yVcCOSj0rQDehFDSWtqeg==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579db-7df370801d72d6a365077cf5;20f1e1cd-1f5f-4d0b-9705-4d1496e1365e
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      user-agent:
+      - datasets/2.18.0; python/3.11.5; huggingface_hub/0.21.4; pyarrow/15.0.0
+    method: HEAD
+    uri: https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/ag_news/ag_news.py
+  response:
+    body:
+      string: ''
+    headers:
+      Accept-Ranges:
+      - bytes
+      Content-Length:
+      - '3991'
+      Content-Type:
+      - text/x-python
+      Date:
+      - Wed, 03 Jul 2024 16:18:37 GMT
+      ETag:
+      - '"560ac59ac8cb6f76ac4180562a7f9342"'
+      Last-Modified:
+      - Tue, 15 Sep 2020 08:26:31 GMT
+      Server:
+      - AmazonS3
+      x-amz-id-2:
+      - jWZfBvV02RXyPxhBlGJvZGV7g+Wl/4SVulXhECuEzAG10cO84QE172l7UbYtcPG/cFiwO60UZho=
+      x-amz-request-id:
+      - JWQXZZYVMTXKNTR6
+      x-amz-version-id:
+      - KEBv8bCp8qzpS5Gtvac48oRrGDGT0SnU
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      X-Amzn-Trace-Id:
+      - b4749bd4-dfad-483c-90a2-c9761a3c850a
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: GET
+    uri: https://huggingface.co/api/datasets/ag_news
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '65'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:36 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - kpY0liXTgmBe5nOAJDFZlgsEo9c-OzliSQKo52ZIxaZ5gQOpCn3vyg==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dc-2e0800b95ccebc8047ad9751;b4749bd4-dfad-483c-90a2-c9761a3c850a
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      X-Amzn-Trace-Id:
+      - b4749bd4-dfad-483c-90a2-c9761a3c850a
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: GET
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news
+  response:
+    body:
+      string: "{\"_id\":\"621ffdd236468d709f181d5d\",\"id\":\"fancyzhx/ag_news\",\"author\":\"fancyzhx\",\"sha\":\"eb185aade064a813bc0b7f42de02595523103ca4\",\"lastModified\":\"2024-03-07T12:02:37.000Z\",\"private\":false,\"gated\":false,\"disabled\":false,\"tags\":[\"task_categories:text-classification\",\"task_ids:topic-classification\",\"annotations_creators:found\",\"language_creators:found\",\"multilinguality:monolingual\",\"source_datasets:original\",\"language:en\",\"license:unknown\",\"size_categories:100K<n<1M\",\"parquet\",\"text\",\"datasets\",\"pandas\",\"mlcroissant\",\"region:us\",\"croissant\"],\"description\":\"\\n\\t\\n\\t\\t\\n\\t\\n\\t\\n\\t\\tDataset
+        Card for \\\"ag_news\\\"\\n\\t\\n\\n\\n\\t\\n\\t\\t\\n\\t\\n\\t\\n\\t\\tDataset
+        Summary\\n\\t\\n\\nAG is a collection of more than 1 million news articles.
+        News articles have been\\ngathered from more than 2000 news sources by ComeToMyHead
+        in more than 1 year of\\nactivity. ComeToMyHead is an academic news search
+        engine which has been running\\nsince July, 2004. The dataset is provided
+        by the academic comunity for research\\npurposes in data mining (clustering,
+        classification, etc), information retrieval\\n(ranking, search, etc)\u2026
+        See the full description on the dataset page: https://huggingface.co/datasets/fancyzhx/ag_news.\",\"paperswithcode_id\":\"ag-news\",\"downloads\":3614,\"likes\":116,\"cardData\":{\"annotations_creators\":[\"found\"],\"language_creators\":[\"found\"],\"language\":[\"en\"],\"license\":[\"unknown\"],\"multilinguality\":[\"monolingual\"],\"size_categories\":[\"100K<n<1M\"],\"source_datasets\":[\"original\"],\"task_categories\":[\"text-classification\"],\"task_ids\":[\"topic-classification\"],\"paperswithcode_id\":\"ag-news\",\"pretty_name\":\"AG\u2019s
+        News Corpus\",\"dataset_info\":{\"features\":[{\"name\":\"text\",\"dtype\":\"string\"},{\"name\":\"label\",\"dtype\":{\"class_label\":{\"names\":{\"0\":\"World\",\"1\":\"Sports\",\"2\":\"Business\",\"3\":\"Sci/Tech\"}}}}],\"splits\":[{\"name\":\"train\",\"num_bytes\":29817303,\"num_examples\":120000},{\"name\":\"test\",\"num_bytes\":1879474,\"num_examples\":7600}],\"download_size\":19820267,\"dataset_size\":31696777},\"configs\":[{\"config_name\":\"default\",\"data_files\":[{\"split\":\"train\",\"path\":\"data/train-*\"},{\"split\":\"test\",\"path\":\"data/test-*\"}]}],\"train-eval-index\":[{\"config\":\"default\",\"task\":\"text-classification\",\"task_id\":\"multi_class_classification\",\"splits\":{\"train_split\":\"train\",\"eval_split\":\"test\"},\"col_mapping\":{\"text\":\"text\",\"label\":\"target\"},\"metrics\":[{\"type\":\"accuracy\",\"name\":\"Accuracy\"},{\"type\":\"f1\",\"name\":\"F1
+        macro\",\"args\":{\"average\":\"macro\"}},{\"type\":\"f1\",\"name\":\"F1 micro\",\"args\":{\"average\":\"micro\"}},{\"type\":\"f1\",\"name\":\"F1
+        weighted\",\"args\":{\"average\":\"weighted\"}},{\"type\":\"precision\",\"name\":\"Precision
+        macro\",\"args\":{\"average\":\"macro\"}},{\"type\":\"precision\",\"name\":\"Precision
+        micro\",\"args\":{\"average\":\"micro\"}},{\"type\":\"precision\",\"name\":\"Precision
+        weighted\",\"args\":{\"average\":\"weighted\"}},{\"type\":\"recall\",\"name\":\"Recall
+        macro\",\"args\":{\"average\":\"macro\"}},{\"type\":\"recall\",\"name\":\"Recall
+        micro\",\"args\":{\"average\":\"micro\"}},{\"type\":\"recall\",\"name\":\"Recall
+        weighted\",\"args\":{\"average\":\"weighted\"}}]}]},\"siblings\":[{\"rfilename\":\".gitattributes\"},{\"rfilename\":\"README.md\"},{\"rfilename\":\"data/test-00000-of-00001.parquet\"},{\"rfilename\":\"data/train-00000-of-00001.parquet\"}],\"createdAt\":\"2022-03-02T23:29:22.000Z\"}"
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3171'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:36 GMT
+      ETag:
+      - W/"c63-/c11dkNoxjpj8JnWoclkRrYfFCM"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - -7-mtJSMvtmvuOoNHkuveyfGzpGfrz5D5XKyk0fA2cVQlhX8RZIFWQ==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dc-5293702b554d7df40f1e4851;b4749bd4-dfad-483c-90a2-c9761a3c850a
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      user-agent:
+      - datasets/2.18.0; python/3.11.5; huggingface_hub/0.21.4; pyarrow/15.0.0; datasets/2.18.0;
+        hf_hub/0.21.4; python/3.11.5
+    method: HEAD
+    uri: https://huggingface.co/datasets/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/README.md
+  response:
+    body:
+      string: ''
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '120'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:36 GMT
+      Location:
+      - /datasets/fancyzhx/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/README.md
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 cf1928ef9a9a7bb589a35ead31bcb4ea.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - HwZ5Uyip1BJHHrPDYdkckkFXiKsEM9h8RYhsQuGeEoI7TBz2LzVgdg==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dc-4d99f8a87769106b469ee2df
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      user-agent:
+      - datasets/2.18.0; python/3.11.5; huggingface_hub/0.21.4; pyarrow/15.0.0; datasets/2.18.0;
+        hf_hub/0.21.4; python/3.11.5
+    method: HEAD
+    uri: https://huggingface.co/datasets/fancyzhx/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/README.md
+  response:
+    body:
+      string: ''
+    headers:
+      Accept-Ranges:
+      - bytes
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Disposition:
+      - inline; filename*=UTF-8''README.md; filename="README.md";
+      Content-Length:
+      - '8070'
+      Content-Security-Policy:
+      - default-src none; sandbox
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:36 GMT
+      ETag:
+      - '"fc01bffaf6b7ff9e9df5818a6fa2bd5cb4a27438"'
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 cf1928ef9a9a7bb589a35ead31bcb4ea.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - 2u_c2VijcwXNsO65gvD5ef74j_GuPHpUtXQgb-07UHFXVQSPjVngcw==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Repo-Commit:
+      - eb185aade064a813bc0b7f42de02595523103ca4
+      X-Request-Id:
+      - Root=1-668579dc-42b9321b20e5774d7430a655
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      user-agent:
+      - datasets/2.18.0; python/3.11.5; huggingface_hub/0.21.4; pyarrow/15.0.0; datasets/2.18.0;
+        hf_hub/0.21.4; python/3.11.5
+    method: HEAD
+    uri: https://huggingface.co/datasets/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/.huggingface.yaml
+  response:
+    body:
+      string: ''
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '128'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:36 GMT
+      Location:
+      - /datasets/fancyzhx/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/.huggingface.yaml
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 350e87fe323bf8d725a381e15f465f40.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - 4ubVPV6Kk0WFLJVCEUiWNFE8cvOLimhOhgf_VrQ2bQkE5vfCPa89Gw==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dc-4dea3e9d14ada9062556b9b7
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      user-agent:
+      - datasets/2.18.0; python/3.11.5; huggingface_hub/0.21.4; pyarrow/15.0.0; datasets/2.18.0;
+        hf_hub/0.21.4; python/3.11.5
+    method: HEAD
+    uri: https://huggingface.co/datasets/fancyzhx/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/.huggingface.yaml
+  response:
+    body:
+      string: ''
+    headers:
+      Accept-Ranges:
+      - bytes
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '15'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:36 GMT
+      ETag:
+      - W/"f-mY2VvLxuxB7KhsoOdQTlMTccuAQ"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 350e87fe323bf8d725a381e15f465f40.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - 4KTrKHX3KWldccC5EpXXZ0FAB__D9gKZfGBybiKmPtGJmHFyzwhcZg==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Error from cloudfront
+      X-Error-Code:
+      - EntryNotFound
+      X-Error-Message:
+      - Entry not found
+      X-Powered-By:
+      - huggingface-moon
+      X-Repo-Commit:
+      - eb185aade064a813bc0b7f42de02595523103ca4
+      X-Request-Id:
+      - Root=1-668579dc-37b6ace3260918ea022f4554
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      X-Amzn-Trace-Id:
+      - fae1c502-1444-4be6-b8ee-9d4f941b1293
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: GET
+    uri: https://huggingface.co/api/datasets/ag_news/revision/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/revision/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '115'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:36 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/revision/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - kRS9w6WFYLnJEq3I2EwbCILFdKD2h9QbbVIiDbiK8YwSds7_nJFH8w==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dc-5e859a32323837c36fdc1306;fae1c502-1444-4be6-b8ee-9d4f941b1293
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      X-Amzn-Trace-Id:
+      - fae1c502-1444-4be6-b8ee-9d4f941b1293
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: GET
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/revision/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: "{\"_id\":\"621ffdd236468d709f181d5d\",\"id\":\"fancyzhx/ag_news\",\"author\":\"fancyzhx\",\"sha\":\"eb185aade064a813bc0b7f42de02595523103ca4\",\"lastModified\":\"2024-03-07T12:02:37.000Z\",\"private\":false,\"gated\":false,\"disabled\":false,\"tags\":[\"task_categories:text-classification\",\"task_ids:topic-classification\",\"annotations_creators:found\",\"language_creators:found\",\"multilinguality:monolingual\",\"source_datasets:original\",\"language:en\",\"license:unknown\",\"size_categories:100K<n<1M\",\"parquet\",\"text\",\"datasets\",\"pandas\",\"mlcroissant\",\"region:us\",\"croissant\"],\"description\":\"\\n\\t\\n\\t\\t\\n\\t\\n\\t\\n\\t\\tDataset
+        Card for \\\"ag_news\\\"\\n\\t\\n\\n\\n\\t\\n\\t\\t\\n\\t\\n\\t\\n\\t\\tDataset
+        Summary\\n\\t\\n\\nAG is a collection of more than 1 million news articles.
+        News articles have been\\ngathered from more than 2000 news sources by ComeToMyHead
+        in more than 1 year of\\nactivity. ComeToMyHead is an academic news search
+        engine which has been running\\nsince July, 2004. The dataset is provided
+        by the academic comunity for research\\npurposes in data mining (clustering,
+        classification, etc), information retrieval\\n(ranking, search, etc)\u2026
+        See the full description on the dataset page: https://huggingface.co/datasets/fancyzhx/ag_news.\",\"paperswithcode_id\":\"ag-news\",\"downloads\":3614,\"likes\":116,\"cardData\":{\"annotations_creators\":[\"found\"],\"language_creators\":[\"found\"],\"language\":[\"en\"],\"license\":[\"unknown\"],\"multilinguality\":[\"monolingual\"],\"size_categories\":[\"100K<n<1M\"],\"source_datasets\":[\"original\"],\"task_categories\":[\"text-classification\"],\"task_ids\":[\"topic-classification\"],\"paperswithcode_id\":\"ag-news\",\"pretty_name\":\"AG\u2019s
+        News Corpus\",\"dataset_info\":{\"features\":[{\"name\":\"text\",\"dtype\":\"string\"},{\"name\":\"label\",\"dtype\":{\"class_label\":{\"names\":{\"0\":\"World\",\"1\":\"Sports\",\"2\":\"Business\",\"3\":\"Sci/Tech\"}}}}],\"splits\":[{\"name\":\"train\",\"num_bytes\":29817303,\"num_examples\":120000},{\"name\":\"test\",\"num_bytes\":1879474,\"num_examples\":7600}],\"download_size\":19820267,\"dataset_size\":31696777},\"configs\":[{\"config_name\":\"default\",\"data_files\":[{\"split\":\"train\",\"path\":\"data/train-*\"},{\"split\":\"test\",\"path\":\"data/test-*\"}]}],\"train-eval-index\":[{\"config\":\"default\",\"task\":\"text-classification\",\"task_id\":\"multi_class_classification\",\"splits\":{\"train_split\":\"train\",\"eval_split\":\"test\"},\"col_mapping\":{\"text\":\"text\",\"label\":\"target\"},\"metrics\":[{\"type\":\"accuracy\",\"name\":\"Accuracy\"},{\"type\":\"f1\",\"name\":\"F1
+        macro\",\"args\":{\"average\":\"macro\"}},{\"type\":\"f1\",\"name\":\"F1 micro\",\"args\":{\"average\":\"micro\"}},{\"type\":\"f1\",\"name\":\"F1
+        weighted\",\"args\":{\"average\":\"weighted\"}},{\"type\":\"precision\",\"name\":\"Precision
+        macro\",\"args\":{\"average\":\"macro\"}},{\"type\":\"precision\",\"name\":\"Precision
+        micro\",\"args\":{\"average\":\"micro\"}},{\"type\":\"precision\",\"name\":\"Precision
+        weighted\",\"args\":{\"average\":\"weighted\"}},{\"type\":\"recall\",\"name\":\"Recall
+        macro\",\"args\":{\"average\":\"macro\"}},{\"type\":\"recall\",\"name\":\"Recall
+        micro\",\"args\":{\"average\":\"micro\"}},{\"type\":\"recall\",\"name\":\"Recall
+        weighted\",\"args\":{\"average\":\"weighted\"}}]}]},\"siblings\":[{\"rfilename\":\".gitattributes\"},{\"rfilename\":\"README.md\"},{\"rfilename\":\"data/test-00000-of-00001.parquet\"},{\"rfilename\":\"data/train-00000-of-00001.parquet\"}],\"createdAt\":\"2022-03-02T23:29:22.000Z\"}"
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3171'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:37 GMT
+      ETag:
+      - W/"c63-/c11dkNoxjpj8JnWoclkRrYfFCM"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - azhlUPbj-PYnCmtlHgr3sNibDG5OFxd0YoZqZrd9AhYSRWIPXBxG9g==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dd-71e16fb7219473490cbfeaff;fae1c502-1444-4be6-b8ee-9d4f941b1293
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 5259783d-2374-4e44-8c2d-f64a4462a3d0
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:37 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - bASqD-FrdgrQCHO53XpCsf04z2_dGbNqCsUL1ipxsAuyMKqLfYEaXA==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dd-0a99fc8f4f1c6b6755f64958;5259783d-2374-4e44-8c2d-f64a4462a3d0
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 5259783d-2374-4e44-8c2d-f64a4462a3d0
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data"}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '96'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:37 GMT
+      ETag:
+      - W/"60-JZB21WRZp66SVgNdrBHeL/qkY80"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - jfoNNCrNTbSd2MzT1kGfCaf6X8AklZcbtp_IZW--I0v_CS0o2Kri3A==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dd-26bfecd608f40cc543111ea1;5259783d-2374-4e44-8c2d-f64a4462a3d0
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 22989ccd-d14b-45d7-ab64-e6f4fa74ef1f
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:37 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - ZzDBtHXwvMSY1TfPn2JVXvABFhzpXs-eyC-B05g0V0FZkKNuiFK3qQ==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dd-0db728ef4d01c22545778807;22989ccd-d14b-45d7-ab64-e6f4fa74ef1f
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 22989ccd-d14b-45d7-ab64-e6f4fa74ef1f
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data","lastCommit":{"id":"eb185aade064a813bc0b7f42de02595523103ca4","title":"Convert
+        dataset to Parquet (#5)","date":"2024-03-07T12:02:37.000Z"}}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '235'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:37 GMT
+      ETag:
+      - W/"eb-B+pFvrJsxGL1ps4aMSAd0a/Cs1o"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - 3wdZIfFFIx88ntv1gMqZP6HWnN2MqwFyMxLmrw7RO_diXBIR6eSI1g==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dd-5c5897ad341cc7734b1339e6;22989ccd-d14b-45d7-ab64-e6f4fa74ef1f
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      X-Amzn-Trace-Id:
+      - 80715e4c-1e13-4a5d-8dc1-7b81ef4d355b
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: GET
+    uri: https://huggingface.co/api/datasets/ag_news/tree/eb185aade064a813bc0b7f42de02595523103ca4/data?recursive=False&expand=False
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/tree/eb185aade064a813bc0b7f42de02595523103ca4/data?recursive=False&expand=False
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '145'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:37 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/tree/eb185aade064a813bc0b7f42de02595523103ca4/data?recursive=False&expand=False
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - OvS2WPUqSsJmG962JjSB4RGY4B8VxJoUtdzk9PVTPwwKMMM4SvZc8w==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dd-13f1c8624050de1a7cbff371;80715e4c-1e13-4a5d-8dc1-7b81ef4d355b
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      X-Amzn-Trace-Id:
+      - 80715e4c-1e13-4a5d-8dc1-7b81ef4d355b
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: GET
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/tree/eb185aade064a813bc0b7f42de02595523103ca4/data?recursive=False&expand=False
+  response:
+    body:
+      string: '[{"type":"file","oid":"a309573a1874d62dce6f554d94553679aab403f4","size":1234829,"lfs":{"oid":"71de87ec66bc5737752a2502204dfa6d7fe9856ade3ea444dc6317789a4f13fb","size":1234829,"pointerSize":132},"path":"data/test-00000-of-00001.parquet"},{"type":"file","oid":"59bd9f92ae98b344b9719de64bf9585a0cb4e2a9","size":18585438,"lfs":{"oid":"fc508d6d9868594e3da960a8cfeb63ab5a4746598b93428c224397080c1f52ee","size":18585438,"pointerSize":133},"path":"data/train-00000-of-00001.parquet"}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '476'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:37 GMT
+      ETag:
+      - W/"1dc-+4Mz0aTdlRbG06IFH0qQs8qTtgg"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - Qu8w-44_QPRdcwLUSpJG2s_q2yf4Tb_MfkFGGJAEgGzpkq30lNCU8g==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dd-6452b3ab4947daca4272f5dc;80715e4c-1e13-4a5d-8dc1-7b81ef4d355b
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 628dd5f8-ed10-470c-97c1-917aaddad57a
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:37 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - Wl_YEpM15Te8YSZiRwb0ZdT2ZR9YSv4_AnNv-FWOiKt0mzpCL3JLwg==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dd-7513dba71b57da117986285e;628dd5f8-ed10-470c-97c1-917aaddad57a
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 628dd5f8-ed10-470c-97c1-917aaddad57a
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data"}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '96'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:37 GMT
+      ETag:
+      - W/"60-JZB21WRZp66SVgNdrBHeL/qkY80"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - FG-NkAXpddnLwy51kc8gDkIuUjQgADiBnLP8fdEG1R9gtXFT3XOEFw==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dd-199b03256e28729857c5607d;628dd5f8-ed10-470c-97c1-917aaddad57a
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - bb38a561-bcb9-4b96-bc18-29e521e401cd
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:37 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - cvWEnMIkdS3WUD-fM9SuGn9qqI9WjlU5YoR6lDldTpwes8kVCa4oCA==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dd-687d2cd75ad1c7a87b2025a3;bb38a561-bcb9-4b96-bc18-29e521e401cd
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - bb38a561-bcb9-4b96-bc18-29e521e401cd
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data","lastCommit":{"id":"eb185aade064a813bc0b7f42de02595523103ca4","title":"Convert
+        dataset to Parquet (#5)","date":"2024-03-07T12:02:37.000Z"}}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '235'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:37 GMT
+      ETag:
+      - W/"eb-B+pFvrJsxGL1ps4aMSAd0a/Cs1o"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - YnSzMMfd-k8dWHz2TdRYvLjbXn56CDSL-8p9QbIh7s4EBeMzB8DYng==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579dd-52959b26463e091c6268ddba;bb38a561-bcb9-4b96-bc18-29e521e401cd
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      X-Amzn-Trace-Id:
+      - 359717b8-dc48-42be-a1f2-5d5bd3c144da
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: GET
+    uri: https://huggingface.co/api/datasets/ag_news/revision/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/revision/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '115'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:38 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/revision/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 12e4fc9256386a4cd8f000b9caa3e012.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - bxevZi33kYh_Aj-4uHxpcKd65IaUH20BY1d7xTYQZF98HZ94KrZawQ==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579de-627306016d47f34d6a711784;359717b8-dc48-42be-a1f2-5d5bd3c144da
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      X-Amzn-Trace-Id:
+      - 359717b8-dc48-42be-a1f2-5d5bd3c144da
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: GET
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/revision/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: "{\"_id\":\"621ffdd236468d709f181d5d\",\"id\":\"fancyzhx/ag_news\",\"author\":\"fancyzhx\",\"sha\":\"eb185aade064a813bc0b7f42de02595523103ca4\",\"lastModified\":\"2024-03-07T12:02:37.000Z\",\"private\":false,\"gated\":false,\"disabled\":false,\"tags\":[\"task_categories:text-classification\",\"task_ids:topic-classification\",\"annotations_creators:found\",\"language_creators:found\",\"multilinguality:monolingual\",\"source_datasets:original\",\"language:en\",\"license:unknown\",\"size_categories:100K<n<1M\",\"parquet\",\"text\",\"datasets\",\"pandas\",\"mlcroissant\",\"region:us\",\"croissant\"],\"description\":\"\\n\\t\\n\\t\\t\\n\\t\\n\\t\\n\\t\\tDataset
+        Card for \\\"ag_news\\\"\\n\\t\\n\\n\\n\\t\\n\\t\\t\\n\\t\\n\\t\\n\\t\\tDataset
+        Summary\\n\\t\\n\\nAG is a collection of more than 1 million news articles.
+        News articles have been\\ngathered from more than 2000 news sources by ComeToMyHead
+        in more than 1 year of\\nactivity. ComeToMyHead is an academic news search
+        engine which has been running\\nsince July, 2004. The dataset is provided
+        by the academic comunity for research\\npurposes in data mining (clustering,
+        classification, etc), information retrieval\\n(ranking, search, etc)\u2026
+        See the full description on the dataset page: https://huggingface.co/datasets/fancyzhx/ag_news.\",\"paperswithcode_id\":\"ag-news\",\"downloads\":3614,\"likes\":116,\"cardData\":{\"annotations_creators\":[\"found\"],\"language_creators\":[\"found\"],\"language\":[\"en\"],\"license\":[\"unknown\"],\"multilinguality\":[\"monolingual\"],\"size_categories\":[\"100K<n<1M\"],\"source_datasets\":[\"original\"],\"task_categories\":[\"text-classification\"],\"task_ids\":[\"topic-classification\"],\"paperswithcode_id\":\"ag-news\",\"pretty_name\":\"AG\u2019s
+        News Corpus\",\"dataset_info\":{\"features\":[{\"name\":\"text\",\"dtype\":\"string\"},{\"name\":\"label\",\"dtype\":{\"class_label\":{\"names\":{\"0\":\"World\",\"1\":\"Sports\",\"2\":\"Business\",\"3\":\"Sci/Tech\"}}}}],\"splits\":[{\"name\":\"train\",\"num_bytes\":29817303,\"num_examples\":120000},{\"name\":\"test\",\"num_bytes\":1879474,\"num_examples\":7600}],\"download_size\":19820267,\"dataset_size\":31696777},\"configs\":[{\"config_name\":\"default\",\"data_files\":[{\"split\":\"train\",\"path\":\"data/train-*\"},{\"split\":\"test\",\"path\":\"data/test-*\"}]}],\"train-eval-index\":[{\"config\":\"default\",\"task\":\"text-classification\",\"task_id\":\"multi_class_classification\",\"splits\":{\"train_split\":\"train\",\"eval_split\":\"test\"},\"col_mapping\":{\"text\":\"text\",\"label\":\"target\"},\"metrics\":[{\"type\":\"accuracy\",\"name\":\"Accuracy\"},{\"type\":\"f1\",\"name\":\"F1
+        macro\",\"args\":{\"average\":\"macro\"}},{\"type\":\"f1\",\"name\":\"F1 micro\",\"args\":{\"average\":\"micro\"}},{\"type\":\"f1\",\"name\":\"F1
+        weighted\",\"args\":{\"average\":\"weighted\"}},{\"type\":\"precision\",\"name\":\"Precision
+        macro\",\"args\":{\"average\":\"macro\"}},{\"type\":\"precision\",\"name\":\"Precision
+        micro\",\"args\":{\"average\":\"micro\"}},{\"type\":\"precision\",\"name\":\"Precision
+        weighted\",\"args\":{\"average\":\"weighted\"}},{\"type\":\"recall\",\"name\":\"Recall
+        macro\",\"args\":{\"average\":\"macro\"}},{\"type\":\"recall\",\"name\":\"Recall
+        micro\",\"args\":{\"average\":\"micro\"}},{\"type\":\"recall\",\"name\":\"Recall
+        weighted\",\"args\":{\"average\":\"weighted\"}}]}]},\"siblings\":[{\"rfilename\":\".gitattributes\"},{\"rfilename\":\"README.md\"},{\"rfilename\":\"data/test-00000-of-00001.parquet\"},{\"rfilename\":\"data/train-00000-of-00001.parquet\"}],\"createdAt\":\"2022-03-02T23:29:22.000Z\"}"
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3171'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:38 GMT
+      ETag:
+      - W/"c63-/c11dkNoxjpj8JnWoclkRrYfFCM"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 12e4fc9256386a4cd8f000b9caa3e012.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - ZeEnB6sFAXGBzjZLcA6a-sbxLv0FGMM5hb0MQPpKA7Aq5oJ09Vt8vQ==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579de-2a15ffe75376e0e46c268a19;359717b8-dc48-42be-a1f2-5d5bd3c144da
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - edef4208-c0e9-4a71-8498-ae450318ff56
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:38 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - TfBOsH3MM8vEPDJcPBF8z2SOl2EPSw-ZP4yaNA3NTbbPJcPxkMuNKw==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579de-398441ab6b22050f3e92369a;edef4208-c0e9-4a71-8498-ae450318ff56
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - edef4208-c0e9-4a71-8498-ae450318ff56
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data"}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '96'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:38 GMT
+      ETag:
+      - W/"60-JZB21WRZp66SVgNdrBHeL/qkY80"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - lnXL_9QOAAB6oFGWd-QXbhe6YpVpm1ihgL-g7SYeLaTRqeUsB6X8sA==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579de-5f17f63e1789a059416984f0;edef4208-c0e9-4a71-8498-ae450318ff56
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 43df6ffd-9bde-4831-9c2b-cb7bbf7a6056
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:38 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - mfUCmrQP1ZSRL5c0uY1uIYQxRMK3TSouvqq0lznyTIo4DoAhlEQK-g==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579de-73261b7500076d6015627e34;43df6ffd-9bde-4831-9c2b-cb7bbf7a6056
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 43df6ffd-9bde-4831-9c2b-cb7bbf7a6056
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data","lastCommit":{"id":"eb185aade064a813bc0b7f42de02595523103ca4","title":"Convert
+        dataset to Parquet (#5)","date":"2024-03-07T12:02:37.000Z"}}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '235'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:38 GMT
+      ETag:
+      - W/"eb-B+pFvrJsxGL1ps4aMSAd0a/Cs1o"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - HTMB-2VFoonw5ATM4rUUD3zGs69at1FWei6-Y7lv8Jtr3NAr3MQK4g==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579de-08b775de1c220c8a5043602e;43df6ffd-9bde-4831-9c2b-cb7bbf7a6056
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 5e40374e-2f6e-4655-bdae-4cd4e2875d78
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:38 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - CvpNswpzigothloC5dh7z4X-eNJY41qFCC1tTxVFMfMjrFe1RpGOhA==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579de-3eff0eae4bb096636948a887;5e40374e-2f6e-4655-bdae-4cd4e2875d78
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 5e40374e-2f6e-4655-bdae-4cd4e2875d78
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data"}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '96'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:38 GMT
+      ETag:
+      - W/"60-JZB21WRZp66SVgNdrBHeL/qkY80"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - bcWzd80LdeXmFlszCUma_q_r_8AMwkD0S4ZkjzXIFOhcVPBhDX9ozQ==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579de-5f10d39b41ac94b04e7cde73;5e40374e-2f6e-4655-bdae-4cd4e2875d78
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 33d01aa0-4215-49e2-b6ef-cc64723e9941
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:38 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - 8MbGp6HztHzp3lBciN2F7DwtbC6dozHB-k3xTmNgGyKbhG2I8gUOWw==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579de-12d1908c455a38b71848d296;33d01aa0-4215-49e2-b6ef-cc64723e9941
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 33d01aa0-4215-49e2-b6ef-cc64723e9941
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data","lastCommit":{"id":"eb185aade064a813bc0b7f42de02595523103ca4","title":"Convert
+        dataset to Parquet (#5)","date":"2024-03-07T12:02:37.000Z"}}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '235'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:38 GMT
+      ETag:
+      - W/"eb-B+pFvrJsxGL1ps4aMSAd0a/Cs1o"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - yV6wcOxAhU9UUADe3gKW5mesQgcVhFR1HgkcnABUo84jRrmlQbONEQ==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579de-4779cbbb6ade105119f7b977;33d01aa0-4215-49e2-b6ef-cc64723e9941
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      user-agent:
+      - datasets/2.18.0; python/3.11.5; huggingface_hub/0.21.4; pyarrow/15.0.0; datasets/2.18.0;
+        hf_hub/0.21.4; python/3.11.5
+    method: HEAD
+    uri: https://huggingface.co/datasets/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/dataset_infos.json
+  response:
+    body:
+      string: ''
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '129'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:38 GMT
+      Location:
+      - /datasets/fancyzhx/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/dataset_infos.json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 be7f6ce4397843276657a8babac08b6e.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - WukuIyFIJIhTPNegcSpqv4EsqotTuyM7GQp80BYhT84JLeFoMWmpfg==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579de-66ebecfc095c345641d0a8e6
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      user-agent:
+      - datasets/2.18.0; python/3.11.5; huggingface_hub/0.21.4; pyarrow/15.0.0; datasets/2.18.0;
+        hf_hub/0.21.4; python/3.11.5
+    method: HEAD
+    uri: https://huggingface.co/datasets/fancyzhx/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/dataset_infos.json
+  response:
+    body:
+      string: ''
+    headers:
+      Accept-Ranges:
+      - bytes
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '15'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:39 GMT
+      ETag:
+      - W/"f-mY2VvLxuxB7KhsoOdQTlMTccuAQ"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 be7f6ce4397843276657a8babac08b6e.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - D5bel163BbsEZy12DMx5x0AxJHiZycXq8C4D9U_RsxD_XDiSsDEJUA==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Error from cloudfront
+      X-Error-Code:
+      - EntryNotFound
+      X-Error-Message:
+      - Entry not found
+      X-Powered-By:
+      - huggingface-moon
+      X-Repo-Commit:
+      - eb185aade064a813bc0b7f42de02595523103ca4
+      X-Request-Id:
+      - Root=1-668579df-71cc00390f58e4c45ba5d7eb
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - e76a739d-6291-4a0f-8dd0-029125cf5297
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:39 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - boCxR8ug2LpPMVwm_6cYiwdfHcq1H0hi4YmfOUyPSuDIyu7zE_gl2Q==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579df-3032b5be2d8156e009178382;e76a739d-6291-4a0f-8dd0-029125cf5297
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - e76a739d-6291-4a0f-8dd0-029125cf5297
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data"}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '96'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:39 GMT
+      ETag:
+      - W/"60-JZB21WRZp66SVgNdrBHeL/qkY80"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - nnsDAPklAV_Ll65nxGlxo90mcoJ4garTPx3i4X7X3JFwsARXqSwUzA==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579df-10f3ed170e55d7260aa90d3c;e76a739d-6291-4a0f-8dd0-029125cf5297
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 2c0cc34f-2947-431d-8250-f769f7ff96f4
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:39 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - L1GiBbTGUIXKZRVWaMUx3pibxujodDLPogCQQOuvISzOa21pFflwNg==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579df-0fae997c1698372916197486;2c0cc34f-2947-431d-8250-f769f7ff96f4
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 2c0cc34f-2947-431d-8250-f769f7ff96f4
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data","lastCommit":{"id":"eb185aade064a813bc0b7f42de02595523103ca4","title":"Convert
+        dataset to Parquet (#5)","date":"2024-03-07T12:02:37.000Z"}}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '235'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:39 GMT
+      ETag:
+      - W/"eb-B+pFvrJsxGL1ps4aMSAd0a/Cs1o"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - Vtqu1pfLE1DuWtKgYq28Mj1gpFpPoWbbauG-xe_gECGNwBCIP9GzpA==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579df-0d0c96e11d1e5cf40453726f;2c0cc34f-2947-431d-8250-f769f7ff96f4
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - c03572b0-6f29-440c-9e28-4a56eb092bb9
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:39 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - g57TCuvWwruZjTbvo1Y8W762nEAR-VdjmyMymSOIno6N_Pcn7QoLNw==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579df-0cc7f1dd2b687eca72a17350;c03572b0-6f29-440c-9e28-4a56eb092bb9
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - c03572b0-6f29-440c-9e28-4a56eb092bb9
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data"}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '96'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:39 GMT
+      ETag:
+      - W/"60-JZB21WRZp66SVgNdrBHeL/qkY80"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - 2cyycOh-lp92jj1QQbalKx3lpIk5Q6GRgyWJxT7eiCcoAKxJrcqLQw==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579df-5da2299305ff8c2c5e48239b;c03572b0-6f29-440c-9e28-4a56eb092bb9
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 6ff8e9e2-624c-4d35-91b6-9749ba833c82
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:39 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - b2AJ01b_KSKxN9fj87eOFjGWnd7ts6S1hcGjk263bFKinzPmwtydpA==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579df-1bf5f2a44d45cd9c5f6fd5d8;6ff8e9e2-624c-4d35-91b6-9749ba833c82
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 6ff8e9e2-624c-4d35-91b6-9749ba833c82
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data","lastCommit":{"id":"eb185aade064a813bc0b7f42de02595523103ca4","title":"Convert
+        dataset to Parquet (#5)","date":"2024-03-07T12:02:37.000Z"}}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '235'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:39 GMT
+      ETag:
+      - W/"eb-B+pFvrJsxGL1ps4aMSAd0a/Cs1o"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - qjW51tuSvlbCz76BQa3AYeECvWDZRuYWSdrs739yFJ7RKqnm9QoaLw==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579df-38ed882d17b36abf2783e4c0;6ff8e9e2-624c-4d35-91b6-9749ba833c82
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 41b0796d-003c-4a19-9e98-14054c3b0fc2
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:39 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - cATcCO31Q8Ev9ofjiDoRQU6cKONCjDhDDqSbkzj1e2LUcOVSlSYrGQ==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579df-6db5e6207493d973706a199e;41b0796d-003c-4a19-9e98-14054c3b0fc2
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 41b0796d-003c-4a19-9e98-14054c3b0fc2
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data"}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '96'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:39 GMT
+      ETag:
+      - W/"60-JZB21WRZp66SVgNdrBHeL/qkY80"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - yNwpY2lXjWqiYWwJnAGsByzwnM9ZyCXCVaAzaSEe3aw-KBy3WJwkxw==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579df-5356832e1eecfbcd6f2bcdef;41b0796d-003c-4a19-9e98-14054c3b0fc2
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 090a08f3-f54e-42bd-aa11-3b42b585f0c7
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:39 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - CY4unlf2uxqvFXMRBVcGsqp1Zn6xPNWqlfeMVwIAYEQ-y2oEZBECFQ==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579df-52319a2e0769f82c21704c6f;090a08f3-f54e-42bd-aa11-3b42b585f0c7
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 090a08f3-f54e-42bd-aa11-3b42b585f0c7
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data","lastCommit":{"id":"eb185aade064a813bc0b7f42de02595523103ca4","title":"Convert
+        dataset to Parquet (#5)","date":"2024-03-07T12:02:37.000Z"}}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '235'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:40 GMT
+      ETag:
+      - W/"eb-B+pFvrJsxGL1ps4aMSAd0a/Cs1o"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - ycLzgHmE288pbnmhReWe0-Is1qZi6o8Pzx1lT8XtGNdiDbCD31rY9g==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579df-4c710c9619e007543070ec5a;090a08f3-f54e-42bd-aa11-3b42b585f0c7
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 1b326ae2-0e62-4749-b59a-b5c6af6c3ca1
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:40 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - fYFitafihIlwbhsBAcnR3PqxSCP0p5deiD55U_-tMGga6ZOxRsLoCQ==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579e0-47c619cf61626049166e24f3;1b326ae2-0e62-4749-b59a-b5c6af6c3ca1
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=False
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - 1b326ae2-0e62-4749-b59a-b5c6af6c3ca1
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data"}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '96'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:40 GMT
+      ETag:
+      - W/"60-JZB21WRZp66SVgNdrBHeL/qkY80"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - J6ryGO2NJCHziqTGHadgppIirD5AC3pYZXBC373ZEM1lhlHwp_4oMw==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579e0-3a4b4eca04cf52e2389a9984;1b326ae2-0e62-4749-b59a-b5c6af6c3ca1
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - dbc7c595-d36b-41bf-a2eb-4f558c330540
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: Temporary Redirect. Redirecting to /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:40 GMT
+      Location:
+      - /api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin, Accept
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - KVuRtMd5TUG82dlpk3nyEUFyZZ1uUQw56XZOUf5ma_DtVHiMUDBv8w==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579e0-1b59a58b6376b38b276a1f46;dbc7c595-d36b-41bf-a2eb-4f558c330540
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: paths=data&expand=True
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      X-Amzn-Trace-Id:
+      - dbc7c595-d36b-41bf-a2eb-4f558c330540
+      user-agent:
+      - unknown/None; hf_hub/0.21.4; python/3.11.5
+    method: POST
+    uri: https://huggingface.co/api/datasets/fancyzhx/ag_news/paths-info/eb185aade064a813bc0b7f42de02595523103ca4
+  response:
+    body:
+      string: '[{"type":"directory","oid":"8d41d068f2b389cff9232940c43579142a7054e3","size":111,"path":"data","lastCommit":{"id":"eb185aade064a813bc0b7f42de02595523103ca4","title":"Convert
+        dataset to Parquet (#5)","date":"2024-03-07T12:02:37.000Z"}}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - https://huggingface.co
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '235'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 03 Jul 2024 16:18:40 GMT
+      ETag:
+      - W/"eb-B+pFvrJsxGL1ps4aMSAd0a/Cs1o"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 3f7e5e686bf8f19b9c786efbe99c7588.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - yInAwHILsqS2NBzxswmImZXpioKm_5GtMMtmNvSiSr1AXrHUItlFUg==
+      X-Amz-Cf-Pop:
+      - DEN52-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-668579e0-4de6bfc15bfdc6ff391ae251;dbc7c595-d36b-41bf-a2eb-4f558c330540
+      cross-origin-opener-policy:
+      - same-origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: GET
+    uri: https://api.openai.com/v1/models/gpt-4-1106-preview
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6rmUlBQykxRslJQSi8o0TXRNTQ0MNMtKEoty0wtV9IByeYnZaUml4BU5OanpOZA
+        BJOLUhNLUkH6DM0sLSxNzY0MzCCqy/NSU+KTKkHqiyuLS1JzlbhquQAAAAD//wMAovmmpWcAAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d8315adb4d51a0-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:18:40 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=iVIcND2CYysE2Ci3gJRh.5l5bsQF9O.DL8hcrFNSVZs-1720023520-1.0.1.1-mX32UQYfz5D4iC7X4vzhb6_mQfPsoAt3CEr7AMFRS3NfL_TLup.23x2gPwPx77qJwCwxU8rYESD7MbO6GYjSZg;
+        path=/; expires=Wed, 03-Jul-24 16:48:40 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=34Fx2SlhmFbJvqoynmOXM4dt9DanSaQhlwME1QN70Ck-1720023520540-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      access-control-allow-origin:
+      - '*'
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '24'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15724800; includeSubDomains
+      x-request-id:
+      - req_80070111bd833abfd767280f790bd393
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "The target is help analysts
+      identify the primary reason for changes in the stock market..\n(\"\\nGiven the
+      list of examples separated by ''## Example <id>'', assign not more than 5 categories
+      that best describe the target for the given examples.\\nDon''t repeat semantically
+      similar categories if a single category can describe multiple examples.\\nOutput
+      only a list of assigned categories separated by a newline; don''t output any
+      additional text.\",)"}, {"role": "user", "content": "\n## Example 1\nText: Wall
+      St. Bears Claw Back Into the Black (Reuters) Reuters - Short-sellers, Wall Street''s
+      dwindling\\band of ultra-cynics, are seeing green again.\n\n\n\n## Example 2\nText:
+      Carlyle Looks Toward Commercial Aerospace (Reuters) Reuters - Private investment
+      firm Carlyle Group,\\which has a reputation for making well-timed and occasionally\\controversial
+      plays in the defense industry, has quietly placed\\its bets on another part
+      of the market.\n\n\n\n## Example 3\nText: Oil and Economy Cloud Stocks'' Outlook
+      (Reuters) Reuters - Soaring crude prices plus worries\\about the economy and
+      the outlook for earnings are expected to\\hang over the stock market next week
+      during the depth of the\\summer doldrums.\n\n\n\n## Example 4\nText: Iraq Halts
+      Oil Exports from Main Southern Pipeline (Reuters) Reuters - Authorities have
+      halted oil export\\flows from the main pipeline in southern Iraq after\\intelligence
+      showed a rebel militia could strike\\infrastructure, an oil official said on
+      Saturday.\n\n\n\n## Example 5\nText: Oil prices soar to all-time record, posing
+      new menace to US economy (AFP) AFP - Tearaway world oil prices, toppling records
+      and straining wallets, present a new economic menace barely three months before
+      the US presidential elections.\n\n\n\n## Example 6\nText: Stocks End Up, But
+      Near Year Lows (Reuters) Reuters - Stocks ended slightly higher on Friday\\but
+      stayed near lows for the year as oil prices surged past  #36;46\\a barrel, offsetting
+      a positive outlook from computer maker\\Dell Inc. (DELL.O)\n\n\n\n## Example
+      7\nText: Money Funds Fell in Latest Week (AP) AP - Assets of the nation''s retail
+      money market mutual funds fell by  #36;1.17 billion in the latest week to  #36;849.98
+      trillion, the Investment Company Institute said Thursday.\n\n\n\n## Example
+      8\nText: Fed minutes show dissent over inflation (USATODAY.com) USATODAY.com
+      - Retail sales bounced back a bit in July, and new claims for jobless benefits
+      fell last week, the government said Thursday, indicating the economy is improving
+      from a midsummer slump.\n\n\n\n## Example 9\nText: Safety Net (Forbes.com) Forbes.com
+      - After earning a PH.D. in Sociology, Danny Bazil Riley started to work as the
+      general manager at a commercial real estate firm at an annual base salary of  #36;70,000.
+      Soon after, a financial planner stopped by his desk to drop off brochures about
+      insurance benefits available through his employer. But, at 32, \"buying insurance
+      was the furthest thing from my mind,\" says Riley.\n\n\n\n## Example 10\nText:
+      Wall St. Bears Claw Back Into the Black  NEW YORK (Reuters) - Short-sellers,
+      Wall Street''s dwindling  band of ultra-cynics, are seeing green again.\n\n"}],
+      "model": "gpt-4-1106-preview"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '3255'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SRQU8jMQyF7/MrrJxbNDPLAttbQYitVkgggQSiqyrNuNPQiR05plCh/neUaWl3
+        Lzm8l/fy2fksAIxvzAiMW1p1IXbDX+37hux8/Px6ffvn983jOD5Onlb3p5ObMT6bQU7w/BWdfqdO
+        HIfYoXqmne0ErWJurc7rsqx//Kyr3gjcYJdjbdTh6bCqyrNhFFx7fN8nl+wdJjOClwIA4LM/MyM1
+        +GFGUA6+lYAp2RbN6HAJwAh3WTE2JZ/UkprB0XRMitRjXzsmDt7BhBrvrLKkKU1ojUlZ4BKXdu1Z
+        pnRrZYUKD4LUpCldsUQWqwh3KAuWYMlhlkPgxusG7qTH37+5PcB23EbheR6M3rruoC88+bScCdrE
+        lMGSctzFtwXA334pb//NaaJwiDpTXiHlwvOy3vWZ4z8c3epibyqr7f5J1WWxJzRpkxTDbOGpRYni
+        +x1lzmJbfAEAAP//AwAuzbaRIgIAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d8315bfb207b1c-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:18:42 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=EH.nuL.2XgGnlwXzDzivbvj1oHZAu_Z.8MaVXYmOhc0-1720023522-1.0.1.1-8Rn9VpWah6RYdU3YqWGUcTeG_Ph.ntkdISMELDjipiduMul2lUe4xspZULF.VUo.yO9E0bHuYM2aNYktGGv4aA;
+        path=/; expires=Wed, 03-Jul-24 16:48:42 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=2R0X41xiAV5JLY0ya_SWtn48o14AxZtcYjngp7CXH1M-1720023522558-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '1472'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '1999213'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 23ms
+      x-request-id:
+      - req_205c2a7980c6bbb287eb264a0e3d901b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "The target is help analysts
+      identify the primary reason for changes in the stock market..\n\nYou will be
+      given different groups of labels that fit this target, separated by ''## Group
+      <id>''. For example:\n\"\"\"\n## Group 1\nlabel A\nlabel B\nlabel C\n...\n\n##
+      Group 2\nlabel similar to label A\nlabel D\n...\n\n\n## Group 3\nlabel similar
+      to label D\nlabel similar to label B\nlabel A\n...\n\"\"\"\n\nYour goal is to
+      squash all presented groups into a single group of labels that merges all semantically
+      similar labels into one more generic label.\nFor example, some labels from the
+      three groups can be merged into the generic labels, since similar labels are
+      presented in different groups:\n\n\"\"\"\ngeneric label A\ngeneric label B\nlabel
+      C\ngeneric label D\n...\n\"\"\"\n\nWhen creating the output list of labels,
+      please follow the guideline:\n\n1. Please use only the label names that are
+      well understood and represent general categories to comply with the initial
+      target.\n2. Try to create distinct categories, don''t output two categories
+      if they represent two semantically similar closing lost reasons.\n3. Don''t
+      try to merge label names if they represent different aspects of a given target
+      - do it only if they represent the same meaning.\n4. Don''t output additional
+      text, only general label names separated by newlines.\n5. Don''t ignore any
+      labels presented in each group - every input label in groups must belong to
+      a single output category.\n6. Create up to 10 different categories.\n"}, {"role":
+      "user", "content": "## Group 1\nEconomic Indicators\nInvestor Behavior\nMarket
+      Trends\nCorporate Performance\nCommodity Prices\n\n\nOutput categories: "}],
+      "model": "gpt-4-1106-preview"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1741'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SRX0srMRDF3/dTDHlupdtWvfZRERERFISL3EqJ2eludDMTJmPrXul3l2z/6Use
+        zsk5+c3kqwAwvjIzMK6x6kJshxf1uovVnf+8/H+nXVNd34RUrv/y9Pn5sTODnODXN3S6T504DrFF
+        9Uxb2wlaxdxano9Ho/HkdDzpjcAVtjlWRx1Oh2U5OhtGwZXH9S7ZsHeYzAz+FQAAX/2ZGanCTzOD
+        0WCvBEzJ1mhmh0sARrjNirEp+aSW1AyOpmNSpB772jFx8A5uqfLOKkua0y2tMCkLXGJjV55lTvdW
+        3lHhSZCqNKcrlshiFeEBZckSLDnMcghcee3gQXr83ZubA2zLdRR+zYPRR9se9KUnn5qFoE1MGSwp
+        x218UwC89Ev5+DWnicIh6kL5HSkXTqbTbZ85/sPRLf/sTGW17Y/U2bjYEZrUJcWwWHqqUaL4fkeZ
+        s9gU3wAAAP//AwAINgYKIgIAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 89d83168b81a5198-DEN
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Jul 2024 16:18:44 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=NUwjdvEAKUcDq5XqLILYNQBA7wbPN8dARe_CV5C0DJw-1720023524-1.0.1.1-lBR_mRFJoDIKjNEqq1tMBkWYYhuTTZg_ufD_zNxD0Jur9iOOqgMraIEF8Pcb_MBrzV.d.xlkgDA6tgW9yx_aWw;
+        path=/; expires=Wed, 03-Jul-24 16:48:44 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=ZHuPj4e5Cf4hnA9kB3ZjqfVBwZsh1SWFiN6263yixTw-1720023524878-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '1994'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '1999589'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 12ms
+      x-request-id:
+      - req_124c7b490778a1a6d6a6377ce5afa6ab
+    status:
+      code: 200
+      message: OK
+version: 1
