@@ -29,6 +29,26 @@ jobs:
     steps:
       - uses: hmarr/debug-action@v3.0.0
 
+      - name: Check user's membership
+        uses: actions/github-script@v7
+        id: check-membership
+        env:
+          ACTOR: ${{ github.actor }}
+        with:
+          github-token: ${{ secrets.GIT_PAT }}
+          script: |
+            const { repo, owner } = context.repo;
+            const actor = process.env.ACTOR;
+            const { data: membership } = await github.rest.orgs.getMembershipForUser({
+              org: owner,
+              username: actor,
+            });
+            if (membership.state != "active") {
+              const error = `Unfortunately you don't have membership in ${owner} organization`;
+              core.setOutput("error", error);
+              core.setFailed(error);
+            }
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -86,7 +106,7 @@ jobs:
         with:
           context: .
           file: Dockerfile.app
-          push: true
+          push: ${{ steps.check-membership.outputs.error && true || false }}
           tags: ${{ steps.calculate-docker-tags.outputs.docker-tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
