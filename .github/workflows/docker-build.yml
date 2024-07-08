@@ -106,7 +106,7 @@ jobs:
         with:
           context: .
           file: Dockerfile.app
-          push: ${{ steps.check-membership.outputs.error && true || false }}
+          push: ${{ steps.check-membership.outputs.error && false || true }}
           tags: ${{ steps.calculate-docker-tags.outputs.docker-tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
