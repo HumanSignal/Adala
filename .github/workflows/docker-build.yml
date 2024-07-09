@@ -31,7 +31,7 @@ jobs:
 
       - name: Check user's membership
         uses: actions/github-script@v7
-        id: check-membership
+        id: actor-membership
         env:
           ACTOR: ${{ github.actor }}
         with:
@@ -43,11 +43,8 @@ jobs:
               org: owner,
               username: actor,
             });
-            if (membership.state != "active") {
-              const error = `Unfortunately you don't have membership in ${owner} organization`;
-              core.setOutput("error", error);
-              core.setFailed(error);
-            }
+            core.setOutput("state", membership.state);
+            core.setOutput("active", membership.state == "active");
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -106,7 +103,7 @@ jobs:
         with:
           context: .
           file: Dockerfile.app
-          push: ${{ steps.check-membership.outputs.error && false || true }}
+          push: ${{ steps.actor-membership.outputs.active }}
           tags: ${{ steps.calculate-docker-tags.outputs.docker-tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
