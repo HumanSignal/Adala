@@ -75,7 +75,7 @@ class LSEBatchItem(BaseModel):
     )
 
     task_id: int
-    output: str
+    output: Optional[str]
     # TODO handle in DIA-1122
     # we don't need to use reserved names anymore here because they're not in a DataFrame, but a structure with proper typing available
     error: bool = Field(False, alias="_adala_error")

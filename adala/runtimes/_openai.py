@@ -8,6 +8,7 @@ from openai import OpenAI, NotFoundError, AsyncOpenAI
 from pydantic import Field, computed_field, ConfigDict
 from .base import Runtime, AsyncRuntime
 from adala.utils.logs import print_error
+import litellm
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
 from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.matching import match_options
@@ -20,8 +21,8 @@ async def async_create_completion(
     model: str,
     user_prompt: str,
     client: AsyncOpenAI,
-    system_prompt: str = None,
-    openai_api_key: str = None,
+    system_prompt: Optional[str] = None,
+    openai_api_key: Optional[str] = None,
     instruction_first: bool = True,
     max_tokens: int = 1000,
     temperature: float = 0.0,
@@ -42,8 +43,10 @@ async def async_create_completion(
     Returns:
         Dict[str, Any]: OpenAI response or error message.
     """
-    openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
-    messages = [{"role": "user", "content": user_prompt}]
+    openai_api_key = (
+        openai_api_key or client.api_key or os.environ['OPENAI_API_KEY']
+    )
+    messages = [{'role': 'user', 'content': user_prompt}]
     if system_prompt:
         if instruction_first:
             messages.insert(0, {"role": "system", "content": system_prompt})
@@ -51,7 +54,13 @@ async def async_create_completion(
             messages[0]["content"] += system_prompt
 
     try:
-        completion = await client.chat.completions.create(
+        # FIXME: I think we're better off doing this globally, since this
+        #        changes the client for the whole module. Probably better to
+        #        just use a single httpx client and make that clear with where
+        #        we assign it.
+        litellm.aclient_session = client._client
+        completion = await litellm.acompletion(
+            api_key=openai_api_key,
             model=model,
             messages=messages,
             max_tokens=max_tokens,
