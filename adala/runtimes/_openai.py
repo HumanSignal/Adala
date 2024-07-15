@@ -124,6 +124,7 @@ class OpenAIChatRuntime(Runtime):
     max_tokens: Optional[int] = 1000
     splitter: Optional[str] = None
     logprobs: Optional[bool] = False
+    temperature: Optional[float] = 0.0
 
     @computed_field
     def _client(self) -> OpenAI:
@@ -150,6 +151,7 @@ class OpenAIChatRuntime(Runtime):
             model=self.openai_model,
             messages=messages,
             logprobs=self.logprobs,
+            temperature=self.temperature,
         )
         completion_text = completion.choices[0].message.content
         if self.logprobs:
