@@ -3053,18 +3053,18 @@ files = [
 
 [[package]]
 name = "kombu"
-version = "5.3.5"
+version = "5.4.0rc2"
 description = "Messaging library for Python."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "kombu-5.3.5-py3-none-any.whl", hash = "sha256:0eac1bbb464afe6fb0924b21bf79460416d25d8abc52546d4f16cad94f789488"},
-    {file = "kombu-5.3.5.tar.gz", hash = "sha256:30e470f1a6b49c70dc6f6d13c3e4cc4e178aa6c469ceb6bcd55645385fc84b93"},
+    {file = "kombu-5.4.0rc2-py3-none-any.whl", hash = "sha256:8e524af154fe54efc7216cd3c13e5af77790289c4f8a752402819391aaab3796"},
+    {file = "kombu-5.4.0rc2.tar.gz", hash = "sha256:82103abcb6cfd7fff878c3e4f5bae64cfe76b0f593087a2717e1b7250a4f5118"},
 ]
 
 [package.dependencies]
 amqp = ">=5.1.1,<6.0.0"
-typing-extensions = {version = "*", markers = "python_version < \"3.10\""}
+typing-extensions = {version = "4.12.1", markers = "python_version < \"3.10\""}
 vine = "*"
 
 [package.extras]
@@ -3077,7 +3077,7 @@ mongodb = ["pymongo (>=4.1.1)"]
 msgpack = ["msgpack"]
 pyro = ["pyro4"]
 qpid = ["qpid-python (>=0.26)", "qpid-tools (>=0.26)"]
-redis = ["redis (>=4.5.2,!=4.5.5,<6.0.0)"]
+redis = ["redis (>=4.5.2,!=4.5.5,!=5.0.2)"]
 slmq = ["softlayer-messaging (>=1.0.3)"]
 sqlalchemy = ["sqlalchemy (>=1.4.48,<2.1)"]
 sqs = ["boto3 (>=1.26.143)", "pycurl (>=7.43.0.5)", "urllib3 (>=1.26.16)"]
@@ -6723,13 +6723,13 @@ types-pyOpenSSL = "*"
 
 [[package]]
 name = "typing-extensions"
-version = "4.10.0"
+version = "4.12.1"
 description = "Backported and Experimental Type Hints for Python 3.8+"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "typing_extensions-4.10.0-py3-none-any.whl", hash = "sha256:69b1a937c3a517342112fb4c6df7e72fc39a38e7891a5730ed4985b5214b5475"},
-    {file = "typing_extensions-4.10.0.tar.gz", hash = "sha256:b0abd7c89e8fb96f98db18d86106ff1d90ab692004eb746cf6eda2682f91b3cb"},
+    {file = "typing_extensions-4.12.1-py3-none-any.whl", hash = "sha256:6024b58b69089e5a89c347397254e35f1bf02a907728ec7fee9bf0fe837d203a"},
+    {file = "typing_extensions-4.12.1.tar.gz", hash = "sha256:915f5e35ff76f56588223f15fdd5938f9a1cf9195c0de25130c627e4d597f6d1"},
 ]
 
 [[package]]
@@ -7463,4 +7463,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "148963d3482af103ca43d177d6f0b9ea008d40f1835b8a75b2919d942662c817"
+content-hash = "1c782f75e3bb5a515435bdb43e1662d9aaf49e1a436f8b0713c7102e096b0ced"
