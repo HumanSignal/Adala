@@ -1,112 +1,14 @@
 import os
-import difflib
-import asyncio
+from typing import Any, Dict, List, Optional
+
+from adala.utils.matching import match_options
+from adala.utils.parse import parse_template, partial_str_format
+from openai import NotFoundError, OpenAI
+from pydantic import ConfigDict, Field, computed_field
 from rich import print
 
-from typing import Optional, Dict, Any, List
-from openai import OpenAI, NotFoundError, AsyncOpenAI
-from pydantic import Field, computed_field, ConfigDict
-from .base import Runtime, AsyncRuntime
-from adala.utils.logs import print_error
-import litellm
-from adala.utils.internal_data import InternalDataFrame, InternalSeries
-from adala.utils.parse import parse_template, partial_str_format
-from adala.utils.matching import match_options
-from tenacity import retry, stop_after_attempt, wait_random_exponential
-import httpx
-
-
-@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
-async def async_create_completion(
-    model: str,
-    user_prompt: str,
-    client: AsyncOpenAI,
-    system_prompt: Optional[str] = None,
-    openai_api_key: Optional[str] = None,
-    instruction_first: bool = True,
-    max_tokens: int = 1000,
-    temperature: float = 0.0,
-) -> Dict[str, Any]:
-    """
-    Async version of create_completion function with error handling and session timeout.
-
-    Args:
-        model: OpenAI model name.
-        user_prompt: User prompt.
-        client: Async OpenAI client.
-        system_prompt: System prompt.
-        openai_api_key: OpenAI API key (if not set, will use OPENAI_API_KEY environment variable).
-        instruction_first: Whether to put instructions first.
-        max_tokens: Maximum tokens to generate.
-        temperature: Temperature for sampling.
-
-    Returns:
-        Dict[str, Any]: OpenAI response or error message.
-    """
-    openai_api_key = (
-        openai_api_key or client.api_key or os.environ['OPENAI_API_KEY']
-    )
-    messages = [{'role': 'user', 'content': user_prompt}]
-    if system_prompt:
-        if instruction_first:
-            messages.insert(0, {"role": "system", "content": system_prompt})
-        else:
-            messages[0]["content"] += system_prompt
-
-    try:
-        # FIXME: I think we're better off doing this globally, since this
-        #        changes the client for the whole module. Probably better to
-        #        just use a single httpx client and make that clear with where
-        #        we assign it.
-        litellm.aclient_session = client._client
-        completion = await litellm.acompletion(
-            api_key=openai_api_key,
-            model=model,
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-        )
-        completion_text = completion.choices[0].message.content
-        return {
-            "text": completion_text,
-            "_adala_error": False,
-            "_adala_message": None,
-            "_adala_details": None,
-        }
-    except Exception as e:
-        # Handle other exceptions
-        return {
-            "text": None,
-            "_adala_error": True,
-            "_adala_message": type(e).__name__,
-            "_adala_details": str(e),
-        }
-
-
-async def async_concurrent_create_completion(
-    prompts,
-    client,
-    instruction_first,
-    openai_model,
-    max_tokens,
-    temperature,
-):
-    tasks = [
-        asyncio.ensure_future(
-            async_create_completion(
-                client=client,
-                user_prompt=prompt["user"],
-                system_prompt=prompt["system"],
-                model=openai_model,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                instruction_first=instruction_first,
-            )
-        )
-        for prompt in prompts
-    ]
-    responses = await asyncio.gather(*tasks)
-    return responses
+from .base import Runtime
+from ._litellm import AsyncLiteLLMChatRuntime
 
 
 class OpenAIChatRuntime(Runtime):
@@ -221,7 +123,7 @@ class OpenAIChatRuntime(Runtime):
         return outputs
 
 
-class AsyncOpenAIChatRuntime(AsyncRuntime):
+class AsyncOpenAIChatRuntime(AsyncLiteLLMChatRuntime):
     """
     Runtime that uses [OpenAI API](https://openai.com/) and chat completion models to perform the skill.
     It uses async calls to OpenAI API.
@@ -239,144 +141,12 @@ class AsyncOpenAIChatRuntime(AsyncRuntime):
             also more money spent and more chances to hit the rate limit. Defaults to 10.
     """
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True
+    )  # for @computed_field
 
-    openai_model: str = Field(alias="model")
-    openai_api_key: Optional[str] = Field(
-        default=os.getenv("OPENAI_API_KEY"), alias="api_key"
-    )
-    base_url: Optional[str] = None
-    max_tokens: Optional[int] = 1000
-    temperature: Optional[float] = 0.0
-    splitter: Optional[str] = None
-    concurrent_clients: Optional[int] = 10
-    timeout: Optional[int] = 10
-
-    @computed_field
-    def _client(self) -> AsyncOpenAI:
-        return AsyncOpenAI(
-            api_key=self.openai_api_key,
-            base_url=self.base_url,
-            http_client=httpx.AsyncClient(
-                limits=httpx.Limits(
-                    max_connections=self.concurrent_clients,
-                    max_keepalive_connections=self.concurrent_clients,
-                ),
-                timeout=self.timeout,
-            ),
-        )
-
-    def init_runtime(self) -> "Runtime":
-        # check model availability
-        try:
-            _client = OpenAI(api_key=self.openai_api_key)
-            _client.models.retrieve(self.openai_model)
-        except NotFoundError:
-            raise ValueError(
-                f'Requested model "{self.openai_model}" is not available in your OpenAI account.'
-            )
-        return self
-
-    def _prepare_prompt(
-        self,
-        row,
-        input_template: str,
-        instructions_template: str,
-        suffix: str,
-        extra_fields: dict,
-    ) -> Dict[str, str]:
-        """Prepare input prompt for OpenAI API from the row of the dataframe"""
-        return {
-            "system": instructions_template,
-            "user": input_template.format(**row, **extra_fields) + suffix,
-        }
-
-    async def batch_to_batch(
-        self,
-        batch: InternalDataFrame,
-        input_template: str,
-        instructions_template: str,
-        output_template: str,
-        extra_fields: Optional[Dict[str, str]] = None,
-        field_schema: Optional[Dict] = None,
-        instructions_first: bool = True,
-    ) -> InternalDataFrame:
-        """Execute batch of requests with async calls to OpenAI API"""
-
-        extra_fields = extra_fields or {}
-        field_schema = field_schema or {}
-
-        options = {}
-        for field, schema in field_schema.items():
-            if schema.get("type") == "array":
-                options[field] = schema.get("items", {}).get("enum", [])
-
-        output_fields = parse_template(
-            partial_str_format(output_template, **extra_fields), include_texts=True
-        )
-
-        if len(output_fields) > 2:
-            raise NotImplementedError("Only one output field is supported")
-
-        suffix = ""
-        outputs = []
-        for output_field in output_fields:
-            if output_field["type"] == "text":
-                suffix += output_field["text"]
-
-            elif output_field["type"] == "var":
-                name = output_field["text"]
-                # prepare prompts
-                prompts = batch.apply(
-                    lambda row: self._prepare_prompt(
-                        row, input_template, instructions_template, suffix, extra_fields
-                    ),
-                    axis=1,
-                ).tolist()
-
-                responses = await async_concurrent_create_completion(
-                    prompts=prompts,
-                    client=self._client,
-                    instruction_first=instructions_first,
-                    max_tokens=self.max_tokens,
-                    temperature=self.temperature,
-                    openai_model=self.openai_model,
-                )
-
-                # parse responses, optionally match it with options
-                for prompt, response in zip(prompts, responses):
-                    completion_text = response.pop("text")
-                    if self.verbose:
-                        if response["error"] is not None:
-                            print_error(
-                                f"Prompt: {prompt}\nOpenAI API error: {response}"
-                            )
-                        else:
-                            print(
-                                f"Prompt: {prompt}\nOpenAI API response: {completion_text}"
-                            )
-                    if name in options and completion_text is not None:
-                        completion_text = match_options(completion_text, options[name])
-                    # still technically possible to have a name collision here with the error, message, details fields
-                    # `name in options` is only `True` for categorical variables, but is never `True` for freeform text generation
-                    response[name] = completion_text
-                    outputs.append(response)
-
-        # TODO: note that this doesn't work for multiple output fields e.g. `Output {output1} and Output {output2}`
-        output_df = InternalDataFrame(outputs)
-        return output_df.set_index(batch.index)
-
-    async def record_to_record(
-        self,
-        record: Dict[str, str],
-        input_template: str,
-        instructions_template: str,
-        output_template: str,
-        extra_fields: Optional[Dict[str, Any]] = None,
-        field_schema: Optional[Dict] = None,
-        instructions_first: bool = True,
-    ) -> Dict[str, str]:
-        raise NotImplementedError("record_to_record is not implemented")
+    model: str
+    api_key: Optional[str] = Field(default=os.getenv('OPENAI_API_KEY'))
 
 
 class OpenAIVisionRuntime(OpenAIChatRuntime):
