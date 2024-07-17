@@ -9,7 +9,7 @@ from adala.utils.logs import print_error
 from adala.utils.matching import match_options
 from adala.utils.parse import parse_template, partial_str_format
 from openai import NotFoundError
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict
 from rich import print
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
@@ -130,7 +130,7 @@ class LiteLLMChatRuntime(Runtime):
     )  # for @computed_field
 
     model: str
-    api_key: Optional[str] = Field(alias='api_key')
+    api_key: Optional[str]
     base_url: Optional[str] = None
     max_tokens: Optional[int] = 1000
     splitter: Optional[str] = None
@@ -160,9 +160,6 @@ class LiteLLMChatRuntime(Runtime):
             max_tokens=self.max_tokens,
             # TODO temperature, **kwargs?
         )
-        # completion = self._client.chat.completions.create(
-        #     model=self.openai_model, messages=messages
-        # )
         completion_text = completion.choices[0].message.content
 
         if self.verbose:
@@ -241,7 +238,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
     It uses async calls to OpenAI API.
 
     Attributes:
-        openai_model: OpenAI model name.
+        model: OpenAI model name.
         openai_api_key: OpenAI API key. If not provided, will be taken from OPENAI_API_KEY environment variable.
         base_url: Can point to any implementation of the OpenAI API. Defaults to OpenAI's.
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
@@ -297,8 +294,6 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
 
     def init_runtime(self) -> 'Runtime':
         # check model availability
-        # FIXME remove
-        logger.info('Starting litellm runtime')
         try:
             # _client = OpenAI(api_key=self.openai_api_key)
             # _client.models.retrieve(self.openai_model)
@@ -458,11 +453,6 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
                             ```
             instructions_first: If True, instructions will be sent before input.
         """
-
-        # if not check_if_new_openai_version():
-        #     raise NotImplementedError(
-        #         f'{self.__class__.__name__} requires OpenAI API version 1.0.0 or higher.'
-        #     )
 
         extra_fields = extra_fields or {}
         field_schema = field_schema or {}
