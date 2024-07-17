@@ -2,7 +2,6 @@ import asyncio
 import logging
 from typing import Any, Dict, List, Optional
 
-import httpx
 import litellm
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
@@ -22,6 +21,7 @@ logger = logging.getLogger(__name__)
 async def async_create_completion(
     model: str,
     user_prompt: str,
+    timeout: int,
     system_prompt: Optional[str] = None,
     api_key: Optional[str] = None,
     instruction_first: bool = True,
@@ -59,6 +59,7 @@ async def async_create_completion(
             messages=messages,
             max_tokens=max_tokens,
             temperature=temperature,
+            timeout=timeout,
         )
         completion_text = completion.choices[0].message.content
         return {
@@ -83,6 +84,7 @@ async def async_concurrent_create_completion(
     model: str,
     max_tokens: int,
     temperature: float,
+    timeout: int,
     api_key: Optional[str] = None,
 ):
     tasks = [
@@ -254,15 +256,6 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
     splitter: Optional[str] = None
     timeout: Optional[int] = 10
 
-    def _init_http_client(self) -> httpx.AsyncClient:
-        client = (
-            httpx.AsyncClient(
-                timeout=self.timeout,
-            ),
-        )
-        litellm.aclient_session = client
-        return client
-
     def init_runtime(self) -> 'Runtime':
         # check model availability
         try:
@@ -272,7 +265,6 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             raise ValueError(
                 f'Requested model "{self.model}" is not available in your OpenAI account.'
             )
-        self._http_client = self._init_http_client
         return self
 
     def _prepare_prompt(
@@ -344,6 +336,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                     temperature=self.temperature,
                     model=self.model,
                     api_key=self.api_key,
+                    timeout=self.timeout,
                 )
 
                 # parse responses, optionally match it with options
