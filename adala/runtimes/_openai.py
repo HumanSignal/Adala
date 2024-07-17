@@ -17,12 +17,15 @@ from ._litellm import (
 
 class OpenAIChatRuntime(LiteLLMChatRuntime):
     """
-    Runtime that uses [OpenAI API](https://openai.com/) and chat completion models to perform the skill.
+    Runtime that uses [OpenAI API](https://openai.com/) and chat completion
+    models to perform the skill.
 
     Attributes:
         model: OpenAI model name.
-        openai_api_key: OpenAI API key. If not provided, will be taken from OPENAI_API_KEY environment variable.
-        base_url: Can point to any implementation of the OpenAI API. Defaults to OpenAI's.
+        api_key: OpenAI API key. If not provided, will be taken from
+                 OPENAI_API_KEY environment variable.
+        base_url: Can point to any implementation of the OpenAI API.
+                  Defaults to OpenAI's.
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
     """
 
@@ -36,20 +39,21 @@ class OpenAIChatRuntime(LiteLLMChatRuntime):
 
 class AsyncOpenAIChatRuntime(AsyncLiteLLMChatRuntime):
     """
-    Runtime that uses [OpenAI API](https://openai.com/) and chat completion models to perform the skill.
-    It uses async calls to OpenAI API.
+    Runtime that uses [OpenAI API](https://openai.com/) and chat completion
+    models to perform the skill. It uses async calls to OpenAI API.
 
     Attributes:
         model: OpenAI model name.
-        openai_api_key: OpenAI API key. If not provided, will be taken from OPENAI_API_KEY environment variable.
-        base_url: Can point to any implementation of the OpenAI API. Defaults to OpenAI's.
+        api_key: OpenAI API key. If not provided, will be taken from
+                 OPENAI_API_KEY environment variable.
+        base_url: Can point to any implementation of the OpenAI API.
+                  Defaults to OpenAI's.
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
-        temperature: Temperature for sampling, between 0 and 1. Higher values means the model will take more risks.
-            Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.
-            Defaults to 0.0.
-
-        concurrent_clients: Number of concurrent clients to OpenAI API. More clients means more parallel requests, but
-            also more money spent and more chances to hit the rate limit. Defaults to 10.
+        temperature: Temperature for sampling, between 0 and 1. Higher values
+                     means the model will take more risks. Try 0.9 for more
+                     creative applications, and 0 (argmax sampling) for ones
+                     with a well-defined answer.
+                     Defaults to 0.0.
     """
 
     model: str
@@ -60,7 +64,8 @@ class AsyncOpenAIChatRuntime(AsyncLiteLLMChatRuntime):
 
 class OpenAIVisionRuntime(LiteLLMVisionRuntime):
     """
-    Runtime that uses [OpenAI API](https://openai.com/) and vision models to perform the skill.
+    Runtime that uses [OpenAI API](https://openai.com/) and vision models to
+    perform the skill.
     Only compatible with OpenAI API version 1.0.0 or higher.
     """
 

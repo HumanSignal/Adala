@@ -36,7 +36,8 @@ async def async_create_completion(
                this: https://litellm.vercel.app/docs/providers
         user_prompt: User prompt.
         system_prompt: System prompt.
-        openai_api_key: OpenAI API key (if not set, will use OPENAI_API_KEY environment variable).
+        api_key: API key, optional. If provided, will be used to authenticate
+                 with the provider of your specified model.
         instruction_first: Whether to put instructions first.
         max_tokens: Maximum tokens to generate.
         temperature: Temperature for sampling.
@@ -104,14 +105,15 @@ async def async_concurrent_create_completion(
 
 class LiteLLMChatRuntime(Runtime):
     """
-    Runtime that uses [LiteLLM API](https://litellm.vercel.app/docs) and chat completion models to perform the skill.
+    Runtime that uses [LiteLLM API](https://litellm.vercel.app/docs) and chat
+    completion models to perform the skill.
 
     Attributes:
         model: Model name, refer to LiteLLM's supported provider docs for
-                    how to pass this for your model: https://litellm.vercel.app/docs/providers
+               how to pass this for your model: https://litellm.vercel.app/docs/providers
         api_key: API key, optional. If provided, will be used to authenticate
                  with the provider of your specified model.
-        base_url: Can point to any implementation of your model's API.
+        base_url: Points to the endpoint where your model is hosted
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
     """
 
@@ -224,20 +226,20 @@ class LiteLLMChatRuntime(Runtime):
 
 class AsyncLiteLLMChatRuntime(AsyncRuntime):
     """
-    Runtime that uses [OpenAI API](https://openai.com/) and chat completion models to perform the skill.
-    It uses async calls to OpenAI API.
+    Runtime that uses [OpenAI API](https://openai.com/) and chat completion
+    models to perform the skill. It uses async calls to OpenAI API.
 
     Attributes:
         model: OpenAI model name.
-        openai_api_key: OpenAI API key. If not provided, will be taken from OPENAI_API_KEY environment variable.
-        base_url: Can point to any implementation of the OpenAI API. Defaults to OpenAI's.
+        api_key: API key, optional. If provided, will be used to authenticate
+                 with the provider of your specified model.
+        base_url: Points to the endpoint where your model is hosted
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
-        temperature: Temperature for sampling, between 0 and 1. Higher values means the model will take more risks.
-            Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.
-            Defaults to 0.0.
-
-        concurrent_clients: Number of concurrent clients to OpenAI API. More clients means more parallel requests, but
-            also more money spent and more chances to hit the rate limit. Defaults to 10.
+        temperature: Temperature for sampling, between 0 and 1. Higher values
+                     means the model will take more risks. Try 0.9 for more
+                     creative applications, and 0 (argmax sampling) for ones
+                     with a well-defined answer.
+                     Defaults to 0.0.
     """
 
     model_config = ConfigDict(
@@ -360,12 +362,15 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                         completion_text = match_options(
                             completion_text, options[name]
                         )
-                    # still technically possible to have a name collision here with the error, message, details fields
-                    # `name in options` is only `True` for categorical variables, but is never `True` for freeform text generation
+                    # still technically possible to have a name collision here
+                    # with the error, message, details fields `name in options`
+                    # is only `True` for categorical variables, but is never
+                    # `True` for freeform text generation
                     response[name] = completion_text
                     outputs.append(response)
 
-        # TODO: note that this doesn't work for multiple output fields e.g. `Output {output1} and Output {output2}`
+        # TODO: note that this doesn't work for multiple output fields e.g.
+        #       `Output {output1} and Output {output2}`
         output_df = InternalDataFrame(outputs)
         return output_df.set_index(batch.index)
 
@@ -399,7 +404,8 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
         instructions_first: bool = False,
     ) -> Dict[str, str]:
         """
-        Execute LiteLLM request given record and templates for input, instructions and output.
+        Execute LiteLLM request given record and templates for input,
+        instructions and output.
 
         Args:
             record: Record to be used for input, instructions and output templates.
@@ -408,7 +414,8 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
             output_template: Template for output message.
             extra_fields: Extra fields to be used in templates.
             field_schema: Field jsonschema to be used for parsing templates.
-                         Field schema must contain "format": "uri" for image fields. For example:
+                          Field schema must contain "format": "uri" for image fields.
+                          For example:
                             ```json
                             {
                                 "image": {
