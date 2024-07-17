@@ -355,7 +355,6 @@ async def test_streaming_openai_only(openai_mock):
         model='gpt-3.5-turbo',
         api_key=OPENAI_API_KEY,
         user_prompt='return the word banana',
-        client=http_client,
     )
 
     assert result == {

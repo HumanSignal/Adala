@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 async def async_create_completion(
     model: str,
     user_prompt: str,
-    client: httpx.Client,
     system_prompt: Optional[str] = None,
     api_key: Optional[str] = None,
     instruction_first: bool = True,
@@ -36,7 +35,6 @@ async def async_create_completion(
         model: model name. Refer to litellm supported models for how to pass
                this: https://litellm.vercel.app/docs/providers
         user_prompt: User prompt.
-        client: Async OpenAI client.
         system_prompt: System prompt.
         openai_api_key: OpenAI API key (if not set, will use OPENAI_API_KEY environment variable).
         instruction_first: Whether to put instructions first.
@@ -46,7 +44,6 @@ async def async_create_completion(
     Returns:
         Dict[str, Any]: OpenAI response or error message.
     """
-    # api_key = api_key or client.api_key or os.environ['OPENAI_API_KEY']
     messages = [{'role': 'user', 'content': user_prompt}]
     if system_prompt:
         if instruction_first:
@@ -55,11 +52,6 @@ async def async_create_completion(
             messages[0]['content'] += system_prompt
 
     try:
-        # FIXME: I think we're better off doing this globally, since this
-        #        changes the client for the whole module. Probably better to
-        #        just use a single httpx client and make that clear with where
-        #        we assign it.
-        # litellm.aclient_session = client._client
         completion = await litellm.acompletion(
             api_key=api_key,
             model=model,
@@ -86,7 +78,6 @@ async def async_create_completion(
 
 async def async_concurrent_create_completion(
     prompts: List[Dict],
-    client: httpx.Client,
     instruction_first: bool,
     model: str,
     max_tokens: int,
@@ -96,7 +87,6 @@ async def async_concurrent_create_completion(
     tasks = [
         asyncio.ensure_future(
             async_create_completion(
-                client=client,
                 user_prompt=prompt['user'],
                 system_prompt=prompt['system'],
                 model=model,
@@ -260,32 +250,11 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
     max_tokens: Optional[int] = 1000
     temperature: Optional[float] = 0.0
     splitter: Optional[str] = None
-    # concurrent_clients: Optional[int] = 10
     timeout: Optional[int] = 10
-
-    # @computed_field
-    # def _client(self) -> AsyncOpenAI:
-    #     """Only used to check that the model exists, all other requests routed through litellm"""
-    #     return AsyncOpenAI(
-    #         api_key=self.openai_api_key,
-    #         base_url=self.base_url,
-    #         http_client=self.http_client,
-    #         # http_client=httpx.AsyncClient(
-    #         #     limits=httpx.Limits(
-    #         #         max_connections=self.concurrent_clients,
-    #         #         max_keepalive_connections=self.concurrent_clients,
-    #         #     ),
-    #         #     timeout=self.timeout,
-    #         # ),
-    #     )
 
     def _init_http_client(self) -> httpx.AsyncClient:
         client = (
             httpx.AsyncClient(
-                # limits=httpx.Limits(
-                #     max_connections=self.concurrent_clients,
-                #     max_keepalive_connections=self.concurrent_clients,
-                # ),
                 timeout=self.timeout,
             ),
         )
@@ -295,8 +264,6 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
     def init_runtime(self) -> 'Runtime':
         # check model availability
         try:
-            # _client = OpenAI(api_key=self.openai_api_key)
-            # _client.models.retrieve(self.openai_model)
             if self.api_key:
                 litellm.check_valid_key(model=self.model, api_key=self.api_key)
         except NotFoundError:
@@ -370,7 +337,6 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
 
                 responses = await async_concurrent_create_completion(
                     prompts=prompts,
-                    client=self._http_client,
                     instruction_first=instructions_first,
                     max_tokens=self.max_tokens,
                     temperature=self.temperature,
@@ -517,11 +483,6 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
             messages=[{'role': 'user', 'content': content}],
             max_tokens=self.max_tokens,
         )
-        # completion = self._client.chat.completions.create(
-        #     model=self.openai_model,
-        #     messages=[{'role': 'user', 'content': content}],
-        #     max_tokens=self.max_tokens,
-        # )
 
         completion_text = completion.choices[0].message.content
         return {output_field_name: completion_text}
