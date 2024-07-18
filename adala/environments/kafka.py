@@ -104,20 +104,21 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             timeout_ms=self.timeout_ms, max_records=batch_size
         )
 
-        if len(batch) == 0:
-            batch_data = []
-        elif len(batch) > 1:
-            logger.error(
-                f"consumer should be subscribed to only one topic and partition, not {list(batch.keys())}"
-            )
-            batch_data = []
-        else:
-            for topic_partition, messages in batch.items():
-                batch_data = [msg.value for msg in messages]
+        # if len(batch) == 0:
+        #     batch_data = []
+        # elif len(batch) > 1:
+        #     logger.error(
+        #         f"consumer should be subscribed to only one topic and partition, not {list(batch.keys())}"
+        #     )
+        #     batch_data = []
+        #     raise Exception
+        # else:
+        for topic_partition, messages in batch.items():
+            batch_data = [msg.value for msg in messages]
 
-            logger.info(
-                f"Received a batch of {len(batch_data)} records from Kafka topic {self.kafka_input_topic}"
-            )
+        logger.info(
+            f"Received a batch of {len(batch_data)} records from Kafka topic {self.kafka_input_topic}"
+        )
         return InternalDataFrame(batch_data)
 
     async def set_predictions(self, predictions: InternalDataFrame):

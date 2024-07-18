@@ -259,6 +259,8 @@ class Agent(BaseModel, ABC):
         else:
             print(f"Using runtime {type(runtime)}")
 
+        batch_count=0
+
         if input is None:
             if self.environment is None:
                 raise ValueError("input is None and no environment is set.")
@@ -272,7 +274,10 @@ class Agent(BaseModel, ABC):
                     data_batch = await self.environment.get_data_batch(
                         batch_size=runtime.batch_size
                     )
+                    for _, messages in data_batch.items():
+                        batch_count+=len(messages)
                     if data_batch.empty:
+                        logger.warning(f"the input kafka {batch_count}")
                         print_text("No more data in the environment. Exiting.")
                         break
                 except Exception as e:

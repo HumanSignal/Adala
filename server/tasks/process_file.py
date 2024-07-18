@@ -141,7 +141,8 @@ async def async_process_streaming_output(
             await consumer.stop()
             retries -= 1
             time.sleep(1)
-
+            
+    final_msgs_no=0
     try:
         while not input_done.is_set():
             data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
@@ -150,6 +151,7 @@ async def async_process_streaming_output(
                 if messages:
                     logger.debug(f"Handling {messages=} in {topic=}")
                     data = [msg.value for msg in messages]
+                    final_msgs_no+=len(data)
                     result_handler(data)
                     logger.debug(f"Handled {len(messages)} messages in {topic=}")
                 else:
@@ -160,4 +162,5 @@ async def async_process_streaming_output(
 
     # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_input
     finally:
+        logger.warning(f"process_file : final_msgs_no : {final_msgs_no}")
         await consumer.stop()

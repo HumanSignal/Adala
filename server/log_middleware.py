@@ -24,19 +24,19 @@ logger = logging.root
 handler = logging.StreamHandler()
 handler.setFormatter(JsonFormatter())
 logger.handlers = [handler]
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 logging.getLogger("uvicorn.access").disabled = True
 
 
 class LogMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         response = await call_next(request)
-        logger.info(
-            "Request",
-            extra={
-                "method": request.method,
-                "url": str(request.url),
-                "status_code": response.status_code,
-            },
-        )
+        # logger.info(
+        #     "Request",
+        #     extra={
+        #         "method": request.method,
+        #         "url": str(request.url),
+        #         "status_code": response.status_code,
+        #     },
+        # )
         return response

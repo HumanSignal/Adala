@@ -13,6 +13,12 @@ from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.matching import match_options
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 import httpx
+import logging
+
+httpx_logger = logging.getLogger("httpx")
+
+httpx_logger.setLevel(logging.WARNING)
+
 
 
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))

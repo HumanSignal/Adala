@@ -133,7 +133,7 @@ class LSEHandler(ResultHandler):
         return self
 
     def __call__(self, result_batch: list[LSEBatchItem]):
-        logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
+        logger.warning(f"\n\nHandler received batch: {result_batch}\n\n")
 
         # coerce dicts to LSEBatchItems for validation
         result_batch = [LSEBatchItem(**record) for record in result_batch]
@@ -142,19 +142,32 @@ class LSEHandler(ResultHandler):
         # TODO handle in DIA-1122
         result_batch = [record for record in result_batch if not record.error]
 
+        for rec in result_batch:
+            if rec.error:
+                logger.warning(f"found error in record {rec}, the error is : {rec.error}")
+                raise Exception
+
         # coerce back to dicts for sending
         result_batch = [record.dict() for record in result_batch]
+        logger.warning(f"\n\nwe are submitting predictions of length Handler received batch: {len(result_batch)}\n\n")
+        retries = 3
+        while retries:
+            try:
+                self.client.make_request(
+                    "POST",
+                    "/api/model-run/batch-predictions",
+                    data=json.dumps(
+                        {
+                            "modelrun_id": self.modelrun_id,
+                            "results": result_batch,
+                        }
+                    ),
+                )
+                retries = 0
+            except Exception as e:
+                logging.info(f"Seeing error on lse api call {e}")
+                retries -= 1
 
-        self.client.make_request(
-            "POST",
-            "/api/model-run/batch-predictions",
-            data=json.dumps(
-                {
-                    "modelrun_id": self.modelrun_id,
-                    "results": result_batch,
-                }
-            ),
-        )
 
 
 class CSVHandler(ResultHandler):

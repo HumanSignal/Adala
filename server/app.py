@@ -20,9 +20,14 @@ from server.tasks.process_file import streaming_parent_task
 from server.utils import get_input_topic_name, get_output_topic_name, Settings, delete_topic
 from server.handlers.result_handlers import ResultHandler
 
+aiokafka_logger = logging.getLogger("aiokafka")
 
+aiokafka_logger.setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
+submitbatch_counter = 0
+task_counter = 0
+producer = None
 
 settings = Settings()
 
@@ -144,7 +149,8 @@ async def submit_streaming(request: SubmitStreamingRequest):
     Returns:
         Response[JobCreated]: The response model for a job created.
     """
-
+    global task_counter
+    task_counter=0
     task = streaming_parent_task
     result = task.apply_async(
         kwargs={"agent": request.agent, "result_handler": request.result_handler}
@@ -166,24 +172,38 @@ async def submit_batch(batch: BatchData):
     Returns:
         Response: Generic response indicating status of request
     """
-
+    import datetime
+    import time
+    global submitbatch_counter
+    global task_counter
+    global producer
+    submitbatch_counter+=1
+    logger.warning(f"datetime : {datetime.datetime.now()} submit batch call : {submitbatch_counter}")
     topic = get_input_topic_name(batch.job_id)
-    producer = AIOKafkaProducer(
-        bootstrap_servers=settings.kafka_bootstrap_servers,
-        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-    )
-    await producer.start()
-
-    try:
-        for record in batch.data:
-            await producer.send_and_wait(topic, value=record)
-    except UnknownTopicOrPartitionError:
-        await producer.stop()
-        raise HTTPException(
-            status_code=500, detail=f"{topic=} for job {batch.job_id} not found"
+    if not producer:
+        producer = AIOKafkaProducer(
+            bootstrap_servers=settings.kafka_bootstrap_servers,
+            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+            acks = 'all'
         )
-    finally:
-        await producer.stop()
+        await producer.start()
+
+    # try:
+
+    for record in batch.data:
+        await producer.send_and_wait(topic, value=record)
+        task_counter+=1
+        # time.sleep(.1)
+   
+    logger.warning(f"datetime : {datetime.datetime.now()} current no tasks put into input topic {task_counter} ")
+    # except UnknownTopicOrPartitionError:
+    #     logger.warning("Input topic not found error")
+    #     await producer.stop()
+    #     raise HTTPException(
+    #         status_code=500, detail=f"{topic=} for job {batch.job_id} not found"
+    #     )
+    # finally:
+    # await producer.stop()
 
     return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
