@@ -349,12 +349,11 @@ async def test_streaming_openai_only(openai_mock):
 
     from adala.runtimes._litellm import async_create_completion
 
-    http_client = httpx.Client()
-
     result = await async_create_completion(
         model='gpt-3.5-turbo',
         api_key=OPENAI_API_KEY,
         user_prompt='return the word banana',
+        timeout=10,
     )
 
     assert result == {
