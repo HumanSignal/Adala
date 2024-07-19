@@ -40,6 +40,8 @@ app.add_middleware(LogMiddleware)
 
 ResponseData = TypeVar("ResponseData")
 
+kafka_producer = None
+
 
 class Response(BaseModel, Generic[ResponseData]):
     success: bool = True
@@ -168,22 +170,20 @@ async def submit_batch(batch: BatchData):
     """
 
     topic = get_input_topic_name(batch.job_id)
-    producer = AIOKafkaProducer(
-        bootstrap_servers=settings.kafka_bootstrap_servers,
-        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-    )
-    await producer.start()
+    if not kafka_producer:
+        kafka_producer = AIOKafkaProducer(
+            bootstrap_servers=settings.kafka_bootstrap_servers,
+            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+        )
+        await kafka_producer.start()
 
     try:
         for record in batch.data:
-            await producer.send_and_wait(topic, value=record)
+            await kafka_producer.send_and_wait(topic, value=record)
     except UnknownTopicOrPartitionError:
-        await producer.stop()
         raise HTTPException(
             status_code=500, detail=f"{topic=} for job {batch.job_id} not found"
         )
-    finally:
-        await producer.stop()
 
     return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
