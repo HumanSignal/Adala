@@ -32,9 +32,7 @@ class OpenAIChatRuntime(LiteLLMChatRuntime):
     model: str
     # openai_model: str = Field(alias='model')
     # TODO does it make any sense for this to be optional?
-    api_key: Optional[str] = Field(
-        default=os.getenv('OPENAI_API_KEY'), alias='openai_api_key'
-    )
+    api_key: Optional[str] = Field(default=os.getenv('OPENAI_API_KEY'))
 
 
 class AsyncOpenAIChatRuntime(AsyncLiteLLMChatRuntime):
@@ -57,9 +55,7 @@ class AsyncOpenAIChatRuntime(AsyncLiteLLMChatRuntime):
     """
 
     model: str
-    api_key: Optional[str] = Field(
-        default=os.getenv('OPENAI_API_KEY'), alias='openai_api_key'
-    )
+    api_key: Optional[str] = Field(default=os.getenv('OPENAI_API_KEY'))
 
 
 class OpenAIVisionRuntime(LiteLLMVisionRuntime):

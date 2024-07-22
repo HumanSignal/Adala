@@ -96,6 +96,7 @@ async def async_concurrent_create_completion(
                 api_key=api_key,
                 max_tokens=max_tokens,
                 temperature=temperature,
+                timeout=timeout,
                 instruction_first=instruction_first,
             )
         )
