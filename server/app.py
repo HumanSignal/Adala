@@ -168,7 +168,7 @@ async def submit_batch(batch: BatchData):
     Returns:
         Response: Generic response indicating status of request
     """
-
+    global kafka_producer
     topic = get_input_topic_name(batch.job_id)
     if not kafka_producer:
         kafka_producer = AIOKafkaProducer(
