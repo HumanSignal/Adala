@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 
 from pydantic import Field
 
@@ -21,10 +20,8 @@ class OpenAIChatRuntime(LiteLLMChatRuntime):
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
     """
 
-    model: str
-    # openai_model: str = Field(alias='model')
     # TODO does it make any sense for this to be optional?
-    api_key: Optional[str] = Field(default=os.getenv('OPENAI_API_KEY'))
+    api_key: str = Field(default=os.getenv('OPENAI_API_KEY'))
 
 
 class AsyncOpenAIChatRuntime(AsyncLiteLLMChatRuntime):
@@ -46,8 +43,7 @@ class AsyncOpenAIChatRuntime(AsyncLiteLLMChatRuntime):
                      Defaults to 0.0.
     """
 
-    model: str
-    api_key: Optional[str] = Field(default=os.getenv('OPENAI_API_KEY'))
+    api_key: str = Field(default=os.getenv('OPENAI_API_KEY'))
 
 
 class OpenAIVisionRuntime(LiteLLMVisionRuntime):
@@ -57,10 +53,7 @@ class OpenAIVisionRuntime(LiteLLMVisionRuntime):
     Only compatible with OpenAI API version 1.0.0 or higher.
     """
 
-    model: str
-    api_key: Optional[str] = Field(
-        default=os.getenv('OPENAI_API_KEY'), alias='openai_api_key'
-    )
+    api_key: str = Field(default=os.getenv('OPENAI_API_KEY'))
     # NOTE this check used to exist in OpenAIVisionRuntime.record_to_record,
     #      but doesn't seem to have a definition
     # def init_runtime(self) -> 'Runtime':
