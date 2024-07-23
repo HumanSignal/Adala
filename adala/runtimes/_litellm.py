@@ -156,7 +156,7 @@ class LiteLLMChatRuntime(Runtime):
             api_key=self.api_key,
             messages=messages,
             max_tokens=self.max_tokens,
-
+            temperature=self.temperature,
         )
         completion_text = completion.choices[0].message.content
 
