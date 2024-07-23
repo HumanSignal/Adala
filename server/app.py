@@ -40,7 +40,8 @@ app.add_middleware(LogMiddleware)
 
 ResponseData = TypeVar("ResponseData")
 
-kafka_producer = None
+kafka_producer = {}
+single_kafka_producer = None
 
 
 class Response(BaseModel, Generic[ResponseData]):
@@ -168,22 +169,48 @@ async def submit_batch(batch: BatchData):
     Returns:
         Response: Generic response indicating status of request
     """
-    global kafka_producer
     topic = get_input_topic_name(batch.job_id)
-    if not kafka_producer:
-        kafka_producer = AIOKafkaProducer(
-            bootstrap_servers=settings.kafka_bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-        )
-        await kafka_producer.start()
-
-    try:
-        for record in batch.data:
-            await kafka_producer.send_and_wait(topic, value=record)
-    except UnknownTopicOrPartitionError:
-        raise HTTPException(
-            status_code=500, detail=f"{topic=} for job {batch.job_id} not found"
-        )
+    global kafka_producer
+    if os.environ['SINGLE_PRODUCER']=='true':
+        logger.warning(f"SINGLE PRODUCER RUN")
+        print(f"SINGLE PRODUCER RUN",flush=True)
+        global single_kafka_producer
+        if not single_kafka_producer:
+            logger.warning(f"creating new kafka_producer_for_topic")
+            single_kafka_producer = AIOKafkaProducer(
+                bootstrap_servers=settings.kafka_bootstrap_servers,
+                value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+            )
+            await single_kafka_producer.start()
+        import time
+        try:
+            for record in batch.data:
+                await single_kafka_producer.send_and_wait(topic, value=record)
+                time.sleep(.1)
+        except UnknownTopicOrPartitionError:
+            raise HTTPException(
+                status_code=500, detail=f"{topic=} for job {batch.job_id} not found"
+            )
+    else:
+        logger.warning(f"MULTIPLE PRODUCER RUN")
+        kafka_producer_for_topic=kafka_producer.get(topic,None)
+        if not kafka_producer_for_topic:
+            logger.warning(f"creating new kafka_producer_for_topic")
+            kafka_producer_for_topic = AIOKafkaProducer(
+                bootstrap_servers=settings.kafka_bootstrap_servers,
+                value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+            )
+            kafka_producer[topic]=kafka_producer_for_topic
+            await kafka_producer_for_topic.start()
+        import time
+        try:
+            for record in batch.data:
+                await kafka_producer_for_topic.send_and_wait(topic, value=record)
+                time.sleep(.1)
+        except UnknownTopicOrPartitionError:
+            raise HTTPException(
+                status_code=500, detail=f"{topic=} for job {batch.job_id} not found"
+            )
 
     return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 

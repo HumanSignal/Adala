@@ -55,6 +55,47 @@ SUBMIT_PAYLOAD = {
     "result_handler": {"type": "DummyHandler"},
 }
 
+SUBMIT_PAYLOAD_HUMOR = {
+    "agent": {
+        "environment": {
+            "type": "AsyncKafkaEnvironment",
+            "kafka_bootstrap_servers": "",
+            "kafka_input_topic": "",
+            "kafka_output_topic": "",
+            "timeout_ms": 1,
+        },
+        "skills": [
+            {
+                "type": "ClassificationSkill",
+                "name": "text_classifier",
+                "instructions": "",
+                "input_template": "{text}",
+                "output_template": "{output}",
+                "labels": {
+                    "output": [
+                        "humor",
+                        "not humor",
+                    ]
+                },
+            }
+        ],
+        "runtimes": {
+            "default": {
+                "type": "AsyncOpenAIChatRuntime",
+                "model": "gpt-3.5-turbo-0125",
+                "api_key": OPENAI_API_KEY,
+                "max_tokens": 10,
+                "temperature": 0,
+                "concurrent_clients": 100,
+                "batch_size": 100,
+                "timeout": 10,
+                "verbose": False,
+            }
+        },
+    },
+    "result_handler": {"type": "DummyHandler"},
+}
+
 
 async def arun_job(
     client: httpx.AsyncClient,
@@ -202,6 +243,73 @@ def test_streaming(client):
             output["output"] == expected_output
         ).all(), "adala did not return expected output"
 
+@pytest.mark.use_openai
+@pytest.mark.use_server
+def test_streaming_10000(multiclient):
+    client = multiclient
+    f = open('jsonrecords.json')
+    import json 
+    # returns JSON object as 
+    # a dictionary
+    datarecord = json.load(f)
+
+    data = pd.DataFrame.from_records(
+        datarecord
+    )
+    batch_data = data.drop("output", axis=1).to_dict(orient="records")
+    expected_output = data.set_index("task_id")["output"]
+
+    with NamedTemporaryFile(mode="r") as f:
+
+        print("filename", f.name, flush=True)
+
+        SUBMIT_PAYLOAD_HUMOR["result_handler"] = {
+            "type": "CSVHandler",
+            "output_path": f.name,
+        }
+
+        resp = client.post("/jobs/submit-streaming", json=SUBMIT_PAYLOAD_HUMOR)
+        resp.raise_for_status()
+        job_id = resp.json()["data"]["job_id"]
+        batchidx=1000
+        for i in range(0,9):
+
+            batch_payload = {
+                "job_id": job_id,
+                "data": batch_data[:batchidx],
+            }
+            resp = client.post("/jobs/submit-batch", json=batch_payload)
+            resp.raise_for_status()
+            batchidx+=1000
+        # time.sleep(1)
+        # batch_payload = {
+        #     "job_id": job_id,
+        #     "data": batch_data[2:],
+        # }
+        # resp = client.post("/jobs/submit-batch", json=batch_payload)
+        # resp.raise_for_status()
+
+        timeout_sec = 60*60*3
+        poll_interval_sec = 1
+        terminal_statuses = ["Completed", "Failed", "Canceled"]
+        for _ in range(int(timeout_sec / poll_interval_sec)):
+            resp = client.get(f"/jobs/{job_id}")
+            status = resp.json()["data"]["status"]
+            if status in terminal_statuses:
+                print("terminal polling ", status, flush=True)
+                break
+            print("polling ", status, flush=True)
+            time.sleep(poll_interval_sec)
+        assert status == "Completed", status
+
+        output = pd.read_csv(f.name).set_index("task_id")
+        print(f"dataframe length, {len(output.index)}")
+        output.to_json('outputresult.json', orient='records', lines=True)
+        assert not output["error"].any(), "adala returned errors"
+        assert (
+            output["output"] == expected_output
+        ).all(), "adala did not return expected output"
+
 
 @pytest.mark.use_openai
 @pytest.mark.use_server
@@ -238,6 +346,45 @@ async def test_streaming_n_concurrent_requests(async_client):
         assert (
             output["output"] == expected_output
         ).all(), "adala did not return expected output"
+
+
+@pytest.mark.use_openai
+@pytest.mark.use_server
+@pytest.mark.asyncio
+async def test_streaming_2_concurrent_requests_100000(multi_async_client):
+    client = multi_async_client
+
+    # TODO test with n_requests > number of celery workers
+    n_requests = 2
+
+    f = open('jsonrecords.json')
+    import json 
+    # returns JSON object as 
+    # a dictionary
+    datarecord = json.load(f)
+
+    data = pd.DataFrame.from_records(
+        datarecord
+    )
+    batch_payload_data = data.drop("output", axis=1).to_dict(orient="records")
+    batch_payload_datas = [batch_payload_data[:1000], batch_payload_data[1000:2000],batch_payload_data[2000:3000],batch_payload_data[3000:4000],batch_payload_data[4000:5000],batch_payload_data[5000:6000],batch_payload_data[6000:7000],batch_payload_data[7000:8000],batch_payload_data[8000:9000],batch_payload_data[9000:10000]]
+    expected_output = data.set_index("task_id")["output"]
+
+    outputs = await asyncio.gather(
+        *[
+            arun_job_and_get_output(
+                client, SUBMIT_PAYLOAD["agent"], batch_payload_datas
+            )
+            for _ in range(n_requests)
+        ]
+    )
+
+    for output in outputs:
+        assert not output["error"].any(), "adala returned errors"
+        assert (
+            output["output"] == expected_output
+        ).all(), "adala did not return expected output"
+
 
 
 @pytest.mark.use_openai
