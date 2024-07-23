@@ -330,6 +330,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                     axis=1,
                 ).tolist()
 
+                # TODO refactor to remove async_concurrent_create_completion and async_create_completion
                 responses = await async_concurrent_create_completion(
                     prompts=prompts,
                     instruction_first=instructions_first,
