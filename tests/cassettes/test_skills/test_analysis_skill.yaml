@@ -27,9 +27,9 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.11.5
-    method: GET
-    uri: https://api.openai.com/v1/models/gpt-4
+      - 3.10.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
@@ -58,8 +58,8 @@ interactions:
         path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Transfer-Encoding:
       - chunked
-      access-control-allow-origin:
-      - '*'
+      X-Content-Type-Options:
+      - nosniff
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
@@ -103,9 +103,9 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.11.5
-    method: GET
-    uri: https://api.openai.com/v1/models/gpt-3.5-turbo
+      - 3.10.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
@@ -202,7 +202,7 @@ interactions:
       \"word\": \"O\", \"start\": 56, \"end\": 57}, {\"entity_group\": \"MISC\", \"score\":
       0.5774009227752686, \"word\": \"##D\", \"start\": 59, \"end\": 60}], \"inputs\":
       \"Samsung Electronics is competing with LG Display in the OLED market.\"}\nCode:
-      "}], "model": "gpt-3.5-turbo"}'
+      "}], "model": "gpt-3.5-turbo", "max_tokens": 1000}'
     headers:
       accept:
       - application/json
