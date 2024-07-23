@@ -69,7 +69,11 @@ def test_agent_quickstart_two_skills():
             ),
             ground_truth_columns={"0->1": "gt_0", "1->2": "gt_1"},
         ),
-        teacher_runtimes={"default": OpenAIChatRuntime(model="gpt-4-turbo-preview")},
+        teacher_runtimes={
+            'default': OpenAIChatRuntime(
+                model='gpt-4-turbo-preview', max_tokens=4096
+            )
+        },
     )
 
     agent.learn()
@@ -77,9 +81,9 @@ def test_agent_quickstart_two_skills():
     # assert final instruction
     assert (
         agent.skills["0->1"].instructions
-        == "For each sequence of numbers provided in the text, transform the input by changing each '0' to a '1'. Leave all other numbers unchanged. Generate the transformed sequence as the output."
+        == "Transform each sequence of numbers provided as input by replacing all '0's with '1's, and leaving all other numbers unchanged to generate the modified sequence. Ensure the output presents only the sequence of numbers directly, without repeating any additional text or format from the input."
     )
     assert (
         agent.skills["1->2"].instructions
-        == "For each given sequence of numbers, increment each number by 1 and provide the resulting sequence. Ensure to process each input according to this rule precisely, incrementing each numeric value by exactly one, and output the upgraded sequence accordingly. Double-check the results to ensure accuracy and adherence to the instruction, considering each number in the input as independent and incrementing it by 1."
+        == 'For each sequence of numbers given, increment each number in the input by 1, maintaining their order and output the modified sequence accordingly.'
     )

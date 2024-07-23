@@ -347,17 +347,13 @@ async def test_streaming_openai_only(openai_mock):
         "mocked openai chat response"
     )
 
-    from adala.runtimes._openai import async_create_completion
-    from openai import AsyncOpenAI
-
-    openai = AsyncOpenAI(
-        api_key=OPENAI_API_KEY,
-    )
+    from adala.runtimes._litellm import async_create_completion
 
     result = await async_create_completion(
-        model="gpt-3.5-turbo",
-        user_prompt="return the word banana",
-        client=openai,
+        model='gpt-3.5-turbo',
+        api_key=OPENAI_API_KEY,
+        user_prompt='return the word banana',
+        timeout=10,
     )
 
     assert result == {
