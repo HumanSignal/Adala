@@ -111,6 +111,8 @@ class Runtime(BaseModelInRegistry):
         elif self.concurrency > 1:
             # run batch processing each row in a parallel way, using a fixed number of CPUs
             logger.info(f"Running batch processing in parallel using {self.concurrency} CPUs")
+            # Warning: parallel processing doubles the memory footprint compared to sequential processing
+            # read more about https://nalepae.github.io/pandarallel/
             pandarallel.initialize(nb_workers=self.concurrency, progress_bar=self.verbose)
             apply_func = batch.parallel_apply
         else:
