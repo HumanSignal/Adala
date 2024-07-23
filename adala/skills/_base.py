@@ -353,7 +353,7 @@ Instruct the model to give the final answer at the end of the prompt, using the 
         # display dialogue:
         for message in messages:
             print(f'"{{{message["role"]}}}":\n{message["content"]}')
-        new_prompt = runtime.execute(messages)['text']
+        new_prompt = runtime.execute(messages)
         self.instructions = new_prompt
 
 
