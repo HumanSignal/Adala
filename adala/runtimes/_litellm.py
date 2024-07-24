@@ -8,7 +8,7 @@ from adala.utils.logs import print_error
 from adala.utils.matching import match_options
 from adala.utils.parse import parse_template, partial_str_format
 from openai import NotFoundError
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from rich import print
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
@@ -118,6 +118,8 @@ class LiteLLMChatRuntime(Runtime):
                  with the provider of your specified model.
         base_url: Points to the endpoint where your model is hosted
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
+        splitter: Splitter to use for splitting messages. Defaults to None.
+        temperature: Temperature for sampling, between 0 and 1.
     """
 
     model_config = ConfigDict(
@@ -129,6 +131,7 @@ class LiteLLMChatRuntime(Runtime):
     base_url: Optional[str] = None
     max_tokens: Optional[int] = 1000
     splitter: Optional[str] = None
+    temperature: Optional[float] = 0.0
 
     def init_runtime(self) -> 'Runtime':
         # check model availability
@@ -153,7 +156,7 @@ class LiteLLMChatRuntime(Runtime):
             api_key=self.api_key,
             messages=messages,
             max_tokens=self.max_tokens,
-            # TODO temperature, **kwargs?
+            temperature=self.temperature,
         )
         completion_text = completion.choices[0].message.content
 
@@ -256,6 +259,15 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
     temperature: Optional[float] = 0.0
     splitter: Optional[str] = None
     timeout: Optional[int] = 10
+
+    @field_validator("concurrency", mode="before")
+    def check_concurrency(cls, value) -> int:
+        value = value or -1
+        if value < 1:
+            raise NotImplementedError(
+                "You must explicitly specify the number of concurrent clients for AsyncOpenAIChatRuntime. "
+                "Set `AsyncOpenAIChatRuntime(concurrency=10, ...)` or any other positive integer. ")
+        return value
 
     def init_runtime(self) -> 'Runtime':
         # check model availability

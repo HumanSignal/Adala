@@ -71,7 +71,7 @@ def test_agent_quickstart_two_skills():
         ),
         teacher_runtimes={
             'default': OpenAIChatRuntime(
-                model='gpt-4-turbo-preview', max_tokens=4096
+                model='gpt-4-turbo-preview', max_tokens=4096, temperature=None
             )
         },
     )

@@ -1,10 +1,14 @@
+import logging
+
 from tqdm import tqdm
 from abc import ABC, abstractmethod
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, Field
 from typing import List, Dict, Optional, Tuple, Any, Callable, ClassVar
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
 from adala.utils.registry import BaseModelInRegistry
+from pandarallel import pandarallel
 
+logger = logging.getLogger(__name__)
 tqdm.pandas()
 
 
@@ -15,10 +19,13 @@ class Runtime(BaseModelInRegistry):
     Attributes:
         verbose (bool): Flag indicating if runtime outputs should be verbose. Defaults to False.
         batch_size (Optional[int]): The batch size to use for processing records. Defaults to None.
+        concurrency (Optional[int]): The number of parallel processes to use for processing records. Defaults to 1.
+                                    Note that when parallel processing is used, the memory footprint will be doubled compared to sequential processing.
     """
 
     verbose: bool = False
     batch_size: Optional[int] = None
+    concurrency: Optional[int] = Field(default=1, alias='concurrent_clients')
 
     @model_validator(mode="after")
     def init_runtime(self) -> "Runtime":
@@ -67,25 +74,51 @@ class Runtime(BaseModelInRegistry):
         output_template: str,
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
-        instructions_first: bool = True,
+        instructions_first: bool = True
     ) -> InternalDataFrame:
         """
         Processes a record.
+        It supports parallel processing of the batch:
+         - when the `concurrency` is set to -1 (using all available CPUs),
+         - when the `concurrency` is set to 1 (sequential processing),
+         - when the `concurrency` is set to a fixed number of CPUs.
+        Please note that parallel processing doubles the memory footprint compared to sequential processing.
 
         Args:
             batch (InternalDataFrame): The batch to process.
             input_template (str): The input template.
-            instructions_template (str): The instructions template.
+            instructions_template (str): The instructions' template.
             output_template (str): The output template.
             extra_fields (Optional[Dict[str, str]]): Extra fields to use in the templates. Defaults to None.
             field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
                 i.e. analogous to {"field_n": {"type": "string"}}.
             instructions_first (bool): Whether to put instructions first. Defaults to True.
-
         Returns:
             InternalDataFrame: The processed batch.
         """
-        output = batch.progress_apply(
+        if self.concurrency == -1:
+            # run batch processing each row in a parallel way, using all available CPUs
+            logger.info("Running batch processing in parallel using all available CPUs")
+            pandarallel.initialize(progress_bar=self.verbose)
+            apply_func = batch.parallel_apply
+        elif self.concurrency == 1:
+            # run batch processing each row in a sequential way
+            logger.info("Running batch processing sequentially")
+            if self.verbose:
+                apply_func = batch.progress_apply
+            else:
+                apply_func = batch.apply
+        elif self.concurrency > 1:
+            # run batch processing each row in a parallel way, using a fixed number of CPUs
+            logger.info(f"Running batch processing in parallel using {self.concurrency} CPUs")
+            # Warning: parallel processing doubles the memory footprint compared to sequential processing
+            # read more about https://nalepae.github.io/pandarallel/
+            pandarallel.initialize(nb_workers=self.concurrency, progress_bar=self.verbose)
+            apply_func = batch.parallel_apply
+        else:
+            raise ValueError(f"Invalid concurrency value: {self.concurrency}")
+
+        output = apply_func(
             self.record_to_record,
             axis=1,
             result_type="expand",
