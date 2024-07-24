@@ -19,13 +19,13 @@ class Runtime(BaseModelInRegistry):
     Attributes:
         verbose (bool): Flag indicating if runtime outputs should be verbose. Defaults to False.
         batch_size (Optional[int]): The batch size to use for processing records. Defaults to None.
-        concurrency (Optional[int]): The number of parallel processes to use for processing records. Defaults to -1 (utilize as many CPUs as available).
+        concurrency (Optional[int]): The number of parallel processes to use for processing records. Defaults to 1.
                                     Note that when parallel processing is used, the memory footprint will be doubled compared to sequential processing.
     """
 
     verbose: bool = False
     batch_size: Optional[int] = None
-    concurrency: Optional[int] = Field(default=-1, alias='concurrent_clients')
+    concurrency: Optional[int] = Field(default=1, alias='concurrent_clients')
 
     @model_validator(mode="after")
     def init_runtime(self) -> "Runtime":
