@@ -116,7 +116,7 @@ def json_schema_to_pydantic_type(json_schema: Dict[str, Any], enum_class_name: s
             else:
                 raise NotImplementedError(f'Unsupported JSON schema format: {format_}')
         elif 'enum' in json_schema:
-            return Enum(enum_class_name, {item: item for item in json_schema['enum']})
+            return Enum(enum_class_name, {item: item for item in json_schema['enum']}, type=str)
         return str
     elif type_ == 'integer':
         return int
