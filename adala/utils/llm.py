@@ -30,8 +30,9 @@ def get_messages(user_prompt: str, system_prompt: Optional[str] = None, instruct
 
 
 async def async_get_llm_response(
-    user_prompt: str,
+    user_prompt: Optional[str] = None,
     system_prompt: Optional[str] = None,
+    messages: Optional[List[Dict[str, str]]] = None,
     model: Optional[str] = 'gpt-4o-mini',
     instruction_first: Optional[bool] = True,
     response_model: Optional[Type[BaseModel]] = None,
@@ -48,6 +49,7 @@ async def async_get_llm_response(
                this: https://litellm.vercel.app/docs/providers
         user_prompt: User prompt.
         system_prompt: System prompt.
+        messages: List of messages to be sent to the model. If provided, `user_prompt`, `system_prompt` and `instruction_first` will be ignored.
         api_key: API key, optional. If provided, will be used to authenticate
                  with the provider of your specified model.
         instruction_first: Whether to put instructions first.
@@ -59,7 +61,13 @@ async def async_get_llm_response(
     Returns:
         Dict[str, Any]: OpenAI response or error message.
     """
-    messages = get_messages(user_prompt, system_prompt, instruction_first)
+
+    if not user_prompt and not messages:
+        raise ValueError("You must provide either `user_prompt` or `messages`.")
+
+    if not messages:
+        # get messages from user_prompt and system_prompt
+        messages = get_messages(user_prompt, system_prompt, instruction_first)
     response = LLMResponse()
 
     if response_model is None:
@@ -139,8 +147,9 @@ async def parallel_async_get_llm_response(
 
 
 def get_llm_response(
-    user_prompt: str,
+    user_prompt: Optional[str] = None,
     system_prompt: Optional[str] = None,
+    messages: Optional[List[Dict[str, str]]] = None,
     model: Optional[str] = 'gpt-4o-mini',
     instruction_first: Optional[bool] = True,
     response_model: Optional[Type[BaseModel]] = None,
@@ -150,8 +159,12 @@ def get_llm_response(
     timeout: Optional[Union[float, int]] = None,
 ) -> Dict[str, Any]:
 
-    # format messages
-    messages = get_messages(user_prompt, system_prompt, instruction_first)
+    if not user_prompt and not messages:
+        raise ValueError("You must provide either `user_prompt` or `messages`.")
+
+    if not messages:
+        # get messages from user_prompt and system_prompt
+        messages = get_messages(user_prompt, system_prompt, instruction_first)
     response = LLMResponse()
 
     if response_model is None:

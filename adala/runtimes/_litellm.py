@@ -55,6 +55,16 @@ class LiteLLMChatRuntime(Runtime):
             )
         return self
 
+    def get_llm_response(self, messages: List[Dict[str, str]]) -> Dict[str, Any]:
+        response = get_llm_response(
+            messages=messages,
+            model=self.model,
+            api_key=self.api_key,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature
+        )
+        return response['data']['text']
+
     def record_to_record(
         self,
         record: Dict[str, str],
@@ -94,7 +104,6 @@ class LiteLLMChatRuntime(Runtime):
             instruction_first=instructions_first,
             model=self.model,
             api_key=self.api_key,
-            messages=messages,
             max_tokens=self.max_tokens,
             temperature=self.temperature,
             response_model=response_model

@@ -315,7 +315,7 @@ and provide me with the new prompt that improves the model’s performance.""",
 Summarize your analysis about incorrect predictions and suggest changes to the prompt.""",
             }
         ]
-        reasoning = runtime.execute(messages)
+        reasoning = runtime.get_llm_response(messages)
 
         messages += [
             {"role": "assistant", "content": reasoning},
@@ -353,7 +353,7 @@ Instruct the model to give the final answer at the end of the prompt, using the 
         # display dialogue:
         for message in messages:
             print(f'"{{{message["role"]}}}":\n{message["content"]}')
-        new_prompt = runtime.execute(messages)
+        new_prompt = runtime.get_llm_response(messages)
         self.instructions = new_prompt
 
 

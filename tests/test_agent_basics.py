@@ -32,11 +32,7 @@ def test_agent_quickstart_single_skill():
 
     agent.learn(learning_iterations=2)
 
-    # assert final instruction
-    # TODO this doesn't look right, investigate
-    # seems the teacher prompt is in this field instead of the student prompt
-    # assert agent.skills["0_to_1"].instructions == 'Refine the prompt to address the issues raised in the user feedback:\nApply the calculation rule to each number in the set as follows: add 1 to the first and third numbers while keeping the second number unchanged. If no specific rule is provided, use the default rule mentioned.'
-
+    assert agent.skills["0_to_1"].instructions == 'Given a set of three numbers, increment each number by 1 individually to generate the output.'
 
 @pytest.mark.vcr
 def test_agent_quickstart_two_skills():
