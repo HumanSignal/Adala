@@ -18,35 +18,35 @@ interactions:
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
       - python
       x-stainless-os:
-      - Linux
+      - MacOS
       x-stainless-package-version:
       - 1.34.0
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA1SQQU8CMRSE7/srnu/iZTHsskrYG/ECaiTxhBpDSvexW2z7Nm0xGsJ/N10W0EsP
-        M53pN90nAKgqLAFlI4I0rR5M9HaxcMtZPX7IXoq33a1/Whr5Kuj50d9jGhO83pIMp9SNZNNqCort
-        0ZaORKDYmo3zLLvLJ6O8MwxXpGOsbsOgGAzvslGfaFhJ8ljCewIAsO/OyGYr+sYShulJMeS9qAnL
-        8yUAdKyjgsJ75YOwAdOLKdkGsh3ujLTmK5h6EBam8xTmULG9DtCIL8I+cji/pbluHa8jl91pfdY3
-        yirfrBwJzzb2arJ1aI4FhwTgo1u1+weKrWPThlXgT7KxMiuOhXj5vz9mvxgDB6Evel4kPSH6Hx/I
-        rDbK1uRap7qJkTM5JL8AAAD//wMACT3X5tkBAAA=
+        H4sIAAAAAAAAAwAAAP//VJBRS8MwFIXf+ysu98WXTtatKOvbRGQTBIWBMJGRpXdpNM2tzZ04xv67
+        pOs2fcnDOTkn38k+AUBbYgGoKyW6btxgwrt7s5jNl0+v+eJFHu6ynam+nh+Xy9lCYxoTvP4gLafU
+        tea6cSSW/dHWLSmh2JrdjrLJOJ9ko86ouSQXY6aRQT4Y3mTjPlGx1RSwgLcEAGDfnZHNl/SDBQzT
+        k1JTCMoQFudLANiyiwqqEGwQ5QXTi6nZC/kOdxpAeZjOU5hDyf5KoFLfBBsiZ70JKfapw/k5x6Zp
+        eR3R/Na5s76x3oZq1ZIK7GO1I2+kOhYcEoD3btj2Hys2LdeNrIQ/ycfKLD8W4uUL/5j9aBQW5S76
+        KE96Qgy7IFSvNtYbapvWdisjZ3JIfgEAAP//AwAiLXNH3AEAAA==
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8a44db043e322ae8-LAX
+      - 8a8e7a309c3194e8-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -54,14 +54,14 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 16 Jul 2024 20:48:53 GMT
+      - Thu, 25 Jul 2024 19:15:13 GMT
       Server:
       - cloudflare
       Set-Cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        path=/; expires=Tue, 16-Jul-24 21:18:53 GMT; domain=.api.openai.com; HttpOnly;
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        path=/; expires=Thu, 25-Jul-24 19:45:13 GMT; domain=.api.openai.com; HttpOnly;
         Secure; SameSite=None
-      - _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000;
+      - _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000;
         path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Transfer-Encoding:
       - chunked
@@ -72,7 +72,7 @@ interactions:
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '1220'
+      - '981'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -80,17 +80,17 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '10000'
+      - '1000000'
       x-ratelimit-remaining-requests:
       - '9999'
       x-ratelimit-remaining-tokens:
-      - '9984'
+      - '999984'
       x-ratelimit-reset-requests:
-      - 8.64s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 96ms
+      - 0s
       x-request-id:
-      - req_6bf4b57a4e275e1b759754ace88dc41f
+      - req_5a0cf5fdb66482ede03bfc5bacb369e5
     status:
       code: 200
       message: OK
@@ -109,403 +109,14 @@ interactions:
       content-type:
       - application/json
       cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - Linux
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//VJBLT8MwEITv+RWLL1yaqkkfqDlCkeAEgiNClZtsExfHa9kb6EP978hJ
-        msLFh5md2W99igCEKkQGIq8k57XV8VLvXl6L1bu9Lw9vD4VMjvulLX+Oj6uFZjEKCdrsMOdLapxT
-        bTWyItPZuUPJGFqTuzRJFulyOm2NmgrUIVZajqfjecyN21A8SdJ5n6xI5ehFBh8RAMCpfQOjKXAv
-        MpiMLkqN3ssSRTYMAQhHOihCeq88S9Px9mZOhtG02E+oNd3A820Nu8YzSPhWjhupYUiOwJPow+dh
-        q6bSOtoEQtNoPehbZZSv1g6lJxM2aDQlV13BOQL4bO9r/iEL66i2vGb6QhMqk1lXKK4/+sfsbxdM
-        LPVVT2dRTyj8wTPW660yJTrrVHts4IzO0S8AAAD//wMAHCUKy+sBAAA=
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8a44db0e2bb32ae8-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 16 Jul 2024 20:48:54 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - heartex
-      openai-processing-ms:
-      - '404'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '60000'
-      x-ratelimit-remaining-requests:
-      - '9981'
-      x-ratelimit-remaining-tokens:
-      - '59984'
-      x-ratelimit-reset-requests:
-      - 2m37.257s
-      x-ratelimit-reset-tokens:
-      - 16ms
-      x-request-id:
-      - req_b80c439d90979372cdf77a627fff83a6
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
-      "Input: Macronutrients\nOutput: "}], "model": "gpt-3.5-turbo", "max_tokens":
-      1000}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '162'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - Linux
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//ZJNBb9swDIXv+RWELrskQZ20XZNbsdMO3bC1l2IYCsVmbGYyqVF026Do
-        fx+kuE22XQxY5Pf4RD+/TAAcNW4Nru681X0Ms1XYff12eX/55fYe66trPtuF8P359u72Wm6WbpoJ
-        2eywtjdqXksfAxoJH8q1ojfMqtXHRVVdLlbL81LopcGQsTbabDm/mNmgG5mdVYuLkeyEakxuDT8m
-        AAAv5Zk9coPPbg1n07eTHlPyLbr1exOAUwn5xPmUKJlnc9NjsRY25GL7xtcqPJgSsiXwinB8s84b
-        RJVHahCQUds9mIB1CBtp9uC5ORCIDTZADMFriwq/B89GRpggr8QrNhns6XTYHO46BOsUEXpPDP3/
-        XmqvG+n2jXrDNM1eDInTtIze+izy6bSlQG/+PqSDbpJBawTZjnc46pR2TAnZyAfYikKr8mRd0VeM
-        njRzRikNeDK2gNRH0bzbAo77SSbqWyydnWgvjHlcM9Q5FnP4bEDpBDWBWjgNffGd8N8tEIOPUSUq
-        eStSmSThVDbqiS3fUR5RfQjQoQ+j/ScMYbZB4nbuxm//+h6aIG1U2eSA8RDC+/mWmFL3oOiTcA5I
-        MokH/HUC8LOEc/grby6q9NEeTH4hZ8FFdZBzx9/hWFwtx6KJ+XA8r6rzyWjQpX0y7B+2xC1qVCpR
-        zTYnr5M/AAAA//8DAC8j7QupAwAA
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8a44db12286e2ae8-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 16 Jul 2024 20:48:55 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - heartex
-      openai-processing-ms:
-      - '1317'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '60000'
-      x-ratelimit-remaining-requests:
-      - '9980'
-      x-ratelimit-remaining-tokens:
-      - '58989'
-      x-ratelimit-reset-requests:
-      - 2m45.261s
-      x-ratelimit-reset-tokens:
-      - 1.011s
-      x-request-id:
-      - req_295fcf94a4e67503740c929d01c9fa0c
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
-      "Input: Vitamins\nOutput: "}], "model": "gpt-3.5-turbo", "max_tokens": 1000}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '156'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - Linux
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//bFNdbxQxDHy/X2Ht896pd9cW9d6AggSVQKUICRCqvFnvbtrEiWLnYFX1
-        v6PsfRWJlzzYHs9MMnmaAVS2rTZQmQHV+OjmV+7h85dPXei+Nz9uLx9vbh/O+vfqrz+a9d1dVRdE
-        aB7I6AG1MMFHR2oD79omESqVrctXq+XycnW1vpgaPrTkCqyPOl8vLuaaUxPmZ8vVxR45BGtIqg38
-        nAEAPE1n0cgt/ak2cFYfKp5EsKdqcxwCqFJwpVKhiBVF1qo+NU1gJZ5kf7OK3rIAJgISIVaLDjhr
-        ssQqoAMqhJygCe0ITNQKWAbx6BygD3kaCtBlNsU4xBQiJTcu4OtAI0SHIyCYlE1ZXHQV/BaTDVnK
-        VuvGI1pAshkABTwpNsFZ8TVY7zNbHWtAbiFsKRXygdDpMNEkmvQv1y8sbA/O/uOgBsvG5dZyf5iD
-        1zW8mR9A9bH8tobrGt7tqG8mNqHTcoMMDUFoFC1TCzqkkPsBEBp0yIZaaC3pTsSOlARw8k86Quig
-        S9lqYaS+eHYkNfweyj31CScthdoRTnerZFkW8IFBgicwKGVecoyOPLHi9AgexyKLyZRwpLG8UEy0
-        Jdajs5Y6ayyxsSSLap+O52OsXOhjCk2JIGfnjvXOspXhPhFK4BIh0RB38OcZwK8pvvmfRFYxBR/1
-        XsMjcVm42qe3On2YU3N5dr7valB0Lxqr89leYSWjKPn7znJPKSY7pbnonD3P/gIAAP//AwCDwvQ0
-        zAMAAA==
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8a44db1b3bfe2ae8-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 16 Jul 2024 20:48:57 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - heartex
-      openai-processing-ms:
-      - '1435'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '60000'
-      x-ratelimit-remaining-requests:
-      - '9980'
-      x-ratelimit-remaining-tokens:
-      - '58991'
-      x-ratelimit-reset-requests:
-      - 2m52.44s
-      x-ratelimit-reset-tokens:
-      - 1.009s
-      x-request-id:
-      - req_c05736bcb9b1353799dfe9e9c579e533
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
-      "Input: Minerals\nOutput: "}], "model": "gpt-3.5-turbo", "max_tokens": 1000}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '156'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - Linux
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA1RSTU/cQAy976+wcs6udqFA2RvqgVOFqnKpqgo5EycxzNjpjAcIiP9eTfaLXubg
-        5/f0/Oa9LwAqbqstVG5Ac2H0y2v/eHd/+XZ5wTfO3d6mu9fuxd/+upEvP/BbVReGNo/k7MBaOQ2j
-        J2OVHewioVFR3VydbTaXZ9fnVzMQtCVfaP1oy/PVxdJybHS53pxd7JmDsqNUbeH3AgDgfX6LR2np
-        tdrCuj5MAqWEPVXb4xJAFdWXSYUpcTIUq+oT6FSMZLb9nYUi+gQYCQQtR/R+AnUux8jSA4vGHoUd
-        pNwUJUcJbECbGZQSiTF66DSCDQRj1JEidFlcyaFIaDcjQw4o0Gg7reB+oAlGjxMguJhdUSiWgQWe
-        MbLmVDbZT0elBCm7AbAAQjAQehtqCGTYqOcUahCKz3Qk1IDSgj6X+zy8kPfLhlj6FfzUQMBh1FiS
-        gXDIgMX53BI49I5zqIFjkQnYC6V58MbidrqjWsk2hxXcQIO+BNNCy2S7dPZaCXA+iGwqOUi2yCS2
-        jOwG6FTbBJw+eTEFkpQjAbb0N6OVSAyfaJ9i+pz5wfiq2v/tx7EUXvsxalMKJNn747xj4TQ8RMKk
-        UgqQTMcd/WMB8GcuX/6vT9UYNYz2YPpEUgQ31zu56lT3E/h1swdNDf0n0nq92Bus0pSMwkPH0lMc
-        I89VLDYXH4t/AAAA//8DAFKmkOaJAwAA
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8a44db25b9af2ae8-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 16 Jul 2024 20:48:58 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - heartex
-      openai-processing-ms:
-      - '1032'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '60000'
-      x-ratelimit-remaining-requests:
-      - '9979'
-      x-ratelimit-remaining-tokens:
-      - '58991'
-      x-ratelimit-reset-requests:
-      - 2m59.398s
-      x-ratelimit-reset-tokens:
-      - 1.009s
-      x-request-id:
-      - req_16ca633aa29b9cb16a5e6a86b1b6bd88
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
-      "Input: Macronutrients are nutrients that provide energy to the body and are
-      needed in larger quantities compared to micronutrients. The three main macronutrients
-      are carbohydrates, proteins, and fats. Carbohydrates are the body''s main source
-      of energy, proteins are essential for growth and repair of tissues, and fats
-      are important for energy storage and hormone production. It is important to
-      consume these macronutrients in appropriate proportions to maintain overall
-      health and well-being.\nOutput: "}], "model": "gpt-3.5-turbo", "max_tokens":
-      1000}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '634'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -517,27 +128,23 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAAwAAAP//ZJNPb9swDMXv+RSELrskQZKua5PrgAED9ueyAcWGoWBsxmYmiRpFtw2K
-        fvdBituk28WARf4en+jnxwmA49ZtwDU9WhOSn639/uv3Lz9u5Prq6jLsPzQBh93++i0/9Def3LQQ
-        st1TY8/UvJGQPBlLPJYbJTQqqsur1XL5brW+uK6FIC35gnXJZhfzy5kNupXZYrm6HMleuKHsNvBz
-        AgDwWJ/FY2zpwW1gMX0+CZQzduQ2L00ATsWXE4c5czaM5qanYiPRKFbbn7FRiYMpU7QMqASnN+vR
-        IKnccUtAkbQ7gAlYT7CV9gAY2yNB1FILHMGjdqTwZ8BobEwZykpQqS1g4PNhc/jWE1ivRBCQI4T/
-        vTSoW+kPraJRnhYvRhzztI7eYRF5f95SoWd/b/JRN8ugDYHsxjucdGo75UzRGD3sRKFTube+6isl
-        ZC2ccc4DnY2tIIckWnZbwXE/2USxo9rZiwaJVMa1Q1NiMYePBpzPUBNoJOYhVN+Z/t0CR8CUVJIy
-        WpUqJEvMdaPI0cod5Y4UvYee0I/278n72ZY4dnM3fvunl9B46ZLKtgQsDt6/nO84cu5vlTBLLAHJ
-        JumIP00AftVwDq/y5pJKSHZr8ptiEVwu1kc9d/ofTtX1xVg0MfSn89ViNRkdunzIRuF2x7EjTco1
-        q8Xn5GnyFwAA//8DAFkWWJGqAwAA
+        H4sIAAAAAAAAA1SQP0/DMBTE93yKhxeWtGr6RyjZKhhasSHEUIQq131NXGw/Y78AVdXvjpyGFhYP
+        d77z73zMAITeigqEaiQr682gpMNDo8rnVVzp5ulL3c8f5y+NWXzEpf0UeUrQZo+Kf1NDRdYbZE3u
+        bKuAkjG1FnfjopxMy2LSGZa2aFKs9jyYDGcDbsOGBqNiPOuTDWmFUVTwmgEAHLszMbotfosKRvmv
+        YjFGWaOoLpcARCCTFCFj1JGlY5FfTUWO0XXYCzSGbmB5a2HfRgYJaUPLGMAHqoO0OUQSffZ0edRQ
+        7QNtEqBrjbnoO+10bNYBZSSXHjDoam7OBacM4K2b1/4jFj6Q9bxmekeXKovpuVBcP/SP2U8XTCzN
+        VR9Ps55QxENktOuddjUGH3S3NXFmp+wHAAD//wMAHzgaVuoBAAA=
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8a44db2f1f0a2ae8-LAX
+      - 8a8e7a385a5094e8-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -545,7 +152,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 16 Jul 2024 20:49:00 GMT
+      - Thu, 25 Jul 2024 19:15:13 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -555,9 +162,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '1443'
+      - '188'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -565,30 +172,28 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '60000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9978'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '58871'
+      - '49999983'
       x-ratelimit-reset-requests:
-      - 3m6.535s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 1.129s
+      - 0s
       x-request-id:
-      - req_c92dc40846d4e2f0c9c418929282108b
+      - req_397edca3f962356c528879100a40f957
     status:
       code: 200
       message: OK
 - request:
     body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
-      "Input: Vitamins are essential nutrients that our body needs in small amounts
-      to function properly. They play a crucial role in various bodily functions such
-      as metabolism, immunity, and overall health. There are 13 essential vitamins
-      that our body needs, including vitamin A, B-vitamins, vitamin C, D, E, and K.
-      These vitamins can be obtained through a balanced diet that includes a variety
-      of fruits, vegetables, whole grains, and lean proteins. In some cases, supplementation
-      may be necessary to prevent vitamin deficiencies.\nOutput: "}], "model": "gpt-3.5-turbo",
-      "max_tokens": 1000}'
+      "Input: Macronutrients"}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "temperature":
+      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"skill_0": {"description": "Output:", "title": "Skill 0", "type":
+      "string"}}, "required": ["skill_0"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -597,18 +202,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '668'
+      - '557'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -620,29 +225,26 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAAwAAAP//XFNNbxQxDL3vr3ia8+yK3VIQvfHRSohDJYQACaEqk/HMmCbONHG2DKj/
-        HSW77QKXHGL7+fn5+fcKaLhvLtDYyaj1s1u/cj+uv7i3b679/fWyvb26O7+7/DW8HpNefU1NWypC
-        94OsPlZtbPCzI+Ugh7CNZJQK6vblbrt9sXv1/FkN+NCTK2XjrOuzzflac+zC+tl2d36snAJbSs0F
-        vq0A4Hd9C0fp6WdzgYpTfzylZEZqLp6SgCYGV34akxInNaJNewraIEpSaX9mNZ4lwUTCntU4SNbI
-        JJqgk1GEHNGFnikh0l3mSGCBRmMJxodcEwPCTNEogYaBrPKe3LLBp4mWimxjtmwchhAh2VMMOVVU
-        t2COwVJKlFqkbCeYBE9quuA4+RbsfRbCkMUWYVsY6RH2FI1zuCfn1h2xjLVZpNpte4YCKFpa7h8n
-        /H8aIepbsFiXe5bxlPi6xZsWb1u8a3F56Pehwic6JZU+usxsjXMLjK3K9NAphjxOMAdqMWTpqUfP
-        pAcCLDbEORStEgx63lNMhGhkJIQBQ8ysqcWexiKCK7LcT8ERxmhY0oGPIyNFOCWWtMF7gaWohgUs
-        Zd32oOY8O/J1ld4s6KjOXFgGmD1FfRwHPQ1smcQypQ0+kiffUWxh0BlX4I4jcMItLaWeJOVYZFtC
-        RiRLvCcYgenpLhcjHLxRRtKq3GkjTwbbNEdPPjyZ2YVxjqErxpfs3NP/wMJpuolkUpBi3KRhPpQ/
-        rIDv9WjyP3fQzDH4WW803JIUwO3ueDTN6U7/jp4doxrUuFNg9/xsdaTYpCUp+ZuBZaQ4R65HVIiu
-        HlZ/AAAA//8DAIUy379DBAAA
+        H4sIAAAAAAAAA2xSTW/bMAy9+1cQOidBnKTL4uuKfhyWXgasXVMYiszYamVRk+iiRpD/PshO4zSY
+        DgLFx/f4QHGfAAhdiAyEqiSr2pnxitpr/Xd+L29TenhcPrnq9fbux7WRH/z7SYwig7avqPiTNVFU
+        O4Osyfaw8igZo2q6nKWr+WKVLjqgpgJNpJWOx/PJ1Zgbv6XxNJ1dHZkVaYVBZPCcAADsuzt6tAV+
+        iAymo89MjSHIEkV2KgIQnkzMCBmCDiwti9EAKrKMNtq2jTFnABOZXEljhsb92Z/Fw6CkMTktp4+h
+        mbn3m3S5rrbf1lTX9+s/i7N+vXTrOkO7xqrTgM7wUz67aAYgrKw77kPDruELJoCQvmxqtBxdi/1G
+        hDdtTD7diGwjfkrlyTbsdSwA6RGGF1eSwXl61wWCkoa8xgDkAS36sp3ArwrbnoNYYAHagpG+RJA1
+        NZ2ejUllmk7Ab6lqCy8ZwyjqMmobRl3RTnKYbMRBfDF/SP4Xvxyjw+mPDZXO0zZcfJnYaatDlXuU
+        oRudCEyubxHlXrpdar6sh3Ceasc50xvaKLj83suJYXsHcD4/gkwszZBP0zQ5GhShDYx1vtO2RO+8
+        Pm1Wckj+AQAA//8DAEilP5xYAwAA
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8a44db393cef2ae8-LAX
+      - 8a8e7a3b6eba94e8-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -650,7 +252,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 16 Jul 2024 20:49:02 GMT
+      - Thu, 25 Jul 2024 19:15:14 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -660,9 +262,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '1721'
+      - '436'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -670,29 +272,28 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '60000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9977'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '58863'
+      - '49998992'
       x-ratelimit-reset-requests:
-      - 3m13.566s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 1.137s
+      - 1ms
       x-request-id:
-      - req_30a24575c1844d2f2f58493fda3e5733
+      - req_044bd7f8dcbaa4d7389f6269da6f6eee
     status:
       code: 200
       message: OK
 - request:
     body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
-      "Input: Minerals are naturally occurring inorganic substances that are essential
-      for the proper functioning of the human body. They play a crucial role in various
-      bodily functions such as bone health, metabolism, nerve function, and overall
-      well-being. Some important minerals include calcium, iron, magnesium, zinc,
-      and potassium. A balanced diet that includes a variety of nutrient-rich foods
-      is important to ensure adequate intake of these essential minerals.\nOutput:
-      "}], "model": "gpt-3.5-turbo", "max_tokens": 1000}'
+      "Input: Vitamins"}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "temperature":
+      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"skill_0": {"description": "Output:", "title": "Skill 0", "type":
+      "string"}}, "required": ["skill_0"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -701,18 +302,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '602'
+      - '551'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -724,27 +325,28 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAAwAAAP//VFLLbtswELz7KxY8y0bsNA/7lkOBomhRtA0QBEURUNRK2oTcVcmlXTfI
-        vxeUZbu98DDDmR0u53UGYKgxGzCut+rC4Odr//zl8TI+dFfX3z483j1+vFt9upeHu+5983VnqqKQ
-        +hmdHlULJ2HwqCR8oF1Eq1hclzer5fJ6tX63GokgDfoi6wadXy6u5ppjLfOL5epqUvZCDpPZwI8Z
-        AMDreJaM3OBvs4GL6ogETMl2aDanSwAmii+IsSlRUstqqjPphBV5jP2ZGKP1CWxE2JJaD61ECJZY
-        LTFxB9ojDFEGjNBmduV1BZZ2ZPocLEMtzX4B9z3uRyNMCVlpMtvaSJJTuUR+fzJJFRA7n5viVgsj
-        9Gi99hUEVFuLpxQqYIxbPGkqsNyAbEtmDzv0fl4jcbeA7xIQXnAP4fgi7a2OaVzM7phFcpzGTMMR
-        nPWOcqiAYhkQbMeYRuAPsTtMHETLJnNYwL0AcsoRYYfQoYJlsA3+ylYRytZecNpN+ncRx1gVkAIl
-        oDBILB8DKtCK97IDC7X1lh020BDq4QVTzAR2XCTqvthz1kjIOo/kemhFmrQw0w+/narhpRui1KVG
-        nL0/4S0xpf4pok3CpQZJZTjI32YAP8cK5v9aZYYoYdAnlRfkYri+OdiZc+nP5O31RKqo9Wd8eXs5
-        mwKatE+K4akl7jAOkcZClpizt9lfAAAA//8DAAI18jaPAwAA
+        H4sIAAAAAAAAAwAAAP//bFNNb9swDL3nVxA6bYAT1GnaILmtHztsRVf0c8BSBLJM20xlSZPotkaQ
+        /z7YTuK0mA828R7fI0GT6wGAoFTMQahCsiqdHs5sfUGTk7fbcXVz93BzJ+vx91A//K3vVpNrETUK
+        m6xQ8U41UrZ0Gpms6WjlUTI2rvF0HM+OJ7N40hKlTVE3stzx8Hh0MuTKJ3Z4FI9PtsrCksIg5vBn
+        AACwbt9NjybFdzGHo2iHlBiCzFHM90kAwlvdIEKGQIGlYRH1pLKG0TRtm0rrA4Kt1Uslte4Ld8/6
+        IO4HJbVerh7p/ZKuivz07ffk/Nb8WF1fPT3dVAf1OuvatQ1llVH7AR3we3z+qRiAMLJstb8qdhV/
+        UgII6fOqRMNN12K9EOGFtF4eLcR8IR6JZUkmgPQIGAIaJqnBVOypkQAXkqG2lYfEpjUYxDQAGQil
+        1Bpkaas2y8Kb9S/gvHXodT2C+wI9tq7x8YHx67ZeBGSUrlIy+R6DbxGcR3ARwWUEPyOQJgUuEM76
+        jC9cUBNhBJ4Sm2n5SiYCQ1I1XycNWy7QkAKpKI0gIcsNc3YawVk87kwzqyXj1xFcSlXszKGQAYJD
+        RRkp2M07tIIEDWbEATLru2EUKDUXo4XYiA/j3gz+Fz9vo81+K7XNnbdJ+LRkIiNDoVh6lKH92SKw
+        dV2Jxu653f7qw0IL523peMn2BU1jOJ12dqK/t56cbS9DsGWpezw+nQ62DYpQB8ZymZHJ0TtP+1sY
+        bAb/AAAA//8DACzQWgIKBAAA
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8a44db45ae662ae8-LAX
+      - 8a8e7a409eaa94e8-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -752,7 +354,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 16 Jul 2024 20:49:03 GMT
+      - Thu, 25 Jul 2024 19:15:16 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -762,9 +364,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '1376'
+      - '1217'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -772,17 +374,425 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '60000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9976'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '58879'
+      - '49998992'
       x-ratelimit-reset-requests:
-      - 3m20.218s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 1.121s
+      - 1ms
       x-request-id:
-      - req_570b0c9d09dfde161d97a11283cb91f9
+      - req_c92445ceaa4992238764fc52318c040e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Input: Minerals"}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "temperature":
+      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"skill_0": {"description": "Output:", "title": "Skill 0", "type":
+      "string"}}, "required": ["skill_0"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '551'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//bFJNb9swDL37VxA8J0E+1rTxbUDRQ7tkGzpgK5bCUGTGViNLmkRl9YL8
+        98FOGqdBdRAIPr7HB5K7BABVjimgLAXLyun+zNa3m7+rOX33+b9vT3f14st8cr9VtuTXn9hrGHb1
+        QpLfWANpK6eJlTUHWHoSTI3q6Ho8mk0+zUbTFqhsTrqhFY77k8FVn6Nf2f5wNL46MkurJAVM4XcC
+        ALBr/8ajyekVUxj23jIVhSAKwvRUBIDe6iaDIgQVWBjGXgdKa5hMY9tErc8AtlZnUmjdNT683Vnc
+        DUponT26Yvz0cHe7Fb9+PMjqfvE4/by42f4563eQrl1raB2NPA3oDD/l04tmAGhE1XK/RnaRL5gA
+        KHwRKzLcuMbdEsNGaZ0Nl5guca4MeaEDCE9gBEcvtK7BShm9V6aAEFfNgCQF4FJwWxesVjkIk0Mp
+        tgQCpK8DC62VIQjso+ToabDEPb7zsk8+ip+P0f60Mm0L5+0qXGwA18qoUGaeRGgngYGtO7Ro5J7b
+        04jvto3O28pxxnZDphG8nh7ksDvGDhyPjyBbFrrLz26Soz8MdWCqsrUyBXnn1elOkn3yHwAA//8D
+        AIxfUrcmAwAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8a8e7a4a2e4194e8-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Jul 2024 19:15:16 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '308'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998992'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_ecbb04138a0c0e2dd0b1cdd49702ec09
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Input: Macronutrients are nutrients that provide calories or energy. They are
+      needed in large amounts and include carbohydrates, proteins, and fats."}], "model":
+      "gpt-3.5-turbo", "max_tokens": 1000, "temperature": 0.0, "tool_choice": {"type":
+      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"skill_1": {"description": "Output:", "title": "Skill 1", "type": "string"}},
+      "required": ["skill_1"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '684'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA2xSwW7bMAy95ysInZPAbpJm8TUd0A3bigIdMmApDFmmbTWy6Er0Ni/Ivw9y0jgN
+        poNA8PG9R1HcjwCEzkUCQlWSVd2YyYq6O/Nx+eH+dr75Xi6+RT+yjf+0aNfZ4997MQ4Myl5Q8Rtr
+        qqhuDLIme4SVQ8kYVOPlTbyazVfxsgdqytEEWtnwZDZdTLh1GU2i+GZxYlakFXqRwM8RAMC+v0OP
+        Nsc/IoFo/Jap0XtZokjORQDCkQkZIb3XnqVlMR5ARZbRhrZta8wFwEQmVdKYwfh49hfxMChpTLqO
+        HyL20cuXxzXOs7vN7x19xt3T8sLvKN01fUNFa9V5QBf4OZ9cmQEIK+ue+9By0/IVE0BIV7Y1Wg5d
+        i/1W+J02Jo23ItmKr1I5si07HQpAOgT0Hi1raWDIcyUZGke/dI6gpCGn0QM5QIuu7KbwVGHXsx2+
+        ttphDtqC16XVhVbSMry20rLmQJM2B0U2TB6oACVdRlWXO8nox8GFUVs/7usKyX66FQfx7lGH0f/i
+        51N0OP+9obJxlPmrrxSFttpXqUPp+5EKz9QcLYLcc79j7bu1EY2juuGUaYc2CMZRfNQTw1oP6Gxx
+        AplYmgvW7HZ06lD4zjPWaaFtia5x+rxyo8PoHwAAAP//AwCSHolscQMAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8a8e7a4e1d3c94e8-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Jul 2024 19:15:17 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '543'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998959'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_300e654badbda2344548a2a3fe40dfe6
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Input: Vitamins are essential nutrients that your body needs in small amounts
+      to work properly. There are 13 essential vitamins, including vitamins A, C,
+      D, E, K, and the B vitamins (thiamine, riboflavin, niacin, pantothenic acid,
+      biotin, B6, B12, and folate). Each vitamin has specific functions and benefits
+      for your health."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "temperature":
+      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"skill_1": {"description": "Output:", "title": "Skill 1", "type":
+      "string"}}, "required": ["skill_1"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '862'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//bFNdb9swDHzPryD0tAFOUCf9St7WJQ22Dhu6bsWKpQhkmY7VyKIg0W2N
+        IP99sJ3EaTE/2MQd70jQ5KYHIHQqJiBULlkVzvTHVE1NMU+/zlL9ZZ69Xpsy4xs1Cg9P11MR1QpK
+        nlDxXjVQVDiDrMm2tPIoGWvX+GIYj0en4/iiIQpK0dSyleP+aHDW59In1D+Jh2c7ZU5aYRAT+NsD
+        ANg077pHm+KrmMBJtEcKDEGuUEwOSQDCk6kRIUPQgaVlEXWkIsto67ZtacwRwURmqaQxXeH22RzF
+        3aCkMUv7cv6Tvq/v1rd/vt3lZTW/Hz/MXn/fHtVrrSvXNJSVVh0GdMQf8Mm7YgDCyqLR/ijZlfxO
+        CSCkX5UFWq67FpuFCGttzDJeiMlC3GuWhbYBpEfAENCylgZsyV7XEuBcMlRUekgorcAipgG0hVBI
+        Y0AWVDZZBC/k1+A8OfSmGsCvHD02rvHoyPh5Vy8CbZUpU21XBww+RfA5gmkEswhuIpA2Bc4RrrqM
+        D5zrOsIIvE4oM/JZ2wislqr+OmmZOEerFUil0wgSTVwzV+cRXMXD1jQjIxk/DmAmVb43h1wGCA6V
+        zrSC/bxDI0jQYqY5QEa+HUaO0nA+WIiteDPube9/8eMu2h620tDKeUrCuyUTmbY65EuPMjQ/WwQm
+        15ao7R6b7S/fLLRwngrHS6Y12towPrts/UR3cB073p2GYGJpOnx4etnbdShCFRiLZabtCr3z+nAM
+        vW3vHwAAAP//AwA51TUmCwQAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8a8e7a53be1d94e8-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Jul 2024 19:15:19 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '1021'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998914'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_e64c95e6593ea7c0b39954c2ad9758ac
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Input: Minerals are naturally occurring substances that are solid and have
+      a crystalline structure."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "temperature":
+      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"skill_1": {"description": "Output:", "title": "Skill 1", "type":
+      "string"}}, "required": ["skill_1"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '635'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//bFLBbtpAEL37K0ZzBoQJpLLPNOFAlVZNW7UlshZ7MBvWO+7uOApF/Htk
+        G7CD4oM1muc373nmHQIA1BnGgOlWSVqUZhjxfm4nY7n9s3xZf+VZ/riXn26+vL3/vmAc1AxeP1Mq
+        Z9Yo5aI0JJptC6eOlFA9Nfw0CaObaRRGDVBwRqam5aUMb0azoVRuzcNxOJmdmFvWKXmM4W8AAHBo
+        3rVHm9ErxjAenDsFea9ywvjyEQA6NnUHlffai7KCgw5M2QrZ2ratjOkBwmySVBnTCbfPoVd3i1LG
+        JM+/X3883P+6+/xtN18sF9E009P/4SP39NrR+7IxtKlsellQD7/04ysxALSqaLgPlZSVXDEBULm8
+        KshK7RoPK/Q7bUwSrjBe4RdtySnjQTkC8p6saGXAVuJ0TQHZKmlAR/8q7SiDDTt4UU5z5WHNmTZ7
+        OLvzoxUe8Z3+MfiofjpVx8uZDOel47W/2jputNV+mzhSvvl79MJlK1GPe2riUL27MJaOi1IS4R3Z
+        emB0SgN2AezANnLNdUWZXn8cBSeD6PdeqEg22ubkSqcv4QiOwRsAAAD//wMAnOEwohsDAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8a8e7a5c2a3294e8-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Jul 2024 19:15:19 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '330'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998971'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_c4b2d0417228bc67ff3f91e32266351a
     status:
       code: 200
       message: OK
@@ -810,31 +820,910 @@ interactions:
       help you with this prompt engineering problem. Please provide me with the current
       prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
       Current prompt\n...\n\n## Examples\n### Example #0\n\nInput: Macronutrients\n\nOutput:
-      Macronutrients are nutrients that provide energy to the body and are needed
-      in larger quantities compared to micronutrients. The three main macronutrients
-      are carbohydrates, proteins, and fats. Carbohydrates are the body''s main source
-      of energy, proteins are essential for growth and repair of tissues, and fats
-      are important for energy storage and hormone production. It is important to
-      consume these macronutrients in appropriate proportions to maintain overall
-      health and well-being.\n\nUser feedback: Prediction is incorrect. Correct answer:
-      \"Carbohydrates, Proteins, Fats\"\n\n\n### Example #1\n\nInput: Vitamins\n\nOutput:
-      Vitamins are essential nutrients that our body needs in small amounts to function
-      properly. They play a crucial role in various bodily functions such as metabolism,
-      immunity, and overall health. There are 13 essential vitamins that our body
-      needs, including vitamin A, B-vitamins, vitamin C, D, E, and K. These vitamins
-      can be obtained through a balanced diet that includes a variety of fruits, vegetables,
-      whole grains, and lean proteins. In some cases, supplementation may be necessary
-      to prevent vitamin deficiencies.\n\nUser feedback: Prediction is incorrect.
+      Macronutrients are nutrients that provide calories or energy. They are needed
+      in large amounts and include carbohydrates, proteins, and fats.\n\nUser feedback:
+      Prediction is incorrect. Correct answer: \"Carbohydrates, Proteins, Fats\"\n\n\n###
+      Example #1\n\nInput: Vitamins\n\nOutput: Vitamins are essential nutrients that
+      your body needs in small amounts to work properly. There are 13 essential vitamins,
+      including vitamins A, C, D, E, K, and the B vitamins (thiamine, riboflavin,
+      niacin, pantothenic acid, biotin, B6, B12, and folate). Each vitamin has specific
+      functions and benefits for your health.\n\nUser feedback: Prediction is incorrect.
       Correct answer: \"Vitamin A, Vitamin C, Vitamin D\"\n\n\n### Example #2\n\nInput:
-      Minerals\n\nOutput: Minerals are naturally occurring inorganic substances that
-      are essential for the proper functioning of the human body. They play a crucial
-      role in various bodily functions such as bone health, metabolism, nerve function,
-      and overall well-being. Some important minerals include calcium, iron, magnesium,
-      zinc, and potassium. A balanced diet that includes a variety of nutrient-rich
-      foods is important to ensure adequate intake of these essential minerals.\n\nUser
+      Minerals\n\nOutput: Minerals are naturally occurring substances that are solid
+      and have a crystalline structure.\n\nUser feedback: Prediction is incorrect.
+      Correct answer: \"Calcium, Iron, Magnesium\"\n\n\n\nSummarize your analysis
+      about incorrect predictions and suggest changes to the prompt."}], "model":
+      "gpt-4", "max_tokens": 1000, "temperature": 0.0}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '2923'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//lFRNb9w2EL3vrxhwr/LCXid1vLc2iVMgadEiuWULYySOJMYUR+WMdr0I
+        /N8LUlrJLhAUvQgS5+u9x6f5vgIwzpodmKpFrbreX9zy6R3fuE/vr8pPsT70j8f27uPfv3/8cHP8
+        5U9TpAouv1Gl56pNxV3vSR2HMVxFQqXU9epme3V7/ep2e5kDHVvyqazp9eLVxeVPV9dTRcuuIjE7
+        +LoCAPienwlbsPRodpDr80lHItiQ2c1JACayTycGRZwoBjXFEqw4KIUMd72GnwP6kzjZhy8tQTXE
+        SEGhj9z1CkLUCShDSeCCaBwqdaEBbQky+BTrIx+cJUCwpOg8WaDH3mPAJAFwBEu1C278qnOxC/2g
+        UKFSw/G0gV/5SAeKBZQoZIFDzhqEItREtsTqoQCngH1PGAW0RZ1TBDBSmkkjOgTvRNMopxl/Sq7R
+        exiCpZjrGnegMAMoILD+gMAG9mEf7jgCPWK62AJcgPfjO6wviwXqCIEs7M1bjCW3JxtRSQr4I7KS
+        C1LAHarsDaDkMh40CVFzfCbL3vyGVeQwaHQUUnoB5aDPVJ8ktz/UvIZjIt296JNk2kC6ZsGOoEdV
+        igGcAJdC8UA2McuwtKWZrySwR/J+k4RYr+Hz0DQkiefbFkNDk3fOnml58DY5pmPrakc2meTsnpfW
+        yfc0j5m88e+riZjRaIthIj5e8n+7bSQ7TgtENls5eyD9FHY0hpshL0b+v/5ZPJJ4YqhodMUkSXVW
+        pMp6ZUGEO9I2MfHugXawNx9yS3zGPMNIiYtGGUtJntNfyKCtk2co3nE28pnIooRA9u+skxTwbRAd
+        J2TnJaabvYEvqeMxA+7wIQWg8oRxnHZWM7vLyeL4s3Gynzdm2jZP85ry3PSRy7TSwuD9fJ4ASnsf
+        CYVDWkmi3I/lTyuAv/I6HF5sODOqeq/8QCE1fP1mO/Yzy+Zdotvt9RRVVvRL4M3l69UE0chJlLr7
+        2oWGYh9dXo8J6Opp9Q8AAAD//wMArtUtnxUGAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8a8e7a60585494e8-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Jul 2024 19:15:33 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '13314'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '1000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '998336'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 99ms
+      x-request-id:
+      - req_5f943c09dafad7037bacb5010e411114
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
+      expected actions and instructs the large language model (LLM) to generate a
+      specific output. This prompt is concatenated with the input text, and the model
+      then creates the required output.\nThis describes the full template how the
+      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nInput:
+      {category}\nOutput: {skill_0}\n```\n\nHere:\n- \"Input: {category}\" is input
+      template,\n- \"{prompt}\" is the LLM prompt,\n- \"Output: {skill_0}\" is the
+      output template.\n\nModel can produce erroneous output if a prompt is not well
+      defined. In our collaboration, we\u2019ll work together to refine a prompt.
+      The process consists of two main steps:\n\n## Step 1\nI will provide you with
+      the current prompt along with prediction examples. Each example contains the
+      input text, the final prediction produced by the model, and the user feedback.
+      User feedback indicates whether the model prediction is correct or not. Your
+      task is to analyze the examples and user feedback, determining whether the existing
+      instruction is describing the task reflected by these examples precisely, and
+      suggests changes to the prompt to address the incorrect predictions.\n\n## Step
+      2\nNext, you will carefully review your reasoning in step 1, integrate the insights
+      to refine the prompt, and provide me with the new prompt that improves the model\u2019s
+      performance."}, {"role": "assistant", "content": "Sure, I\u2019d be happy to
+      help you with this prompt engineering problem. Please provide me with the current
+      prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
+      Current prompt\n...\n\n## Examples\n### Example #0\n\nInput: Macronutrients\n\nOutput:
+      Macronutrients are nutrients that provide calories or energy. They are needed
+      in large amounts and include carbohydrates, proteins, and fats.\n\nUser feedback:
+      Prediction is incorrect. Correct answer: \"Carbohydrates, Proteins, Fats\"\n\n\n###
+      Example #1\n\nInput: Vitamins\n\nOutput: Vitamins are essential nutrients that
+      your body needs in small amounts to work properly. There are 13 essential vitamins,
+      including vitamins A, C, D, E, K, and the B vitamins (thiamine, riboflavin,
+      niacin, pantothenic acid, biotin, B6, B12, and folate). Each vitamin has specific
+      functions and benefits for your health.\n\nUser feedback: Prediction is incorrect.
+      Correct answer: \"Vitamin A, Vitamin C, Vitamin D\"\n\n\n### Example #2\n\nInput:
+      Minerals\n\nOutput: Minerals are naturally occurring substances that are solid
+      and have a crystalline structure.\n\nUser feedback: Prediction is incorrect.
+      Correct answer: \"Calcium, Iron, Magnesium\"\n\n\n\nSummarize your analysis
+      about incorrect predictions and suggest changes to the prompt."}, {"role": "assistant",
+      "content": "## Analysis\nThe current prompt seems to be instructing the model
+      to provide a detailed explanation or definition of the input category. However,
+      based on the user feedback, it appears that the users are expecting a list of
+      items that fall under the given category, not a detailed explanation. \n\nFor
+      example, in Example #0, the user expected \"Carbohydrates, Proteins, Fats\"
+      as the output for the input \"Macronutrients\", but the model provided a detailed
+      explanation of what macronutrients are. The same pattern is observed in the
+      other examples as well.\n\n## Suggested Changes\nThe prompt should be modified
+      to instruct the model to list examples of the given category, rather than providing
+      a detailed explanation or definition. The model needs to understand that it
+      should provide a list of items that fall under the given category. \n\nFor instance,
+      the prompt could be changed to something like: \"Given a category, list some
+      examples that belong to this category. Do not provide definitions or explanations,
+      just list the items.\" This would make it clear to the model what is expected
+      in the output."}, {"role": "user", "content": "\nNow please carefully review
+      your reasoning in Step 1 and help with Step 2: refining the prompt.\n\n## Current
+      prompt\n...\n\n## Follow this guidance to refine the prompt:\n\n1. The new prompt
+      should should describe the task precisely, and address the points raised in
+      the user feedback.\n\n2. The new prompt should be similar to the current prompt,
+      and only differ in the parts that address the issues you identified in Step
+      1.\n    Example:\n    - Current prompt: \"Generate a summary of the input text.\"\n    -
+      New prompt: \"Generate a summary of the input text. Pay attention to the original
+      style.\"\n\n3. Reply only with the new prompt. Do not include input and output
+      templates in the prompt.\n"}], "model": "gpt-4", "max_tokens": 1000, "temperature":
+      0.0}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '4809'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//VJHBTsMwEETv+YqVz2nVNFCaHFGBD0AgJIoq19kmBsdr7C1qqfrvyElI
+        4WLJO36j2fEpARC6EiUI1UhWrTOTgo532cv9d6aq+fPjatY81Hp5+9w82c/Fh0gjQdt3VPxLTRW1
+        ziBrsr2sPErG6JrdzLMivyryvBNaqtBErHY8uZrMFlk+EA1phUGU8JoAAJy6M2azFR5ECbP0d9Ji
+        CLJGUY6PAIQnEydChqADS8sivYiKLKPt4q7Fg/5CCxKUZKzJH1Nwnr50hSDB6MBAO9CMbQBuJMMW
+        DdkamIAbHUZqCisCSzzCFe601bGCAOQBD85IK7t7Cu/7wL05N9i7T9dCDAnP42qGaudpG2uwe2PG
+        ebQOzcajDGTjGoHJ9fg5AXjrKtz/a0U4T63jDdMH2mhYXBe9n7j81kWdLweRiaX5Qy1vkiGhCMfA
+        2G522tbondddozFnck5+AAAA//8DAEevzcVIAgAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8a8e7ab5d89c94e8-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Jul 2024 19:15:35 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '2151'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '1000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '997889'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 126ms
+      x-request-id:
+      - req_bbea3ce6800d4fd13572eeb04b61ec69
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "\"Given a category, provide
+      a list of items that belong to this category. Do not provide definitions or
+      explanations, just list the items.\""}, {"role": "user", "content": "Input:
+      Macronutrients"}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "temperature":
+      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"skill_0": {"description": "Output:", "title": "Skill 0", "type":
+      "string"}}, "required": ["skill_0"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '694'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA2xS3W+bMBB/56+w7plUkI9u4S3Kumhrpy3TXtamQgYc8Gp8rn2sTaP875MhITQa
+        D9bpfv59+I59wBjIAhIGecUpr40azXF3M31+aV7Xq/j+7nc0W/zKFp/ct9i+6BsIPQOzPyKnE+sq
+        x9ooQRJ1B+dWcBJeNf4wjueT6Xxy3QI1FkJ5WmloNLmajaixGY6ieDw7MiuUuXCQsIeAMcb27ekz
+        6kK8QsKi8NSphXO8FJD0lxgDi8p3gDsnHXFNEJ7BHDUJ7WPrRqkBQIgqzblSZ+Pu2w/q86C4Uql+
+        K24XX6fryXqpVkta/oy+fKz/VquBXye9M22gbaPzfkADvO8nF2aMgeZ1y/3ekGnogskYcFs2tdDk
+        U8N+A+5JKpVGG0g2sOQ2w2pXWE7CheyHRRJSu5B95uQ2cIB3Yofgf/XjsTr0M1dYGouZuxghbKWW
+        rkqt4K59CjhC01l4ucd2t827dYGxWBtKCZ+E9oJxNOv04Pw7DdATSEhcDfrjKDgmBLdzJOp0K3Up
+        rLGyX3VwCP4BAAD//wMAqrlGVukCAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8a8e7ac5e96e94e8-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Jul 2024 19:15:36 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '348'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998957'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_cfcd05f755ce0a054d04c8cf98da6992
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "\"Given a category, provide
+      a list of items that belong to this category. Do not provide definitions or
+      explanations, just list the items.\""}, {"role": "user", "content": "Input:
+      Vitamins"}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "temperature": 0.0,
+      "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"skill_0": {"description": "Output:", "title": "Skill 0", "type":
+      "string"}}, "required": ["skill_0"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '688'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//bFJNT+MwEL3nV1hzblGafkBzKyziwKFa0BZWWxS5rpt68Rf2RCJU/e8r
+        J20cqvUheprn995kxoeEEBBbyAmwPUWmrBzOTX0/WS2eVk/8c3L3UH4tPq6ff6W/1fJ1NoNBUJjN
+        X87wrLpiRlnJURjd0sxxijy4jq6z0Xw8mY9nDaHMlssgKy0Ox1fTIVZuY4bpKJuelHsjGPeQkz8J
+        IYQcmm/oUW/5J+QkHZwrintPSw55d4kQcEaGClDvhUeqEQaRZEYj16FtXUnZI9AYWTAqZQxuz6GH
+        46ColIVZbl9wenO7fx3/fK7rbCGd0JuPVS+vta5t09Cu0qwbUI/v6vlFGCGgqWq0ywpthRdKQoC6
+        slJcY+gaDmvw70LKIl1DvoaVQKqEJosBOcPbCO8i/BHhfYSPazjCt7xj8j/8dkLHbi3SlNaZjb+Y
+        MuyEFn5fOE5987fg0dg2Iti9Neuvvm0UrDPKYoHmnetgOEonrR/EFxfZ7EyiQSp7quwmOXUIvvbI
+        VbETuuTOOtG9huSY/AMAAP//AwBkIc6YDAMAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8a8e7aca289594e8-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Jul 2024 19:15:37 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '336'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998958'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_abbac1e5c2fac6382702214bf4ac6a67
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "\"Given a category, provide
+      a list of items that belong to this category. Do not provide definitions or
+      explanations, just list the items.\""}, {"role": "user", "content": "Input:
+      Minerals"}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "temperature": 0.0,
+      "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"skill_0": {"description": "Output:", "title": "Skill 0", "type":
+      "string"}}, "required": ["skill_0"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '688'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//bFLbjtowEH3PV4z8si8QJVw3eSu0qlZly156kVqvIhNMcHE8XntScRH/
+        XiWwwKL6ITqa43POZDy7AICpOUuB5UtBeWl1O8HNp/63D+Pxw9xOkmH08xWfn7aj9bQYPxasVStw
+        9kfm9KYKcyytlqTQHOjcSUGydo2HnTjp9pLusCFKnEtdywpL7W7Yb1PlZtiO4k7/qFyiyqVnKfwO
+        AAB2zbfu0czlmqUQtd4qpfReFJKlp0sAzKGuK0x4rzwJQ6x1JnM0JE3dtqm0viAIUWe50PocfDi7
+        C3welNA6e7izq9Hoy497l3Ret1Mz/D65XY+eqou8g/XGNg0tKpOfBnTBn+rpVRgAM6JstNOKbEVX
+        SgAmXFGV0lDdNdtx5ldK6yziLOVsojwBLkCRLD3QUhDMpEZTACHQUkIuSBboNnBzr4x0QvublHMT
+        h/BYCUdbzk0nhI9KlGjmnJtuCJ9R16gXwrPSf6Xj3PRDGKO1DR6EcOfQcG6GIfxSJufc3IYwkaJW
+        JSF8VflK6jokCmEkqrUiydmevfuvffA//HJE+9Pzayysw5m/ek22UEb5Zeak8M1UmSe0h4ja7qVZ
+        s+rd5jDrsLSUEa6kqQ3jqHvwY+fNPrOD+EgSktAXqkEvOHbI/MaTLLOFMoV01qnT1gX74B8AAAD/
+        /wMAtONQi3QDAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8a8e7acebfa194e8-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Jul 2024 19:15:38 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '883'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998958'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_7a54b92a1606047f635e72d36a71afa8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Input: Carbohydrates, Proteins, Fats"}], "model": "gpt-3.5-turbo", "max_tokens":
+      1000, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
+      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
+      "Correctly extracted `Output` with all the required parameters with correct
+      types", "parameters": {"properties": {"skill_1": {"description": "Output:",
+      "title": "Skill 1", "type": "string"}}, "required": ["skill_1"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '572'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA2xSS4+bMBC+8yusOZPVQpJm4dZWrdSqr2gPq26zQo4x4I3xuPZYTRrlv1dAFrJR
+        OVij+fw9PMMxYgxUCTkD0XASrdWzDA8f3qzS+7+h/bJvPu3Dn3Ipqyx9KD+vnyHuGLh9loJeWDcC
+        W6slKTQDLJzkJDvVZJUm2XyRze96oMVS6o5WW5rNb5YzCm6Ls9skXZ6ZDSohPeTsV8QYY8f+7DKa
+        Uu4hZ7fxS6eV3vNaQj5eYgwc6q4D3HvliRuCeAIFGpKmi22C1hcAIepCcK0n4+E7XtTToLjWxer3
+        w9dv63QRHh9DpXZv34n6nq9/Hi78BumD7QNVwYhxQBf42M+vzBgDw9ue+z2QDXTFZAy4q0MrDXWp
+        4bgBv1NaF8kG8g28526LzaF0nKSP2Q+HJJXxMfvIyW/gBK/ETtH/6qdzdRpnrrG2Drf+aoRQKaN8
+        UzjJff8U8IR2sOjknvrdhlfrAuuwtVQQ7qTpBO8WgxxMf9MEJsszSEhcT/0si875wB88ybaolKml
+        s06Ni45O0T8AAAD//wMAwDoLhOcCAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8a8e7ad65cb794e8-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Jul 2024 19:15:39 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '251'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998988'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_e5a9aa73de9a4ec70a99199122c2f027
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Input: Vitamin A, Vitamin B, Vitamin C, Vitamin D, Vitamin E, Vitamin K"}],
+      "model": "gpt-3.5-turbo", "max_tokens": 1000, "temperature": 0.0, "tool_choice":
+      {"type": "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"skill_1": {"description": "Output:", "title": "Skill 1", "type": "string"}},
+      "required": ["skill_1"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '607'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA2xS32/aMBB+z19xuueAGmjLyFtpkVg7aZOmttNGFZnkCB4X27MvWxHif58SKKGo
+        frBO9/n7ofNtIwDUBaaA+UpJXjnuje1mOgpm9unz/cDT488f32fePM42k3B9/w3jhmEXvymXN1Y/
+        t5VjEm3NHs49KaFGNRkNkvHwcjwct0BlC+KGVjrpDftXPan9wvYuksHVgbmyOqeAKfyKAAC27d1k
+        NAW9YgoX8VunohBUSZgeHwGgt9x0UIWggygjGHdgbo2QaWKbmvkEEGs5yxVzZ7w/25O6G5Rizm7K
+        iX+Yrqlgdzn58np9J6PC/3l+PvHbS29cG2hZm/w4oBP82E/PzADQqKrlfq3F1XLGBEDly7oiI01q
+        3M4xrDVzlswxneOTFlVpE+AmhkkMtzHcxTCNQZkCHkB5AgqBjGjFsLQeKqWNKG20KcH+Ja+YYUWK
+        ZdVS/hFzb0HalP057vBdkl30Uf1yqHbHD2NbOm8X4Wz+uNRGh1XmSYV2DhjEur1FI/fSLkb97q/R
+        eVs5ycSuyTSC48FeDrtV7MBhcgDFiuKunwyG0SEghk0QqrKlNiV55/VxTaJd9B8AAP//AwCLfPQh
+        JQMAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8a8e7ada3a7694e8-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Jul 2024 19:15:40 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '547'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998979'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_3cd8da4cf88cc16b95ee1296c20f89b5
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
+      "Input: List of items that belong to the category ''Minerals'':\n1. Quartz\n2.
+      Diamond\n3. Gold\n4. Silver\n5. Copper\n6. Iron\n7. Zinc\n8. Lead\n9. Nickel\n10.
+      Bauxite"}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "temperature": 0.0,
+      "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"skill_1": {"description": "Output:", "title": "Skill 1", "type":
+      "string"}}, "required": ["skill_1"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '701'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA2xSS4/aMBC+8ytGcw4rwmO75NbSqtpqBa16a1lFxhmCi+Nx7ckWFvHfqwQaWNQc
+        nNF8+R4Zz6EHgKbADFBvlOjK2/6U958eZLEYz8Z/3Mtcbx9fZ6ndil8tSotJw+DVL9Lyj3WnufKW
+        xLA7wTqQEmpU03fDdDoaT8eDFqi4INvQSi/90d2kL3VYcX+QDidn5oaNpogZ/OwBABzas8noCtph
+        Bq1O26koRlUSZt1HABjYNh1UMZooygkmF1CzE3JNbFdbewUIs821svZifHoOV/VlUMrafOTv38eF
+        4t3+69N8QL/tl82IeEBXfifpvW8DrWunuwFd4V0/uzEDQKeqlruoxddywwRAFcq6IidNajwsMW6N
+        tXm6xGyJ32oV5DWBj0ZV7IoEPrMtEvhu7AuFBGbsffN+DOwS+GGcTuCJVJHA3Ogt2QQ+qHpnhJZ4
+        xDe+x97/6udzdeyux3LpA6/izbRxbZyJmzyQiu1fYxT2J4tG7rldg/rNzaIPXHnJhbfkGsF0+HDS
+        w8vmXdAOFBZlr1iT+945IcZ9FKrytXElBR9MtxW9Y+8vAAAA//8DALhD3v8UAwAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8a8e7adfec3a94e8-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Jul 2024 19:15:40 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '398'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998957'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_0b9dba8032a6f28c8954b073c2a78f79
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
+      expected actions and instructs the large language model (LLM) to generate a
+      specific output. This prompt is concatenated with the input text, and the model
+      then creates the required output.\nThis describes the full template how the
+      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nInput:
+      {category}\nOutput: {skill_0}\n```\n\nHere:\n- \"Input: {category}\" is input
+      template,\n- \"{prompt}\" is the LLM prompt,\n- \"Output: {skill_0}\" is the
+      output template.\n\nModel can produce erroneous output if a prompt is not well
+      defined. In our collaboration, we\u2019ll work together to refine a prompt.
+      The process consists of two main steps:\n\n## Step 1\nI will provide you with
+      the current prompt along with prediction examples. Each example contains the
+      input text, the final prediction produced by the model, and the user feedback.
+      User feedback indicates whether the model prediction is correct or not. Your
+      task is to analyze the examples and user feedback, determining whether the existing
+      instruction is describing the task reflected by these examples precisely, and
+      suggests changes to the prompt to address the incorrect predictions.\n\n## Step
+      2\nNext, you will carefully review your reasoning in step 1, integrate the insights
+      to refine the prompt, and provide me with the new prompt that improves the model\u2019s
+      performance."}, {"role": "assistant", "content": "Sure, I\u2019d be happy to
+      help you with this prompt engineering problem. Please provide me with the current
+      prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
+      Current prompt\n\"Given a category, provide a list of items that belong to this
+      category. Do not provide definitions or explanations, just list the items.\"\n\n##
+      Examples\n### Example #0\n\nInput: Macronutrients\n\nOutput: Carbohydrates,
+      Proteins, Fats\n\nUser feedback: Prediction is correct.\n\n\n### Example #1\n\nInput:
+      Vitamins\n\nOutput: Vitamin A, Vitamin B, Vitamin C, Vitamin D, Vitamin E, Vitamin
+      K\n\nUser feedback: Prediction is incorrect. Correct answer: \"Vitamin A, Vitamin
+      C, Vitamin D\"\n\n\n### Example #2\n\nInput: Minerals\n\nOutput: List of items
+      that belong to the category ''Minerals'':\n1. Quartz\n2. Diamond\n3. Gold\n4.
+      Silver\n5. Copper\n6. Iron\n7. Zinc\n8. Lead\n9. Nickel\n10. Bauxite\n\nUser
       feedback: Prediction is incorrect. Correct answer: \"Calcium, Iron, Magnesium\"\n\n\n\nSummarize
       your analysis about incorrect predictions and suggest changes to the prompt."}],
-      "model": "gpt-4", "max_tokens": 1000}'
+      "model": "gpt-4", "max_tokens": 1000, "temperature": 0.0}'
     headers:
       accept:
       - application/json
@@ -843,18 +1732,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '3811'
+      - '2707'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -866,34 +1755,32 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAAwAAAP//ZJXNbtw2EMfv+xQDBWgushB/1Kn3FidIE6Bo0jropVsYs9RIGpsiBc5o
-        14vAQF+jr5cnCUhKWju9GGsO5+v3n6G+rgAKros1FKZDNf1gT67s3Se8cu/CjXlfd7/ZsL/+/YOe
-        SfvHw/VdUUYPv70jo7NXZXw/WFL2LptNIFSKUU9fn52eXp5dXVwkQ+9rstGtHfTk4uTV5en55NF5
-        NiTFGv5eAQB8TX9jba6mh2INr8r5pCcRbKlYL5cAiuBtPClQhEXRaVEejcY7JZfKffEC3ji0B2EB
-        38BHZ3wIZBQ+B6rZxBYEfoKbsW1J8n+ND/A5+H5QeNuha2njNu5X3pED7Qhwh2xxawnoASMGAXQ1
-        WO/v2bWAmm7Rw0BGqYaXU8KX4EcdRhVAAXY1m0gMOAcdhQI0RPUWzX0JrCBEvYDle0oXEkhggYg+
-        UEeujtmiSVHuYcpiD6mYIfgdpwtozBhQKR2za3zoUXlHUJOYwENuGY3xIQf0wCpgxhDIKYyuphD5
-        JqNvUsIhwangS/dDmDZBivx6NMG7UQOTUylhx4o9OylTHT07CmgFMNBceRUpf/B72lEo/88EJCsk
-        oN2EuCbhQPXENbLpfSCQgQw3bCr4E7WjEB0coIuSWHQYSwUfnlZeplwCe3QKCKIBue208WGPoQbL
-        orH3Re/YYawg9xuFbH04VBBbuPHlDGlrqQfLJOC8zkonIb/9+18cAqUwBEpy4JYt6wG243Jzjwdg
-        F1tLCrNATQ07qqNIS6jE7YuHHqdJyeqAsYQhotwTSOdHW09kDkeCy1At06p+mp3kFLRccM7dL2Mc
-        ntB9NgU+PEUtFVwf5tR5ZJeEWYup3Vx3qtegg3aMRTwnNimdZKamIRPR2UOVuafLPnDLDu2MwTew
-        Kaqq2hQp6pbApJ1OrYrvSbtY1LRnLOsk4qbI+46LuDFQR2i1Owlk0+rKuI2bYUjKBRouw7JwO17L
-        4Bu0Nu9VRjFnKJ8RxadMf0Bawft0kPRYx3o/xjFZw1/Tlm3cp0RqOYE35fLz7fHnu00Rva/jnBk7
-        1k/lsWxY5yRZFYshj89x9/J7Mj8MWZ+qmF7ix+UJt76N+xCfezdau5w37Fi620Ao3sXnWtQP2f1x
-        BfBP+lSMz17/Igt7q/6eXAz4+vw8xyuOX6Wj9ezny8mqXtEeDVe/XK2mEgs5iFJ/27Br40Zy+nTE
-        QlePq+8AAAD//wMAm53BXzEHAAA=
+        H4sIAAAAAAAAA4xUTW/bRhC961cMqEMvshD5I651C1q3apAgh+SUuDBWyxF3reUOsTMULQT+78Es
+        KYoOgqIXQeRw3nvz5uP7DKDwZbGGwjojtm7CxR0d7+8+vL82m83906fbzearq5/ff/3S7m4+fCwW
+        mkHbJ7RyylpaqpuA4in2YZvQCCrq6vZydXd1fXe9yoGaSgyaVjVycX3x5u3qashw5C1ysYZvMwCA
+        7/lXtcUSn4s1vFmc3tTIbCos1uNHAEWioG8Kw+xZTJRicQ5aioIxy53P4V004cieH+JD/OIQbJsS
+        RoEmUd0IeAYb0CTwEbww+MiSWqvFgRAEzwJesGYQZwS2GChWGjFQ+QNGsEawonRcwoY6PGBagDiE
+        XDow5kyCLYLiVlXwsYLOi8tfZanPArTrH3ssj7yEvygBPht1eqHi7vv/MF9NCSylhFbCMSvFEg5e
+        TO0jw7YV8NGGtsQSakqoBUTotArNbxmVoEErWC7hnwnD5ZRhwK19xGSCGvSz8gopUHVcQOd8wDN4
+        Z3gg0Jr/AyC2krw6vtQmzefwua0qzLR/OBMrHJs3NM1SG0r1tDYl9sVxg9bvvFWzq9aXOClBqDOp
+        5IE2G3ai733Wppto1eifGwEmISQMOuCKPWrtPXolqNdwzJMyGQftNrUC+0idOjGt3kcw5WHglt8Y
+        rDMhYKx8P2W12eOU6FWt2a530BCz3wYEptDmwR390Tnl/bklQgp08CfXJjLEoVcnmlaW8CuvbW5F
+        NoGpRnEqMfg9ruGh+Dvvghm3AUws8z4NDIuR1/Q7Rbtfr5U43chxp/4kiCRjcok7H7P9DHk/mmCi
+        yc8LeGpZenCtN6MvH4p+dDxDZ46LsxOvO9Y5FKf+ODxCZ6L8j3lXAZNp2J33Vf3zDOwyh8PQTIYx
+        dzSbb6xtkxF1GkufTw4vi+GOvYwHMFDVJNrqsYxtCON7dYLdY0LDFPXYsVDTp7/MAP7Nh7Z9dTuL
+        vqePQnuMCnhzc9XjFeebfo5eXp2iQmLCOXD7+9vZILHgIwvWjzsfK0xN8vnwqtDZy+wHAAAA//8D
+        AOueVz1vBgAA
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8a44db501ee72ae8-LAX
+      - 8a8e7ae49b5f94e8-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -901,7 +1788,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 16 Jul 2024 20:49:18 GMT
+      - Thu, 25 Jul 2024 19:15:54 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -911,9 +1798,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '13908'
+      - '13790'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -921,17 +1808,17 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '10000'
+      - '1000000'
       x-ratelimit-remaining-requests:
       - '9999'
       x-ratelimit-remaining-tokens:
-      - '8110'
+      - '998393'
       x-ratelimit-reset-requests:
-      - 8.64s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 11.34s
+      - 96ms
       x-request-id:
-      - req_661f191d71ccc3b6ccc5b3e02bd9721b
+      - req_d61d0183882bf18d26919741e0447fa5
     status:
       code: 200
       message: OK
@@ -958,59 +1845,45 @@ interactions:
       performance."}, {"role": "assistant", "content": "Sure, I\u2019d be happy to
       help you with this prompt engineering problem. Please provide me with the current
       prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
-      Current prompt\n...\n\n## Examples\n### Example #0\n\nInput: Macronutrients\n\nOutput:
-      Macronutrients are nutrients that provide energy to the body and are needed
-      in larger quantities compared to micronutrients. The three main macronutrients
-      are carbohydrates, proteins, and fats. Carbohydrates are the body''s main source
-      of energy, proteins are essential for growth and repair of tissues, and fats
-      are important for energy storage and hormone production. It is important to
-      consume these macronutrients in appropriate proportions to maintain overall
-      health and well-being.\n\nUser feedback: Prediction is incorrect. Correct answer:
-      \"Carbohydrates, Proteins, Fats\"\n\n\n### Example #1\n\nInput: Vitamins\n\nOutput:
-      Vitamins are essential nutrients that our body needs in small amounts to function
-      properly. They play a crucial role in various bodily functions such as metabolism,
-      immunity, and overall health. There are 13 essential vitamins that our body
-      needs, including vitamin A, B-vitamins, vitamin C, D, E, and K. These vitamins
-      can be obtained through a balanced diet that includes a variety of fruits, vegetables,
-      whole grains, and lean proteins. In some cases, supplementation may be necessary
-      to prevent vitamin deficiencies.\n\nUser feedback: Prediction is incorrect.
-      Correct answer: \"Vitamin A, Vitamin C, Vitamin D\"\n\n\n### Example #2\n\nInput:
-      Minerals\n\nOutput: Minerals are naturally occurring inorganic substances that
-      are essential for the proper functioning of the human body. They play a crucial
-      role in various bodily functions such as bone health, metabolism, nerve function,
-      and overall well-being. Some important minerals include calcium, iron, magnesium,
-      zinc, and potassium. A balanced diet that includes a variety of nutrient-rich
-      foods is important to ensure adequate intake of these essential minerals.\n\nUser
+      Current prompt\n\"Given a category, provide a list of items that belong to this
+      category. Do not provide definitions or explanations, just list the items.\"\n\n##
+      Examples\n### Example #0\n\nInput: Macronutrients\n\nOutput: Carbohydrates,
+      Proteins, Fats\n\nUser feedback: Prediction is correct.\n\n\n### Example #1\n\nInput:
+      Vitamins\n\nOutput: Vitamin A, Vitamin B, Vitamin C, Vitamin D, Vitamin E, Vitamin
+      K\n\nUser feedback: Prediction is incorrect. Correct answer: \"Vitamin A, Vitamin
+      C, Vitamin D\"\n\n\n### Example #2\n\nInput: Minerals\n\nOutput: List of items
+      that belong to the category ''Minerals'':\n1. Quartz\n2. Diamond\n3. Gold\n4.
+      Silver\n5. Copper\n6. Iron\n7. Zinc\n8. Lead\n9. Nickel\n10. Bauxite\n\nUser
       feedback: Prediction is incorrect. Correct answer: \"Calcium, Iron, Magnesium\"\n\n\n\nSummarize
       your analysis about incorrect predictions and suggest changes to the prompt."},
-      {"role": "assistant", "content": "## Analysis of Incorrect Predictions & Suggestions
-      for Prompt Change\n\nGiven the available examples and looking at the expected
-      ''correct'' outputs as indicated in the user feedback, it seems like the model
-      is comprehending the task correctly and providing accurate and informative descriptions
-      according to its current understanding of the prompt. The descriptions given
-      for macronutrients, vitamins, and minerals are correct.\n\nHowever, the user
-      feedback suggests that the desired output is more specific. Rather than an explanation
-      or description, users want a straightforward list of examples for the given
-      category. \n\nSo, the problem lies not in the model\u2019s interpretive ability
-      but in the way input task is defined to the model.\n\nTo make the prompt clearer,
-      we should specify that the model is expected to provide short, specific example
-      outputs rather than descriptions or explanations. By specifying this expectation
-      in the prompt, we can guide the model\u2019s output more effectively.\n\nSo
-      the original prompt of \"...\" can be changed to something like this: \n\n\"Given
-      a category of health-related substances, provide a list of specific substances
-      that fall under this category, rather than a description or explanation. For
-      example:\n\nInput: Vitamins\nOutput: Vitamin A, Vitamin C, Vitamin D\"\n\nBy
-      including this explicit example, we clarify the desired format of the output."},
-      {"role": "user", "content": "\nNow please carefully review your reasoning in
-      Step 1 and help with Step 2: refining the prompt.\n\n## Current prompt\n...\n\n##
-      Follow this guidance to refine the prompt:\n\n1. The new prompt should should
-      describe the task precisely, and address the points raised in the user feedback.\n\n2.
-      The new prompt should be similar to the current prompt, and only differ in the
-      parts that address the issues you identified in Step 1.\n    Example:\n    -
-      Current prompt: \"Generate a summary of the input text.\"\n    - New prompt:
-      \"Generate a summary of the input text. Pay attention to the original style.\"\n\n3.
-      Reply only with the new prompt. Do not include input and output templates in
-      the prompt.\n"}], "model": "gpt-4", "max_tokens": 1000}'
+      {"role": "assistant", "content": "## Analysis\n\nThe current prompt is clear
+      in its instruction to list items that belong to a given category. However, the
+      model seems to be struggling with the context of the categories. For example,
+      in Example #1, the model correctly listed vitamins but included more than what
+      the user expected. In Example #2, the model listed minerals in the context of
+      geology, while the user was expecting minerals in the context of nutrition.\n\n##
+      Suggested Changes\n\nThe prompt could be made more specific to guide the model
+      towards the correct context. For instance, if the categories are related to
+      nutrition, the prompt could specify that. However, without knowing the context
+      in advance, it''s challenging to make the prompt more specific.\n\nA possible
+      solution could be to ask the user to provide more context in their input. The
+      prompt could be changed to something like: \"Given a category and its context,
+      provide a list of items that belong to this category. Do not provide definitions
+      or explanations, just list the items.\"\n\nThis way, the user could specify
+      whether they want minerals in the context of geology or nutrition, for example.
+      This should help the model make more accurate predictions."}, {"role": "user",
+      "content": "\nNow please carefully review your reasoning in Step 1 and help
+      with Step 2: refining the prompt.\n\n## Current prompt\n\"Given a category,
+      provide a list of items that belong to this category. Do not provide definitions
+      or explanations, just list the items.\"\n\n## Follow this guidance to refine
+      the prompt:\n\n1. The new prompt should should describe the task precisely,
+      and address the points raised in the user feedback.\n\n2. The new prompt should
+      be similar to the current prompt, and only differ in the parts that address
+      the issues you identified in Step 1.\n    Example:\n    - Current prompt: \"Generate
+      a summary of the input text.\"\n    - New prompt: \"Generate a summary of the
+      input text. Pay attention to the original style.\"\n\n3. Reply only with the
+      new prompt. Do not include input and output templates in the prompt.\n"}], "model":
+      "gpt-4", "max_tokens": 1000, "temperature": 0.0}'
     headers:
       accept:
       - application/json
@@ -1019,18 +1892,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '5987'
+      - '4820'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
+      - __cf_bm=0eu0BBz711fZCOXhxTDxESJNG29g.uAbkhAA7CsmbJE-1721934913-1.0.1.1-.jY4avCpWhV75BtigNk1YZ8rPbVJCZFuqEqfDC1IUS6kockRrQ9WamOU9yzMd78nBCSg6.eq55FeppPNAsxqqQ;
+        _cfuvid=gQityNIU1uJ0DeTuEMImrNr2QeTc4gMhNl2e4XArkAM-1721934913284-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -1042,25 +1915,25 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA1RSwWojMQy9z1cIn5OQSbLtJrdCYWEpFLr0ULZLcDyaGTcay1iaJqHk3xdP0qS9
-        GKSnJz09+aMAML4yKzCuteq6SOMlvT3G7fRuO3/qcPaw+/Ny/5Sen31Pt/TbjDKDN2/o9JM1cdxF
-        QvUcTrBLaBVz1/J2VpY3s+WP5QB0XCFlWhN1vBhPb8r5mdGydyhmBX8LAICP4c3aQoV7s4Lp6DPT
-        oYht0KwuRQAmMeWMsSJe1AY1oyvoOCiGQe6r+eXfMYAFZxUbTgdISFksKEOLlrQFGyrYIVFAkREc
-        uE+gVrbgJReRFwWJ6HztHeDe5t0FtLUKtSWCPlSYQFsvlyETuGcIrBATv/sKoUJxycdsmQAnwH0k
-        G+wQT+Alj7RBdphAWu6pgg1mzRycFzxJ4Po6nAMdJq/GnHc+XswibmLiTTY29ESXfO2Dl3ad0AqH
-        bIwoxxP9WAD8G47Sf/PZxMRd1LXyFkNuWJaL+amhuX6AK7woz6CyWvpK+7kozhqNHESxW9c+NJhi
-        8sOVstLiWPwHAAD//wMA4vqD2JwCAAA=
+        H4sIAAAAAAAAA1RRwY7aMBS85ytGPgcEC+wKbpXY7p7aQ3uo1K2QcR6JqePn2o9t0Ip/r5xAUC+W
+        PPNmPJ73UQDKVmoDZRotpg1usubz85et255f98/H+PLa/TCfPi++rf50X7tGlVnB+yMZuammhtvg
+        SCz7gTaRtFB2nT89zNeL5Xq16omWK3JZVgeZLCezx/niqmjYGkpqg58FAHz0Z87mK+rUBrPyhrSU
+        kq5JbcYhQEV2GVE6JZtEe1HlnTTshXwf90292Hfy0DBaqOZ4hvYVrCT0U52UCJHfbUXQcDYJ+AAr
+        1CZIowV7cuxrCEMam0aXKb43dLPAX+scGnIB1qMmT1GL9TU0Wo4EbcwpaqHef4otw7OMz1Z0sN7m
+        MhM4grrgtNf9vcTxlGSIJQ0NuaZvSl3/ehlLclyHyPtcqD85N+LZOjW7SDqxz4Uk4TDILwXwq1/G
+        6b9+VYjcBtkJ/yafDdePT4Ofuu/9zi4frqSwaHfH57PZurhGVOmchNrdwfqaYoi2X04OWlyKfwAA
+        AP//AwBkrw1tkwIAAA==
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8a44dba95dc92ae8-LAX
+      - 8a8e7b3c489794e8-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -1068,7 +1941,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 16 Jul 2024 20:49:22 GMT
+      - Thu, 25 Jul 2024 19:15:57 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -1078,9 +1951,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '2858'
+      - '2629'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -1088,880 +1961,17 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '10000'
+      - '1000000'
       x-ratelimit-remaining-requests:
       - '9999'
       x-ratelimit-remaining-tokens:
-      - '7593'
+      - '997889'
       x-ratelimit-reset-requests:
-      - 8.64s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 14.442s
+      - 126ms
       x-request-id:
-      - req_d7c92f889060fd4071d2e73af9188581
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "\"Given a category related
-      to health and wellness, your task is to list specific examples that fall under
-      this category. Do not provide descriptions or explanations. Your answer should
-      be a concise list of examples only.\""}, {"role": "user", "content": "Input:
-      Macronutrients\nOutput: "}], "model": "gpt-3.5-turbo", "max_tokens": 1000}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '381'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA1SQMW/CMBCF9/yKk2cS4SCCYK1UtUPVdujSUiEnORKD47PsS1WE+O+VQyDq4uG9
-        e+++8zkBELoWGxBVq7jqnEnX5vAajvOnA+afmj9+ZEfP7yuiXu8XL2IWE1QesOJbKquocwZZk73a
-        lUfFGFvlKpeyyNdFPhgd1WhirHGcLrJlyr0vKZ3LfDkmW9IVBrGBrwQA4Dy8kdHW+Cs2MJ/dlA5D
-        UA2KzX0IQHgyUREqBB1YWRazyazIMtoBW2bwoHxJ7an2ijFsbZ7BmydGbcPWLjJ4VBzEmL3clxpq
-        nKcyAtremLu+11aHdudRBbJxQWBy1/glAfgejuv/8QrnqXO8YzqijYWFvNaJ6TsnUy5Hk4mVmfRV
-        kYx8IpwCY7fba9ugd14Pl0bK5JL8AQAA//8DAGU0AdLoAQAA
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8a44dbc39faf2ae8-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 16 Jul 2024 20:49:23 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '427'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '60000'
-      x-ratelimit-remaining-requests:
-      - '9978'
-      x-ratelimit-remaining-tokens:
-      - '58935'
-      x-ratelimit-reset-requests:
-      - 3m8.7s
-      x-ratelimit-reset-tokens:
-      - 1.065s
-      x-request-id:
-      - req_662eca936bcb67f4984d74589004a309
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "\"Given a category related
-      to health and wellness, your task is to list specific examples that fall under
-      this category. Do not provide descriptions or explanations. Your answer should
-      be a concise list of examples only.\""}, {"role": "user", "content": "Input:
-      Vitamins\nOutput: "}], "model": "gpt-3.5-turbo", "max_tokens": 1000}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '375'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA1RQ0U4CMRB8v6/Y9Jkj3BFQ7g1FQ6KJTxqMGlLulqPYdpt2STSEfzc9Du58aTIz
-        nd2ZPSYAQlWiAFHuJJfG6XSm9y88n/mn1bNdhsf9u1quFvhqqqWcoxhEB232WPLFNSzJOI2syJ7l
-        0qNkjFOzmzzLpvlsOm4EQxXqaKsdp+PhJOWD31A6yvJJ69yRKjGIAj4SAIBj88aMtsIfUcBocGEM
-        hiBrFMX1E4DwpCMjZAgqsLQsBp1YkmW0TewU3hRLoyzcf9oOLPrgLsv78KEP5qIde7rm0VQ7T5uY
-        3R60vvJbZVXYrT3KQDbuDkzubD8lAF9N78O/KsJ5Mo7XTN9o48BpW1t0l+7E/CIysdQdfztK2nwi
-        /AZGs94qW6N3XjVHiCmTU/IHAAD//wMAfqkIrwMCAAA=
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8a44dbc80da82ae8-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 16 Jul 2024 20:49:23 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '317'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '60000'
-      x-ratelimit-remaining-requests:
-      - '9977'
-      x-ratelimit-remaining-tokens:
-      - '58937'
-      x-ratelimit-reset-requests:
-      - 3m16.63s
-      x-ratelimit-reset-tokens:
-      - 1.063s
-      x-request-id:
-      - req_0b95ae2bfc9411f305095b502751b4f9
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "\"Given a category related
-      to health and wellness, your task is to list specific examples that fall under
-      this category. Do not provide descriptions or explanations. Your answer should
-      be a concise list of examples only.\""}, {"role": "user", "content": "Input:
-      Minerals\nOutput: "}], "model": "gpt-3.5-turbo", "max_tokens": 1000}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '375'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//VJDLbsIwFET3+QrL6wQRaEDJtquIorbbPoSMcwkG29eyb0oR4t8rh0DU
-        jR8znvGxLwljXDW8YlzuBUnjdFbqwyvVzSn/OdXrF3kyT/X5PezK1fHcrHgaE7g9gKR7aiLROA2k
-        0N5s6UEQxNZ8OcvzxaxczHvDYAM6xlpH2XxSZNT5LWbTfFYMyT0qCYFX7DNhjLFLP0ZG28Avr9g0
-        vSsGQhAt8OpxiDHuUUeFixBUIGGJp6Mp0RLYHjtjtUf7ZTP2LLRUnYnLtWgthGHzoayM8xtSLOsM
-        H4quDwKNrfO4jbS20/qh75RVYb/xIALaeFsgdLf4NWHsu39p9w+eO4/G0YbwCDYWFuWtjo9/O5r5
-        YjAJSehRXxbJwMfDORCYzU7ZFrzzqn92pEyuyR8AAAD//wMALbtIEvUBAAA=
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8a44dbcbdae92ae8-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 16 Jul 2024 20:49:24 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '256'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '60000'
-      x-ratelimit-remaining-requests:
-      - '9976'
-      x-ratelimit-remaining-tokens:
-      - '58937'
-      x-ratelimit-reset-requests:
-      - 3m24.651s
-      x-ratelimit-reset-tokens:
-      - 1.063s
-      x-request-id:
-      - req_5d260bb090dfe165b93681273d7a4d23
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
-      "Input: 1. Carbohydrates\n2. Proteins\n3. Fats\nOutput: "}], "model": "gpt-3.5-turbo",
-      "max_tokens": 1000}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '186'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//XFI9b9swEN31Kw6cZcN24sT2VrToVidDkKUoDEo6SUzIO4J3SiIE/u8F
-        ZcdGu3B4X3y842cBYFxjdmDq3modop9t/cvD8BD79/v9Zvnj17f9+Pz4/HO/WNmPx40ps4OrF6z1
-        yzWvOUSP6phOdJ3QKubU5f1qubxbbe9uJyJwgz7buqizm/l6pkOqeLZYrtZnZ8+uRjE7+F0AAHxO
-        Z+5IDX6YHSzKLySgiO3Q7C4iAJPYZ8RYESdqSU15JWsmRZpqP/UIPGgcFAQxCChDhWDBO1HgFoKt
-        E9OgySGpQM0hMPkRWh6oAUfQMjcyh6ceBf9X24SAIkjqrIeWE8TEb65x1AESpm4ESw1Ug/MTVnmu
-        X2US8pCg4sahzOG7TRX3Y5OsopQ5Q9GRlJO5tSoQvR2hcW2LCUkhv15yuZzSONRJmdu4EDnleZwu
-        ecNkvYcerdd+Er2j97MKHXVzc57Y8TJqz11MXOW10OD9BW8dOekPCa0w5bGKcjzZjwXAn2mlwz9b
-        MjFxiHpQfkXKgTe3pzhz/URXcr05k8pq/RXfropzPyOjKIZD66jDFJOb9ptbFsfiLwAAAP//AwA/
-        V4li3gIAAA==
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8a44dbcf1f752ae8-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 16 Jul 2024 20:49:25 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '1053'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '60000'
-      x-ratelimit-remaining-requests:
-      - '9975'
-      x-ratelimit-remaining-tokens:
-      - '58984'
-      x-ratelimit-reset-requests:
-      - 3m32.783s
-      x-ratelimit-reset-tokens:
-      - 1.016s
-      x-request-id:
-      - req_3a1bfb936d2e08b639842cefa1baebd4
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
-      "Input: - Vitamin C\n- Vitamin D\n- Vitamin B12\n- Vitamin E\n- Vitamin A\nOutput:
-      "}], "model": "gpt-3.5-turbo", "max_tokens": 1000}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '213'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA2xSTW/bMAy951cQOm2AUiTpmq2+bd0XBjQF2mGHrUMhy7TNRhYFkW4WFP3vg520
-        zT4uAsSn9/RIvvsJgKHKFGB869R3KUxPw+3FhkK7uvg622K9vKQV3a0+XZ1/cWffjR0YXN6i10fW
-        kecuBVTiuIN9Rqc4qM5fL+bz5eJ0uRyBjisMA61JOj0+Oplqn0uezuaLkz2zZfIopoAfEwCA+/Ec
-        PMYKf5kCZvax0qGIa9AUT48ATOYwVIwTIVEX1dhn0HNUjKPtz5gRXEYQ7hA8dx1HEO6zRwGuQVuE
-        QKJYwR2p6yhKcR2v4xS+7a5wVsAZae4F6tyTigXR7DYl5kwoFta0IQslhgAJU8IsFsrM3nOgQ533
-        BXx0qluoSVp4IS50HC1oH91LCzVnpZqwgo7C+vDuMaMLYgGbBrYc1nKo+m6+KOAcndpR10LiPmje
-        Wqgc5S2kzFXvB9f/KB7KfChg1Y+9IVZi4Q4bVFcGBKbhb0kUnW//39nbAq42iAqJ1SkPQ/EuZ9ZD
-        YsbqryFh04jZL+3haduBm5S5HJIR+xCe6jVFkvYmoxOOw2ZFOe3oDxOAn2Oq+j+CYlLmLumN8hrj
-        IHj8ZidnnnP8DM5niz2qrC4cAK9mk71DI1tR7G5qig3mlGkM2eBz8jD5DQAA//8DAGKk9I1jAwAA
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8a44dbd74a542ae8-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 16 Jul 2024 20:49:27 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '1313'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '60000'
-      x-ratelimit-remaining-requests:
-      - '9974'
-      x-ratelimit-remaining-tokens:
-      - '58978'
-      x-ratelimit-reset-requests:
-      - 3m40.107s
-      x-ratelimit-reset-tokens:
-      - 1.022s
-      x-request-id:
-      - req_71f7b9d3572336cd011c309cda768568
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "..."}, {"role": "user", "content":
-      "Input: - Iron\n- Calcium\n- Magnesium\n- Zinc\n- Potassium\nOutput: "}], "model":
-      "gpt-3.5-turbo", "max_tokens": 1000}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '199'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA2RUXW/UQAx8v19h5fmu6hUo9N4qKKISXxJISFBU7SVO1rCxw9o5GlD/O3KSu4Py
-        Eilre2Y8a+/vBUBBVbGBoozByrZLq4v07d2dXn749Oz155c/3pzm6sPly1dX198vfulQLL1Ctt+w
-        tH3VSSltl9BIeAqXGYOho66fnq3X52cX50/HQCsVJi9rOls9Onmysj5vZXW6PnsyV0ahErXYwJcF
-        AMDv8esaucK7YgOny/1Ji6qhwWJzSAIosiQ/KYIqqQW2YnkMlsKGPMr+GBESqYHUgAlbZFMYpIcu
-        y44qrCBkBFRFNgoJWmLMISnUksEiwlaq4QSuQhkdwiIqHpO6FAaFABXVNWZkA9cFxNAGYgvExA3I
-        zrMTRAzJ4uaGb3gF11l4A9dtJ9nlH/hqyW1wh50uYitNki2xY2asYJtEKigxJV3Cz0hlhIipU7Ac
-        WB0M5G5okMFilr6J0tuxDyd+HlJJfbuBq0PTzq2WhRvYCqNC4AoM0eIS2l7LhFD3XLqqJTDmHYJS
-        wyERN8sxeZaVxIy4GXnehIZRR6ZXo8K9JcDeYtoje/mEeeTQvvNW3NrJtAGobXtG0EEN24mUFIh3
-        knZYuT0ufTyPGLLNhaOUz8TlQ69nvCPnT+mn2qmrLoshMejAfumkS3jx9vLvX6fyi4CKdqQkPHK9
-        F/OZ/N/gLkuHeW7Va/9zNv5rU516qmAbUuASJ7qDLw9avOFrLlNf+bQF2IVMaIMPUC1SKWQfE+KH
-        00vsm5ChIjQoA48CAFn7jOOOtIg2pwRKA2T80VOel8h7ks7Ir3IWUswreH/Y3SRNl2Xre859Sofz
-        mpg03mYMKux7qibdVH6/APg6vhH9P2tfdFnazm5NviM74KPHE1xxfJWOwfX5PmpiIf0VuHi2mBUW
-        0zDd1sQN5i7T+GS4zsX94g8AAAD//wMABComITEFAAA=
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8a44dbe11f572ae8-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 16 Jul 2024 20:49:29 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '2401'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '60000'
-      x-ratelimit-remaining-requests:
-      - '9973'
-      x-ratelimit-remaining-tokens:
-      - '58981'
-      x-ratelimit-reset-requests:
-      - 3m47.188s
-      x-ratelimit-reset-tokens:
-      - 1.019s
-      x-request-id:
-      - req_690475c25816576ccdfb11809ca79083
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
-      expected actions and instructs the large language model (LLM) to generate a
-      specific output. This prompt is concatenated with the input text, and the model
-      then creates the required output.\nThis describes the full template how the
-      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nInput:
-      {category}\nOutput: {skill_0}\n```\n\nHere:\n- \"Input: {category}\" is input
-      template,\n- \"{prompt}\" is the LLM prompt,\n- \"Output: {skill_0}\" is the
-      output template.\n\nModel can produce erroneous output if a prompt is not well
-      defined. In our collaboration, we\u2019ll work together to refine a prompt.
-      The process consists of two main steps:\n\n## Step 1\nI will provide you with
-      the current prompt along with prediction examples. Each example contains the
-      input text, the final prediction produced by the model, and the user feedback.
-      User feedback indicates whether the model prediction is correct or not. Your
-      task is to analyze the examples and user feedback, determining whether the existing
-      instruction is describing the task reflected by these examples precisely, and
-      suggests changes to the prompt to address the incorrect predictions.\n\n## Step
-      2\nNext, you will carefully review your reasoning in step 1, integrate the insights
-      to refine the prompt, and provide me with the new prompt that improves the model\u2019s
-      performance."}, {"role": "assistant", "content": "Sure, I\u2019d be happy to
-      help you with this prompt engineering problem. Please provide me with the current
-      prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
-      Current prompt\n\"Given a category related to health and wellness, your task
-      is to list specific examples that fall under this category. Do not provide descriptions
-      or explanations. Your answer should be a concise list of examples only.\"\n\n##
-      Examples\n### Example #0\n\nInput: Macronutrients\n\nOutput: 1. Carbohydrates\n2.
-      Proteins\n3. Fats\n\nUser feedback: Prediction is incorrect. Correct answer:
-      \"Carbohydrates, Proteins, Fats\"\n\n\n### Example #1\n\nInput: Vitamins\n\nOutput:
-      - Vitamin C\n- Vitamin D\n- Vitamin B12\n- Vitamin E\n- Vitamin A\n\nUser feedback:
-      Prediction is incorrect. Correct answer: \"Vitamin A, Vitamin C, Vitamin D\"\n\n\n###
-      Example #2\n\nInput: Minerals\n\nOutput: - Iron\n- Calcium\n- Magnesium\n- Zinc\n-
-      Potassium\n\nUser feedback: Prediction is incorrect. Correct answer: \"Calcium,
-      Iron, Magnesium\"\n\n\n\nSummarize your analysis about incorrect predictions
-      and suggest changes to the prompt."}], "model": "gpt-4", "max_tokens": 1000}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '2724'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA5RUTWsjRxC961cU40MSkIW19q6xbku+HNCGhZiQJQqm1FMzU3ZPVaerR7JY/N9D
-        94wk55BDLsPQ9fXeq0d9nQFUXFcrqFyHyfXBX975p89X++X97z+uf/3l+kut6eah+/iHDzt72lXz
-        XKHbJ3LpWLVw2gdPiVXGsIuEiXLX5e275fLDu7vbqxLotSafy9qQLm8urz4sr6eKTtmRVSv4cwYA
-        8LV8Mzap6aVaQakvLz2ZYUvV6pQEUEX1+aVCM7aEkqr5OehUEkmBe3EBHwX9wdg28lPUHlJHEKLu
-        uKYa6AUzEwOUGgajCA1RvUX3PAdOYES9QeowlTKPsc1faQdsCQo5+Ha9/vQdDFJTzEBqlha0KfkJ
-        7RnYwGmM5FIZwim/tCQUMeVcDCFqiIyJznBKu9Kj5R0JOEzUamSyBdzrnnYU5xMT7jEegM0GOuJV
-        8EzAUjIajT2m9AaWDikMCSJZUDFabGQjDx0V/vbNSQFgqTkPPitwAHoJmcmbNklh+0ZRNEAIHlnA
-        6O+BxFGeu9dYGxgFjNkpsD2A075Hm8OeU6dDAhn6LUUDjbAdvKcEQVmS5ZaTXmNhHr5efyq4Ly7g
-        t6FtyXLs+w6lJdvIgwLWdSSzksxy3ECIVLPLxh1Xjp5becsmgxmNMDLFkjuHPYFDAfPcdskf8u65
-        GaHQC1uRN0TtQxGExfmhJkCwQI6bLCOrAG4z0VxUswWPh2k7C7inSNkYkzuDGtXAfZY1/4ilOBTc
-        q8x6U/1cbIFHYxwgki/6JIWO0Keu8NuT90JmczjoEE+GLA6xdEJ3Nl7ZdIPenyyY/TsNWcAPCqLp
-        uG2oyVzkMOqpRTOPMmq2gC95JIrtKYJ1Ovg6OwXBqTg2GiFocxq+gOzCEdgpfbLv0Vn/01Moh//2
-        FQs0USUtNlU1HY/X09Xx2oao23yhZPD+9N6wsHWPkdBU8oWxpGEsf50B/FWu2/Cvg1WNxnhM+kyS
-        G75/fz32q86H9Bxd3t1M0aQJ/Tlwe3M7myBWdrBE/WPD0lIMkcu1y0Bnr7N/AAAA//8DALIVKpnk
-        BQAA
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8a44dbf1bcab2ae8-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 16 Jul 2024 20:49:39 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '9417'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '10000'
-      x-ratelimit-remaining-requests:
-      - '9999'
-      x-ratelimit-remaining-tokens:
-      - '8384'
-      x-ratelimit-reset-requests:
-      - 8.64s
-      x-ratelimit-reset-tokens:
-      - 9.696s
-      x-request-id:
-      - req_0e0d251c377e3baab8ae629fd3a85759
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
-      expected actions and instructs the large language model (LLM) to generate a
-      specific output. This prompt is concatenated with the input text, and the model
-      then creates the required output.\nThis describes the full template how the
-      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nInput:
-      {category}\nOutput: {skill_0}\n```\n\nHere:\n- \"Input: {category}\" is input
-      template,\n- \"{prompt}\" is the LLM prompt,\n- \"Output: {skill_0}\" is the
-      output template.\n\nModel can produce erroneous output if a prompt is not well
-      defined. In our collaboration, we\u2019ll work together to refine a prompt.
-      The process consists of two main steps:\n\n## Step 1\nI will provide you with
-      the current prompt along with prediction examples. Each example contains the
-      input text, the final prediction produced by the model, and the user feedback.
-      User feedback indicates whether the model prediction is correct or not. Your
-      task is to analyze the examples and user feedback, determining whether the existing
-      instruction is describing the task reflected by these examples precisely, and
-      suggests changes to the prompt to address the incorrect predictions.\n\n## Step
-      2\nNext, you will carefully review your reasoning in step 1, integrate the insights
-      to refine the prompt, and provide me with the new prompt that improves the model\u2019s
-      performance."}, {"role": "assistant", "content": "Sure, I\u2019d be happy to
-      help you with this prompt engineering problem. Please provide me with the current
-      prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
-      Current prompt\n\"Given a category related to health and wellness, your task
-      is to list specific examples that fall under this category. Do not provide descriptions
-      or explanations. Your answer should be a concise list of examples only.\"\n\n##
-      Examples\n### Example #0\n\nInput: Macronutrients\n\nOutput: 1. Carbohydrates\n2.
-      Proteins\n3. Fats\n\nUser feedback: Prediction is incorrect. Correct answer:
-      \"Carbohydrates, Proteins, Fats\"\n\n\n### Example #1\n\nInput: Vitamins\n\nOutput:
-      - Vitamin C\n- Vitamin D\n- Vitamin B12\n- Vitamin E\n- Vitamin A\n\nUser feedback:
-      Prediction is incorrect. Correct answer: \"Vitamin A, Vitamin C, Vitamin D\"\n\n\n###
-      Example #2\n\nInput: Minerals\n\nOutput: - Iron\n- Calcium\n- Magnesium\n- Zinc\n-
-      Potassium\n\nUser feedback: Prediction is incorrect. Correct answer: \"Calcium,
-      Iron, Magnesium\"\n\n\n\nSummarize your analysis about incorrect predictions
-      and suggest changes to the prompt."}, {"role": "assistant", "content": "## Analysis\nFrom
-      the provided examples and user feedback, it seems that the large language model
-      (LLM) understanding of the task is correct and it is generating appropriate
-      examples under the given categories. However, the primary issue seems to lie
-      in the formatting of the output response.\n\nThe users'' feedback indicates
-      that they expect the output to be provided as a plain sequence of words separated
-      by commas, without numbers or bullet points as generated by the LLM.\n\n## Suggested
-      Changes\nTo address the incorrect predictions and align the output with user
-      expectations, we can slightly modify the existing prompt to include a specification
-      about the display format. Here is the proposed improved instruction:\n\n\"Given
-      a category related to health and wellness, your task is to list specific examples
-      that fall under this category. Do not provide descriptions or explanations.
-      Your answer should be a concise list of examples. The list should be formatted
-      as a sequence of words separated by commas, without any numbers or bullet points
-      in front.\""}, {"role": "user", "content": "\nNow please carefully review your
-      reasoning in Step 1 and help with Step 2: refining the prompt.\n\n## Current
-      prompt\n\"Given a category related to health and wellness, your task is to list
-      specific examples that fall under this category. Do not provide descriptions
-      or explanations. Your answer should be a concise list of examples only.\"\n\n##
-      Follow this guidance to refine the prompt:\n\n1. The new prompt should should
-      describe the task precisely, and address the points raised in the user feedback.\n\n2.
-      The new prompt should be similar to the current prompt, and only differ in the
-      parts that address the issues you identified in Step 1.\n    Example:\n    -
-      Current prompt: \"Generate a summary of the input text.\"\n    - New prompt:
-      \"Generate a summary of the input text. Pay attention to the original style.\"\n\n3.
-      Reply only with the new prompt. Do not include input and output templates in
-      the prompt.\n"}], "model": "gpt-4", "max_tokens": 1000}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '4780'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=HLvgucfz5wSfnrlcOwGscxsenCsI21cr01f56SqnkKY-1721162933-1.0.1.1-M2ur9xDzPqDV97_elPqQaACNn9BvhofFVTzcxDhuEU6KBa86qW.fBWcJIiPe.QNluI7P6Kwci.gxNMVMdcCkTA;
-        _cfuvid=P4hZdwOPfZCAA9r.YzhkXYaQZ8g357nPpvDcX5rDDVg-1721162933404-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//VFLBjhoxDL3PV1g5A1roFjqcu6ISl6qXbdWtUCYxTHYzdhp7FtCKf68y
-        sLC9RLKfn/3sl7cKwARvlmBca9V1KY7r+Py9fnTr4+rbbPXj0T2sF4EfvizW659+ZkaFwc0zOn1n
-        TRx3KaIGpjPsMlrF0nW6mE2n81m9qAegY4+x0HZJx/fju/n004XRcnAoZgm/KwCAt+Et2sjjwSzh
-        bvSe6VDE7tAsr0UAJnMsGWNFgqglNaMb6JgUaZD7ZFbhFQksOKu443yEjLGIBWVo0UZtwZKHPcZI
-        KDKCI/cZ1MoLBClFMYiCJHRhGxzgwZbdBbS1ClsbI/TkMYO2Qa5DJvCVgVghZX4NHsGjuBxSOZkA
-        Z8BDipbsEE/gVxlpSfaYQVruo4cGi2YmFwTPEnh7HT6ClFGQyhpWwILg3x7JYSnac/YCgsnmYc/m
-        CI67zgrsg7bcK1DfNZgHHU0fIyokDqQCgVzsPfrJkzGXc56uPkTepcxN8Yz6GK/5baAg7SajFaZy
-        c1FOZ/qpAvgz+N3/Z6FJmbukG+UXpNKwvp+e+5nb17qhn+cXUFlt/MCqF9VFoZGjKHabbaAd5pTD
-        YH/RWZ2qfwAAAP//AwCFhXte9QIAAA==
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8a44dc2edfcc2ae8-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 16 Jul 2024 20:49:43 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '3501'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '10000'
-      x-ratelimit-remaining-requests:
-      - '9999'
-      x-ratelimit-remaining-tokens:
-      - '7894'
-      x-ratelimit-reset-requests:
-      - 8.64s
-      x-ratelimit-reset-tokens:
-      - 12.636s
-      x-request-id:
-      - req_d17b42b932c1a20da0bbab8155b02069
+      - req_ab9dbab7910133dcc76990b5060ec2e5
     status:
       code: 200
       message: OK

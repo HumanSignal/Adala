@@ -36,6 +36,9 @@ class VectorDBMemory(Memory):
         self.remember_many([observation], [data])
 
     def remember_many(self, observations: List[str], data: List[Dict]):
+        # filter None values from each item in `data`
+        data = [{k: v for k, v in d.items() if v is not None} for d in data]
+
         self._collection.add(
             ids=[self.create_unique_id(o) for o in observations],
             documents=observations,
