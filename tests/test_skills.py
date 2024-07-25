@@ -60,7 +60,7 @@ def test_classification_skill():
 
     agent.learn()
     assert agent.skills[
-               "product_category_classification"].instructions == '"Classify the provided text into appropriate categories such as Electronics, Furniture/Home Decor, Footwear/Clothing, etc. If no text is provided, do not assign any category and explicitly state that text input is required for classification."'
+               "product_category_classification"].instructions == "Classify the input text by determining the most appropriate product category based on its primary use or context, focusing on the functionality and overall purpose rather than just prominent keywords. Do not add any prefix such as 'Labels.' to the category name unless it is explicitly included in the category list provided."
 
 
 @pytest.mark.vcr
@@ -190,8 +190,7 @@ def test_summarization_skill():
     assert predictions.summary[
                2] == 'Vitamin D is a fat-soluble nutrient essential for human survival. It is primarily obtained from the sun, oily fish, eggs, and fortified foods. Supplementing with vitamin D can improve immune health, bone health, and overall well-being. The effects of vitamin D depend on the levels of 25-hydroxyvitamin D in the blood, and benefits are most noticeable when reversing a deficiency.'
 
-    # TODO: uncomment when deprecating `text` field in output
-    # pd.testing.assert_series_equal(predictions.text, df.text)
+    pd.testing.assert_series_equal(predictions.text, df.text)
 
 
 @pytest.mark.vcr

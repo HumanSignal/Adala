@@ -15,10 +15,8 @@ class ExampleResponseModel(BaseModel):
         'return the word banana with exclamation mark',
         {
             "data": {
-                "text": "banana!",
+                "_completion_text": "banana!",
             },
-            # TODO: `text` is deprecated - remove it and use `data` instead
-            "text": "banana!",
             "_adala_error": False,
             "_adala_message": None,
             "_adala_details": None, }),
@@ -31,8 +29,6 @@ class ExampleResponseModel(BaseModel):
                     "name": "Carla",
                     "age": 25,
                 },
-                # TODO: `text` is deprecated - remove it and use `data` instead
-                'text': None,
                 "_adala_error": False,
                 "_adala_message": None,
                 "_adala_details": None
@@ -58,10 +54,8 @@ def test_get_llm_response(response_model, user_prompt, expected_result):
         'return the word banana with exclamation mark',
         {
             "data": {
-                "text": "banana!",
+                "_completion_text": "banana!",
             },
-            # TODO: `text` is deprecated - remove it and use `data` instead
-            "text": "banana!",
             "_adala_error": False,
             "_adala_message": None,
             "_adala_details": None, }),
@@ -74,8 +68,6 @@ def test_get_llm_response(response_model, user_prompt, expected_result):
                     "name": "Carla",
                     "age": 25,
                 },
-                # TODO: `text` is deprecated - remove it and use `data` instead
-                'text': None,
                 "_adala_error": False,
                 "_adala_message": None,
                 "_adala_details": None

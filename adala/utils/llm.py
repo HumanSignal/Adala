@@ -15,8 +15,6 @@ class LLMResponse(BaseModel):
     adala_error: bool = Field(default=False, serialization_alias='_adala_error')
     adala_message: str = Field(default=None, serialization_alias='_adala_message')
     adala_details: str = Field(default=None, serialization_alias='_adala_details')
-    # `text` is deprecated, use `data` instead
-    text: str = Field(default=None, deprecated=True)
 
 
 def get_messages(user_prompt: str, system_prompt: Optional[str] = None, instruction_first: bool = True):
@@ -82,9 +80,7 @@ async def async_get_llm_response(
                 timeout=timeout,
             )
             completion_text = completion.choices[0].message.content
-            response.data['text'] = completion_text
-            # TODO: `text` is deprecated - remove it and use `data` instead
-            response.text = completion_text
+            response.data['_completion_text'] = completion_text
         except Exception as e:
             response.adala_error = True
             response.adala_message = type(e).__name__
@@ -105,8 +101,6 @@ async def async_get_llm_response(
             timeout=timeout,
         )
         response.data = instructor_response.model_dump(by_alias=True)
-        # TODO: `text` is deprecated - remove it and use `data` instead
-        response.text = completion.choices[0].message.content
     except Exception as e:
         response.adala_error = True
         response.adala_message = type(e).__name__
@@ -180,9 +174,7 @@ def get_llm_response(
                 timeout=timeout,
             )
             completion_text = completion.choices[0].message.content
-            response.data['text'] = completion_text
-            # TODO: `text` is deprecated - remove it and use `data` instead
-            response.text = completion_text
+            response.data['_completion_text'] = completion_text
         except Exception as e:
             response.adala_error = True
             response.adala_message = type(e).__name__
@@ -203,8 +195,6 @@ def get_llm_response(
             response_model=response_model,
         )
         response.data = instructor_response.model_dump(by_alias=True)
-        # TODO: `text` is deprecated - remove it and use `data` instead
-        response.text = completion.choices[0].message.content
     except Exception as e:
         response.adala_error = True
         response.adala_message = type(e).__name__

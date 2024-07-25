@@ -63,7 +63,7 @@ class LiteLLMChatRuntime(Runtime):
             max_tokens=self.max_tokens,
             temperature=self.temperature
         )
-        return response['data']['text']
+        return response['data']['_completion_text']
 
     def record_to_record(
         self,
