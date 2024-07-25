@@ -89,9 +89,9 @@ pytest
 
 Adala uses [pytest-recording](https://pypi.org/project/pytest-recording/) to cache network calls in [VCR cassette files](https://vcrpy.readthedocs.io/en/latest/), so that the test suite can be run in CI and without network access. When adding tests that make network calls, such as to OpenAI, run the test suite with
 ```bash
-pytest --record_mode=once
+pytest --record_mode=once --block-network
 ```
-and commit the resulting cassette `.yml` files that are generated. To modify existing tests that make network calls, delete their cassette files before running pytest.
+and commit the resulting cassette `.yml` files that are generated. `--block-network` ensures that new tests do not make network calls without being marked `@pytest.mark.vcr`. To modify existing tests that make network calls, delete their cassette files before running pytest, or run only those tests with `--record_mode=rewrite`.
 
 ## Server
 
