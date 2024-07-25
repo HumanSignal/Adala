@@ -22,7 +22,7 @@ from server.handlers.result_handlers import ResultHandler
 
 
 logger = logging.getLogger(__name__)
-
+single_producer = None
 
 settings = Settings()
 
@@ -166,24 +166,30 @@ async def submit_batch(batch: BatchData):
     Returns:
         Response: Generic response indicating status of request
     """
-
+    global single_producer
     topic = get_input_topic_name(batch.job_id)
-    producer = AIOKafkaProducer(
-        bootstrap_servers=settings.kafka_bootstrap_servers,
-        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-    )
-    await producer.start()
-
+    if not single_producer:
+        producer = AIOKafkaProducer(
+            bootstrap_servers=settings.kafka_bootstrap_servers,
+            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+        )
+        single_producer=producer
+        await single_producer.start()
+       
+    import time
     try:
         for record in batch.data:
-            await producer.send_and_wait(topic, value=record)
+            await single_producer.send_and_wait(topic, value=record)
+            time.sleep(.1)
     except UnknownTopicOrPartitionError:
-        await producer.stop()
+        # await single_producer.stop()
         raise HTTPException(
             status_code=500, detail=f"{topic=} for job {batch.job_id} not found"
         )
-    finally:
-        await producer.stop()
+    except Exception as e:
+        print(f"exception entering kafka msgs {e}", flush=True)
+    # finally:
+    #     await producer.stop()
 
     return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
