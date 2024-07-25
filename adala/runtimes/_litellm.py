@@ -109,7 +109,9 @@ class LiteLLMChatRuntime(Runtime):
             response_model=response_model
         )
 
-        return response['data']
+        response.update(**response.get('data', {}))
+        response.pop('data', None)
+        return response
 
 
 class AsyncLiteLLMChatRuntime(AsyncRuntime):
@@ -193,6 +195,10 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             timeout=self.timeout,
             response_model=response_model
         )
+
+        for response in responses:
+            response.update(**response.get('data', {}))
+            response.pop('data', None)
 
         output_df = InternalDataFrame(responses)
         return output_df.set_index(batch.index)

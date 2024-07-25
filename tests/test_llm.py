@@ -1,22 +1,6 @@
-import openai_responses
 import pytest
-import json
 from pydantic import BaseModel, Field
-from typing import Union, Dict
-
-
-def _build_openai_response(completion: Union[str, Dict]):
-    # can extend this to handle failures, multiple completions, etc
-    if isinstance(completion, str):
-        completion = {
-            "choices": [{
-                "index": 0,
-                "finish_reason": "stop",
-                "message": {
-                    "content": completion,
-                    "role": "assistant"
-                }}]}
-    return completion
+from adala.utils.llm import get_llm_response, async_get_llm_response
 
 
 class ExampleResponseModel(BaseModel):
@@ -25,48 +9,29 @@ class ExampleResponseModel(BaseModel):
 
 
 @pytest.mark.parametrize(
-    'response_model, chat_completion, expected_result',
+    'response_model, user_prompt, expected_result',
     [(
         None,
-        "mocked openai chat response",
+        'return the word banana with exclamation mark',
         {
             "data": {
-                "text": "mocked openai chat response",
+                "text": "banana!",
             },
-            # "text" is deprecated - remove it and use "data" instead
-            "text": "mocked openai chat response",
+            # TODO: `text` is deprecated - remove it and use `data` instead
+            "text": "banana!",
             "_adala_error": False,
             "_adala_message": None,
             "_adala_details": None, }),
 
         (
             ExampleResponseModel,
-            {
-                'choices': [{
-                    'finish_reason': 'stop',
-                    'index': 0,
-                    'message': {
-                        'role': 'assistant',
-                        'content': None,
-                        'tool_calls': [{
-                            'id': 'ai_1',
-                            'type': 'function',
-                            'function': {
-                                'name': ExampleResponseModel.__name__,
-                                'arguments': json.dumps({
-                                    'name': 'Carla',
-                                    'age': 25,
-                                })
-                            }
-                        }]
-                    }
-                }]
-            },
+            "My name is Carla and I am 25 years old.",
             {
                 "data": {
                     "name": "Carla",
                     "age": 25,
                 },
+                # TODO: `text` is deprecated - remove it and use `data` instead
                 'text': None,
                 "_adala_error": False,
                 "_adala_message": None,
@@ -75,22 +40,11 @@ class ExampleResponseModel(BaseModel):
         ),
     ]
 )
-@openai_responses.mock()
-def test_get_llm_response(openai_mock, response_model, chat_completion, expected_result):
-    OPENAI_API_KEY = "mocked"
-
-    openai_mock.router.route(host="localhost").pass_through()
-    openai_mock.router.route(host="127.0.0.1").pass_through()
-    # # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
-    openai_mock.chat.completions.create.response = _build_openai_response(chat_completion)
-
-    from adala.utils.llm import get_llm_response
+@pytest.mark.vcr
+def test_get_llm_response(response_model, user_prompt, expected_result):
 
     result = get_llm_response(
-        model='gpt-3.5-turbo',
-        api_key=OPENAI_API_KEY,
-        user_prompt='return the word banana',
-        timeout=10,
+        user_prompt=user_prompt,
         response_model=response_model,
     )
 
@@ -98,48 +52,29 @@ def test_get_llm_response(openai_mock, response_model, chat_completion, expected
 
 
 @pytest.mark.parametrize(
-    'response_model, chat_completion, expected_result',
+    'response_model, user_prompt, expected_result',
     [(
         None,
-        "mocked openai chat response",
+        'return the word banana with exclamation mark',
         {
             "data": {
-                "text": "mocked openai chat response",
+                "text": "banana!",
             },
-            # "text" is deprecated - remove it and use "data" instead
-            "text": "mocked openai chat response",
+            # TODO: `text` is deprecated - remove it and use `data` instead
+            "text": "banana!",
             "_adala_error": False,
             "_adala_message": None,
             "_adala_details": None, }),
 
         (
             ExampleResponseModel,
-            {
-                'choices': [{
-                    'finish_reason': 'stop',
-                    'index': 0,
-                    'message': {
-                        'role': 'assistant',
-                        'content': None,
-                        'tool_calls': [{
-                            'id': 'ai_1',
-                            'type': 'function',
-                            'function': {
-                                'name': ExampleResponseModel.__name__,
-                                'arguments': json.dumps({
-                                    'name': 'Carla',
-                                    'age': 25,
-                                })
-                            }
-                        }]
-                    }
-                }]
-            },
+            "My name is Carla and I am 25 years old.",
             {
                 "data": {
                     "name": "Carla",
                     "age": 25,
                 },
+                # TODO: `text` is deprecated - remove it and use `data` instead
                 'text': None,
                 "_adala_error": False,
                 "_adala_message": None,
@@ -149,26 +84,11 @@ def test_get_llm_response(openai_mock, response_model, chat_completion, expected
     ]
 )
 @pytest.mark.asyncio
-@openai_responses.mock()
-async def test_async_get_llm_response(openai_mock, response_model, chat_completion, expected_result):
-    """
-    Example of using openai_responses for mocking. Not possible to combine with Celery at this time.
-    """
-
-    OPENAI_API_KEY = "mocked"
-
-    openai_mock.router.route(host="localhost").pass_through()
-    openai_mock.router.route(host="127.0.0.1").pass_through()
-    # # https://mharrisb1.github.io/openai-responses-python/user_guide/responses/
-    openai_mock.chat.completions.create.response = _build_openai_response(chat_completion)
-
-    from adala.utils.llm import async_get_llm_response
+@pytest.mark.vcr
+async def test_async_get_llm_response(response_model, user_prompt, expected_result):
 
     result = await async_get_llm_response(
-        model='gpt-3.5-turbo',
-        api_key=OPENAI_API_KEY,
-        user_prompt='return the word banana',
-        timeout=10,
+        user_prompt=user_prompt,
         response_model=response_model
     )
 

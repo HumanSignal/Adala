@@ -170,4 +170,4 @@ async def test_agent_arun_classification_skill():
 
     predictions = await agent.arun(input=df)
 
-    assert [item['output'] for item in predictions["data"].tolist()] == ["class_A", "class_B", "class_A"]
+    assert predictions["output"].tolist() == ["class_A", "class_B", "class_A"]
