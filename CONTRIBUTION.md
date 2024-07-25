@@ -67,47 +67,47 @@ Contributions that align with the items detailed in our roadmap, found in the ma
 
 ## Development Environment
 
-Adala uses [PDM](https://pdm.fming.dev/latest) to manage dependencies (both application and development) and packaging. To create an development environment, [install PDM](https://pdm.fming.dev/latest/#recommended-installation-method), navigate to the repository root and run:
+Adala uses [Poetry]((https://python-poetry.org/) to manage dependencies (both application and development) and packaging. To create an development environment, [install Poetry](https://python-poetry.org/docs/#installation), navigate to the repository root and run:
 
 ```bash
-pdm install --dev 
+poetry install --with dev 
 ```
 
-to specifically install Adala development only dependencies (using `pdm`'s [direct support for such](https://pdm.fming.dev/latest/usage/dependency/#add-development-only-dependencies)).
+to specifically install Adala development only dependencies.
 
 After this, activate the environment by running
 
 ```bash
-eval $(pdm venv activate) 
+poetry shell
 ```
 
 And run the test suite with
 
 ```bash
-pytest --cov
+pytest
 ```
 
-You can expand with additional test dependencies using `pdm` with
-
+Adala uses [pytest-recording](https://pypi.org/project/pytest-recording/) to cache network calls in [VCR cassette files](https://vcrpy.readthedocs.io/en/latest/), so that the test suite can be run in CI and without network access. When adding tests that make network calls, such as to OpenAI, run the test suite with
 ```bash
-pdm add -dG test <package-name>
+pytest --record_mode=once
 ```
+and commit the resulting cassette `.yml` files that are generated. To modify existing tests that make network calls, delete their cassette files before running pytest.
+
+## Server
+
+See the [server README](https://github.com/HumanSignal/Adala/tree/master/server) for instructions on running, developing, and testing Adala as a server rather than as a Python library. The server pytests are not run by default.
 
 Happy developing, we're excited to review your contributions!
 
 ### Documentation
 
-Interested in contributing to our docs? Wonderful! Docs are located in `./docs`. After installing dev dependecies (including `docs` group), you can build and serve docs dynamically with
+Interested in contributing to our docs? Wonderful! Docs are located in `./docs`. After installing dev dependecies, you can build and serve docs dynamically with
 
 ```bash
 mkdocs serve -f ./docs/mkdocs.yml
 ```
 
-All doc dependencies are managed by `pdm`, and similar to test development dependenices, can be expanded upon with
-
-```bash
-pdm add -dG doc <package-name>
-```
+All doc dependencies are managed by `poetry` as part of development dependencies.
 
 ## Code of Conduct
 
