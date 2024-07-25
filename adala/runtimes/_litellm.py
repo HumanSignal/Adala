@@ -83,22 +83,15 @@ class LiteLLMChatRuntime(Runtime):
 
         extra_fields = extra_fields or {}
 
-        # options = {}
-        # for field, schema in field_schema.items():
-        #     if schema.get('type') == 'array':
-        #         options[field] = schema.get('items', {}).get('enum', [])
-
-        messages = [
-            {'role': 'system', 'content': instructions_template},
-            {'role': 'user', 'content': input_template.format(**record, **extra_fields)},
-        ]
-
         response_model = parse_template_to_pydantic_class(
             output_template,
             provided_field_schema=field_schema
-        ),
+        )
 
         response = get_llm_response(
+            user_prompt=input_template.format(**record, **extra_fields),
+            system_prompt=instructions_template,
+            instruction_first=instructions_first,
             model=self.model,
             api_key=self.api_key,
             messages=messages,
@@ -107,33 +100,7 @@ class LiteLLMChatRuntime(Runtime):
             response_model=response_model
         )
 
-        # output_fields = parse_template(
-        #     partial_str_format(output_template, **extra_fields),
-        #     include_texts=True,
-        # )
-
-        # outputs = {}
-        # for output_field in output_fields:
-        #     if output_field['type'] == 'text':
-        #         if user_prompt is not None:
-        #             user_prompt += f"\n{output_field['text']}"
-        #         else:
-        #             user_prompt = output_field['text']
-        #     elif output_field['type'] == 'var':
-        #         name = output_field['text']
-        #         messages.append({'role': 'user', 'content': user_prompt})
-        #         completion_text = self.execute(messages)
-        #         if name in options:
-        #             completion_text = match_options(
-        #                 completion_text, options[name]
-        #             )
-        #         outputs[name] = completion_text
-        #         messages.append(
-        #             {'role': 'assistant', 'content': completion_text}
-        #         )
-        #         user_prompt = None
-        #
-        # return outputs
+        return response['data']
 
 
 class AsyncLiteLLMChatRuntime(AsyncRuntime):
@@ -186,20 +153,6 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             )
         return self
 
-    def _prepare_prompt(
-        self,
-        row,
-        input_template: str,
-        instructions_template: str,
-        suffix: str,
-        extra_fields: dict,
-    ) -> Dict[str, str]:
-        """Prepare input prompt for OpenAI API from the row of the dataframe"""
-        return {
-            'system': instructions_template,
-            'user': input_template.format(**row, **extra_fields) + suffix,
-        }
-
     async def batch_to_batch(
         self,
         batch: InternalDataFrame,
@@ -212,79 +165,27 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
     ) -> InternalDataFrame:
         """Execute batch of requests with async calls to OpenAI API"""
 
-        extra_fields = extra_fields or {}
-        field_schema = field_schema or {}
-
-        options = {}
-        for field, schema in field_schema.items():
-            if schema.get('type') == 'array':
-                options[field] = schema.get('items', {}).get('enum', [])
-
-        output_fields = parse_template(
-            partial_str_format(output_template, **extra_fields),
-            include_texts=True,
+        response_model = parse_template_to_pydantic_class(
+            output_template,
+            provided_field_schema=field_schema
         )
 
-        if len(output_fields) > 2:
-            raise NotImplementedError('Only one output field is supported')
+        extra_fields = extra_fields or {}
+        user_prompts = batch.apply(lambda row: input_template.format(**row, **extra_fields), axis=1).tolist()
 
-        suffix = ''
-        outputs = []
-        for output_field in output_fields:
-            if output_field['type'] == 'text':
-                suffix += output_field['text']
+        responses = await parallel_async_get_llm_response(
+            user_prompts=user_prompts,
+            system_prompt=instructions_template,
+            instruction_first=instructions_first,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            model=self.model,
+            api_key=self.api_key,
+            timeout=self.timeout,
+            response_model=response_model
+        )
 
-            elif output_field['type'] == 'var':
-                name = output_field['text']
-                # prepare prompts
-                prompts = batch.apply(
-                    lambda row: self._prepare_prompt(
-                        row,
-                        input_template,
-                        instructions_template,
-                        suffix,
-                        extra_fields,
-                    ),
-                    axis=1,
-                ).tolist()
-
-                # TODO refactor to remove async_concurrent_create_completion and async_create_completion
-                responses = await parallel_async_get_llm_response(
-                    prompts=prompts,
-                    instruction_first=instructions_first,
-                    max_tokens=self.max_tokens,
-                    temperature=self.temperature,
-                    model=self.model,
-                    api_key=self.api_key,
-                    timeout=self.timeout,
-                )
-
-                # parse responses, optionally match it with options
-                for prompt, response in zip(prompts, responses):
-                    completion_text = response.pop('text')
-                    if self.verbose:
-                        if response['error'] is not None:
-                            print_error(
-                                f'Prompt: {prompt}\nLiteLLM API error: {response}'
-                            )
-                        else:
-                            print(
-                                f'Prompt: {prompt}\nLiteLLM API response: {completion_text}'
-                            )
-                    if name in options and completion_text is not None:
-                        completion_text = match_options(
-                            completion_text, options[name]
-                        )
-                    # still technically possible to have a name collision here
-                    # with the error, message, details fields `name in options`
-                    # is only `True` for categorical variables, but is never
-                    # `True` for freeform text generation
-                    response[name] = completion_text
-                    outputs.append(response)
-
-        # TODO: note that this doesn't work for multiple output fields e.g.
-        #       `Output {output1} and Output {output2}`
-        output_df = InternalDataFrame(outputs)
+        output_df = InternalDataFrame(responses)
         return output_df.set_index(batch.index)
 
     async def record_to_record(
