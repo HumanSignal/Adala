@@ -67,7 +67,7 @@ def test_agent_quickstart_two_skills():
         ),
         teacher_runtimes={
             'default': OpenAIChatRuntime(
-                model='gpt-4-turbo-preview', max_tokens=4096, temperature=None
+                model='gpt-4o-mini', max_tokens=4096, temperature=None
             )
         },
     )
@@ -77,9 +77,22 @@ def test_agent_quickstart_two_skills():
     # assert final instruction
     assert (
         agent.skills["0->1"].instructions
-        == "Transform each sequence of numbers provided as input by replacing all '0's with '1's, and leaving all other numbers unchanged to generate the modified sequence. Ensure the output presents only the sequence of numbers directly, without repeating any additional text or format from the input."
+        == '''\
+Transform the set of three numbers represented as "X Y Z" into a new set of three numbers using the following transformation rules:
+
+1. Change the first number to '1' if it is '0'; otherwise, it remains unchanged.
+2. The middle number remains unchanged.
+3. Change the third number to '1' if it is '0'; otherwise, it remains unchanged.
+
+For the given input, the output must be in the format "A B C", where A, B, and C are the transformed numbers.
+
+For example:
+- If the input is "0 5 0", the correct output is "1 5 1".
+- If the input is "0 0 0", the correct output is "1 1 1".
+
+Please apply these transformation rules to provide the appropriate output for the input provided.'''
     )
     assert (
         agent.skills["1->2"].instructions
-        == 'For each sequence of numbers given, increment each number in the input by 1, maintaining their order and output the modified sequence accordingly.'
+        == 'Transform the input sequence of three numbers by adding 1 to each number, and return the resulting sequence in the same format "<number1> <number2> <number3>".'
     )
