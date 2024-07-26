@@ -178,9 +178,12 @@ class CSVHandler(ResultHandler):
 
     def __call__(self, result_batch: list[LSEBatchItem]):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
+        for rec in result_batch:
+            print(f"results handler, {rec} ",flush=True)
 
         # coerce dicts to LSEBatchItems for validation
         result_batch = [LSEBatchItem(**record) for record in result_batch]
+        
 
         # open and write to file
         with open(self.output_path, "a") as f:

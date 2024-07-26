@@ -7,6 +7,9 @@ import pytest_asyncio
 from fakeredis import FakeStrictRedis
 from fastapi.testclient import TestClient
 from server.app import _get_redis_conn
+from server.utils import Settings
+import os
+
 
 
 @pytest.fixture(scope="module")
@@ -50,8 +53,21 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_server)
 
 
+
+
 @pytest.fixture
 def client():
+    os.environ['SINGLE_PRODUCER'] = 'true'
+    from server.app import app
+
+    with TestClient(app) as client:
+        yield client
+
+
+@pytest.fixture
+def multiclient():
+    os.environ['SINGLE_PRODUCER'] = 'false'
+
     from server.app import app
 
     with TestClient(app) as client:
@@ -61,7 +77,16 @@ def client():
 @pytest_asyncio.fixture
 async def async_client():
     from server.app import app
+    os.environ['SINGLE_PRODUCER'] = 'true'
+    async with httpx.AsyncClient(
+        timeout=10, app=app, base_url="http://localhost:30001"
+    ) as client:
+        yield client
 
+@pytest_asyncio.fixture
+async def multi_async_client():
+    from server.app import app
+    os.environ['SINGLE_PRODUCER'] = 'true'
     async with httpx.AsyncClient(
         timeout=10, app=app, base_url="http://localhost:30001"
     ) as client:
