@@ -11,8 +11,32 @@ async_instructor_client = instructor.from_litellm(litellm.acompletion)
 
 
 class LLMResponse(BaseModel):
+    """
+    Base class for LLM response.
+    """
+
+
+class ConstrainedLLMResponse(LLMResponse):
+    """
+    LLM response from constrained generation.
+    `data` object contains fields required by the response model.
+    """
     data: Dict = Field(default_factory=dict)
-    adala_error: bool = Field(default=False, serialization_alias='_adala_error')
+
+
+class UnconstrainedLLMResponse(LLMResponse):
+    """
+    LLM response from unconstrained generation.
+    `text` field contains raw completion text.
+    """
+    text: str = Field(default=None)
+
+
+class ErrorLLMResponse(LLMResponse):
+    """
+    LLM response in case of error.
+    """
+    adala_error: bool = Field(default=True, serialization_alias='_adala_error')
     adala_message: str = Field(default=None, serialization_alias='_adala_message')
     adala_details: str = Field(default=None, serialization_alias='_adala_details')
 
@@ -38,7 +62,7 @@ async def async_get_llm_response(
     max_tokens: Optional[int] = 1000,
     temperature: Optional[float] = 0.0,
     timeout: Optional[Union[float, int]] = None,
-) -> Dict[str, Any]:
+) -> LLMResponse:
     """
     Async version of create_completion function with error handling and session timeout.
 
@@ -57,7 +81,7 @@ async def async_get_llm_response(
         timeout: Timeout in seconds.
 
     Returns:
-        Dict[str, Any]: OpenAI response or error message.
+        LLMResponse: OpenAI response or error message.
     """
 
     if not user_prompt and not messages:
@@ -66,7 +90,6 @@ async def async_get_llm_response(
     if not messages:
         # get messages from user_prompt and system_prompt
         messages = get_messages(user_prompt, system_prompt, instruction_first)
-    response = LLMResponse()
 
     if response_model is None:
         # unconstrained generation - return raw completion text and store it in `data` field: {"text": completion_text}
@@ -80,14 +103,9 @@ async def async_get_llm_response(
                 timeout=timeout,
             )
             completion_text = completion.choices[0].message.content
-            response.data['_completion_text'] = completion_text
+            return UnconstrainedLLMResponse(text=completion_text)
         except Exception as e:
-            response.adala_error = True
-            response.adala_message = type(e).__name__
-            # create a traceback string
-            response.adala_details = traceback.format_exc()
-        finally:
-            return response.model_dump(by_alias=True)
+            return ErrorLLMResponse(adala_message=type(e).__name__, adala_details=traceback.format_exc())
 
     # constrained generation branch - use `response_model` to constrain the LLM response
     try:
@@ -100,13 +118,9 @@ async def async_get_llm_response(
             response_model=response_model,
             timeout=timeout,
         )
-        response.data = instructor_response.model_dump(by_alias=True)
+        return ConstrainedLLMResponse(data=instructor_response.model_dump(by_alias=True))
     except Exception as e:
-        response.adala_error = True
-        response.adala_message = type(e).__name__
-        response.adala_details = traceback.format_exc()
-    finally:
-        return response.model_dump(by_alias=True)
+        return ErrorLLMResponse(adala_message=type(e).__name__, adala_details=traceback.format_exc())
 
 
 async def parallel_async_get_llm_response(
@@ -151,7 +165,26 @@ def get_llm_response(
     max_tokens: Optional[int] = 1000,
     temperature: Optional[float] = 0.0,
     timeout: Optional[Union[float, int]] = None,
-) -> Dict[str, Any]:
+) -> LLMResponse:
+
+    """
+    Synchronous version of create_completion function with error handling and session timeout.
+
+    Args:
+        user_prompt (Optional[str]): User prompt.
+        system_prompt (Optional[str]): System prompt.
+        messages (Optional[List[Dict[str, str]]]): List of messages to be sent to the model. If provided, `user_prompt`, `system_prompt` and `instruction_first` will be ignored.
+        model (Optional[str]): Model name. Refer to litellm supported models for how to pass this: https://litellm.vercel.app/docs/providers
+        instruction_first (Optional[bool]): Whether to put instructions first.
+        response_model (Optional[Type[BaseModel]]): Pydantic model to constrain the LLM generated response. If not provided, the raw completion text will be returned.
+        api_key (Optional[str]): API key, optional. If provided, will be used to authenticate with the provider of your specified model.
+        max_tokens (Optional[int]): Maximum tokens to generate.
+        temperature (Optional[float]): Temperature for sampling.
+        timeout (Optional[Union[float, int]]): Timeout in seconds.
+
+    Returns:
+        Dict[str, Any]: OpenAI response or error message.
+    """
 
     if not user_prompt and not messages:
         raise ValueError("You must provide either `user_prompt` or `messages`.")
@@ -159,7 +192,6 @@ def get_llm_response(
     if not messages:
         # get messages from user_prompt and system_prompt
         messages = get_messages(user_prompt, system_prompt, instruction_first)
-    response = LLMResponse()
 
     if response_model is None:
         # unconstrained generation - return raw completion text and store it in `data` field: {"text": completion_text}
@@ -174,14 +206,9 @@ def get_llm_response(
                 timeout=timeout,
             )
             completion_text = completion.choices[0].message.content
-            response.data['_completion_text'] = completion_text
+            return UnconstrainedLLMResponse(text=completion_text)
         except Exception as e:
-            response.adala_error = True
-            response.adala_message = type(e).__name__
-            # create a traceback string
-            response.adala_details = traceback.format_exc()
-        finally:
-            return response.model_dump(by_alias=True)
+            return ErrorLLMResponse(adala_message=type(e).__name__, adala_details=traceback.format_exc())
 
     # constrained generation branch - use `response_model` to constrain the LLM response
     try:
@@ -194,13 +221,9 @@ def get_llm_response(
             temperature=temperature,
             response_model=response_model,
         )
-        response.data = instructor_response.model_dump(by_alias=True)
+        return ConstrainedLLMResponse(data=instructor_response.model_dump(by_alias=True))
     except Exception as e:
-        response.adala_error = True
-        response.adala_message = type(e).__name__
-        response.adala_details = traceback.format_exc()
-    finally:
-        return response.model_dump(by_alias=True)
+        return ErrorLLMResponse(adala_message=type(e).__name__, adala_details=traceback.format_exc())
 
 
 def parallel_get_llm_response(

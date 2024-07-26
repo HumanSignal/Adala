@@ -1,18 +1,20 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import litellm
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
 from adala.utils.matching import match_options
 from adala.utils.parse import parse_template, partial_str_format, parse_template_to_pydantic_class
-from adala.utils.llm import parallel_async_get_llm_response, get_llm_response
+from adala.utils.llm import (
+    parallel_async_get_llm_response, get_llm_response, ConstrainedLLMResponse,
+    UnconstrainedLLMResponse, ErrorLLMResponse
+)
 from openai import NotFoundError
 from pydantic import ConfigDict, field_validator
 from rich import print
 
 from .base import AsyncRuntime, Runtime
-from ..utils.llm import parallel_async_get_llm_response
 
 logger = logging.getLogger(__name__)
 
@@ -55,15 +57,22 @@ class LiteLLMChatRuntime(Runtime):
             )
         return self
 
-    def get_llm_response(self, messages: List[Dict[str, str]]) -> Dict[str, Any]:
-        response = get_llm_response(
+    def get_llm_response(self, messages: List[Dict[str, str]]) -> str:
+        # TODO: sunset this method in favor of record_to_record
+        if self.verbose:
+            print(f'**Prompt content**:\n{messages}')
+        response: Union[ErrorLLMResponse, UnconstrainedLLMResponse] = get_llm_response(
             messages=messages,
             model=self.model,
             api_key=self.api_key,
             max_tokens=self.max_tokens,
             temperature=self.temperature
         )
-        return response['data']['_completion_text']
+        if isinstance(response, ErrorLLMResponse):
+            raise ValueError(f'{response.adala_message}\n{response.adala_details}')
+        if self.verbose:
+            print(f'**Response**:\n{response.text}')
+        return response.text
 
     def record_to_record(
         self,
@@ -98,7 +107,7 @@ class LiteLLMChatRuntime(Runtime):
             provided_field_schema=field_schema
         )
 
-        response = get_llm_response(
+        response: Union[ConstrainedLLMResponse, ErrorLLMResponse] = get_llm_response(
             user_prompt=input_template.format(**record, **extra_fields),
             system_prompt=instructions_template,
             instruction_first=instructions_first,
@@ -109,9 +118,12 @@ class LiteLLMChatRuntime(Runtime):
             response_model=response_model
         )
 
-        response.update(**response.get('data', {}))
-        response.pop('data', None)
-        return response
+        if isinstance(response, ErrorLLMResponse):
+            if self.verbose:
+                print_error(response.adala_message, response.adala_details)
+            return response.model_dump(by_alias=True)
+
+        return response.data
 
 
 class AsyncLiteLLMChatRuntime(AsyncRuntime):
@@ -184,7 +196,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         extra_fields = extra_fields or {}
         user_prompts = batch.apply(lambda row: input_template.format(**row, **extra_fields), axis=1).tolist()
 
-        responses = await parallel_async_get_llm_response(
+        responses: List[Union[ConstrainedLLMResponse, ErrorLLMResponse]] = await parallel_async_get_llm_response(
             user_prompts=user_prompts,
             system_prompt=instructions_template,
             instruction_first=instructions_first,
@@ -196,11 +208,17 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             response_model=response_model
         )
 
+        # conver list of LLMResponse objects to the dataframe records
+        df_data = []
         for response in responses:
-            response.update(**response.get('data', {}))
-            response.pop('data', None)
+            if isinstance(response, ErrorLLMResponse):
+                if self.verbose:
+                    print_error(response.adala_message, response.adala_details)
+                df_data.append(response.model_dump(by_alias=True))
+            else:
+                df_data.append(response.data)
 
-        output_df = InternalDataFrame(responses)
+        output_df = InternalDataFrame(df_data)
         return output_df.set_index(batch.index)
 
     async def record_to_record(

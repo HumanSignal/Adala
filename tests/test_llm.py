@@ -1,6 +1,6 @@
 import pytest
 from pydantic import BaseModel, Field
-from adala.utils.llm import get_llm_response, async_get_llm_response
+from adala.utils.llm import get_llm_response, async_get_llm_response, ConstrainedLLMResponse, UnconstrainedLLMResponse
 
 
 class ExampleResponseModel(BaseModel):
@@ -13,28 +13,12 @@ class ExampleResponseModel(BaseModel):
     [(
         None,
         'return the word banana with exclamation mark',
-        {
-            "data": {
-                "_completion_text": "banana!",
-            },
-            "_adala_error": False,
-            "_adala_message": None,
-            "_adala_details": None, }),
-
-        (
-            ExampleResponseModel,
-            "My name is Carla and I am 25 years old.",
-            {
-                "data": {
-                    "name": "Carla",
-                    "age": 25,
-                },
-                "_adala_error": False,
-                "_adala_message": None,
-                "_adala_details": None
-            }
-        ),
-    ]
+        UnconstrainedLLMResponse(text="banana!")
+    ), (
+        ExampleResponseModel,
+        "My name is Carla and I am 25 years old.",
+        ConstrainedLLMResponse(data={"name": "Carla", "age": 25})
+    )]
 )
 @pytest.mark.vcr
 def test_get_llm_response(response_model, user_prompt, expected_result):
@@ -52,28 +36,12 @@ def test_get_llm_response(response_model, user_prompt, expected_result):
     [(
         None,
         'return the word banana with exclamation mark',
-        {
-            "data": {
-                "_completion_text": "banana!",
-            },
-            "_adala_error": False,
-            "_adala_message": None,
-            "_adala_details": None, }),
-
-        (
-            ExampleResponseModel,
-            "My name is Carla and I am 25 years old.",
-            {
-                "data": {
-                    "name": "Carla",
-                    "age": 25,
-                },
-                "_adala_error": False,
-                "_adala_message": None,
-                "_adala_details": None
-            }
-        ),
-    ]
+        UnconstrainedLLMResponse(text="banana!")
+    ), (
+        ExampleResponseModel,
+        "My name is Carla and I am 25 years old.",
+        ConstrainedLLMResponse(data={"name": "Carla", "age": 25})
+    )]
 )
 @pytest.mark.asyncio
 @pytest.mark.vcr
