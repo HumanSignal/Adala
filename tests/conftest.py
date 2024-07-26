@@ -11,7 +11,10 @@ from server.app import _get_redis_conn
 
 @pytest.fixture(scope="module")
 def vcr_config():
-    return {"filter_headers": ["authorization"]}
+    return {
+        "filter_headers": ["authorization"],
+        "match_on": ('method', 'scheme', 'host', 'port', 'path', 'query', 'body')
+    }
 
 
 def pytest_addoption(parser):

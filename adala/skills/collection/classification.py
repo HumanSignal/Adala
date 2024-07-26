@@ -29,15 +29,7 @@ class ClassificationSkill(TransformSkill):
                 )
 
             self.field_schema[labels_field] = {
-                "type": "array",
-                "items": {"type": "string", "enum": labels},
+                "type": "string",
+                "description": "The classification label.",
+                "enum": labels
             }
-
-        # add label list to instructions
-        # TODO: doesn't work for multiple outputs
-        self.instructions += "\n\nAssume the following output labels:\n\n"
-        labels_list = "\n".join(self.labels[output_fields[0]])
-        self.instructions += f"{labels_list}\n\n"
-        self.instructions += (
-            "Don't output anything else - only respond with one of the labels above."
-        )

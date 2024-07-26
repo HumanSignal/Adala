@@ -55,14 +55,16 @@ def test_classification_skill():
         environment=StaticEnvironment(
             df=df, ground_truth_columns={"predicted_category": "category"}
         ),
-        teacher_runtimes={"default": OpenAIChatRuntime(model="gpt-4")},
+        teacher_runtimes={"default": OpenAIChatRuntime(model="gpt-4-turbo")},
     )
 
     agent.learn()
+    assert agent.skills[
+               "product_category_classification"].instructions == "Classify the input text by determining the most appropriate product category based on its primary use or context, focusing on the functionality and overall purpose rather than just prominent keywords. Do not add any prefix such as 'Labels.' to the category name unless it is explicitly included in the category list provided."
 
 
 @pytest.mark.vcr
-def test_analysis_skill():
+def test_parallel_skillset_with_analysis():
     df = pd.DataFrame(
         [
             {
@@ -116,11 +118,55 @@ def test_analysis_skill():
     agent = Agent(
         skills=skillset,
         environment=env,
-        teacher_runtimes={"default": OpenAIChatRuntime(model="gpt-4")},
+        runtimes={"default": OpenAIChatRuntime(model="gpt-4o")},
+        teacher_runtimes={"default": OpenAIChatRuntime(model="gpt-4o")},
     )
     # AnalysisSkill.improve not implemented
     # agent.learn(learning_iterations=1, num_feedbacks=1, batch_size=3)
     predictions = agent.run()
+    assert predictions.code[0] == '''\
+import json
+import sys
+
+# Read input from stdin
+input_data = sys.stdin.read()
+
+# Parse the input JSON
+input_json = json.loads(input_data)
+
+# Initialize the output structure
+output_json = {
+    "id": "",
+    "data": {
+        "text": input_json["inputs"]
+    },
+    "project": "",
+    "predictions": [
+        {
+            "id": "",
+            "lead_time": 0,
+            "result": [
+                {
+                    "id": str(i),
+                    "from_name": "label",
+                    "to_name": "text",
+                    "type": "labels",
+                    "value": {
+                        "start": entity["start"],
+                        "end": entity["end"],
+                        "score": entity["score"],
+                        "text": entity["word"],
+                        "labels": [entity["entity_group"]]
+                    }
+                } for i, entity in enumerate(input_json["outputs"])
+            ],
+            "score": 0
+        }
+    ]
+}
+
+# Output the transformed JSON
+print(json.dumps(output_json, indent=4))'''
 
 
 @pytest.mark.vcr
@@ -138,13 +184,18 @@ def test_summarization_skill():
         skills=SummarizationSkill(name="summarization", input_data_field="text")
     )
 
-    agent.run(df)
+    predictions = agent.run(df)
+    assert predictions.summary[
+               0] == 'Caffeine, found in coffee beans and synthesized in labs, has the same structure in various forms. It is a stimulant that improves physical strength and mental stimulation. Habitual use is linked to reduced risks of diseases. Caffeine works by antagonizing adenosine receptors, promoting alertness by inhibiting sedation. It affects dopamine, serotonin, acetylcholine, and adrenaline systems.'
+    assert predictions.summary[
+               2] == 'Vitamin D is a fat-soluble nutrient essential for human survival. It is primarily obtained from the sun, oily fish, eggs, and fortified foods. Supplementing with vitamin D can improve immune health, bone health, and overall well-being. The effects of vitamin D depend on the levels of 25-hydroxyvitamin D in the blood, and benefits are most noticeable when reversing a deficiency.'
+
+    pd.testing.assert_series_equal(predictions.text, df.text)
 
 
 @pytest.mark.vcr
 @pytest.mark.skip(reason="flakes in CI")
 def test_transform_skill():
-
     def extract_and_convert_numbers(text):
         pattern = "\d{1,3}(?:,\d{3})*\.?\d*"
         numbers = re.findall(pattern, text)
@@ -200,7 +251,6 @@ def test_transform_skill():
 @pytest.mark.vcr
 @pytest.mark.skip(reason="flakes in CI")
 def test_ontology_creator_merger_skill():
-
     ds = load_dataset("ag_news", "default")
     df = pd.DataFrame(data=ds["train"][:10]["text"], columns=["text"])
 
@@ -248,12 +298,12 @@ def test_question_answering_skill():
 
     agent = Agent(skills=QuestionAnsweringSkill())
 
-    agent.run(df)
+    predictions = agent.run(df)
+    assert (predictions.answer == predictions.expected_answer).mean() == 3 / 5
 
 
 @pytest.mark.vcr
 def test_linear_skillset():
-
     df = pd.DataFrame(
         [
             {
@@ -303,6 +353,10 @@ def test_linear_skillset():
     )
 
     agent.learn(learning_iterations=2)
+    assert agent.skills[
+               "skill_0"].instructions == '"Given a category and its context, provide a list of items that belong to this category. The context will help in generating a more accurate list. Do not provide definitions or explanations, just list the items."'  # noqa: E501
+    # TODO: not learned with 2 iterations, need to increase learning_iterations
+    assert agent.skills["skill_1"].instructions == '...'
 
 
 @pytest.mark.vcr
@@ -324,4 +378,14 @@ def test_translation_skill():
 
     agent = Agent(skills=TranslationSkill(target_language="Swahili"))
 
-    agent.run(df)
+    predictions = agent.run(df)
+    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima",
+                                                'Maisha ni mazuri',
+                                                'Msitu unaniita',
+                                                'Napenda pizza ya Napolitana',
+                                                'Maua ya spring ni mazuri',
+                                                "Nyota zinang'aa usiku",
+                                                'Upinde wa mvua baada ya mvua',
+                                                'Ninahitaji kahawa',
+                                                'Muziki huchezesha roho',
+                                                'Ndoto zinakuwa kweli']
