@@ -229,12 +229,14 @@ def get_llm_response(
 def parallel_get_llm_response(
     user_prompts: List[str],
     system_prompt: Optional[str] = None,
+    messages: Optional[List[Dict[str, str]]] = None,
     model: Optional[str] = 'gpt-4o-mini',
     instruction_first: Optional[bool] = True,
     response_model: Optional[Type[BaseModel]] = None,
     api_key: Optional[str] = None,
     max_tokens: Optional[int] = 1000,
-    temperature: Optional[float] = 0.0
+    temperature: Optional[float] = 0.0,
+    timeout: Optional[Union[float, int]] = None,
 ):
     pool = mp.Pool(mp.cpu_count())
     responses = pool.starmap(
@@ -243,12 +245,14 @@ def parallel_get_llm_response(
             (
                 user_prompt,
                 system_prompt,
+                messages,
                 model,
                 instruction_first,
                 response_model,
                 api_key,
                 max_tokens,
-                temperature
+                temperature,
+                timeout
             )
             for user_prompt in user_prompts
         ]
