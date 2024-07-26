@@ -55,12 +55,12 @@ async def async_get_llm_response(
     user_prompt: Optional[str] = None,
     system_prompt: Optional[str] = None,
     messages: Optional[List[Dict[str, str]]] = None,
-    model: Optional[str] = 'gpt-4o-mini',
-    instruction_first: Optional[bool] = True,
+    model: str = 'gpt-4o-mini',
+    instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
     api_key: Optional[str] = None,
-    max_tokens: Optional[int] = 1000,
-    temperature: Optional[float] = 0.0,
+    max_tokens: int = 1000,
+    temperature: float = 0.0,
     timeout: Optional[Union[float, int]] = None,
 ) -> LLMResponse:
     """
@@ -126,12 +126,12 @@ async def async_get_llm_response(
 async def parallel_async_get_llm_response(
     user_prompts: List[str],
     system_prompt: Optional[str] = None,
-    model: Optional[str] = 'gpt-4o-mini',
-    instruction_first: Optional[bool] = True,
+    model: str = 'gpt-4o-mini',
+    instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
     api_key: Optional[str] = None,
-    max_tokens: Optional[int] = 1000,
-    temperature: Optional[float] = 0.0,
+    max_tokens: int = 1000,
+    temperature: float = 0.0,
     timeout: Optional[Union[float, int]] = None,
 ):
     tasks = [
@@ -158,12 +158,12 @@ def get_llm_response(
     user_prompt: Optional[str] = None,
     system_prompt: Optional[str] = None,
     messages: Optional[List[Dict[str, str]]] = None,
-    model: Optional[str] = 'gpt-4o-mini',
-    instruction_first: Optional[bool] = True,
+    model: str = 'gpt-4o-mini',
+    instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
     api_key: Optional[str] = None,
-    max_tokens: Optional[int] = 1000,
-    temperature: Optional[float] = 0.0,
+    max_tokens: int = 1000,
+    temperature: float = 0.0,
     timeout: Optional[Union[float, int]] = None,
 ) -> LLMResponse:
 
@@ -230,12 +230,12 @@ def parallel_get_llm_response(
     user_prompts: List[str],
     system_prompt: Optional[str] = None,
     messages: Optional[List[Dict[str, str]]] = None,
-    model: Optional[str] = 'gpt-4o-mini',
-    instruction_first: Optional[bool] = True,
+    model: str = 'gpt-4o-mini',
+    instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
     api_key: Optional[str] = None,
-    max_tokens: Optional[int] = 1000,
-    temperature: Optional[float] = 0.0,
+    max_tokens: int = 1000,
+    temperature: float = 0.0,
     timeout: Optional[Union[float, int]] = None,
 ):
     pool = mp.Pool(mp.cpu_count())
