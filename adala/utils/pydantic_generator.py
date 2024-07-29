@@ -143,3 +143,8 @@ def json_schema_to_pydantic_type(json_schema: Dict[str, Any], enum_class_name: s
         return Optional[Any]  # Use Optional[Any] for nullable fields
     else:
         raise ValueError(f'Unsupported JSON schema type: {type_}')
+
+
+def add_new_field_to_model(model: BaseModel, field_name: str, field_schema: Dict[str, Any]) -> BaseModel:
+    new_fields = {field_name: json_schema_to_pydantic_field(field_schema)}
+    return create_model(model.__class__.__name__, **model.__fields__, **new_fields)
