@@ -58,6 +58,7 @@ class LiteLLMInferenceSettings(BaseSettings):
         max_tokens: Maximum tokens to generate.
         temperature: Temperature for sampling.
         timeout: Timeout in seconds.
+        seed: Integer seed to reduce nondeterminism in generation.
     '''
     model: str = 'gpt-4o-mini'
     api_key: Optional[str] = None
@@ -66,6 +67,7 @@ class LiteLLMInferenceSettings(BaseSettings):
     max_tokens: int = 1000
     temperature: float = 0.0
     timeout: Optional[Union[float, int]] = None
+    seed: Optional[int] = 47
 
 
 def get_messages(user_prompt: str, system_prompt: Optional[str] = None, instruction_first: bool = True):
