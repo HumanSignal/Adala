@@ -68,7 +68,7 @@ def test_agent_quickstart_two_skills():
         ),
         teacher_runtimes={
             'default': OpenAIChatRuntime(
-                model='gpt-4o-mini', max_tokens=4096, temperature=None
+                model='gpt-4o-mini', max_tokens=4096
             )
         },
     )
