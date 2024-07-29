@@ -3,7 +3,7 @@ import instructor
 import litellm
 import traceback
 import multiprocessing as mp
-from typing import Optional, Dict, Any, List, Type, Union
+from typing import Optional, Dict, List, Type, Union
 from pydantic import BaseModel, Field
 
 instructor_client = instructor.from_litellm(litellm.completion)
@@ -59,6 +59,8 @@ async def async_get_llm_response(
     instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
     api_key: Optional[str] = None,
+    base_url: Optional[str] = None,
+    api_version: Optional[str] = None,
     max_tokens: int = 1000,
     temperature: float = 0.0,
     timeout: Optional[Union[float, int]] = None,
@@ -74,6 +76,8 @@ async def async_get_llm_response(
         messages: List of messages to be sent to the model. If provided, `user_prompt`, `system_prompt` and `instruction_first` will be ignored.
         api_key: API key, optional. If provided, will be used to authenticate
                  with the provider of your specified model.
+        base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
+        api_version (Optional[str]): API version, optional except for Azure.
         instruction_first: Whether to put instructions first.
         response_model: Pydantic model to constrain the LLM generated response. If not provided, the raw completion text will be returned.  # noqa
         max_tokens: Maximum tokens to generate.
@@ -97,6 +101,8 @@ async def async_get_llm_response(
             completion = await litellm.acompletion(
                 model=model,
                 api_key=api_key,
+                api_base=base_url,
+                api_version=api_version,
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=temperature,
@@ -112,6 +118,8 @@ async def async_get_llm_response(
         instructor_response, completion = await async_instructor_client.chat.completions.create_with_completion(
             model=model,
             api_key=api_key,
+            base_url=base_url,
+            api_version=api_version,
             messages=messages,
             max_tokens=max_tokens,
             temperature=temperature,
@@ -130,6 +138,8 @@ async def parallel_async_get_llm_response(
     instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
     api_key: Optional[str] = None,
+    base_url: Optional[str] = None,
+    api_version: Optional[str] = None,
     max_tokens: int = 1000,
     temperature: float = 0.0,
     timeout: Optional[Union[float, int]] = None,
@@ -141,6 +151,8 @@ async def parallel_async_get_llm_response(
                 system_prompt=system_prompt,
                 model=model,
                 api_key=api_key,
+                base_url=base_url,
+                api_version=api_version,
                 max_tokens=max_tokens,
                 temperature=temperature,
                 timeout=timeout,
@@ -162,6 +174,8 @@ def get_llm_response(
     instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
     api_key: Optional[str] = None,
+    base_url: Optional[str] = None,
+    api_version: Optional[str] = None,
     max_tokens: int = 1000,
     temperature: float = 0.0,
     timeout: Optional[Union[float, int]] = None,
@@ -178,6 +192,8 @@ def get_llm_response(
         instruction_first (Optional[bool]): Whether to put instructions first.
         response_model (Optional[Type[BaseModel]]): Pydantic model to constrain the LLM generated response. If not provided, the raw completion text will be returned.
         api_key (Optional[str]): API key, optional. If provided, will be used to authenticate with the provider of your specified model.
+        base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
+        api_version (Optional[str]): API version, optional except for Azure.
         max_tokens (Optional[int]): Maximum tokens to generate.
         temperature (Optional[float]): Temperature for sampling.
         timeout (Optional[Union[float, int]]): Timeout in seconds.
@@ -200,6 +216,8 @@ def get_llm_response(
             completion = litellm.completion(
                 model=model,
                 api_key=api_key,
+                api_base=base_url,
+                api_version=api_version,
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=temperature,
@@ -215,6 +233,8 @@ def get_llm_response(
         instructor_response, completion = instructor_client.chat.completions.create_with_completion(
             model=model,
             api_key=api_key,
+            base_url=base_url,
+            api_version=api_version,
             messages=messages,
             max_tokens=max_tokens,
             timeout=timeout,

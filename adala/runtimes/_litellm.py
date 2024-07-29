@@ -42,6 +42,7 @@ class LiteLLMChatRuntime(Runtime):
     model: str
     api_key: Optional[str]
     base_url: Optional[str] = None
+    api_version: Optional[str] = None
     max_tokens: Optional[int] = 1000
     splitter: Optional[str] = None
     temperature: Optional[float] = 0.0
@@ -113,6 +114,8 @@ class LiteLLMChatRuntime(Runtime):
             instruction_first=instructions_first,
             model=self.model,
             api_key=self.api_key,
+            base_url=self.base_url,
+            api_version=self.api_version,
             max_tokens=self.max_tokens,
             temperature=self.temperature,
             response_model=response_model
@@ -151,6 +154,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
     model: str
     api_key: Optional[str] = None
     base_url: Optional[str] = None
+    api_version: Optional[str] = None
     max_tokens: Optional[int] = 1000
     temperature: Optional[float] = 0.0
     splitter: Optional[str] = None
@@ -204,11 +208,13 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             temperature=self.temperature,
             model=self.model,
             api_key=self.api_key,
+            base_url=self.base_url,
+            api_version=self.api_version,
             timeout=self.timeout,
             response_model=response_model
         )
 
-        # conver list of LLMResponse objects to the dataframe records
+        # convert list of LLMResponse objects to the dataframe records
         df_data = []
         for response in responses:
             if isinstance(response, ErrorLLMResponse):
@@ -334,6 +340,8 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
         completion = litellm.completion(
             model=self.model,
             api_key=self.api_key,
+            base_url=self.base_url,
+            api_version=self.api_version,
             messages=[{'role': 'user', 'content': content}],
             max_tokens=self.max_tokens,
         )
