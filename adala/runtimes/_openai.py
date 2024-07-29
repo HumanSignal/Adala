@@ -12,12 +12,7 @@ class OpenAIChatRuntime(LiteLLMChatRuntime):
     models to perform the skill.
 
     Attributes:
-        model: OpenAI model name.
-        api_key: OpenAI API key. If not provided, will be taken from
-                 OPENAI_API_KEY environment variable.
-        base_url: Can point to any implementation of the OpenAI API.
-                  Defaults to OpenAI's.
-        max_tokens: Maximum number of tokens to generate. Defaults to 1000.
+        inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
     """
 
     # TODO does it make any sense for this to be optional?
@@ -30,17 +25,8 @@ class AsyncOpenAIChatRuntime(AsyncLiteLLMChatRuntime):
     models to perform the skill. It uses async calls to OpenAI API.
 
     Attributes:
-        model: OpenAI model name.
-        api_key: OpenAI API key. If not provided, will be taken from
-                 OPENAI_API_KEY environment variable.
-        base_url: Can point to any implementation of the OpenAI API.
-                  Defaults to OpenAI's.
-        max_tokens: Maximum number of tokens to generate. Defaults to 1000.
-        temperature: Temperature for sampling, between 0 and 1. Higher values
-                     means the model will take more risks. Try 0.9 for more
-                     creative applications, and 0 (argmax sampling) for ones
-                     with a well-defined answer.
-                     Defaults to 0.0.
+        inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
+
     """
 
     api_key: str = Field(default=os.getenv('OPENAI_API_KEY'))

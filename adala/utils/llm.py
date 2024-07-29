@@ -43,6 +43,22 @@ class ErrorLLMResponse(LLMResponse):
 
 
 class LiteLLMInferenceSettings(BaseSettings):
+    '''
+    Common inference settings for LiteLLM.
+
+    Attributes:
+        model: model name. Refer to litellm supported models for how to pass
+               this: https://litellm.vercel.app/docs/providers
+        api_key: API key, optional. If provided, will be used to authenticate
+                 with the provider of your specified model.
+        base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
+        api_version (Optional[str]): API version, optional except for Azure.
+        instruction_first: Whether to put instructions first.
+        response_model: Pydantic model to constrain the LLM generated response. If not provided, the raw completion text will be returned.  # noqa
+        max_tokens: Maximum tokens to generate.
+        temperature: Temperature for sampling.
+        timeout: Timeout in seconds.
+    '''
     model: str = 'gpt-4o-mini'
     api_key: Optional[str] = None
     base_url: Optional[str] = None
@@ -74,20 +90,12 @@ async def async_get_llm_response(
     Async version of create_completion function with error handling and session timeout.
 
     Args:
-        model: model name. Refer to litellm supported models for how to pass
-               this: https://litellm.vercel.app/docs/providers
+        inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
         user_prompt: User prompt.
         system_prompt: System prompt.
         messages: List of messages to be sent to the model. If provided, `user_prompt`, `system_prompt` and `instruction_first` will be ignored.
-        api_key: API key, optional. If provided, will be used to authenticate
-                 with the provider of your specified model.
-        base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
-        api_version (Optional[str]): API version, optional except for Azure.
         instruction_first: Whether to put instructions first.
         response_model: Pydantic model to constrain the LLM generated response. If not provided, the raw completion text will be returned.  # noqa
-        max_tokens: Maximum tokens to generate.
-        temperature: Temperature for sampling.
-        timeout: Timeout in seconds.
 
     Returns:
         LLMResponse: OpenAI response or error message.
@@ -160,18 +168,12 @@ def get_llm_response(
     Synchronous version of create_completion function with error handling and session timeout.
 
     Args:
+        inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
         user_prompt (Optional[str]): User prompt.
         system_prompt (Optional[str]): System prompt.
         messages (Optional[List[Dict[str, str]]]): List of messages to be sent to the model. If provided, `user_prompt`, `system_prompt` and `instruction_first` will be ignored.
-        model (Optional[str]): Model name. Refer to litellm supported models for how to pass this: https://litellm.vercel.app/docs/providers
         instruction_first (Optional[bool]): Whether to put instructions first.
         response_model (Optional[Type[BaseModel]]): Pydantic model to constrain the LLM generated response. If not provided, the raw completion text will be returned.
-        api_key (Optional[str]): API key, optional. If provided, will be used to authenticate with the provider of your specified model.
-        base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
-        api_version (Optional[str]): API version, optional except for Azure.
-        max_tokens (Optional[int]): Maximum tokens to generate.
-        temperature (Optional[float]): Temperature for sampling.
-        timeout (Optional[Union[float, int]]): Timeout in seconds.
 
     Returns:
         Dict[str, Any]: OpenAI response or error message.

@@ -24,13 +24,7 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
     completion models to perform the skill.
 
     Attributes:
-        model: Model name, refer to LiteLLM's supported provider docs for
-               how to pass this for your model: https://litellm.vercel.app/docs/providers
-        api_key: API key, optional. If provided, will be used to authenticate
-                 with the provider of your specified model.
-        base_url: Points to the endpoint where your model is hosted
-        max_tokens: Maximum number of tokens to generate. Defaults to 1000.
-        temperature: Temperature for sampling, between 0 and 1.
+        inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
     """
 
     model_config = ConfigDict(
@@ -119,16 +113,7 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
     models to perform the skill. It uses async calls to OpenAI API.
 
     Attributes:
-        model: OpenAI model name.
-        api_key: API key, optional. If provided, will be used to authenticate
-                 with the provider of your specified model.
-        base_url: Points to the endpoint where your model is hosted
-        max_tokens: Maximum number of tokens to generate. Defaults to 1000.
-        temperature: Temperature for sampling, between 0 and 1. Higher values
-                     means the model will take more risks. Try 0.9 for more
-                     creative applications, and 0 (argmax sampling) for ones
-                     with a well-defined answer.
-                     Defaults to 0.0.
+        inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
     """
 
     model_config = ConfigDict(
