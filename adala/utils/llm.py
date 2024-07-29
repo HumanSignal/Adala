@@ -5,6 +5,7 @@ import traceback
 import multiprocessing as mp
 from typing import Optional, Dict, List, Type, Union
 from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings
 
 instructor_client = instructor.from_litellm(litellm.completion)
 async_instructor_client = instructor.from_litellm(litellm.acompletion)
@@ -41,6 +42,16 @@ class ErrorLLMResponse(LLMResponse):
     adala_details: str = Field(default=None, serialization_alias='_adala_details')
 
 
+class LiteLLMInferenceSettings(BaseSettings):
+    model: str = 'gpt-4o-mini'
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
+    api_version: Optional[str] = None
+    max_tokens: int = 1000
+    temperature: float = 0.0
+    timeout: Optional[Union[float, int]] = None
+
+
 def get_messages(user_prompt: str, system_prompt: Optional[str] = None, instruction_first: bool = True):
     messages = [{'role': 'user', 'content': user_prompt}]
     if system_prompt:
@@ -52,18 +63,12 @@ def get_messages(user_prompt: str, system_prompt: Optional[str] = None, instruct
 
 
 async def async_get_llm_response(
+    inference_settings: LiteLLMInferenceSettings,
     user_prompt: Optional[str] = None,
     system_prompt: Optional[str] = None,
     messages: Optional[List[Dict[str, str]]] = None,
-    model: str = 'gpt-4o-mini',
     instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
-    api_key: Optional[str] = None,
-    base_url: Optional[str] = None,
-    api_version: Optional[str] = None,
-    max_tokens: int = 1000,
-    temperature: float = 0.0,
-    timeout: Optional[Union[float, int]] = None,
 ) -> LLMResponse:
     """
     Async version of create_completion function with error handling and session timeout.
@@ -99,14 +104,8 @@ async def async_get_llm_response(
         # unconstrained generation - return raw completion text and store it in `data` field: {"text": completion_text}
         try:
             completion = await litellm.acompletion(
-                model=model,
-                api_key=api_key,
-                api_base=base_url,
-                api_version=api_version,
                 messages=messages,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                timeout=timeout,
+                **inference_settings.dict(),
             )
             completion_text = completion.choices[0].message.content
             return UnconstrainedLLMResponse(text=completion_text)
@@ -116,15 +115,9 @@ async def async_get_llm_response(
     # constrained generation branch - use `response_model` to constrain the LLM response
     try:
         instructor_response, completion = await async_instructor_client.chat.completions.create_with_completion(
-            model=model,
-            api_key=api_key,
-            base_url=base_url,
-            api_version=api_version,
             messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
             response_model=response_model,
-            timeout=timeout,
+            **inference_settings.dict(),
         )
         return ConstrainedLLMResponse(data=instructor_response.model_dump(by_alias=True))
     except Exception as e:
@@ -132,30 +125,18 @@ async def async_get_llm_response(
 
 
 async def parallel_async_get_llm_response(
+    inference_settings: LiteLLMInferenceSettings,
     user_prompts: List[str],
     system_prompt: Optional[str] = None,
-    model: str = 'gpt-4o-mini',
     instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
-    api_key: Optional[str] = None,
-    base_url: Optional[str] = None,
-    api_version: Optional[str] = None,
-    max_tokens: int = 1000,
-    temperature: float = 0.0,
-    timeout: Optional[Union[float, int]] = None,
 ):
     tasks = [
         asyncio.ensure_future(
             async_get_llm_response(
+                inference_settings=inference_settings,
                 user_prompt=user_prompt,
                 system_prompt=system_prompt,
-                model=model,
-                api_key=api_key,
-                base_url=base_url,
-                api_version=api_version,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                timeout=timeout,
                 instruction_first=instruction_first,
                 response_model=response_model,
             )
@@ -167,18 +148,12 @@ async def parallel_async_get_llm_response(
 
 
 def get_llm_response(
+    inference_settings: LiteLLMInferenceSettings,
     user_prompt: Optional[str] = None,
     system_prompt: Optional[str] = None,
     messages: Optional[List[Dict[str, str]]] = None,
-    model: str = 'gpt-4o-mini',
     instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
-    api_key: Optional[str] = None,
-    base_url: Optional[str] = None,
-    api_version: Optional[str] = None,
-    max_tokens: int = 1000,
-    temperature: float = 0.0,
-    timeout: Optional[Union[float, int]] = None,
 ) -> LLMResponse:
 
     """
@@ -214,14 +189,8 @@ def get_llm_response(
         # TODO: this branch can be considered as deprecated at some point, as we always want to run LLM constrained by pydantic model  # noqa
         try:
             completion = litellm.completion(
-                model=model,
-                api_key=api_key,
-                api_base=base_url,
-                api_version=api_version,
                 messages=messages,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                timeout=timeout,
+                **inference_settings.dict(),
             )
             completion_text = completion.choices[0].message.content
             return UnconstrainedLLMResponse(text=completion_text)
@@ -231,15 +200,9 @@ def get_llm_response(
     # constrained generation branch - use `response_model` to constrain the LLM response
     try:
         instructor_response, completion = instructor_client.chat.completions.create_with_completion(
-            model=model,
-            api_key=api_key,
-            base_url=base_url,
-            api_version=api_version,
             messages=messages,
-            max_tokens=max_tokens,
-            timeout=timeout,
-            temperature=temperature,
             response_model=response_model,
+            **inference_settings.dict(),
         )
         return ConstrainedLLMResponse(data=instructor_response.model_dump(by_alias=True))
     except Exception as e:
@@ -247,16 +210,12 @@ def get_llm_response(
 
 
 def parallel_get_llm_response(
+    inference_settings: LiteLLMInferenceSettings,
     user_prompts: List[str],
     system_prompt: Optional[str] = None,
     messages: Optional[List[Dict[str, str]]] = None,
-    model: str = 'gpt-4o-mini',
     instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
-    api_key: Optional[str] = None,
-    max_tokens: int = 1000,
-    temperature: float = 0.0,
-    timeout: Optional[Union[float, int]] = None,
 ):
     pool = mp.Pool(mp.cpu_count())
     responses = pool.starmap(
@@ -266,13 +225,9 @@ def parallel_get_llm_response(
                 user_prompt,
                 system_prompt,
                 messages,
-                model,
                 instruction_first,
                 response_model,
-                api_key,
-                max_tokens,
-                temperature,
-                timeout
+                *inference_settings.dict().values(),
             )
             for user_prompt in user_prompts
         ]

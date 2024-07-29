@@ -4,11 +4,10 @@ from typing import Any, Dict, List, Optional, Union
 import litellm
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
-from adala.utils.matching import match_options
 from adala.utils.parse import parse_template, partial_str_format, parse_template_to_pydantic_class
 from adala.utils.llm import (
     parallel_async_get_llm_response, get_llm_response, ConstrainedLLMResponse,
-    UnconstrainedLLMResponse, ErrorLLMResponse
+    UnconstrainedLLMResponse, ErrorLLMResponse, LiteLLMInferenceSettings
 )
 from openai import NotFoundError
 from pydantic import ConfigDict, field_validator
@@ -19,7 +18,7 @@ from .base import AsyncRuntime, Runtime
 logger = logging.getLogger(__name__)
 
 
-class LiteLLMChatRuntime(Runtime):
+class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
     """
     Runtime that uses [LiteLLM API](https://litellm.vercel.app/docs) and chat
     completion models to perform the skill.
@@ -31,7 +30,6 @@ class LiteLLMChatRuntime(Runtime):
                  with the provider of your specified model.
         base_url: Points to the endpoint where your model is hosted
         max_tokens: Maximum number of tokens to generate. Defaults to 1000.
-        splitter: Splitter to use for splitting messages. Defaults to None.
         temperature: Temperature for sampling, between 0 and 1.
     """
 
@@ -39,13 +37,7 @@ class LiteLLMChatRuntime(Runtime):
         arbitrary_types_allowed=True
     )  # for @computed_field
 
-    model: str
-    api_key: Optional[str]
-    base_url: Optional[str] = None
-    api_version: Optional[str] = None
-    max_tokens: Optional[int] = 1000
     splitter: Optional[str] = None
-    temperature: Optional[float] = 0.0
 
     def init_runtime(self) -> 'Runtime':
         # check model availability
@@ -64,10 +56,7 @@ class LiteLLMChatRuntime(Runtime):
             print(f'**Prompt content**:\n{messages}')
         response: Union[ErrorLLMResponse, UnconstrainedLLMResponse] = get_llm_response(
             messages=messages,
-            model=self.model,
-            api_key=self.api_key,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature
+            inference_settings=LiteLLMInferenceSettings(self),
         )
         if isinstance(response, ErrorLLMResponse):
             raise ValueError(f'{response.adala_message}\n{response.adala_details}')
@@ -112,13 +101,8 @@ class LiteLLMChatRuntime(Runtime):
             user_prompt=input_template.format(**record, **extra_fields),
             system_prompt=instructions_template,
             instruction_first=instructions_first,
-            model=self.model,
-            api_key=self.api_key,
-            base_url=self.base_url,
-            api_version=self.api_version,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature,
-            response_model=response_model
+            response_model=response_model,
+            inference_settings=LiteLLMInferenceSettings(self),
         )
 
         if isinstance(response, ErrorLLMResponse):
@@ -129,7 +113,7 @@ class LiteLLMChatRuntime(Runtime):
         return response.data
 
 
-class AsyncLiteLLMChatRuntime(AsyncRuntime):
+class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
     """
     Runtime that uses [OpenAI API](https://openai.com/) and chat completion
     models to perform the skill. It uses async calls to OpenAI API.
@@ -151,14 +135,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         arbitrary_types_allowed=True
     )  # for @computed_field
 
-    model: str
-    api_key: Optional[str] = None
-    base_url: Optional[str] = None
-    api_version: Optional[str] = None
-    max_tokens: Optional[int] = 1000
-    temperature: Optional[float] = 0.0
     splitter: Optional[str] = None
-    timeout: Optional[int] = 10
 
     @field_validator("concurrency", mode="before")
     def check_concurrency(cls, value) -> int:
@@ -204,14 +181,8 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             user_prompts=user_prompts,
             system_prompt=instructions_template,
             instruction_first=instructions_first,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature,
-            model=self.model,
-            api_key=self.api_key,
-            base_url=self.base_url,
-            api_version=self.api_version,
-            timeout=self.timeout,
-            response_model=response_model
+            response_model=response_model,
+            inference_settings=LiteLLMInferenceSettings(self),
         )
 
         # convert list of LLMResponse objects to the dataframe records
@@ -338,12 +309,8 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
             print(f'**Prompt content**:\n{content}')
 
         completion = litellm.completion(
-            model=self.model,
-            api_key=self.api_key,
-            base_url=self.base_url,
-            api_version=self.api_version,
             messages=[{'role': 'user', 'content': content}],
-            max_tokens=self.max_tokens,
+            inference_settings=LiteLLMInferenceSettings(self),
         )
 
         completion_text = completion.choices[0].message.content
