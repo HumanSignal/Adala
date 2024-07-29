@@ -15,7 +15,6 @@ import uvicorn
 from redis import Redis
 
 from server.log_middleware import LogMiddleware
-from server.tasks.process_file import app as celery_app
 from server.tasks.process_file import streaming_parent_task
 from server.utils import get_input_topic_name, get_output_topic_name, Settings, delete_topic
 from server.handlers.result_handlers import ResultHandler
