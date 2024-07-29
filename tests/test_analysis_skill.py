@@ -20,20 +20,23 @@ def test_code_generation():
                 name="code_generation",
                 input_template="Input JSON format: {payload}",
                 output_template="Code: {code}",
-                instructions="Generate Python code that takes the input JSON and returns the output JSON",
+                instructions="Generate Python code that calculates the sum of the given values per each key",
             ),
         ]
     )
 
     agent = Agent(skills=skillset, environment=env)
     predictions = agent.run()
-    pd.testing.assert_frame_equal(
-        predictions,
-        pd.DataFrame(
-            [
-                {
-                    "code": '```python\nimport json\n\n# Input JSON\ninput_json = [\n    {"a": 1, "b": 2},\n    {"a": 3, "b": 4},\n    {"a": 5, "b": 6}\n]\n\n# Output JSON\noutput_json = json.dumps(input_json)\n\nprint(output_json)\n```'
-                }
-            ]
-        ),
-    )
+    expected_code = '''\
+# Given input JSON format
+input1 = {"a": 1, "b": 2}
+input2 = {"a": 3, "b": 4}
+input3 = {"a": 5, "b": 6}
+
+# Calculate the sum of values per key
+result = {}
+for key in input1.keys():
+    result[key] = input1[key] + input2[key] + input3[key]
+
+result'''
+    assert predictions.code[0] == expected_code

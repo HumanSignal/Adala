@@ -20,16 +20,16 @@ def test_rag_with_openai_chat_completion():
             skills=[
                 RAGSkill(
                     name="rag",
-                    input_template="Text: {text}",
+                    input_template="Text: {input}",
                     output_template="{examples}",
-                    rag_input_template="Text: {text}\nEmotions: {emotions}",
+                    rag_input_template="Text: {input}\nEmotions: {emotions}",
                     num_results=2,
                     memory=memory,
                 ),
                 ClassificationSkill(
                     name="emotions",
                     instructions="Recognize emotions from text.",
-                    input_template="Examples:\n\n{examples}\n\nNow recognize:\n\nText: {text}",
+                    input_template="Examples:\n\n{examples}\n\nNow recognize:\n\nText: {input}",
                     output_template="Emotions: {prediction}",
                     labels={"prediction": ["happy", "sad", "angry", "neutral"]},
                 ),
@@ -39,7 +39,7 @@ def test_rag_with_openai_chat_completion():
             ground_truth_columns={"prediction": "emotions"},
             df=pd.DataFrame(
                 {
-                    "text": [
+                    "input": [
                         "I am happy",
                         "I am angry",
                         "I am sad",
@@ -53,7 +53,9 @@ def test_rag_with_openai_chat_completion():
             ),
         ),
         runtimes={"default": OpenAIChatRuntime(model="gpt-3.5-turbo")},
-        teacher_runtimes={"openai-teacher": OpenAIChatRuntime(model="gpt-4")},
+        teacher_runtimes={"openai-teacher": OpenAIChatRuntime(model="gpt-4o")},
         default_teacher_runtime="openai-teacher",
     )
     agent.learn(learning_iterations=2)
+
+    # TODO: @matt-bernstein: Add assertions
