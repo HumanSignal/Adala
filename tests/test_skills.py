@@ -389,3 +389,22 @@ def test_translation_skill():
                                                 'Ninahitaji kahawa',
                                                 'Muziki huchezesha roho',
                                                 'Ndoto zinakuwa kweli']
+
+
+@pytest.mark.vcr
+def test_entity_extraction():
+    from adala.skills.collection.entity_extraction import EntityExtraction
+    # documents that contain entities
+    df = pd.DataFrame([
+        {"text": "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services."},
+        {"text": "The iPhone 14 is the latest smartphone from Apple Inc."},
+        {"text": "The MacBook Pro is a line of Macintosh portable computers introduced in January 2006 by Apple Inc."},
+        {"text": "The Apple Watch is a line of smartwatches produced by Apple Inc."},
+        {"text": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."},
+    ])
+
+    agent = Agent(skills=EntityExtraction())
+    predictions = agent.run(df)
+    assert len(predictions.entities) == 5
+    assert predictions.entities[0][0]['quote_string'] == "Apple Inc."
+    assert predictions.entities[0][1]['quote_string'] == "American"
