@@ -25,6 +25,12 @@ def pytest_addoption(parser):
         help="run tests that require OpenAI key",
     )
     parser.addoption(
+        "--use-azure",
+        action="store_true",
+        default=False,
+        help="run tests that require Azure OpenAI key",
+    )
+    parser.addoption(
         "--use-server",
         action="store_true",
         default=False,
@@ -34,6 +40,7 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "use_openai: mark test as requiring OpenAI key")
+    config.addinivalue_line("markers", "use_azure: mark test as requiring Azure OpenAI key")
     config.addinivalue_line(
         "markers", "use_server: mark test as requiring running adala server"
     )
@@ -45,6 +52,12 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "use_openai" in item.keywords:
                 item.add_marker(skip_openai)
+
+    if not config.getoption("--use-azure"):
+        skip_azure = pytest.mark.skip(reason="need Azure OpenAI key to run")
+        for item in items:
+            if "use_azure" in item.keywords:
+                item.add_marker(skip_azure)
 
     if not config.getoption("--use-server"):
         skip_server = pytest.mark.skip(reason="need live server to run")
