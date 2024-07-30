@@ -81,12 +81,12 @@ def get_messages(user_prompt: str, system_prompt: Optional[str] = None, instruct
 
 
 async def async_get_llm_response(
-    inference_settings: LiteLLMInferenceSettings,
     user_prompt: Optional[str] = None,
     system_prompt: Optional[str] = None,
     messages: Optional[List[Dict[str, str]]] = None,
     instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
+    inference_settings: LiteLLMInferenceSettings = LiteLLMInferenceSettings(),
 ) -> LLMResponse:
     """
     Async version of create_completion function with error handling and session timeout.
@@ -135,11 +135,11 @@ async def async_get_llm_response(
 
 
 async def parallel_async_get_llm_response(
-    inference_settings: LiteLLMInferenceSettings,
     user_prompts: List[str],
     system_prompt: Optional[str] = None,
     instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
+    inference_settings: LiteLLMInferenceSettings = LiteLLMInferenceSettings(),
 ):
     tasks = [
         asyncio.ensure_future(
@@ -158,12 +158,12 @@ async def parallel_async_get_llm_response(
 
 
 def get_llm_response(
-    inference_settings: LiteLLMInferenceSettings,
     user_prompt: Optional[str] = None,
     system_prompt: Optional[str] = None,
     messages: Optional[List[Dict[str, str]]] = None,
     instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
+    inference_settings: LiteLLMInferenceSettings = LiteLLMInferenceSettings(),
 ) -> LLMResponse:
 
     """
@@ -214,12 +214,12 @@ def get_llm_response(
 
 
 def parallel_get_llm_response(
-    inference_settings: LiteLLMInferenceSettings,
     user_prompts: List[str],
     system_prompt: Optional[str] = None,
     messages: Optional[List[Dict[str, str]]] = None,
     instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
+    inference_settings: LiteLLMInferenceSettings = LiteLLMInferenceSettings(),
 ):
     pool = mp.Pool(mp.cpu_count())
     responses = pool.starmap(
