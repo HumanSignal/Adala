@@ -3,7 +3,6 @@ import logging
 import json
 from abc import abstractmethod
 from pydantic import BaseModel, Field, computed_field, ConfigDict, model_validator
-from pathlib import Path
 import csv
 
 from adala.utils.registry import BaseModelInRegistry
@@ -75,7 +74,8 @@ class LSEBatchItem(BaseModel):
     )
 
     task_id: int
-    output: Optional[str]
+    # TODO this field no longer populates if there was an error, so validation fails without a default - should probably split this item into 3 different constructors corresponding to new internal adala objects (or just reuse those objects)
+    output: Optional[str] = None
     # TODO handle in DIA-1122
     # we don't need to use reserved names anymore here because they're not in a DataFrame, but a structure with proper typing available
     error: bool = Field(False, alias="_adala_error")
