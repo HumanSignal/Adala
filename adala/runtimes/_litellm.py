@@ -31,8 +31,6 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         arbitrary_types_allowed=True
     )  # for @computed_field
 
-    splitter: Optional[str] = None
-
     def init_runtime(self) -> 'Runtime':
         # check model availability
         try:
@@ -119,8 +117,6 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
     model_config = ConfigDict(
         arbitrary_types_allowed=True
     )  # for @computed_field
-
-    splitter: Optional[str] = None
 
     @field_validator("concurrency", mode="before")
     def check_concurrency(cls, value) -> int:
