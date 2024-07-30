@@ -28,24 +28,15 @@ def test_code_generation():
     agent = Agent(skills=skillset, environment=env)
     predictions = agent.run()
     expected_code = """\
-import json
-from collections import defaultdict
+# Given input JSON format
+input1 = {"a": 1, "b": 2}
+input2 = {"a": 3, "b": 4}
+input3 = {"a": 5, "b": 6}
 
-def sum_values(json_list):
-    result = defaultdict(int)
-    for json_str in json_list:
-        data = json.loads(json_str)
-        for key, value in data.items():
-            result[key] += value
-    return dict(result)
+# Calculate the sum of values per key
+result = {}
+for key in input1.keys():
+    result[key] = input1[key] + input2[key] + input3[key]
 
-# Example usage
-input_jsons = [
-    '{"a": 1, "b": 2}',
-    '{"a": 3, "b": 4}',
-    '{"a": 5, "b": 6}'
-]
-
-output = sum_values(input_jsons)
-print(output)  # Output will be {'a': 9, 'b': 12}"""
+result"""
     assert predictions.code[0] == expected_code

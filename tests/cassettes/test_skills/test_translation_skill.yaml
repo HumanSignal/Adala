@@ -13,9 +13,6 @@ interactions:
       - '111'
       content-type:
       - application/json
-      cookie:
-      - __cf_bm=XnKzp8r_WZCfJw13WL1LTtBJ4HpbBBvYwzacT.7sgyQ-1722353252-1.0.1.1-Q7.i9SCq.ATMyfQQImljnUY.tyN_ldf_kvwyo7DkMshxNU.8kwWbeuKXZxzbHQe0sjy3Xty8bdwAdqbaxPG02A;
-        _cfuvid=xVBbjRk60YJc1IvMjv37Nuh0ZkC4zKLBlpdJ9nWDDkE-1722350760594-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
@@ -39,17 +36,17 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA1SQwW7CMBBE7/mKrS+9JIgEKCLHSlVbVfADVYVMsklMba9rb6oixL9XDgHaiw8z
-        nvEbHxMAoWpRgqg6yZVxOlt97R/0QcrN91uDYfOYr5vOe9M88xOvRRoTtNtjxZfUpCLjNLIie7Yr
-        j5IxtubLopgtZvPlajAM1ahjrHWczSaLjHu/o2yaF4sx2ZGqMIgS3hMAgONwRkZb448oYZpeFIMh
-        yBZFeb0EIDzpqAgZggosLYv0ZlZkGe2A/YJa0x283hvY94FBQtzQM3pwnlovTQqBxJg9XR/V1DpP
-        uwhoe62veqOsCt3Wowxk4wMabcvdueCUAHwM8/p/xMJ5Mo63TJ9oY2U+PxeK24f+McfpgomlvunF
-        PBkJRTgERrNtlG3RO6+GrZEzOSW/AAAA//8DAABEWzrqAQAA
+        H4sIAAAAAAAAA1SQS0/DMBCE7/kViy9ckiqPRkCOiEernjkghCo33SYujte1N4KC+t+R07SFiw8z
+        nvE3/okAhFqLCkTdSq47q5O73W728vDN+4X+LBbPj7yV+9Kms/n961Mh4pCg1RZrPqUmNXVWIysy
+        R7t2KBlDa3aT58Vtlpb5YHS0Rh1ijeWkmJQJ925FSZrl5ZhsSdXoRQVvEQDAz3AGRrPGL1FBGp+U
+        Dr2XDYrqfAlAONJBEdJ75VkaFvHFrMkwmgF7hlrTFcyvO9j2nkFC2NAzOrCOGie7GDyJMXs4P6qp
+        sY5WAdD0Wp/1jTLKt0uH0pMJD2g0DbfHgkME8D7M6/8RC+uos7xk+kATKrPpsVBcPvSPOU4XTCz1
+        Rc+n0Ugo/N4zdsuNMg0669SwNXBGh+gXAAD//wMAqpdUC+oBAAA=
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8ab6651b6b442a24-ORD
+      - 8ab90649dfd9106c-ORD
       Connection:
       - keep-alive
       Content-Encoding:
@@ -57,9 +54,15 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 30 Jul 2024 15:31:19 GMT
+      - Tue, 30 Jul 2024 23:10:52 GMT
       Server:
       - cloudflare
+      Set-Cookie:
+      - __cf_bm=D4iHUEfwsfFTD5r2THCxXnMxu5SG_o933Wboe8P6m7o-1722381052-1.0.1.1-fts5iCjEL.VXSdInsZkkuLx3YpF6xyi7JsUsYQ_Z60w5QHOgjyqlLa6KULVqCRz67w5Bg2DTOaJqM3Fe.D01JQ;
+        path=/; expires=Tue, 30-Jul-24 23:40:52 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=cEPYwS3a4TTZkxz2p_0w7mxh72DlaaHZWZaLC49LCWg-1722381052852-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Transfer-Encoding:
       - chunked
       X-Content-Type-Options:
@@ -69,7 +72,7 @@ interactions:
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '239'
+      - '152'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -81,329 +84,26 @@ interactions:
       x-ratelimit-remaining-requests:
       - '9999'
       x-ratelimit-remaining-tokens:
-      - '49999984'
+      - '49999983'
       x-ratelimit-reset-requests:
       - 6ms
       x-ratelimit-reset-tokens:
       - 0s
       x-request-id:
-      - req_881bc667375a6075366b0ba99bf20263
+      - req_51a11fb5b7a10f242d7d04ccbad2540a
     status:
       code: 200
       message: OK
 - request:
     body: '{"messages": [{"role": "system", "content": "Translate given text to the
       target language."}, {"role": "user", "content": "Text: \"\"\"\nEl sol brilla
-      siempre\n\"\"\"\n\n Target language: Swahili"}], "model": "gpt-4o-mini", "max_tokens":
+      siempre\n\"\"\"\n\n Target language: Swahili"}], "model": "gpt-3.5-turbo", "max_tokens":
       1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type": "function", "function":
       {"name": "Output"}}, "tools": [{"type": "function", "function": {"name": "Output",
       "description": "Correctly extracted `Output` with all the required parameters
       with correct types", "parameters": {"properties": {"translation": {"description":
       "Translation:", "title": "Translation", "type": "string"}}, "required": ["translation"],
       "type": "object"}}}]}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '676'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=XnKzp8r_WZCfJw13WL1LTtBJ4HpbBBvYwzacT.7sgyQ-1722353252-1.0.1.1-Q7.i9SCq.ATMyfQQImljnUY.tyN_ldf_kvwyo7DkMshxNU.8kwWbeuKXZxzbHQe0sjy3Xty8bdwAdqbaxPG02A;
-        _cfuvid=xVBbjRk60YJc1IvMjv37Nuh0ZkC4zKLBlpdJ9nWDDkE-1722350760594-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - Linux
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.11.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//bFLbbptAEH3nK1bzbCqMnWB4a6NIVaI2SpVYkeoITWCBdfYWdogcW/73
-        asExjlUeVqM5ey47wy5gDEQJGYOiQSqUlWH6tr6U8cXm5ufi/dfiaalu36vl/Vt03SQPTzDxDPOy
-        5gV9sr4VRlnJSRg9wEXLkbhXnSZxPLuYzZO0B5QpufS02lI4N6ESWoRxFM/DKAmniwO7MaLgDjL2
-        N2CMsV1/+py65BvIWDT57CjuHNYcsuMlxqA10ncAnROOUBNMRrAwmrj20XUn5QlAxsi8QClH4+Hb
-        ndTjsFDKXN1vN9g9Xn1fXj80ydXmx+/tY/JnnZz4DdIftg9Udbo4DukEP/azMzPGQKPquXcd2Y7O
-        mIwBtnWnuCafGnYroBa1k+jlVpCt4KZDJoVG1DVukZUoFK5gD1909sH/6udDtT+OW5ratubFnU0P
-        KqGFa/KWo+tfAY6MHSy83HO/1u7LpsC2RlnKybxy7QUX6SAH4880gtPDyoEMoRz7aRoc8oH7cMRV
-        Xgld89a2ot8xVDaPqmhWzquIcwj2wT8AAAD//wMA0aHaIPECAAA=
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8ab6651eaf752a24-ORD
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 30 Jul 2024 15:31:19 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - heartex
-      openai-processing-ms:
-      - '215'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '30000'
-      x-ratelimit-limit-tokens:
-      - '150000000'
-      x-ratelimit-remaining-requests:
-      - '29999'
-      x-ratelimit-remaining-tokens:
-      - '149998970'
-      x-ratelimit-reset-requests:
-      - 2ms
-      x-ratelimit-reset-tokens:
-      - 0s
-      x-request-id:
-      - req_3faa7ab755aab14be0ab0a3fbe42aabd
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "Translate given text to the
-      target language."}, {"role": "user", "content": "Text: \"\"\"\nLa vie est belle\n\"\"\"\n\n
-      Target language: Swahili"}], "model": "gpt-4o-mini", "max_tokens": 1000, "seed":
-      47, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
-      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
-      "Correctly extracted `Output` with all the required parameters with correct
-      types", "parameters": {"properties": {"translation": {"description": "Translation:",
-      "title": "Translation", "type": "string"}}, "required": ["translation"], "type":
-      "object"}}}]}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '671'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=XnKzp8r_WZCfJw13WL1LTtBJ4HpbBBvYwzacT.7sgyQ-1722353252-1.0.1.1-Q7.i9SCq.ATMyfQQImljnUY.tyN_ldf_kvwyo7DkMshxNU.8kwWbeuKXZxzbHQe0sjy3Xty8bdwAdqbaxPG02A;
-        _cfuvid=xVBbjRk60YJc1IvMjv37Nuh0ZkC4zKLBlpdJ9nWDDkE-1722350760594-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - Linux
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.11.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA2xSTW/bMAy9+1cIPNeFm6SL49s27LBD2qUYNqxLYSiy7CiVRFWit2ZB/vsgO4vd
-        YD4IBJ/eh0gfEsZAVVAwEFtOwjidLl5278y3X78/LpUQu8cXUX1uVvl+9ejUysFVZOBmJwX9Y10L
-        NE5LUmh7WHjJSUbVm/lkMr2dzvKsAwxWUkda4yidYWqUVekkm8zSbJ7e5Cf2FpWQAQr2M2GMsUN3
-        xpy2kq9QsE6r6xgZAm8kFOdLjIFHHTvAQ1CBuCW4GkCBlqSN0W2r9QggRF0KrvVg3H+HUT0Mi2td
-        PtCPr/b9B2z2X55v75A+vS4X7rvdjPx66b3rAtWtFechjfBzv7gwYwwsNx33viXX0gWTMeC+aY20
-        FFPDYQ3kuQ2aR7k1FGtYchW2nFnFDP/TerWGI7zROCb/q59O1fE8ao2N87gJF5ODWlkVtqWXPHQv
-        gEDoeoso99SttH2zJXAejaOS8FnaKJjnvRwMP9IALk4YIXE9as+TUzwI+0DSlLWyjfTOq269ULsy
-        q7NpNaszKSE5Jn8BAAD//wMAy3HkTuwCAAA=
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8ab66521ebb32a24-ORD
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 30 Jul 2024 15:31:20 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - heartex
-      openai-processing-ms:
-      - '293'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '30000'
-      x-ratelimit-limit-tokens:
-      - '150000000'
-      x-ratelimit-remaining-requests:
-      - '29999'
-      x-ratelimit-remaining-tokens:
-      - '149998972'
-      x-ratelimit-reset-requests:
-      - 2ms
-      x-ratelimit-reset-tokens:
-      - 0s
-      x-request-id:
-      - req_8f42e1f699b92885f9a922aee44b34c7
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "Translate given text to the
-      target language."}, {"role": "user", "content": "Text: \"\"\"\nDer Wald ruft
-      mich\n\"\"\"\n\n Target language: Swahili"}], "model": "gpt-4o-mini", "max_tokens":
-      1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type": "function", "function":
-      {"name": "Output"}}, "tools": [{"type": "function", "function": {"name": "Output",
-      "description": "Correctly extracted `Output` with all the required parameters
-      with correct types", "parameters": {"properties": {"translation": {"description":
-      "Translation:", "title": "Translation", "type": "string"}}, "required": ["translation"],
-      "type": "object"}}}]}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '673'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=XnKzp8r_WZCfJw13WL1LTtBJ4HpbBBvYwzacT.7sgyQ-1722353252-1.0.1.1-Q7.i9SCq.ATMyfQQImljnUY.tyN_ldf_kvwyo7DkMshxNU.8kwWbeuKXZxzbHQe0sjy3Xty8bdwAdqbaxPG02A;
-        _cfuvid=xVBbjRk60YJc1IvMjv37Nuh0ZkC4zKLBlpdJ9nWDDkE-1722350760594-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - Linux
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.11.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//bFLbauMwEH33V4h5rhfHSVPHjwuFXjZtt7BQaIpRFNlRqttKI7ptyL8X
-        KWnshtWDGOboXJjRNiMExApqAmxNkSkr89nfzVTdzUbtSF7NzbUWb7qopm/zj/OPjYazyDDLDWf4
-        xfrBjLKSozAHmDlOkUfV0UVZjs/Hk6pIgDIrLiOts5hPTK6EFnlZlJO8uMhH1YG9NoJxDzV5zggh
-        ZJvumFOv+D+oSdJKHcW9px2H+viIEHBGxg5Q74VHqhHOepAZjVzH6DpIOQDQGNkwKmVvvD/bQd0P
-        i0rZ3Nrpa3i8vZQPf24efy7974er9unyVznw20u/2xSoDZodhzTAj/36xIwQ0FQl7n1AG/CESQhQ
-        1wXFNcbUsF0AOqq9pFFuAfUC5l5gIEFTLQTSBezgm8Iu+1/9cqh2x0FL01lnlv5kbtAKLfy6cZz6
-        lB88Gru3iHIvaaHh247AOqMsNmheuY6C1WwvB/036sEvDA1SOWhX2SEe+HePXDWt0B131om0XGht
-        U7TFeDVpC84h22WfAAAA//8DAOF9Y87qAgAA
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8ab66526fa552a24-ORD
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 30 Jul 2024 15:31:22 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - heartex
-      openai-processing-ms:
-      - '993'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '30000'
-      x-ratelimit-limit-tokens:
-      - '150000000'
-      x-ratelimit-remaining-requests:
-      - '29999'
-      x-ratelimit-remaining-tokens:
-      - '149998972'
-      x-ratelimit-reset-requests:
-      - 2ms
-      x-ratelimit-reset-tokens:
-      - 0s
-      x-request-id:
-      - req_b456784d0ba3058fd6cf2ed5a3ee866e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "Translate given text to the
-      target language."}, {"role": "user", "content": "Text: \"\"\"\nAmo la pizza
-      napoletana\n\"\"\"\n\n Target language: Swahili"}], "model": "gpt-4o-mini",
-      "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
-      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
-      "function": {"name": "Output", "description": "Correctly extracted `Output`
-      with all the required parameters with correct types", "parameters": {"properties":
-      {"translation": {"description": "Translation:", "title": "Translation", "type":
-      "string"}}, "required": ["translation"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -416,8 +116,8 @@ interactions:
       content-type:
       - application/json
       cookie:
-      - __cf_bm=XnKzp8r_WZCfJw13WL1LTtBJ4HpbBBvYwzacT.7sgyQ-1722353252-1.0.1.1-Q7.i9SCq.ATMyfQQImljnUY.tyN_ldf_kvwyo7DkMshxNU.8kwWbeuKXZxzbHQe0sjy3Xty8bdwAdqbaxPG02A;
-        _cfuvid=xVBbjRk60YJc1IvMjv37Nuh0ZkC4zKLBlpdJ9nWDDkE-1722350760594-0.0.1.1-604800000
+      - __cf_bm=D4iHUEfwsfFTD5r2THCxXnMxu5SG_o933Wboe8P6m7o-1722381052-1.0.1.1-fts5iCjEL.VXSdInsZkkuLx3YpF6xyi7JsUsYQ_Z60w5QHOgjyqlLa6KULVqCRz67w5Bg2DTOaJqM3Fe.D01JQ;
+        _cfuvid=cEPYwS3a4TTZkxz2p_0w7mxh72DlaaHZWZaLC49LCWg-1722381052852-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
@@ -441,19 +141,19 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSS2+bQBC+8ytWczYVBqfB3BJVSuKqaRWlh7qO0GYZ8Kb7KjtIfsj/vVrsGGKV
-        w2o0336PnWEfMQaygoKBWHMS2ql4/vfts82Wef5lt7lCMZdPd/dq2d0sFs86h0lg2Nc3FPTO+iSs
-        dgpJWnOERYucMKhOr9M0u8pmedoD2laoAq1xFM9srKWRcZqkszi5jqcncbG2UqCHgv2OGGNs358h
-        p6lwAwVLJu8djd7zBqE4X2IMWqtCB7j30hM3BJMBFNYQmhDddEqNALJWlYIrNRgfv/2oHobFlSpv
-        b7a/vi1+fn1Ydv55sfnxlGfdwy35kd9Reuv6QHVnxHlII/zcLy7MGAPDdc/93pHr6ILJGPC26TQa
-        CqlhvwJqufGKB7kVFCt4lIY7NBVnTu52nG05e+TOKrmCA3wQO0T/q19O1eE8c2Ub19pXfzFCqKWR
-        fl22yH3/FPBk3dEiyL30u+0+rAtca7WjkuwfNEFwnh7lYPijBnA6PYFkiatRP8miU0DwW0+oy1qa
-        BlvXyn7TULsyqZOsmtUJIkSH6B8AAAD//wMAnrMinPcCAAA=
+        H4sIAAAAAAAAAwAAAP//bFI7b9swEN71K4hbutiBLcVtrK0GijRd0gZFljoQzhQtM+Er5BGNbfi/
+        F5QcSTGqgTjcx+/BOx0zxkDWUDLgOySunZouX1+/P5rrx1+rb1gXt2pF93/lw/73nXl++wqTxLCb
+        Z8HpnXXFrXZKkLSmg7kXSCKpzr/keXEzny2KFtC2FirRGkfT4moxpeg3djqb54szc2clFwFK9idj
+        jLFje6aMphZvULLZ5L2jRQjYCCj7S4yBtyp1AEOQgdAQTAaQW0PCpNgmKjUCyFpVcVRqMO6+46ge
+        BoVKVYciLn8+yEMebw8i9265ut77ItyN/DrpvWsDbaPh/YBGeN8vL8wYA4O65d5HcpEumIwB+iZq
+        YSilhuMayKMJCpPcGso1/IjIdvEga8leomk+IbIapcY1nOCD1in7X/10rk79yJVtnLebcDFB2Eoj
+        w67yAkP7EghkXWeR5J7a1cYP2wLnrXZUkX0RJgku804Ohp9pAOefzyBZQjXqz26yc0AI+0BCV1tp
+        GuGdl/2is1P2DwAA//8DAFOg5Q7nAgAA
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8ab665312fe62a24-ORD
+      - 8ab9064d3c5a106c-ORD
       Connection:
       - keep-alive
       Content-Encoding:
@@ -461,7 +161,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 30 Jul 2024 15:31:23 GMT
+      - Tue, 30 Jul 2024 23:10:53 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -473,32 +173,32 @@ interactions:
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '367'
+      - '330'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
       - max-age=15552000; includeSubDomains; preload
       x-ratelimit-limit-requests:
-      - '30000'
+      - '10000'
       x-ratelimit-limit-tokens:
-      - '150000000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '29999'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '149998970'
+      - '49998970'
       x-ratelimit-reset-requests:
-      - 2ms
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 0s
+      - 1ms
       x-request-id:
-      - req_1a255210db85ae122c4fe1e104939a20
+      - req_114375e1f0f1b6e564f18589b65d1dbb
     status:
       code: 200
       message: OK
 - request:
     body: '{"messages": [{"role": "system", "content": "Translate given text to the
-      target language."}, {"role": "user", "content": "Text: \"\"\"\n\u6625\u5929\u7684\u82b1\u5f88\u7f8e\n\"\"\"\n\n
-      Target language: Swahili"}], "model": "gpt-4o-mini", "max_tokens": 1000, "seed":
+      target language."}, {"role": "user", "content": "Text: \"\"\"\nLa vie est belle\n\"\"\"\n\n
+      Target language: Swahili"}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed":
       47, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
       "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
       "Correctly extracted `Output` with all the required parameters with correct
@@ -513,12 +213,12 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '691'
+      - '673'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=XnKzp8r_WZCfJw13WL1LTtBJ4HpbBBvYwzacT.7sgyQ-1722353252-1.0.1.1-Q7.i9SCq.ATMyfQQImljnUY.tyN_ldf_kvwyo7DkMshxNU.8kwWbeuKXZxzbHQe0sjy3Xty8bdwAdqbaxPG02A;
-        _cfuvid=xVBbjRk60YJc1IvMjv37Nuh0ZkC4zKLBlpdJ9nWDDkE-1722350760594-0.0.1.1-604800000
+      - __cf_bm=D4iHUEfwsfFTD5r2THCxXnMxu5SG_o933Wboe8P6m7o-1722381052-1.0.1.1-fts5iCjEL.VXSdInsZkkuLx3YpF6xyi7JsUsYQ_Z60w5QHOgjyqlLa6KULVqCRz67w5Bg2DTOaJqM3Fe.D01JQ;
+        _cfuvid=cEPYwS3a4TTZkxz2p_0w7mxh72DlaaHZWZaLC49LCWg-1722381052852-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
@@ -542,19 +242,19 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSyW7bMBC96ysGc7YKU1asWNduQNLtkDZA60CgJFqmyy1c0NqG/72grFiKUR6I
-        wTy+N29meEwAkLdYAjZb6htpRLp63i1Nu/qWP34JZvdJko9kZ+x9cZCHt884iwxd71jjX1hvGi2N
-        YJ5rdYYby6hnUZUUWba4WeS3ix6QumUi0jrj01ynkiueZvMsT+dFSm4H9lbzhjks4VcCAHDs7+hT
-        tewvljCfvWQkc452DMvLIwC0WsQMUue481R5nI1go5VnKlpXQYgJ4LUWVUOFGAufz3ESj8OiQlRt
-        9vCQq4O6e7y7+bP4Wfx49/1DUb+/n9Q7S+9Nb2gTVHMZ0gS/5MurYgCoqOy5X4M3wV8xAZDaLkim
-        fHSNxzV6S5UTNMqtsVzjZxoo7Ck4Y7nqQHGQ9BAsX+MJX2mdkv/FT0N0uoxc6M5YXburCeKGK+62
-        lWXU9Z2g89qcS0S5p3614dW20Fgtja+8/s1UFFwNm8XxQ40gIQPotadikp+TZDCIbu88k9WGq47Z
-        2HH/RzemWhJSL5dFTVaYnJJ/AAAA//8DAK9Vz5f2AgAA
+        H4sIAAAAAAAAAwAAAP//bFLbbtswDH33Vwh8Too4RrbVr2u37tIOw4Y2bVMYiiLb6iRRkWhgWZB/
+        H2SnthvUDwLBo3MR6X3CGKgN5AxEzUkYp6fn2+3V7UX2/PDxp6Yv39QNXv66sbfl7PL603eYRAau
+        n6WgF9aZQOO0JIW2g4WXnGRUTd/P59mHdLbIWsDgRupIqxxNs7PFlBq/xuksnS+OzBqVkAFy9pgw
+        xti+PWNGu5F/IWezyUvHyBB4JSHvLzEGHnXsAA9BBeKWYDKAAi1JG2PbRusRQIi6EFzrwbj79qN6
+        GBTXuli+W37e/a6v+MP99n6JX+/usnIjL9KRXye9c22gsrGiH9AI7/v5iRljYLlpuT8acg2dMBkD
+        7qvGSEsxNexXQJ7boHmUW0G+gmuuQs2ZVczwf41XKzjAK41D8lb9dKwO/ag1Vs7jOpxMDkplVagL
+        L3loXwCB0HUWUe6pXWnzakvgPBpHBeEfaaPgedrJwfATDWB6XDcQEtfjfpocA0LYBZKmKJWtpHde
+        9QtODsl/AAAA//8DAFIhOi7fAgAA
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8ab665364eb82a24-ORD
+      - 8ab90650d9f6106c-ORD
       Connection:
       - keep-alive
       Content-Encoding:
@@ -562,7 +262,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 30 Jul 2024 15:31:24 GMT
+      - Tue, 30 Jul 2024 23:10:53 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -574,39 +274,38 @@ interactions:
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '596'
+      - '221'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
       - max-age=15552000; includeSubDomains; preload
       x-ratelimit-limit-requests:
-      - '30000'
+      - '10000'
       x-ratelimit-limit-tokens:
-      - '150000000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '29999'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '149998972'
+      - '49998971'
       x-ratelimit-reset-requests:
-      - 2ms
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 0s
+      - 1ms
       x-request-id:
-      - req_89605aa71778c9122fee2f11537cb02f
+      - req_55976d966791f51dfb31d74412cb8467
     status:
       code: 200
       message: OK
 - request:
     body: '{"messages": [{"role": "system", "content": "Translate given text to the
-      target language."}, {"role": "user", "content": "Text: \"\"\"\n\u0417\u0432\u0435\u0437\u0434\u044b
-      \u0441\u0432\u0435\u0440\u043a\u0430\u044e\u0442 \u043d\u043e\u0447\u044c\u044e\n\"\"\"\n\n
-      Target language: Swahili"}], "model": "gpt-4o-mini", "max_tokens": 1000, "seed":
-      47, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
-      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
-      "Correctly extracted `Output` with all the required parameters with correct
-      types", "parameters": {"properties": {"translation": {"description": "Translation:",
-      "title": "Translation", "type": "string"}}, "required": ["translation"], "type":
-      "object"}}}]}'
+      target language."}, {"role": "user", "content": "Text: \"\"\"\nDer Wald ruft
+      mich\n\"\"\"\n\n Target language: Swahili"}], "model": "gpt-3.5-turbo", "max_tokens":
+      1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type": "function", "function":
+      {"name": "Output"}}, "tools": [{"type": "function", "function": {"name": "Output",
+      "description": "Correctly extracted `Output` with all the required parameters
+      with correct types", "parameters": {"properties": {"translation": {"description":
+      "Translation:", "title": "Translation", "type": "string"}}, "required": ["translation"],
+      "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -615,12 +314,12 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '771'
+      - '675'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=XnKzp8r_WZCfJw13WL1LTtBJ4HpbBBvYwzacT.7sgyQ-1722353252-1.0.1.1-Q7.i9SCq.ATMyfQQImljnUY.tyN_ldf_kvwyo7DkMshxNU.8kwWbeuKXZxzbHQe0sjy3Xty8bdwAdqbaxPG02A;
-        _cfuvid=xVBbjRk60YJc1IvMjv37Nuh0ZkC4zKLBlpdJ9nWDDkE-1722350760594-0.0.1.1-604800000
+      - __cf_bm=D4iHUEfwsfFTD5r2THCxXnMxu5SG_o933Wboe8P6m7o-1722381052-1.0.1.1-fts5iCjEL.VXSdInsZkkuLx3YpF6xyi7JsUsYQ_Z60w5QHOgjyqlLa6KULVqCRz67w5Bg2DTOaJqM3Fe.D01JQ;
+        _cfuvid=cEPYwS3a4TTZkxz2p_0w7mxh72DlaaHZWZaLC49LCWg-1722381052852-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
@@ -644,19 +343,19 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSS2/bMAy++1cIvOwSD35tTX0cUGxAtxrYYcO2FIbq0I5aWVQkeqgb5L8PttPY
-        DeaDQPDT9xDpQyAEqC3kAqqd5Kq1OrzeP37ca/zxmf4mcv/7K67ll+9dkmnqY4LVwKCHR6z4lfW+
-        otZqZEVmgiuHknFQja+SJP2QZutsBFraoh5ojeUwo7BVRoVJlGRhdBXG6xN7R6pCD7n4EwghxGE8
-        h5xmi8+Qi2j12mnRe9kg5OdLQoAjPXRAeq88S8OwmsGKDKMZoptO6wXARLqspNaz8fQdFvU8LKl1
-        Wf+8xeTTXfHt+aagl/SmdsWvvri1C79JurdjoLoz1XlIC/zczy/MhAAj25FbdGw7vmAKAdI1XYuG
-        h9Rw2AA7abyWg9wG8g3c9cRSvCgjTfNOOik6r566DRzhjdIx+F99f6qO54FraqyjB38xP6iVUX5X
-        OpR+fAd4JjtZDHL342K7N7sC66i1XDI9oRkEr+NJDubfaQbj5AQysdSLfpQGp4Dge8/YlrUyDTrr
-        1LhmqG0Z1VG6zeoIEYJj8A8AAP//AwDv0ojl9AIAAA==
+        H4sIAAAAAAAAAwAAAP//bFJbT8IwFH7fr2jOMxg2QGWPhKiJGi/REBWzlFK2StfW9jRKCP/ddMNt
+        EvvQnJyv3yXndBcRAmIFKQFWUGSlkf3J5+fV3F183c1vJL7Orp+no5fheXF1ev9xsYFeYOjlB2f4
+        yzphujSSo9CqhpnlFHlQjc+SZHgeD8ajCij1istAyw32hyfjPnq71P1BnIwPzEILxh2k5C0ihJBd
+        dYeMasW/ISWD3m+n5M7RnEPaPCIErJahA9Q54ZAqhF4LMq2QqxBbeSk7AGotM0albI3rs+vU7aCo
+        lNno5nvkivmkmC2Tp6eX04eteHzdXE47frX01lSB1l6xZkAdvOmnR2aEgKJlxb3zaDweMQkBanNf
+        coUhNewWgJYqJ2mQW0C6gFsn0BOvqBIC6QL28EdhH/1Xvx+qfTNoqXNj9dIdzQ3WQglXZJZTV+UH
+        h9rUFkHuvVqo/7MjMFaXBjPUG66C4CSp5aD9Qh3wgKFGKtt2PIijQz5wW4e8zNZC5dwaK5rtRvvo
+        BwAA//8DAHdRWILcAgAA
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8ab6653df8162a24-ORD
+      - 8ab906547f60106c-ORD
       Connection:
       - keep-alive
       Content-Encoding:
@@ -664,7 +363,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 30 Jul 2024 15:31:25 GMT
+      - Tue, 30 Jul 2024 23:10:54 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -676,234 +375,32 @@ interactions:
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '422'
+      - '191'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
       - max-age=15552000; includeSubDomains; preload
       x-ratelimit-limit-requests:
-      - '30000'
+      - '10000'
       x-ratelimit-limit-tokens:
-      - '150000000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '29999'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '149998966'
+      - '49998971'
       x-ratelimit-reset-requests:
-      - 2ms
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 0s
+      - 1ms
       x-request-id:
-      - req_01cd00d5aa5c9202db2ebfbf2b06562e
+      - req_6e047ceb656e907fe205b5f4f514f727
     status:
       code: 200
       message: OK
 - request:
     body: '{"messages": [{"role": "system", "content": "Translate given text to the
-      target language."}, {"role": "user", "content": "Text: \"\"\"\n\u96e8\u306e\u5f8c\u306e\u8679\n\"\"\"\n\n
-      Target language: Swahili"}], "model": "gpt-4o-mini", "max_tokens": 1000, "seed":
-      47, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
-      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
-      "Correctly extracted `Output` with all the required parameters with correct
-      types", "parameters": {"properties": {"translation": {"description": "Translation:",
-      "title": "Translation", "type": "string"}}, "required": ["translation"], "type":
-      "object"}}}]}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '685'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=XnKzp8r_WZCfJw13WL1LTtBJ4HpbBBvYwzacT.7sgyQ-1722353252-1.0.1.1-Q7.i9SCq.ATMyfQQImljnUY.tyN_ldf_kvwyo7DkMshxNU.8kwWbeuKXZxzbHQe0sjy3Xty8bdwAdqbaxPG02A;
-        _cfuvid=xVBbjRk60YJc1IvMjv37Nuh0ZkC4zKLBlpdJ9nWDDkE-1722350760594-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - Linux
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.11.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//bFJdb5tAEHznV5z22VQY7MbmsfVDmypKpcpKpDpCazjwpfeVu8WNY/m/
-        VweOIVZ5QMsOMzs3e8eIMRAV5AzKHVKprIyXL8+f3X26/vFNP7zc3j6us4flPFm9fX+723uYBIbZ
-        PvOS3lmfSqOs5CSM7uHScSQeVKc3aZrNs9li3gHKVFwGWmMpnplYCS3iNElncXITTxdn9s6IknvI
-        2e+IMcaO3Tv41BV/hZwlk/eO4t5jwyG//MQYOCNDB9B74Qk1wWQAS6OJ62Bdt1KOADJGFiVKOQzu
-        n+OoHsJCKYtV+qt9nH7F15/rzK2UEXfp4Uu6l6N5vfTBdobqVpeXkEb4pZ9fDWMMNKqOe9+SbemK
-        yRiga1rFNQXXcNwAOdReYpDbQL6BtQ2psb/I1L5FtkWskB36rw2c4IPeKfpf/XSuTpfYpWmsM1t/
-        lSLUQgu/KxxH350GPBnbjwhyT9162w8bA+uMslSQ+cN1EFwsezkYLtUATrMzSIZQjvpJGp0Ngj94
-        4qqohW64s050y4baFkmdZNWsTjiH6BT9AwAA//8DAPd3tGr6AgAA
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8ab665427d8c2a24-ORD
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 30 Jul 2024 15:31:25 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - heartex
-      openai-processing-ms:
-      - '523'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '30000'
-      x-ratelimit-limit-tokens:
-      - '150000000'
-      x-ratelimit-remaining-requests:
-      - '29999'
-      x-ratelimit-remaining-tokens:
-      - '149998973'
-      x-ratelimit-reset-requests:
-      - 2ms
-      x-ratelimit-reset-tokens:
-      - 0s
-      x-request-id:
-      - req_b301d638a8184e931c1c6175ce035398
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "Translate given text to the
-      target language."}, {"role": "user", "content": "Text: \"\"\"\n\ucee4\ud53c\uac00
-      \ud544\uc694\ud574\n\"\"\"\n\n Target language: Swahili"}], "model": "gpt-4o-mini",
-      "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
-      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
-      "function": {"name": "Output", "description": "Correctly extracted `Output`
-      with all the required parameters with correct types", "parameters": {"properties":
-      {"translation": {"description": "Translation:", "title": "Translation", "type":
-      "string"}}, "required": ["translation"], "type": "object"}}}]}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '692'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=XnKzp8r_WZCfJw13WL1LTtBJ4HpbBBvYwzacT.7sgyQ-1722353252-1.0.1.1-Q7.i9SCq.ATMyfQQImljnUY.tyN_ldf_kvwyo7DkMshxNU.8kwWbeuKXZxzbHQe0sjy3Xty8bdwAdqbaxPG02A;
-        _cfuvid=xVBbjRk60YJc1IvMjv37Nuh0ZkC4zKLBlpdJ9nWDDkE-1722350760594-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - Linux
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.11.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA2xSS4+bMBC+8yusOYeKEDYh3Brl0GqVVNX2oapZIQcGcNbYDh7aplH+e2XIBjYq
-        B2s0n7+HZzh7jIHIIWGQVZyy2kh/eTzMrfr441fw9GW9iRefV9N4q1ff1tvvH04wcQy9P2BGr6x3
-        ma6NRBJa9XDWICd0qtNFGM4eZlE874Ba5ygdrTTkR9qvhRJ+GISRHyz8aXxlV1pkaCFhPz3GGDt3
-        p8upcvwDCQsmr50areUlQnK7xBg0WroOcGuFJa4IJgOYaUWoXHTVSjkCSGuZZlzKwbj/zqN6GBaX
-        Mv27eb/Bx/B4XK/yhzl9fZKnxz1G+civlz6ZLlDRquw2pBF+6yd3ZoyB4nXH/dSSaemOyRjwpmxr
-        VORSw3kH1HBlJXdyO0h2sOWVIH4Q7IVX/DffwQXeSFy8/9XP1+pym7TUpWn03t4NDgqhhK3SBrnt
-        HgCWtOktnNxzt9H2zZLANLo2lJJ+QeUE42UvB8N/NAKvGGnicmgvF941HtiTJazTQqgSG9OIbrtQ
-        mDQoglkeFQEieBfvHwAAAP//AwBHefhE6wIAAA==
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8ab665476b6b2a24-ORD
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 30 Jul 2024 15:31:26 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - heartex
-      openai-processing-ms:
-      - '394'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '30000'
-      x-ratelimit-limit-tokens:
-      - '150000000'
-      x-ratelimit-remaining-requests:
-      - '29999'
-      x-ratelimit-remaining-tokens:
-      - '149998972'
-      x-ratelimit-reset-requests:
-      - 2ms
-      x-ratelimit-reset-tokens:
-      - 0s
-      x-request-id:
-      - req_2a0ad823c73b15f56f89a8d5449c8fa1
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "Translate given text to the
-      target language."}, {"role": "user", "content": "Text: \"\"\"\nA m\u00fasica
-      toca a alma\n\"\"\"\n\n Target language: Swahili"}], "model": "gpt-4o-mini",
+      target language."}, {"role": "user", "content": "Text: \"\"\"\nAmo la pizza
+      napoletana\n\"\"\"\n\n Target language: Swahili"}], "model": "gpt-3.5-turbo",
       "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
       "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
       "function": {"name": "Output", "description": "Correctly extracted `Output`
@@ -922,8 +419,8 @@ interactions:
       content-type:
       - application/json
       cookie:
-      - __cf_bm=XnKzp8r_WZCfJw13WL1LTtBJ4HpbBBvYwzacT.7sgyQ-1722353252-1.0.1.1-Q7.i9SCq.ATMyfQQImljnUY.tyN_ldf_kvwyo7DkMshxNU.8kwWbeuKXZxzbHQe0sjy3Xty8bdwAdqbaxPG02A;
-        _cfuvid=xVBbjRk60YJc1IvMjv37Nuh0ZkC4zKLBlpdJ9nWDDkE-1722350760594-0.0.1.1-604800000
+      - __cf_bm=D4iHUEfwsfFTD5r2THCxXnMxu5SG_o933Wboe8P6m7o-1722381052-1.0.1.1-fts5iCjEL.VXSdInsZkkuLx3YpF6xyi7JsUsYQ_Z60w5QHOgjyqlLa6KULVqCRz67w5Bg2DTOaJqM3Fe.D01JQ;
+        _cfuvid=cEPYwS3a4TTZkxz2p_0w7mxh72DlaaHZWZaLC49LCWg-1722381052852-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
@@ -947,19 +444,19 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAAwAAAP//bFLfb9owEH7PX2HdM5lCYDTN61YVqaOTKl66UUVu4iQuts+1LxoM8b9P
-        DpSkaHmwTvf5++G7HCLGQFaQMyhbTqW2Kr59f1v4eoU/1ne0elj/2r+3d5X+85jtdtLDJDDw9U2U
-        9MH6UqK2SpBEc4JLJziJoDq9SdPZ19k8W/SAxkqoQGssxXOMtTQyTpN0Hic38TQ7s1uUpfCQs98R
-        Y4wd+jPkNJXYQc6SyUdHC+95IyC/XGIMHKrQAe699MQNwWQASzQkTIhuOqVGACGqouRKDcan7zCq
-        h2FxpYrsaY1LsX1eLuQTfuezx2exbO/Nt5HfSXpv+0B1Z8rLkEb4pZ9fmTEGhuue+7Mj29EVkzHg
-        rum0MBRSw2ED5Ljxige5DeQbWHV/5VaytpNN5zlz2OIGjvBJ5hj9r345V8fLtBU21uGrvxoe1NJI
-        3xZOcN8/AjyhPVkEuZd+q92nRYF1qC0VhFthgmB2e5KD4V8awGl6BgmJq1E/mUbngOD3noQuamka
-        4ayT/Y6htkVSJ7NqXidCQHSM/gEAAP//AwDtPUQV8QIAAA==
+        H4sIAAAAAAAAA2xSS0/jMBC+51dYc25R2hDR5oa4sKzU3RUgDhRFk8RNXfzCnki0Vf87clKSUG0O
+        1mg+fw/P5BgxBqKCjEG5RSqVldPlx8f9i3xebdUnrezf5NfDI/2+3T2mzw/7OUwCwxQ7XtI366o0
+        ykpOwugOLh1H4kF1djOfJ4tZnF63gDIVl4FWW5omV+mUGleYaTybp2fm1oiSe8jYa8QYY8f2DBl1
+        xT8hY/Hku6O491hzyPpLjIEzMnQAvReeUBNMBrA0mrgOsXUj5QggY2ReopSDcfcdR/UwKJQyt/fF
+        gd9VL4u7J4/Xi/dkly7jf4Uf+XXSe9sG2jS67Ac0wvt+dmHGGGhULfdPQ7ahCyZjgK5uFNcUUsNx
+        DeRQe4lBbg3ZGlZoua6QWXE4INsjW6E1UhBqXMMJfsidov/Vb+fq1E9dmto6U/iLIcJGaOG3uePo
+        28eAJ2M7iyD31m63+bEwsM4oSzmZd66D4DLt5GD4nwZwlpxBMoRy1I8X0Tkg+L0nrvKN0DV31ol+
+        19Ep+gIAAP//AwAJJzmm6gIAAA==
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8ab6654c19862a24-ORD
+      - 8ab90657bcdc106c-ORD
       Connection:
       - keep-alive
       Content-Encoding:
@@ -967,7 +464,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 30 Jul 2024 15:31:27 GMT
+      - Tue, 30 Jul 2024 23:10:55 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -979,34 +476,33 @@ interactions:
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '388'
+      - '197'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
       - max-age=15552000; includeSubDomains; preload
       x-ratelimit-limit-requests:
-      - '30000'
+      - '10000'
       x-ratelimit-limit-tokens:
-      - '150000000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '29999'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '149998970'
+      - '49998970'
       x-ratelimit-reset-requests:
-      - 2ms
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 0s
+      - 1ms
       x-request-id:
-      - req_a82672f3baa9010182545aef7e2c4a4f
+      - req_0ea6668de1fcc3bf6af7073750046ce5
     status:
       code: 200
       message: OK
 - request:
     body: '{"messages": [{"role": "system", "content": "Translate given text to the
-      target language."}, {"role": "user", "content": "Text: \"\"\"\n\u0938\u092a\u0928\u0947
-      \u0938\u091a \u0939\u094b\u0924\u0947 \u0939\u0948\u0902\n\"\"\"\n\n Target
-      language: Swahili"}], "model": "gpt-4o-mini", "max_tokens": 1000, "seed": 47,
-      "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
+      target language."}, {"role": "user", "content": "Text: \"\"\"\n\u6625\u5929\u7684\u82b1\u5f88\u7f8e\n\"\"\"\n\n
+      Target language: Swahili"}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed":
+      47, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
       "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
       "Correctly extracted `Output` with all the required parameters with correct
       types", "parameters": {"properties": {"translation": {"description": "Translation:",
@@ -1020,12 +516,12 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '736'
+      - '693'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=XnKzp8r_WZCfJw13WL1LTtBJ4HpbBBvYwzacT.7sgyQ-1722353252-1.0.1.1-Q7.i9SCq.ATMyfQQImljnUY.tyN_ldf_kvwyo7DkMshxNU.8kwWbeuKXZxzbHQe0sjy3Xty8bdwAdqbaxPG02A;
-        _cfuvid=xVBbjRk60YJc1IvMjv37Nuh0ZkC4zKLBlpdJ9nWDDkE-1722350760594-0.0.1.1-604800000
+      - __cf_bm=D4iHUEfwsfFTD5r2THCxXnMxu5SG_o933Wboe8P6m7o-1722381052-1.0.1.1-fts5iCjEL.VXSdInsZkkuLx3YpF6xyi7JsUsYQ_Z60w5QHOgjyqlLa6KULVqCRz67w5Bg2DTOaJqM3Fe.D01JQ;
+        _cfuvid=cEPYwS3a4TTZkxz2p_0w7mxh72DlaaHZWZaLC49LCWg-1722381052852-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
@@ -1049,19 +545,19 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAAwAAAP//bFJNb9swDL37Vwg8x4PrZOvs21osGNpi3WHAAiyFocq0o04SVYvGmgb5
-        74McN3GD+SAQfHofIr1LhABdQylAbSQr601aPD992q5u2/7rj7tfz5m64mx53VJfLFf2DmaRQY9P
-        qPiN9UGR9QZZkzvAqkPJGFUvLvN8/nG+KPIBsFSjibTWc7qg1Gqn0zzLF2l2mV58Htkb0goDlOJ3
-        IoQQu+GMOV2NL1CKbPbWsRiCbBHK4yUhoCMTOyBD0IGlY5idQEWO0cXorjdmAjCRqZQ05mR8+HaT
-        +jQsaUwlnb+5/9L6v+Z19RM52G+4vH25ySZ+B+mtHwI1vVPHIU3wY788MxMCnLQD975n3/MZUwiQ
-        XdtbdBxTw24N3EkXjIxyayjX8L0mJvGqnWRttVzDHt5J7JP/1Q9jtT9O2lDrO3oMZ4ODRjsdNlWH
-        MgwPgMDkDxZR7mHYaP9uSeA7sp4rpj/oomAxLhRO/9EEHDEmlmbSLpIxHoRtYLRVo12Lne/0sF1o
-        fJU12bxeNBkiJPvkHwAAAP//AwCR7FQX6wIAAA==
+        H4sIAAAAAAAAAwAAAP//bFJNj9owEL3nV4zmDKsATbvJbU9UW7XVFlXdtqyQcZxg1l/YE2kB8d8r
+        J0CyqD5Yo3l+b97M+JgAoCyxAOQbRlw7Nc53u8/PW7d41IuHfOrv80NaVr/n2Q9bPnIcRYZdbwWn
+        C+uOW+2UIGlNB3MvGImoOvk0nc7uJ2mWtYC2pVCRVjsaz+6yMTV+bcfpZJqdmRsruQhYwN8EAODY
+        3tGjKcUbFpCOLhktQmC1wOL6CAC9VTGDLAQZiBnCUQ9ya0iYaNs0Sg0AslatOFOqL9yd4yDuB8WU
+        Wn1b7yuzffgy/+Oefj7xxWH3/Po2//VhUK+T3rvWUNUYfh3QAL/mi5tiAGiYbrnfG3IN3TABkPm6
+        0cJQdI3HJZJnJigW5ZZYLPEraxjsGQTnpanBSNDs0Hi5xBO+0zol/4tfztHpOnJla+ftOtxMECtp
+        ZNisvGCh7QQDWdeViHIv7Wqbd9tC5612tCL7KkwUzD92cth/ph6czM4gWWJqkE/z5GwQwz6Q0KtK
+        mlr42PFl0ckp+QcAAP//AwBjdz6p5wIAAA==
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8ab665502ecd2a24-ORD
+      - 8ab9065ad9e1106c-ORD
       Connection:
       - keep-alive
       Content-Encoding:
@@ -1069,7 +565,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 30 Jul 2024 15:31:33 GMT
+      - Tue, 30 Jul 2024 23:10:55 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -1081,25 +577,532 @@ interactions:
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '5568'
+      - '192'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
       - max-age=15552000; includeSubDomains; preload
       x-ratelimit-limit-requests:
-      - '30000'
+      - '10000'
       x-ratelimit-limit-tokens:
-      - '150000000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '29999'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '149998966'
+      - '49998971'
       x-ratelimit-reset-requests:
-      - 2ms
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 0s
+      - 1ms
       x-request-id:
-      - req_068d92d237f1258cad99ba59af7539b8
+      - req_31dadbc70fa85d4c711b9ed9474c852a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Translate given text to the
+      target language."}, {"role": "user", "content": "Text: \"\"\"\n\u0417\u0432\u0435\u0437\u0434\u044b
+      \u0441\u0432\u0435\u0440\u043a\u0430\u044e\u0442 \u043d\u043e\u0447\u044c\u044e\n\"\"\"\n\n
+      Target language: Swahili"}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed":
+      47, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
+      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
+      "Correctly extracted `Output` with all the required parameters with correct
+      types", "parameters": {"properties": {"translation": {"description": "Translation:",
+      "title": "Translation", "type": "string"}}, "required": ["translation"], "type":
+      "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '773'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=D4iHUEfwsfFTD5r2THCxXnMxu5SG_o933Wboe8P6m7o-1722381052-1.0.1.1-fts5iCjEL.VXSdInsZkkuLx3YpF6xyi7JsUsYQ_Z60w5QHOgjyqlLa6KULVqCRz67w5Bg2DTOaJqM3Fe.D01JQ;
+        _cfuvid=cEPYwS3a4TTZkxz2p_0w7mxh72DlaaHZWZaLC49LCWg-1722381052852-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//bFJLb9swDL77Vwi87JIUcdIsjW9DL2m3PrZi7YClMBRHcbRIoipRQ90g
+        /32QndpuMB8Egp++h0jvE8ZAriFjUGw5Fdqq4fzlZfFr++1nqKSrLqrPi787PB+pq++zavMVBpGB
+        qz+ioHfWWYHaKkESTQMXTnASUTWdjceTi3Q0ndaAxrVQkVZaGk7OpkMKboXDUTqeHplblIXwkLHf
+        CWOM7eszZjRr8QoZGw3eO1p4z0sBWXuJMXCoYge499ITNwSDDizQkDAxtglK9QBCVHnBleqMm2/f
+        q7tBcaXyx9WlvXE/rp9uZ4uH3WW40tevb/z+S8+vka5sHWgTTNEOqIe3/ezEjDEwXNfcu0A20AmT
+        MeCuDFoYiqlhvwRy3HjFo9wSsiXcVkicvUnDTfmJcxa83IUlHOCD0CH5X/18rA7tvBWW1uHKn4wP
+        NtJIv82d4L5+BnhC21hEued6r+HDqsA61JZywp0wUXA+b+Sg+5M6MJ0cQULiqtdPx8kxIPjKk9D5
+        RppSOOtku+XkkPwDAAD//wMAcGhGDOQCAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8ab9065e0f5c106c-ORD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 30 Jul 2024 23:10:56 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '251'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998966'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_f99763055ccd8d325a19ad4dc3d9290a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Translate given text to the
+      target language."}, {"role": "user", "content": "Text: \"\"\"\n\u96e8\u306e\u5f8c\u306e\u8679\n\"\"\"\n\n
+      Target language: Swahili"}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed":
+      47, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
+      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
+      "Correctly extracted `Output` with all the required parameters with correct
+      types", "parameters": {"properties": {"translation": {"description": "Translation:",
+      "title": "Translation", "type": "string"}}, "required": ["translation"], "type":
+      "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '687'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=D4iHUEfwsfFTD5r2THCxXnMxu5SG_o933Wboe8P6m7o-1722381052-1.0.1.1-fts5iCjEL.VXSdInsZkkuLx3YpF6xyi7JsUsYQ_Z60w5QHOgjyqlLa6KULVqCRz67w5Bg2DTOaJqM3Fe.D01JQ;
+        _cfuvid=cEPYwS3a4TTZkxz2p_0w7mxh72DlaaHZWZaLC49LCWg-1722381052852-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//bFJdb9swDHz3ryD4nBRxsqyN37phnygwrFs3pEth0LbsqJUlRaK3pUH+
+        +yA7sdNgfjBonu94OmoXAaAsMAHM18R5bdV4sdl8XL51N8+lYPvO3T89v7n5dvnhx/tZES9xFBgm
+        exQ5H1kXuamtEiyN7uDcCWIRVOPL6XR2FU/mr1ugNoVQgVZZHs8u5mNuXGbGk3g6PzDXRubCYwK/
+        IgCAXfsOHnUh/mICk9GxUwvvqRKY9D8BoDMqdJC8l55JM44GMDeahQ62daPUCcDGqDQnpYbB3bM7
+        qYegSKlUruX3n9e3y0VGG+2qz4/TT+Wt/np3Mq+T3trWUNnovA/oBO/7ydkwANRUt9wvDduGz5gA
+        SK5qaqE5uMbdCtmR9oqC3AqTFd7ZkBr8Iah/NwQZUUGw7b5WuMcXevvof/XDodr3sStTWWcyf5Yi
+        llJLv06dIN+eBj0b240Icg/tepsXG0PrTG05ZfMkdBBcvOrkcLhQAxgfQTZM6qQ/uYoOBtFvPYs6
+        LaWuhLNO9suO9tE/AAAA//8DAEsevDnrAgAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8ab906614c0e106c-ORD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 30 Jul 2024 23:10:56 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '225'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998972'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_1b8623882720fc160dd756ff85fbe303
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Translate given text to the
+      target language."}, {"role": "user", "content": "Text: \"\"\"\n\ucee4\ud53c\uac00
+      \ud544\uc694\ud574\n\"\"\"\n\n Target language: Swahili"}], "model": "gpt-3.5-turbo",
+      "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
+      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"translation": {"description": "Translation:", "title": "Translation", "type":
+      "string"}}, "required": ["translation"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '694'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=D4iHUEfwsfFTD5r2THCxXnMxu5SG_o933Wboe8P6m7o-1722381052-1.0.1.1-fts5iCjEL.VXSdInsZkkuLx3YpF6xyi7JsUsYQ_Z60w5QHOgjyqlLa6KULVqCRz67w5Bg2DTOaJqM3Fe.D01JQ;
+        _cfuvid=cEPYwS3a4TTZkxz2p_0w7mxh72DlaaHZWZaLC49LCWg-1722381052852-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA2xS22rjMBB991eIeU6K467Txm+lWyjbK7tLS2mKGSuKrUaWVGnMbgj590V2arth
+        /SCGOToXzXgXMQZyBRkDXiHx2qrp4uPj+uU+LX7zdB4vDC/N1d3T5cXNc/XdeJgEhineBadP1gk3
+        tVWCpNEdzJ1AEkF1dpYkp+ezOJ23QG1WQgVaaWl6epJOqXGFmcazJD0wKyO58JCx14gxxnbtGTLq
+        lfgLGYsnn51aeI+lgKy/xBg4o0IH0HvpCTXBZAC50SR0iK0bpUYAGaNyjkoNxt23G9XDoFCpfJ3Y
+        p5urHz/x8nGlb283Rb39dv348Gvk10lvbRto3WjeD2iE9/3syIwx0Fi33IeGbENHTMYAXdnUQlNI
+        DbslkEPtFQa5JWRLuJcaK0n4LtkGK/yDS9jDF5F99L/67VDt+1krU1pnCn80OlhLLX2VO4G+fQJ4
+        MrazCHJv7U6bL2sC60xtKSezEToILuadHAx/0QDOkgNIhlCN+vF5dAgIfutJ1Pla6lI462S/4Wgf
+        /QMAAP//AwBV/qk54AIAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8ab906647933106c-ORD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 30 Jul 2024 23:10:57 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '198'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998971'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_125ac3f7f2b92acecb3cf5980d172ab4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Translate given text to the
+      target language."}, {"role": "user", "content": "Text: \"\"\"\nA m\u00fasica
+      toca a alma\n\"\"\"\n\n Target language: Swahili"}], "model": "gpt-3.5-turbo",
+      "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
+      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"translation": {"description": "Translation:", "title": "Translation", "type":
+      "string"}}, "required": ["translation"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '682'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=D4iHUEfwsfFTD5r2THCxXnMxu5SG_o933Wboe8P6m7o-1722381052-1.0.1.1-fts5iCjEL.VXSdInsZkkuLx3YpF6xyi7JsUsYQ_Z60w5QHOgjyqlLa6KULVqCRz67w5Bg2DTOaJqM3Fe.D01JQ;
+        _cfuvid=cEPYwS3a4TTZkxz2p_0w7mxh72DlaaHZWZaLC49LCWg-1722381052852-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA2xS32/aMBB+z19h3TNUhAyx5m1atfWFTZs2bdqoIseYxNTxufZ5UBD/e+WEJila
+        HqzTff5++C6nhDFQG8gZiJqTaKye3j493f/5uLOirLIfh83qw129//5P3O9W+30Kk8jAcicFvbJu
+        BDZWS1JoOlg4yUlG1XQ5n2fv09li2QINbqSOtMrSNLtZTCm4EqezdL64MGtUQnrI2d+EMcZO7Rkz
+        mo08QM5mk9dOI73nlYS8v8QYONSxA9x75YkbgskACjQkTYxtgtYjgBB1IbjWg3H3nUb1MCiudTE/
+        /iR+kGr/67f9fPdp+a3MvviM0pFfJ/1s20DbYEQ/oBHe9/MrM8bA8Kblfg1kA10xGQPuqtBIQzE1
+        nNZAjhuveZRbQ76GVTiqR8XqIGp5lL7mzGGNazjDG6Vz8r/64VKd+4FrrKzD0l/ND7bKKF8XTnLf
+        vgM8oe0sotxDu9jwZldgHTaWCsJHaaLgbdbJwfArDWD67gISEtej/myZXAKCf/Ykm2KrTCWddapf
+        c3JOXgAAAP//AwD0xgsh5QIAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8ab906675d52106c-ORD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 30 Jul 2024 23:10:57 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '398'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998970'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_1b4f0cd8037ac7a82b3c1f1d3280922e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Translate given text to the
+      target language."}, {"role": "user", "content": "Text: \"\"\"\n\u0938\u092a\u0928\u0947
+      \u0938\u091a \u0939\u094b\u0924\u0947 \u0939\u0948\u0902\n\"\"\"\n\n Target
+      language: Swahili"}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed":
+      47, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
+      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
+      "Correctly extracted `Output` with all the required parameters with correct
+      types", "parameters": {"properties": {"translation": {"description": "Translation:",
+      "title": "Translation", "type": "string"}}, "required": ["translation"], "type":
+      "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '738'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=D4iHUEfwsfFTD5r2THCxXnMxu5SG_o933Wboe8P6m7o-1722381052-1.0.1.1-fts5iCjEL.VXSdInsZkkuLx3YpF6xyi7JsUsYQ_Z60w5QHOgjyqlLa6KULVqCRz67w5Bg2DTOaJqM3Fe.D01JQ;
+        _cfuvid=cEPYwS3a4TTZkxz2p_0w7mxh72DlaaHZWZaLC49LCWg-1722381052852-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.5
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//bFLbbtswDH33Vwh8Tgo7mbvMbxswrN2wBVsx7JbCkG3GUSOLikSja4P8
+        +yA7cdxgfhAIHp2LSO8jIUBVkAkoN5LLxurpm93uRv5afr77eff8u3p3fbu4/oqp+hYX1dtbmAQG
+        FQ9Y8ol1VVJjNbIi08OlQ8kYVJPXs9l8kcTpogMaqlAHWm15Or9Kp9y6gqZxMkuPzA2pEj1k4k8k
+        hBD77gwZTYV/IRPx5NRp0HtZI2TDJSHAkQ4dkN4rz9IwTM5gSYbRhNim1XoEMJHOS6n12bj/9qP6
+        PCipdf7xRqdzWXxIlinOqx+bT9+T3fbhfTXy66WfbBdo3ZpyGNAIH/rZhZkQYGTTcZct25YvmEKA
+        dHXboOGQGvYrYCeN1zLIrSBbwZeKmMSzMnLbPkqxfUStVnCAFzqH6H/1/bE6DOPWVFtHhb+YHqyV
+        UX6TO5S+ewV4JttbBLn7bq3ti02BddRYzpm2aIJgEs96PTj/SSP0BDKx1KN+8io6JgT/5BmbfK1M
+        jc46NWw5OkT/AAAA//8DAGhQwkbkAgAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8ab9066b7c7a106c-ORD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 30 Jul 2024 23:10:58 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '198'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998966'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_191ba1ec6562404cbbb833c151e7a4b2
     status:
       code: 200
       message: OK
