@@ -41,7 +41,7 @@ SUBMIT_PAYLOAD = {
         ],
         "runtimes": {
             "default": {
-                "type": "AsyncOpenAIChatRuntime",
+                "type": "AsyncLiteLLMChatRuntime",
                 "model": "gpt-3.5-turbo-0125",
                 "api_key": OPENAI_API_KEY,
                 "max_tokens": 10,

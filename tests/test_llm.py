@@ -12,8 +12,8 @@ class ExampleResponseModel(BaseModel):
     'response_model, user_prompt, expected_result',
     [(
         None,
-        'return the word banana with exclamation mark',
-        UnconstrainedLLMResponse(text="banana!")
+        'return the word Banana with exclamation mark',
+        UnconstrainedLLMResponse(text="Banana!")
     ), (
         ExampleResponseModel,
         "My name is Carla and I am 25 years old.",

@@ -33,7 +33,8 @@ def test_agent_quickstart_single_skill():
 
     agent.learn(learning_iterations=2)
 
-    assert agent.skills["0_to_1"].instructions == 'Given a set of three numbers, increment each number by 1 individually to generate the output.'
+    assert agent.skills["0_to_1"].instructions == '''\
+Transform the input consisting of three integers by incrementing each integer by 1. For each input, output three integers that represent this transformation. Ensure the output is formatted as three integers separated by spaces.'''
 
 @pytest.mark.vcr
 def test_agent_quickstart_two_skills():
@@ -79,31 +80,18 @@ def test_agent_quickstart_two_skills():
     assert (
         agent.skills["0->1"].instructions
         == '''\
-Transform the set of three numbers represented as "X Y Z" into a new set of three numbers using the following transformation rules:
-
-1. Change the first number to '1' if it is '0'; otherwise, it remains unchanged.
-2. The middle number remains unchanged.
-3. Change the third number to '1' if it is '0'; otherwise, it remains unchanged.
-
-For the given input, the output must be in the format "A B C", where A, B, and C are the transformed numbers.
-
-For example:
-- If the input is "0 5 0", the correct output is "1 5 1".
-- If the input is "0 0 0", the correct output is "1 1 1".
-
-Please apply these transformation rules to provide the appropriate output for the input provided.'''
+Transform the input numbers by changing each 0 to 1 and leaving all other numbers unchanged. Return the transformed output as a space-separated string.'''
     )
     assert (
         agent.skills["1->2"].instructions
-        == 'Transform the input sequence of three numbers by adding 1 to each number, and return the resulting sequence in the same format "<number1> <number2> <number3>".'
+        == '''\
+You are tasked with incrementing each number in the input text by 1. For each number in the input, provide the corresponding incremented value in the output. Ensure that all numbers are transformed correctly.'''
     )
 
 @pytest.mark.vcr
 def test_agent_run_classification_skill():
     from adala.agents import Agent
-    from adala.skills import LinearSkillSet, ClassificationSkill
-    from adala.environments import StaticEnvironment
-    from adala.runtimes import OpenAIChatRuntime
+    from adala.skills import ClassificationSkill
 
     agent = Agent(
         skills=ClassificationSkill(
@@ -133,8 +121,7 @@ def test_agent_run_classification_skill():
 @pytest.mark.vcr
 async def test_agent_arun_classification_skill():
     from adala.agents import Agent
-    from adala.skills import LinearSkillSet, ClassificationSkill
-    from adala.environments import StaticEnvironment
+    from adala.skills import ClassificationSkill
     from adala.runtimes import AsyncOpenAIChatRuntime
 
     agent = Agent(

@@ -59,8 +59,10 @@ def test_classification_skill():
     )
 
     agent.learn()
-    assert agent.skills[
-               "product_category_classification"].instructions == "Classify the input text by determining the most appropriate product category based on its primary use or context, focusing on the functionality and overall purpose rather than just prominent keywords. Do not add any prefix such as 'Labels.' to the category name unless it is explicitly included in the category list provided."
+    assert (agent.skills[
+               "product_category_classification"].instructions == '''\
+Classify the input text into the most appropriate general category based on the overall context and intended use of the items mentioned. Focus on the primary function and common applications of the products described, avoiding specific brand names or detailed features. Provide the category without any prefixes or labels.'''
+    )
 
 
 @pytest.mark.vcr
@@ -124,50 +126,55 @@ def test_parallel_skillset_with_analysis():
     # AnalysisSkill.improve not implemented
     # agent.learn(learning_iterations=1, num_feedbacks=1, batch_size=3)
     predictions = agent.run()
-    assert predictions.code[0] == '''\
-import json
+    expected_code = '''\
 import sys
+import json
 
 # Read input from stdin
 input_data = sys.stdin.read()
 
 # Parse the input JSON
-input_json = json.loads(input_data)
+input_jsons = input_data.strip().split('\n')
 
-# Initialize the output structure
-output_json = {
-    "id": "",
-    "data": {
-        "text": input_json["inputs"]
-    },
-    "project": "",
-    "predictions": [
-        {
-            "id": "",
-            "lead_time": 0,
-            "result": [
-                {
-                    "id": str(i),
-                    "from_name": "label",
-                    "to_name": "text",
-                    "type": "labels",
-                    "value": {
-                        "start": entity["start"],
-                        "end": entity["end"],
-                        "score": entity["score"],
-                        "text": entity["word"],
-                        "labels": [entity["entity_group"]]
-                    }
-                } for i, entity in enumerate(input_json["outputs"])
-            ],
-            "score": 0
-        }
-    ]
-}
+# Prepare the output list
+output_list = []
 
-# Output the transformed JSON
-print(json.dumps(output_json, indent=4))'''
+for idx, input_json in enumerate(input_jsons):
+    data = json.loads(input_json)
+    outputs = data['outputs']
+    inputs_text = data['inputs']
+    predictions = []
 
+    for output in outputs:
+        predictions.append({
+            'id': str(idx),
+            'lead_time': 0,  # Assuming lead_time is not provided
+            'result': [{
+                'id': str(idx) + '_' + str(outputs.index(output)),
+                'from_name': output['entity_group'],
+                'to_name': 'text',  # Assuming 'text' is the object tag
+                'type': 'labels',  # Assuming the type is 'labels'
+                'value': {
+                    'start': output['start'],
+                    'end': output['end'],
+                    'text': output['word']
+                }
+            }],
+            'score': output['score']
+        })
+
+    output_list.append({
+        'id': str(idx),
+        'data': {'text': inputs_text},
+        'project': 'project_id',  # Placeholder for project ID
+        'predictions': predictions
+    })
+
+# Print the output JSON
+print(json.dumps(output_list, indent=2))'''
+    # temp hack to compare strings properly
+    expected_code = expected_code.replace("'\n'", "'\\n'")
+    assert predictions.code[0] == expected_code
 
 @pytest.mark.vcr
 def test_summarization_skill():
@@ -185,10 +192,12 @@ def test_summarization_skill():
     )
 
     predictions = agent.run(df)
-    assert predictions.summary[
-               0] == 'Caffeine, found in coffee beans and synthesized in labs, has the same structure in various forms. It is a stimulant that improves physical strength and mental stimulation. Habitual use is linked to reduced risks of diseases. Caffeine works by antagonizing adenosine receptors, promoting alertness by inhibiting sedation. It affects dopamine, serotonin, acetylcholine, and adrenaline systems.'
-    assert predictions.summary[
-               2] == 'Vitamin D is a fat-soluble nutrient essential for human survival. It is primarily obtained from the sun, oily fish, eggs, and fortified foods. Supplementing with vitamin D can improve immune health, bone health, and overall well-being. The effects of vitamin D depend on the levels of 25-hydroxyvitamin D in the blood, and benefits are most noticeable when reversing a deficiency.'
+    assert (predictions.summary[0] == '''\
+Caffeine, found in coffee beans and synthesized in labs, is a powerful stimulant with the same structure across various forms like coffee, energy drinks, and pills. It enhances physical strength and endurance, acts as a nootropic by stimulating neurons, and is linked to a lower risk of Alzheimer's, cirrhosis, and liver cancer. Caffeine works by antagonizing adenosine receptors, promoting alertness and wakefulness, and influencing neurotransmitter systems such as dopamine and serotonin.'''
+    )
+    assert (predictions.summary[2] == '''\
+Vitamin D is a fat-soluble nutrient essential for human survival, primarily obtained from sunlight, oily fish, and eggs, and often added to milk. It offers various health benefits, including improved immune and bone health, and may lower the risk of cancer mortality, diabetes, and multiple sclerosis. The effectiveness of vitamin D is linked to individual levels of 25-hydroxyvitamin D, with benefits typically observed after correcting deficiencies.'''
+    )
 
     pd.testing.assert_series_equal(predictions.text, df.text)
 
@@ -299,7 +308,7 @@ def test_question_answering_skill():
     agent = Agent(skills=QuestionAnsweringSkill())
 
     predictions = agent.run(df)
-    assert (predictions.answer == predictions.expected_answer).mean() == 3 / 5
+    assert (predictions.answer == predictions.expected_answer).mean() == 1 / 5
 
 
 @pytest.mark.vcr
@@ -353,8 +362,9 @@ def test_linear_skillset():
     )
 
     agent.learn(learning_iterations=2)
-    assert agent.skills[
-               "skill_0"].instructions == '"Given a category and its context, provide a list of items that belong to this category. The context will help in generating a more accurate list. Do not provide definitions or explanations, just list the items."'  # noqa: E501
+    assert (agent.skills["skill_0"].instructions == '''\
+"Provide a concise list of specific examples relevant to the given category, formatted as a single string without additional explanations. Limit the examples to three key items."'''
+    )
     # TODO: not learned with 2 iterations, need to increase learning_iterations
     assert agent.skills["skill_1"].instructions == '...'
 
@@ -379,13 +389,4 @@ def test_translation_skill():
     agent = Agent(skills=TranslationSkill(target_language="Swahili"))
 
     predictions = agent.run(df)
-    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima",
-                                                'Maisha ni mazuri',
-                                                'Msitu unaniita',
-                                                'Napenda pizza ya Napolitana',
-                                                'Maua ya spring ni mazuri',
-                                                "Nyota zinang'aa usiku",
-                                                'Upinde wa mvua baada ya mvua',
-                                                'Ninahitaji kahawa',
-                                                'Muziki huchezesha roho',
-                                                'Ndoto zinakuwa kweli']
+    assert predictions.translation.tolist() == ['Jua linaangaza daima', 'Maisha ni mazuri', 'Msitu unaniita', 'Ninapenda pizza ya Napoli', 'Maua ya spring ni mazuri', "Nyota zinang'ara usiku", 'Upinde wa mvua baada ya mvua', 'Nahitaji kahawa', 'Muziki huigusa roho', 'Ndoto zinatimia']
