@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from adala.skills import LinearSkillSet, TransformSkill  # type: ignore
-from adala.utils.internal_data import InternalDataFrame # type: ignore
+from adala.utils.internal_data import InternalDataFrame  # type: ignore
 from adala.environments import StaticEnvironment  # type: ignore
 
 NaN = float("nan")

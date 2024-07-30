@@ -241,7 +241,9 @@ async def test_streaming_n_concurrent_requests(async_client):
         ).all(), "adala did not return expected output"
 
 
-@pytest.mark.skip(reason='TODO: @matt-bernstein Failed at assert status == "Failed", probably existed before the skip')
+@pytest.mark.skip(
+    reason='TODO: @matt-bernstein Failed at assert status == "Failed", probably existed before the skip'
+)
 @pytest.mark.use_openai
 @pytest.mark.use_server
 @pytest.mark.asyncio

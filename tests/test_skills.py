@@ -59,9 +59,10 @@ def test_classification_skill():
     )
 
     agent.learn()
-    assert (agent.skills[
-               "product_category_classification"].instructions == '''\
-Classify the input text into the most appropriate general category based on the overall context and intended use of the items mentioned. Focus on the primary function and common applications of the products described, avoiding specific brand names or detailed features. Provide the category without any prefixes or labels.'''
+    assert (
+        agent.skills["product_category_classification"].instructions
+        == """\
+Classify the input text into the most appropriate general category based on the overall context and intended use of the items mentioned. Focus on the primary function and common applications of the products described, avoiding specific brand names or detailed features. Provide the category without any prefixes or labels."""
     )
 
 
@@ -126,7 +127,7 @@ def test_parallel_skillset_with_analysis():
     # AnalysisSkill.improve not implemented
     # agent.learn(learning_iterations=1, num_feedbacks=1, batch_size=3)
     predictions = agent.run()
-    expected_code = '''\
+    expected_code = """\
 import sys
 import json
 
@@ -171,10 +172,11 @@ for idx, input_json in enumerate(input_jsons):
     })
 
 # Print the output JSON
-print(json.dumps(output_list, indent=2))'''
+print(json.dumps(output_list, indent=2))"""
     # temp hack to compare strings properly
     expected_code = expected_code.replace("'\n'", "'\\n'")
     assert predictions.code[0] == expected_code
+
 
 @pytest.mark.vcr
 def test_summarization_skill():
@@ -192,11 +194,15 @@ def test_summarization_skill():
     )
 
     predictions = agent.run(df)
-    assert (predictions.summary[0] == '''\
-Caffeine, found in coffee beans and synthesized in labs, is a powerful stimulant with the same structure across various forms like coffee, energy drinks, and pills. It enhances physical strength and endurance, acts as a nootropic by stimulating neurons, and is linked to a lower risk of Alzheimer's, cirrhosis, and liver cancer. Caffeine works by antagonizing adenosine receptors, promoting alertness and wakefulness, and influencing neurotransmitter systems such as dopamine and serotonin.'''
+    assert (
+        predictions.summary[0]
+        == """\
+Caffeine, found in coffee beans and synthesized in labs, is a powerful stimulant with the same structure across various forms like coffee, energy drinks, and pills. It enhances physical strength and endurance, acts as a nootropic by stimulating neurons, and is linked to a lower risk of Alzheimer's, cirrhosis, and liver cancer. Caffeine works by antagonizing adenosine receptors, promoting alertness and wakefulness, and influencing neurotransmitter systems such as dopamine and serotonin."""
     )
-    assert (predictions.summary[2] == '''\
-Vitamin D is a fat-soluble nutrient essential for human survival, primarily obtained from sunlight, oily fish, and eggs, and often added to milk. It offers various health benefits, including improved immune and bone health, and may lower the risk of cancer mortality, diabetes, and multiple sclerosis. The effectiveness of vitamin D is linked to individual levels of 25-hydroxyvitamin D, with benefits typically observed after correcting deficiencies.'''
+    assert (
+        predictions.summary[2]
+        == """\
+Vitamin D is a fat-soluble nutrient essential for human survival, primarily obtained from sunlight, oily fish, and eggs, and often added to milk. It offers various health benefits, including improved immune and bone health, and may lower the risk of cancer mortality, diabetes, and multiple sclerosis. The effectiveness of vitamin D is linked to individual levels of 25-hydroxyvitamin D, with benefits typically observed after correcting deficiencies."""
     )
 
     pd.testing.assert_series_equal(predictions.text, df.text)
@@ -362,11 +368,13 @@ def test_linear_skillset():
     )
 
     agent.learn(learning_iterations=2)
-    assert (agent.skills["skill_0"].instructions == '''\
+    assert (
+        agent.skills["skill_0"].instructions
+        == '''\
 "Provide a concise list of specific examples relevant to the given category, formatted as a single string without additional explanations. Limit the examples to three key items."'''
     )
     # TODO: not learned with 2 iterations, need to increase learning_iterations
-    assert agent.skills["skill_1"].instructions == '...'
+    assert agent.skills["skill_1"].instructions == "..."
 
 
 @pytest.mark.vcr
@@ -389,4 +397,15 @@ def test_translation_skill():
     agent = Agent(skills=TranslationSkill(target_language="Swahili"))
 
     predictions = agent.run(df)
-    assert predictions.translation.tolist() == ['Jua linaangaza daima', 'Maisha ni mazuri', 'Msitu unaniita', 'Ninapenda pizza ya Napoli', 'Maua ya spring ni mazuri', "Nyota zinang'ara usiku", 'Upinde wa mvua baada ya mvua', 'Nahitaji kahawa', 'Muziki huigusa roho', 'Ndoto zinatimia']
+    assert predictions.translation.tolist() == [
+        "Jua linaangaza daima",
+        "Maisha ni mazuri",
+        "Msitu unaniita",
+        "Ninapenda pizza ya Napoli",
+        "Maua ya spring ni mazuri",
+        "Nyota zinang'ara usiku",
+        "Upinde wa mvua baada ya mvua",
+        "Nahitaji kahawa",
+        "Muziki huigusa roho",
+        "Ndoto zinatimia",
+    ]

@@ -92,8 +92,8 @@ def parse_template(string, include_texts=True) -> List[TemplateChunks]:
 def parse_template_to_pydantic_class(
     output_template: str,
     provided_field_schema: Optional[Dict[str, Any]] = None,
-    class_name: str = 'Output',
-    description: str = ''
+    class_name: str = "Output",
+    description: str = "",
 ) -> Type[BaseModel]:
     """
     Parses a template string to extract output fields and map them to the pydantic BaseModel class definition.
@@ -134,7 +134,7 @@ def parse_template_to_pydantic_class(
 
     provided_field_schema = provided_field_schema or {}
     properties = {}
-    previous_text = ''
+    previous_text = ""
     for chunk in chunks:
         if chunk["type"] == "text":
             previous_text = chunk["text"]
@@ -147,14 +147,15 @@ def parse_template_to_pydantic_class(
             # if description is not provided, use the text before the field,
             # otherwise use the field name with underscores replaced by spaces
             field_description = field_schema_entry.get(
-                "description", previous_text) or field_name.replace("_", " ")
+                "description", previous_text
+            ) or field_name.replace("_", " ")
             field_description = field_description.strip(string.punctuation).strip()
-            previous_text = ''
+            previous_text = ""
 
             # create JSON schema entry for the field
             properties[field_name] = {
                 "type": field_type,
-                "description": field_description
+                "description": field_description,
             }
             # add the rest of the fields from provided_field_schema
             for key, value in field_schema_entry.items():
@@ -165,7 +166,7 @@ def parse_template_to_pydantic_class(
         "type": "object",
         "title": class_name,
         "description": description,
-        "properties": properties
+        "properties": properties,
     }
 
     return json_schema_to_model(json_schema)

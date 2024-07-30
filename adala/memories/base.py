@@ -6,7 +6,6 @@ from adala.utils.internal_data import InternalDataFrame
 
 
 class Memory(BaseModel, ABC):
-
     """
     Base class for memories.
     """

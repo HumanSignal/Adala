@@ -4,10 +4,18 @@ from typing import Any, Dict, List, Optional, Union
 import litellm
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
-from adala.utils.parse import parse_template, partial_str_format, parse_template_to_pydantic_class
+from adala.utils.parse import (
+    parse_template,
+    partial_str_format,
+    parse_template_to_pydantic_class,
+)
 from adala.utils.llm import (
-    parallel_async_get_llm_response, get_llm_response, ConstrainedLLMResponse,
-    UnconstrainedLLMResponse, ErrorLLMResponse, LiteLLMInferenceSettings
+    parallel_async_get_llm_response,
+    get_llm_response,
+    ConstrainedLLMResponse,
+    UnconstrainedLLMResponse,
+    ErrorLLMResponse,
+    LiteLLMInferenceSettings,
 )
 from openai import NotFoundError
 from pydantic import ConfigDict, field_validator
@@ -27,11 +35,9 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
     """
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True
-    )  # for @computed_field
+    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
 
-    def init_runtime(self) -> 'Runtime':
+    def init_runtime(self) -> "Runtime":
         # check model availability
         try:
             if self.api_key:
@@ -45,15 +51,17 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
     def get_llm_response(self, messages: List[Dict[str, str]]) -> str:
         # TODO: sunset this method in favor of record_to_record
         if self.verbose:
-            print(f'**Prompt content**:\n{messages}')
+            print(f"**Prompt content**:\n{messages}")
         response: Union[ErrorLLMResponse, UnconstrainedLLMResponse] = get_llm_response(
             messages=messages,
-            inference_settings=LiteLLMInferenceSettings(**self.dict(include=LiteLLMInferenceSettings.model_fields.keys())),
+            inference_settings=LiteLLMInferenceSettings(
+                **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
+            ),
         )
         if isinstance(response, ErrorLLMResponse):
-            raise ValueError(f'{response.adala_message}\n{response.adala_details}')
+            raise ValueError(f"{response.adala_message}\n{response.adala_details}")
         if self.verbose:
-            print(f'**Response**:\n{response.text}')
+            print(f"**Response**:\n{response.text}")
         return response.text
 
     def record_to_record(
@@ -85,8 +93,7 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         extra_fields = extra_fields or {}
 
         response_model = parse_template_to_pydantic_class(
-            output_template,
-            provided_field_schema=field_schema
+            output_template, provided_field_schema=field_schema
         )
 
         response: Union[ConstrainedLLMResponse, ErrorLLMResponse] = get_llm_response(
@@ -94,7 +101,9 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
             system_prompt=instructions_template,
             instruction_first=instructions_first,
             response_model=response_model,
-            inference_settings=LiteLLMInferenceSettings(**self.dict(include=LiteLLMInferenceSettings.model_fields.keys())),
+            inference_settings=LiteLLMInferenceSettings(
+                **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
+            ),
         )
 
         if isinstance(response, ErrorLLMResponse):
@@ -114,9 +123,7 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
         inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
     """
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True
-    )  # for @computed_field
+    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
 
     @field_validator("concurrency", mode="before")
     def check_concurrency(cls, value) -> int:
@@ -124,10 +131,11 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
         if value < 1:
             raise NotImplementedError(
                 "You must explicitly specify the number of concurrent clients for AsyncOpenAIChatRuntime. "
-                "Set `AsyncOpenAIChatRuntime(concurrency=10, ...)` or any other positive integer. ")
+                "Set `AsyncOpenAIChatRuntime(concurrency=10, ...)` or any other positive integer. "
+            )
         return value
 
-    def init_runtime(self) -> 'Runtime':
+    def init_runtime(self) -> "Runtime":
         # check model availability
         try:
             if self.api_key:
@@ -151,19 +159,24 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
         """Execute batch of requests with async calls to OpenAI API"""
 
         response_model = parse_template_to_pydantic_class(
-            output_template,
-            provided_field_schema=field_schema
+            output_template, provided_field_schema=field_schema
         )
 
         extra_fields = extra_fields or {}
-        user_prompts = batch.apply(lambda row: input_template.format(**row, **extra_fields), axis=1).tolist()
+        user_prompts = batch.apply(
+            lambda row: input_template.format(**row, **extra_fields), axis=1
+        ).tolist()
 
-        responses: List[Union[ConstrainedLLMResponse, ErrorLLMResponse]] = await parallel_async_get_llm_response(
-            user_prompts=user_prompts,
-            system_prompt=instructions_template,
-            instruction_first=instructions_first,
-            response_model=response_model,
-            inference_settings=LiteLLMInferenceSettings(**self.dict(include=LiteLLMInferenceSettings.model_fields.keys())),
+        responses: List[Union[ConstrainedLLMResponse, ErrorLLMResponse]] = (
+            await parallel_async_get_llm_response(
+                user_prompts=user_prompts,
+                system_prompt=instructions_template,
+                instruction_first=instructions_first,
+                response_model=response_model,
+                inference_settings=LiteLLMInferenceSettings(
+                    **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
+                ),
+            )
         )
 
         # convert list of LLMResponse objects to the dataframe records
@@ -189,7 +202,7 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
     ) -> Dict[str, str]:
-        raise NotImplementedError('record_to_record is not implemented')
+        raise NotImplementedError("record_to_record is not implemented")
 
 
 class LiteLLMVisionRuntime(LiteLLMChatRuntime):
@@ -242,56 +255,56 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
 
         if len(output_fields) > 1:
             raise NotImplementedError(
-                f'{self.__class__.__name__} does not support multiple output fields. '
-                f'Found: {output_fields}'
+                f"{self.__class__.__name__} does not support multiple output fields. "
+                f"Found: {output_fields}"
             )
         output_field = output_fields[0]
-        output_field_name = output_field['text']
+        output_field_name = output_field["text"]
 
         input_fields = parse_template(input_template)
 
         # split input template into text and image parts
-        input_text = ''
+        input_text = ""
         content = [
             {
-                'type': 'text',
-                'text': instructions_template,
+                "type": "text",
+                "text": instructions_template,
             }
         ]
         for field in input_fields:
-            if field['type'] == 'text':
-                input_text += field['text']
-            elif field['type'] == 'var':
-                if field['text'] not in field_schema:
-                    input_text += record[field['text']]
-                elif field_schema[field['text']]['type'] == 'string':
-                    if field_schema[field['text']].get('format') == 'uri':
+            if field["type"] == "text":
+                input_text += field["text"]
+            elif field["type"] == "var":
+                if field["text"] not in field_schema:
+                    input_text += record[field["text"]]
+                elif field_schema[field["text"]]["type"] == "string":
+                    if field_schema[field["text"]].get("format") == "uri":
                         if input_text:
-                            content.append(
-                                {'type': 'text', 'text': input_text}
-                            )
-                            input_text = ''
+                            content.append({"type": "text", "text": input_text})
+                            input_text = ""
                         content.append(
                             {
-                                'type': 'image_url',
-                                'image_url': record[field['text']],
+                                "type": "image_url",
+                                "image_url": record[field["text"]],
                             }
                         )
                     else:
-                        input_text += record[field['text']]
+                        input_text += record[field["text"]]
                 else:
                     raise ValueError(
                         f'Unsupported field type: {field_schema[field["text"]]["type"]}'
                     )
         if input_text:
-            content.append({'type': 'text', 'text': input_text})
+            content.append({"type": "text", "text": input_text})
 
         if self.verbose:
-            print(f'**Prompt content**:\n{content}')
+            print(f"**Prompt content**:\n{content}")
 
         completion = litellm.completion(
-            messages=[{'role': 'user', 'content': content}],
-            inference_settings=LiteLLMInferenceSettings(**self.dict(include=LiteLLMInferenceSettings.model_fields.keys())),
+            messages=[{"role": "user", "content": content}],
+            inference_settings=LiteLLMInferenceSettings(
+                **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
+            ),
         )
 
         completion_text = completion.choices[0].message.content

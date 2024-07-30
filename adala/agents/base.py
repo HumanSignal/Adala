@@ -214,8 +214,7 @@ class Agent(BaseModel, ABC):
         return runtime
 
     def run(
-        self, input: InternalDataFrame = None, runtime: Optional[str] = None,
-        **kwargs
+        self, input: InternalDataFrame = None, runtime: Optional[str] = None, **kwargs
     ) -> InternalDataFrame:
         """
         Runs the agent on the specified dataset.

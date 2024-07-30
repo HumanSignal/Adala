@@ -25,7 +25,7 @@ class Runtime(BaseModelInRegistry):
 
     verbose: bool = False
     batch_size: Optional[int] = None
-    concurrency: Optional[int] = Field(default=1, alias='concurrent_clients')
+    concurrency: Optional[int] = Field(default=1, alias="concurrent_clients")
 
     @model_validator(mode="after")
     def init_runtime(self) -> "Runtime":
@@ -74,7 +74,7 @@ class Runtime(BaseModelInRegistry):
         output_template: str,
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
-        instructions_first: bool = True
+        instructions_first: bool = True,
     ) -> InternalDataFrame:
         """
         Processes a record.
@@ -110,10 +110,14 @@ class Runtime(BaseModelInRegistry):
                 apply_func = batch.apply
         elif self.concurrency > 1:
             # run batch processing each row in a parallel way, using a fixed number of CPUs
-            logger.info(f"Running batch processing in parallel using {self.concurrency} CPUs")
+            logger.info(
+                f"Running batch processing in parallel using {self.concurrency} CPUs"
+            )
             # Warning: parallel processing doubles the memory footprint compared to sequential processing
             # read more about https://nalepae.github.io/pandarallel/
-            pandarallel.initialize(nb_workers=self.concurrency, progress_bar=self.verbose)
+            pandarallel.initialize(
+                nb_workers=self.concurrency, progress_bar=self.verbose
+            )
             apply_func = batch.parallel_apply
         else:
             raise ValueError(f"Invalid concurrency value: {self.concurrency}")

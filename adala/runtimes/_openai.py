@@ -2,8 +2,7 @@ import os
 
 from pydantic import Field
 
-from ._litellm import (AsyncLiteLLMChatRuntime, LiteLLMChatRuntime,
-                       LiteLLMVisionRuntime)
+from ._litellm import AsyncLiteLLMChatRuntime, LiteLLMChatRuntime, LiteLLMVisionRuntime
 
 
 class OpenAIChatRuntime(LiteLLMChatRuntime):
@@ -16,7 +15,7 @@ class OpenAIChatRuntime(LiteLLMChatRuntime):
     """
 
     # TODO does it make any sense for this to be optional?
-    api_key: str = Field(default=os.getenv('OPENAI_API_KEY'))
+    api_key: str = Field(default=os.getenv("OPENAI_API_KEY"))
 
 
 class AsyncOpenAIChatRuntime(AsyncLiteLLMChatRuntime):
@@ -29,7 +28,7 @@ class AsyncOpenAIChatRuntime(AsyncLiteLLMChatRuntime):
 
     """
 
-    api_key: str = Field(default=os.getenv('OPENAI_API_KEY'))
+    api_key: str = Field(default=os.getenv("OPENAI_API_KEY"))
 
 
 class OpenAIVisionRuntime(LiteLLMVisionRuntime):
@@ -39,7 +38,7 @@ class OpenAIVisionRuntime(LiteLLMVisionRuntime):
     Only compatible with OpenAI API version 1.0.0 or higher.
     """
 
-    api_key: str = Field(default=os.getenv('OPENAI_API_KEY'))
+    api_key: str = Field(default=os.getenv("OPENAI_API_KEY"))
     # NOTE this check used to exist in OpenAIVisionRuntime.record_to_record,
     #      but doesn't seem to have a definition
     # def init_runtime(self) -> 'Runtime':

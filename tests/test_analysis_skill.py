@@ -27,7 +27,7 @@ def test_code_generation():
 
     agent = Agent(skills=skillset, environment=env)
     predictions = agent.run()
-    expected_code = '''\
+    expected_code = """\
 import json
 from collections import defaultdict
 
@@ -47,5 +47,5 @@ input_jsons = [
 ]
 
 output = sum_values(input_jsons)
-print(output)  # Output will be {'a': 9, 'b': 12}'''
+print(output)  # Output will be {'a': 9, 'b': 12}"""
     assert predictions.code[0] == expected_code

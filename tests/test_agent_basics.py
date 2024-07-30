@@ -33,8 +33,12 @@ def test_agent_quickstart_single_skill():
 
     agent.learn(learning_iterations=2)
 
-    assert agent.skills["0_to_1"].instructions == '''\
-Transform the input consisting of three integers by incrementing each integer by 1. For each input, output three integers that represent this transformation. Ensure the output is formatted as three integers separated by spaces.'''
+    assert (
+        agent.skills["0_to_1"].instructions
+        == """\
+Transform the input consisting of three integers by incrementing each integer by 1. For each input, output three integers that represent this transformation. Ensure the output is formatted as three integers separated by spaces."""
+    )
+
 
 @pytest.mark.vcr
 def test_agent_quickstart_two_skills():
@@ -68,9 +72,7 @@ def test_agent_quickstart_two_skills():
             ground_truth_columns={"0->1": "gt_0", "1->2": "gt_1"},
         ),
         teacher_runtimes={
-            'default': OpenAIChatRuntime(
-                model='gpt-4o-mini', max_tokens=4096
-            )
+            "default": OpenAIChatRuntime(model="gpt-4o-mini", max_tokens=4096)
         },
     )
 
@@ -79,14 +81,15 @@ def test_agent_quickstart_two_skills():
     # assert final instruction
     assert (
         agent.skills["0->1"].instructions
-        == '''\
-Transform the input numbers by changing each 0 to 1 and leaving all other numbers unchanged. Return the transformed output as a space-separated string.'''
+        == """\
+Transform the input numbers by changing each 0 to 1 and leaving all other numbers unchanged. Return the transformed output as a space-separated string."""
     )
     assert (
         agent.skills["1->2"].instructions
-        == '''\
-You are tasked with incrementing each number in the input text by 1. For each number in the input, provide the corresponding incremented value in the output. Ensure that all numbers are transformed correctly.'''
+        == """\
+You are tasked with incrementing each number in the input text by 1. For each number in the input, provide the corresponding incremented value in the output. Ensure that all numbers are transformed correctly."""
     )
+
 
 @pytest.mark.vcr
 def test_agent_run_classification_skill():
@@ -99,7 +102,7 @@ def test_agent_run_classification_skill():
             instructions="Classify the input text into one of the given classes.",
             input_template="Text: {input}",
             output_template="Output: {output}",
-            labels={'output': ['class_A', 'class_B']},
+            labels={"output": ["class_A", "class_B"]},
         )
     )
 
@@ -130,11 +133,11 @@ async def test_agent_arun_classification_skill():
             instructions="Classify the input text into one of the given classes.",
             input_template="Text: {input}",
             output_template="Output: {output}",
-            labels={'output': ['class_A', 'class_B']},
+            labels={"output": ["class_A", "class_B"]},
         ),
         runtimes={
-            'default': AsyncOpenAIChatRuntime(
-                model='gpt-3.5-turbo',
+            "default": AsyncOpenAIChatRuntime(
+                model="gpt-3.5-turbo",
                 api_key=os.getenv("OPENAI_API_KEY"),
                 max_tokens=10,
                 temperature=0,
@@ -143,7 +146,7 @@ async def test_agent_arun_classification_skill():
                 timeout=10,
                 verbose=False,
             )
-        }
+        },
     )
 
     df = pd.DataFrame(

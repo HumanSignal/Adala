@@ -13,17 +13,21 @@ from server.app import _get_redis_conn
 def vcr_config():
     return {
         "filter_headers": ["authorization"],
-        "match_on": ('method', 'scheme', 'host', 'port', 'path', 'query', 'body')
+        "match_on": ("method", "scheme", "host", "port", "path", "query", "body"),
     }
 
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "use_openai: mark test as requiring OpenAI key")
-    config.addinivalue_line("markers", "use_azure: mark test as requiring Azure OpenAI key")
+    config.addinivalue_line(
+        "markers", "use_azure: mark test as requiring Azure OpenAI key"
+    )
     config.addinivalue_line(
         "markers", "use_server: mark test as requiring running adala server"
     )
-    config.addinivalue_line("addopts", "-m 'not (use_openai or use_azure or use_server)'")
+    config.addinivalue_line(
+        "addopts", "-m 'not (use_openai or use_azure or use_server)'"
+    )
 
 
 @pytest.fixture

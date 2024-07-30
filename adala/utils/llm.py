@@ -22,6 +22,7 @@ class ConstrainedLLMResponse(LLMResponse):
     LLM response from constrained generation.
     `data` object contains fields required by the response model.
     """
+
     data: Dict = Field(default_factory=dict)
 
 
@@ -30,6 +31,7 @@ class UnconstrainedLLMResponse(LLMResponse):
     LLM response from unconstrained generation.
     `text` field contains raw completion text.
     """
+
     text: str = Field(default=None)
 
 
@@ -37,13 +39,14 @@ class ErrorLLMResponse(LLMResponse):
     """
     LLM response in case of error.
     """
-    adala_error: bool = Field(default=True, serialization_alias='_adala_error')
-    adala_message: str = Field(default=None, serialization_alias='_adala_message')
-    adala_details: str = Field(default=None, serialization_alias='_adala_details')
+
+    adala_error: bool = Field(default=True, serialization_alias="_adala_error")
+    adala_message: str = Field(default=None, serialization_alias="_adala_message")
+    adala_details: str = Field(default=None, serialization_alias="_adala_details")
 
 
 class LiteLLMInferenceSettings(BaseSettings):
-    '''
+    """
     Common inference settings for LiteLLM.
 
     Attributes:
@@ -59,8 +62,9 @@ class LiteLLMInferenceSettings(BaseSettings):
         temperature: Temperature for sampling.
         timeout: Timeout in seconds.
         seed: Integer seed to reduce nondeterminism in generation.
-    '''
-    model: str = 'gpt-4o-mini'
+    """
+
+    model: str = "gpt-4o-mini"
     api_key: Optional[str] = None
     base_url: Optional[str] = None
     api_version: Optional[str] = None
@@ -70,13 +74,17 @@ class LiteLLMInferenceSettings(BaseSettings):
     seed: Optional[int] = 47
 
 
-def get_messages(user_prompt: str, system_prompt: Optional[str] = None, instruction_first: bool = True):
-    messages = [{'role': 'user', 'content': user_prompt}]
+def get_messages(
+    user_prompt: str,
+    system_prompt: Optional[str] = None,
+    instruction_first: bool = True,
+):
+    messages = [{"role": "user", "content": user_prompt}]
     if system_prompt:
         if instruction_first:
-            messages.insert(0, {'role': 'system', 'content': system_prompt})
+            messages.insert(0, {"role": "system", "content": system_prompt})
         else:
-            messages[0]['content'] += system_prompt
+            messages[0]["content"] += system_prompt
     return messages
 
 
@@ -120,18 +128,26 @@ async def async_get_llm_response(
             completion_text = completion.choices[0].message.content
             return UnconstrainedLLMResponse(text=completion_text)
         except Exception as e:
-            return ErrorLLMResponse(adala_message=type(e).__name__, adala_details=traceback.format_exc())
+            return ErrorLLMResponse(
+                adala_message=type(e).__name__, adala_details=traceback.format_exc()
+            )
 
     # constrained generation branch - use `response_model` to constrain the LLM response
     try:
-        instructor_response, completion = await async_instructor_client.chat.completions.create_with_completion(
-            messages=messages,
-            response_model=response_model,
-            **inference_settings.dict(),
+        instructor_response, completion = (
+            await async_instructor_client.chat.completions.create_with_completion(
+                messages=messages,
+                response_model=response_model,
+                **inference_settings.dict(),
+            )
         )
-        return ConstrainedLLMResponse(data=instructor_response.model_dump(by_alias=True))
+        return ConstrainedLLMResponse(
+            data=instructor_response.model_dump(by_alias=True)
+        )
     except Exception as e:
-        return ErrorLLMResponse(adala_message=type(e).__name__, adala_details=traceback.format_exc())
+        return ErrorLLMResponse(
+            adala_message=type(e).__name__, adala_details=traceback.format_exc()
+        )
 
 
 async def parallel_async_get_llm_response(
@@ -165,7 +181,6 @@ def get_llm_response(
     response_model: Optional[Type[BaseModel]] = None,
     inference_settings: LiteLLMInferenceSettings = LiteLLMInferenceSettings(),
 ) -> LLMResponse:
-
     """
     Synchronous version of create_completion function with error handling and session timeout.
 
@@ -199,18 +214,26 @@ def get_llm_response(
             completion_text = completion.choices[0].message.content
             return UnconstrainedLLMResponse(text=completion_text)
         except Exception as e:
-            return ErrorLLMResponse(adala_message=type(e).__name__, adala_details=traceback.format_exc())
+            return ErrorLLMResponse(
+                adala_message=type(e).__name__, adala_details=traceback.format_exc()
+            )
 
     # constrained generation branch - use `response_model` to constrain the LLM response
     try:
-        instructor_response, completion = instructor_client.chat.completions.create_with_completion(
-            messages=messages,
-            response_model=response_model,
-            **inference_settings.dict(),
+        instructor_response, completion = (
+            instructor_client.chat.completions.create_with_completion(
+                messages=messages,
+                response_model=response_model,
+                **inference_settings.dict(),
+            )
         )
-        return ConstrainedLLMResponse(data=instructor_response.model_dump(by_alias=True))
+        return ConstrainedLLMResponse(
+            data=instructor_response.model_dump(by_alias=True)
+        )
     except Exception as e:
-        return ErrorLLMResponse(adala_message=type(e).__name__, adala_details=traceback.format_exc())
+        return ErrorLLMResponse(
+            adala_message=type(e).__name__, adala_details=traceback.format_exc()
+        )
 
 
 def parallel_get_llm_response(
@@ -234,7 +257,7 @@ def parallel_get_llm_response(
                 *inference_settings.dict().values(),
             )
             for user_prompt in user_prompts
-        ]
+        ],
     )
     pool.close()
     pool.join()
