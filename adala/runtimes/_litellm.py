@@ -50,7 +50,7 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
             print(f'**Prompt content**:\n{messages}')
         response: Union[ErrorLLMResponse, UnconstrainedLLMResponse] = get_llm_response(
             messages=messages,
-            inference_settings=LiteLLMInferenceSettings(self),
+            inference_settings=LiteLLMInferenceSettings(**self.dict(include=LiteLLMInferenceSettings.model_fields.keys())),
         )
         if isinstance(response, ErrorLLMResponse):
             raise ValueError(f'{response.adala_message}\n{response.adala_details}')
@@ -96,7 +96,7 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
             system_prompt=instructions_template,
             instruction_first=instructions_first,
             response_model=response_model,
-            inference_settings=LiteLLMInferenceSettings(self),
+            inference_settings=LiteLLMInferenceSettings(**self.dict(include=LiteLLMInferenceSettings.model_fields.keys())),
         )
 
         if isinstance(response, ErrorLLMResponse):
@@ -167,7 +167,7 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
             system_prompt=instructions_template,
             instruction_first=instructions_first,
             response_model=response_model,
-            inference_settings=LiteLLMInferenceSettings(self),
+            inference_settings=LiteLLMInferenceSettings(**self.dict(include=LiteLLMInferenceSettings.model_fields.keys())),
         )
 
         # convert list of LLMResponse objects to the dataframe records
@@ -295,7 +295,7 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
 
         completion = litellm.completion(
             messages=[{'role': 'user', 'content': content}],
-            inference_settings=LiteLLMInferenceSettings(self),
+            inference_settings=LiteLLMInferenceSettings(**self.dict(include=LiteLLMInferenceSettings.model_fields.keys())),
         )
 
         completion_text = completion.choices[0].message.content
