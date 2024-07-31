@@ -13,11 +13,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, SerializeAsAny, field_validator
 import uvicorn
 from redis import Redis
+import time
 
 from server.log_middleware import LogMiddleware
 from server.tasks.process_file import app as celery_app
 from server.tasks.process_file import streaming_parent_task
-from server.utils import get_input_topic_name, get_output_topic_name, Settings, delete_topic
+from server.utils import (
+    get_input_topic_name,
+    get_output_topic_name,
+    Settings,
+    delete_topic,
+)
 from server.handlers.result_handlers import ResultHandler
 
 
@@ -177,6 +183,7 @@ async def submit_batch(batch: BatchData):
     try:
         for record in batch.data:
             await producer.send_and_wait(topic, value=record)
+            time.sleep(0.1)
     except UnknownTopicOrPartitionError:
         await producer.stop()
         raise HTTPException(
