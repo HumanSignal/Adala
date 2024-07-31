@@ -187,13 +187,7 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
                     print_error(response.adala_message, response.adala_details)
                 df_data.append(response.model_dump(by_alias=True))
             else:
-                _data = response.data
-                _data['_adala_error'] = False
-                if '_adala_message' not in _data:
-                    _data['_adala_message'] = ''
-                if '_adala_details' not in _data:
-                    _data['_adala_details'] = ''
-                df_data.append(_data)
+                df_data.append(response.data)
 
         output_df = InternalDataFrame(df_data)
         return output_df.set_index(batch.index)
