@@ -24,6 +24,10 @@ class ConstrainedLLMResponse(LLMResponse):
     """
 
     data: Dict = Field(default_factory=dict)
+    adala_error: bool = Field(
+        default=False, serialization_alias='_adala_error'
+    )
+
 
 
 class UnconstrainedLLMResponse(LLMResponse):
@@ -33,6 +37,10 @@ class UnconstrainedLLMResponse(LLMResponse):
     """
 
     text: str = Field(default=None)
+    adala_error: bool = Field(
+        default=False, serialization_alias='_adala_error'
+    )
+
 
 
 class ErrorLLMResponse(LLMResponse):
@@ -243,7 +251,7 @@ def parallel_get_llm_response(
     instruction_first: bool = True,
     response_model: Optional[Type[BaseModel]] = None,
     inference_settings: LiteLLMInferenceSettings = LiteLLMInferenceSettings(),
-):
+) -> List[LLMResponse]:
     pool = mp.Pool(mp.cpu_count())
     responses = pool.starmap(
         get_llm_response,
