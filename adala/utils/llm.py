@@ -69,7 +69,6 @@ class LiteLLMInferenceSettings(BaseSettings):
         base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
         api_version (Optional[str]): API version, optional except for Azure.
         instruction_first: Whether to put instructions first.
-        response_model: Pydantic model to constrain the LLM generated response. If not provided, the raw completion text will be returned.  # noqa
         max_tokens: Maximum tokens to generate.
         temperature: Temperature for sampling.
         timeout: Timeout in seconds.
