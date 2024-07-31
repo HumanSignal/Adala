@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional, Union
 
 import litellm
+from litellm.exceptions import AuthenticationError
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
 from adala.utils.parse import (
@@ -17,7 +18,6 @@ from adala.utils.llm import (
     ErrorLLMResponse,
     LiteLLMInferenceSettings,
 )
-from openai import NotFoundError
 from pydantic import ConfigDict, field_validator
 from rich import print
 
@@ -37,15 +37,26 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
 
+    def as_inference_settings(self, **override_kwargs) -> LiteLLMInferenceSettings:
+        inference_settings = LiteLLMInferenceSettings(**self.dict(include=LiteLLMInferenceSettings.model_fields.keys()))
+        inference_settings.update(**override_kwargs)
+        return inference_settings
+
     def init_runtime(self) -> "Runtime":
         # check model availability
+        # extension of litellm.check_valid_key for non-openai deployments
         try:
-            if self.api_key:
-                litellm.check_valid_key(model=self.model, api_key=self.api_key)
-        except NotFoundError:
-            raise ValueError(
-                f'Requested model "{self.model}" is not available with your api_key.'
+            messages = [{"role": "user", "content": "Hey, how's it going?"}]
+            get_llm_response(
+                messages=messages,
+                inference_settings=self.as_inference_settings(max_tokens=10)
             )
+        except AuthenticationError:
+            raise ValueError(
+                f'Requested model "{self.model}" is not available with your api_key and settings.'
+            )
+        except Exception as e:
+            raise ValueError(f'Failed to check availability of requested model "{self.model}": {e}')
         return self
 
     def get_llm_response(self, messages: List[Dict[str, str]]) -> str:
@@ -54,9 +65,7 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
             print(f"**Prompt content**:\n{messages}")
         response: Union[ErrorLLMResponse, UnconstrainedLLMResponse] = get_llm_response(
             messages=messages,
-            inference_settings=LiteLLMInferenceSettings(
-                **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
-            ),
+            inference_settings=self.as_inference_settings(),
         )
         if isinstance(response, ErrorLLMResponse):
             raise ValueError(f"{response.adala_message}\n{response.adala_details}")
@@ -101,9 +110,7 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
             system_prompt=instructions_template,
             instruction_first=instructions_first,
             response_model=response_model,
-            inference_settings=LiteLLMInferenceSettings(
-                **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
-            ),
+            inference_settings=self.as_inference_settings(),
         )
 
         if isinstance(response, ErrorLLMResponse):
@@ -125,6 +132,28 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
 
+    def as_inference_settings(self, **override_kwargs) -> LiteLLMInferenceSettings:
+        inference_settings = LiteLLMInferenceSettings(**self.dict(include=LiteLLMInferenceSettings.model_fields.keys()))
+        inference_settings.update(**override_kwargs)
+        return inference_settings
+
+    def init_runtime(self) -> "Runtime":
+        # check model availability
+        # extension of litellm.check_valid_key for non-openai deployments
+        try:
+            messages = [{"role": "user", "content": "Hey, how's it going?"}]
+            get_llm_response(
+                messages=messages,
+                inference_settings=self.as_inference_settings(max_tokens=10)
+            )
+        except AuthenticationError:
+            raise ValueError(
+                f'Requested model "{self.model}" is not available with your api_key and settings.'
+            )
+        except Exception as e:
+            raise ValueError(f'Failed to check availability of requested model "{self.model}": {e}')
+        return self
+
     @field_validator("concurrency", mode="before")
     def check_concurrency(cls, value) -> int:
         value = value or -1
@@ -134,17 +163,6 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
                 "Set `AsyncOpenAIChatRuntime(concurrency=10, ...)` or any other positive integer. "
             )
         return value
-
-    def init_runtime(self) -> "Runtime":
-        # check model availability
-        try:
-            if self.api_key:
-                litellm.check_valid_key(model=self.model, api_key=self.api_key)
-        except NotFoundError:
-            raise ValueError(
-                f'Requested model "{self.model}" is not available in your OpenAI account.'
-            )
-        return self
 
     async def batch_to_batch(
         self,
@@ -173,9 +191,7 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
                 system_prompt=instructions_template,
                 instruction_first=instructions_first,
                 response_model=response_model,
-                inference_settings=LiteLLMInferenceSettings(
-                    **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
-                ),
+                inference_settings=self.as_inference_settings(),
             )
         )
 
@@ -302,9 +318,7 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
 
         completion = litellm.completion(
             messages=[{"role": "user", "content": content}],
-            inference_settings=LiteLLMInferenceSettings(
-                **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
-            ),
+            inference_settings=self.as_inference_settings(),
         )
 
         completion_text = completion.choices[0].message.content
