@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"messages": [{"role": "user", "content": "return the word banana with
+    body: '{"messages": [{"role": "user", "content": "return the word Banana with
       exclamation mark"}], "model": "gpt-4o-mini", "max_tokens": 1000, "seed": 47,
       "temperature": 0.0}'
     headers:
@@ -37,17 +37,17 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA1SQPW/CMBRF9/wK982kCiEIyFaGDgyVEK1Utaoi47wkLv4ifqitEP+9chJIu3i4
-        x/fq2OeIMZAl5AxEw0lop+LVUW7osHk47Jq31+3LTvsn/UXiuN7Kx2eYhIbdf6Kga+teWO0UkrSm
-        x6JFThhWp4s0nc2TLFt1QNsSVajVjuLMxloaGadJmsXJIp4uh3ZjpUAPOXuPGGPs3J3B05T4DTlL
-        JtdEo/e8RshvlxiD1qqQAPdeeuKGYDJCYQ2h6dTX3HDD72CAl9uqsrVr7T4YmJNSt7ySRvqmaJF7
-        a8KCJ+v6+iVi7KOzP/0TAtda7agge0ATBqfzfg7GPxvhbGBkias/nWU06IH/8YS6qKSpsXWt7F9S
-        uSKpklmZVQkiRJfoFwAA//8DAFOhKJDXAQAA
+        H4sIAAAAAAAAAwAAAP//VJA9b8IwFEX3/Ar3zaRKAuEjW7t0YaNqhaoqcowJBtvPxA9UhPjvlZNA
+        2sXDPb5Xx75GjIHaQMFA7DgJ43S8OKrl+ryqD84b/zl+36/PL8auLvz48baEUWhgtZeC7q1ngcZp
+        SQpth0UjOcmwms6ybJwneZ61wOBG6lCrHcUTjI2yKs6SbBInszid9+0dKiE9FOwrYoyxa3sGT7uR
+        P1CwZHRPjPSe1xKKxyXGoEEdEuDeK0/cEowGKNCStK36K7fc8ifo4e2xqrF2DVbBwJ60fuRbZZXf
+        lY3kHm1Y8ISuq98ixr5b+9M/IXANGkcl4UHaMJjm3RwMfzbAcc8Iies/nXnU64G/eJKm3Cpby8Y1
+        qnvJ1pXTNK2m01mVLiC6Rb8AAAD//wMATZZOl9cBAAA=
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8ab61b2238b51124-ORD
+      - 8ab61dab0ff51ce2-ORD
       Connection:
       - keep-alive
       Content-Encoding:
@@ -55,14 +55,14 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 30 Jul 2024 14:40:49 GMT
+      - Tue, 30 Jul 2024 14:42:33 GMT
       Server:
       - cloudflare
       Set-Cookie:
-      - __cf_bm=fHfAWN2f4j1UEoL2vV18wWL57L0BUsy3mQqoQNcQa4E-1722350449-1.0.1.1-u12Dx_bIPpuXxGwicHxBDD1pOyaPTvUZSYPL.txiQvjFmpRb8RDucf6y.z0H9F2eGv1Yyv.gbha6wOXgvH3ufg;
-        path=/; expires=Tue, 30-Jul-24 15:10:49 GMT; domain=.api.openai.com; HttpOnly;
+      - __cf_bm=U.QsEfIGTzsqxtcP6FrcHBMwGMWzLvz1VZmhwW6lGNM-1722350553-1.0.1.1-5LrU0EHrNJBvSZhTUjQTM9K4wWlp_BG5ZNuQMBMKYAnIyLSi.3zmjFa9e_YNBFYkD8avCoDMZ1kyr1cBAUPCMw;
+        path=/; expires=Tue, 30-Jul-24 15:12:33 GMT; domain=.api.openai.com; HttpOnly;
         Secure; SameSite=None
-      - _cfuvid=w.R4ljApv4Ww.phiz27y.87GQLg5l5EgKcqvE5HNP8g-1722350449356-0.0.1.1-604800000;
+      - _cfuvid=kUJx58fC8YYZZDNTWJfOJfMCMZ3dJ1pkSwlXBlwS.g4-1722350553169-0.0.1.1-604800000;
         path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Transfer-Encoding:
       - chunked
@@ -73,7 +73,7 @@ interactions:
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '105'
+      - '253'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -91,7 +91,7 @@ interactions:
       x-ratelimit-reset-tokens:
       - 0s
       x-request-id:
-      - req_9803bf4350ac6f1b4041d4be85b88c39
+      - req_d96ab7ce0e87524aca13b64d3eb63519
     status:
       code: 200
       message: OK
