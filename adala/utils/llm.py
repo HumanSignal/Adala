@@ -61,6 +61,8 @@ class LiteLLMInferenceSettings(BaseSettings):
     """
     Common inference settings for LiteLLM.
 
+    See `litellm.types.completion.CompletionRequest` for other parameters not set here.
+
     Attributes:
         model: model name. Refer to litellm supported models for how to pass
                this: https://litellm.vercel.app/docs/providers
