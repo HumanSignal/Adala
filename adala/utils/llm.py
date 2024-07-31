@@ -15,6 +15,12 @@ class LLMResponse(BaseModel):
     """
     Base class for LLM response.
     """
+    adala_message: str = Field(
+        default=None, serialization_alias='_adala_message'
+    )
+    adala_details: str = Field(
+        default=None, serialization_alias='_adala_details'
+    )
 
 
 class ConstrainedLLMResponse(LLMResponse):
@@ -49,8 +55,6 @@ class ErrorLLMResponse(LLMResponse):
     """
 
     adala_error: bool = Field(default=True, serialization_alias="_adala_error")
-    adala_message: str = Field(default=None, serialization_alias="_adala_message")
-    adala_details: str = Field(default=None, serialization_alias="_adala_details")
 
 
 class LiteLLMInferenceSettings(BaseSettings):
