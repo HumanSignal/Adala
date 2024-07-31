@@ -2,7 +2,7 @@ from typing import Optional
 import logging
 import json
 from abc import abstractmethod
-from pydantic import BaseModel, Field, computed_field, ConfigDict, model_validator, field_validator
+from pydantic import BaseModel, Field, computed_field, ConfigDict, model_validator
 import csv
 
 from adala.utils.registry import BaseModelInRegistry
@@ -195,9 +195,22 @@ class CSVHandler(ResultHandler):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
 
         # coerce dicts to LSEBatchItems for validation
-        result_batch = [LSEBatchItem(**record) for record in result_batch]
+        norm_result_batch = []
+        for result in result_batch:
+
+            # This is checking for NaNs to avoid validation errors
+            if result.get('_adala_error') != result.get('_adala_error'):
+                result['_adala_error'] = False
+            if result.get('_adala_message') != result.get('_adala_message'):
+                result['_adala_message'] = None
+            if result.get('_adala_details') != result.get('_adala_details'):
+                result['_adala_details'] = None
+            if result.get('output') != result.get('output'):
+                result['output'] = None
+
+            norm_result_batch.append(LSEBatchItem(**result))
 
         # open and write to file
         with open(self.output_path, "a") as f:
             writer = csv.DictWriter(f, fieldnames=self.columns)
-            writer.writerows([record.dict() for record in result_batch])
+            writer.writerows([record.dict() for record in norm_result_batch])
