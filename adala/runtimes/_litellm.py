@@ -1,8 +1,12 @@
+import asyncio
 import logging
 from typing import Any, Dict, List, Optional, Union
 
+from pydantic_settings import BaseSettings
 import litellm
 from litellm.exceptions import AuthenticationError
+import instructor
+import traceback
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
 from adala.utils.parse import (
@@ -10,19 +14,58 @@ from adala.utils.parse import (
     partial_str_format,
     parse_template_to_pydantic_class,
 )
-from adala.utils.llm import (
-    parallel_async_get_llm_response,
-    get_llm_response,
-    ConstrainedLLMResponse,
-    ErrorLLMResponse,
-    LiteLLMInferenceSettings,
-)
 from pydantic import ConfigDict, field_validator
 from rich import print
 
 from .base import AsyncRuntime, Runtime
 
+instructor_client = instructor.from_litellm(litellm.completion)
+async_instructor_client = instructor.from_litellm(litellm.acompletion)
+
 logger = logging.getLogger(__name__)
+
+
+class LiteLLMInferenceSettings(BaseSettings):
+    """
+    Common inference settings for LiteLLM.
+
+    See `litellm.types.completion.CompletionRequest` for other parameters not set here.
+
+    Attributes:
+        model: model name. Refer to litellm supported models for how to pass
+               this: https://litellm.vercel.app/docs/providers
+        api_key: API key, optional. If provided, will be used to authenticate
+                 with the provider of your specified model.
+        base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
+        api_version (Optional[str]): API version, optional except for Azure.
+        instruction_first: Whether to put instructions first.
+        max_tokens: Maximum tokens to generate.
+        temperature: Temperature for sampling.
+        timeout: Timeout in seconds.
+        seed: Integer seed to reduce nondeterminism in generation.
+    """
+
+    model: str = "gpt-4o-mini"
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
+    api_version: Optional[str] = None
+    max_tokens: int = 1000
+    temperature: float = 0.0
+    timeout: Optional[Union[float, int]] = None
+    seed: Optional[int] = 47
+
+def get_messages(
+    user_prompt: str,
+    system_prompt: Optional[str] = None,
+    instruction_first: bool = True,
+):
+    messages = [{"role": "user", "content": user_prompt}]
+    if system_prompt:
+        if instruction_first:
+            messages.insert(0, {"role": "system", "content": system_prompt})
+        else:
+            messages[0]["content"] += system_prompt
+    return messages
 
 
 class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
@@ -46,9 +89,9 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         # extension of litellm.check_valid_key for non-openai deployments
         try:
             messages = [{"role": "user", "content": "Hey, how's it going?"}]
-            get_llm_response(
+            litellm.completion(
                 messages=messages,
-                inference_settings=self.as_inference_settings(max_tokens=10)
+                **self.as_inference_settings(max_tokens=10).dict()
             )
         except AuthenticationError:
             raise ValueError(
@@ -102,19 +145,27 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         response_model = parse_template_to_pydantic_class(
             output_template, provided_field_schema=field_schema
         )
+        messages = get_messages(input_template.format(**record, **extra_fields), self.system_prompt, self.instruction_first)
 
-        response: Union[ConstrainedLLMResponse, ErrorLLMResponse] = get_llm_response(
-            user_prompt=input_template.format(**record, **extra_fields),
-            system_prompt=instructions_template,
-            instruction_first=instructions_first,
-            response_model=response_model,
-            inference_settings=self.as_inference_settings(),
-        )
-
-        if isinstance(response, ErrorLLMResponse):
+        try:
+            response = instructor_client.chat.completions.create(
+                    messages=messages,
+                    response_model=response_model,
+                    **self.as_inference_settings().dict(),
+            )
+        except Exception as e:
+            error_message = type(e).__name__
+            # error_details = str(e)
+            error_details = traceback.format_exc()
             if self.verbose:
-                print_error(response.adala_message, response.adala_details)
-            return response.model_dump(by_alias=True)
+                print_error(error_message, error_details)
+            # TODO change this format
+            error_dct = {
+                "_adala_error": True,
+                "_adala_message": error_message,
+                "_adala_details": error_details,
+            }
+            return error_dct
 
         return response.data
 
@@ -140,9 +191,9 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
         # extension of litellm.check_valid_key for non-openai deployments
         try:
             messages = [{"role": "user", "content": "Hey, how's it going?"}]
-            get_llm_response(
+            litellm.completion(
                 messages=messages,
-                inference_settings=self.as_inference_settings(max_tokens=10)
+                **self.as_inference_settings(max_tokens=10).dict()
             )
         except AuthenticationError:
             raise ValueError(
@@ -183,23 +234,34 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
             lambda row: input_template.format(**row, **extra_fields), axis=1
         ).tolist()
 
-        responses: List[Union[ConstrainedLLMResponse, ErrorLLMResponse]] = (
-            await parallel_async_get_llm_response(
-                user_prompts=user_prompts,
-                system_prompt=instructions_template,
-                instruction_first=instructions_first,
-                response_model=response_model,
-                inference_settings=self.as_inference_settings(),
+        tasks = [
+            asyncio.ensure_future(
+                async_instructor_client.chat.completions.create(
+                    messages=get_messages(user_prompt, self.system_prompt, self.instruction_first),
+                    response_model=response_model,
+                    **self.as_inference_settings().dict(),
+                )
             )
-        )
+            for user_prompt in user_prompts
+        ]
+        responses = await asyncio.gather(*tasks, return_exceptions=True)
 
         # convert list of LLMResponse objects to the dataframe records
         df_data = []
         for response in responses:
-            if isinstance(response, ErrorLLMResponse):
+            if isinstance(response, Exception):
+                error_message = type(response).__name__
+                # error_details = str(response)
+                error_details = traceback.format_exc()
                 if self.verbose:
-                    print_error(response.adala_message, response.adala_details)
-                df_data.append(response.model_dump(by_alias=True))
+                    print_error(error_message, error_details)
+                # TODO change this format
+                error_dct = {
+                    "_adala_error": True,
+                    "_adala_message": error_message,
+                    "_adala_details": error_details,
+                }
+                df_data.append(error_dct)
             else:
                 df_data.append(response.data)
 
