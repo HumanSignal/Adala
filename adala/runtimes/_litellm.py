@@ -14,7 +14,6 @@ from adala.utils.llm import (
     parallel_async_get_llm_response,
     get_llm_response,
     ConstrainedLLMResponse,
-    UnconstrainedLLMResponse,
     ErrorLLMResponse,
     LiteLLMInferenceSettings,
 )
@@ -63,15 +62,14 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         # TODO: sunset this method in favor of record_to_record
         if self.verbose:
             print(f"**Prompt content**:\n{messages}")
-        response: Union[ErrorLLMResponse, UnconstrainedLLMResponse] = get_llm_response(
+        completion = litellm.completion(
             messages=messages,
-            inference_settings=self.as_inference_settings(),
+            **self.as_inference_settings().dict(),
         )
-        if isinstance(response, ErrorLLMResponse):
-            raise ValueError(f"{response.adala_message}\n{response.adala_details}")
+        completion_text = completion.choices[0].message.content
         if self.verbose:
-            print(f"**Response**:\n{response.text}")
-        return response.text
+            print(f"**Response**:\n{completion_text}")
+        return completion_text
 
     def record_to_record(
         self,
