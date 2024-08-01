@@ -27,7 +27,7 @@ def test_code_generation():
 
     agent = Agent(skills=skillset, environment=env)
     predictions = agent.run()
-    expected_code = '''\
+    expected_code = """\
 # Given input JSON format
 input1 = {"a": 1, "b": 2}
 input2 = {"a": 3, "b": 4}
@@ -38,5 +38,5 @@ result = {}
 for key in input1.keys():
     result[key] = input1[key] + input2[key] + input3[key]
 
-result'''
+result"""
     assert predictions.code[0] == expected_code

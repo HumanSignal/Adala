@@ -13,44 +13,21 @@ from server.app import _get_redis_conn
 def vcr_config():
     return {
         "filter_headers": ["authorization"],
-        "match_on": ('method', 'scheme', 'host', 'port', 'path', 'query', 'body')
+        "match_on": ("method", "scheme", "host", "port", "path", "query", "body"),
     }
-
-
-def pytest_addoption(parser):
-    parser.addoption(
-        "--use-openai",
-        action="store_true",
-        default=False,
-        help="run tests that require OpenAI key",
-    )
-    parser.addoption(
-        "--use-server",
-        action="store_true",
-        default=False,
-        help="run tests that require running adala server",
-    )
 
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "use_openai: mark test as requiring OpenAI key")
     config.addinivalue_line(
+        "markers", "use_azure: mark test as requiring Azure OpenAI key"
+    )
+    config.addinivalue_line(
         "markers", "use_server: mark test as requiring running adala server"
     )
-
-
-def pytest_collection_modifyitems(config, items):
-    if not config.getoption("--use-openai"):
-        skip_openai = pytest.mark.skip(reason="need OpenAI key to run")
-        for item in items:
-            if "use_openai" in item.keywords:
-                item.add_marker(skip_openai)
-
-    if not config.getoption("--use-server"):
-        skip_server = pytest.mark.skip(reason="need live server to run")
-        for item in items:
-            if "use_server" in item.keywords:
-                item.add_marker(skip_server)
+    config.addinivalue_line(
+        "addopts", "-m 'not (use_openai or use_azure or use_server)'"
+    )
 
 
 @pytest.fixture

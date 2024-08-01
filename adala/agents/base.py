@@ -2,13 +2,12 @@ import logging
 from pydantic import (
     BaseModel,
     Field,
-    SkipValidation,
     field_validator,
     model_validator,
     SerializeAsAny,
 )
-from abc import ABC, abstractmethod
-from typing import Any, Optional, List, Dict, Union, Tuple
+from abc import ABC
+from typing import Optional, Dict, Union, Tuple
 from rich import print
 import yaml
 
@@ -215,8 +214,7 @@ class Agent(BaseModel, ABC):
         return runtime
 
     def run(
-        self, input: InternalDataFrame = None, runtime: Optional[str] = None,
-        **kwargs
+        self, input: InternalDataFrame = None, runtime: Optional[str] = None, **kwargs
     ) -> InternalDataFrame:
         """
         Runs the agent on the specified dataset.

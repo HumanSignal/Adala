@@ -59,8 +59,11 @@ def test_classification_skill():
     )
 
     agent.learn()
-    assert agent.skills[
-               "product_category_classification"].instructions == "Classify the input text by determining the most appropriate product category based on its primary use or context, focusing on the functionality and overall purpose rather than just prominent keywords. Do not add any prefix such as 'Labels.' to the category name unless it is explicitly included in the category list provided."
+    assert (
+        agent.skills["product_category_classification"].instructions
+        == """\
+Classify the input text by identifying the most relevant category based on the context and usage of the item described. Ensure to format the category correctly by excluding any prefixes such as 'Labels.' For example, if the item fits into the electronics category, simply state 'Electronics' without any prefix. Remember to strictly adhere to this format and exclude prefixes like 'Labels.' from your output to ensure accuracy."""
+    )
 
 
 @pytest.mark.vcr
@@ -124,7 +127,7 @@ def test_parallel_skillset_with_analysis():
     # AnalysisSkill.improve not implemented
     # agent.learn(learning_iterations=1, num_feedbacks=1, batch_size=3)
     predictions = agent.run()
-    assert predictions.code[0] == '''\
+    expected_code = """\
 import json
 import sys
 
@@ -136,37 +139,45 @@ input_json = json.loads(input_data)
 
 # Initialize the output structure
 output_json = {
-    "id": "",
-    "data": {
-        "text": input_json["inputs"]
-    },
-    "project": "",
-    "predictions": [
-        {
-            "id": "",
-            "lead_time": 0,
-            "result": [
-                {
-                    "id": str(i),
-                    "from_name": "label",
-                    "to_name": "text",
-                    "type": "labels",
-                    "value": {
-                        "start": entity["start"],
-                        "end": entity["end"],
-                        "score": entity["score"],
-                        "text": entity["word"],
-                        "labels": [entity["entity_group"]]
-                    }
-                } for i, entity in enumerate(input_json["outputs"])
-            ],
-            "score": 0
-        }
-    ]
+    "id": None,
+    "data": {},
+    "project": None,
+    "predictions": []
 }
 
-# Output the transformed JSON
-print(json.dumps(output_json, indent=4))'''
+# Fill the data field
+output_json["data"] = {"text": input_json["inputs"]}
+
+# Fill the predictions field
+prediction = {
+    "id": None,
+    "lead_time": None,
+    "result": [],
+    "score": None
+}
+
+for entity in input_json["outputs"]:
+    result = {
+        "id": None,
+        "from_name": "label",
+        "to_name": "text",
+        "type": "labels",
+        "value": {
+            "start": entity["start"],
+            "end": entity["end"],
+            "text": entity["word"],
+            "labels": [entity["entity_group"]]
+        }
+    }
+    prediction["result"].append(result)
+
+output_json["predictions"].append(prediction)
+
+# Print the output JSON
+print(json.dumps(output_json, indent=4))"""
+    # temp hack to compare strings properly
+    expected_code = expected_code.replace("'\n'", "'\\n'")
+    assert predictions.code[0] == expected_code
 
 
 @pytest.mark.vcr
@@ -185,10 +196,16 @@ def test_summarization_skill():
     )
 
     predictions = agent.run(df)
-    assert predictions.summary[
-               0] == 'Caffeine, found in coffee beans and synthesized in labs, has the same structure in various forms. It is a stimulant that improves physical strength and mental stimulation. Habitual use is linked to reduced risks of diseases. Caffeine works by antagonizing adenosine receptors, promoting alertness by inhibiting sedation. It affects dopamine, serotonin, acetylcholine, and adrenaline systems.'
-    assert predictions.summary[
-               2] == 'Vitamin D is a fat-soluble nutrient essential for human survival. It is primarily obtained from the sun, oily fish, eggs, and fortified foods. Supplementing with vitamin D can improve immune health, bone health, and overall well-being. The effects of vitamin D depend on the levels of 25-hydroxyvitamin D in the blood, and benefits are most noticeable when reversing a deficiency.'
+    assert (
+        predictions.summary[0]
+        == """\
+Caffeine, found in coffee beans and synthesized in labs, has the same structure in various forms. It is a stimulant that improves physical strength and mental stimulation, classified as a nootropic. Habitual use is linked to reduced risks of Alzheimer's, cirrhosis, and liver cancer. Caffeine antagonizes adenosine receptors, promoting alertness by inhibiting sedation. It affects dopamine, serotonin, acetylcholine, and adrenaline systems."""
+    )
+    assert (
+        predictions.summary[2]
+        == """\
+Vitamin D is a fat-soluble nutrient essential for human survival. It is primarily obtained from the sun, oily fish, eggs, and fortified foods like milk. Supplementing with vitamin D can improve immune health, bone health, and overall well-being. It may also reduce the risk of cancer, diabetes, and multiple sclerosis. The benefits of vitamin D depend on the individual's levels of 25-hydroxyvitamin D, and improvements are typically observed when reversing a deficiency."""
+    )
 
     pd.testing.assert_series_equal(predictions.text, df.text)
 
@@ -353,10 +370,13 @@ def test_linear_skillset():
     )
 
     agent.learn(learning_iterations=2)
-    assert agent.skills[
-               "skill_0"].instructions == '"Given a category and its context, provide a list of items that belong to this category. The context will help in generating a more accurate list. Do not provide definitions or explanations, just list the items."'  # noqa: E501
+    assert (
+        agent.skills["skill_0"].instructions
+        == '''\
+"Given a category, which could be from various fields like nutrition, geology, etc., list three distinct examples that fall within this category. For instance, if the category is 'Fruits', you should list distinct types of fruits like 'Apples, Bananas, Oranges'. The order of the examples does not matter."'''
+    )
     # TODO: not learned with 2 iterations, need to increase learning_iterations
-    assert agent.skills["skill_1"].instructions == '...'
+    assert agent.skills["skill_1"].instructions == "..."
 
 
 @pytest.mark.vcr
@@ -379,13 +399,4 @@ def test_translation_skill():
     agent = Agent(skills=TranslationSkill(target_language="Swahili"))
 
     predictions = agent.run(df)
-    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima",
-                                                'Maisha ni mazuri',
-                                                'Msitu unaniita',
-                                                'Napenda pizza ya Napolitana',
-                                                'Maua ya spring ni mazuri',
-                                                "Nyota zinang'aa usiku",
-                                                'Upinde wa mvua baada ya mvua',
-                                                'Ninahitaji kahawa',
-                                                'Muziki huchezesha roho',
-                                                'Ndoto zinakuwa kweli']
+    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima", 'Maisha ni mazuri', 'Msitu unaniita', 'Napenda pizza ya Napolitana', 'Maua ya spring ni mazuri', "Nyota zinang'aa usiku", 'Upinde wa mvua baada ya mvua', 'Ninahitaji kahawa', 'Muziki huchezesha roho', 'Ndoto zinakuwa kweli']

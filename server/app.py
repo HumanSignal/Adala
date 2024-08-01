@@ -16,7 +16,6 @@ from redis import Redis
 import time
 
 from server.log_middleware import LogMiddleware
-from server.tasks.process_file import app as celery_app
 from server.tasks.process_file import streaming_parent_task
 from server.utils import (
     get_input_topic_name,

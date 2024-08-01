@@ -31,5 +31,5 @@ class ClassificationSkill(TransformSkill):
             self.field_schema[labels_field] = {
                 "type": "string",
                 "description": "The classification label.",
-                "enum": labels
+                "enum": labels,
             }

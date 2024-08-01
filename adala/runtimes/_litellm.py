@@ -4,11 +4,18 @@ from typing import Any, Dict, List, Optional, Union
 import litellm
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
-from adala.utils.matching import match_options
-from adala.utils.parse import parse_template, partial_str_format, parse_template_to_pydantic_class
+from adala.utils.parse import (
+    parse_template,
+    partial_str_format,
+    parse_template_to_pydantic_class,
+)
 from adala.utils.llm import (
-    parallel_async_get_llm_response, get_llm_response, ConstrainedLLMResponse,
-    UnconstrainedLLMResponse, ErrorLLMResponse
+    parallel_async_get_llm_response,
+    get_llm_response,
+    ConstrainedLLMResponse,
+    UnconstrainedLLMResponse,
+    ErrorLLMResponse,
+    LiteLLMInferenceSettings,
 )
 from openai import NotFoundError
 from pydantic import ConfigDict, field_validator
@@ -19,34 +26,18 @@ from .base import AsyncRuntime, Runtime
 logger = logging.getLogger(__name__)
 
 
-class LiteLLMChatRuntime(Runtime):
+class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
     """
     Runtime that uses [LiteLLM API](https://litellm.vercel.app/docs) and chat
     completion models to perform the skill.
 
     Attributes:
-        model: Model name, refer to LiteLLM's supported provider docs for
-               how to pass this for your model: https://litellm.vercel.app/docs/providers
-        api_key: API key, optional. If provided, will be used to authenticate
-                 with the provider of your specified model.
-        base_url: Points to the endpoint where your model is hosted
-        max_tokens: Maximum number of tokens to generate. Defaults to 1000.
-        splitter: Splitter to use for splitting messages. Defaults to None.
-        temperature: Temperature for sampling, between 0 and 1.
+        inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
     """
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True
-    )  # for @computed_field
+    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
 
-    model: str
-    api_key: Optional[str]
-    base_url: Optional[str] = None
-    max_tokens: Optional[int] = 1000
-    splitter: Optional[str] = None
-    temperature: Optional[float] = 0.0
-
-    def init_runtime(self) -> 'Runtime':
+    def init_runtime(self) -> "Runtime":
         # check model availability
         try:
             if self.api_key:
@@ -60,18 +51,17 @@ class LiteLLMChatRuntime(Runtime):
     def get_llm_response(self, messages: List[Dict[str, str]]) -> str:
         # TODO: sunset this method in favor of record_to_record
         if self.verbose:
-            print(f'**Prompt content**:\n{messages}')
+            print(f"**Prompt content**:\n{messages}")
         response: Union[ErrorLLMResponse, UnconstrainedLLMResponse] = get_llm_response(
             messages=messages,
-            model=self.model,
-            api_key=self.api_key,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature
+            inference_settings=LiteLLMInferenceSettings(
+                **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
+            ),
         )
         if isinstance(response, ErrorLLMResponse):
-            raise ValueError(f'{response.adala_message}\n{response.adala_details}')
+            raise ValueError(f"{response.adala_message}\n{response.adala_details}")
         if self.verbose:
-            print(f'**Response**:\n{response.text}')
+            print(f"**Response**:\n{response.text}")
         return response.text
 
     def record_to_record(
@@ -103,19 +93,17 @@ class LiteLLMChatRuntime(Runtime):
         extra_fields = extra_fields or {}
 
         response_model = parse_template_to_pydantic_class(
-            output_template,
-            provided_field_schema=field_schema
+            output_template, provided_field_schema=field_schema
         )
 
         response: Union[ConstrainedLLMResponse, ErrorLLMResponse] = get_llm_response(
             user_prompt=input_template.format(**record, **extra_fields),
             system_prompt=instructions_template,
             instruction_first=instructions_first,
-            model=self.model,
-            api_key=self.api_key,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature,
-            response_model=response_model
+            response_model=response_model,
+            inference_settings=LiteLLMInferenceSettings(
+                **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
+            ),
         )
 
         if isinstance(response, ErrorLLMResponse):
@@ -126,35 +114,16 @@ class LiteLLMChatRuntime(Runtime):
         return response.data
 
 
-class AsyncLiteLLMChatRuntime(AsyncRuntime):
+class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
     """
     Runtime that uses [OpenAI API](https://openai.com/) and chat completion
     models to perform the skill. It uses async calls to OpenAI API.
 
     Attributes:
-        model: OpenAI model name.
-        api_key: API key, optional. If provided, will be used to authenticate
-                 with the provider of your specified model.
-        base_url: Points to the endpoint where your model is hosted
-        max_tokens: Maximum number of tokens to generate. Defaults to 1000.
-        temperature: Temperature for sampling, between 0 and 1. Higher values
-                     means the model will take more risks. Try 0.9 for more
-                     creative applications, and 0 (argmax sampling) for ones
-                     with a well-defined answer.
-                     Defaults to 0.0.
+        inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
     """
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True
-    )  # for @computed_field
-
-    model: str
-    api_key: Optional[str] = None
-    base_url: Optional[str] = None
-    max_tokens: Optional[int] = 1000
-    temperature: Optional[float] = 0.0
-    splitter: Optional[str] = None
-    timeout: Optional[int] = 10
+    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
 
     @field_validator("concurrency", mode="before")
     def check_concurrency(cls, value) -> int:
@@ -162,10 +131,11 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         if value < 1:
             raise NotImplementedError(
                 "You must explicitly specify the number of concurrent clients for AsyncOpenAIChatRuntime. "
-                "Set `AsyncOpenAIChatRuntime(concurrency=10, ...)` or any other positive integer. ")
+                "Set `AsyncOpenAIChatRuntime(concurrency=10, ...)` or any other positive integer. "
+            )
         return value
 
-    def init_runtime(self) -> 'Runtime':
+    def init_runtime(self) -> "Runtime":
         # check model availability
         try:
             if self.api_key:
@@ -189,26 +159,27 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         """Execute batch of requests with async calls to OpenAI API"""
 
         response_model = parse_template_to_pydantic_class(
-            output_template,
-            provided_field_schema=field_schema
+            output_template, provided_field_schema=field_schema
         )
 
         extra_fields = extra_fields or {}
-        user_prompts = batch.apply(lambda row: input_template.format(**row, **extra_fields), axis=1).tolist()
+        user_prompts = batch.apply(
+            lambda row: input_template.format(**row, **extra_fields), axis=1
+        ).tolist()
 
-        responses: List[Union[ConstrainedLLMResponse, ErrorLLMResponse]] = await parallel_async_get_llm_response(
-            user_prompts=user_prompts,
-            system_prompt=instructions_template,
-            instruction_first=instructions_first,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature,
-            model=self.model,
-            api_key=self.api_key,
-            timeout=self.timeout,
-            response_model=response_model
+        responses: List[Union[ConstrainedLLMResponse, ErrorLLMResponse]] = (
+            await parallel_async_get_llm_response(
+                user_prompts=user_prompts,
+                system_prompt=instructions_template,
+                instruction_first=instructions_first,
+                response_model=response_model,
+                inference_settings=LiteLLMInferenceSettings(
+                    **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
+                ),
+            )
         )
 
-        # conver list of LLMResponse objects to the dataframe records
+        # convert list of LLMResponse objects to the dataframe records
         df_data = []
         for response in responses:
             if isinstance(response, ErrorLLMResponse):
@@ -231,7 +202,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
     ) -> Dict[str, str]:
-        raise NotImplementedError('record_to_record is not implemented')
+        raise NotImplementedError("record_to_record is not implemented")
 
 
 class LiteLLMVisionRuntime(LiteLLMChatRuntime):
@@ -284,58 +255,56 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
 
         if len(output_fields) > 1:
             raise NotImplementedError(
-                f'{self.__class__.__name__} does not support multiple output fields. '
-                f'Found: {output_fields}'
+                f"{self.__class__.__name__} does not support multiple output fields. "
+                f"Found: {output_fields}"
             )
         output_field = output_fields[0]
-        output_field_name = output_field['text']
+        output_field_name = output_field["text"]
 
         input_fields = parse_template(input_template)
 
         # split input template into text and image parts
-        input_text = ''
+        input_text = ""
         content = [
             {
-                'type': 'text',
-                'text': instructions_template,
+                "type": "text",
+                "text": instructions_template,
             }
         ]
         for field in input_fields:
-            if field['type'] == 'text':
-                input_text += field['text']
-            elif field['type'] == 'var':
-                if field['text'] not in field_schema:
-                    input_text += record[field['text']]
-                elif field_schema[field['text']]['type'] == 'string':
-                    if field_schema[field['text']].get('format') == 'uri':
+            if field["type"] == "text":
+                input_text += field["text"]
+            elif field["type"] == "var":
+                if field["text"] not in field_schema:
+                    input_text += record[field["text"]]
+                elif field_schema[field["text"]]["type"] == "string":
+                    if field_schema[field["text"]].get("format") == "uri":
                         if input_text:
-                            content.append(
-                                {'type': 'text', 'text': input_text}
-                            )
-                            input_text = ''
+                            content.append({"type": "text", "text": input_text})
+                            input_text = ""
                         content.append(
                             {
-                                'type': 'image_url',
-                                'image_url': record[field['text']],
+                                "type": "image_url",
+                                "image_url": record[field["text"]],
                             }
                         )
                     else:
-                        input_text += record[field['text']]
+                        input_text += record[field["text"]]
                 else:
                     raise ValueError(
                         f'Unsupported field type: {field_schema[field["text"]]["type"]}'
                     )
         if input_text:
-            content.append({'type': 'text', 'text': input_text})
+            content.append({"type": "text", "text": input_text})
 
         if self.verbose:
-            print(f'**Prompt content**:\n{content}')
+            print(f"**Prompt content**:\n{content}")
 
         completion = litellm.completion(
-            model=self.model,
-            api_key=self.api_key,
-            messages=[{'role': 'user', 'content': content}],
-            max_tokens=self.max_tokens,
+            messages=[{"role": "user", "content": content}],
+            inference_settings=LiteLLMInferenceSettings(
+                **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
+            ),
         )
 
         completion_text = completion.choices[0].message.content

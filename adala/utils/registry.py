@@ -9,9 +9,9 @@ _registry = {}
 
 
 class BaseModelInRegistry(BaseModel, ABC):
-    type: Optional[
-        str
-    ] = None  # TODO: this is a workaround for the `type` being represented in OpenAPI schema. If you have a better idea, feel free to fix it
+    type: Optional[str] = (
+        None  # TODO: this is a workaround for the `type` being represented in OpenAPI schema. If you have a better idea, feel free to fix it
+    )
 
     @field_serializer("type")
     def serialize_type(self, v: str) -> str:
