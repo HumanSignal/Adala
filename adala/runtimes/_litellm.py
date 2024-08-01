@@ -54,6 +54,7 @@ class LiteLLMInferenceSettings(BaseSettings):
     timeout: Optional[Union[float, int]] = None
     seed: Optional[int] = 47
 
+
 def get_messages(
     user_prompt: str,
     system_prompt: Optional[str] = None,
@@ -80,7 +81,9 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
     model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
 
     def as_inference_settings(self, **override_kwargs) -> LiteLLMInferenceSettings:
-        inference_settings = LiteLLMInferenceSettings(**self.dict(include=LiteLLMInferenceSettings.model_fields.keys()))
+        inference_settings = LiteLLMInferenceSettings(
+            **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
+        )
         inference_settings.update(**override_kwargs)
         return inference_settings
 
@@ -90,15 +93,16 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         try:
             messages = [{"role": "user", "content": "Hey, how's it going?"}]
             litellm.completion(
-                messages=messages,
-                **self.as_inference_settings(max_tokens=10).dict()
+                messages=messages, **self.as_inference_settings(max_tokens=10).dict()
             )
         except AuthenticationError:
             raise ValueError(
                 f'Requested model "{self.model}" is not available with your api_key and settings.'
             )
         except Exception as e:
-            raise ValueError(f'Failed to check availability of requested model "{self.model}": {e}')
+            raise ValueError(
+                f'Failed to check availability of requested model "{self.model}": {e}'
+            )
         return self
 
     def get_llm_response(self, messages: List[Dict[str, str]]) -> str:
@@ -145,13 +149,17 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         response_model = parse_template_to_pydantic_class(
             output_template, provided_field_schema=field_schema
         )
-        messages = get_messages(input_template.format(**record, **extra_fields), self.system_prompt, self.instruction_first)
+        messages = get_messages(
+            input_template.format(**record, **extra_fields),
+            self.system_prompt,
+            self.instruction_first,
+        )
 
         try:
             response = instructor_client.chat.completions.create(
-                    messages=messages,
-                    response_model=response_model,
-                    **self.as_inference_settings().dict(),
+                messages=messages,
+                response_model=response_model,
+                **self.as_inference_settings().dict(),
             )
         except Exception as e:
             error_message = type(e).__name__
@@ -182,7 +190,9 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
     model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
 
     def as_inference_settings(self, **override_kwargs) -> LiteLLMInferenceSettings:
-        inference_settings = LiteLLMInferenceSettings(**self.dict(include=LiteLLMInferenceSettings.model_fields.keys()))
+        inference_settings = LiteLLMInferenceSettings(
+            **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
+        )
         inference_settings.update(**override_kwargs)
         return inference_settings
 
@@ -192,15 +202,16 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
         try:
             messages = [{"role": "user", "content": "Hey, how's it going?"}]
             litellm.completion(
-                messages=messages,
-                **self.as_inference_settings(max_tokens=10).dict()
+                messages=messages, **self.as_inference_settings(max_tokens=10).dict()
             )
         except AuthenticationError:
             raise ValueError(
                 f'Requested model "{self.model}" is not available with your api_key and settings.'
             )
         except Exception as e:
-            raise ValueError(f'Failed to check availability of requested model "{self.model}": {e}')
+            raise ValueError(
+                f'Failed to check availability of requested model "{self.model}": {e}'
+            )
         return self
 
     @field_validator("concurrency", mode="before")
@@ -237,7 +248,9 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
         tasks = [
             asyncio.ensure_future(
                 async_instructor_client.chat.completions.create(
-                    messages=get_messages(user_prompt, self.system_prompt, self.instruction_first),
+                    messages=get_messages(
+                        user_prompt, self.system_prompt, self.instruction_first
+                    ),
                     response_model=response_model,
                     **self.as_inference_settings().dict(),
                 )
