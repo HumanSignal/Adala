@@ -12,7 +12,9 @@ def test_llm_sync():
     # test plaintext success
 
     result = runtime.get_llm_response(
-        messages=[{'role': 'user', 'content': 'return the word Banana with exclamation mark'}],
+        messages=[
+            {"role": "user", "content": "return the word Banana with exclamation mark"}
+        ],
     )
     expected_result = "Banana!"
     assert result == expected_result
@@ -20,14 +22,14 @@ def test_llm_sync():
     # test structured success
 
     result = runtime.record_to_record(
-        record={'input_name': 'Carla', 'input_age': 25},
+        record={"input_name": "Carla", "input_age": 25},
         input_template="My name is {input_name} and I am {input_age} years old.",
         instructions_template="",
         output_template="name: {name}, age: {age}",
     )
 
     # note age coerced to string
-    expected_result = {'name': 'Carla', 'age': '25'}
+    expected_result = {"name": "Carla", "age": "25"}
     assert result == expected_result
 
 
@@ -36,7 +38,7 @@ def test_llm_async():
 
     runtime = AsyncLiteLLMChatRuntime()
 
-    batch = pd.DataFrame.from_records([{'input_name': 'Carla', 'input_age': 25}])
+    batch = pd.DataFrame.from_records([{"input_name": "Carla", "input_age": 25}])
 
     result = asyncio.run(
         runtime.batch_to_batch(
@@ -48,6 +50,6 @@ def test_llm_async():
     )
 
     # note age coerced to string
-    expected_result = pd.DataFrame.from_records([{'name': 'Carla', 'age': '25'}])
+    expected_result = pd.DataFrame.from_records([{"name": "Carla", "age": "25"}])
     # need 2 all() for row and column axis
     assert (result == expected_result).all().all()

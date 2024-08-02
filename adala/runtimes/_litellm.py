@@ -79,8 +79,7 @@ class LiteLLMChatRuntime(Runtime):
                 temperature=self.temperature,
                 seed=self.seed,
                 # extra inference params passed to this runtime
-                **self.model_extra
-
+                **self.model_extra,
             )
         except AuthenticationError:
             raise ValueError(
@@ -103,7 +102,7 @@ class LiteLLMChatRuntime(Runtime):
             temperature=self.temperature,
             seed=self.seed,
             # extra inference params passed to this runtime
-            **self.model_extra
+            **self.model_extra,
         )
         completion_text = completion.choices[0].message.content
         if self.verbose:
@@ -157,7 +156,7 @@ class LiteLLMChatRuntime(Runtime):
                 temperature=self.temperature,
                 seed=self.seed,
                 # extra inference params passed to this runtime
-                **self.model_extra
+                **self.model_extra,
             )
         except Exception as e:
             error_message = type(e).__name__
@@ -217,7 +216,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                 temperature=self.temperature,
                 seed=self.seed,
                 # extra inference params passed to this runtime
-                **self.model_extra
+                **self.model_extra,
             )
         except AuthenticationError:
             raise ValueError(
@@ -264,7 +263,9 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             asyncio.ensure_future(
                 async_instructor_client.chat.completions.create(
                     messages=get_messages(
-                        user_prompt, instructions_template, instructions_first,
+                        user_prompt,
+                        instructions_template,
+                        instructions_first,
                     ),
                     response_model=response_model,
                     model=self.model,
@@ -272,7 +273,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                     temperature=self.temperature,
                     seed=self.seed,
                     # extra inference params passed to this runtime
-                    **self.model_extra
+                    **self.model_extra,
                 )
             )
             for user_prompt in user_prompts
@@ -415,7 +416,7 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
             temperature=self.temperature,
             seed=self.seed,
             # extra inference params passed to this runtime
-            **self.model_extra
+            **self.model_extra,
         )
 
         completion_text = completion.choices[0].message.content
