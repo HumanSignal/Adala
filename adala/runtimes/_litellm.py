@@ -296,7 +296,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                 }
                 df_data.append(error_dct)
             else:
-                df_data.append(response.data)
+                df_data.append(response.dict())
 
         output_df = InternalDataFrame(df_data)
         return output_df.set_index(batch.index)
