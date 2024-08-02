@@ -38,7 +38,6 @@ class LiteLLMInferenceSettings(BaseSettings):
                  with the provider of your specified model.
         base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
         api_version (Optional[str]): API version, optional except for Azure.
-        instruction_first: Whether to put instructions first.
         max_tokens: Maximum tokens to generate.
         temperature: Temperature for sampling.
         timeout: Timeout in seconds.
