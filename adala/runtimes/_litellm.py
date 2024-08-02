@@ -98,7 +98,12 @@ class LiteLLMChatRuntime(Runtime):
             print(f"**Prompt content**:\n{messages}")
         completion = litellm.completion(
             messages=messages,
-            **self.as_inference_settings().dict(),
+            model=self.model,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            seed=self.seed,
+            # extra inference params passed to this runtime
+            **self.model_extra
         )
         completion_text = completion.choices[0].message.content
         if self.verbose:
@@ -143,6 +148,7 @@ class LiteLLMChatRuntime(Runtime):
         )
 
         try:
+            # returns a pydantic model named Output
             response = instructor_client.chat.completions.create(
                 messages=messages,
                 response_model=response_model,
@@ -167,7 +173,7 @@ class LiteLLMChatRuntime(Runtime):
             }
             return error_dct
 
-        return response.data
+        return response.dict()
 
 
 class AsyncLiteLLMChatRuntime(AsyncRuntime):
@@ -405,7 +411,11 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
 
         completion = litellm.completion(
             messages=[{"role": "user", "content": content}],
-            inference_settings=self.as_inference_settings(),
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            seed=self.seed,
+            # extra inference params passed to this runtime
+            **self.model_extra
         )
 
         completion_text = completion.choices[0].message.content
