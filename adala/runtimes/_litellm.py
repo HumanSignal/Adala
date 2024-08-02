@@ -1,7 +1,11 @@
+import asyncio
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import litellm
+from litellm.exceptions import AuthenticationError
+import instructor
+import traceback
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
 from adala.utils.parse import (
@@ -9,42 +13,81 @@ from adala.utils.parse import (
     partial_str_format,
     parse_template_to_pydantic_class,
 )
-from adala.utils.llm import (
-    parallel_async_get_llm_response,
-    get_llm_response,
-    ConstrainedLLMResponse,
-    UnconstrainedLLMResponse,
-    ErrorLLMResponse,
-    LiteLLMInferenceSettings,
-)
-from openai import NotFoundError
 from pydantic import ConfigDict, field_validator
 from rich import print
 
 from .base import AsyncRuntime, Runtime
 
+instructor_client = instructor.from_litellm(litellm.completion)
+async_instructor_client = instructor.from_litellm(litellm.acompletion)
+
 logger = logging.getLogger(__name__)
 
 
-class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
+def get_messages(
+    user_prompt: str,
+    system_prompt: Optional[str] = None,
+    instruction_first: bool = True,
+):
+    messages = [{"role": "user", "content": user_prompt}]
+    if system_prompt:
+        if instruction_first:
+            messages.insert(0, {"role": "system", "content": system_prompt})
+        else:
+            messages[0]["content"] += system_prompt
+    return messages
+
+
+class LiteLLMChatRuntime(Runtime):
     """
     Runtime that uses [LiteLLM API](https://litellm.vercel.app/docs) and chat
     completion models to perform the skill.
 
+    The default model provider is [OpenAI](https://openai.com/), using the OPENAI_API_KEY environment variable. Other providers [can be chosen](https://litellm.vercel.app/docs/set_keys) through environment variables or passed parameters.
+
     Attributes:
-        inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
+        model: model name. Refer to litellm supported models for how to pass
+               this: https://litellm.vercel.app/docs/providers
+        max_tokens: Maximum tokens to generate.
+        temperature: Temperature for sampling.
+        seed: Integer seed to reduce nondeterminism in generation.
+
+    Extra parameters passed to this class will be used for inference. See `litellm.types.completion.CompletionRequest` for a full list. Some common ones are:
+        api_key: API key, optional. If provided, will be used to authenticate
+                 with the provider of your specified model.
+        base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
+        api_version (Optional[str]): API version, optional except for Azure.
+        timeout: Timeout in seconds.
     """
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
+    model: str = "gpt-4o-mini"
+    max_tokens: int = 1000
+    temperature: float = 0.0
+    seed: Optional[int] = 47
+
+    model_config = ConfigDict(extra="allow")
 
     def init_runtime(self) -> "Runtime":
         # check model availability
+        # extension of litellm.check_valid_key for non-openai deployments
         try:
-            if self.api_key:
-                litellm.check_valid_key(model=self.model, api_key=self.api_key)
-        except NotFoundError:
+            messages = [{"role": "user", "content": "Hey, how's it going?"}]
+            litellm.completion(
+                messages=messages,
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                seed=self.seed,
+                # extra inference params passed to this runtime
+                **self.model_extra,
+            )
+        except AuthenticationError:
             raise ValueError(
-                f'Requested model "{self.model}" is not available with your api_key.'
+                f'Requested model "{self.model}" is not available with your api_key and settings.'
+            )
+        except Exception as e:
+            raise ValueError(
+                f'Failed to check availability of requested model "{self.model}": {e}'
             )
         return self
 
@@ -52,17 +95,19 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         # TODO: sunset this method in favor of record_to_record
         if self.verbose:
             print(f"**Prompt content**:\n{messages}")
-        response: Union[ErrorLLMResponse, UnconstrainedLLMResponse] = get_llm_response(
+        completion = litellm.completion(
             messages=messages,
-            inference_settings=LiteLLMInferenceSettings(
-                **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
-            ),
+            model=self.model,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            seed=self.seed,
+            # extra inference params passed to this runtime
+            **self.model_extra,
         )
-        if isinstance(response, ErrorLLMResponse):
-            raise ValueError(f"{response.adala_message}\n{response.adala_details}")
+        completion_text = completion.choices[0].message.content
         if self.verbose:
-            print(f"**Response**:\n{response.text}")
-        return response.text
+            print(f"**Response**:\n{completion_text}")
+        return completion_text
 
     def record_to_record(
         self,
@@ -95,35 +140,93 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         response_model = parse_template_to_pydantic_class(
             output_template, provided_field_schema=field_schema
         )
-
-        response: Union[ConstrainedLLMResponse, ErrorLLMResponse] = get_llm_response(
-            user_prompt=input_template.format(**record, **extra_fields),
-            system_prompt=instructions_template,
-            instruction_first=instructions_first,
-            response_model=response_model,
-            inference_settings=LiteLLMInferenceSettings(
-                **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
-            ),
+        messages = get_messages(
+            input_template.format(**record, **extra_fields),
+            instructions_template,
+            instructions_first,
         )
 
-        if isinstance(response, ErrorLLMResponse):
+        try:
+            # returns a pydantic model named Output
+            response = instructor_client.chat.completions.create(
+                messages=messages,
+                response_model=response_model,
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                seed=self.seed,
+                # extra inference params passed to this runtime
+                **self.model_extra,
+            )
+        except Exception as e:
+            error_message = type(e).__name__
+            # error_details = str(e)
+            error_details = traceback.format_exc()
             if self.verbose:
-                print_error(response.adala_message, response.adala_details)
-            return response.model_dump(by_alias=True)
+                print_error(error_message, error_details)
+            # TODO change this format
+            error_dct = {
+                "_adala_error": True,
+                "_adala_message": error_message,
+                "_adala_details": error_details,
+            }
+            return error_dct
 
-        return response.data
+        return response.dict()
 
 
-class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
+class AsyncLiteLLMChatRuntime(AsyncRuntime):
     """
     Runtime that uses [OpenAI API](https://openai.com/) and chat completion
     models to perform the skill. It uses async calls to OpenAI API.
 
+    The default model provider is [OpenAI](https://openai.com/), using the OPENAI_API_KEY environment variable. Other providers [can be chosen](https://litellm.vercel.app/docs/set_keys) through environment variables or passed parameters.
+
     Attributes:
-        inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
+        model: model name. Refer to litellm supported models for how to pass
+               this: https://litellm.vercel.app/docs/providers
+        max_tokens: Maximum tokens to generate.
+        temperature: Temperature for sampling.
+        seed: Integer seed to reduce nondeterminism in generation.
+
+    Extra parameters passed to this class will be used for inference. See `litellm.types.completion.CompletionRequest` for a full list. Some common ones are:
+        api_key: API key, optional. If provided, will be used to authenticate
+                 with the provider of your specified model.
+        base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
+        api_version (Optional[str]): API version, optional except for Azure.
+        timeout: Timeout in seconds.
     """
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
+    model: str = "gpt-4o-mini"
+    max_tokens: int = 1000
+    temperature: float = 0.0
+    seed: Optional[int] = 47
+
+    model_config = ConfigDict(extra="allow")
+
+    def init_runtime(self) -> "Runtime":
+        # check model availability
+        # extension of litellm.check_valid_key for non-openai deployments
+        try:
+            messages = [{"role": "user", "content": "Hey, how's it going?"}]
+            litellm.completion(
+                messages=messages,
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                seed=self.seed,
+                # extra inference params passed to this runtime
+                **self.model_extra,
+            )
+        except AuthenticationError:
+            raise ValueError(
+                f'Requested model "{self.model}" is not available with your api_key and settings.'
+            )
+        except Exception as e:
+            raise ValueError(
+                f'Failed to check availability of requested model "{self.model}": {e}'
+            )
+        return self
 
     @field_validator("concurrency", mode="before")
     def check_concurrency(cls, value) -> int:
@@ -134,17 +237,6 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
                 "Set `AsyncOpenAIChatRuntime(concurrency=10, ...)` or any other positive integer. "
             )
         return value
-
-    def init_runtime(self) -> "Runtime":
-        # check model availability
-        try:
-            if self.api_key:
-                litellm.check_valid_key(model=self.model, api_key=self.api_key)
-        except NotFoundError:
-            raise ValueError(
-                f'Requested model "{self.model}" is not available in your OpenAI account.'
-            )
-        return self
 
     async def batch_to_batch(
         self,
@@ -167,27 +259,45 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
             lambda row: input_template.format(**row, **extra_fields), axis=1
         ).tolist()
 
-        responses: List[Union[ConstrainedLLMResponse, ErrorLLMResponse]] = (
-            await parallel_async_get_llm_response(
-                user_prompts=user_prompts,
-                system_prompt=instructions_template,
-                instruction_first=instructions_first,
-                response_model=response_model,
-                inference_settings=LiteLLMInferenceSettings(
-                    **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
-                ),
+        tasks = [
+            asyncio.ensure_future(
+                async_instructor_client.chat.completions.create(
+                    messages=get_messages(
+                        user_prompt,
+                        instructions_template,
+                        instructions_first,
+                    ),
+                    response_model=response_model,
+                    model=self.model,
+                    max_tokens=self.max_tokens,
+                    temperature=self.temperature,
+                    seed=self.seed,
+                    # extra inference params passed to this runtime
+                    **self.model_extra,
+                )
             )
-        )
+            for user_prompt in user_prompts
+        ]
+        responses = await asyncio.gather(*tasks, return_exceptions=True)
 
         # convert list of LLMResponse objects to the dataframe records
         df_data = []
         for response in responses:
-            if isinstance(response, ErrorLLMResponse):
+            if isinstance(response, Exception):
+                error_message = type(response).__name__
+                # error_details = str(response)
+                error_details = traceback.format_exc()
                 if self.verbose:
-                    print_error(response.adala_message, response.adala_details)
-                df_data.append(response.model_dump(by_alias=True))
+                    print_error(error_message, error_details)
+                # TODO change this format
+                error_dct = {
+                    "_adala_error": True,
+                    "_adala_message": error_message,
+                    "_adala_details": error_details,
+                }
+                df_data.append(error_dct)
             else:
-                df_data.append(response.data)
+                df_data.append(response.dict())
 
         output_df = InternalDataFrame(df_data)
         return output_df.set_index(batch.index)
@@ -302,9 +412,11 @@ class LiteLLMVisionRuntime(LiteLLMChatRuntime):
 
         completion = litellm.completion(
             messages=[{"role": "user", "content": content}],
-            inference_settings=LiteLLMInferenceSettings(
-                **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
-            ),
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            seed=self.seed,
+            # extra inference params passed to this runtime
+            **self.model_extra,
         )
 
         completion_text = completion.choices[0].message.content
