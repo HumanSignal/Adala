@@ -1,8 +1,7 @@
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from pydantic_settings import BaseSettings
 import litellm
 from litellm.exceptions import AuthenticationError
 import instructor
@@ -25,35 +24,6 @@ async_instructor_client = instructor.from_litellm(litellm.acompletion)
 logger = logging.getLogger(__name__)
 
 
-class LiteLLMInferenceSettings(BaseSettings):
-    """
-    Common inference settings for LiteLLM.
-
-    See `litellm.types.completion.CompletionRequest` for other parameters not set here.
-
-    Attributes:
-        model: model name. Refer to litellm supported models for how to pass
-               this: https://litellm.vercel.app/docs/providers
-        api_key: API key, optional. If provided, will be used to authenticate
-                 with the provider of your specified model.
-        base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
-        api_version (Optional[str]): API version, optional except for Azure.
-        max_tokens: Maximum tokens to generate.
-        temperature: Temperature for sampling.
-        timeout: Timeout in seconds.
-        seed: Integer seed to reduce nondeterminism in generation.
-    """
-
-    model: str = "gpt-4o-mini"
-    api_key: Optional[str] = None
-    base_url: Optional[str] = None
-    api_version: Optional[str] = None
-    max_tokens: int = 1000
-    temperature: float = 0.0
-    timeout: Optional[Union[float, int]] = None
-    seed: Optional[int] = 47
-
-
 def get_messages(
     user_prompt: str,
     system_prompt: Optional[str] = None,
@@ -68,23 +38,34 @@ def get_messages(
     return messages
 
 
-class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
+class LiteLLMChatRuntime(Runtime):
     """
     Runtime that uses [LiteLLM API](https://litellm.vercel.app/docs) and chat
     completion models to perform the skill.
 
+    The default model provider is [OpenAI](https://openai.com/), using the OPENAI_API_KEY environment variable. Other providers [can be chosen](https://litellm.vercel.app/docs/set_keys) through environment variables or passed parameters.
+
     Attributes:
-        inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
+        model: model name. Refer to litellm supported models for how to pass
+               this: https://litellm.vercel.app/docs/providers
+        max_tokens: Maximum tokens to generate.
+        temperature: Temperature for sampling.
+        seed: Integer seed to reduce nondeterminism in generation.
+
+    Extra parameters passed to this class will be used for inference. See `litellm.types.completion.CompletionRequest` for a full list. Some common ones are:
+        api_key: API key, optional. If provided, will be used to authenticate
+                 with the provider of your specified model.
+        base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
+        api_version (Optional[str]): API version, optional except for Azure.
+        timeout: Timeout in seconds.
     """
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
+    model: str = "gpt-4o-mini"
+    max_tokens: int = 1000
+    temperature: float = 0.0
+    seed: Optional[int] = 47
 
-    def as_inference_settings(self, **override_kwargs) -> LiteLLMInferenceSettings:
-        inference_settings = LiteLLMInferenceSettings(
-            **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
-        )
-        inference_settings.update(**override_kwargs)
-        return inference_settings
+    model_config = ConfigDict(extra="allow")
 
     def init_runtime(self) -> "Runtime":
         # check model availability
@@ -92,7 +73,14 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         try:
             messages = [{"role": "user", "content": "Hey, how's it going?"}]
             litellm.completion(
-                messages=messages, **self.as_inference_settings(max_tokens=10).dict()
+                messages=messages,
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                seed=self.seed,
+                # extra inference params passed to this runtime
+                **self.model_extra
+
             )
         except AuthenticationError:
             raise ValueError(
@@ -150,15 +138,20 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         )
         messages = get_messages(
             input_template.format(**record, **extra_fields),
-            self.system_prompt,
-            self.instruction_first,
+            instructions_template,
+            instructions_first,
         )
 
         try:
             response = instructor_client.chat.completions.create(
                 messages=messages,
                 response_model=response_model,
-                **self.as_inference_settings().dict(),
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                seed=self.seed,
+                # extra inference params passed to this runtime
+                **self.model_extra
             )
         except Exception as e:
             error_message = type(e).__name__
@@ -177,23 +170,34 @@ class LiteLLMChatRuntime(LiteLLMInferenceSettings, Runtime):
         return response.data
 
 
-class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
+class AsyncLiteLLMChatRuntime(AsyncRuntime):
     """
     Runtime that uses [OpenAI API](https://openai.com/) and chat completion
     models to perform the skill. It uses async calls to OpenAI API.
 
+    The default model provider is [OpenAI](https://openai.com/), using the OPENAI_API_KEY environment variable. Other providers [can be chosen](https://litellm.vercel.app/docs/set_keys) through environment variables or passed parameters.
+
     Attributes:
-        inference_settings (LiteLLMInferenceSettings): Common inference settings for LiteLLM.
+        model: model name. Refer to litellm supported models for how to pass
+               this: https://litellm.vercel.app/docs/providers
+        max_tokens: Maximum tokens to generate.
+        temperature: Temperature for sampling.
+        seed: Integer seed to reduce nondeterminism in generation.
+
+    Extra parameters passed to this class will be used for inference. See `litellm.types.completion.CompletionRequest` for a full list. Some common ones are:
+        api_key: API key, optional. If provided, will be used to authenticate
+                 with the provider of your specified model.
+        base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
+        api_version (Optional[str]): API version, optional except for Azure.
+        timeout: Timeout in seconds.
     """
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
+    model: str = "gpt-4o-mini"
+    max_tokens: int = 1000
+    temperature: float = 0.0
+    seed: Optional[int] = 47
 
-    def as_inference_settings(self, **override_kwargs) -> LiteLLMInferenceSettings:
-        inference_settings = LiteLLMInferenceSettings(
-            **self.dict(include=LiteLLMInferenceSettings.model_fields.keys())
-        )
-        inference_settings.update(**override_kwargs)
-        return inference_settings
+    model_config = ConfigDict(extra="allow")
 
     def init_runtime(self) -> "Runtime":
         # check model availability
@@ -201,7 +205,13 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
         try:
             messages = [{"role": "user", "content": "Hey, how's it going?"}]
             litellm.completion(
-                messages=messages, **self.as_inference_settings(max_tokens=10).dict()
+                messages=messages,
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                seed=self.seed,
+                # extra inference params passed to this runtime
+                **self.model_extra
             )
         except AuthenticationError:
             raise ValueError(
@@ -248,10 +258,15 @@ class AsyncLiteLLMChatRuntime(LiteLLMInferenceSettings, AsyncRuntime):
             asyncio.ensure_future(
                 async_instructor_client.chat.completions.create(
                     messages=get_messages(
-                        user_prompt, self.system_prompt, self.instruction_first
+                        user_prompt, instructions_template, instructions_first,
                     ),
                     response_model=response_model,
-                    **self.as_inference_settings().dict(),
+                    model=self.model,
+                    max_tokens=self.max_tokens,
+                    temperature=self.temperature,
+                    seed=self.seed,
+                    # extra inference params passed to this runtime
+                    **self.model_extra
                 )
             )
             for user_prompt in user_prompts
