@@ -1,8 +1,12 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Union
+import logging
+import os
 from pathlib import Path
 from kafka.admin import KafkaAdminClient, NewTopic
 from kafka.errors import TopicAlreadyExistsError
+
+LOG_LEVEL = os.environ.get('ADALA_LOG_LEVEL', 'INFO').upper()
 
 
 class Settings(BaseSettings):
@@ -71,3 +75,9 @@ def delete_topic(topic_name: str):
     )
 
     admin_client.delete_topics(topics=[topic_name])
+
+
+def init_logger(name, level=LOG_LEVEL):
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    return logger
