@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 import litellm
 from litellm.exceptions import AuthenticationError
 import instructor
+from instructor.exceptions import InstructorRetryException
 import traceback
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
@@ -158,12 +159,31 @@ class LiteLLMChatRuntime(Runtime):
                 # extra inference params passed to this runtime
                 **self.model_extra,
             )
-        except Exception as e:
+        except InstructorRetryException as e:
+            # get root cause error from retries
+            n_attempts = e.n_attempts
+            e = e.__cause__.last_attempt.exception()
+            logger.error(f'Inference error {e} after {n_attempts=}')
             error_message = type(e).__name__
-            # error_details = str(e)
-            error_details = traceback.format_exc()
+            error_details = str(e)
+            tb = traceback.format_exc()
             if self.verbose:
-                print_error(error_message, error_details)
+                print_error(error_message, tb)
+            # TODO change this format
+            error_dct = {
+                "_adala_error": True,
+                "_adala_message": error_message,
+                "_adala_details": error_details,
+            }
+            return error_dct
+        except Exception as e:
+            # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
+            logger.error(f'Inference error {e}')
+            error_message = type(e).__name__
+            error_details = str(e)
+            tb = traceback.format_exc()
+            if self.verbose:
+                print_error(error_message, tb)
             # TODO change this format
             error_dct = {
                 "_adala_error": True,
@@ -283,12 +303,33 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         # convert list of LLMResponse objects to the dataframe records
         df_data = []
         for response in responses:
-            if isinstance(response, Exception):
-                error_message = type(response).__name__
-                # error_details = str(response)
-                error_details = traceback.format_exc()
+            if isinstance(response, InstructorRetryException):
+                e = response
+                # get root cause error from retries
+                n_attempts = e.n_attempts
+                e = e.__cause__.last_attempt.exception()
+                logger.error(f'Inference error {e} after {n_attempts=}')
+                error_message = type(e).__name__
+                error_details = str(e)
+                tb = traceback.format_exc()
                 if self.verbose:
-                    print_error(error_message, error_details)
+                    print_error(error_message, tb)
+                # TODO change this format
+                error_dct = {
+                    "_adala_error": True,
+                    "_adala_message": error_message,
+                    "_adala_details": error_details,
+                }
+                df_data.append(error_dct)
+            elif isinstance(response, Exception):
+                e = response
+                # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
+                logger.error(f'Inference error {e}')
+                error_message = type(e).__name__
+                error_details = str(e)
+                tb = traceback.format_exc()
+                if self.verbose:
+                    print_error(error_message, tb)
                 # TODO change this format
                 error_dct = {
                     "_adala_error": True,
