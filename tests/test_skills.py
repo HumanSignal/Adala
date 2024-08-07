@@ -1,20 +1,16 @@
-import pandas as pd
 import re
+
+import pandas as pd
 import pytest
 from adala.agents import Agent
-from adala.environments import StaticEnvironment, SimpleCodeValidationEnvironment
-from adala.skills import (
-    ClassificationSkill,
-    AnalysisSkill,
-    ParallelSkillSet,
-    LinearSkillSet,
-    TransformSkill,
-    OntologyCreator,
-    OntologyMerger,
-)
+from adala.environments import (SimpleCodeValidationEnvironment,
+                                StaticEnvironment)
 from adala.runtimes import OpenAIChatRuntime
-from adala.skills.collection.summarization import SummarizationSkill
+from adala.skills import (AnalysisSkill, ClassificationSkill, LinearSkillSet,
+                          OntologyCreator, OntologyMerger, ParallelSkillSet,
+                          TransformSkill)
 from adala.skills.collection.qa import QuestionAnsweringSkill
+from adala.skills.collection.summarization import SummarizationSkill
 from adala.skills.collection.translation import TranslationSkill
 from datasets import load_dataset
 
@@ -62,7 +58,7 @@ def test_classification_skill():
     assert (
         agent.skills["product_category_classification"].instructions
         == """\
-Classify the input text by identifying the most relevant category based on the context and usage of the item described. Ensure to format the category correctly by excluding any prefixes such as 'Labels.' For example, if the item fits into the electronics category, simply state 'Electronics' without any prefix. Remember to strictly adhere to this format and exclude prefixes like 'Labels.' from your output to ensure accuracy."""
+\"Classify the input text into its correct product category based on the description provided. Ensure accuracy by closely examining both the specific items mentioned and the context or intended use described in the text. Prioritize aligning the description with the most relevant category based on its functional use and setting, rather than solely on the type of product mentioned.\""""
     )
 
 
@@ -128,8 +124,8 @@ def test_parallel_skillset_with_analysis():
     # agent.learn(learning_iterations=1, num_feedbacks=1, batch_size=3)
     predictions = agent.run()
     expected_code = """\
-import json
 import sys
+import json
 
 # Read input from stdin
 input_data = sys.stdin.read()
@@ -140,24 +136,21 @@ input_json = json.loads(input_data)
 # Initialize the output structure
 output_json = {
     "id": None,
-    "data": {},
+    "data": input_json,
     "project": None,
-    "predictions": []
+    "predictions": [
+        {
+            "id": None,
+            "lead_time": None,
+            "result": [],
+            "score": None
+        }
+    ]
 }
 
-# Fill the data field
-output_json["data"] = {"text": input_json["inputs"]}
-
-# Fill the predictions field
-prediction = {
-    "id": None,
-    "lead_time": None,
-    "result": [],
-    "score": None
-}
-
-for entity in input_json["outputs"]:
-    result = {
+# Populate the result field
+for entity in input_json.get("outputs", []):
+    result_entry = {
         "id": None,
         "from_name": "label",
         "to_name": "text",
@@ -169,11 +162,9 @@ for entity in input_json["outputs"]:
             "labels": [entity["entity_group"]]
         }
     }
-    prediction["result"].append(result)
+    output_json["predictions"][0]["result"].append(result_entry)
 
-output_json["predictions"].append(prediction)
-
-# Print the output JSON
+# Output the transformed JSON
 print(json.dumps(output_json, indent=4))"""
     # temp hack to compare strings properly
     expected_code = expected_code.replace("'\n'", "'\\n'")
@@ -184,9 +175,9 @@ print(json.dumps(output_json, indent=4))"""
 def test_summarization_skill():
     df = pd.DataFrame(
         [
-            "Caffeine comes from coffee beans, but it can also be synthesized in a laboratory. It has the same structure whether it’s in coffee, energy drinks, tea, or pills. Caffeine is a powerful stimulant, and it can be used to improve physical strength and endurance. It is classified as a nootropic because it sensitizes neurons and provides mental stimulation. Habitual caffeine use is also associated with a reduced risk of Alzheimer's disease, cirrhosis, and liver cancer. Caffeine’s main mechanism concerns antagonizing adenosine receptors. Adenosine causes sedation and relaxation when it acts upon its receptors, located in the brain. Caffeine prevents this action and causes alertness and wakefulness. This inhibition of adenosine can influence the dopamine, serotonin, acetylcholine, and adrenaline systems. For practical tips on the optimal use of caffeine, check out our Supplement Guides.",
-            "Vitamin C is a water-soluble essential vitamin that can be found in fruits and vegetables, especially citrus. Humans are unable to synthesize vitamin C from their bodies, so it must be acquired through dietary intake. Vitamin C is important for immune system function and is a powerful antioxidant. It also acts as a cofactor for collagen synthesis.[2]. People often supplement with vitamin C when they have a cold. According to various studies, vitamin C may be effective in reducing the duration of a cold, but does not seem to reduce the frequency of colds in a population.[3][4] The available literature suggests that a dose ranging from 200 mg to 2,000 mg could be beneficial for reducing cold duration.Often utilized for its antioxidant effects, vitamin C has been studied for its potential role in Alzheimer’s disease and cancer. Lower vitamin C levels are present in people with Alzheimer’s, even with adequate dietary intake.[5] It is thought that oxidative stress plays a major role in the pathogenesis of the disease, so vitamin C’s antioxidative effects could be beneficial.[6][7] In rodent studies, oral vitamin C was able to reduce oxidative and inflammatory biomarkers.[8] In recent cancer research, vitamin C was found to promote oxidative stress in cancer cells, leading to cytotoxic effects at high doses in mice.[9] While promising, further research and human studies are required to determine efficacy.",
-            "Vitamin D is a fat-soluble nutrient. It is one of the 24 micronutrients critical for human survival. The sun is the major natural source through eliciting vitamin D production in the skin, but vitamin D is also found naturally in oily fish and eggs and is added to milk and milk alternatives. Supplemental vitamin D is associated with a range of benefits, including improved immune health, bone health, and well-being. Supplementation may also reduce the risk of cancer mortality, diabetes, and multiple sclerosis.The effects of vitamin D likely depend on a person’s circulating levels of 25-hydroxyvitamin D (25(OH)D; a form of vitamin D that is measured in blood samples to determine vitamin D status), and many of its benefits will only be seen when a deficiency is reversed.",
+            "Caffeine, found in coffee beans and synthesized in labs, has the same structure in various forms. It is a stimulant that enhances physical strength and mental stimulation. Habitual use is linked to reduced risks of diseases. Caffeine works by antagonizing adenosine receptors, promoting alertness by inhibiting sedation. It affects neurotransmitter systems like dopamine and serotonin.",
+            "Vitamin C is a water-soluble essential vitamin found in fruits and vegetables, crucial for immune system function and collagen synthesis. It is commonly supplemented during colds to reduce duration. Studies suggest doses of 200-2000 mg are beneficial. Vitamin C is studied for its antioxidant effects in Alzheimer's disease and cancer, with potential benefits in reducing oxidative stress and promoting cytotoxic effects in cancer cells. Further research and human studies are needed to determine efficacy.",
+            "Vitamin D is a fat-soluble nutrient essential for human survival. It is primarily obtained from the sun, oily fish, eggs, and fortified foods like milk. Supplementing with vitamin D can improve immune health, bone health, and overall well-being. It may also reduce the risk of cancer, diabetes, and multiple sclerosis. The effects of vitamin D depend on the levels of 25-hydroxyvitamin D in the blood, and benefits are most noticeable when reversing a deficiency.",
         ],
         columns=["text"],
     )
@@ -373,7 +364,7 @@ def test_linear_skillset():
     assert (
         agent.skills["skill_0"].instructions
         == '''\
-"Given a category, which could be from various fields like nutrition, geology, etc., list three distinct examples that fall within this category. For instance, if the category is 'Fruits', you should list distinct types of fruits like 'Apples, Bananas, Oranges'. The order of the examples does not matter."'''
+"Provide specific examples that fall under the given category. If possible, list them in the order of their commonality or importance."'''
     )
     # TODO: not learned with 2 iterations, need to increase learning_iterations
     assert agent.skills["skill_1"].instructions == "..."
@@ -399,4 +390,4 @@ def test_translation_skill():
     agent = Agent(skills=TranslationSkill(target_language="Swahili"))
 
     predictions = agent.run(df)
-    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima", 'Maisha ni mazuri', 'Msitu unaniita', 'Napenda pizza ya Napolitana', 'Maua ya spring ni mazuri', "Nyota zinang'aa usiku", 'Upinde wa mvua baada ya mvua', 'Ninahitaji kahawa', 'Muziki huchezesha roho', 'Ndoto zinakuwa kweli']
+    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima", 'Maisha ni mazuri', 'Msitu unaniita', 'Napenda pizza ya Napolitana', 'Maua ya spring ni mazuri sana', "Nyota zinang'aa usiku", 'Upinde wa mvua baada ya mvua', 'Ninahitaji kahawa', 'Muziki huchezesha roho', 'Ndoto zinakuwa kweli']
