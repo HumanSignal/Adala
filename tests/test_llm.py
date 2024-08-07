@@ -1,55 +1,55 @@
 import pytest
-from pydantic import BaseModel, Field
-from adala.utils.llm import get_llm_response, async_get_llm_response, ConstrainedLLMResponse, UnconstrainedLLMResponse
+import asyncio
+import pandas as pd
+from adala.runtimes import LiteLLMChatRuntime, AsyncLiteLLMChatRuntime
 
 
-class ExampleResponseModel(BaseModel):
-    name: str = Field(..., description="Name of the person")
-    age: int = Field(..., description="Age of the person")
-
-
-@pytest.mark.parametrize(
-    'response_model, user_prompt, expected_result',
-    [(
-        None,
-        'return the word banana with exclamation mark',
-        UnconstrainedLLMResponse(text="banana!")
-    ), (
-        ExampleResponseModel,
-        "My name is Carla and I am 25 years old.",
-        ConstrainedLLMResponse(data={"name": "Carla", "age": 25})
-    )]
-)
 @pytest.mark.vcr
-def test_get_llm_response(response_model, user_prompt, expected_result):
+def test_llm_sync():
 
-    result = get_llm_response(
-        user_prompt=user_prompt,
-        response_model=response_model,
+    runtime = LiteLLMChatRuntime()
+
+    # test plaintext success
+
+    result = runtime.get_llm_response(
+        messages=[
+            {"role": "user", "content": "return the word Banana with exclamation mark"}
+        ],
+    )
+    expected_result = "Banana!"
+    assert result == expected_result
+
+    # test structured success
+
+    result = runtime.record_to_record(
+        record={"input_name": "Carla", "input_age": 25},
+        input_template="My name is {input_name} and I am {input_age} years old.",
+        instructions_template="",
+        output_template="name: {name}, age: {age}",
     )
 
+    # note age coerced to string
+    expected_result = {"name": "Carla", "age": "25"}
     assert result == expected_result
 
 
-@pytest.mark.parametrize(
-    'response_model, user_prompt, expected_result',
-    [(
-        None,
-        'return the word banana with exclamation mark',
-        UnconstrainedLLMResponse(text="banana!")
-    ), (
-        ExampleResponseModel,
-        "My name is Carla and I am 25 years old.",
-        ConstrainedLLMResponse(data={"name": "Carla", "age": 25})
-    )]
-)
-@pytest.mark.asyncio
 @pytest.mark.vcr
-async def test_async_get_llm_response(response_model, user_prompt, expected_result):
+def test_llm_async():
 
-    result = await async_get_llm_response(
-        user_prompt=user_prompt,
-        response_model=response_model
+    runtime = AsyncLiteLLMChatRuntime()
+
+    batch = pd.DataFrame.from_records([{"input_name": "Carla", "input_age": 25}])
+
+    result = asyncio.run(
+        runtime.batch_to_batch(
+            batch,
+            input_template="My name is {input_name} and I am {input_age} years old.",
+            instructions_template="",
+            output_template="name: {name}, age: {age}",
+        )
     )
 
-    assert result == expected_result
+    # note age coerced to string
+    expected_result = pd.DataFrame.from_records([{"name": "Carla", "age": "25"}])
+    # need 2 all() for row and column axis
+    assert (result == expected_result).all().all()

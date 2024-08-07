@@ -42,16 +42,16 @@ def json_schema_to_model(json_schema: Dict[str, Any]) -> Type[BaseModel]:
         A Pydantic model.
     """
 
-    assert json_schema.get('type') == 'object', 'Only object schemas are supported'
+    assert json_schema.get("type") == "object", "Only object schemas are supported"
 
     # `title` is the model class name
-    model_name = json_schema.get('title', 'Model')
+    model_name = json_schema.get("title", "Model")
 
     # `description` is the model class docstring
-    model_description = json_schema.get('description', '')
+    model_description = json_schema.get("description", "")
 
     fields_def = {}
-    for name, prop in json_schema.get('properties', {}).items():
+    for name, prop in json_schema.get("properties", {}).items():
         fields_def[name] = json_schema_to_pydantic_field(prop)
 
     # Create the BaseModel class using create_model().
@@ -81,20 +81,22 @@ def json_schema_to_pydantic_field(json_schema: Dict[str, Any]) -> Tuple[Any, Fie
     field_params = {}
 
     # Get the field description.
-    description = json_schema.get('description')
+    description = json_schema.get("description")
     if description:
-        field_params['description'] = description
+        field_params["description"] = description
 
     # Get the field examples.
-    examples = json_schema.get('examples')
+    examples = json_schema.get("examples")
     if examples:
-        field_params['examples'] = examples
+        field_params["examples"] = examples
 
     # Create a Field object with the type and optional parameters.
     return type_, Field(..., **field_params)
 
 
-def json_schema_to_pydantic_type(json_schema: Dict[str, Any], enum_class_name: str = 'Labels') -> Any:
+def json_schema_to_pydantic_type(
+    json_schema: Dict[str, Any], enum_class_name: str = "Labels"
+) -> Any:
     """
     Converts a JSON schema type to a Pydantic type.
 
@@ -106,45 +108,42 @@ def json_schema_to_pydantic_type(json_schema: Dict[str, Any], enum_class_name: s
         A Pydantic type.
     """
 
-    type_ = json_schema.get('type')
+    type_ = json_schema.get("type")
 
-    if type_ == 'string':
-        if 'format' in json_schema:
-            format_ = json_schema['format']
-            if format_ == 'date-time':
+    if type_ == "string":
+        if "format" in json_schema:
+            format_ = json_schema["format"]
+            if format_ == "date-time":
                 return datetime
             else:
-                raise NotImplementedError(f'Unsupported JSON schema format: {format_}')
-        elif 'enum' in json_schema:
-            return Enum(enum_class_name, {item: item for item in json_schema['enum']}, type=str)
+                raise NotImplementedError(f"Unsupported JSON schema format: {format_}")
+        elif "enum" in json_schema:
+            return Enum(
+                enum_class_name, {item: item for item in json_schema["enum"]}, type=str
+            )
         return str
-    elif type_ == 'integer':
+    elif type_ == "integer":
         return int
-    elif type_ == 'number':
+    elif type_ == "number":
         return float
-    elif type_ == 'boolean':
+    elif type_ == "boolean":
         return bool
-    elif type_ == 'array':
-        items_schema = json_schema.get('items')
+    elif type_ == "array":
+        items_schema = json_schema.get("items")
         if items_schema:
             item_type = json_schema_to_pydantic_type(items_schema)
             return List[item_type]
         else:
             return List
-    elif type_ == 'object':
+    elif type_ == "object":
         # Handle nested models.
-        properties = json_schema.get('properties')
+        properties = json_schema.get("properties")
         if properties:
             nested_model = json_schema_to_model(json_schema)
             return nested_model
         else:
             return Dict
-    elif type_ == 'null':
+    elif type_ == "null":
         return Optional[Any]  # Use Optional[Any] for nullable fields
     else:
-        raise ValueError(f'Unsupported JSON schema type: {type_}')
-
-
-def add_new_field_to_model(model: BaseModel, field_name: str, field_schema: Dict[str, Any]) -> BaseModel:
-    new_fields = {field_name: json_schema_to_pydantic_field(field_schema)}
-    return create_model(model.__class__.__name__, **model.__fields__, **new_fields)
+        raise ValueError(f"Unsupported JSON schema type: {type_}")

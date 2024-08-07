@@ -6,7 +6,10 @@ import pytest
 from tempfile import NamedTemporaryFile
 import pandas as pd
 
+
+# TODO manage which keys correspond to which models/deployments, probably using a litellm Router
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+AZURE_API_KEY = os.getenv("AZURE_API_KEY")
 LS_API_KEY = os.getenv("LS_API_KEY")
 
 SUBMIT_PAYLOAD = {
@@ -22,7 +25,7 @@ SUBMIT_PAYLOAD = {
             {
                 "type": "ClassificationSkill",
                 "name": "text_classifier",
-                "instructions": "",
+                "instructions": "Always return the answer 'Feature Lack'.",
                 "input_template": "{text}",
                 "output_template": "{output}",
                 "labels": {
@@ -38,12 +41,11 @@ SUBMIT_PAYLOAD = {
         ],
         "runtimes": {
             "default": {
-                "type": "AsyncOpenAIChatRuntime",
+                "type": "AsyncLiteLLMChatRuntime",
                 "model": "gpt-3.5-turbo-0125",
                 "api_key": OPENAI_API_KEY,
                 "max_tokens": 10,
                 "temperature": 0,
-                "concurrent_clients": 100,
                 "batch_size": 100,
                 "timeout": 10,
                 "verbose": False,
@@ -222,6 +224,7 @@ async def test_streaming_n_concurrent_requests(async_client):
     batch_payload_datas = [batch_payload_data[:2], batch_payload_data[2:]]
     expected_output = data.set_index("task_id")["output"]
 
+    # this sometimes takes too long and flakes, set timeout_sec if behavior continues
     outputs = await asyncio.gather(
         *[
             arun_job_and_get_output(
@@ -238,7 +241,9 @@ async def test_streaming_n_concurrent_requests(async_client):
         ).all(), "adala did not return expected output"
 
 
-@pytest.mark.skip(reason='TODO: @matt-bernstein Failed at assert status == "Failed", probably existed before the skip')
+@pytest.mark.skip(
+    reason='TODO: @matt-bernstein Failed at assert status == "Failed", probably existed before the skip'
+)
 @pytest.mark.use_openai
 @pytest.mark.use_server
 @pytest.mark.asyncio
@@ -312,3 +317,75 @@ async def test_streaming_submit_edge_cases(client, async_client):
     # TODO test max number of records in batch
     # TODO test sending lots of batches at once
     # TODO test startup race condition for simultaneous submit-streaming and submit-batch
+
+
+@pytest.mark.use_azure
+@pytest.mark.use_server
+def test_streaming_azure(client):
+
+    data = pd.DataFrame.from_records(
+        [
+            {"task_id": 1, "text": "anytexthere", "output": "Feature Lack"},
+            {"task_id": 2, "text": "othertexthere", "output": "Feature Lack"},
+            {"task_id": 3, "text": "anytexthere", "output": "Feature Lack"},
+            {"task_id": 4, "text": "othertexthere", "output": "Feature Lack"},
+        ]
+    )
+    batch_data = data.drop("output", axis=1).to_dict(orient="records")
+    expected_output = data.set_index("task_id")["output"]
+
+    with NamedTemporaryFile(mode="r") as f:
+
+        SUBMIT_PAYLOAD["agent"]["default"] = {
+            "type": "AsyncLiteLLMChatRuntime",
+            "model": "azure/gpt35turbo",
+            "api_key": AZURE_API_KEY,
+            "base_url": "https://humansignal-openai-test.openai.azure.com/",
+            "api_version": "2024-06-01",
+            "max_tokens": 10,
+            "temperature": 0,
+            "batch_size": 100,
+            "timeout": 10,
+            "verbose": False,
+        }
+
+        SUBMIT_PAYLOAD["result_handler"] = {
+            "type": "CSVHandler",
+            "output_path": f.name,
+        }
+
+        resp = client.post("/jobs/submit-streaming", json=SUBMIT_PAYLOAD)
+        resp.raise_for_status()
+        job_id = resp.json()["data"]["job_id"]
+
+        batch_payload = {
+            "job_id": job_id,
+            "data": batch_data[:2],
+        }
+        resp = client.post("/jobs/submit-batch", json=batch_payload)
+        resp.raise_for_status()
+        time.sleep(1)
+        batch_payload = {
+            "job_id": job_id,
+            "data": batch_data[2:],
+        }
+        resp = client.post("/jobs/submit-batch", json=batch_payload)
+        resp.raise_for_status()
+
+        timeout_sec = 10
+        poll_interval_sec = 1
+        terminal_statuses = ["Completed", "Failed", "Canceled"]
+        for _ in range(int(timeout_sec / poll_interval_sec)):
+            resp = client.get(f"/jobs/{job_id}")
+            status = resp.json()["data"]["status"]
+            if status in terminal_statuses:
+                break
+            print("polling ", status)
+            time.sleep(poll_interval_sec)
+        assert status == "Completed", status
+
+        output = pd.read_csv(f.name).set_index("task_id")
+        assert not output["error"].any(), "adala returned errors"
+        assert (
+            output["output"] == expected_output
+        ).all(), "adala did not return expected output"

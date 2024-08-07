@@ -3,7 +3,6 @@ import logging
 import json
 from abc import abstractmethod
 from pydantic import BaseModel, Field, computed_field, ConfigDict, model_validator
-from pathlib import Path
 import csv
 
 from adala.utils.registry import BaseModelInRegistry
@@ -75,7 +74,8 @@ class LSEBatchItem(BaseModel):
     )
 
     task_id: int
-    output: Optional[str]
+    # TODO this field no longer populates if there was an error, so validation fails without a default - should probably split this item into 3 different constructors corresponding to new internal adala objects (or just reuse those objects)
+    output: Optional[str] = None
     # TODO handle in DIA-1122
     # we don't need to use reserved names anymore here because they're not in a DataFrame, but a structure with proper typing available
     error: bool = Field(False, alias="_adala_error")
@@ -136,25 +136,40 @@ class LSEHandler(ResultHandler):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
 
         # coerce dicts to LSEBatchItems for validation
-        result_batch = [LSEBatchItem(**record) for record in result_batch]
+        norm_result_batch = []
+        for result in result_batch:
+
+            # This is checking for NaNs to avoid validation errors
+            if result.get('_adala_error') != result.get('_adala_error'):
+                result['_adala_error'] = False
+            if result.get('_adala_message') != result.get('_adala_message'):
+                result['_adala_message'] = None
+            if result.get('_adala_details') != result.get('_adala_details'):
+                result['_adala_details'] = None
+            if result.get('output') != result.get('output'):
+                result['output'] = None
+
+            norm_result_batch.append(LSEBatchItem(**result))
 
         # omit failed tasks for now
         # TODO handle in DIA-1122
-        result_batch = [record for record in result_batch if not record.error]
+        result_batch = [record for record in norm_result_batch if not record.error]
 
         # coerce back to dicts for sending
         result_batch = [record.dict() for record in result_batch]
-
-        self.client.make_request(
-            "POST",
-            "/api/model-run/batch-predictions",
-            data=json.dumps(
-                {
-                    "modelrun_id": self.modelrun_id,
-                    "results": result_batch,
-                }
-            ),
-        )
+        if result_batch:
+            self.client.make_request(
+                "POST",
+                "/api/model-run/batch-predictions",
+                data=json.dumps(
+                    {
+                        "modelrun_id": self.modelrun_id,
+                        "results": result_batch,
+                    }
+                ),
+            )
+        else:
+            logger.error(f'No valid results to send to LSE for modelrun_id {self.modelrun_id}')
 
 
 class CSVHandler(ResultHandler):
@@ -180,9 +195,22 @@ class CSVHandler(ResultHandler):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
 
         # coerce dicts to LSEBatchItems for validation
-        result_batch = [LSEBatchItem(**record) for record in result_batch]
+        norm_result_batch = []
+        for result in result_batch:
+
+            # This is checking for NaNs to avoid validation errors
+            if result.get('_adala_error') != result.get('_adala_error'):
+                result['_adala_error'] = False
+            if result.get('_adala_message') != result.get('_adala_message'):
+                result['_adala_message'] = None
+            if result.get('_adala_details') != result.get('_adala_details'):
+                result['_adala_details'] = None
+            if result.get('output') != result.get('output'):
+                result['output'] = None
+
+            norm_result_batch.append(LSEBatchItem(**result))
 
         # open and write to file
         with open(self.output_path, "a") as f:
             writer = csv.DictWriter(f, fieldnames=self.columns)
-            writer.writerows([record.dict() for record in result_batch])
+            writer.writerows([record.dict() for record in norm_result_batch])

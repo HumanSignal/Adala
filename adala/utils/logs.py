@@ -94,9 +94,11 @@ def highlight_differences(text1, text2):
     diff = ndiff(text1, text2)
     highlighted = "".join(
         [
-            '<span style="background-color: lightgreen;">' + i[2] + "</span>"
-            if i[0] == "+"
-            else i[2]
+            (
+                '<span style="background-color: lightgreen;">' + i[2] + "</span>"
+                if i[0] == "+"
+                else i[2]
+            )
             for i in diff
             if i[0] != "-"
         ]
