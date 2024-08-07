@@ -1,6 +1,6 @@
 import pandas as pd
 
-from adala.runtimes import Runtime
+from adala.runtimes import Runtime, AsyncRuntime
 from adala.skills._base import TransformSkill
 from pydantic import BaseModel, Field, model_validator
 from typing import List, Type, Optional, Dict
@@ -78,3 +78,11 @@ class EntityExtraction(TransformSkill):
         output = self.extract_indices(pd.concat([input, output], axis=1))
         return output
 
+    async def aapply(
+        self,
+        input: InternalDataFrame,
+        runtime: AsyncRuntime,
+    ) -> InternalDataFrame:
+        output = await super().aapply(input, runtime)
+        output = self.extract_indices(pd.concat([input, output], axis=1))
+        return output
