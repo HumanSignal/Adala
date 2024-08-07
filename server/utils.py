@@ -6,7 +6,7 @@ from pathlib import Path
 from kafka.admin import KafkaAdminClient, NewTopic
 from kafka.errors import TopicAlreadyExistsError
 
-LOG_LEVEL = os.environ.get('ADALA_LOG_LEVEL', 'INFO').upper()
+LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO').upper()
 
 
 class Settings(BaseSettings):
@@ -78,7 +78,7 @@ def delete_topic(topic_name: str):
 
 
 def init_logger(name, level=LOG_LEVEL):
-    """Set up a logger that respects the ADALA_LOG_LEVEL env var
+    """Set up a logger that respects the LOG_LEVEL env var
 
     Args:
         name (str): the name of the logger, typically the __name__ of the module
