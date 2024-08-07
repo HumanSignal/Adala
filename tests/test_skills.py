@@ -399,4 +399,84 @@ def test_translation_skill():
     agent = Agent(skills=TranslationSkill(target_language="Swahili"))
 
     predictions = agent.run(df)
-    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima", 'Maisha ni mazuri', 'Msitu unaniita', 'Napenda pizza ya Napolitana', 'Maua ya spring ni mazuri', "Nyota zinang'aa usiku", 'Upinde wa mvua baada ya mvua', 'Ninahitaji kahawa', 'Muziki huchezesha roho', 'Ndoto zinakuwa kweli']
+    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima", 'Maisha ni mazuri', 'Msitu unaniita',
+                                                'Napenda pizza ya Napolitana', 'Maua ya spring ni mazuri',
+                                                "Nyota zinang'aa usiku", 'Upinde wa mvua baada ya mvua',
+                                                'Ninahitaji kahawa', 'Muziki huchezesha roho', 'Ndoto zinakuwa kweli']
+
+
+@pytest.mark.vcr
+def test_entity_extraction():
+    from adala.skills.collection.entity_extraction import EntityExtraction
+    # documents that contain entities
+    df = pd.DataFrame([
+        {
+            "text": "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services."},
+        {"text": "The iPhone 14 is the latest smartphone from Apple Inc."},
+        {"text": "The MacBook Pro is a line of Macintosh portable computers introduced in January 2006 by Apple Inc."},
+        {"text": "The Apple Watch is a line of smartwatches produced by Apple Inc."},
+        {"text": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."},
+    ])
+
+    agent = Agent(
+        skills=EntityExtraction(labels=["Organization", "Person", "Product", "Version"]),
+        runtimes={'default': OpenAIChatRuntime(model="gpt-4o-mini")}
+    )
+    predictions = agent.run(df)
+    assert predictions.entities.tolist() == [[{'quote_string': 'Apple Inc.',
+                                               'label': 'Organization'},
+                                              {'quote_string': 'American multinational technology company',
+                                               'label': 'Product'}],
+                                             [{'quote_string': 'iPhone 14', 'label': 'Product'},
+                                              {'quote_string': 'Apple Inc.',
+                                               'label': 'Organization'}],
+                                             [{'quote_string': 'MacBook Pro', 'label': 'Product'},
+                                              {'quote_string': 'Macintosh', 'label': 'Product'},
+                                              {'quote_string': 'January 2006', 'label': 'Version'},
+                                              {'quote_string': 'Apple Inc.',
+                                               'label': 'Organization'}],
+                                             [{'quote_string': 'Apple Watch', 'label': 'Product'},
+                                              {'quote_string': 'Apple Inc.',
+                                               'label': 'Organization'}],
+                                             [{'quote_string': 'iPad', 'label': 'Product'},
+                                              {'quote_string': 'tablet computers', 'label': 'Product'},
+                                              {'quote_string': 'Apple Inc.',
+                                               'label': 'Organization'}]]
+
+
+@pytest.mark.vcr
+def test_entity_extraction_no_labels():
+    from adala.skills.collection.entity_extraction import EntityExtraction
+    # documents that contain entities
+    df = pd.DataFrame([
+        {
+            "text": "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services."},
+        {"text": "The iPhone 14 is the latest smartphone from Apple Inc."},
+        {"text": "The MacBook Pro is a line of Macintosh portable computers introduced in January 2006 by Apple Inc."},
+        {"text": "The Apple Watch is a line of smartwatches produced by Apple Inc."},
+        {"text": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."},
+    ])
+
+    agent = Agent(
+        skills=EntityExtraction(
+            input_template='Extract entities from the input text that represents the main points of discussion.\n\nInput:\n"""\n{text}\n"""',
+        ),
+        runtimes={'default': OpenAIChatRuntime(model="gpt-4o")}
+    )
+    predictions = agent.run(df)
+    assert predictions.entities.tolist() == [[{'quote_string': 'Apple Inc.', 'start': 0, 'end': 10},
+                                              {'quote_string': 'American multinational technology company', 'start': 17,
+                                               'end': 58},
+                                              {'quote_string': 'consumer electronics', 'start': 79, 'end': 99},
+                                              {'quote_string': 'computer software', 'start': 101, 'end': 118},
+                                              {'quote_string': 'online services', 'start': 124, 'end': 139}],
+                                             [{'quote_string': 'iPhone 14', 'start': 4, 'end': 13},
+                                              {'quote_string': 'Apple Inc.', 'start': 44, 'end': 54}],
+                                             [{'quote_string': 'The MacBook Pro', 'start': 0, 'end': 15},
+                                              {'quote_string': 'Macintosh portable computers', 'start': 29, 'end': 57},
+                                              {'quote_string': 'January 2006', 'start': 72, 'end': 84},
+                                              {'quote_string': 'Apple Inc.', 'start': 88, 'end': 98}],
+                                             [{'quote_string': 'The Apple Watch', 'start': 0, 'end': 15},
+                                              {'quote_string': 'a line of smartwatches', 'start': 19, 'end': 41},
+                                              {'quote_string': 'produced by Apple Inc.', 'start': 42, 'end': 64}],
+                                             [{'quote_string': 'The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc.', 'start': 0, 'end': 86}]]
