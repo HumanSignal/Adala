@@ -76,7 +76,6 @@ class LSEBatchItem(BaseModel):
     task_id: int
     # TODO this field no longer populates if there was an error, so validation fails without a default - should probably split this item into 3 different constructors corresponding to new internal adala objects (or just reuse those objects)
     output: Optional[str] = None
-    # TODO handle in DIA-1122
     # we don't need to use reserved names anymore here because they're not in a DataFrame, but a structure with proper typing available
     error: bool = Field(False, alias="_adala_error")
     message: Optional[str] = Field(None, alias="_adala_message")
@@ -150,10 +149,6 @@ class LSEHandler(ResultHandler):
                 result['output'] = None
 
             norm_result_batch.append(LSEBatchItem(**result))
-
-        # omit failed tasks for now
-        # TODO handle in DIA-1122
-        result_batch = [record for record in norm_result_batch if not record.error]
 
         # coerce back to dicts for sending
         result_batch = [record.dict() for record in result_batch]
