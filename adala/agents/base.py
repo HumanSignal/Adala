@@ -346,7 +346,22 @@ class Agent(BaseModel, ABC):
             )
 
             inputs = self.environment.get_data_batch(batch_size=batch_size)
+
+            # TODO more thought-through fix here
+            # if any of the skills have a .field_schema, such as this one for a ClassificationSkill:
+            #    {'prediction': {'type': 'string', 'description': 'The classification label.', 'enum': ['happy', 'sad', 'angry', 'neutral']}}
+            # then the predictions will be formatted as pydantic models according to this schema, ex.:
+            #         input emotions examples    prediction
+            #     0  I am happy    happy           Labels.happy
+            #     1  I am angry    angry           Labels.angry
+            #     2    I am sad      sad             Labels.sad
+            # but the environment feedback will not, and they need to match.
+            # Disabling schemas for now.
+
+            # made this the default:
+            # predictions = self.skills.apply(inputs, runtime=runtime, schema=False)
             predictions = self.skills.apply(inputs, runtime=runtime)
+
             feedback = self.environment.get_feedback(
                 self.skills, predictions, num_feedbacks=num_feedbacks
             )
