@@ -82,6 +82,7 @@ class Runtime(BaseModelInRegistry):
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
+        response_model: Optional[Type[BaseModel]] = None,
     ) -> InternalDataFrame:
         """
         Processes a record.
@@ -139,6 +140,7 @@ class Runtime(BaseModelInRegistry):
             extra_fields=extra_fields,
             field_schema=field_schema,
             instructions_first=instructions_first,
+            response_model=response_model,
         )
         return output
 

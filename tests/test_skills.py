@@ -399,7 +399,10 @@ def test_translation_skill():
     agent = Agent(skills=TranslationSkill(target_language="Swahili"))
 
     predictions = agent.run(df)
-    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima", 'Maisha ni mazuri', 'Msitu unaniita', 'Napenda pizza ya Napolitana', 'Maua ya spring ni mazuri', "Nyota zinang'aa usiku", 'Upinde wa mvua baada ya mvua', 'Ninahitaji kahawa', 'Muziki huchezesha roho', 'Ndoto zinakuwa kweli']
+    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima", 'Maisha ni mazuri', 'Msitu unaniita',
+                                                'Napenda pizza ya Napolitana', 'Maua ya spring ni mazuri',
+                                                "Nyota zinang'aa usiku", 'Upinde wa mvua baada ya mvua',
+                                                'Ninahitaji kahawa', 'Muziki huchezesha roho', 'Ndoto zinakuwa kweli']
 
 
 @pytest.mark.vcr
@@ -461,19 +464,19 @@ def test_entity_extraction_no_labels():
         runtimes={'default': OpenAIChatRuntime(model="gpt-4o")}
     )
     predictions = agent.run(df)
-    assert predictions.entities.tolist() == [[{'quote_string': 'Apple Inc.'},
-                                              {'quote_string': 'American multinational technology company'},
-                                              {'quote_string': 'consumer electronics'},
-                                              {'quote_string': 'computer software'},
-                                              {'quote_string': 'online services'}],
-                                             [{'quote_string': 'iPhone 14'}, {'quote_string': 'Apple Inc.'}],
-                                             [{'quote_string': 'MacBook Pro'},
-                                              {'quote_string': 'Macintosh portable computers'},
-                                              {'quote_string': 'January 2006'},
-                                              {'quote_string': 'Apple Inc.'}],
-                                             [{'quote_string': 'The Apple Watch'},
-                                              {'quote_string': 'a line of smartwatches'},
-                                              {'quote_string': 'Apple Inc.'}],
-                                             [{'quote_string': 'iPad'},
-                                              {'quote_string': 'tablet computers'},
-                                              {'quote_string': 'Apple Inc.'}]]
+    assert predictions.entities.tolist() == [[{'quote_string': 'Apple Inc.', 'start': 0, 'end': 10},
+                                              {'quote_string': 'American multinational technology company', 'start': 17,
+                                               'end': 58},
+                                              {'quote_string': 'consumer electronics', 'start': 79, 'end': 99},
+                                              {'quote_string': 'computer software', 'start': 101, 'end': 118},
+                                              {'quote_string': 'online services', 'start': 124, 'end': 139}],
+                                             [{'quote_string': 'iPhone 14', 'start': 4, 'end': 13},
+                                              {'quote_string': 'Apple Inc.', 'start': 44, 'end': 54}],
+                                             [{'quote_string': 'The MacBook Pro', 'start': 0, 'end': 15},
+                                              {'quote_string': 'Macintosh portable computers', 'start': 29, 'end': 57},
+                                              {'quote_string': 'January 2006', 'start': 72, 'end': 84},
+                                              {'quote_string': 'Apple Inc.', 'start': 88, 'end': 98}],
+                                             [{'quote_string': 'The Apple Watch', 'start': 0, 'end': 15},
+                                              {'quote_string': 'a line of smartwatches', 'start': 19, 'end': 41},
+                                              {'quote_string': 'produced by Apple Inc.', 'start': 42, 'end': 64}],
+                                             [{'quote_string': 'The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc.', 'start': 0, 'end': 86}]]
