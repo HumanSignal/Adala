@@ -78,6 +78,16 @@ def delete_topic(topic_name: str):
 
 
 def init_logger(name, level=LOG_LEVEL):
+    """Set up a logger that respects the ADALA_LOG_LEVEL env var
+
+    Args:
+        name (str): the name of the logger, typically the __name__ of the module
+        level (Union[str,int]): the logging level to use
+            (either a string like "INFO" or an int coming from the logging
+            module, like logging.INFO)
+    Returns:
+        logging.Logger
+    """
     logger = logging.getLogger(name)
     logger.setLevel(level)
     return logger
