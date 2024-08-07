@@ -163,7 +163,7 @@ class LiteLLMChatRuntime(Runtime):
             # get root cause error from retries
             n_attempts = e.n_attempts
             e = e.__cause__.last_attempt.exception()
-            logger.error(f'Inference error {e} after {n_attempts=}')
+            logger.error(f"Inference error {e} after {n_attempts=}")
             error_message = type(e).__name__
             error_details = str(e)
             tb = traceback.format_exc()
@@ -178,7 +178,7 @@ class LiteLLMChatRuntime(Runtime):
             return error_dct
         except Exception as e:
             # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
-            logger.error(f'Inference error {e}')
+            logger.error(f"Inference error {e}")
             error_message = type(e).__name__
             error_details = str(e)
             tb = traceback.format_exc()
@@ -308,7 +308,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                 # get root cause error from retries
                 n_attempts = e.n_attempts
                 e = e.__cause__.last_attempt.exception()
-                logger.error(f'Inference error {e} after {n_attempts=}')
+                logger.error(f"Inference error {e} after {n_attempts=}")
                 error_message = type(e).__name__
                 error_details = str(e)
                 tb = traceback.format_exc()
@@ -324,7 +324,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             elif isinstance(response, Exception):
                 e = response
                 # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
-                logger.error(f'Inference error {e}')
+                logger.error(f"Inference error {e}")
                 error_message = type(e).__name__
                 error_details = str(e)
                 tb = traceback.format_exc()
