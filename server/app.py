@@ -179,6 +179,9 @@ async def submit_batch(batch: BatchData):
             # FIXME Temporary workaround for messages getting dropped.
             #       Remove once our kafka messaging is more reliable.
             time.sleep(0.1)
+        logger.info(
+            f"The number of records sent to input_topic:{topic} record_no:{len(batch.data)}"
+        )
     except UnknownTopicOrPartitionError:
         await producer.stop()
         raise HTTPException(
