@@ -71,5 +71,7 @@ FROM python-base as production
 # Copy artifacts from other stages
 COPY --from=venv-builder /usr/src/app /usr/src/app
 
+ENV LITELLM_LOG=WARNING
+
 # Set the working directory in the container to where the app will be run from
 WORKDIR /usr/src/app/server
