@@ -1,7 +1,6 @@
 import asyncio
 import json
 import os
-import logging
 import time
 
 from adala.agents import Agent
@@ -9,17 +8,12 @@ from adala.agents import Agent
 from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import UnknownTopicOrPartitionError
 from celery import Celery
-from server.utils import (
-    get_input_topic_name,
-    get_output_topic_name,
-    ensure_topic,
-    delete_topic,
-    Settings,
-)
 from server.handlers.result_handlers import ResultHandler
+from server.utils import (Settings, delete_topic, ensure_topic,
+                          get_input_topic_name, get_output_topic_name,
+                          init_logger)
 
-
-logger = logging.getLogger(__name__)
+logger = init_logger(__name__)
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 app = Celery(
