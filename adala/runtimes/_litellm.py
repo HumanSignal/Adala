@@ -39,6 +39,18 @@ def get_messages(
     return messages
 
 
+def _format_error_dict(e: Exception) -> dict:
+            error_message = type(e).__name__
+            error_details = str(e)
+            # TODO change this format?
+            error_dct = {
+                "_adala_error": True,
+                "_adala_message": error_message,
+                "_adala_details": error_details,
+            }
+            return error_dct
+
+
 class LiteLLMChatRuntime(Runtime):
     """
     Runtime that uses [LiteLLM API](https://litellm.vercel.app/docs) and chat
@@ -163,34 +175,18 @@ class LiteLLMChatRuntime(Runtime):
             # get root cause error from retries
             n_attempts = e.n_attempts
             e = e.__cause__.last_attempt.exception()
-            logger.error(f"Inference error {e} after {n_attempts=}")
-            error_message = type(e).__name__
-            error_details = str(e)
+            dct = _format_error_dict(e)
+            print_error(f"Inference error {dct['_adala_message']} after {n_attempts=}")
             tb = traceback.format_exc()
-            if self.verbose:
-                print_error(error_message, tb)
-            # TODO change this format
-            error_dct = {
-                "_adala_error": True,
-                "_adala_message": error_message,
-                "_adala_details": error_details,
-            }
-            return error_dct
+            logger.debug(tb)
+            return dct
         except Exception as e:
             # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
-            logger.error(f"Inference error {e}")
-            error_message = type(e).__name__
-            error_details = str(e)
+            dct = _format_error_dict(e)
+            print_error(f"Inference error {dct['_adala_message']}")
             tb = traceback.format_exc()
-            if self.verbose:
-                print_error(error_message, tb)
-            # TODO change this format
-            error_dct = {
-                "_adala_error": True,
-                "_adala_message": error_message,
-                "_adala_details": error_details,
-            }
-            return error_dct
+            logger.debug(tb)
+            return dct
 
         return response.dict()
 
@@ -308,35 +304,19 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                 # get root cause error from retries
                 n_attempts = e.n_attempts
                 e = e.__cause__.last_attempt.exception()
-                logger.error(f"Inference error {e} after {n_attempts=}")
-                error_message = type(e).__name__
-                error_details = str(e)
+                dct = _format_error_dict(e)
+                print_error(f"Inference error {dct['_adala_message']} after {n_attempts=}")
                 tb = traceback.format_exc()
-                if self.verbose:
-                    print_error(error_message, tb)
-                # TODO change this format
-                error_dct = {
-                    "_adala_error": True,
-                    "_adala_message": error_message,
-                    "_adala_details": error_details,
-                }
-                df_data.append(error_dct)
+                logger.debug(tb)
+                df_data.append(dct)
             elif isinstance(response, Exception):
                 e = response
                 # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
-                logger.error(f"Inference error {e}")
-                error_message = type(e).__name__
-                error_details = str(e)
+                dct = _format_error_dict(e)
+                print_error(f"Inference error {dct['_adala_message']}")
                 tb = traceback.format_exc()
-                if self.verbose:
-                    print_error(error_message, tb)
-                # TODO change this format
-                error_dct = {
-                    "_adala_error": True,
-                    "_adala_message": error_message,
-                    "_adala_details": error_details,
-                }
-                df_data.append(error_dct)
+                logger.debug(tb)
+                df_data.append(dct)
             else:
                 df_data.append(response.dict())
 
