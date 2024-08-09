@@ -94,6 +94,14 @@ def json_schema_to_pydantic_field(json_schema: Dict[str, Any]) -> Tuple[Any, Fie
     return type_, Field(..., **field_params)
 
 
+class PrettyPrintingEnum(Enum):
+    """
+    Needed to not clutter the output with the enum class name when it is included in a teacher prompt during Agent.learn().
+    """
+    def __str__(self):
+        return self.name
+
+
 def json_schema_to_pydantic_type(
     json_schema: Dict[str, Any], enum_class_name: str = "Labels"
 ) -> Any:
@@ -118,7 +126,7 @@ def json_schema_to_pydantic_type(
             else:
                 raise NotImplementedError(f"Unsupported JSON schema format: {format_}")
         elif "enum" in json_schema:
-            return Enum(
+            return PrettyPrintingEnum(
                 enum_class_name, {item: item for item in json_schema["enum"]}, type=str
             )
         return str
