@@ -153,8 +153,6 @@ class TransformSkill(Skill):
         self,
         input: InternalDataFrame,
         runtime: Runtime,
-        # TODO probaby default this to true and plumb through the callsites from Agent.learn()
-        schema: bool = False,
     ) -> InternalDataFrame:
         """
         Applies the skill to a dataframe and returns another dataframe.
@@ -172,7 +170,7 @@ class TransformSkill(Skill):
             input_template=self.input_template,
             output_template=self.output_template,
             instructions_template=self.instructions,
-            field_schema=(self.field_schema if schema else None),
+            field_schema=self.field_schema,
             extra_fields=self._get_extra_fields(),
             instructions_first=self.instructions_first,
         )
