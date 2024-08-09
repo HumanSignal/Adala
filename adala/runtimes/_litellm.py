@@ -40,15 +40,15 @@ def get_messages(
 
 
 def _format_error_dict(e: Exception) -> dict:
-            error_message = type(e).__name__
-            error_details = str(e)
-            # TODO change this format?
-            error_dct = {
-                "_adala_error": True,
-                "_adala_message": error_message,
-                "_adala_details": error_details,
-            }
-            return error_dct
+    error_message = type(e).__name__
+    error_details = str(e)
+    # TODO change this format?
+    error_dct = {
+        "_adala_error": True,
+        "_adala_message": error_message,
+        "_adala_details": error_details,
+    }
+    return error_dct
 
 
 class LiteLLMChatRuntime(Runtime):
@@ -305,7 +305,9 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                 n_attempts = e.n_attempts
                 e = e.__cause__.last_attempt.exception()
                 dct = _format_error_dict(e)
-                print_error(f"Inference error {dct['_adala_message']} after {n_attempts=}")
+                print_error(
+                    f"Inference error {dct['_adala_message']} after {n_attempts=}"
+                )
                 tb = traceback.format_exc()
                 logger.debug(tb)
                 df_data.append(dct)
