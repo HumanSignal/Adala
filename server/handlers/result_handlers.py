@@ -130,6 +130,19 @@ class LSEHandler(ResultHandler):
 
         return self
 
+    def prepare_errors_payload(self, error_batch):
+        transformed_errors = []
+        for error in error_batch:
+            error = error.dict()
+            transformed_error = {
+                "task_id": error["task_id"],
+                "message": error["details"] if "details" in error else "",
+                "error_type": error["message"] if "message" in error else ""
+            }
+            transformed_errors.append(transformed_error)
+
+        return transformed_errors
+
     def __call__(self, result_batch: list[LSEBatchItem]):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
 
@@ -151,6 +164,9 @@ class LSEHandler(ResultHandler):
 
             norm_result_batch.append(LSEBatchItem(**result))
 
+        result_batch = [record for record in norm_result_batch if not record.error]
+        error_batch = [record for record in norm_result_batch if record.error]
+
         # coerce back to dicts for sending
         result_batch = [record.dict() for record in result_batch]
         if result_batch:
@@ -166,6 +182,22 @@ class LSEHandler(ResultHandler):
             )
         else:
             logger.error(f'No valid results to send to LSE for modelrun_id {self.modelrun_id}')
+
+        # Send failed predictions back to LSE
+        if error_batch:
+            error_batch = self.prepare_errors_payload(error_batch)
+            self.client.make_request(
+                "POST",
+                "/api/model-run/batch-failed-predictions",
+                data=json.dumps(
+                    {
+                        "modelrun_id": self.modelrun_id,
+                        "failed_predictions": error_batch,
+                    }
+                )
+            )
+        else:
+            logger.debug(f'No errors to send to LSE for modelrun_id {self.modelrun_id}')
 
 
 class CSVHandler(ResultHandler):
