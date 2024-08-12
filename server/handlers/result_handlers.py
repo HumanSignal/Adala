@@ -1,14 +1,13 @@
 from typing import Optional
-import logging
 import json
 from abc import abstractmethod
 from pydantic import BaseModel, Field, computed_field, ConfigDict, model_validator
 import csv
 
 from adala.utils.registry import BaseModelInRegistry
+from server.utils import init_logger
 
-
-logger = logging.getLogger(__name__)
+logger = init_logger(__name__)
 
 try:
     from label_studio_sdk import Client as LSEClient
@@ -147,6 +146,8 @@ class LSEHandler(ResultHandler):
                 result['_adala_details'] = None
             if result.get('output') != result.get('output'):
                 result['output'] = None
+
+            logger.debug('Record in LSEHandler: %s', result)
 
             norm_result_batch.append(LSEBatchItem(**result))
 

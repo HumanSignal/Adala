@@ -1,4 +1,3 @@
-import logging
 from enum import Enum
 from typing import Any, Dict, Generic, List, Optional, TypeVar
 import os
@@ -15,18 +14,13 @@ import uvicorn
 from redis import Redis
 import time
 
+from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
 from server.tasks.process_file import streaming_parent_task
-from server.utils import (
-    get_input_topic_name,
-    get_output_topic_name,
-    Settings,
-    delete_topic,
-)
-from server.handlers.result_handlers import ResultHandler
+from server.utils import (Settings, delete_topic, get_input_topic_name,
+                          get_output_topic_name, init_logger)
 
-
-logger = logging.getLogger(__name__)
+logger = init_logger(__name__)
 
 
 settings = Settings()
@@ -185,6 +179,9 @@ async def submit_batch(batch: BatchData):
             # FIXME Temporary workaround for messages getting dropped.
             #       Remove once our kafka messaging is more reliable.
             time.sleep(0.1)
+        logger.info(
+            f"The number of records sent to input_topic:{topic} record_no:{len(batch.data)}"
+        )
     except UnknownTopicOrPartitionError:
         await producer.stop()
         raise HTTPException(
