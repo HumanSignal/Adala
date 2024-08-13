@@ -57,8 +57,7 @@ def test_classification_skill():
     agent.learn()
     assert (
         agent.skills["product_category_classification"].instructions
-        == """\
-\"Classify the input text into its correct product category based on the description provided. Ensure accuracy by closely examining both the specific items mentioned and the context or intended use described in the text. Prioritize aligning the description with the most relevant category based on its functional use and setting, rather than solely on the type of product mentioned.\""""
+        == 'Classify the input text into the correct product category by emphasizing both the primary function of the item and its intended context of use. Even if certain keywords might suggest a typical category, analyze how the context or specific usage mentioned might indicate a different category. Analyze the entire text holistically to understand its full context and primary purpose before deciding on the category.'
     )
 
 
@@ -135,39 +134,37 @@ input_json = json.loads(input_data)
 
 # Initialize the output structure
 output_json = {
-    "id": None,
-    "data": input_json,
-    "project": None,
+    "id": "",
+    "data": {
+        "text": input_json["inputs"]
+    },
+    "project": "",
     "predictions": [
         {
-            "id": None,
-            "lead_time": None,
-            "result": [],
-            "score": None
+            "id": "",
+            "lead_time": 0,
+            "result": [
+                {
+                    "id": str(i),
+                    "from_name": "label",
+                    "to_name": "text",
+                    "type": "labels",
+                    "value": {
+                        "start": entity["start"],
+                        "end": entity["end"],
+                        "score": entity["score"],
+                        "text": entity["word"],
+                        "labels": [entity["entity_group"]]
+                    }
+                } for i, entity in enumerate(input_json["outputs"])
+            ],
+            "score": 0
         }
     ]
 }
 
-# Populate the result field
-for entity in input_json.get("outputs", []):
-    result_entry = {
-        "id": None,
-        "from_name": "label",
-        "to_name": "text",
-        "type": "labels",
-        "value": {
-            "start": entity["start"],
-            "end": entity["end"],
-            "text": entity["word"],
-            "labels": [entity["entity_group"]]
-        }
-    }
-    output_json["predictions"][0]["result"].append(result_entry)
-
 # Output the transformed JSON
 print(json.dumps(output_json, indent=4))"""
-    # temp hack to compare strings properly
-    expected_code = expected_code.replace("'\n'", "'\\n'")
     assert predictions.code[0] == expected_code
 
 
@@ -364,8 +361,7 @@ def test_linear_skillset():
     agent.learn(learning_iterations=2)
     assert (
         agent.skills["skill_0"].instructions
-        == '''\
-"Provide specific examples that fall under the given category. If possible, list them in the order of their commonality or importance."'''
+        == '"Given a category, directly provide a list of the most common or well-known items that belong to that category. Do not provide a definition or repeat the category."'
     )
     # TODO: not learned with 2 iterations, need to increase learning_iterations
     assert agent.skills["skill_1"].instructions == "..."
@@ -392,10 +388,16 @@ def test_translation_skill():
 
     predictions = agent.run(df)
 
-    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima", 'Maisha ni mazuri', 'Msitu unaniita',
-                                                'Napenda pizza ya Napolitana', 'Maua ya spring ni mazuri sana',
-                                                "Nyota zinang'aa usiku", 'Upinde wa mvua baada ya mvua',
-                                                'Ninahitaji kahawa', 'Muziki huchezesha roho', 'Ndoto zinakuwa kweli']
+    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima",
+                                                'Maisha ni mazuri',
+                                                'Msitu unaniita',
+                                                'Napenda pizza ya Napolitana',
+                                                'Maua ya spring ni mazuri',
+                                                "Nyota zinang'aa usiku",
+                                                'Upinde wa mvua baada ya mvua',
+                                                'Nahitaji kahawa',
+                                                'Muziki huchezesha roho',
+                                                'Ndoto zinakuwa kweli']
 
 
 @pytest.mark.vcr
@@ -417,24 +419,34 @@ def test_entity_extraction():
     )
     predictions = agent.run(df)
     assert predictions.entities.tolist() == [[{'quote_string': 'Apple Inc.',
-                                               'label': 'Organization'},
-                                              {'quote_string': 'American multinational technology company',
-                                               'label': 'Product'}],
-                                             [{'quote_string': 'iPhone 14', 'label': 'Product'},
+                                               'label': 'Organization',
+                                               'start': 0,
+                                               'end': 10}],
+                                             [{'quote_string': 'iPhone 14', 'label': 'Product', 'start': 4, 'end': 13},
                                               {'quote_string': 'Apple Inc.',
-                                               'label': 'Organization'}],
-                                             [{'quote_string': 'MacBook Pro', 'label': 'Product'},
-                                              {'quote_string': 'Macintosh', 'label': 'Product'},
-                                              {'quote_string': 'January 2006', 'label': 'Version'},
+                                               'label': 'Organization',
+                                               'start': 44,
+                                               'end': 54}],
+                                             [{'quote_string': 'MacBook Pro', 'label': 'Product', 'start': 4,
+                                               'end': 15},
+                                              {'quote_string': 'Macintosh', 'label': 'Product', 'start': 29, 'end': 38},
+                                              {'quote_string': 'January 2006', 'label': 'Version', 'start': 72,
+                                               'end': 84},
                                               {'quote_string': 'Apple Inc.',
-                                               'label': 'Organization'}],
-                                             [{'quote_string': 'Apple Watch', 'label': 'Product'},
+                                               'label': 'Organization',
+                                               'start': 88,
+                                               'end': 98}],
+                                             [{'quote_string': 'Apple Watch', 'label': 'Product', 'start': 4,
+                                               'end': 15},
                                               {'quote_string': 'Apple Inc.',
-                                               'label': 'Organization'}],
-                                             [{'quote_string': 'iPad', 'label': 'Product'},
-                                              {'quote_string': 'tablet computers', 'label': 'Product'},
+                                               'label': 'Organization',
+                                               'start': 54,
+                                               'end': 64}],
+                                             [{'quote_string': 'iPad', 'label': 'Product', 'start': 4, 'end': 8},
                                               {'quote_string': 'Apple Inc.',
-                                               'label': 'Organization'}]]
+                                               'label': 'Organization',
+                                               'start': 76,
+                                               'end': 86}]]
 
 
 @pytest.mark.vcr
@@ -458,7 +470,8 @@ def test_entity_extraction_no_labels():
     )
     predictions = agent.run(df)
     assert predictions.entities.tolist() == [[{'quote_string': 'Apple Inc.', 'start': 0, 'end': 10},
-                                              {'quote_string': 'American multinational technology company', 'start': 17,
+                                              {'quote_string': 'American multinational technology company',
+                                               'start': 17,
                                                'end': 58},
                                               {'quote_string': 'consumer electronics', 'start': 79, 'end': 99},
                                               {'quote_string': 'computer software', 'start': 101, 'end': 118},
@@ -470,6 +483,8 @@ def test_entity_extraction_no_labels():
                                               {'quote_string': 'January 2006', 'start': 72, 'end': 84},
                                               {'quote_string': 'Apple Inc.', 'start': 88, 'end': 98}],
                                              [{'quote_string': 'The Apple Watch', 'start': 0, 'end': 15},
-                                              {'quote_string': 'a line of smartwatches', 'start': 19, 'end': 41},
-                                              {'quote_string': 'produced by Apple Inc.', 'start': 42, 'end': 64}],
-                                             [{'quote_string': 'The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc.', 'start': 0, 'end': 86}]]
+                                              {'quote_string': 'smartwatches', 'start': 29, 'end': 41},
+                                              {'quote_string': 'Apple Inc.', 'start': 54, 'end': 64}],
+                                             [{'quote_string': 'iPad', 'start': 4, 'end': 8},
+                                              {'quote_string': 'tablet computers', 'start': 22, 'end': 38},
+                                              {'quote_string': 'Apple Inc.', 'start': 76, 'end': 86}]]

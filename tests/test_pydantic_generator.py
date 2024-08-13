@@ -1,7 +1,7 @@
 import pytest
 from enum import Enum
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Literal
 from adala.utils.pydantic_generator import json_schema_to_model
 from adala.utils.parse import parse_template_to_pydantic_class
 
@@ -22,19 +22,13 @@ sample_schema = {
 }
 
 
-class Labels(Enum):
-    engineer = "engineer"
-    doctor = "doctor"
-    teacher = "teacher"
-
-
 # Expected Pydantic model
 class Person(BaseModel):
     """A person object"""
 
     name: str = Field(..., description="The person's name")
     age: int = Field(..., description="The person's age")
-    profession: Labels = Field(..., description="The person's profession")
+    profession: Literal["engineer", "doctor", "teacher"] = Field(..., description="The person's profession")
 
 
 def test_json_schema_to_model():
@@ -58,7 +52,7 @@ def test_json_schema_to_model():
     # Assert that the instances are equivalent
     assert instance.name == expected_instance.name
     assert instance.age == expected_instance.age
-    assert instance.profession.value == expected_instance.profession.value
+    assert instance.profession == expected_instance.profession
 
 
 def test_parse_template_to_pydantic_class():
@@ -92,7 +86,7 @@ def test_parse_template_to_pydantic_class():
     # Create an instance of the generated class
     instance = GeneratedClassDef(field1="value1", field2=["label1"])
     assert instance.field1 == "value1"
-    assert instance.field2[0].value == "label1"
+    assert instance.field2[0] == "label1"
 
     # assert there is exception when trying to generate non-existent label for field2
     from pydantic import ValidationError
