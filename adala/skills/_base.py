@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, field_validator
-from typing import List, Optional, Any, Dict, Tuple, Union, ClassVar
+from typing import List, Optional, Any, Dict, Tuple, Union, ClassVar, Type
 from abc import ABC, abstractmethod
 from adala.utils.internal_data import (
     InternalDataFrame,
@@ -31,6 +31,7 @@ class Skill(BaseModelInRegistry):
         instructions_first (bool): Flag indicating if instructions should be executed before input. Defaults to True.
         verbose (bool): Flag indicating if runtime outputs should be verbose. Defaults to False.
         frozen (bool): Flag indicating if the skill is frozen. Defaults to False.
+        response_model (Optional[Type[BaseModel]]): Pydantic-based response model for the skill. If used, `output_template` and `field_schema` are ignored. Note that using `response_model` will become the default in the future.
         type (ClassVar[str]): Type of the skill.
     """
 
@@ -44,6 +45,8 @@ class Skill(BaseModelInRegistry):
         description="Instructs agent what to do with the input data. "
         "Can use templating to refer to input fields.",
         examples=["Label the input text with the following labels: {labels}"],
+        # TODO: instructions can be deprecated in favor of using `input_template` to specify the instructions
+        default=''
     )
     input_template: str = Field(
         title="Input template",
@@ -56,6 +59,8 @@ class Skill(BaseModelInRegistry):
         description="Template for the output data. "
         "Can use templating to refer to input parameters and perform data transformations",
         examples=["Output: {output}", "{predictions}"],
+        # TODO: output_template can be deprecated in favor of using `response_model` to specify the output
+        default=''
     )
     description: Optional[str] = Field(
         default="",
@@ -95,6 +100,12 @@ class Skill(BaseModelInRegistry):
         examples=[True, False],
     )
 
+    response_model: Type[BaseModel] = Field(
+        default=None,
+        title="Response model",
+        description="Pydantic-based response model for the skill. If used, `output_template` and `field_schema` are ignored.",
+    )
+
     def _get_extra_fields(self):
         """
         Retrieves fields that are not categorized as system fields.
@@ -111,6 +122,12 @@ class Skill(BaseModelInRegistry):
             "output_template",
             "instructions",
             "field_schema",
+            "extra_fields",
+            "instructions_first",
+            "verbose",
+            "frozen",
+            "response_model",
+            "type",
         }
         extra_fields = self.model_dump(exclude=system_fields)
         return extra_fields
@@ -173,6 +190,7 @@ class TransformSkill(Skill):
             field_schema=self.field_schema,
             extra_fields=self._get_extra_fields(),
             instructions_first=self.instructions_first,
+            response_model=self.response_model,
         )
 
     async def aapply(
@@ -199,6 +217,7 @@ class TransformSkill(Skill):
             field_schema=self.field_schema,
             extra_fields=self._get_extra_fields(),
             instructions_first=self.instructions_first,
+            response_model=self.response_model
         )
 
     def improve(
@@ -411,6 +430,7 @@ class SynthesisSkill(Skill):
             field_schema=self.field_schema,
             extra_fields=self._get_extra_fields(),
             instructions_first=self.instructions_first,
+            response_model=self.response_model
         )
 
     def improve(self, **kwargs):
@@ -479,6 +499,7 @@ class AnalysisSkill(Skill):
                 instructions_template=self.instructions,
                 extra_fields=extra_fields,
                 instructions_first=self.instructions_first,
+                response_model=self.response_model
             )
             outputs.append(InternalSeries(output))
         output = InternalDataFrame(outputs)
