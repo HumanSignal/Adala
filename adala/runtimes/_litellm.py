@@ -153,9 +153,10 @@ class LiteLLMChatRuntime(Runtime):
 
         extra_fields = extra_fields or {}
 
-        response_model = parse_template_to_pydantic_class(
-            output_template, provided_field_schema=field_schema
-        )
+        if not response_model:
+            response_model = parse_template_to_pydantic_class(
+                output_template, provided_field_schema=field_schema
+            )
         messages = get_messages(
             input_template.format(**record, **extra_fields),
             instructions_template,
@@ -270,9 +271,10 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
     ) -> InternalDataFrame:
         """Execute batch of requests with async calls to OpenAI API"""
 
-        response_model = parse_template_to_pydantic_class(
-            output_template, provided_field_schema=field_schema
-        )
+        if not response_model:
+            response_model = parse_template_to_pydantic_class(
+                output_template, provided_field_schema=field_schema
+            )
 
         extra_fields = extra_fields or {}
         user_prompts = batch.apply(
