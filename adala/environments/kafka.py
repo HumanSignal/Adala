@@ -91,10 +91,15 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     async def message_sender(
         self, producer: AIOKafkaProducer, data: Iterable, topic: str
     ):
+        record_no = 0
         try:
             for record in data:
                 await producer.send_and_wait(topic, value=record)
+                record_no += 1
                 # print_text(f"Sent message: {record} to {topic=}")
+            logger.info(
+                f"The number of records sent to topic:{topic}, record_no:{record_no}"
+            )
         finally:
             pass
             # print_text(f"No more messages for {topic=}")
@@ -116,7 +121,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
                 batch_data = [msg.value for msg in messages]
 
             logger.info(
-                f"Received a batch of {len(batch_data)} records from Kafka topic {self.kafka_input_topic}"
+                f"Received a batch with number_of_messages:{len(batch_data)} records from Kafka input_topic:{self.kafka_input_topic}"
             )
         return InternalDataFrame(batch_data)
 

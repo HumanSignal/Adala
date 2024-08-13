@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Union, Type
 import litellm
 from litellm.exceptions import AuthenticationError
 import instructor
+from instructor.exceptions import InstructorRetryException
 import traceback
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
@@ -37,6 +38,18 @@ def get_messages(
         else:
             messages[0]["content"] += system_prompt
     return messages
+
+
+def _format_error_dict(e: Exception) -> dict:
+    error_message = type(e).__name__
+    error_details = str(e)
+    # TODO change this format?
+    error_dct = {
+        "_adala_error": True,
+        "_adala_message": error_message,
+        "_adala_details": error_details,
+    }
+    return error_dct
 
 
 class LiteLLMChatRuntime(Runtime):
@@ -161,19 +174,22 @@ class LiteLLMChatRuntime(Runtime):
                 # extra inference params passed to this runtime
                 **self.model_extra,
             )
+        except InstructorRetryException as e:
+            # get root cause error from retries
+            n_attempts = e.n_attempts
+            e = e.__cause__.last_attempt.exception()
+            dct = _format_error_dict(e)
+            print_error(f"Inference error {dct['_adala_message']} after {n_attempts=}")
+            tb = traceback.format_exc()
+            logger.debug(tb)
+            return dct
         except Exception as e:
-            error_message = type(e).__name__
-            # error_details = str(e)
-            error_details = traceback.format_exc()
-            if self.verbose:
-                print_error(error_message, error_details)
-            # TODO change this format
-            error_dct = {
-                "_adala_error": True,
-                "_adala_message": error_message,
-                "_adala_details": error_details,
-            }
-            return error_dct
+            # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
+            dct = _format_error_dict(e)
+            print_error(f"Inference error {dct['_adala_message']}")
+            tb = traceback.format_exc()
+            logger.debug(tb)
+            return dct
 
         return response.dict()
 
@@ -287,19 +303,26 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         # convert list of LLMResponse objects to the dataframe records
         df_data = []
         for response in responses:
-            if isinstance(response, Exception):
-                error_message = type(response).__name__
-                # error_details = str(response)
-                error_details = traceback.format_exc()
-                if self.verbose:
-                    print_error(error_message, error_details)
-                # TODO change this format
-                error_dct = {
-                    "_adala_error": True,
-                    "_adala_message": error_message,
-                    "_adala_details": error_details,
-                }
-                df_data.append(error_dct)
+            if isinstance(response, InstructorRetryException):
+                e = response
+                # get root cause error from retries
+                n_attempts = e.n_attempts
+                e = e.__cause__.last_attempt.exception()
+                dct = _format_error_dict(e)
+                print_error(
+                    f"Inference error {dct['_adala_message']} after {n_attempts=}"
+                )
+                tb = traceback.format_exc()
+                logger.debug(tb)
+                df_data.append(dct)
+            elif isinstance(response, Exception):
+                e = response
+                # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
+                dct = _format_error_dict(e)
+                print_error(f"Inference error {dct['_adala_message']}")
+                tb = traceback.format_exc()
+                logger.debug(tb)
+                df_data.append(dct)
             else:
                 df_data.append(response.dict())
 
