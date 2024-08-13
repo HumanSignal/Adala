@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Type, Union, Tuple
+from typing import Any, Dict, List, Optional, Type, Union, Tuple, Literal
 from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel, Field, create_model
@@ -118,9 +118,10 @@ def json_schema_to_pydantic_type(
             else:
                 raise NotImplementedError(f"Unsupported JSON schema format: {format_}")
         elif "enum" in json_schema:
-            return Enum(
-                enum_class_name, {item: item for item in json_schema["enum"]}, type=str
-            )
+            return Literal[*json_schema["enum"]]
+            # return Enum(
+            #     enum_class_name, {item: item for item in json_schema["enum"]}, type=str
+            # )
         return str
     elif type_ == "integer":
         return int
