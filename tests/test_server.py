@@ -5,6 +5,7 @@ import asyncio
 import pytest
 from tempfile import NamedTemporaryFile
 import pandas as pd
+from copy import deepcopy
 
 
 # TODO manage which keys correspond to which models/deployments, probably using a litellm Router
@@ -194,17 +195,18 @@ def test_streaming_use_cases(client, input_data, skills, output_column):
 
     data = pd.DataFrame.from_records(input_data)
     batch_data = data.drop(output_column, axis=1).to_dict(orient="records")
+    submit_payload = deepcopy(SUBMIT_PAYLOAD)
 
     with NamedTemporaryFile(mode="r") as f:
 
-        SUBMIT_PAYLOAD["agent"]["skills"] = skills
+        submit_payload["agent"]["skills"] = skills
 
-        SUBMIT_PAYLOAD["result_handler"] = {
+        submit_payload["result_handler"] = {
             "type": "CSVHandler",
             "output_path": f.name,
         }
 
-        resp = client.post("/jobs/submit-streaming", json=SUBMIT_PAYLOAD)
+        resp = client.post("/jobs/submit-streaming", json=submit_payload)
         resp.raise_for_status()
         job_id = resp.json()["data"]["job_id"]
 
@@ -236,6 +238,8 @@ def test_streaming_use_cases(client, input_data, skills, output_column):
 
         output = pd.read_csv(f.name).set_index("task_id")
         assert not output["error"].any(), "adala returned errors"
+
+        # check for expected output
         expected_outputs = data.set_index("task_id")[output_column].tolist()
         actual_outputs = [eval(item)[output_column] for item in output.output.tolist()]
         for actual_output, expected_output in zip(actual_outputs, expected_outputs):
@@ -269,7 +273,6 @@ async def test_streaming_n_concurrent_requests(async_client):
     )
     batch_payload_data = data.drop("output", axis=1).to_dict(orient="records")
     batch_payload_datas = [batch_payload_data[:2], batch_payload_data[2:]]
-    expected_output = data.set_index("task_id")["output"]
 
     # this sometimes takes too long and flakes, set timeout_sec if behavior continues
     outputs = await asyncio.gather(
@@ -283,9 +286,10 @@ async def test_streaming_n_concurrent_requests(async_client):
 
     for output in outputs:
         assert not output["error"].any(), "adala returned errors"
-        assert (
-            output["output"] == expected_output
-        ).all(), "adala did not return expected output"
+        expected_outputs = data.set_index("task_id")["output"].tolist()
+        actual_outputs = [eval(item)["output"] for item in output.output.tolist()]
+        for actual_output, expected_output in zip(actual_outputs, expected_outputs):
+            assert actual_output == expected_output, "adala did not return expected output"
 
 
 @pytest.mark.skip(
@@ -379,7 +383,6 @@ def test_streaming_azure(client):
         ]
     )
     batch_data = data.drop("output", axis=1).to_dict(orient="records")
-    expected_output = data.set_index("task_id")["output"]
 
     with NamedTemporaryFile(mode="r") as f:
 
@@ -433,6 +436,7 @@ def test_streaming_azure(client):
 
         output = pd.read_csv(f.name).set_index("task_id")
         assert not output["error"].any(), "adala returned errors"
-        assert (
-            output["output"] == expected_output
-        ).all(), "adala did not return expected output"
+        expected_outputs = data.set_index("task_id")["output"].tolist()
+        actual_outputs = [eval(item)["output"] for item in output.output.tolist()]
+        for actual_output, expected_output in zip(actual_outputs, expected_outputs):
+            assert actual_output == expected_output, "adala did not return expected output"
