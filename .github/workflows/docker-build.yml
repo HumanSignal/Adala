@@ -49,7 +49,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: 'recursive'
           token: ${{ github.token }}
           ref: ${{ inputs.sha }}
           fetch-depth: 0
