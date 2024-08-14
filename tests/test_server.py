@@ -245,10 +245,9 @@ def test_streaming_use_cases(client, input_data, skills, output_column):
         for actual_output, expected_output in zip(actual_outputs, expected_outputs):
             if skills[0]["type"] == "EntityExtraction":
                 # Live generations may be flaky, check only 3 entities are presented
-                assert len(actual_output) == len(expected_output)
-                assert actual_output[0]["label"] == expected_output[0]["label"]
-                assert actual_output[1]["label"] == expected_output[1]["label"]
-                assert actual_output[2]["label"] == expected_output[2]["label"]
+                actual_labels = [entity["label"] for entity in actual_output]
+                expected_labels = [entity["label"] for entity in expected_output]
+                assert actual_labels == expected_labels
                 continue
 
             assert actual_output == expected_output, "adala did not return expected output"

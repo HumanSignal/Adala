@@ -137,7 +137,7 @@ def get_index():
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    logger.error(str(exc))
+    logger.error(f'Request validation error: {exc}')
     return JSONResponse(content=str(exc), status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
