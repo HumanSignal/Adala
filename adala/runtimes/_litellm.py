@@ -7,6 +7,7 @@ from litellm.exceptions import AuthenticationError
 import instructor
 from instructor.exceptions import InstructorRetryException
 import traceback
+from adala.utils.exceptions import ConstrainedGenerationError
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
 from adala.utils.parse import (
@@ -17,6 +18,8 @@ from adala.utils.parse import (
 from openai import NotFoundError
 from pydantic import ConfigDict, field_validator, BaseModel
 from rich import print
+from tenacity import AsyncRetrying, Retrying, retry_if_not_exception_type, stop_after_attempt
+from pydantic_core._pydantic_core import ValidationError
 
 from .base import AsyncRuntime, Runtime
 
@@ -163,6 +166,10 @@ class LiteLLMChatRuntime(Runtime):
             instructions_first,
         )
 
+        retries = Retrying(
+            retry=retry_if_not_exception_type((ValidationError)), stop=stop_after_attempt(3)
+        )
+
         try:
             # returns a pydantic model named Output
             response = instructor_client.chat.completions.create(
@@ -172,6 +179,7 @@ class LiteLLMChatRuntime(Runtime):
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
                 seed=self.seed,
+                max_retries=retries,
                 # extra inference params passed to this runtime
                 **self.model_extra,
             )
@@ -185,6 +193,9 @@ class LiteLLMChatRuntime(Runtime):
             logger.debug(tb)
             return dct
         except Exception as e:
+            # Catch case where the model does not return a properly formatted output
+            if type(e).__name__ == 'ValidationError' and 'Invalid JSON' in str(e):
+                e = ConstrainedGenerationError()
             # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
             dct = _format_error_dict(e)
             print_error(f"Inference error {dct['_adala_message']}")
@@ -281,6 +292,10 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             lambda row: input_template.format(**row, **extra_fields), axis=1
         ).tolist()
 
+        retries = AsyncRetrying(
+            retry=retry_if_not_exception_type((ValidationError)), stop=stop_after_attempt(3)
+        )
+
         tasks = [
             asyncio.ensure_future(
                 async_instructor_client.chat.completions.create(
@@ -294,6 +309,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                     max_tokens=self.max_tokens,
                     temperature=self.temperature,
                     seed=self.seed,
+                    max_retries=retries,
                     # extra inference params passed to this runtime
                     **self.model_extra,
                 )
@@ -319,6 +335,9 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                 df_data.append(dct)
             elif isinstance(response, Exception):
                 e = response
+                # Catch case where the model does not return a properly formatted output
+                if type(e).__name__ == 'ValidationError' and 'Invalid JSON' in str(e):
+                    e = ConstrainedGenerationError()
                 # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
                 dct = _format_error_dict(e)
                 print_error(f"Inference error {dct['_adala_message']}")
