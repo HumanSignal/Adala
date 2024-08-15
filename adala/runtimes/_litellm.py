@@ -4,8 +4,9 @@ from typing import Any, Dict, List, Optional, Union, Type
 
 import litellm
 from litellm.exceptions import AuthenticationError
+from litellm.types.utils import Usage
 import instructor
-from instructor.exceptions import InstructorRetryException
+from instructor.exceptions import InstructorRetryException, IncompleteOutputException
 import traceback
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
@@ -50,6 +51,11 @@ def _format_error_dict(e: Exception) -> dict:
         "_adala_details": error_details,
     }
     return error_dct
+
+def _update_with_usage(data: Dict, usage: Usage) -> None:
+    data["_prompt_tokens"] = usage.prompt_tokens
+    data["_completion_tokens"] = usage.completion_tokens
+    # TODO: add cost, other info from completion
 
 
 class LiteLLMChatRuntime(Runtime):
@@ -165,7 +171,7 @@ class LiteLLMChatRuntime(Runtime):
 
         try:
             # returns a pydantic model named Output
-            response = instructor_client.chat.completions.create(
+            response, completion = instructor_client.chat.completions.create_with_completion(
                 messages=messages,
                 response_model=response_model,
                 model=self.model,
@@ -175,6 +181,16 @@ class LiteLLMChatRuntime(Runtime):
                 # extra inference params passed to this runtime
                 **self.model_extra,
             )
+            usage = completion.usage
+        except IncompleteOutputException as e:
+            usage = e.last_completion.usage
+            dct = _format_error_dict(e)
+            print_error(f"Inference error {dct['_adala_message']}: Incomplete output. Increase max_tokens.")
+            tb = traceback.format_exc()
+            logger.error(tb)
+            _update_with_usage(dct, usage)
+            return dct
+
         except InstructorRetryException as e:
             # get root cause error from retries
             n_attempts = e.n_attempts
@@ -192,7 +208,9 @@ class LiteLLMChatRuntime(Runtime):
             logger.debug(tb)
             return dct
 
-        return response.dict()
+        resp = response.dict()
+        _update_with_usage(resp, usage)
+        return resp
 
 
 class AsyncLiteLLMChatRuntime(AsyncRuntime):
@@ -283,7 +301,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
 
         tasks = [
             asyncio.ensure_future(
-                async_instructor_client.chat.completions.create(
+                async_instructor_client.chat.completions.create_with_completion(
                     messages=get_messages(
                         user_prompt,
                         instructions_template,
@@ -305,6 +323,15 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         # convert list of LLMResponse objects to the dataframe records
         df_data = []
         for response in responses:
+            if isinstance(response, IncompleteOutputException):
+                e = response
+                usage = e.last_completion.usage
+                dct = _format_error_dict(e)
+                _update_with_usage(dct, usage)
+                print_error(f"Inference error {dct['_adala_message']}: Incomplete output. Increase max_tokens.")
+                tb = traceback.format_exc()
+                logger.error(tb)
+                df_data.append(dct)
             if isinstance(response, InstructorRetryException):
                 e = response
                 # get root cause error from retries
@@ -326,7 +353,10 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                 logger.debug(tb)
                 df_data.append(dct)
             else:
-                df_data.append(response.dict())
+                resp, completion = response
+                dct = resp.dict()
+                _update_with_usage(dct, completion.usage)
+                df_data.append(dct)
 
         output_df = InternalDataFrame(df_data)
         return output_df.set_index(batch.index)
