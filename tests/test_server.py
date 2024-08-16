@@ -5,6 +5,7 @@ import asyncio
 import pytest
 from tempfile import NamedTemporaryFile
 import pandas as pd
+from copy import deepcopy
 
 
 # TODO manage which keys correspond to which models/deployments, probably using a litellm Router
@@ -42,9 +43,9 @@ SUBMIT_PAYLOAD = {
         "runtimes": {
             "default": {
                 "type": "AsyncLiteLLMChatRuntime",
-                "model": "gpt-3.5-turbo-0125",
+                "model": "gpt-4o-mini",
                 "api_key": OPENAI_API_KEY,
-                "max_tokens": 10,
+                "max_tokens": 200,
                 "temperature": 0,
                 "batch_size": 100,
                 "timeout": 10,
@@ -144,29 +145,68 @@ def test_ready_endpoint(client, redis_mock):
     assert result == "ok", f"Expected status = ok, but instead returned {result}."
 
 
-@pytest.mark.use_openai
-@pytest.mark.use_server
-def test_streaming(client):
-
-    data = pd.DataFrame.from_records(
+@pytest.mark.parametrize("input_data, skills, output_column", [
+    # text classification
+    (
         [
             {"task_id": 1, "text": "anytexthere", "output": "Feature Lack"},
             {"task_id": 2, "text": "othertexthere", "output": "Feature Lack"},
             {"task_id": 3, "text": "anytexthere", "output": "Feature Lack"},
             {"task_id": 4, "text": "othertexthere", "output": "Feature Lack"},
-        ]
+        ],
+        [{
+            "type": "ClassificationSkill",
+            "name": "text_classifier",
+            "instructions": "Always return the answer 'Feature Lack'.",
+            "input_template": "{text}",
+            "output_template": "{output}",
+            "labels": {
+                "output": [
+                    "Feature Lack",
+                    "Price",
+                    "Integration Issues",
+                    "Usability Concerns",
+                    "Competitor Advantage",
+                ]
+            },
+        }],
+        "output"
+    ),
+    # entity extraction
+    (
+        [
+            {"task_id": 1, "text": "John Doe, 26 years old, works at Google", "entities": [{"start": 0, "end": 8, "label": "PERSON"}, {"start": 26, "end": 36, "label": "AGE"}, {"start": 47, "end": 53, "label": "ORG"}]},
+            {"task_id": 2, "text": "Jane Doe, 30 years old, works at Microsoft", "entities": [{"start": 0, "end": 8, "label": "PERSON"}, {"start": 26, "end": 36, "label": "AGE"}, {"start": 47, "end": 55, "label": "ORG"}]},
+            {"task_id": 3, "text": "John Smith, 40 years old, works at Amazon", "entities": [{"start": 0, "end": 10, "label": "PERSON"}, {"start": 28, "end": 38, "label": "AGE"}, {"start": 49, "end": 55, "label": "ORG"}]},
+            {"task_id": 4, "text": "Jane Smith, 35 years old, works at Facebook", "entities": [{"start": 0, "end": 10, "label": "PERSON"}, {"start": 28, "end": 38, "label": "AGE"}, {"start": 49, "end": 57, "label": "ORG"}]},
+        ],
+        [{
+            "type": "EntityExtraction",
+            "name": "entity_extraction",
+            "input_template": 'Extract entities from the input text.\n\nInput:\n"""\n{text}\n"""',
+            "labels": ["PERSON", "AGE", "ORG"]
+        }],
+        "entities"
     )
-    batch_data = data.drop("output", axis=1).to_dict(orient="records")
-    expected_output = data.set_index("task_id")["output"]
+])
+@pytest.mark.use_openai
+@pytest.mark.use_server
+def test_streaming_use_cases(client, input_data, skills, output_column):
+
+    data = pd.DataFrame.from_records(input_data)
+    batch_data = data.drop(output_column, axis=1).to_dict(orient="records")
+    submit_payload = deepcopy(SUBMIT_PAYLOAD)
 
     with NamedTemporaryFile(mode="r") as f:
 
-        SUBMIT_PAYLOAD["result_handler"] = {
+        submit_payload["agent"]["skills"] = skills
+
+        submit_payload["result_handler"] = {
             "type": "CSVHandler",
             "output_path": f.name,
         }
 
-        resp = client.post("/jobs/submit-streaming", json=SUBMIT_PAYLOAD)
+        resp = client.post("/jobs/submit-streaming", json=submit_payload)
         resp.raise_for_status()
         job_id = resp.json()["data"]["job_id"]
 
@@ -198,9 +238,19 @@ def test_streaming(client):
 
         output = pd.read_csv(f.name).set_index("task_id")
         assert not output["error"].any(), "adala returned errors"
-        assert (
-            output["output"] == expected_output
-        ).all(), "adala did not return expected output"
+
+        # check for expected output
+        expected_outputs = data.set_index("task_id")[output_column].tolist()
+        actual_outputs = [eval(item)[output_column] for item in output.output.tolist()]
+        for actual_output, expected_output in zip(actual_outputs, expected_outputs):
+            if skills[0]["type"] == "EntityExtraction":
+                # Live generations may be flaky, check only 3 entities are presented
+                actual_labels = [entity["label"] for entity in actual_output]
+                expected_labels = [entity["label"] for entity in expected_output]
+                assert actual_labels == expected_labels
+                continue
+
+            assert actual_output == expected_output, "adala did not return expected output"
 
 
 @pytest.mark.use_openai
@@ -222,7 +272,6 @@ async def test_streaming_n_concurrent_requests(async_client):
     )
     batch_payload_data = data.drop("output", axis=1).to_dict(orient="records")
     batch_payload_datas = [batch_payload_data[:2], batch_payload_data[2:]]
-    expected_output = data.set_index("task_id")["output"]
 
     # this sometimes takes too long and flakes, set timeout_sec if behavior continues
     outputs = await asyncio.gather(
@@ -236,9 +285,10 @@ async def test_streaming_n_concurrent_requests(async_client):
 
     for output in outputs:
         assert not output["error"].any(), "adala returned errors"
-        assert (
-            output["output"] == expected_output
-        ).all(), "adala did not return expected output"
+        expected_outputs = data.set_index("task_id")["output"].tolist()
+        actual_outputs = [eval(item)["output"] for item in output.output.tolist()]
+        for actual_output, expected_output in zip(actual_outputs, expected_outputs):
+            assert actual_output == expected_output, "adala did not return expected output"
 
 
 @pytest.mark.skip(
@@ -332,7 +382,6 @@ def test_streaming_azure(client):
         ]
     )
     batch_data = data.drop("output", axis=1).to_dict(orient="records")
-    expected_output = data.set_index("task_id")["output"]
 
     with NamedTemporaryFile(mode="r") as f:
 
@@ -386,6 +435,7 @@ def test_streaming_azure(client):
 
         output = pd.read_csv(f.name).set_index("task_id")
         assert not output["error"].any(), "adala returned errors"
-        assert (
-            output["output"] == expected_output
-        ).all(), "adala did not return expected output"
+        expected_outputs = data.set_index("task_id")["output"].tolist()
+        actual_outputs = [eval(item)["output"] for item in output.output.tolist()]
+        for actual_output, expected_output in zip(actual_outputs, expected_outputs):
+            assert actual_output == expected_output, "adala did not return expected output"
