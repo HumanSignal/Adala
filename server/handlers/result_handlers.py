@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any, List, Dict
 import json
 from abc import abstractmethod
 from pydantic import BaseModel, Field, computed_field, ConfigDict, model_validator
@@ -74,7 +74,7 @@ class LSEBatchItem(BaseModel):
 
     task_id: int
     # TODO this field no longer populates if there was an error, so validation fails without a default - should probably split this item into 3 different constructors corresponding to new internal adala objects (or just reuse those objects)
-    output: Optional[str] = None
+    output: Optional[Dict] = None
     # we don't need to use reserved names anymore here because they're not in a DataFrame, but a structure with proper typing available
     error: bool = Field(False, alias="_adala_error")
     message: Optional[str] = Field(None, alias="_adala_message")
@@ -94,6 +94,32 @@ class LSEBatchItem(BaseModel):
             )
 
         return self
+
+    @classmethod
+    def from_result(cls, result: Dict) -> "LSEBatchItem":
+        """
+        Prepare a result for processing by the handler:
+        - extract error, message and detail if result is a failed prediction
+        - otherwise, put the result payload to the output field
+        """
+        # Copy system fields
+        prepared_result = {k: v for k, v in result.items() if k in (
+            'task_id', '_adala_error', '_adala_message', '_adala_details')}
+
+        # Normalize results if they contain NaN
+        if result.get('_adala_error') != result.get('_adala_error'):
+            prepared_result['_adala_error'] = False
+        if result.get('_adala_message') != result.get('_adala_message'):
+            prepared_result['_adala_message'] = None
+        if result.get('_adala_details') != result.get('_adala_details'):
+            prepared_result['_adala_details'] = None
+
+        # filter out the rest of custom fields
+        prepared_result['output'] = {k: v for k, v in result.items() if k not in prepared_result}
+
+        logger.debug(f'Prepared result: {prepared_result}')
+
+        return cls(**prepared_result)
 
 
 class LSEHandler(ResultHandler):
@@ -143,26 +169,11 @@ class LSEHandler(ResultHandler):
 
         return transformed_errors
 
-    def __call__(self, result_batch: list[LSEBatchItem]):
+    def __call__(self, result_batch: list[Dict]):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
 
         # coerce dicts to LSEBatchItems for validation
-        norm_result_batch = []
-        for result in result_batch:
-
-            # This is checking for NaNs to avoid validation errors
-            if result.get('_adala_error') != result.get('_adala_error'):
-                result['_adala_error'] = False
-            if result.get('_adala_message') != result.get('_adala_message'):
-                result['_adala_message'] = None
-            if result.get('_adala_details') != result.get('_adala_details'):
-                result['_adala_details'] = None
-            if result.get('output') != result.get('output'):
-                result['output'] = None
-
-            logger.debug('Record in LSEHandler: %s', result)
-
-            norm_result_batch.append(LSEBatchItem(**result))
+        norm_result_batch = [LSEBatchItem.from_result(result) for result in result_batch]
 
         result_batch = [record for record in norm_result_batch if not record.error]
         error_batch = [record for record in norm_result_batch if record.error]
@@ -219,24 +230,11 @@ class CSVHandler(ResultHandler):
 
         return self
 
-    def __call__(self, result_batch: list[LSEBatchItem]):
+    def __call__(self, result_batch: List[Dict]):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
 
         # coerce dicts to LSEBatchItems for validation
-        norm_result_batch = []
-        for result in result_batch:
-
-            # This is checking for NaNs to avoid validation errors
-            if result.get('_adala_error') != result.get('_adala_error'):
-                result['_adala_error'] = False
-            if result.get('_adala_message') != result.get('_adala_message'):
-                result['_adala_message'] = None
-            if result.get('_adala_details') != result.get('_adala_details'):
-                result['_adala_details'] = None
-            if result.get('output') != result.get('output'):
-                result['output'] = None
-
-            norm_result_batch.append(LSEBatchItem(**result))
+        norm_result_batch = [LSEBatchItem.from_result(result) for result in result_batch]
 
         # open and write to file
         with open(self.output_path, "a") as f:

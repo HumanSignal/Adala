@@ -4,6 +4,9 @@ import os
 import json
 
 import fastapi
+from fastapi import Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from adala.agents import Agent
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import UnknownTopicOrPartitionError
@@ -130,6 +133,12 @@ class BatchData(BaseModel):
 @app.get("/")
 def get_index():
     return {"status": "ok"}
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    logger.error(f'Request validation error: {exc}')
+    return JSONResponse(content=str(exc), status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
 @app.post("/jobs/submit-streaming", response_model=Response[JobCreated])
