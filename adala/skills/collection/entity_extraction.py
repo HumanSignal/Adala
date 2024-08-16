@@ -1,16 +1,67 @@
 import logging
 import pandas as pd
-
+import jsonschema
+from jsonschema import validate
 from adala.runtimes import Runtime, AsyncRuntime
 from adala.skills._base import TransformSkill
 from pydantic import BaseModel, Field, model_validator
-from typing import List, Type, Optional, Dict
+from typing import List, Type, Optional, Dict, Any
 
 from adala.utils.internal_data import InternalDataFrame
-from adala.utils.parse import parse_template
 from adala.utils.pydantic_generator import field_schema_to_pydantic_class
 
 logger = logging.getLogger(__name__)
+
+
+def validate_schema(schema: Dict[str, Any]):
+    expected_schema = {
+        "type": "object",
+        "patternProperties": {
+            # name of the output field
+            ".*": {
+                "type": "object",
+                "properties": {
+                    # "type": "array"
+                    "type": {"type": "string", "enum": ["array"]},
+                    "description": {"type": "string"},
+                    # "items": {"type": "object"} - one or two properties
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": ["object"]
+                            },
+                            "properties": {
+                                "type": "object",
+                                "patternProperties": {
+                                    ".*": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {"type": "string", "enum": ["string"]},
+                                            "description": {"type": "string"},
+                                            "enum": {"type": "array", "items": {"type": "string"}}
+                                        },
+                                        "required": ["type"]
+                                    }
+                                },
+                                "minProperties": 1,
+                                "maxProperties": 2
+                            }
+                        },
+                        "required": ["type", "properties"]
+                    }
+                },
+                "required": ["type", "items"]
+            }
+        },
+        "additionalProperties": False
+    }
+
+    try:
+        validate(instance=schema, schema=expected_schema)
+    except jsonschema.exceptions.ValidationError as e:
+        raise ValueError(f"Invalid schema: {e.message}")
 
 
 class EntityExtraction(TransformSkill):
@@ -36,23 +87,9 @@ class EntityExtraction(TransformSkill):
 
         if self.field_schema:
             # in case field_schema is already provided, we don't need to parse output template and validate labels
-            # just ensure that schema contains exactly one field and enum is presented
-            if len(self.field_schema) != 1:
-                raise ValueError(f"EntityExtraction skill only supports one output field, got {self.field_schema}")
+            # check schema structure: it must contain one or two fields covering extracted quote string and labels
+            validate_schema(self.field_schema)
             schema = next(iter(self.field_schema.values()))
-            if schema["type"] != "array":
-                raise ValueError(f"EntityExtraction skill only supports array output field, got {schema['type']}")
-            if "items" not in schema:
-                raise ValueError(f"EntityExtraction skill output field must have items, got {schema}")
-            if "type" not in schema["items"]:
-                raise ValueError(f"EntityExtraction skill output field items must have type, got {schema['items']}")
-            if schema["items"]["type"] != "object":
-                raise ValueError(f"EntityExtraction skill output field items must be object, got {schema['items']['type']}")
-            if "properties" not in schema["items"] or not schema["items"]["properties"]:
-                raise ValueError(f"EntityExtraction skill output field items must have properties, got {schema['items']}")
-
-            if len(schema["items"]["properties"]) > 2:
-                raise ValueError(f"EntityExtraction skill output field items properties must have 1 or 2 fields, got {schema['items']['properties']}")
 
             # identify quote string field as one field of "type": "string" without "enum"
             self._quote_string_field_name = next(
@@ -64,9 +101,11 @@ class EntityExtraction(TransformSkill):
 
             # check if description provided for quote string field, if not - warning and generate a default one
             if "description" not in schema["items"]["properties"][self._quote_string_field_name]:
-                logger.warning(f"EntityExtraction skill output field items properties quote string field must have 'description', "
-                               f"generated default description: {self._default_quote_string_description}")
-                schema["items"]["properties"][self._quote_string_field_name]["description"] = self._default_quote_string_description
+                logger.warning(
+                    f"EntityExtraction skill output field items properties quote string field must have 'description', "
+                    f"generated default description: {self._default_quote_string_description}")
+                schema["items"]["properties"][self._quote_string_field_name][
+                    "description"] = self._default_quote_string_description
 
             if len(schema["items"]["properties"]) == 2:
                 # identify labels list field as one field of "type": "string" with "enum"
@@ -78,9 +117,11 @@ class EntityExtraction(TransformSkill):
                                      f" of type string with enum (list of labels), got {schema['items']['properties']}")
                 # check if description provided for labels field, if not - warning and generate a default one
                 if "description" not in schema["items"]["properties"][self._labels_field_name]:
-                    logger.warning(f"EntityExtraction skill output field items properties labels field must have 'description', "
-                                   f"generated default description: {self._default_labels_description}")
-                    schema["items"]["properties"][self._labels_field_name]["description"] = self._default_labels_description
+                    logger.warning(
+                        f"EntityExtraction skill output field items properties labels field must have 'description', "
+                        f"generated default description: {self._default_labels_description}")
+                    schema["items"]["properties"][self._labels_field_name][
+                        "description"] = self._default_labels_description
 
         else:
             # if field_schema is not provided, parse output_template and validate labels

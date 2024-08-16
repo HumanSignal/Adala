@@ -1,11 +1,44 @@
 import logging
+import jsonschema
+from jsonschema import validate
 
 from adala.skills._base import Skill, TransformSkill
 from adala.utils.pydantic_generator import field_schema_to_pydantic_class
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from pydantic import model_validator
 
 logger = logging.getLogger(__name__)
+
+
+def validate_schema(schema: Dict[str, Any]):
+    expected_schema = {
+        "type": "object",
+        "patternProperties": {
+            # single output field
+            ".*": {
+                "type": "object",
+                "properties": {
+                    "type": {"type": "string", "enum": ["string"]},
+                    "enum": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "minItems": 1
+                    },
+                    "description": {"type": "string"}
+                },
+                "required": ["type", "enum"],
+                "additionalProperties": False
+            }
+        },
+        "minProperties": 1,
+        "maxProperties": 1,
+        "additionalProperties": False
+    }
+
+    try:
+        validate(instance=schema, schema=expected_schema)
+    except jsonschema.exceptions.ValidationError as e:
+        raise ValueError(f"Invalid schema: {e.message}")
 
 
 class ClassificationSkill(TransformSkill):
@@ -42,23 +75,8 @@ class ClassificationSkill(TransformSkill):
         if self.field_schema:
             # in case field_schema is already provided, we don't need to parse output template and validate labels
             # just ensure that schema contains exactly one field and enum is presented
-            if len(self.field_schema) != 1:
-                raise ValueError(
-                    f"Classification skill only supports one output field, got {self.field_schema}"
-                )
-            schema = next(iter(self.field_schema.values()))
-            if schema["type"] != "string":
-                raise ValueError(
-                    f"Classification skill only supports string output field, got {schema['type']}"
-                )
-            if "enum" not in schema:
-                raise ValueError(
-                    f"Classification skill output field must have enum, got {schema}"
-                )
-            if not schema["enum"]:
-                raise ValueError(
-                    f"Classification skill output field enum must not be empty, got {schema}"
-                )
+            validate_schema(self.field_schema)
+            schema = list(self.field_schema.values())[0]
 
             # check if description is provided for the output field, if not - warning and generate a default one
             if "description" not in schema:
