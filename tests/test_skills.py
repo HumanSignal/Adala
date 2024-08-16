@@ -33,20 +33,33 @@ def test_classification_skill():
         ]
     )
 
+    field_schema = {
+        "predicted_category": {
+            "type": "string",
+            "enum": [
+                "Footwear/Clothing",
+                "Electronics",
+                "Food/Beverages",
+                "Furniture/Home Decor",
+                "Beauty/Personal Care",
+            ],
+        }
+    }
+
     agent = Agent(
         skills=ClassificationSkill(
-            name="product_category_classification",
+            name="Output",
             input_template="Text: {text}",
             output_template="Category: {predicted_category}",
-            labels={
-                "predicted_category": [
-                    "Footwear/Clothing",
-                    "Electronics",
-                    "Food/Beverages",
-                    "Furniture/Home Decor",
-                    "Beauty/Personal Care",
-                ]
-            },
+            labels=[
+                "Footwear/Clothing",
+                "Electronics",
+                "Food/Beverages",
+                "Furniture/Home Decor",
+                "Beauty/Personal Care",
+            ],
+            # note that if correct `field_schema` is provided, `output_template` and `labels` will be ignored
+            field_schema=field_schema
         ),
         environment=StaticEnvironment(
             df=df, ground_truth_columns={"predicted_category": "category"}
@@ -56,7 +69,7 @@ def test_classification_skill():
 
     agent.learn()
     assert (
-        agent.skills["product_category_classification"].instructions
+        agent.skills["Output"].instructions
         == 'Classify the input text into the correct product category by emphasizing both the primary function of the item and its intended context of use. Even if certain keywords might suggest a typical category, analyze how the context or specific usage mentioned might indicate a different category. Analyze the entire text holistically to understand its full context and primary purpose before deciding on the category.'
     )
 
@@ -86,7 +99,7 @@ def test_parallel_skillset_with_analysis():
     skillset = ParallelSkillSet(
         skills=[
             AnalysisSkill(
-                name="code_generation",
+                name="Output",
                 input_template="Input JSON: {payload}",
                 output_template="Code: {code}",
                 instructions="""
@@ -180,7 +193,7 @@ def test_summarization_skill():
     )
 
     agent = Agent(
-        skills=SummarizationSkill(name="summarization", input_data_field="text")
+        skills=SummarizationSkill(name="Output", input_data_field="text")
     )
 
     predictions = agent.run(df)
@@ -230,7 +243,7 @@ def test_transform_skill():
     skills = LinearSkillSet(
         skills=[
             TransformSkill(
-                name="math_solver",
+                name="Output",
                 # we start with no instructions then explain how agent can learn more details
                 instructions="",
                 # instructions=prompt,
@@ -302,7 +315,7 @@ def test_question_answering_skill():
         ]
     )
 
-    agent = Agent(skills=QuestionAnsweringSkill())
+    agent = Agent(skills=QuestionAnsweringSkill(name="Output"))
 
     predictions = agent.run(df)
     assert (predictions.answer == predictions.expected_answer).mean() == 3 / 5
@@ -361,7 +374,7 @@ def test_linear_skillset():
     agent.learn(learning_iterations=2)
     assert (
         agent.skills["skill_0"].instructions
-        == '"Given a category, directly provide a list of the most common or well-known items that belong to that category. Do not provide a definition or repeat the category."'
+        == '"Given a category, your task is to generate a list of at least three specific items or elements that belong to this category. The output should not be the same as the input category. Instead, provide detailed and distinct examples within that category. For instance, if the category is \'Macronutrients\', your output should include \'Carbohydrates, Proteins, Fats\'. Remember, the goal is to provide unique examples, not to repeat the category name."'
     )
     # TODO: not learned with 2 iterations, need to increase learning_iterations
     assert agent.skills["skill_1"].instructions == "..."
@@ -384,7 +397,7 @@ def test_translation_skill():
         ]
     )
 
-    agent = Agent(skills=TranslationSkill(target_language="Swahili"))
+    agent = Agent(skills=TranslationSkill(name='Output', description='', target_language="Swahili"))
 
     predictions = agent.run(df)
 
@@ -413,8 +426,29 @@ def test_entity_extraction():
         {"text": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."},
     ])
 
+    field_schema = {
+        "entities": {
+            "type": "array",
+            'description': 'Extracted entities:',
+            "items": {
+                "type": "object",
+                "properties": {
+                    "quote_string": {
+                        "type": "string",
+                        "description": "The text of the entity extracted from the input document."
+                    },
+                    "label": {
+                        "type": "string",
+                        "description": "The label assigned to the entity.",
+                        "enum": ["Organization", "Person", "Product", "Version"]
+                    }
+                }
+            }
+        }
+    }
+
     agent = Agent(
-        skills=EntityExtraction(labels=["Organization", "Person", "Product", "Version"]),
+        skills=EntityExtraction(name='Output', field_schema=field_schema),
         runtimes={'default': OpenAIChatRuntime(model="gpt-4o-mini")}
     )
     predictions = agent.run(df)
@@ -464,7 +498,24 @@ def test_entity_extraction_no_labels():
 
     agent = Agent(
         skills=EntityExtraction(
+            name='Output',
             input_template='Extract entities from the input text that represents the main points of discussion.\n\nInput:\n"""\n{text}\n"""',
+            field_schema={
+                'entities': {
+                    'type': 'array',
+                    'description': 'Extracted entities:',
+                    'items': {
+                        'type': 'object',
+                        'properties': {
+                            'quote_string': {
+                                'type': 'string',
+                                'description': 'The text of the entity extracted from the input document.'
+                            }
+                        }
+                    }
+
+                }
+            }
         ),
         runtimes={'default': OpenAIChatRuntime(model="gpt-4o")}
     )

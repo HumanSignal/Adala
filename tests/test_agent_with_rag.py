@@ -27,11 +27,11 @@ def test_rag_with_openai_chat_completion():
                     memory=memory,
                 ),
                 ClassificationSkill(
-                    name="emotions",
+                    name="Output",
                     instructions="Recognize emotions from text.",
                     input_template="Examples:\n\n{examples}\n\nNow recognize:\n\nText: {input}",
                     output_template="Emotions: {prediction}",
-                    labels={"prediction": ["happy", "sad", "angry", "neutral"]},
+                    labels=["happy", "sad", "angry", "neutral"],
                 ),
             ]
         ),
