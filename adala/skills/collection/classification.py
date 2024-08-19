@@ -62,7 +62,7 @@ class ClassificationSkill(TransformSkill):
     instructions: str = "Classify input text."
     input_template: str = 'Input:\n"""\n{text}\n"""'
     output_template: str = "Classification result: {label}"
-    labels: Optional[List[str]]
+    labels: Optional[List[str]] = None
 
     _default_output_field_description: str = "The classification label"
 
