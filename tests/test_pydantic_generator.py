@@ -2,7 +2,10 @@ import pytest
 import string
 from pydantic import BaseModel, Field
 from typing import List, Literal
-from adala.utils.pydantic_generator import json_schema_to_model, field_schema_to_pydantic_class
+from adala.utils.pydantic_generator import (
+    json_schema_to_model,
+    field_schema_to_pydantic_class,
+)
 
 # Sample JSON schema
 sample_schema = {
@@ -27,7 +30,9 @@ class Person(BaseModel):
 
     name: str = Field(..., description="The person's name")
     age: int = Field(..., description="The person's age")
-    profession: Literal["engineer", "doctor", "teacher"] = Field(..., description="The person's profession")
+    profession: Literal["engineer", "doctor", "teacher"] = Field(
+        ..., description="The person's profession"
+    )
 
 
 def test_json_schema_to_model():
@@ -54,22 +59,27 @@ def test_json_schema_to_model():
     assert instance.profession == expected_instance.profession
 
 
-@pytest.mark.parametrize('field_schema, fields_descriptions, good_params, bad_params, ', (
-    # create from field schema
+@pytest.mark.parametrize(
+    "field_schema, fields_descriptions, good_params, bad_params, ",
     (
-        {
-            "field1": {"type": "string", "description": "Description for field1"},
-            "field2": {
-                "type": "array",
-                "items": {"type": "string", "enum": ["label1", "label2"]},
+        # create from field schema
+        (
+            {
+                "field1": {"type": "string", "description": "Description for field1"},
+                "field2": {
+                    "type": "array",
+                    "items": {"type": "string", "enum": ["label1", "label2"]},
+                },
             },
-        },
-        ("Description for field1", None),
-        {"field1": "value1", "field2": ["label1"]},
-        {"field1": "value1", "field2": ["label2", "non_existent_label"]}
+            ("Description for field1", None),
+            {"field1": "value1", "field2": ["label1"]},
+            {"field1": "value1", "field2": ["label2", "non_existent_label"]},
+        ),
     ),
-))
-def test_field_schema_to_pydantic_class(field_schema, fields_descriptions, good_params, bad_params):
+)
+def test_field_schema_to_pydantic_class(
+    field_schema, fields_descriptions, good_params, bad_params
+):
 
     # Generated Pydantic class
     GeneratedClassDef = field_schema_to_pydantic_class(
@@ -82,7 +92,9 @@ def test_field_schema_to_pydantic_class(field_schema, fields_descriptions, good_
     assert (
         GeneratedClassDef.model_fields["field1"].description == fields_descriptions[0]
     )
-    assert GeneratedClassDef.model_fields["field2"].description == fields_descriptions[1]
+    assert (
+        GeneratedClassDef.model_fields["field2"].description == fields_descriptions[1]
+    )
     assert GeneratedClassDef.model_fields["field1"].is_required()
     assert GeneratedClassDef.model_fields["field2"].is_required()
 

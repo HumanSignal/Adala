@@ -103,21 +103,26 @@ class LSEBatchItem(BaseModel):
         - otherwise, put the result payload to the output field
         """
         # Copy system fields
-        prepared_result = {k: v for k, v in result.items() if k in (
-            'task_id', '_adala_error', '_adala_message', '_adala_details')}
+        prepared_result = {
+            k: v
+            for k, v in result.items()
+            if k in ("task_id", "_adala_error", "_adala_message", "_adala_details")
+        }
 
         # Normalize results if they contain NaN
-        if result.get('_adala_error') != result.get('_adala_error'):
-            prepared_result['_adala_error'] = False
-        if result.get('_adala_message') != result.get('_adala_message'):
-            prepared_result['_adala_message'] = None
-        if result.get('_adala_details') != result.get('_adala_details'):
-            prepared_result['_adala_details'] = None
+        if result.get("_adala_error") != result.get("_adala_error"):
+            prepared_result["_adala_error"] = False
+        if result.get("_adala_message") != result.get("_adala_message"):
+            prepared_result["_adala_message"] = None
+        if result.get("_adala_details") != result.get("_adala_details"):
+            prepared_result["_adala_details"] = None
 
         # filter out the rest of custom fields
-        prepared_result['output'] = {k: v for k, v in result.items() if k not in prepared_result}
+        prepared_result["output"] = {
+            k: v for k, v in result.items() if k not in prepared_result
+        }
 
-        logger.debug(f'Prepared result: {prepared_result}')
+        logger.debug(f"Prepared result: {prepared_result}")
 
         return cls(**prepared_result)
 
@@ -163,7 +168,7 @@ class LSEHandler(ResultHandler):
             transformed_error = {
                 "task_id": error["task_id"],
                 "message": error["details"] if "details" in error else "",
-                "error_type": error["message"] if "message" in error else ""
+                "error_type": error["message"] if "message" in error else "",
             }
             transformed_errors.append(transformed_error)
 
@@ -173,7 +178,9 @@ class LSEHandler(ResultHandler):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
 
         # coerce dicts to LSEBatchItems for validation
-        norm_result_batch = [LSEBatchItem.from_result(result) for result in result_batch]
+        norm_result_batch = [
+            LSEBatchItem.from_result(result) for result in result_batch
+        ]
 
         result_batch = [record for record in norm_result_batch if not record.error]
         error_batch = [record for record in norm_result_batch if record.error]
@@ -192,7 +199,9 @@ class LSEHandler(ResultHandler):
                 ),
             )
         else:
-            logger.error(f'No valid results to send to LSE for modelrun_id {self.modelrun_id}')
+            logger.error(
+                f"No valid results to send to LSE for modelrun_id {self.modelrun_id}"
+            )
 
         # Send failed predictions back to LSE
         if error_batch:
@@ -205,10 +214,10 @@ class LSEHandler(ResultHandler):
                         "modelrun_id": self.modelrun_id,
                         "failed_predictions": error_batch,
                     }
-                )
+                ),
             )
         else:
-            logger.debug(f'No errors to send to LSE for modelrun_id {self.modelrun_id}')
+            logger.debug(f"No errors to send to LSE for modelrun_id {self.modelrun_id}")
 
 
 class CSVHandler(ResultHandler):
@@ -234,7 +243,9 @@ class CSVHandler(ResultHandler):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
 
         # coerce dicts to LSEBatchItems for validation
-        norm_result_batch = [LSEBatchItem.from_result(result) for result in result_batch]
+        norm_result_batch = [
+            LSEBatchItem.from_result(result) for result in result_batch
+        ]
 
         # open and write to file
         with open(self.output_path, "a") as f:

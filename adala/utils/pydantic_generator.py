@@ -150,7 +150,9 @@ def json_schema_to_pydantic_type(
         raise ValueError(f"Unsupported JSON schema type: {type_}")
 
 
-def field_schema_to_pydantic_class(field_schema: Dict[str, Any], class_name: str, description: str) -> Type[BaseModel]:
+def field_schema_to_pydantic_class(
+    field_schema: Dict[str, Any], class_name: str, description: str
+) -> Type[BaseModel]:
     """
     Parses a template string to extract output fields and map them to the pydantic BaseModel class definition.
     Variable prefixes with stripped punctuation will replace `description` fields in the schema if not provided.

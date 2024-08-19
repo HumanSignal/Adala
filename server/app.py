@@ -20,8 +20,13 @@ import time
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
 from server.tasks.process_file import streaming_parent_task
-from server.utils import (Settings, delete_topic, get_input_topic_name,
-                          get_output_topic_name, init_logger)
+from server.utils import (
+    Settings,
+    delete_topic,
+    get_input_topic_name,
+    get_output_topic_name,
+    init_logger,
+)
 
 logger = init_logger(__name__)
 
@@ -137,8 +142,10 @@ def get_index():
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    logger.error(f'Request validation error: {exc}')
-    return JSONResponse(content=str(exc), status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+    logger.error(f"Request validation error: {exc}")
+    return JSONResponse(
+        content=str(exc), status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
+    )
 
 
 @app.post("/jobs/submit-streaming", response_model=Response[JobCreated])

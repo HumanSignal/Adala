@@ -145,50 +145,89 @@ def test_ready_endpoint(client, redis_mock):
     assert result == "ok", f"Expected status = ok, but instead returned {result}."
 
 
-@pytest.mark.parametrize("input_data, skills, output_column", [
-    # text classification
-    (
-        [
-            {"task_id": 1, "text": "anytexthere", "output": "Feature Lack"},
-            {"task_id": 2, "text": "othertexthere", "output": "Feature Lack"},
-            {"task_id": 3, "text": "anytexthere", "output": "Feature Lack"},
-            {"task_id": 4, "text": "othertexthere", "output": "Feature Lack"},
-        ],
-        [{
-            "type": "ClassificationSkill",
-            "name": "text_classifier",
-            "instructions": "Always return the answer 'Feature Lack'.",
-            "input_template": "{text}",
-            "output_template": "{output}",
-            "labels": {
-                "output": [
-                    "Feature Lack",
-                    "Price",
-                    "Integration Issues",
-                    "Usability Concerns",
-                    "Competitor Advantage",
-                ]
-            },
-        }],
-        "output"
-    ),
-    # entity extraction
-    (
-        [
-            {"task_id": 1, "text": "John Doe, 26 years old, works at Google", "entities": [{"start": 0, "end": 8, "label": "PERSON"}, {"start": 26, "end": 36, "label": "AGE"}, {"start": 47, "end": 53, "label": "ORG"}]},
-            {"task_id": 2, "text": "Jane Doe, 30 years old, works at Microsoft", "entities": [{"start": 0, "end": 8, "label": "PERSON"}, {"start": 26, "end": 36, "label": "AGE"}, {"start": 47, "end": 55, "label": "ORG"}]},
-            {"task_id": 3, "text": "John Smith, 40 years old, works at Amazon", "entities": [{"start": 0, "end": 10, "label": "PERSON"}, {"start": 28, "end": 38, "label": "AGE"}, {"start": 49, "end": 55, "label": "ORG"}]},
-            {"task_id": 4, "text": "Jane Smith, 35 years old, works at Facebook", "entities": [{"start": 0, "end": 10, "label": "PERSON"}, {"start": 28, "end": 38, "label": "AGE"}, {"start": 49, "end": 57, "label": "ORG"}]},
-        ],
-        [{
-            "type": "EntityExtraction",
-            "name": "entity_extraction",
-            "input_template": 'Extract entities from the input text.\n\nInput:\n"""\n{text}\n"""',
-            "labels": ["PERSON", "AGE", "ORG"]
-        }],
-        "entities"
-    )
-])
+@pytest.mark.parametrize(
+    "input_data, skills, output_column",
+    [
+        # text classification
+        (
+            [
+                {"task_id": 1, "text": "anytexthere", "output": "Feature Lack"},
+                {"task_id": 2, "text": "othertexthere", "output": "Feature Lack"},
+                {"task_id": 3, "text": "anytexthere", "output": "Feature Lack"},
+                {"task_id": 4, "text": "othertexthere", "output": "Feature Lack"},
+            ],
+            [
+                {
+                    "type": "ClassificationSkill",
+                    "name": "text_classifier",
+                    "instructions": "Always return the answer 'Feature Lack'.",
+                    "input_template": "{text}",
+                    "output_template": "{output}",
+                    "labels": {
+                        "output": [
+                            "Feature Lack",
+                            "Price",
+                            "Integration Issues",
+                            "Usability Concerns",
+                            "Competitor Advantage",
+                        ]
+                    },
+                }
+            ],
+            "output",
+        ),
+        # entity extraction
+        (
+            [
+                {
+                    "task_id": 1,
+                    "text": "John Doe, 26 years old, works at Google",
+                    "entities": [
+                        {"start": 0, "end": 8, "label": "PERSON"},
+                        {"start": 26, "end": 36, "label": "AGE"},
+                        {"start": 47, "end": 53, "label": "ORG"},
+                    ],
+                },
+                {
+                    "task_id": 2,
+                    "text": "Jane Doe, 30 years old, works at Microsoft",
+                    "entities": [
+                        {"start": 0, "end": 8, "label": "PERSON"},
+                        {"start": 26, "end": 36, "label": "AGE"},
+                        {"start": 47, "end": 55, "label": "ORG"},
+                    ],
+                },
+                {
+                    "task_id": 3,
+                    "text": "John Smith, 40 years old, works at Amazon",
+                    "entities": [
+                        {"start": 0, "end": 10, "label": "PERSON"},
+                        {"start": 28, "end": 38, "label": "AGE"},
+                        {"start": 49, "end": 55, "label": "ORG"},
+                    ],
+                },
+                {
+                    "task_id": 4,
+                    "text": "Jane Smith, 35 years old, works at Facebook",
+                    "entities": [
+                        {"start": 0, "end": 10, "label": "PERSON"},
+                        {"start": 28, "end": 38, "label": "AGE"},
+                        {"start": 49, "end": 57, "label": "ORG"},
+                    ],
+                },
+            ],
+            [
+                {
+                    "type": "EntityExtraction",
+                    "name": "entity_extraction",
+                    "input_template": 'Extract entities from the input text.\n\nInput:\n"""\n{text}\n"""',
+                    "labels": ["PERSON", "AGE", "ORG"],
+                }
+            ],
+            "entities",
+        ),
+    ],
+)
 @pytest.mark.use_openai
 @pytest.mark.use_server
 def test_streaming_use_cases(client, input_data, skills, output_column):
@@ -250,7 +289,9 @@ def test_streaming_use_cases(client, input_data, skills, output_column):
                 assert actual_labels == expected_labels
                 continue
 
-            assert actual_output == expected_output, "adala did not return expected output"
+            assert (
+                actual_output == expected_output
+            ), "adala did not return expected output"
 
 
 @pytest.mark.use_openai
@@ -288,7 +329,9 @@ async def test_streaming_n_concurrent_requests(async_client):
         expected_outputs = data.set_index("task_id")["output"].tolist()
         actual_outputs = [eval(item)["output"] for item in output.output.tolist()]
         for actual_output, expected_output in zip(actual_outputs, expected_outputs):
-            assert actual_output == expected_output, "adala did not return expected output"
+            assert (
+                actual_output == expected_output
+            ), "adala did not return expected output"
 
 
 @pytest.mark.skip(
@@ -438,4 +481,6 @@ def test_streaming_azure(client):
         expected_outputs = data.set_index("task_id")["output"].tolist()
         actual_outputs = [eval(item)["output"] for item in output.output.tolist()]
         for actual_output, expected_output in zip(actual_outputs, expected_outputs):
-            assert actual_output == expected_output, "adala did not return expected output"
+            assert (
+                actual_output == expected_output
+            ), "adala did not return expected output"

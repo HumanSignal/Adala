@@ -51,7 +51,9 @@ class Runtime(BaseModelInRegistry):
         extra_fields: Optional[Dict[str, Any]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
-        output_template: Optional[str] = None,  # TODO: deprecated in favor of response_model, can be removed
+        output_template: Optional[
+            str
+        ] = None,  # TODO: deprecated in favor of response_model, can be removed
     ) -> Dict[str, str]:
         """
         Processes a record.
@@ -80,7 +82,9 @@ class Runtime(BaseModelInRegistry):
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
-        output_template: Optional[str] = None,  # TODO: deprecated in favor of response_model, can be removed
+        output_template: Optional[
+            str
+        ] = None,  # TODO: deprecated in favor of response_model, can be removed
     ) -> InternalDataFrame:
         """
         Processes a record.
@@ -153,7 +157,9 @@ class Runtime(BaseModelInRegistry):
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
-        output_template: Optional[str] = None,  # TODO: deprecated in favor of response_model, can be removed
+        output_template: Optional[
+            str
+        ] = None,  # TODO: deprecated in favor of response_model, can be removed
     ) -> InternalDataFrame:
         """
         Processes a record and return a batch.
@@ -182,7 +188,7 @@ class Runtime(BaseModelInRegistry):
             extra_fields=extra_fields,
             field_schema=field_schema,
             instructions_first=instructions_first,
-            response_model=response_model
+            response_model=response_model,
         )
 
 
@@ -231,7 +237,9 @@ class AsyncRuntime(Runtime):
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
-        output_template: Optional[str] = None,  # TODO: deprecated in favor of response_model, can be removed
+        output_template: Optional[
+            str
+        ] = None,  # TODO: deprecated in favor of response_model, can be removed
     ) -> InternalDataFrame:
         """
         Processes a record.

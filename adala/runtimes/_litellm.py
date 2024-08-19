@@ -17,7 +17,12 @@ from adala.utils.parse import (
 from openai import NotFoundError
 from pydantic import ConfigDict, field_validator, BaseModel
 from rich import print
-from tenacity import AsyncRetrying, Retrying, retry_if_not_exception_type, stop_after_attempt
+from tenacity import (
+    AsyncRetrying,
+    Retrying,
+    retry_if_not_exception_type,
+    stop_after_attempt,
+)
 from pydantic_core._pydantic_core import ValidationError
 
 from .base import AsyncRuntime, Runtime
@@ -131,7 +136,9 @@ class LiteLLMChatRuntime(Runtime):
         input_template: str,
         instructions_template: str,
         response_model: Type[BaseModel],
-        output_template: Optional[str] = None,  # TODO: deprecated in favor of response_model, can be removed
+        output_template: Optional[
+            str
+        ] = None,  # TODO: deprecated in favor of response_model, can be removed
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = False,
@@ -156,7 +163,9 @@ class LiteLLMChatRuntime(Runtime):
         extra_fields = extra_fields or {}
 
         if not response_model:
-            raise ValueError('You must explicitly specify the `response_model` in runtime.')
+            raise ValueError(
+                "You must explicitly specify the `response_model` in runtime."
+            )
 
         messages = get_messages(
             input_template.format(**record, **extra_fields),
@@ -165,7 +174,8 @@ class LiteLLMChatRuntime(Runtime):
         )
 
         retries = Retrying(
-            retry=retry_if_not_exception_type((ValidationError)), stop=stop_after_attempt(3)
+            retry=retry_if_not_exception_type((ValidationError)),
+            stop=stop_after_attempt(3),
         )
 
         try:
@@ -192,7 +202,7 @@ class LiteLLMChatRuntime(Runtime):
             return dct
         except Exception as e:
             # Catch case where the model does not return a properly formatted output
-            if type(e).__name__ == 'ValidationError' and 'Invalid JSON' in str(e):
+            if type(e).__name__ == "ValidationError" and "Invalid JSON" in str(e):
                 e = ConstrainedGenerationError()
             # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
             dct = _format_error_dict(e)
@@ -273,7 +283,9 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         input_template: str,
         instructions_template: str,
         response_model: Type[BaseModel],
-        output_template: Optional[str] = None,  # TODO: deprecated in favor of response_model, can be removed
+        output_template: Optional[
+            str
+        ] = None,  # TODO: deprecated in favor of response_model, can be removed
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
@@ -281,16 +293,20 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         """Execute batch of requests with async calls to OpenAI API"""
 
         if not response_model:
-            raise ValueError('You must explicitly specify the `response_model` in runtime.')
+            raise ValueError(
+                "You must explicitly specify the `response_model` in runtime."
+            )
 
         extra_fields = extra_fields or {}
         user_prompts = batch.apply(
             # TODO: remove "extra_fields" to avoid name collisions
-            lambda row: input_template.format(**row, **extra_fields), axis=1
+            lambda row: input_template.format(**row, **extra_fields),
+            axis=1,
         ).tolist()
 
         retries = AsyncRetrying(
-            retry=retry_if_not_exception_type((ValidationError)), stop=stop_after_attempt(3)
+            retry=retry_if_not_exception_type((ValidationError)),
+            stop=stop_after_attempt(3),
         )
 
         tasks = [
@@ -333,7 +349,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             elif isinstance(response, Exception):
                 e = response
                 # Catch case where the model does not return a properly formatted output
-                if type(e).__name__ == 'ValidationError' and 'Invalid JSON' in str(e):
+                if type(e).__name__ == "ValidationError" and "Invalid JSON" in str(e):
                     e = ConstrainedGenerationError()
                 # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
                 dct = _format_error_dict(e)

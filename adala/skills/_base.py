@@ -1,6 +1,12 @@
 import logging
 import string
-from pydantic import BaseModel, Field, field_validator, model_validator, field_serializer
+from pydantic import (
+    BaseModel,
+    Field,
+    field_validator,
+    model_validator,
+    field_serializer,
+)
 from typing import List, Optional, Any, Dict, Tuple, Union, ClassVar, Type
 from abc import ABC, abstractmethod
 from adala.utils.internal_data import (
@@ -51,7 +57,7 @@ class Skill(BaseModelInRegistry):
         "Can use templating to refer to input fields.",
         examples=["Label the input text with the following labels: {labels}"],
         # TODO: instructions can be deprecated in favor of using `input_template` to specify the instructions
-        default=''
+        default="",
     )
     input_template: str = Field(
         title="Input template",
@@ -65,7 +71,7 @@ class Skill(BaseModelInRegistry):
         "Can use templating to refer to input parameters and perform data transformations",
         examples=["Output: {output}", "{predictions}"],
         # TODO: output_template can be deprecated in favor of using `response_model` to specify the output
-        default=''
+        default="",
     )
     description: Optional[str] = Field(
         default="",
@@ -161,9 +167,11 @@ class Skill(BaseModelInRegistry):
         assert self.field_schema, "field_schema is required to create a response model"
         if self.response_model:
             return
-        self.response_model = field_schema_to_pydantic_class(self.field_schema, self.name, self.description)
+        self.response_model = field_schema_to_pydantic_class(
+            self.field_schema, self.name, self.description
+        )
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_response_model(self):
         if self.response_model:
             # if response_model, we use it right away
@@ -171,7 +179,9 @@ class Skill(BaseModelInRegistry):
 
         if not self.field_schema:
             # if field_schema is not provided, extract it from `output_template`
-            logger.info(f"Parsing output_template to generate the response model: {self.output_template}")
+            logger.info(
+                f"Parsing output_template to generate the response model: {self.output_template}"
+            )
             self.field_schema = {}
             chunks = parse_template(self.output_template)
 
@@ -187,7 +197,9 @@ class Skill(BaseModelInRegistry):
                     # if description is not provided, use the text before the field,
                     # otherwise use the field name with underscores replaced by spaces
                     field_description = previous_text or field_name.replace("_", " ")
-                    field_description = field_description.strip(string.punctuation).strip()
+                    field_description = field_description.strip(
+                        string.punctuation
+                    ).strip()
                     previous_text = ""
 
                     # create default JSON schema entry for the field
@@ -201,14 +213,14 @@ class Skill(BaseModelInRegistry):
 
     # When serializing the agent, ensure `response_model` is excluded.
     # It will be restored from `field_schema` during deserialization.
-    @field_serializer('response_model')
+    @field_serializer("response_model")
     def serialize_response_model(self, value):
         return None
 
     # remove `response_model` from the pickle serialization
     def __getstate__(self):
         state = super().__getstate__()
-        state['__dict__']['response_model'] = None
+        state["__dict__"]["response_model"] = None
         return state
 
     def __setstate__(self, state):
@@ -286,7 +298,7 @@ class TransformSkill(Skill):
             field_schema=self.field_schema,
             extra_fields=self._get_extra_fields(),
             instructions_first=self.instructions_first,
-            response_model=self.response_model
+            response_model=self.response_model,
         )
 
     def improve(
@@ -330,8 +342,10 @@ class TransformSkill(Skill):
             # TODO: self.output_template can be missed or incompatible with the field_schema
             # we need to redefine how we create examples for learn()
             if not self.output_template:
-                raise ValueError("`output_template` is required for improve() method and must contain "
-                                 "the output fields from `field_schema`")
+                raise ValueError(
+                    "`output_template` is required for improve() method and must contain "
+                    "the output fields from `field_schema`"
+                )
             examples.append(
                 f"### Example #{i}\n\n"
                 f"{self.input_template.format(**row)}\n\n"
@@ -505,7 +519,7 @@ class SynthesisSkill(Skill):
             field_schema=self.field_schema,
             extra_fields=self._get_extra_fields(),
             instructions_first=self.instructions_first,
-            response_model=self.response_model
+            response_model=self.response_model,
         )
 
     def improve(self, **kwargs):
@@ -574,7 +588,7 @@ class AnalysisSkill(Skill):
                 instructions_template=self.instructions,
                 extra_fields=extra_fields,
                 instructions_first=self.instructions_first,
-                response_model=self.response_model
+                response_model=self.response_model,
             )
             outputs.append(InternalSeries(output))
         output = InternalDataFrame(outputs)

@@ -3,12 +3,17 @@ import re
 import pandas as pd
 import pytest
 from adala.agents import Agent
-from adala.environments import (SimpleCodeValidationEnvironment,
-                                StaticEnvironment)
+from adala.environments import SimpleCodeValidationEnvironment, StaticEnvironment
 from adala.runtimes import OpenAIChatRuntime
-from adala.skills import (AnalysisSkill, ClassificationSkill, LinearSkillSet,
-                          OntologyCreator, OntologyMerger, ParallelSkillSet,
-                          TransformSkill)
+from adala.skills import (
+    AnalysisSkill,
+    ClassificationSkill,
+    LinearSkillSet,
+    OntologyCreator,
+    OntologyMerger,
+    ParallelSkillSet,
+    TransformSkill,
+)
 from adala.skills.collection.qa import QuestionAnsweringSkill
 from adala.skills.collection.summarization import SummarizationSkill
 from adala.skills.collection.translation import TranslationSkill
@@ -59,7 +64,7 @@ def test_classification_skill():
                 "Beauty/Personal Care",
             ],
             # note that if correct `field_schema` is provided, `output_template` and `labels` will be ignored
-            field_schema=field_schema
+            field_schema=field_schema,
         ),
         environment=StaticEnvironment(
             df=df, ground_truth_columns={"predicted_category": "category"}
@@ -70,7 +75,7 @@ def test_classification_skill():
     agent.learn()
     assert (
         agent.skills["Output"].instructions
-        == 'Classify the input text into the correct product category by emphasizing both the primary function of the item and its intended context of use. Even if certain keywords might suggest a typical category, analyze how the context or specific usage mentioned might indicate a different category. Analyze the entire text holistically to understand its full context and primary purpose before deciding on the category.'
+        == "Classify the input text into the correct product category by emphasizing both the primary function of the item and its intended context of use. Even if certain keywords might suggest a typical category, analyze how the context or specific usage mentioned might indicate a different category. Analyze the entire text holistically to understand its full context and primary purpose before deciding on the category."
     )
 
 
@@ -192,9 +197,7 @@ def test_summarization_skill():
         columns=["text"],
     )
 
-    agent = Agent(
-        skills=SummarizationSkill(name="Output", input_data_field="text")
-    )
+    agent = Agent(skills=SummarizationSkill(name="Output", input_data_field="text"))
 
     predictions = agent.run(df)
     # breakpoint()
@@ -374,7 +377,7 @@ def test_linear_skillset():
     agent.learn(learning_iterations=2)
     assert (
         agent.skills["skill_0"].instructions
-        == '"Given a category, your task is to generate a list of at least three specific items or elements that belong to this category. The output should not be the same as the input category. Instead, provide detailed and distinct examples within that category. For instance, if the category is \'Macronutrients\', your output should include \'Carbohydrates, Proteins, Fats\'. Remember, the goal is to provide unique examples, not to repeat the category name."'
+        == "\"Given a category, your task is to generate a list of at least three specific items or elements that belong to this category. The output should not be the same as the input category. Instead, provide detailed and distinct examples within that category. For instance, if the category is 'Macronutrients', your output should include 'Carbohydrates, Proteins, Fats'. Remember, the goal is to provide unique examples, not to repeat the category name.\""
     )
     # TODO: not learned with 2 iterations, need to increase learning_iterations
     assert agent.skills["skill_1"].instructions == "..."
@@ -397,145 +400,208 @@ def test_translation_skill():
         ]
     )
 
-    agent = Agent(skills=TranslationSkill(name='Output', description='', target_language="Swahili"))
+    agent = Agent(
+        skills=TranslationSkill(
+            name="Output", description="", target_language="Swahili"
+        )
+    )
 
     predictions = agent.run(df)
 
-    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima",
-                                                'Maisha ni mazuri',
-                                                'Msitu unaniita',
-                                                'Napenda pizza ya Napolitana',
-                                                'Maua ya spring ni mazuri',
-                                                "Nyota zinang'aa usiku",
-                                                'Upinde wa mvua baada ya mvua',
-                                                'Nahitaji kahawa',
-                                                'Muziki huchezesha roho',
-                                                'Ndoto zinakuwa kweli']
+    assert predictions.translation.tolist() == [
+        "Jua huzidi kung'aa daima",
+        "Maisha ni mazuri",
+        "Msitu unaniita",
+        "Napenda pizza ya Napolitana",
+        "Maua ya spring ni mazuri",
+        "Nyota zinang'aa usiku",
+        "Upinde wa mvua baada ya mvua",
+        "Nahitaji kahawa",
+        "Muziki huchezesha roho",
+        "Ndoto zinakuwa kweli",
+    ]
 
 
 @pytest.mark.vcr
 def test_entity_extraction():
     from adala.skills.collection.entity_extraction import EntityExtraction
+
     # documents that contain entities
-    df = pd.DataFrame([
-        {
-            "text": "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services."},
-        {"text": "The iPhone 14 is the latest smartphone from Apple Inc."},
-        {"text": "The MacBook Pro is a line of Macintosh portable computers introduced in January 2006 by Apple Inc."},
-        {"text": "The Apple Watch is a line of smartwatches produced by Apple Inc."},
-        {"text": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."},
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "text": "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services."
+            },
+            {"text": "The iPhone 14 is the latest smartphone from Apple Inc."},
+            {
+                "text": "The MacBook Pro is a line of Macintosh portable computers introduced in January 2006 by Apple Inc."
+            },
+            {
+                "text": "The Apple Watch is a line of smartwatches produced by Apple Inc."
+            },
+            {
+                "text": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."
+            },
+        ]
+    )
 
     field_schema = {
         "entities": {
             "type": "array",
-            'description': 'Extracted entities:',
+            "description": "Extracted entities:",
             "items": {
                 "type": "object",
                 "properties": {
                     "quote_string": {
                         "type": "string",
-                        "description": "The text of the entity extracted from the input document."
+                        "description": "The text of the entity extracted from the input document.",
                     },
                     "label": {
                         "type": "string",
                         "description": "The label assigned to the entity.",
-                        "enum": ["Organization", "Person", "Product", "Version"]
-                    }
-                }
-            }
+                        "enum": ["Organization", "Person", "Product", "Version"],
+                    },
+                },
+            },
         }
     }
 
     agent = Agent(
-        skills=EntityExtraction(name='Output', field_schema=field_schema),
-        runtimes={'default': OpenAIChatRuntime(model="gpt-4o-mini")}
+        skills=EntityExtraction(name="Output", field_schema=field_schema),
+        runtimes={"default": OpenAIChatRuntime(model="gpt-4o-mini")},
     )
     predictions = agent.run(df)
-    assert predictions.entities.tolist() == [[{'quote_string': 'Apple Inc.',
-                                               'label': 'Organization',
-                                               'start': 0,
-                                               'end': 10}],
-                                             [{'quote_string': 'iPhone 14', 'label': 'Product', 'start': 4, 'end': 13},
-                                              {'quote_string': 'Apple Inc.',
-                                               'label': 'Organization',
-                                               'start': 44,
-                                               'end': 54}],
-                                             [{'quote_string': 'MacBook Pro', 'label': 'Product', 'start': 4,
-                                               'end': 15},
-                                              {'quote_string': 'Macintosh', 'label': 'Product', 'start': 29, 'end': 38},
-                                              {'quote_string': 'January 2006', 'label': 'Version', 'start': 72,
-                                               'end': 84},
-                                              {'quote_string': 'Apple Inc.',
-                                               'label': 'Organization',
-                                               'start': 88,
-                                               'end': 98}],
-                                             [{'quote_string': 'Apple Watch', 'label': 'Product', 'start': 4,
-                                               'end': 15},
-                                              {'quote_string': 'Apple Inc.',
-                                               'label': 'Organization',
-                                               'start': 54,
-                                               'end': 64}],
-                                             [{'quote_string': 'iPad', 'label': 'Product', 'start': 4, 'end': 8},
-                                              {'quote_string': 'Apple Inc.',
-                                               'label': 'Organization',
-                                               'start': 76,
-                                               'end': 86}]]
+    assert predictions.entities.tolist() == [
+        [
+            {
+                "quote_string": "Apple Inc.",
+                "label": "Organization",
+                "start": 0,
+                "end": 10,
+            }
+        ],
+        [
+            {"quote_string": "iPhone 14", "label": "Product", "start": 4, "end": 13},
+            {
+                "quote_string": "Apple Inc.",
+                "label": "Organization",
+                "start": 44,
+                "end": 54,
+            },
+        ],
+        [
+            {"quote_string": "MacBook Pro", "label": "Product", "start": 4, "end": 15},
+            {"quote_string": "Macintosh", "label": "Product", "start": 29, "end": 38},
+            {
+                "quote_string": "January 2006",
+                "label": "Version",
+                "start": 72,
+                "end": 84,
+            },
+            {
+                "quote_string": "Apple Inc.",
+                "label": "Organization",
+                "start": 88,
+                "end": 98,
+            },
+        ],
+        [
+            {"quote_string": "Apple Watch", "label": "Product", "start": 4, "end": 15},
+            {
+                "quote_string": "Apple Inc.",
+                "label": "Organization",
+                "start": 54,
+                "end": 64,
+            },
+        ],
+        [
+            {"quote_string": "iPad", "label": "Product", "start": 4, "end": 8},
+            {
+                "quote_string": "Apple Inc.",
+                "label": "Organization",
+                "start": 76,
+                "end": 86,
+            },
+        ],
+    ]
 
 
 @pytest.mark.vcr
 def test_entity_extraction_no_labels():
     from adala.skills.collection.entity_extraction import EntityExtraction
+
     # documents that contain entities
-    df = pd.DataFrame([
-        {
-            "text": "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services."},
-        {"text": "The iPhone 14 is the latest smartphone from Apple Inc."},
-        {"text": "The MacBook Pro is a line of Macintosh portable computers introduced in January 2006 by Apple Inc."},
-        {"text": "The Apple Watch is a line of smartwatches produced by Apple Inc."},
-        {"text": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."},
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "text": "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services."
+            },
+            {"text": "The iPhone 14 is the latest smartphone from Apple Inc."},
+            {
+                "text": "The MacBook Pro is a line of Macintosh portable computers introduced in January 2006 by Apple Inc."
+            },
+            {
+                "text": "The Apple Watch is a line of smartwatches produced by Apple Inc."
+            },
+            {
+                "text": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."
+            },
+        ]
+    )
 
     agent = Agent(
         skills=EntityExtraction(
-            name='Output',
+            name="Output",
             input_template='Extract entities from the input text that represents the main points of discussion.\n\nInput:\n"""\n{text}\n"""',
             field_schema={
-                'entities': {
-                    'type': 'array',
-                    'description': 'Extracted entities:',
-                    'items': {
-                        'type': 'object',
-                        'properties': {
-                            'quote_string': {
-                                'type': 'string',
-                                'description': 'The text of the entity extracted from the input document.'
+                "entities": {
+                    "type": "array",
+                    "description": "Extracted entities:",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "quote_string": {
+                                "type": "string",
+                                "description": "The text of the entity extracted from the input document.",
                             }
-                        }
-                    }
-
+                        },
+                    },
                 }
-            }
+            },
         ),
-        runtimes={'default': OpenAIChatRuntime(model="gpt-4o")}
+        runtimes={"default": OpenAIChatRuntime(model="gpt-4o")},
     )
     predictions = agent.run(df)
-    assert predictions.entities.tolist() == [[{'quote_string': 'Apple Inc.', 'start': 0, 'end': 10},
-                                              {'quote_string': 'American multinational technology company',
-                                               'start': 17,
-                                               'end': 58},
-                                              {'quote_string': 'consumer electronics', 'start': 79, 'end': 99},
-                                              {'quote_string': 'computer software', 'start': 101, 'end': 118},
-                                              {'quote_string': 'online services', 'start': 124, 'end': 139}],
-                                             [{'quote_string': 'iPhone 14', 'start': 4, 'end': 13},
-                                              {'quote_string': 'Apple Inc.', 'start': 44, 'end': 54}],
-                                             [{'quote_string': 'The MacBook Pro', 'start': 0, 'end': 15},
-                                              {'quote_string': 'Macintosh portable computers', 'start': 29, 'end': 57},
-                                              {'quote_string': 'January 2006', 'start': 72, 'end': 84},
-                                              {'quote_string': 'Apple Inc.', 'start': 88, 'end': 98}],
-                                             [{'quote_string': 'The Apple Watch', 'start': 0, 'end': 15},
-                                              {'quote_string': 'smartwatches', 'start': 29, 'end': 41},
-                                              {'quote_string': 'Apple Inc.', 'start': 54, 'end': 64}],
-                                             [{'quote_string': 'iPad', 'start': 4, 'end': 8},
-                                              {'quote_string': 'tablet computers', 'start': 22, 'end': 38},
-                                              {'quote_string': 'Apple Inc.', 'start': 76, 'end': 86}]]
+    assert predictions.entities.tolist() == [
+        [
+            {"quote_string": "Apple Inc.", "start": 0, "end": 10},
+            {
+                "quote_string": "American multinational technology company",
+                "start": 17,
+                "end": 58,
+            },
+            {"quote_string": "consumer electronics", "start": 79, "end": 99},
+            {"quote_string": "computer software", "start": 101, "end": 118},
+            {"quote_string": "online services", "start": 124, "end": 139},
+        ],
+        [
+            {"quote_string": "iPhone 14", "start": 4, "end": 13},
+            {"quote_string": "Apple Inc.", "start": 44, "end": 54},
+        ],
+        [
+            {"quote_string": "The MacBook Pro", "start": 0, "end": 15},
+            {"quote_string": "Macintosh portable computers", "start": 29, "end": 57},
+            {"quote_string": "January 2006", "start": 72, "end": 84},
+            {"quote_string": "Apple Inc.", "start": 88, "end": 98},
+        ],
+        [
+            {"quote_string": "The Apple Watch", "start": 0, "end": 15},
+            {"quote_string": "smartwatches", "start": 29, "end": 41},
+            {"quote_string": "Apple Inc.", "start": 54, "end": 64},
+        ],
+        [
+            {"quote_string": "iPad", "start": 4, "end": 8},
+            {"quote_string": "tablet computers", "start": 22, "end": 38},
+            {"quote_string": "Apple Inc.", "start": 76, "end": 86},
+        ],
+    ]

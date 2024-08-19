@@ -22,17 +22,17 @@ def validate_schema(schema: Dict[str, Any]):
                     "enum": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "minItems": 1
+                        "minItems": 1,
                     },
-                    "description": {"type": "string"}
+                    "description": {"type": "string"},
                 },
                 "required": ["type", "enum"],
-                "additionalProperties": False
+                "additionalProperties": False,
             }
         },
         "minProperties": 1,
         "maxProperties": 1,
-        "additionalProperties": False
+        "additionalProperties": False,
     }
 
     try:
@@ -70,7 +70,9 @@ class ClassificationSkill(TransformSkill):
     def validate_response_model(self):
 
         if self.response_model:
-            raise NotImplementedError("Classification skill does not support custom response model yet.")
+            raise NotImplementedError(
+                "Classification skill does not support custom response model yet."
+            )
 
         if self.field_schema:
             # in case field_schema is already provided, we don't need to parse output template and validate labels
@@ -106,5 +108,7 @@ class ClassificationSkill(TransformSkill):
                 "enum": self.labels,
             }
 
-        self.response_model = field_schema_to_pydantic_class(self.field_schema, self.name, self.description)
+        self.response_model = field_schema_to_pydantic_class(
+            self.field_schema, self.name, self.description
+        )
         return self
