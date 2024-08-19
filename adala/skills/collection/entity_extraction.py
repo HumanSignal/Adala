@@ -70,6 +70,52 @@ def validate_schema(schema: Dict[str, Any]):
 class EntityExtraction(TransformSkill):
     """
     Extract entities from the input text.
+    Example of the input and output:
+    **Input**:
+    ```
+    {"text": "The quick brown fox jumps over the lazy dog."}
+    ```
+    **Output field schema:**
+    ```
+    {
+        "entities": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "quote_string": {
+                        "type": "string",
+                        "description": "The text of the entity extracted from the input document."
+                    },
+                    "label": {
+                        "type": "string",
+                        "description": "The label assigned to the entity.",
+                        "enum": ["COLOR", "ANIMAL"]
+                    }
+                }
+            }
+        }
+    }
+    ```
+    **Output**:
+    ```
+    {"entities": [
+        {"quote_string": "brown", "label": "COLOR", "start": 10, "end": 15},
+        {"quote_string": "fox", "label": "ANIMAL", "start": 16, "end": 19},
+    ]}
+    ```
+
+    Attributes:
+    - `name` (str): The name of the skill.
+    - `input_template` (str): The template of the input.
+    - `field_schema` (Optional[Dict[str, Any]]): The schema of the output field.
+    - `labels` (Optional[List[str]]): (deprecated, use `field_schema` instead)
+                                    The list of labels assigned to the entities. For example, ["COLOR", "ANIMAL"].
+                                    If not provided, no labels will be assigned.
+    - `output_template` (str): (deprecated, use `field_schema` instead)
+                                The template of the output. For example, "Extracted entities: {entities}".
+    - `response_model` (Optional[Type[BaseModel]]): The Pydantic model of the response.
+                                                    If not provided, it will be generated from `field_schema`.
 
     """
 
@@ -229,13 +275,17 @@ class EntityExtraction(TransformSkill):
                 # this can be as a baseline for now
                 # and we can improve this to handle entities ambiguity (for example, requesting "prefix" in response model)
                 # as well as fuzzy pattern matching
-                start_idx = text.lower().find(entity["quote_string"].lower())
+                start_idx = text.lower().find(
+                    entity[self._quote_string_field_name].lower()
+                )
                 if start_idx == -1:
                     # we need to remove the entity if it is not found in the text
                     to_remove.append(entity)
                 else:
                     entity["start"] = start_idx
-                    entity["end"] = start_idx + len(entity["quote_string"])
+                    entity["end"] = start_idx + len(
+                        entity[self._quote_string_field_name]
+                    )
             for entity in to_remove:
                 entities.remove(entity)
         return df
