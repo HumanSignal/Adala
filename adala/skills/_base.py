@@ -1,6 +1,6 @@
 import logging
 import string
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator, field_serializer
 from typing import List, Optional, Any, Dict, Tuple, Union, ClassVar, Type
 from abc import ABC, abstractmethod
 from adala.utils.internal_data import (
@@ -157,6 +157,12 @@ class Skill(BaseModelInRegistry):
         )
         return [f["text"] for f in output_fields]
 
+    def _create_response_model_from_field_schema(self):
+        assert self.field_schema, "field_schema is required to create a response model"
+        if self.response_model:
+            return
+        self.response_model = field_schema_to_pydantic_class(self.field_schema, self.name, self.description)
+
     @model_validator(mode='after')
     def validate_response_model(self):
         if self.response_model:
@@ -190,8 +196,25 @@ class Skill(BaseModelInRegistry):
                         "description": field_description,
                     }
 
-        self.response_model = field_schema_to_pydantic_class(self.field_schema, self.name, self.description)
+        self._create_response_model_from_field_schema()
         return self
+
+    # When serializing the agent, ensure `response_model` is excluded.
+    # It will be restored from `field_schema` during deserialization.
+    @field_serializer('response_model')
+    def serialize_response_model(self, value):
+        return None
+
+    # remove `response_model` from the pickle serialization
+    def __getstate__(self):
+        state = super().__getstate__()
+        state['__dict__']['response_model'] = None
+        return state
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        # ensure response_model is restored from field_schema, if not already set
+        self._create_response_model_from_field_schema()
 
     @abstractmethod
     def apply(self, input, runtime):

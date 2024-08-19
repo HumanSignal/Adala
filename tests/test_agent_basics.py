@@ -2,7 +2,6 @@ import pandas as pd
 import pytest
 import os
 
-
 pytest.skip(allow_module_level=True, reason="redundant and hard to rewrite, TODO fix vcr")
 
 
