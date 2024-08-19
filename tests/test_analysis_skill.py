@@ -17,7 +17,7 @@ def test_code_generation():
     skillset = LinearSkillSet(
         skills=[
             AnalysisSkill(
-                name="code_generation",
+                name="Output",
                 input_template="Input JSON format: {payload}",
                 output_template="Code: {code}",
                 instructions="Generate Python code that calculates the sum of the given values per each key",

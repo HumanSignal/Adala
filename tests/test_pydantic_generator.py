@@ -1,9 +1,8 @@
 import pytest
-from enum import Enum
+import string
 from pydantic import BaseModel, Field
 from typing import List, Literal
-from adala.utils.pydantic_generator import json_schema_to_model
-from adala.utils.parse import parse_template_to_pydantic_class
+from adala.utils.pydantic_generator import json_schema_to_model, field_schema_to_pydantic_class
 
 # Sample JSON schema
 sample_schema = {
@@ -55,41 +54,45 @@ def test_json_schema_to_model():
     assert instance.profession == expected_instance.profession
 
 
-def test_parse_template_to_pydantic_class():
-    # Sample template
-    template = "some text {field1} some more labels {field2}"
-
-    # Sample field schema
-    field_schema = {
-        "field1": {"type": "string", "description": "Description for field1"},
-        "field2": {
-            "type": "array",
-            "items": {"type": "string", "enum": ["label1", "label2"]},
+@pytest.mark.parametrize('field_schema, fields_descriptions, good_params, bad_params, ', (
+    # create from field schema
+    (
+        {
+            "field1": {"type": "string", "description": "Description for field1"},
+            "field2": {
+                "type": "array",
+                "items": {"type": "string", "enum": ["label1", "label2"]},
+            },
         },
-    }
+        ("Description for field1", None),
+        {"field1": "value1", "field2": ["label1"]},
+        {"field1": "value1", "field2": ["label2", "non_existent_label"]}
+    ),
+))
+def test_field_schema_to_pydantic_class(field_schema, fields_descriptions, good_params, bad_params):
 
     # Generated Pydantic class
-    GeneratedClassDef = parse_template_to_pydantic_class(
-        template, field_schema, "MySuperClass", "A super class"
+    GeneratedClassDef = field_schema_to_pydantic_class(
+        field_schema, "MySuperClass", "A super class"
     )
 
     assert GeneratedClassDef.__name__ == "MySuperClass"
     assert GeneratedClassDef.__doc__ == "A super class"
     assert GeneratedClassDef.model_fields["field1"].annotation == str
     assert (
-        GeneratedClassDef.model_fields["field1"].description == "Description for field1"
+        GeneratedClassDef.model_fields["field1"].description == fields_descriptions[0]
     )
-    assert GeneratedClassDef.model_fields["field2"].description == "some more labels"
+    assert GeneratedClassDef.model_fields["field2"].description == fields_descriptions[1]
     assert GeneratedClassDef.model_fields["field1"].is_required()
     assert GeneratedClassDef.model_fields["field2"].is_required()
 
     # Create an instance of the generated class
-    instance = GeneratedClassDef(field1="value1", field2=["label1"])
-    assert instance.field1 == "value1"
-    assert instance.field2[0] == "label1"
+    instance = GeneratedClassDef(**good_params)
+    assert instance.field1 == good_params["field1"]
+    assert instance.field2 == good_params["field2"]
 
     # assert there is exception when trying to generate non-existent label for field2
     from pydantic import ValidationError
 
     with pytest.raises(ValidationError):
-        GeneratedClassDef(field1="value1", field2=["label2", "non_existent_label"])
+        GeneratedClassDef(**bad_params)

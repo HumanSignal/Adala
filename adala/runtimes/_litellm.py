@@ -13,7 +13,6 @@ from adala.utils.logs import print_error
 from adala.utils.parse import (
     parse_template,
     partial_str_format,
-    parse_template_to_pydantic_class,
 )
 from openai import NotFoundError
 from pydantic import ConfigDict, field_validator, BaseModel
@@ -131,11 +130,11 @@ class LiteLLMChatRuntime(Runtime):
         record: Dict[str, str],
         input_template: str,
         instructions_template: str,
-        output_template: str,
+        response_model: Type[BaseModel],
+        output_template: Optional[str] = None,  # TODO: deprecated in favor of response_model, can be removed
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = False,
-        response_model: Optional[Type[BaseModel]] = None,
     ) -> Dict[str, str]:
         """
         Execute OpenAI request given record and templates for input, instructions and output.
@@ -144,11 +143,11 @@ class LiteLLMChatRuntime(Runtime):
             record: Record to be used for input, instructions and output templates.
             input_template: Template for input message.
             instructions_template: Template for instructions message.
-            output_template: Template for output message.
+            output_template: Template for output message (deprecated, not used).
             extra_fields: Extra fields to be used in templates.
             field_schema: Field schema to be used for parsing templates.
             instructions_first: If True, instructions will be sent before input.
-            response_model: Pydantic model for response. If set, `output_template` and `field_schema` are ignored.
+            response_model: Pydantic model for response.
 
         Returns:
             Dict[str, str]: Output record.
@@ -157,9 +156,8 @@ class LiteLLMChatRuntime(Runtime):
         extra_fields = extra_fields or {}
 
         if not response_model:
-            response_model = parse_template_to_pydantic_class(
-                output_template, provided_field_schema=field_schema
-            )
+            raise ValueError('You must explicitly specify the `response_model` in runtime.')
+
         messages = get_messages(
             input_template.format(**record, **extra_fields),
             instructions_template,
@@ -274,21 +272,20 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         batch: InternalDataFrame,
         input_template: str,
         instructions_template: str,
-        output_template: str,
+        response_model: Type[BaseModel],
+        output_template: Optional[str] = None,  # TODO: deprecated in favor of response_model, can be removed
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
-        response_model: Optional[Type[BaseModel]] = None,
     ) -> InternalDataFrame:
         """Execute batch of requests with async calls to OpenAI API"""
 
         if not response_model:
-            response_model = parse_template_to_pydantic_class(
-                output_template, provided_field_schema=field_schema
-            )
+            raise ValueError('You must explicitly specify the `response_model` in runtime.')
 
         extra_fields = extra_fields or {}
         user_prompts = batch.apply(
+            # TODO: remove "extra_fields" to avoid name collisions
             lambda row: input_template.format(**row, **extra_fields), axis=1
         ).tolist()
 

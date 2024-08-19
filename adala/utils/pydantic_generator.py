@@ -148,3 +148,48 @@ def json_schema_to_pydantic_type(
         return Optional[Any]  # Use Optional[Any] for nullable fields
     else:
         raise ValueError(f"Unsupported JSON schema type: {type_}")
+
+
+def field_schema_to_pydantic_class(field_schema: Dict[str, Any], class_name: str, description: str) -> Type[BaseModel]:
+    """
+    Parses a template string to extract output fields and map them to the pydantic BaseModel class definition.
+    Variable prefixes with stripped punctuation will replace `description` fields in the schema if not provided.
+    For example:
+        "{"field1": {"type": "string"}} will become:
+        ```python
+        class Template(BaseModel):
+            field1: str = Field(..., description="Model output")
+        ```
+
+    Args:
+        field_schema (Dict[str, Any]): The standard JSON schema of the fields. For example:
+        ```json
+        {
+            "field1": {
+                "type": "string",
+                "description": "Model output"
+            }
+        }
+        ```
+        class_name (str): The name of the Pydantic class to generate.
+        description (str): The docstring of the Pydantic class
+
+    Returns:
+        Type[BaseModel]: A Pydantic class representing the template.
+
+    Example:
+        >>> field_schema_to_pydantic_class({"field1": {"type": "string"}, "field2": {"type": "array", "items": {"type": "string", "enum": ["label1", "label2"]}}}, "Template", "A template class")
+        class Template(BaseModel):
+            '''A template class'''
+            field1: str = Field(..., description="some text")
+            field2: List[Items] = Field(..., description="some more labels")
+    """
+
+    json_schema = {
+        "type": "object",
+        "title": class_name,
+        "description": description,
+        "properties": field_schema,
+    }
+
+    return json_schema_to_model(json_schema)
