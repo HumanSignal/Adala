@@ -118,10 +118,7 @@ def json_schema_to_pydantic_type(
             else:
                 raise NotImplementedError(f"Unsupported JSON schema format: {format_}")
         elif "enum" in json_schema:
-            return Literal[*json_schema["enum"]]
-            # return Enum(
-            #     enum_class_name, {item: item for item in json_schema["enum"]}, type=str
-            # )
+            return Literal[tuple(json_schema["enum"])]
         return str
     elif type_ == "integer":
         return int
