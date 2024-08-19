@@ -143,6 +143,20 @@ class Skill(BaseModelInRegistry):
         extra_fields = self.model_dump(exclude=system_fields)
         return extra_fields
 
+    def get_input_fields(self):
+        """
+        Retrieves input fields.
+
+        Returns:
+            List[str]: A list of input fields.
+        """
+        extra_fields = self._get_extra_fields()
+        input_fields = parse_template(
+            partial_str_format(self.input_template, **extra_fields),
+            include_texts=False,
+        )
+        return [f["text"] for f in input_fields]
+
     def get_output_fields(self):
         """
         Retrieves output fields.

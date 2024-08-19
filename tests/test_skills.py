@@ -534,17 +534,17 @@ def test_entity_extraction_no_labels():
     df = pd.DataFrame(
         [
             {
-                "text": "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services."
+                "tweet": "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services."
             },
-            {"text": "The iPhone 14 is the latest smartphone from Apple Inc."},
+            {"tweet": "The iPhone 14 is the latest smartphone from Apple Inc."},
             {
-                "text": "The MacBook Pro is a line of Macintosh portable computers introduced in January 2006 by Apple Inc."
-            },
-            {
-                "text": "The Apple Watch is a line of smartwatches produced by Apple Inc."
+                "tweet": "The MacBook Pro is a line of Macintosh portable computers introduced in January 2006 by Apple Inc."
             },
             {
-                "text": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."
+                "tweet": "The Apple Watch is a line of smartwatches produced by Apple Inc."
+            },
+            {
+                "tweet": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."
             },
         ]
     )
@@ -552,9 +552,9 @@ def test_entity_extraction_no_labels():
     agent = Agent(
         skills=EntityExtraction(
             name="Output",
-            input_template='Extract entities from the input text that represents the main points of discussion.\n\nInput:\n"""\n{text}\n"""',
+            input_template='Extract entities from the input text that represents the main points of discussion.\n\nInput:\n"""\n{tweet}\n"""',
             field_schema={
-                "entities": {
+                "label": {
                     "type": "array",
                     "description": "Extracted entities:",
                     "items": {
@@ -572,7 +572,7 @@ def test_entity_extraction_no_labels():
         runtimes={"default": OpenAIChatRuntime(model="gpt-4o")},
     )
     predictions = agent.run(df)
-    assert predictions.entities.tolist() == [
+    assert predictions.label.tolist() == [
         [
             {"quote_string": "Apple Inc.", "start": 0, "end": 10},
             {
@@ -589,15 +589,15 @@ def test_entity_extraction_no_labels():
             {"quote_string": "Apple Inc.", "start": 44, "end": 54},
         ],
         [
-            {"quote_string": "The MacBook Pro", "start": 0, "end": 15},
+            {"quote_string": "MacBook Pro", "start": 4, "end": 15},
             {"quote_string": "Macintosh portable computers", "start": 29, "end": 57},
             {"quote_string": "January 2006", "start": 72, "end": 84},
             {"quote_string": "Apple Inc.", "start": 88, "end": 98},
         ],
         [
             {"quote_string": "The Apple Watch", "start": 0, "end": 15},
-            {"quote_string": "smartwatches", "start": 29, "end": 41},
-            {"quote_string": "Apple Inc.", "start": 54, "end": 64},
+            {"quote_string": "a line of smartwatches", "start": 19, "end": 41},
+            {"quote_string": "produced by Apple Inc.", "start": 42, "end": 64},
         ],
         [
             {"quote_string": "iPad", "start": 4, "end": 8},

@@ -87,6 +87,27 @@ class EntityExtraction(TransformSkill):
     _labels_field_name: str = "label"
     _default_labels_description: str = "The label assigned to the entity."
 
+    def _get_input_field_name(self):
+        # if field_schema is not provided, parse output_template and validate labels
+        input_fields = self.get_input_fields()
+        if len(input_fields) != 1:
+            logger.warning(
+                f"EntityExtraction skill only supports one input field, got {input_fields}. "
+                f"Using the first one: {input_fields[0]}"
+            )
+        output_field_name = input_fields[0]
+        return output_field_name
+
+    def _get_output_field_name(self):
+        # if field_schema is not provided, parse output_template and validate labels
+        output_fields = self.get_output_fields()
+        if len(output_fields) != 1:
+            raise ValueError(
+                f"EntityExtraction skill only supports one output field, got {output_fields}"
+            )
+        output_field_name = output_fields[0]
+        return output_field_name
+
     @model_validator(mode="after")
     def validate_response_model(self):
         if self.response_model:
@@ -157,14 +178,7 @@ class EntityExtraction(TransformSkill):
                     ] = self._default_labels_description
 
         else:
-            # if field_schema is not provided, parse output_template and validate labels
-            output_fields = self.get_output_fields()
-            if len(output_fields) != 1:
-                raise ValueError(
-                    f"Classification skill only supports one output field, got {output_fields}"
-                )
-            output_field_name = output_fields[0]
-
+            output_field_name = self._get_output_field_name()
             self.field_schema = {
                 output_field_name: {
                     "type": "array",
@@ -204,9 +218,11 @@ class EntityExtraction(TransformSkill):
          [{"quote_string": "entity_1", "start": 0, "end": 5}, {"quote_string": "entity_2", "start": 10, "end": 15}, ...]
          ```
         """
+        input_field_name = self._get_input_field_name()
+        output_field_name = self._get_output_field_name()
         for i, row in df.iterrows():
-            text = row["text"]
-            entities = row["entities"]
+            text = row[input_field_name]
+            entities = row[output_field_name]
             to_remove = []
             for entity in entities:
                 # TODO: current naive implementation assumes that the quote_string is unique in the text.
