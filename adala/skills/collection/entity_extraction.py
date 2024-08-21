@@ -270,22 +270,33 @@ class EntityExtraction(TransformSkill):
             text = row[input_field_name]
             entities = row[output_field_name]
             to_remove = []
+            found_entities_ends = {}
             for entity in entities:
                 # TODO: current naive implementation assumes that the quote_string is unique in the text.
                 # this can be as a baseline for now
                 # and we can improve this to handle entities ambiguity (for example, requesting "prefix" in response model)
                 # as well as fuzzy pattern matching
+                ent_str = entity[self._quote_string_field_name]
+                # check the last index of the found entities, to start the search from
+                start_search_idx = 0
+                for found_ent in found_entities_ends:
+                    # to avoid overlapping entities
+                    if found_ent.startswith(ent_str):
+                        start_search_idx = found_entities_ends[found_ent]
+                        break
+
                 start_idx = text.lower().find(
-                    entity[self._quote_string_field_name].lower()
+                    entity[self._quote_string_field_name].lower(),
+                    start_search_idx,
                 )
                 if start_idx == -1:
                     # we need to remove the entity if it is not found in the text
                     to_remove.append(entity)
                 else:
+                    end_index = start_idx + len(entity[self._quote_string_field_name])
                     entity["start"] = start_idx
-                    entity["end"] = start_idx + len(
-                        entity[self._quote_string_field_name]
-                    )
+                    entity["end"] = end_index
+                    found_entities_ends[ent_str] = end_index
             for entity in to_remove:
                 entities.remove(entity)
         return df
