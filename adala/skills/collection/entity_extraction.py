@@ -277,14 +277,17 @@ class EntityExtraction(TransformSkill):
                 # - requesting surrounding context from LLM
                 # - perform fuzzy matching over strings if model still hallucinates when copying the text
                 ent_str = entity[self._quote_string_field_name]
-                # check the last index of the found entities, to start the search from
-                start_search_idx = 0
-                for found_ent in found_entities_ends:
-                    # to avoid overlapping entities, start from the end of the last entity with the same prefix
-                    start_search_idx = max(
-                        found_entities_ends[found_ent] for found_ent in found_entities_ends
-                        if found_ent.startswith(ent_str)
-                    )
+                # to avoid overlapping entities, start from the end of the last entity with the same prefix
+                matching_end_indices = [
+                    found_entities_ends[found_ent] for found_ent in found_entities_ends
+                    if found_ent.startswith(ent_str)
+                ]
+                if matching_end_indices:
+                    # start searching from the end of the last entity with the same prefix
+                    start_search_idx = max(matching_end_indices)
+                else:
+                    # start searching from the beginning
+                    start_search_idx = 0
 
                 start_idx = text.lower().find(
                     entity[self._quote_string_field_name].lower(),
