@@ -281,9 +281,9 @@ class EntityExtraction(TransformSkill):
                 start_search_idx = 0
                 for found_ent in found_entities_ends:
                     # to avoid overlapping entities
-                    if found_ent.startswith(ent_str):
-                        start_search_idx = found_entities_ends[found_ent]
-                        break
+                    start_search_idx = max(
+                        [found_entities_end[found_ent] for found_ent in found_entities_ends if found_ent.startswith(ent_str)]
+                    )
 
                 start_idx = text.lower().find(
                     entity[self._quote_string_field_name].lower(),
