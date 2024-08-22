@@ -116,7 +116,7 @@ class SubmitStreamingRequest(BaseModel):
         """
         Allows polymorphism for ResultHandlers created from a dict; same implementation as the Skills, Environment, and Runtime within an Agent
         "type" is the name of the subclass of ResultHandler being used. Currently available subclasses: LSEHandler, DummyHandler
-        Look in server/handlers/result_handlers.py for available subclasses
+        Look in server/handlers/result_handlers.py for available subclasses.
         """
         if "type" not in value:
             raise HTTPException(
