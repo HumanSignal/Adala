@@ -279,7 +279,8 @@ class EntityExtraction(TransformSkill):
                 ent_str = entity[self._quote_string_field_name]
                 # to avoid overlapping entities, start from the end of the last entity with the same prefix
                 matching_end_indices = [
-                    found_entities_ends[found_ent] for found_ent in found_entities_ends
+                    found_entities_ends[found_ent]
+                    for found_ent in found_entities_ends
                     if found_ent.startswith(ent_str)
                 ]
                 if matching_end_indices:
