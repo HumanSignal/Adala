@@ -272,17 +272,18 @@ class EntityExtraction(TransformSkill):
             to_remove = []
             found_entities_ends = {}
             for entity in entities:
-                # TODO: current naive implementation assumes that the quote_string is unique in the text.
-                # this can be as a baseline for now
-                # and we can improve this to handle entities ambiguity (for example, requesting "prefix" in response model)
-                # as well as fuzzy pattern matching
+                # TODO: current naive implementation uses exact string matching which can seem to be a baseline
+                # we can improve this further by handling ambiguity, for example:
+                # - requesting surrounding context from LLM
+                # - perform fuzzy matching over strings if model still hallucinates when copying the text
                 ent_str = entity[self._quote_string_field_name]
                 # check the last index of the found entities, to start the search from
                 start_search_idx = 0
                 for found_ent in found_entities_ends:
-                    # to avoid overlapping entities
+                    # to avoid overlapping entities, start from the end of the last entity with the same prefix
                     start_search_idx = max(
-                        [found_entities_end[found_ent] for found_ent in found_entities_ends if found_ent.startswith(ent_str)]
+                        found_entities_ends[found_ent] for found_ent in found_entities_ends
+                        if found_ent.startswith(ent_str)
                     )
 
                 start_idx = text.lower().find(
