@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional, Union, Type
+from typing import Any, Dict, List, Optional, Type
 
 import litellm
 from litellm.exceptions import AuthenticationError
@@ -15,7 +15,6 @@ from adala.utils.parse import (
     parse_template,
     partial_str_format,
 )
-from openai import NotFoundError
 from pydantic import ConfigDict, field_validator, BaseModel
 from rich import print
 from tenacity import (
