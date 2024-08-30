@@ -4,6 +4,9 @@ import os
 import json
 
 import fastapi
+from fastapi import Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from adala.agents import Agent
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import UnknownTopicOrPartitionError
@@ -17,8 +20,13 @@ import time
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
 from server.tasks.process_file import streaming_parent_task
-from server.utils import (Settings, delete_topic, get_input_topic_name,
-                          get_output_topic_name, init_logger)
+from server.utils import (
+    Settings,
+    delete_topic,
+    get_input_topic_name,
+    get_output_topic_name,
+    init_logger,
+)
 
 logger = init_logger(__name__)
 
@@ -108,7 +116,7 @@ class SubmitStreamingRequest(BaseModel):
         """
         Allows polymorphism for ResultHandlers created from a dict; same implementation as the Skills, Environment, and Runtime within an Agent
         "type" is the name of the subclass of ResultHandler being used. Currently available subclasses: LSEHandler, DummyHandler
-        Look in server/handlers/result_handlers.py for available subclasses
+        Look in server/handlers/result_handlers.py for available subclasses.
         """
         if "type" not in value:
             raise HTTPException(
@@ -130,6 +138,14 @@ class BatchData(BaseModel):
 @app.get("/")
 def get_index():
     return {"status": "ok"}
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    logger.error(f"Request validation error: {exc}")
+    return JSONResponse(
+        content=str(exc), status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
+    )
 
 
 @app.post("/jobs/submit-streaming", response_model=Response[JobCreated])

@@ -14,7 +14,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"
 pandas = "*"
-openai = "^1.14.3"
+openai = "^1.42.0"
 guidance = "0.0.64"
 pydantic = "^2"
 rich = "^13"
@@ -62,7 +62,7 @@ fakeredis = "^2.23.2"
 flower = "^2.0.1"
 pytest-asyncio = "^0.23.7"
 celery = {extras = ["pytest"], version = "^5.4.0"}
-openai-responses = "^0.8.1"
+openai-responses = "^0.9.1"
 pytest-recording = "^0.13.1"
 mockafka-py = "^0.1.57"
 
