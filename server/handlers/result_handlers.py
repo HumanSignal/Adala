@@ -80,6 +80,11 @@ class LSEBatchItem(BaseModel):
     message: Optional[str] = Field(None, alias="_adala_message")
     details: Optional[str] = Field(None, alias="_adala_details")
 
+    prompt_tokens : int = Field(alias="_prompt_tokens")
+    completion_tokens : int = Field(alias="_completion_tokens")
+    # this can fail to calculate
+    total_cost_usd : Optional[float] = Field(alias="_total_cost_usd")
+
     @model_validator(mode="after")
     def check_error_consistency(self):
         has_error = self.error
