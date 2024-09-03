@@ -3,7 +3,7 @@ import logging
 from typing import Any, Dict, List, Optional, Type
 
 import litellm
-from litellm.exceptions import AuthenticationError
+from litellm.exceptions import AuthenticationError, ContentPolicyViolationError, BadRequestError
 from litellm.types.utils import Usage
 import instructor
 from instructor.exceptions import InstructorRetryException, IncompleteOutputException
@@ -22,6 +22,7 @@ from tenacity import (
     Retrying,
     retry_if_not_exception_type,
     stop_after_attempt,
+    wait_random_exponential,
 )
 from pydantic_core._pydantic_core import ValidationError
 
@@ -32,6 +33,17 @@ async_instructor_client = instructor.from_litellm(litellm.acompletion)
 
 logger = logging.getLogger(__name__)
 
+
+# basically only retrying on timeout, incomplete output, or rate limit
+# https://docs.litellm.ai/docs/exception_mapping#custom-mapping-list
+# NOTE: token usage is only correctly calculated if we only use instructor retries, not litellm retries
+# https://github.com/jxnl/instructor/pull/763
+retry_policy = dict(
+    retry=retry_if_not_exception_type((ValidationError, ContentPolicyViolationError, AuthenticationError, BadRequestError)),
+    # should stop earlier on ValidationError and later on other errors, but couldn't figure out how to do that cleanly
+    stop=stop_after_attempt(3),
+    wait=wait_random_exponential(multiplier=1, max=60),
+)
 
 def get_messages(
     user_prompt: str,
@@ -178,10 +190,7 @@ class LiteLLMChatRuntime(Runtime):
             instructions_first,
         )
 
-        retries = Retrying(
-            retry=retry_if_not_exception_type((ValidationError)),
-            stop=stop_after_attempt(3),
-        )
+        retries = Retrying(**retry_policy)
 
         try:
             # returns a pydantic model named Output
@@ -207,6 +216,7 @@ class LiteLLMChatRuntime(Runtime):
             return dct
 
         except InstructorRetryException as e:
+            usage = e.total_usage
             # get root cause error from retries
             n_attempts = e.n_attempts
             e = e.__cause__.last_attempt.exception()
@@ -214,12 +224,13 @@ class LiteLLMChatRuntime(Runtime):
             print_error(f"Inference error {dct['_adala_message']} after {n_attempts=}")
             tb = traceback.format_exc()
             logger.debug(tb)
+            _update_with_usage(dct, usage)
             return dct
         except Exception as e:
             # Catch case where the model does not return a properly formatted output
             if type(e).__name__ == "ValidationError" and "Invalid JSON" in str(e):
                 e = ConstrainedGenerationError()
-            # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
+            # there are no other known errors to catch
             dct = _format_error_dict(e)
             print_error(f"Inference error {dct['_adala_message']}")
             tb = traceback.format_exc()
@@ -321,10 +332,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             axis=1,
         ).tolist()
 
-        retries = AsyncRetrying(
-            retry=retry_if_not_exception_type((ValidationError)),
-            stop=stop_after_attempt(3),
-        )
+        retries = AsyncRetrying(**retry_policy)
 
         tasks = [
             asyncio.ensure_future(
