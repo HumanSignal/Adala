@@ -7,7 +7,6 @@ from adala.runtimes import LiteLLMChatRuntime, AsyncLiteLLMChatRuntime
 
 @pytest.mark.vcr
 def test_llm_sync():
-
     runtime = LiteLLMChatRuntime()
 
     # test plaintext success
@@ -34,7 +33,15 @@ def test_llm_sync():
     )
 
     # note age coerced to string
-    expected_result = {"name": "Carla", "age": "25"}
+    expected_result = {
+        "name": "Carla",
+        "age": "25",
+        "_prompt_tokens": 86,
+        "_completion_tokens": 10,
+        "_prompt_cost_usd": 1.29e-05,
+        "_completion_cost_usd": 6e-06,
+        "_total_cost_usd": 1.89e-05,
+    }
     assert result == expected_result
 
     # test structured failure
@@ -52,13 +59,17 @@ def test_llm_sync():
         "_adala_error": True,
         "_adala_message": "AuthenticationError",
         "_adala_details": "litellm.AuthenticationError: AuthenticationError: OpenAIException - Error code: 401 - {'error': {'message': 'Incorrect API key provided: fake_api_key. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}",
+        "_prompt_tokens": 9,
+        "_completion_tokens": 0,
+        "_prompt_cost_usd": 1.35e-06,
+        "_completion_cost_usd": 0.0,
+        "_total_cost_usd": 1.35e-06,
     }
     assert result == expected_result
 
 
 @pytest.mark.vcr
 def test_llm_async():
-
     # test success
 
     runtime = AsyncLiteLLMChatRuntime()
@@ -79,9 +90,20 @@ def test_llm_async():
     )
 
     # note age coerced to string
-    expected_result = pd.DataFrame.from_records([{"name": "Carla", "age": "25"}])
-    # need 2 all() for row and column axis
-    assert (result == expected_result).all().all()
+    expected_result = pd.DataFrame.from_records(
+        [
+            {
+                "name": "Carla",
+                "age": "25",
+                "_prompt_tokens": 86,
+                "_completion_tokens": 10,
+                "_prompt_cost_usd": 1.29e-05,
+                "_completion_cost_usd": 6e-06,
+                "_total_cost_usd": 1.89e-05,
+            }
+        ]
+    )
+    pd.testing.assert_frame_equal(result, expected_result)
 
     # test failure
 
@@ -103,10 +125,14 @@ def test_llm_async():
                 "_adala_error": True,
                 "_adala_message": "AuthenticationError",
                 "_adala_details": "litellm.AuthenticationError: AuthenticationError: OpenAIException - Incorrect API key provided: fake_api_key. You can find your API key at https://platform.openai.com/account/api-keys.",
+                "_prompt_tokens": 9,
+                "_completion_tokens": 0,
+                "_prompt_cost_usd": 1.35e-06,
+                "_completion_cost_usd": 0.0,
+                "_total_cost_usd": 1.35e-06,
             }
         ]
     )
-    # need 2 all() for row and column axis
-    assert (result == expected_result).all().all()
+    pd.testing.assert_frame_equal(result, expected_result)
 
     # TODO test batch with successes and failures, figure out how to inject a particular error into LiteLLM
