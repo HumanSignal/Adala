@@ -3,7 +3,12 @@ import logging
 from typing import Any, Dict, List, Optional, Type
 
 import litellm
-from litellm.exceptions import AuthenticationError, ContentPolicyViolationError, BadRequestError, NotFoundError
+from litellm.exceptions import (
+    AuthenticationError,
+    ContentPolicyViolationError,
+    BadRequestError,
+    NotFoundError,
+)
 from litellm.types.utils import Usage
 import instructor
 from instructor.exceptions import InstructorRetryException, IncompleteOutputException
@@ -39,11 +44,19 @@ logger = logging.getLogger(__name__)
 # NOTE: token usage is only correctly calculated if we only use instructor retries, not litellm retries
 # https://github.com/jxnl/instructor/pull/763
 retry_policy = dict(
-    retry=retry_if_not_exception_type((ValidationError, ContentPolicyViolationError, AuthenticationError, BadRequestError)),
+    retry=retry_if_not_exception_type(
+        (
+            ValidationError,
+            ContentPolicyViolationError,
+            AuthenticationError,
+            BadRequestError,
+        )
+    ),
     # should stop earlier on ValidationError and later on other errors, but couldn't figure out how to do that cleanly
     stop=stop_after_attempt(3),
     wait=wait_random_exponential(multiplier=1, max=60),
 )
+
 
 def get_messages(
     user_prompt: str,
@@ -71,23 +84,25 @@ def _format_error_dict(e: Exception) -> dict:
     return error_dct
 
 
-def _log_llm_exception(self, e) -> dict:
-     dct = _format_error_dict(e)
-     base_error = f"Inference error {dct['_adala_message']}"
-     tb = traceback.format_exc()
-     logger.error(f'{base_error}\nTraceback:\n{tb}')
-     return dct
+def _log_llm_exception(e) -> dict:
+    dct = _format_error_dict(e)
+    base_error = f"Inference error {dct['_adala_message']}"
+    tb = traceback.format_exc()
+    logger.error(f"{base_error}\nTraceback:\n{tb}")
+    return dct
 
 
 def _update_with_usage(data: Dict, usage: Usage, model: str) -> None:
     data["_prompt_tokens"] = usage.prompt_tokens
     # will not exist if there is no completion
-    data["_completion_tokens"] = usage.get('completion_tokens', 0)
+    data["_completion_tokens"] = usage.get("completion_tokens", 0)
     # can't use litellm.completion_cost bc it only takes the most recent completion, and .usage is summed over retries
     # TODO make sure this is calculated correctly after we turn on caching
     # litellm will register the cost of an azure model on first successful completion. If there hasn't been a successful completion, the model will not be registered
     try:
-        prompt_cost, completion_cost = litellm.cost_per_token(model, usage.prompt_tokens, usage.get('completion_tokens', 0))
+        prompt_cost, completion_cost = litellm.cost_per_token(
+            model, usage.prompt_tokens, usage.get("completion_tokens", 0)
+        )
         data["_prompt_cost_usd"] = prompt_cost
         data["_completion_cost_usd"] = completion_cost
         data["_total_cost_usd"] = prompt_cost + completion_cost
@@ -216,16 +231,18 @@ class LiteLLMChatRuntime(Runtime):
 
         try:
             # returns a pydantic model named Output
-            response, completion = instructor_client.chat.completions.create_with_completion(
-                messages=messages,
-                response_model=response_model,
-                model=self.model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                seed=self.seed,
-                max_retries=retries,
-                # extra inference params passed to this runtime
-                **self.model_extra,
+            response, completion = (
+                instructor_client.chat.completions.create_with_completion(
+                    messages=messages,
+                    response_model=response_model,
+                    model=self.model,
+                    max_tokens=self.max_tokens,
+                    temperature=self.temperature,
+                    seed=self.seed,
+                    max_retries=retries,
+                    # extra inference params passed to this runtime
+                    **self.model_extra,
+                )
             )
             usage = completion.usage
             dct = response.dict()
@@ -242,10 +259,16 @@ class LiteLLMChatRuntime(Runtime):
             # usage = e.total_usage
             # not available here, so have to approximate by hand, assuming the same error occurred each time
             n_attempts = retries.stop.max_attempt_number
-            prompt_tokens = n_attempts * litellm.token_counter(model=self.model, messages=messages[:-1])  # response is appended as the last message
+            prompt_tokens = n_attempts * litellm.token_counter(
+                model=self.model, messages=messages[:-1]
+            )  # response is appended as the last message
             # TODO a pydantic validation error may be appended as the last message, don't know how to get the raw response in this case
             completion_tokens = 0
-            usage = Usage(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens, total_tokens=(prompt_tokens + completion_tokens))
+            usage = Usage(
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                total_tokens=(prompt_tokens + completion_tokens),
+            )
 
             # Catch case where the model does not return a properly formatted output
             if type(e).__name__ == "ValidationError" and "Invalid JSON" in str(e):
@@ -391,10 +414,16 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                 # not available here, so have to approximate by hand, assuming the same error occurred each time
                 n_attempts = retries.stop.max_attempt_number
                 messages = []  # TODO how to get these?
-                prompt_tokens = n_attempts * litellm.token_counter(model=self.model, messages=messages[:-1])  # response is appended as the last message
+                prompt_tokens = n_attempts * litellm.token_counter(
+                    model=self.model, messages=messages[:-1]
+                )  # response is appended as the last message
                 # TODO a pydantic validation error may be appended as the last message, don't know how to get the raw response in this case
                 completion_tokens = 0
-                usage = Usage(prompt_tokens, completion_tokens, total_tokens=(prompt_tokens + completion_tokens))
+                usage = Usage(
+                    prompt_tokens,
+                    completion_tokens,
+                    total_tokens=(prompt_tokens + completion_tokens),
+                )
 
                 # Catch case where the model does not return a properly formatted output
                 if type(e).__name__ == "ValidationError" and "Invalid JSON" in str(e):
