@@ -13,9 +13,9 @@ from aiokafka.errors import UnknownTopicOrPartitionError
 from fastapi import HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, SerializeAsAny, field_validator
-import uvicorn
 from redis import Redis
 import time
+import uvicorn
 
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
@@ -195,8 +195,13 @@ async def submit_batch(batch: BatchData):
             # FIXME Temporary workaround for messages getting dropped.
             #       Remove once our kafka messaging is more reliable.
             time.sleep(0.1)
+
+        batch_size = len(json.dumps(batch.dict()).encode("utf-8"))
         logger.info(
             f"The number of records sent to input_topic:{topic} record_no:{len(batch.data)}"
+        )
+        logger.info(
+            f"Size of batch in bytes received for job_id:{batch.job_id} batch_size:{batch_size}"
         )
     except UnknownTopicOrPartitionError:
         await producer.stop()
