@@ -4374,17 +4374,17 @@ datalib = ["numpy (>=1)", "pandas (>=1.2.3)", "pandas-stubs (>=1.1.0.11)"]
 
 [[package]]
 name = "openai-responses"
-version = "0.9.1"
+version = "0.10.1"
 description = "🧪🤖 Pytest plugin for automatically mocking OpenAI requests"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "openai_responses-0.9.1-py3-none-any.whl", hash = "sha256:d6f10f28efba6f7a1c0302b71ee30cfd6d289f04592b1c57b0686c10bc2762d0"},
-    {file = "openai_responses-0.9.1.tar.gz", hash = "sha256:37525b50a22009d8f2a1bc058cd9fb1189b85e906ad6f28f7bd304ebb03af4dd"},
+    {file = "openai_responses-0.10.1-py3-none-any.whl", hash = "sha256:215135d487396264c82c2de42c401e64e90f1e7348d1d6e48bc45490ce7edc64"},
+    {file = "openai_responses-0.10.1.tar.gz", hash = "sha256:90d7677b68848a3ceb8e779e1d9c48d88db34d929f09d1d5ed132f540e768d94"},
 ]
 
 [package.dependencies]
-openai = ">=1.32,<1.43"
+openai = ">=1.32,<1.44"
 requests-toolbelt = ">=1,<2"
 respx = ">=0.20,<0.21"
 
@@ -6961,7 +6961,6 @@ description = "Automatically mock your HTTP interactions to simplify and speed u
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "vcrpy-6.0.1-py2.py3-none-any.whl", hash = "sha256:621c3fb2d6bd8aa9f87532c688e4575bcbbde0c0afeb5ebdb7e14cac409edfdd"},
     {file = "vcrpy-6.0.1.tar.gz", hash = "sha256:9e023fee7f892baa0bbda2f7da7c8ac51165c1c6e38ff8688683a12a4bde9278"},
 ]
 
@@ -7575,4 +7574,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "ac1c42cbf5d9437dd339468af4463dcc2a7b2cf272a49cc1a9523a01931d3de7"
+content-hash = "dd18a815b4c9f7aeeec790909507208d4e78baa4880db211fea7e2ad713b8450"
