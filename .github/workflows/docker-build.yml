@@ -49,7 +49,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: 'recursive'
           token: ${{ github.token }}
           ref: ${{ inputs.sha }}
           fetch-depth: 0
@@ -98,7 +97,7 @@ jobs:
             core.setOutput("docker-tags", docker_tags);
 
       - name: Push Docker image
-        uses: docker/build-push-action@v6.6.1
+        uses: docker/build-push-action@v6.7.0
         id: docker_build_and_push
         with:
           context: .

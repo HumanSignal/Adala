@@ -3,7 +3,7 @@ import logging
 from tqdm import tqdm
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, model_validator, Field
-from typing import List, Dict, Optional, Tuple, Any, Callable, ClassVar
+from typing import List, Dict, Optional, Tuple, Any, Callable, ClassVar, Type
 from adala.utils.internal_data import InternalDataFrame, InternalSeries
 from adala.utils.registry import BaseModelInRegistry
 from pandarallel import pandarallel
@@ -21,6 +21,9 @@ class Runtime(BaseModelInRegistry):
         batch_size (Optional[int]): The batch size to use for processing records. Defaults to None.
         concurrency (Optional[int]): The number of parallel processes to use for processing records. Defaults to 1.
                                     Note that when parallel processing is used, the memory footprint will be doubled compared to sequential processing.
+        response_model (Optional[Type[BaseModel]]): The response model to use for processing records. Defaults to None.
+                                                    If set, the response will be generated according to this model and `output_template` and `field_schema` fields will be ignored.
+                                                    Note, explicitly providing ResponseModel will be the default behavior for all runtimes in the future.
     """
 
     verbose: bool = False
@@ -44,10 +47,13 @@ class Runtime(BaseModelInRegistry):
         record: Dict[str, str],
         input_template: str,
         instructions_template: str,
-        output_template: str,
+        response_model: Type[BaseModel],
         extra_fields: Optional[Dict[str, Any]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
+        output_template: Optional[
+            str
+        ] = None,  # TODO: deprecated in favor of response_model, can be removed
     ) -> Dict[str, str]:
         """
         Processes a record.
@@ -56,11 +62,12 @@ class Runtime(BaseModelInRegistry):
             record (Dict[str, str]): The record to process.
             input_template (str): The input template.
             instructions_template (str): The instructions template.
-            output_template (str): The output template.
+            response_model (Type[BaseModel]): The response model to use for processing records.
             extra_fields (Optional[Dict[str, str]]): Extra fields to use in the templates. Defaults to None.
             field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
                 i.e. analogous to {"field_n": {"type": "string"}}.
             instructions_first (bool): Whether to put instructions first. Defaults to True.
+            output_template (str): The output template. Deprecated.
 
         Returns:
             Dict[str, str]: The processed record.
@@ -71,10 +78,13 @@ class Runtime(BaseModelInRegistry):
         batch: InternalDataFrame,
         input_template: str,
         instructions_template: str,
-        output_template: str,
+        response_model: Type[BaseModel],
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
+        output_template: Optional[
+            str
+        ] = None,  # TODO: deprecated in favor of response_model, can be removed
     ) -> InternalDataFrame:
         """
         Processes a record.
@@ -88,11 +98,12 @@ class Runtime(BaseModelInRegistry):
             batch (InternalDataFrame): The batch to process.
             input_template (str): The input template.
             instructions_template (str): The instructions' template.
-            output_template (str): The output template.
+            response_model (Type[BaseModel]): The response model to use for processing records.
             extra_fields (Optional[Dict[str, str]]): Extra fields to use in the templates. Defaults to None.
             field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
                 i.e. analogous to {"field_n": {"type": "string"}}.
             instructions_first (bool): Whether to put instructions first. Defaults to True.
+            output_template (str): The output template. Deprecated.
         Returns:
             InternalDataFrame: The processed batch.
         """
@@ -132,6 +143,7 @@ class Runtime(BaseModelInRegistry):
             extra_fields=extra_fields,
             field_schema=field_schema,
             instructions_first=instructions_first,
+            response_model=response_model,
         )
         return output
 
@@ -140,11 +152,14 @@ class Runtime(BaseModelInRegistry):
         record: Dict[str, str],
         input_template: str,
         instructions_template: str,
-        output_template: str,
+        response_model: Type[BaseModel],
         output_batch_size: int = 1,
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
+        output_template: Optional[
+            str
+        ] = None,  # TODO: deprecated in favor of response_model, can be removed
     ) -> InternalDataFrame:
         """
         Processes a record and return a batch.
@@ -153,12 +168,13 @@ class Runtime(BaseModelInRegistry):
             record (Dict[str, str]): The record to process.
             input_template (str): The input template.
             instructions_template (str): The instructions template.
-            output_template (str): The output template.
+            response_model (Optional[Type[BaseModel]]): The response model to use for processing records. Defaults to None.
             output_batch_size (int): The batch size for the output. Defaults to 1.
             extra_fields (Optional[Dict[str, str]]): Extra fields to use in the templates. Defaults to None.
             field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
                 i.e. analogous to {"field_n": {"type": "string"}}.
             instructions_first (bool): Whether to put instructions first. Defaults to True.
+            output_template (str): The output template. Deprecated.
 
         Returns:
             InternalDataFrame: The processed batch.
@@ -172,6 +188,7 @@ class Runtime(BaseModelInRegistry):
             extra_fields=extra_fields,
             field_schema=field_schema,
             instructions_first=instructions_first,
+            response_model=response_model,
         )
 
 
@@ -188,6 +205,7 @@ class AsyncRuntime(Runtime):
         extra_fields: Optional[Dict[str, Any]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
+        response_model: Optional[Type[BaseModel]] = None,
     ) -> Dict[str, str]:
         """
         Processes a record.
@@ -201,6 +219,9 @@ class AsyncRuntime(Runtime):
             field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
                 i.e. analogous to {"field_n": {"type": "string"}}.
             instructions_first (bool): Whether to put instructions first. Defaults to True.
+            response_model (Optional[Type[BaseModel]]): The response model to use for processing records. Defaults to None.
+                                                        If set, the response will be generated according to this model and `output_template` and `field_schema` fields will be ignored.
+                                                        Note, explicitly providing ResponseModel will be the default behavior for all runtimes in the future.
 
         Returns:
             Dict[str, str]: The processed record.
@@ -212,10 +233,13 @@ class AsyncRuntime(Runtime):
         batch: InternalDataFrame,
         input_template: str,
         instructions_template: str,
-        output_template: str,
+        response_model: Type[BaseModel],
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
+        output_template: Optional[
+            str
+        ] = None,  # TODO: deprecated in favor of response_model, can be removed
     ) -> InternalDataFrame:
         """
         Processes a record.
@@ -224,11 +248,12 @@ class AsyncRuntime(Runtime):
             batch (InternalDataFrame): The batch to process.
             input_template (str): The input template.
             instructions_template (str): The instructions template.
-            output_template (str): The output template.
+            response_model (Optional[Type[BaseModel]]): The response model to use for processing records.
             extra_fields (Optional[Dict[str, str]]): Extra fields to use in the templates. Defaults to None.
             field_schema (Optional[Dict]): Field JSON schema to use in the templates. Defaults to all fields are strings,
                 i.e. analogous to {"field_n": {"type": "string"}}.
             instructions_first (bool): Whether to put instructions first. Defaults to True.
+            output_template (str): The output template. Deprecated.
 
         Returns:
             InternalDataFrame: The processed batch.
@@ -243,5 +268,6 @@ class AsyncRuntime(Runtime):
             extra_fields=extra_fields,
             field_schema=field_schema,
             instructions_first=instructions_first,
+            response_model=response_model,
         )
         return output

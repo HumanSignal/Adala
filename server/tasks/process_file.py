@@ -9,9 +9,14 @@ from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import UnknownTopicOrPartitionError
 from celery import Celery
 from server.handlers.result_handlers import ResultHandler
-from server.utils import (Settings, delete_topic, ensure_topic,
-                          get_input_topic_name, get_output_topic_name,
-                          init_logger)
+from server.utils import (
+    Settings,
+    delete_topic,
+    ensure_topic,
+    get_input_topic_name,
+    get_output_topic_name,
+    init_logger,
+)
 
 logger = init_logger(__name__)
 

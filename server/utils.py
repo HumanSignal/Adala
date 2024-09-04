@@ -6,7 +6,7 @@ from pathlib import Path
 from kafka.admin import KafkaAdminClient, NewTopic
 from kafka.errors import TopicAlreadyExistsError
 
-LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO').upper()
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 
 
 class Settings(BaseSettings):

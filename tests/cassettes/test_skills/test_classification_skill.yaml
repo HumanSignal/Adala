@@ -13,12 +13,15 @@ interactions:
       - '143'
       content-type:
       - application/json
+      cookie:
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -30,24 +33,24 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAAwAAAP//VJExT8MwEIX3/IrDC0uD3DRSoAsrqCAECwNCletcElPHZ+yLSoX635HT
-        0MLi4X33nt6dvzMAYWqxBKE7xbr3Nr9h3a3krjWxepK7L/kZty/P5mX/+Lm6fhCz5KDNB2r+dV1p
-        6r1FNuSOWAdUjCl1XhULWS6ui2IEPdVok631nJc5D2FDeSGLMpdlLm8md0dGYxRLeMsAAL7HN/V0
-        NX6JJcjZr9JjjKpFsTwNAYhANilCxWgiK8didoaaHKMbq9+htXQB95c9dBgQmKBD62FPwxW8dopB
-        Kwf3cMxJMuwMd8BUq/3t39CAzRBVWswN1k764dTSUusDbeLET3pjnIndOqCK5FKjyOTFSA8ZwPt4
-        jeHfgsIH6j2vmbboUuC8PMaJ8x/8gdUEmVjZs76YZ1M/EfeRsV83xrUYfDDH0zR+rasKZVWX2Ijs
-        kP0AAAD//wMAMw/OESgCAAA=
+        H4sIAAAAAAAAA1SRQUvEMBCF7/0VYy5ettJdK133IoKK4kFBUERkyabTJppmQjJVF9n/LunWXb3k
+        8L55jzeT7wxAmFosQCgtWXXe5qcfoX24kPr263594VaPd6q/cuf13eeHfr4Uk+Sg1Rsq/nUdKeq8
+        RTbktlgFlIwpdVrNjk+qeTEvB9BRjTbZWs95mXMfVpTPilmZF2VenI5uTUZhFAt4yQAAvoc39XQ1
+        fokFFJNfpcMYZYtisRsCEIFsUoSM0USWjsVkDxU5RjdUv0Zr6QBuDjvQGBCYQKP1sKb+CJ60ZFDS
+        wQ1sc5IMn4Y1MNVyffY3NGDTR5kWc721o77ZtbTU+kCrOPKd3hhnol4GlJFcahSZvBjoJgN4Ha7R
+        /1tQ+ECd5yXTO7oUOC23cWL/B39gNUImlnavH0+zsZ+I68jYLRvjWgw+mO1pGr9UVYVFVZfYiGyT
+        /QAAAP//AwDF2umvKAIAAA==
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83b31fa1a08ce-LAX
+      - 8b2b2eb2fa164892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -55,15 +58,9 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:17:03 GMT
+      - Tue, 13 Aug 2024 19:41:26 GMT
       Server:
       - cloudflare
-      Set-Cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        path=/; expires=Wed, 07-Aug-24 15:47:03 GMT; domain=.api.openai.com; HttpOnly;
-        Secure; SameSite=None
-      - _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000;
-        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Transfer-Encoding:
       - chunked
       X-Content-Type-Options:
@@ -71,27 +68,27 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '1217'
+      - '1658'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
       - max-age=15552000; includeSubDomains; preload
       x-ratelimit-limit-requests:
-      - '500'
+      - '10000'
       x-ratelimit-limit-tokens:
-      - '30000'
+      - '2000000'
       x-ratelimit-remaining-requests:
-      - '499'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '28994'
+      - '1998994'
       x-ratelimit-reset-requests:
-      - 120ms
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 2.012s
+      - 30ms
       x-request-id:
-      - req_2e96d9c47211c0c42fd18f1ec6687e14
+      - req_027e41a5b93846046dd289c9c9ee29f4
     status:
       code: 200
       message: OK
@@ -110,14 +107,14 @@ interactions:
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -129,24 +126,24 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA1SRQU/jMBCF7/kVgy9c0qptWtj2shJI0AqWC9JeVqhynWlscDzGntCtUP87shva
-        3UsO7/MbvffyWQAIU4sFCKUlq9bbwZyV/nVb3VzdLeXd6vH5YTe/97ur94fq6fetKJODNq+o+Ns1
-        VNR6i2zIHbEKKBnT1fH1pBpNqx+TaQYt1WiTrfE8qIazAXdhQ4PReDLrnZqMwigW8KcAAPjM35TR
-        1fhXLGBUfistxigbFIvTIwARyCZFyBhNZOlYlGeoyDG6HHuJ1tIFrC5beO0ig4TUoWMM4AM1QbYl
-        RIIV1OQuGbT8QNgiWuOaWMKm42zVGBCYQKP1sKcOdoY1SLdnbVyTFYdYD2FJO1DSwQqOwTJiquX+
-        578BA267KNNArrO21w+nxpYaH2gTe37St8aZqNcBZSSX2kUmLzI9FAAvednuv7GED9R6XjO9oUsH
-        x9PjOXH+l2dYzXrIxNKe9em86POJuI+M7XprXIPBB5Nnzi0OxRcAAAD//wMA0EbWbGUCAAA=
+        H4sIAAAAAAAAAwAAAP//VJFBTwIxEIXv+yvGXrwsBMQV5WJiYgLqUePBGFJ2h22x7TTtLEoM/920
+        rKCXPbyvb/Le2+8CQOhGzEDUSnJtvRncbEP7Mqoer6bbp4/JfBu8fb3fqLuH6lndizI5aLXBmn9d
+        w5qsN8ia3AHXASVjujqeXkyq6fXo+ioDSw2aZGs9DybDasBdWNFgNL6oeqciXWMUM3grAAC+8zdl
+        dA1+iRmMyl/FYoyyRTE7PgIQgUxShIxRR5aORXmCNTlGl2PP0Rg6g8W5hU0XGSSkDh1jAB+oDdKW
+        EAkW0JA7Z1Byi7BGNNq1sYRVx9mqMCAwgULjYUcdfGpWIN2OlXZtVhxiM4Q5fUItHSzgECwjpkbu
+        bv8GDLjuokwDuc6YXt8fGxtqfaBV7PlRX2uno1oGlJFcaheZvMh0XwC852W7f2MJH8h6XjJ9oEsH
+        x5eHc+L0L09wUvWQiaU56Zc3RZ9PxF1ktMu1di0GH3SeObfYFz8AAAD//wMAgc743GUCAAA=
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83b3acdcc08ce-LAX
+      - 8b2b2ebf1ac04892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -154,7 +151,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:17:04 GMT
+      - Tue, 13 Aug 2024 19:41:27 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -164,9 +161,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '800'
+      - '532'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -174,17 +171,17 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '200000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9998'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '198993'
+      - '49998993'
       x-ratelimit-reset-requests:
-      - 9.127s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 301ms
+      - 1ms
       x-request-id:
-      - req_922a0c6c0792ff5365db109bc6628808
+      - req_9b852577db96af97c7a158a39d5a03b6
     status:
       code: 200
       message: OK
@@ -194,11 +191,11 @@ interactions:
       "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
       "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
       "function": {"name": "Output", "description": "Correctly extracted `Output`
-      with all the required parameters with correct types", "parameters": {"$defs":
-      {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
-      Decor", "Beauty/Personal Care"], "title": "Labels", "type": "string"}}, "properties":
-      {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}], "description":
-      "The classification label"}}, "required": ["predicted_category"], "type": "object"}}}]}'
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_category": {"description": "The classification label", "enum": ["Footwear/Clothing",
+      "Electronics", "Food/Beverages", "Furniture/Home Decor", "Beauty/Personal Care"],
+      "title": "Predicted Category", "type": "string"}}, "required": ["predicted_category"],
+      "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -207,18 +204,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '817'
+      - '767'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -230,25 +227,25 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAAwAAAP//bFJNj5swEL3zK6w5J6uQBKXLsVWrdlfbrrqXXTUVcsxA3LU9rj1UjaL8
-        9wpIgI3KAVnzeB9+wzERAnQJuQC1l6ysN/NbVvuvj5V5+h3x/ilL39+mn/W6iXK9+xRg1jJo9wsV
-        X1g3iqw3yJpcD6uAkrFVTTfL1WK9erfMOsBSiaal1Z7nq5tszk3Y0XyRLrMzc09aYYRc/EiEEOLY
-        vduMrsS/kIvF7DKxGKOsEfLhIyEgkGknIGPUkaVjmI2gIsfo2tiuMWYCMJEplDRmNO6f4+Q8FiWN
-        KfxBWVt/uEsz9fL9z/OjpIfnzRdHE79e+uC7QFXj1FDQBB/m+ZWZEOCk7bjfGvYNXzGFABnqxqLj
-        NjUct+ADlloxloWSjDWFwxbyLXw0qDiQ0ypu4QRvVE7J/84/J90ErJoozbm08/w0bMFQ7QPt4lWp
-        UGmn474IKGN3OYhMvvdufToHaN4sEHwg67lgekXXCqbppteD8Qcb0QvGxNJMSMt1cg4I8RAZbVFp
-        V2PwQQ+7T07JPwAAAP//AwAmSpUv+gIAAA==
+        H4sIAAAAAAAAA2xS22rjMBB991eIeU5KnGya1O9b2IVuaUsLy6YYWZ44amWNKo2zCSH/vvhS2w3r
+        ByPm+Fx0xqdICNA5JALUTrIqnZne7H3xkt8sPvbhaX3798GE6vr2+iBfvtmHAJOaQdkbKv5kXSkq
+        nUHWZFtYeZSMtWq8mi+Wq/VsvWqAknI0Na1wPF1cLadc+Yyms3i+7Jg70goDJOJPJIQQp+ZdZ7Q5
+        HiARs8nnpMQQZIGQ9B8JAZ5MPQEZgg4sLcNkABVZRlvHtpUxI4CJTKqkMYNx+5xG56EoaUz6K4vp
+        tzks3u72P9WTRJk9P97/yJ5Hfq300TWBtpVVfUEjvJ8nF2ZCgJVlw72v2FV8wRQCpC+qEi3XqeG0
+        Aecx14oxT5VkLMgfN5Bs4LtBxZ6sVmEDZ/iico7+d34ddeNxWwVputK6+bnfgqHCecrCRamw1VaH
+        XepRhuZyEJhc6137NA5QfVkgOE+l45TpHW0tGMfrVg+GH2xAVx3GxNKMSPNl1AWEcAyMZbrVtkDv
+        vO53H52jfwAAAP//AwCfLPwO+gIAAA==
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83b418f8208ce-LAX
+      - 8b2b2ec49d684892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -256,7 +253,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:17:05 GMT
+      - Tue, 13 Aug 2024 19:41:27 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -266,9 +263,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '451'
+      - '182'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -276,17 +273,17 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '200000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9998'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '198982'
+      - '49998982'
       x-ratelimit-reset-requests:
-      - 16.696s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 305ms
+      - 1ms
       x-request-id:
-      - req_5c29fc0feaebe5da7a538ae1925ad93d
+      - req_1c2e6a6ebd41facebf974b75153e79c6
     status:
       code: 200
       message: OK
@@ -296,11 +293,11 @@ interactions:
       "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
       "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
       "function": {"name": "Output", "description": "Correctly extracted `Output`
-      with all the required parameters with correct types", "parameters": {"$defs":
-      {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
-      Decor", "Beauty/Personal Care"], "title": "Labels", "type": "string"}}, "properties":
-      {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}], "description":
-      "The classification label"}}, "required": ["predicted_category"], "type": "object"}}}]}'
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_category": {"description": "The classification label", "enum": ["Footwear/Clothing",
+      "Electronics", "Food/Beverages", "Furniture/Home Decor", "Beauty/Personal Care"],
+      "title": "Predicted Category", "type": "string"}}, "required": ["predicted_category"],
+      "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -309,18 +306,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '812'
+      - '762'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -332,25 +329,25 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAAwAAAP//bFJdb9MwFH3Pr7DuczualnYsb6BpqsREQQgErFPkureJwfY19jWjqvrf
-        UdKsySr8EFn3+Hzk2IdMCNBbKASoWrKy3oxvWNUr9fWTzb/w27SkhXm6f18v8fY62j8wahi0+YmK
-        n1lXiqw3yJrcCVYBJWOjml9PZ5PXszfTRQtY2qJpaJXn8exqPuYUNjSe5NN5x6xJK4xQiIdMCCEO
-        7bfJ6Lb4FwoxGT1PLMYoK4TifEgICGSaCcgYdWTpGEY9qMgxuia2S8YMACYypZLG9MandRjs+6Kk
-        MeX9h/Dus9Z6lX//+G21svHHk6V093vgd5Le+zbQLjl1LmiAn+fFhZkQ4KRtuavEPvEFUwiQoUoW
-        HTep4bAGH3CrFeO2VJKxorBfQ7GGuxSc5hTw1ZIsiltUFNZwhBdyx+x/+8dBSQF3KUrTtdfNj+fr
-        MFT5QJt40S7stNOxLgPK2P4lRCZ/8m58WgdIL24SfCDruWT6ha4RzPPFSQ/6l9ajNx3GxNIMSNN5
-        1gWEuI+MttxpV2HwQZ8fQXbM/gEAAP//AwC8Q0tIAwMAAA==
+        H4sIAAAAAAAAA2xSTY+bMBC98yusOScrQhqRcG1X2kpN91KtVDUVMmYgbo3HtYfNplH+ewVJgI3K
+        AVnzeB9+wykSAnQJmQC1l6waZ+abV1+/mOrw7Sk8vyXV5vFT9bWg+PXwZ8sSZh2Dil+o+MZ6UNQ4
+        g6zJXmDlUTJ2qos0Wa7SdbxOe6ChEk1Hqx3Plw+rObe+oHm8SFZX5p60wgCZ+BEJIcSpf3cZbYlv
+        kIl4dps0GIKsEbLhIyHAk+kmIEPQgaVlmI2gIstou9i2NWYCMJHJlTRmNL48p8l5LEoak3/+++Wp
+        3qjDktht18n3bbF+SSn+OPG7SB9dH6hqrRoKmuDDPLszEwKsbHruc8uu5TumECB93TZouUsNpx04
+        j6VWjGWuJGNN/riDbAePBhV7slqFHZzhnco5+t/556Qbj1UbpLmWdp2fhy0Yqp2nItyVCpW2Ouxz
+        jzL0l4PA5C7enU/vAO27BYLz1DjOmX6j7QQXi/SiB+MPNqI3jImlmZCSD9E1IIRjYGzyStsavfN6
+        2H10jv4BAAD//wMA6AnpEvoCAAA=
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83b45fd4f08ce-LAX
+      - 8b2b2ec7ebb54892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -358,7 +355,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:17:06 GMT
+      - Tue, 13 Aug 2024 19:41:28 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -368,9 +365,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '505'
+      - '239'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -378,17 +375,17 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '200000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9997'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '198983'
+      - '49998983'
       x-ratelimit-reset-requests:
-      - 24.614s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 304ms
+      - 1ms
       x-request-id:
-      - req_7e9efe2907eee5057540b762518a59a9
+      - req_07f6851c6654678da4d7a5e776fa66ba
     status:
       code: 200
       message: OK
@@ -398,11 +395,11 @@ interactions:
       "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
       "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
       "function": {"name": "Output", "description": "Correctly extracted `Output`
-      with all the required parameters with correct types", "parameters": {"$defs":
-      {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
-      Decor", "Beauty/Personal Care"], "title": "Labels", "type": "string"}}, "properties":
-      {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}], "description":
-      "The classification label"}}, "required": ["predicted_category"], "type": "object"}}}]}'
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_category": {"description": "The classification label", "enum": ["Footwear/Clothing",
+      "Electronics", "Food/Beverages", "Furniture/Home Decor", "Beauty/Personal Care"],
+      "title": "Predicted Category", "type": "string"}}, "required": ["predicted_category"],
+      "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -411,18 +408,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '807'
+      - '757'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -434,25 +431,25 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSyW7bMBC96yuIOdup5SWNdU0bIIcgcdAWTepCoKmxxITiEOQIjmv43wstkRUj
-        OgjEe3qLhnOIhACdQSJAFZJV6cx4yaq4v9s9PunFpam+4e3q1+7mx2q5Mv98AaNaQZsXVPyuulBU
-        OoOsyba08igZa9f463Q2mc+uppcNUVKGppbljsezi8WYK7+h8SSeLjplQVphgET8iYQQ4tC86442
-        wzdIxGT0jpQYgswRkv4jIcCTqRGQIejA0jKMTqQiy2jr2rYyZkAwkUmVNOYU3D6Hwfk0KGlM+uB+
-        f9/L+Onu4W3x89m8Wubl7jHHQV5rvXdNoW1lVT+gAd/jyVmYEGBl2WjvK3YVnymFAOnzqkTLdWs4
-        rMF5zLRizFIlGXPy+zUka7gh4h1K/+XaEBfa5ms4wgevY/TZ+e9gQh63VZCmG12HH/u7MJQ7T5tw
-        NlrYaqtDkXqUoflFCEyuza5zmgSoPlwjOE+l45TpFW1tGMfz1g9OazZgu4UAJpZmgE/nUdcQwj4w
-        lulW2xy987pfgegY/QcAAP//AwDmPvkkAQMAAA==
+        H4sIAAAAAAAAA2xSTY/TMBC951dYc26XpkvUkuuqLXCAw6osEkWR60wSs47Ha0+Aqup/R/nYNFuR
+        Q2S9l/eR8ZwjIUDnkApQlWRVOzP/8NuXT7Txp8fH+Ol5HzZb3K9y/FR8LhbvYdYq6PgLFb+q7hTV
+        ziBrsj2tPErG1jVeLe+T1XqxXndETTmaVlY6nt/fJXNu/JHmi3iZDMqKtMIAqfgRCSHEuXu3HW2O
+        fyEVi9krUmMIskRIx4+EAE+mRUCGoANLyzC7kooso21r28aYCcFEJlPSmGtw/5wn5+ugpDHZQxHv
+        qvASlh/3m93Ll7Di7bd49/04yeutT64rVDRWjQOa8COe3oQJAVbWnfZrw67hG6UQIH3Z1Gi5bQ3n
+        AziPuVaMeaYkY0n+dID0AFsi/oPSv3swxJW25QEu8MbrEv3v/HMyIY9FE6QZRjfgl/EuDJXO0zHc
+        jBYKbXWoMo8ydL8Igcn12W1OlwDNm2sE56l2nDE9o20N4zjp/eC6ZhN2WAhgYmkm+DKJhoYQToGx
+        zgptS/TO63EFokv0DwAA//8DAOeyxREBAwAA
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83b4b1cbf08ce-LAX
+      - 8b2b2ecbfafe4892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -460,7 +457,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:17:07 GMT
+      - Tue, 13 Aug 2024 19:41:28 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -470,9 +467,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '725'
+      - '254'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -480,17 +477,17 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '200000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9996'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '198985'
+      - '49998984'
       x-ratelimit-reset-requests:
-      - 32.452s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 304ms
+      - 1ms
       x-request-id:
-      - req_81cfd3439ba623e390eb08d78b345a32
+      - req_e4663ac57d387af799e588a7b0d32815
     status:
       code: 200
       message: OK
@@ -500,11 +497,11 @@ interactions:
       "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
       "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
       "function": {"name": "Output", "description": "Correctly extracted `Output`
-      with all the required parameters with correct types", "parameters": {"$defs":
-      {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
-      Decor", "Beauty/Personal Care"], "title": "Labels", "type": "string"}}, "properties":
-      {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}], "description":
-      "The classification label"}}, "required": ["predicted_category"], "type": "object"}}}]}'
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_category": {"description": "The classification label", "enum": ["Footwear/Clothing",
+      "Electronics", "Food/Beverages", "Furniture/Home Decor", "Beauty/Personal Care"],
+      "title": "Predicted Category", "type": "string"}}, "required": ["predicted_category"],
+      "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -513,18 +510,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '809'
+      - '759'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -536,25 +533,25 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSXW/TMBR9z6+w7nM7+klpXhkwCaohhEDriiLXuU28Or7GvkZ0Vf87StKlWYUf
-        Iusen48c+5gIATqHVIAqJavKmeGSVfn1SZfL6X59/2d1Zxf0fbXK8cvox3oLg5pB2ydU/MK6UVQ5
-        g6zJtrDyKBlr1fFiMh3Npu8miwaoKEdT0wrHw+nNfMjRb2k4Gk/mZ2ZJWmGAVDwmQghxbL51Rpvj
-        X0jFaPAyqTAEWSCk3SEhwJOpJyBD0IGlZRhcQEWW0daxbTSmBzCRyZQ05mLcrmNvfylKGpPNxrfv
-        f35ez8rf+7ffls+fHuL+A1O+7fm10gfXBNpFq7qCeng3T6/MhAArq4Z7H9lFvmIKAdIXsULLdWo4
-        bsB5zLVizDMlGQvyhw2kG/gYvdUcPb65owrFLSryGzjBK7lT8r/9r15JHncxSHNu7zw/dddhqHCe
-        tuGqXdhpq0OZeZSh+UsITK71rn0aB4ivbhKcp8pxxrRHWwuOx/NWDy4v7YIuzxgTS9MjTWbJOSCE
-        Q2Cssp22BXrndfcIklPyDwAA//8DAEeQjYEDAwAA
+        H4sIAAAAAAAAAwAAAP//bFJdb9MwFH3Pr7DuczuSlKxrXmETlUAgHhCDosh1blN3jm3Z12Wl6n+f
+        8rEkq/BDZN3j85FjnyPGQJaQMxB7TqK2ar46uurn4vut+7I4HNN/Klk/xPcfwuPx/kf8GWYNw2wP
+        KOiVdSNMbRWSNLqDhUNO2Kgmy3SRLe/iu1UL1KZE1dAqS/PFTTan4LZmHidp1jP3Rgr0kLPfEWOM
+        ndtvk1GX+Aw5i2evkxq95xVCPhxiDJxRzQS499IT1wSzERRGE+omtg5KTQAyRhWCKzUad+s82Y9F
+        caUKK9T79bdHud7r7HnrlgdX/kqf/k79OumTbQPtghZDQRN8mOdXZoyB5nXL/RrIhmtlxoC7KtSo
+        qUkN5w1Yh6UUhGUhOGFl3GkD+QYegtOSgsN3n0yN7CMK4zZwgTdyl+h/+z+Tkhzugueqb6+fX4br
+        UKayzmz9Vbuwk1r6feGQ+/YvwZOxnXfj0zpAeHOTYJ2pLRVknlA3gkly2+nB+NJGdNVjZIirCSnN
+        oj4g+JMnrIud1BU66+TwCKJL9AIAAP//AwBoBoyfAwMAAA==
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83b520e5308ce-LAX
+      - 8b2b2ed04bbb4892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -562,7 +559,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:17:07 GMT
+      - Tue, 13 Aug 2024 19:41:29 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -572,9 +569,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '253'
+      - '189'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -582,17 +579,17 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '200000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9995'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '198985'
+      - '49998984'
       x-ratelimit-reset-requests:
-      - 39.972s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 304ms
+      - 1ms
       x-request-id:
-      - req_8a7d2d48d49dce4044cc38181acb75fa
+      - req_53bbde382d51a065f06412102ef3d867
     status:
       code: 200
       message: OK
@@ -602,11 +599,11 @@ interactions:
       "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
       "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
       "function": {"name": "Output", "description": "Correctly extracted `Output`
-      with all the required parameters with correct types", "parameters": {"$defs":
-      {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
-      Decor", "Beauty/Personal Care"], "title": "Labels", "type": "string"}}, "properties":
-      {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}], "description":
-      "The classification label"}}, "required": ["predicted_category"], "type": "object"}}}]}'
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_category": {"description": "The classification label", "enum": ["Footwear/Clothing",
+      "Electronics", "Food/Beverages", "Furniture/Home Decor", "Beauty/Personal Care"],
+      "title": "Predicted Category", "type": "string"}}, "required": ["predicted_category"],
+      "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -615,18 +612,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '812'
+      - '762'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -638,25 +635,25 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSyW7bMBC96yuIOdupljq1dXS6JKcobdoe6kKgqLGsliJZcpjGMPzvhZZIilEe
-        BGIe36JHngLGoC4hZSAOnERj5HJD4vCQFdk23vrw68fPxfom2zw/fSof7pyARcvQxS8U9MK6Erox
-        EqnWqoeFRU7Yqkbv4iR8m6zjdQc0ukTZ0ipDy+RqtSRvC70Mo3g1MA+6FuggZT8Cxhg7dd82oyrx
-        GVIWLl4mDTrHK4R0PMQYWC3bCXDnakdcESwmUGhFqNrYyks5A0hrmQsu5WTcr9NsPxXFpcy/f4v+
-        3t++v47DL7fJh+TxD949VZs4m/n10kfTBdp7JcaCZvg4Ty/MGAPFm45778l4umAyBtxWvkFFbWo4
-        7cBYLGtBWOaCE1baHneQ7mCL3NPxTYbWacUlu+EWd3CGV3Ln4H/7n7OSLO6943Job5ifx+uQujJW
-        F+6iXdjXqnaH3CJ33V+CI21679ancwD/6ibBWN0Yykn/RtUKRtF1rwfTS5vQzYCRJi5npHgVDAHB
-        HR1hk+9rVaE1th4fQXAO/gEAAP//AwBNm5RgAwMAAA==
+        H4sIAAAAAAAAAwAAAP//bFJda9swFH33rxD3OelslyyJ37asLF0pGxRKYRlGkW8crbKkSVfrvJD/
+        PvxR2w3TgxH36Hz4SKeIMZAFZAzEkZOorJqvf7vy6cP29i69Se8/pZtH/qDFzdMifv78soJZwzD7
+        nyjolXUlTGUVkjS6g4VDTtioJsv0erFcxat1C1SmQNXQSkvz66vFnILbm3mcpIueeTRSoIeMfY8Y
+        Y+zUfpuMusA/kLF49jqp0HteImTDIcbAGdVMgHsvPXFNMBtBYTShbmLroNQEIGNULrhSo3G3TpP9
+        WBRXKt/WmNq75IvfkpD38e3jy6/N3wdRTvw66dq2gQ5Bi6GgCT7MswszxkDzquV+DWQDXTAZA+7K
+        UKGmJjWcdmAdFlIQFrnghKVx9Q6yHXxEHqh+9w2dN5ortuEOd3CGN3Ln6H/7H5OSHB6C56pvr5+f
+        h+tQprTO7P1Fu3CQWvpj7pD79i/Bk7Gdd+PTOkB4c5Ngnaks5WSeUTeCSbLs9GB8aSO67jEyxNWE
+        lL6P+oDga09Y5QepS3TWyeERROfoHwAAAP//AwD9QEzhAwMAAA==
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83b553acc08ce-LAX
+      - 8b2b2ed3a9f24892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -664,7 +661,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:17:08 GMT
+      - Tue, 13 Aug 2024 19:41:30 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -674,9 +671,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '575'
+      - '219'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -684,17 +681,17 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '200000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9994'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '198983'
+      - '49998983'
       x-ratelimit-reset-requests:
-      - 48.102s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 304ms
+      - 1ms
       x-request-id:
-      - req_a0b54bfe26ff7d735f0007e48067d41a
+      - req_e1be4789778383f7d65b774f65403f90
     status:
       code: 200
       message: OK
@@ -723,18 +720,15 @@ interactions:
       prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
       Current prompt\nClassify input text.\n\n## Examples\n### Example #0\n\nText:
       Apple product with a sleek design.\n\nCategory: Electronics\n\nUser feedback:
-      Prediction is incorrect. Correct answer: \"Electronics\"\n\n\n### Example #1\n\nText:
-      Laptop stand for the kitchen.\n\nCategory: Furniture/Home Decor\n\nUser feedback:
-      Prediction is incorrect. Correct answer: \"Furniture/Home Decor\"\n\n\n### Example
-      #2\n\nText: Chocolate leather boots.\n\nCategory: Footwear/Clothing\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Footwear/Clothing\"\n\n\n###
-      Example #3\n\nText: Wooden cream for surfaces.\n\nCategory: Furniture/Home Decor\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Furniture/Home Decor\"\n\n\n###
-      Example #4\n\nText: Natural finish for your lips.\n\nCategory: Beauty/Personal
-      Care\n\nUser feedback: Prediction is incorrect. Correct answer: \"Beauty/Personal
-      Care\"\n\n\n\nSummarize your analysis about incorrect predictions and suggest
-      changes to the prompt."}], "model": "gpt-4-turbo", "max_tokens": 1000, "seed":
-      47, "temperature": 0.0}'
+      Prediction is correct.\n\n\n### Example #1\n\nText: Laptop stand for the kitchen.\n\nCategory:
+      Electronics\n\nUser feedback: Prediction is incorrect. Correct answer: \"Furniture/Home
+      Decor\"\n\n\n### Example #2\n\nText: Chocolate leather boots.\n\nCategory: Footwear/Clothing\n\nUser
+      feedback: Prediction is correct.\n\n\n### Example #3\n\nText: Wooden cream for
+      surfaces.\n\nCategory: Furniture/Home Decor\n\nUser feedback: Prediction is
+      correct.\n\n\n### Example #4\n\nText: Natural finish for your lips.\n\nCategory:
+      Beauty/Personal Care\n\nUser feedback: Prediction is correct.\n\n\n\nSummarize
+      your analysis about incorrect predictions and suggest changes to the prompt."}],
+      "model": "gpt-4-turbo", "max_tokens": 1000, "seed": 47, "temperature": 0.0}'
     headers:
       accept:
       - application/json
@@ -743,18 +737,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2845'
+      - '2676'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -766,42 +760,40 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA7RW32/cNgx+z19BuA8Dgss1TW5Lc29dmnTFuiHrj23AbkhpiT6rkSVDou9yC/K/
-        D5Rl+5J2j3sxYImi+JHfR/H+AKAwulhCoWpk1bT26JxV/f42/Fr/9kf35h0v7v7Bd1fbP1/9/mlx
-        zcVMTvjyCykeTs2Vb1pLbLzrt1UgZBKvL85OTo8Xpy9PztNG4zVZObZu+WhxxF0o/dHJ8cni6Hhx
-        dHyeT9feKIrFEv46AAC4T1+J02m6K5ZwPBtWGooR11QsRyOAIngrKwXGaCKj62POm8o7JpdCf/bs
-        GbxyaHfRRPAVvHXKh0CK4TqQNkrwxJVbuU+tdxBoY2hr3Bq4JqA7FMgR2uA3RpOegWHAtiUMEbhG
-        TmYJ73diNToEDASouENrdzDciEr5oJN3n052kQJURLpEdTuDsksOA0EkaqJYlQQIjYmd0xQEZzru
-        g6wp3zSdMwrlSjAOar9NbgePYFJQkRyTnsMlqnrABLH22z0MCpnWPuwGEKSh3E3ooEFWNcW0sipG
-        QC5uKayKMUESxVfA5vCxNhFit15T5KeJkyCrzqW8Cbbs2+7GfEx4GrOuWXJi3GgGFkuypAEjrIqp
-        qOJ3NJuvCqmxkOFDHwZpuKjRrSkOxbgOvmlZzN6YDfU4MDNnlv7aYBoMOzAxdgTaUwTnORVLnFhD
-        sDVcPyYFhcqHBp2ihCegVHiyUxaD4R2g09B6Ya1BK9U1jim0gbgvr6+epIJUjc7EZg4/+S1tKMwk
-        BnJ1uqoPVwAlz+RiF+QywkABjIscukzVyocp4hko76LR1K9V3lqf9ID6Sxe5IcdxKTl6MYfDwwsJ
-        vup58hHjLbymqIJpxfHh4RIuv46m53TjheQtKVMZBVj6jmH7mBaOSKfaKCsar3ZzeOsiE2rJBUIZ
-        PGpYFRd5G4xrhS90x7NVIUJVvrN6vE0PoW1oBrFTdU+Y8bjcPLkA4zItsG2Db4NBThh0p3hSS4mR
-        NAjZOE43eJf5diJJeqU1XA6dJOuj55qk6K1TtkuiHruNNpnZ2ThnTqGDdWc07SWp3CUh98dbSrpN
-        II58x4KlwbY1bh2zBsVHTbYV12jN2g2tbqDrkz5TDVANxbkgOhVEH1LhdnAx7iUkVW5euF/b6Xyf
-        0m1tVM98SXOU8HOVcp2NtFlrIufQIn0jDwnDlIYp6rRY+s5pTHfKkk7OMttL4i2RA22qigI5fopw
-        IQivBpn9MsgM3qenIQHlqRGV5KgySjTLPj8fqQ/v92Dlre1rk1Q+dORer0mYJj0OXUAmu4NAldj3
-        3Xa/geQmkEAPFU3pM27j7YYgUFsHjENVxyB8ANSppAgbClKZvq1EphZKqkQhyo9cHFt0+1/9NHdT
-        yYpIYGqenz9/Xrn/SVV7jJNYbKcJLiVVwTuj4gyuuuAMd4Ge/+QbgtekfJjBlfe8JQzPL6zn2rj1
-        DH4k7Hj3/JpC9A4tXGCgGRCrOXyKvcL2LpZKaWIKjXGD/CJDZTixdAh8Dlc+DDqeAfaYez9lSr5A
-        ogbk5fbO7uSdTG+m8v5WDEZeTWLoyQ0/G3mA3RYDpeR/pDtewr3c8LByOS+7JdyPD/jNENZDLsrK
-        JcaEXLIsp/x0x28/DkLYNE3d8SxrNyt2aCMNGsdoXJ5LTJMcZgL2pFa7R8x9PCrN9we3QFUXUYZH
-        11mb1x/GSdD6dRt8GfP+uF4ZZ2J9EwijdzL1RfZtkXYfDgD+ThNn92iILHr4N+xvyYnD709/6P0V
-        06A77S4Wi7zLntFOG+cvjw9yiEXcRabmpjJuLU+36SfQqr1RZ2d0fKYXVBUHDwf/AgAA//8DABo9
-        t6SPCwAA
+        H4sIAAAAAAAAAwAAAP//pFbbahxHEH3XVxSjB4HY3UiyhLJ6M7KMDQ6YWBiSTJB6umtmOurp6vRl
+        V2vjfw/Vc9mRnAhMXha2LzV1Tp061V8PAAqtiisoZCui7JxZrje++e3i90BNSh+SUQ2eXf796XOs
+        m+3n02LBN6j6C2Ucb60kdc5g1GT7belRROSop5dnry4ufz5Zn+SNjhQavta4uDxfxuQrWp6dnJ0v
+        T86XJ+vhdktaYiiu4I8DAICv+ZfztAofiyvIsfJKhyGIBour6RBA4cnwSiFC0CEKG4vFflOSjWhz
+        6oeHh/DaCrMLOgDV8N5K8h5lhI8elZaMJ5S2tG89dRBbBHwUDDSA87TRCtUCdAThHAofILYi5mMZ
+        JTRo0QtjduDQ1+S7AFs0BrQFaTi3eqdtky9IEbEhv+MsnCeVZAxQiYAKyOYT2roUIeJjXME72uIG
+        /YI3PMJWBCDLRxisRNjm5SmRI053xJNP6xHoFaNbwvHxTQ8MDk+Pj6/gtsX8KSiLD8JFcsCRFdTk
+        c9gHHWWLtixytAGMRgUiQFncGJTRk9Uy8IkWewQjtxPW0FIyClqxQagQLZTF2+StjsnjT++oQ3iD
+        knxZrOC21QE6HcZPSZGxGP2AZgckZfIeFVQoRQoz6FCTTDMWt+TVBGqRs9OyBR0g7pyWuVgiBJKa
+        5QtbHVvAPZwFeMGcc6UtSLJBK/RTEVlZj5FrmCsWsYMKeTenoO2cu8Xw6ZCaBkMMIEDpukaPNkKK
+        2ui4A+Z8pGvFpWLFfupvoILrVtgGA0TKkT966lzkY7cEumOJPlWBYJ6E3GUF9mH1F85vlFxWFP/r
+        XASZq1MheKy1RcWfwc61IugvfVzdOfK95Kie4HPSvWIjWoWK0Y+cDB8ChUF6Xe1ZGYTNuhUeIXD1
+        B2q4CbPyOlKzlumzzAI+XcHx8Wul4LpPIQkDN32mgeX8S744x8ZQrKTkRTNXS6SpqHmVNrmBfwTa
+        U4lk+XHGgUxWqoXgULKC4QF3LMfBNjrdtHGmwgq/E6IAJ3zUMhnhn8rijAm4NsIzzFsRHuBNJtgx
+        eWND5x6xcaSgLK4HE5p5S1lwLzD7W05qI5qEK3g/E0NHXJ4BwwJCkm3f9VO0p27FXPXyFM55cp4B
+        TTqYvGDyOh3DoI6cfKZ8TveqLBjxK0b8sTdhuBldeRBT3wiM+72VJikugIDKa6xHBwd2si2NNwZO
+        dAxoapDCQpM48l4aZKGlLSukwhjRg+DBMTRCr9635CcPXkCHlgH0chXM92swL5jpaIcVThrsDfXo
+        30zxCFRCzob5SjwCR5GWxVCsYUSBNCh8xsOJTTbyK240c753jdx9mp3ID3sb9IGLsJd4ZomnhyMv
+        4tCL4Umv5pa8v78v7f+UxA6k8FgnbofnXvuSRJ51JBdGpjCOgOc9re3gxHN/4mnT149H/LyjdSDT
+        A/+ukXsFDAJbgICjl+p9NC/4aMYMwLL7/GDRVwPjpc2TcqzfULBx0KJxM0V34mFo534u5BpMzx6m
+        f3T7kfT/9vs+GW2fV1F/yYN6NX+AcUmD4EegTcYM69+mF52hxnmqwrA/rdfa6tDeeRSBLL/eQiRX
+        5N1vBwB/5pdjevIYLHr8d5Ee0HLA8/W6j1fsH6yz3YvhXVlEisLsN9bn64MhxSLsQsTurta2Qe+8
+        7l+StbuTl5d4cqnOsS4Ovh38AwAA//8DAEhgNhlXCwAA
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83b5b1a4508ce-LAX
+      - 8b2b2ed7e9b14892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -809,7 +801,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:17:30 GMT
+      - Tue, 13 Aug 2024 19:41:51 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -819,27 +811,27 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '21190'
+      - '20971'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
       - max-age=15552000; includeSubDomains; preload
       x-ratelimit-limit-requests:
-      - '500'
+      - '10000'
       x-ratelimit-limit-tokens:
-      - '30000'
+      - '2000000'
       x-ratelimit-remaining-requests:
-      - '499'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '28366'
+      - '1998405'
       x-ratelimit-reset-requests:
-      - 120ms
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 3.268s
+      - 47ms
       x-request-id:
-      - req_14d40208823736da69d634d2a29b5e24
+      - req_13b2b638e76c6690cff6774b1d5a90ee
     status:
       code: 200
       message: OK
@@ -868,48 +860,45 @@ interactions:
       prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
       Current prompt\nClassify input text.\n\n## Examples\n### Example #0\n\nText:
       Apple product with a sleek design.\n\nCategory: Electronics\n\nUser feedback:
-      Prediction is incorrect. Correct answer: \"Electronics\"\n\n\n### Example #1\n\nText:
-      Laptop stand for the kitchen.\n\nCategory: Furniture/Home Decor\n\nUser feedback:
-      Prediction is incorrect. Correct answer: \"Furniture/Home Decor\"\n\n\n### Example
-      #2\n\nText: Chocolate leather boots.\n\nCategory: Footwear/Clothing\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Footwear/Clothing\"\n\n\n###
-      Example #3\n\nText: Wooden cream for surfaces.\n\nCategory: Furniture/Home Decor\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Furniture/Home Decor\"\n\n\n###
-      Example #4\n\nText: Natural finish for your lips.\n\nCategory: Beauty/Personal
-      Care\n\nUser feedback: Prediction is incorrect. Correct answer: \"Beauty/Personal
-      Care\"\n\n\n\nSummarize your analysis about incorrect predictions and suggest
-      changes to the prompt."}, {"role": "assistant", "content": "### Analysis of
-      Incorrect Predictions\n\nUpon reviewing the examples provided, it appears that
-      the model''s predictions are actually correct according to the user feedback,
-      but there seems to be a misunderstanding or miscommunication in how the feedback
-      is presented. Each example shows that the category predicted by the model matches
-      the \"correct answer\" provided in the user feedback. This suggests that the
-      model is functioning correctly, but the feedback might be incorrectly labeled
-      as \"Prediction is incorrect.\"\n\n### Suggested Changes to the Prompt\n\nGiven
-      the analysis, the primary issue does not seem to lie with the model''s performance
-      but rather with the clarity and potential misinterpretation of the feedback
-      mechanism. However, to enhance the prompt and ensure clearer instructions for
-      the model, consider the following adjustments:\n\n1. **Clarify the Task Description**:
-      Enhance the prompt to be more specific about what the model needs to classify.
-      Instead of a broad \"Classify input text,\" it could be more descriptive, such
-      as \"Classify the input text into the appropriate product category based on
-      its description.\"\n\n2. **Add Examples in the Prompt**: Including examples
-      directly in the prompt can guide the model by showing expected input-output
-      mappings. This can help in aligning the model''s understanding of categories.\n\n3.
-      **Specify Categories**: If there are specific categories into which the texts
-      should be classified, listing these in the prompt can help the model understand
-      the boundaries and distinctions between different categories.\n\n4. **Feedback
-      Mechanism Review**: It might be beneficial to review how feedback is collected
-      and presented to ensure it accurately reflects the performance of the model.
-      This could involve rephrasing the feedback or adding a verification step before
-      concluding that the prediction is incorrect.\n\n### Revised Prompt\n\n```\nClassify
-      the input text into the appropriate product category based on its description.
-      Categories include Electronics, Furniture/Home Decor, Footwear/Clothing, Beauty/Personal
-      Care, etc. Use the description to determine the most fitting category. For example,
-      a text describing an item commonly used in cooking might be classified under
-      Kitchenware.\n\nText: {text}\nCategory: {predicted_category}\n```\n\nThis revised
-      prompt provides clearer instructions and context, which should help in maintaining
-      or improving the accuracy of the model''s predictions."}, {"role": "user", "content":
+      Prediction is correct.\n\n\n### Example #1\n\nText: Laptop stand for the kitchen.\n\nCategory:
+      Electronics\n\nUser feedback: Prediction is incorrect. Correct answer: \"Furniture/Home
+      Decor\"\n\n\n### Example #2\n\nText: Chocolate leather boots.\n\nCategory: Footwear/Clothing\n\nUser
+      feedback: Prediction is correct.\n\n\n### Example #3\n\nText: Wooden cream for
+      surfaces.\n\nCategory: Furniture/Home Decor\n\nUser feedback: Prediction is
+      correct.\n\n\n### Example #4\n\nText: Natural finish for your lips.\n\nCategory:
+      Beauty/Personal Care\n\nUser feedback: Prediction is correct.\n\n\n\nSummarize
+      your analysis about incorrect predictions and suggest changes to the prompt."},
+      {"role": "assistant", "content": "### Analysis of Incorrect Predictions\n\nFrom
+      the examples provided, it appears that the model generally performs well in
+      classifying the category of products based on the input text. However, there
+      was one instance where the model''s prediction was incorrect:\n\n- **Example
+      #1**: The text \"Laptop stand for the kitchen\" was classified as \"Electronics\"
+      when the correct category should have been \"Furniture/Home Decor\". This misclassification
+      likely occurred because the model focused on the word \"Laptop,\" which is typically
+      associated with electronics, rather than considering the context of the item
+      being used in the kitchen, which suggests a different utility and category.\n\n###
+      Suggested Changes to the Prompt\n\nTo improve the model''s accuracy in categorizing
+      products, the prompt could be refined to emphasize the importance of context
+      and the intended use of the product described in the text. Here are some suggestions
+      for modifying the prompt:\n\n1. **Add Contextual Emphasis**: Modify the prompt
+      to encourage the model to consider the overall context and the intended use
+      of the product, rather than focusing solely on specific keywords that might
+      typically be associated with a particular category.\n\n2. **Clarify Task Description**:
+      The current prompt \"Classify input text\" is somewhat vague. It could be more
+      specific, such as \"Classify the input text into the appropriate product category
+      based on its description and intended use.\"\n\n3. **Provide Examples in the
+      Prompt**: Including a brief example or two in the prompt itself can guide the
+      model on how to better analyze the text. For instance, mentioning that \"A laptop
+      stand for the kitchen should be considered as ''Furniture/Home Decor'' due to
+      its usage context\" could provide clear guidance.\n\n### Revised Prompt\n\nHere
+      is a revised version of the prompt incorporating these suggestions:\n\n```\nClassify
+      the input text into the appropriate product category by carefully considering
+      the description and intended use of the product. Focus on the overall context
+      in which the product is mentioned, rather than isolating specific keywords.
+      For example, a ''laptop stand for the kitchen'' should be categorized under
+      ''Furniture/Home Decor'' due to its usage context.\n```\n\nThis revised prompt
+      should help the model make more accurate predictions by emphasizing the importance
+      of context and usage in product categorization."}, {"role": "user", "content":
       "\nNow please carefully review your reasoning in Step 1 and help with Step 2:
       refining the prompt.\n\n## Current prompt\nClassify input text.\n\n## Follow
       this guidance to refine the prompt:\n\n1. The new prompt should should describe
@@ -929,18 +918,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '6102'
+      - '5877'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -952,25 +941,24 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2RRwWrbQBC96yuGPUdGttTY8bGlEAJJodBDKcWsViNp09XOsjNKrQb/e1lZsVN6
-        2cN7897OvPeaASjbqD0o02sxQ3D5nZh+6L4V7rE6uqH8ehu771+equP9xz/PD+omKah+RiNvqpWh
-        ITgUS/5Mm4haMLmut5uyqMrdh2ImBmrQJVkXJK9yGWNN+abYVHlR5cXdou7JGmS1hx8ZAMDr/KY9
-        fYNHtYfZa0YGZNYdqv1lCEBFcglRmtmyaC/q5koa8oJ+Xv2TSxPtBNIjWB9GAcGjgPVCYIXBUIxo
-        BEKkZjQCRgt2FCeoNWMD5Gdlg2yiDen6NPliG2xW8NnzGBG0MWPUZoJ6AuOI0U2gne289d1/6t9W
-        +hkciAUiOnzR/vrt6v0dEduRdcrSj84t+OkSjKMuRKp54S94a73l/hBRM/kUAgsFNbOnDODnXMD4
-        T6YqRBqCHIR+oU+G63W5Oxuqa/FXulzqUUKi3XvZ7S5bdlQ8seBwaK3vMIZoz4204WC2Wyy2TYWt
-        yk7ZXwAAAP//AwBnq6E1nwIAAA==
+        H4sIAAAAAAAAA1RRTU/jMBC951eMfG5QUoKy7RGuSCCQOOwKVa49SVwcj2WPUSrU/46chpa9+PA+
+        Zt48fxUAwmixBaEGyWr0ttx8hp4T2elQvb3Uj/ebqbf+9e/T5i61z2KVHbQ/oOIf142i0VtkQ+5M
+        q4CSMU+t2/XtXfunruuZGEmjzbbec9mUnMKeynW1bsqqKavN4h7IKIxiC/8KAICv+c05ncZJbKFa
+        /SAjxih7FNuLCEAEshkRMkYTWToWqyupyDG6OfqDzYruCDwgGOcTA+PEYBzTjCkKARWDD6STYlCS
+        sadwXIEiF43GYFwPe+JhlkePynRGgWEcI4zociOoQTqdBSbAvH1ioJC3oNOoIUW8+Z0wYJeizC25
+        ZO2Cny4nW+p9oH1c+AveGWfisAsoI7l8XmTyYmZPBcD7XG36ry3hA42ed0wf6PLAuq7a80Bx/dIr
+        vW4Wkoml/W27rYslo4jHyDjuOuN6DD6Yc9ed36m2xarVDXaiOBXfAAAA//8DACNkKCJ5AgAA
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83be07feb08ce-LAX
+      - 8b2b2f5cab294892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -978,7 +966,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:17:31 GMT
+      - Tue, 13 Aug 2024 19:41:53 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -988,113 +976,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '1562'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '500'
-      x-ratelimit-limit-tokens:
-      - '30000'
-      x-ratelimit-remaining-requests:
-      - '499'
-      x-ratelimit-remaining-tokens:
-      - '27581'
-      x-ratelimit-reset-requests:
-      - 120ms
-      x-ratelimit-reset-tokens:
-      - 4.838s
-      x-request-id:
-      - req_44f8e6e86e175a0ec15046702dde9c9d
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "Classify the input text into
-      its correct product category based on the description provided. Ensure accuracy
-      by closely aligning the description with the most relevant category."}, {"role":
-      "user", "content": "Text: Apple product with a sleek design."}], "model": "gpt-3.5-turbo",
-      "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
-      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
-      "function": {"name": "Output", "description": "Correctly extracted `Output`
-      with all the required parameters with correct types", "parameters": {"$defs":
-      {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
-      Decor", "Beauty/Personal Care"], "title": "Labels", "type": "string"}}, "properties":
-      {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}], "description":
-      "The classification label"}}, "required": ["predicted_category"], "type": "object"}}}]}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '974'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//bFLbattAEH3XVyzzbAdf4tjRa6idFtqYEmggDmK9Gslbr3aW3VFbY/zv
-        RZdIiokexDJH57JndI6EAJ1CLEAdJKvCmfE9qwP5zdf1ar3cvqwn4fHh7wv92YTNcZHDqGLQ/jcq
-        fmfdKCqcQdZkG1h5lIyV6nQ5m09u56vFrAYKStFUtNzxeH6zGHPp9zSeTGeLlnkgrTBALF4jIYQ4
-        1+8qo03xH8RiMnqfFBiCzBHi7iMhwJOpJiBD0IGlZRj1oCLLaKvYtjRmADCRSZQ0pjdunvPg3Bcl
-        jUn089ZuOHt8/hG+re9Wx5+/vj/4La8Gfo30ydWBstKqrqAB3s3jKzMhwMqi5j6V7Eq+YgoB0udl
-        gZar1HDegfOYasWYJkoy5uRPO4h38MWgYk9Wq7CDC3xQuUSfnd8G3XjMyiBNW1o7v3RbMJQ7T/tw
-        VSpk2upwSDzKUF8OApNrvCuf2gHKDwsE56lwnDAd0VaC09tZowf9D9ajyxZjYmmGpPuoDQjhFBiL
-        JNM2R++87nYfXaL/AAAA//8DAAnqaNP6AgAA
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8af83bedefff08ce-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Wed, 07 Aug 2024 15:17:33 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '440'
+      - '1403'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -1102,33 +986,32 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '200000'
+      - '2000000'
       x-ratelimit-remaining-requests:
-      - '9996'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '198942'
+      - '1997636'
       x-ratelimit-reset-requests:
-      - 32.326s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 317ms
+      - 70ms
       x-request-id:
-      - req_87a9d64f498a52a4e8b2eb587ad47230
+      - req_9f7265498847b2dafd7d855d4085d42b
     status:
       code: 200
       message: OK
 - request:
     body: '{"messages": [{"role": "system", "content": "Classify the input text into
-      its correct product category based on the description provided. Ensure accuracy
-      by closely aligning the description with the most relevant category."}, {"role":
-      "user", "content": "Text: Laptop stand for the kitchen."}], "model": "gpt-3.5-turbo",
-      "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
-      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
-      "function": {"name": "Output", "description": "Correctly extracted `Output`
-      with all the required parameters with correct types", "parameters": {"$defs":
-      {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
-      Decor", "Beauty/Personal Care"], "title": "Labels", "type": "string"}}, "properties":
-      {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}], "description":
-      "The classification label"}}, "required": ["predicted_category"], "type": "object"}}}]}'
+      the correct product category, considering both the specific items mentioned
+      and their context or intended use."}, {"role": "user", "content": "Text: Apple
+      product with a sleek design."}], "model": "gpt-3.5-turbo", "max_tokens": 1000,
+      "seed": 47, "temperature": 0.0, "tool_choice": {"type": "function", "function":
+      {"name": "Output"}}, "tools": [{"type": "function", "function": {"name": "Output",
+      "description": "Correctly extracted `Output` with all the required parameters
+      with correct types", "parameters": {"properties": {"predicted_category": {"description":
+      "The classification label", "enum": ["Footwear/Clothing", "Electronics", "Food/Beverages",
+      "Furniture/Home Decor", "Beauty/Personal Care"], "title": "Predicted Category",
+      "type": "string"}}, "required": ["predicted_category"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -1137,18 +1020,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '969'
+      - '886'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -1160,25 +1043,25 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSXW+bMBR951dY9zmpoEn6weOmpupLu25S1GmZkGMu4MbYln3JFkX575OBAo3G
-        A7Lu4Xz4XE4RYyBzSBmIipOorZrfk6js+uZl9b5+/Pbl8HMf3yw3b+u3+Mdmf4BZYJjdOwr6YF0J
-        U1uFJI3uYOGQEwbV5PZ6ES8Xd6tFC9QmRxVopaX54mo1p8btzDxOrlc9szJSoIeU/YoYY+zUvkNG
-        neNfSFk8+5jU6D0vEdLhI8bAGRUmwL2XnrgmmI2gMJpQh9i6UWoCkDEqE1yp0bh7TpPzWBRXKluK
-        Qh6q6pC8PtXP+Ve8f90U8s/3cuLXSR9tG6hotBgKmuDDPL0wYww0r1vuS0O2oQsmY8Bd2dSoKaSG
-        0xasw1wKwjwTnLA07riFdAsPCgU5o6XwWzjDJ5Vz9L/z70k3DovGc9WX1s/PwxaUKa0zO39RKhRS
-        S19lDrlvLweejO28g0/rAM2nBYJ1praUkdmjDoLJMun0YPzBRvS2x8gQV1PSXdQHBH/0hHVWSF2i
-        s04Ou4/O0T8AAAD//wMA4I3cjPoCAAA=
+        H4sIAAAAAAAAA2xSTY/aMBC951dYc4YVISB2c94eemkq9dCVShUZZxJM/VV7jKCI/14lgSSgzSGy
+        5uV9+E0uCWMgK8gZiD0noZ2avx19c4wHUex/FNnHP736XheL5WH9WlfLE8xaht0dUNCd9SKsdgpJ
+        WtPDwiMnbFXTzTJbb17TNOsAbStULa1xNM9e1nOKfmfni3S5vjH3VgoMkLNfCWOMXbp3m9FUeIKc
+        LWb3icYQeIOQDx8xBt6qdgI8BBmIG4LZCAprCE0b20SlJgBZq0rBlRqN++cyOY9FcaVKTnTM/r6/
+        HXTxNY0fGr8dz/jzFCd+vfTZdYHqaMRQ0AQf5vmTGWNguO64RSQX6YnJGHDfRI2G2tRw2YLzWElB
+        WJWCEzbWn7eQb+GLQkHeGinCFq7woHJNPjv/nnTjsY6Bq1tpt/l12IKyjfN2F55KhVoaGfalRx66
+        y0Eg63rv1qdzgPiwQHDeakcl2T9oWsE02/R6MP5gI3rHyBJXE9JqldwCQjgHQl3W0jTonZfD7pNr
+        8h8AAP//AwC8DitW+gIAAA==
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83bf22d8608ce-LAX
+      - 8b2b2f6878c54892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -1186,7 +1069,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:17:33 GMT
+      - Tue, 13 Aug 2024 19:41:53 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -1196,9 +1079,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '455'
+      - '211'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -1206,33 +1089,32 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '200000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9995'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '198945'
+      - '49998953'
       x-ratelimit-reset-requests:
-      - 40.274s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 316ms
+      - 1ms
       x-request-id:
-      - req_7780b5df164c361bd1853e52894b0ae2
+      - req_ffa609b8586edf3f728801450090d0ee
     status:
       code: 200
       message: OK
 - request:
     body: '{"messages": [{"role": "system", "content": "Classify the input text into
-      its correct product category based on the description provided. Ensure accuracy
-      by closely aligning the description with the most relevant category."}, {"role":
-      "user", "content": "Text: Chocolate leather boots."}], "model": "gpt-3.5-turbo",
-      "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
-      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
-      "function": {"name": "Output", "description": "Correctly extracted `Output`
-      with all the required parameters with correct types", "parameters": {"$defs":
-      {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
-      Decor", "Beauty/Personal Care"], "title": "Labels", "type": "string"}}, "properties":
-      {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}], "description":
-      "The classification label"}}, "required": ["predicted_category"], "type": "object"}}}]}'
+      the correct product category, considering both the specific items mentioned
+      and their context or intended use."}, {"role": "user", "content": "Text: Laptop
+      stand for the kitchen."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed":
+      47, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
+      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
+      "Correctly extracted `Output` with all the required parameters with correct
+      types", "parameters": {"properties": {"predicted_category": {"description":
+      "The classification label", "enum": ["Footwear/Clothing", "Electronics", "Food/Beverages",
+      "Furniture/Home Decor", "Beauty/Personal Care"], "title": "Predicted Category",
+      "type": "string"}}, "required": ["predicted_category"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -1241,18 +1123,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '964'
+      - '881'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -1264,25 +1146,25 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAAwAAAP//bFJNj9owEL3nV1hzhi0QECXXarNV1aU9VGW1pYqMMyRuHY9rT7plEf+9
-        SsKGLNocIuu9vI+M5xgJATqHRIAqJavKmfGKVflnt/ke322+PZe3n9bzx3D/dXZ/m+qHNYwaBe1+
-        oeIX1Y2iyhlkTbajlUfJ2LhOl7N4Mo/fL+YtUVGOppEVjsfxzWLMtd/ReDKdLc7KkrTCAIn4EQkh
-        xLF9Nx1tjv8gEZPRC1JhCLJASPqPhABPpkFAhqADS8swupCKLKNtatvamAHBRCZT0phLcPccB+fL
-        oKQx2WHzNz+kS6PXS/n5Y7pPn5/q9FHTIK+zPri20L62qh/QgO/x5CpMCLCyarVfanY1XymFAOmL
-        ukLLTWs4bsF5zLVizDMlGQvyhy0kW0iJ+Amlf/fBEJfaFls4wSuvU/TW+edgQh73dZDmPLozfurv
-        wlDhPO3C1Whhr60OZeZRhvYXITC5LrvJaROgfnWN4DxVjjOm32gbw2m86vzgsmYD9rwQwMTSDPD5
-        Kjo3hHAIjFW217ZA77zuVyA6Rf8BAAD//wMAF72kJgEDAAA=
+        H4sIAAAAAAAAAwAAAP//bFLbTttAEH33V6zmOUE4IU3xG4L2AQX1QoXaksrarMfOwnpnuzsGQpR/
+        r3zBNlH9YK3m+Fz2jPeREKAzSASorWRVOjM9f/LF81+7fL1abX7c/Ty/Uvrx8vfD82pxbb7BpGbQ
+        5gEVv7FOFJXOIGuyLaw8SsZaNV7O5ovlxzg+a4CSMjQ1rXA8nZ8splz5DU1P49miY25JKwyQiPtI
+        CCH2zbvOaDN8gUScTt4mJYYgC4Sk/0gI8GTqCcgQdGBpGSYDqMgy2jq2rYwZAUxkUiWNGYzbZz86
+        D0VJY9LVTViV+aW7vaXvL7OLX/nT3dfqsyxGfq30zjWB8sqqvqAR3s+TIzMhwMqy4X6p2FV8xBQC
+        pC+qEi3XqWG/Bucx04oxS5VkLMjv1pCs4ZNBxZ6sVmENB3incoj+d/4z6sZjXgVputK6+aHfgqHC
+        edqEo1Ih11aHbepRhuZyEJhc6137NA5QvVsgOE+l45TpEW0tGM8/tHow/GADuuwwJpZmRDqbR11A
+        CLvAWKa5tgV653W/++gQ/QMAAP//AwAe3F8U+gIAAA==
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83bf68b6608ce-LAX
+      - 8b2b2f6c88884892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -1290,7 +1172,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:17:34 GMT
+      - Tue, 13 Aug 2024 19:41:54 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -1300,9 +1182,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '640'
+      - '220'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -1310,563 +1192,32 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '200000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9994'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '198946'
+      - '49998954'
       x-ratelimit-reset-requests:
-      - 48.206s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 316ms
+      - 1ms
       x-request-id:
-      - req_a40dff8fc316c85341cdc593daf6b571
+      - req_d8a4e873f54902949bbe0b7abd452f29
     status:
       code: 200
       message: OK
 - request:
     body: '{"messages": [{"role": "system", "content": "Classify the input text into
-      its correct product category based on the description provided. Ensure accuracy
-      by closely aligning the description with the most relevant category."}, {"role":
-      "user", "content": "Text: Wooden cream for surfaces."}], "model": "gpt-3.5-turbo",
-      "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
-      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
-      "function": {"name": "Output", "description": "Correctly extracted `Output`
-      with all the required parameters with correct types", "parameters": {"$defs":
-      {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
-      Decor", "Beauty/Personal Care"], "title": "Labels", "type": "string"}}, "properties":
-      {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}], "description":
-      "The classification label"}}, "required": ["predicted_category"], "type": "object"}}}]}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '966'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//bFJBbtswELzrFcSe7dSOYzjWsRWEHIoWBVoEaB0INLWS2VBcglw2UQ3/
-        vZCsWIpRHghih7MznOUxEQJ0CakAdZCsGmfmW1YH/ynT2D5mdcxePn77wfL+Oz2/cpbBrGPQ/jcq
-        fmPdKGqcQdZkz7DyKBm7rsvN7Wpxt7pfr3ugoRJNR6sdz1c36zlHv6f5Ynm7HpgH0goDpOJXIoQQ
-        x37vPNoSXyEVi9lbpcEQZI2QXi4JAZ5MVwEZgg4sLcNsBBVZRtvZttGYCcBEplDSmFH4vI6T8xiU
-        NKZoH/+Ubb4x+stGfn7Iq/zvS8x/apronVu3rjdURasuAU3wSz29EhMCrGx67tfILvIVUwiQvo4N
-        Wu5cw3EHzmOpFWNZKMlYk293kO4gj95qjh4/PFCDIkNFfgcneNfulPzv/DQJyWMVgzRDekP9dBmH
-        odp52oerdKHSVodD4VGG/pUQmNxZu9PpFSC+myQ4T43jgukZbddweTeMHcafNqLbAWNiaaakbTIY
-        hNAGxqaotK3RO68vnyA5Jf8AAAD//wMAHrXHawMDAAA=
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8af83bfc5aa408ce-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Wed, 07 Aug 2024 15:17:35 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '511'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '200000'
-      x-ratelimit-remaining-requests:
-      - '9993'
-      x-ratelimit-remaining-tokens:
-      - '198945'
-      x-ratelimit-reset-requests:
-      - 55.924s
-      x-ratelimit-reset-tokens:
-      - 316ms
-      x-request-id:
-      - req_c40c2a1f3e490075a463cad78f9499f0
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "Classify the input text into
-      its correct product category based on the description provided. Ensure accuracy
-      by closely aligning the description with the most relevant category."}, {"role":
-      "user", "content": "Text: Natural finish for your lips."}], "model": "gpt-3.5-turbo",
-      "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
-      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
-      "function": {"name": "Output", "description": "Correctly extracted `Output`
-      with all the required parameters with correct types", "parameters": {"$defs":
-      {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
-      Decor", "Beauty/Personal Care"], "title": "Labels", "type": "string"}}, "properties":
-      {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}], "description":
-      "The classification label"}}, "required": ["predicted_category"], "type": "object"}}}]}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '969'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA2xSXU/bMBR9z6+w7nPLGkpomzfWPbCJqUMa08SKIte5SQ2ObdnXE13V/47yQRKq
-        +SGy7vH5yLGPEWMgc0gZiD0nUVk1XZHYu3ix1I8Pa/x2X3zVL7++lD+Xq9937hYmNcPsnlHQO+tC
-        mMoqJGl0CwuHnLBWjReX89nVfJkkDVCZHFVNKy1N5xfJlILbmeksvkw65t5IgR5S9idijLFj860z
-        6hxfIWWzyfukQu95iZD2hxgDZ1Q9Ae699MQ1wWQAhdGEuo6tg1IjgIxRmeBKDcbtOo72Q1Fcqexm
-        vfn3d+Ou5/n93ep1uXi4vX6Mw/P3kV8rfbBNoCJo0Rc0wvt5embGGGheNdxNIBvojMkYcFeGCjXV
-        qeG4Beswl4IwzwQnLI07bCHdwmfkgQ6ffqDzRnPF1tzhFk7wQe4U/W//NCrJYRE8V1173fzUX4cy
-        pXVm58/ahUJq6feZQ+6bvwRPxrbetU/jAOHDTYJ1prKUkXlBXQvGV3GrB8NLG9BVh5EhrkakZBZ1
-        AcEfPGGVFVKX6KyT/SOITtEbAAAA//8DAFrQx+YDAwAA
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8af83c0119bf08ce-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Wed, 07 Aug 2024 15:17:41 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '5728'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '200000'
-      x-ratelimit-remaining-requests:
-      - '9992'
-      x-ratelimit-remaining-tokens:
-      - '198945'
-      x-ratelimit-reset-requests:
-      - 1m3.801s
-      x-ratelimit-reset-tokens:
-      - 316ms
-      x-request-id:
-      - req_c8f7cd66042128243759581ca1058ba5
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
-      expected actions and instructs the large language model (LLM) to generate a
-      specific output. This prompt is concatenated with the input text, and the model
-      then creates the required output.\nThis describes the full template how the
-      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nText:
-      {text}\nCategory: {predicted_category}\n```\n\nHere:\n- \"Text: {text}\" is
-      input template,\n- \"{prompt}\" is the LLM prompt,\n- \"Category: {predicted_category}\"
-      is the output template.\n\nModel can produce erroneous output if a prompt is
-      not well defined. In our collaboration, we\u2019ll work together to refine a
-      prompt. The process consists of two main steps:\n\n## Step 1\nI will provide
-      you with the current prompt along with prediction examples. Each example contains
-      the input text, the final prediction produced by the model, and the user feedback.
-      User feedback indicates whether the model prediction is correct or not. Your
-      task is to analyze the examples and user feedback, determining whether the existing
-      instruction is describing the task reflected by these examples precisely, and
-      suggests changes to the prompt to address the incorrect predictions.\n\n## Step
-      2\nNext, you will carefully review your reasoning in step 1, integrate the insights
-      to refine the prompt, and provide me with the new prompt that improves the model\u2019s
-      performance."}, {"role": "assistant", "content": "Sure, I\u2019d be happy to
-      help you with this prompt engineering problem. Please provide me with the current
-      prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
-      Current prompt\nClassify the input text into its correct product category based
-      on the description provided. Ensure accuracy by closely aligning the description
-      with the most relevant category.\n\n## Examples\n### Example #0\n\nText: Apple
-      product with a sleek design.\n\nCategory: Electronics\n\nUser feedback: Prediction
-      is incorrect. Correct answer: \"Electronics\"\n\n\n### Example #1\n\nText: Laptop
-      stand for the kitchen.\n\nCategory: Electronics\n\nUser feedback: Prediction
-      is incorrect. Correct answer: \"Furniture/Home Decor\"\n\n\n### Example #2\n\nText:
-      Chocolate leather boots.\n\nCategory: Footwear/Clothing\n\nUser feedback: Prediction
-      is incorrect. Correct answer: \"Footwear/Clothing\"\n\n\n### Example #3\n\nText:
-      Wooden cream for surfaces.\n\nCategory: Furniture/Home Decor\n\nUser feedback:
-      Prediction is incorrect. Correct answer: \"Furniture/Home Decor\"\n\n\n### Example
-      #4\n\nText: Natural finish for your lips.\n\nCategory: Beauty/Personal Care\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Beauty/Personal Care\"\n\n\n\nSummarize
-      your analysis about incorrect predictions and suggest changes to the prompt."}],
-      "model": "gpt-4-turbo", "max_tokens": 1000, "seed": 47, "temperature": 0.0}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '2993'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//vFZNbxtHDL37VxDrQ1JBVixbrmvdUjdpGhStmzooiqowqFmuduLZ4WKG
-        a1kJ8t8Lzn5Iih2gQT8uexiSM3yPXD5+OADIbJ7NITMliqlqd3Qhprxv3s3C28tffn5z9vvri/dn
-        r4vNrAnTs+fZWCN4+Y6M9FETw1XtSCz71mwCoZDeOj0/OT2enX7z9TQZKs7JadiqlqPZkTRhyUcn
-        xyezo+PZ0fFFF12yNRSzOfxxAADwIX01T5/TfTaH43F/UlGMuKJsPjgBZIGdnmQYo42CXrLx1mjY
-        C/mU+uHhITz36DbRRuACfvCGQyAjcBUot0bxxIVf+Lc1ewh0Z2lt/QqkJKB7VMgR6sB3Nqd8DFYA
-        65owRJASJbklvE/Ua7gQMOh5FLcBNKYJKDSGZZMCAiVz5IrAesNeEZA3liJYn65sIgUoiPIlmltA
-        n+89xI3UjUzgFQV6EgFhGQhvc177uSKZTmA0etHmDofHo9EcFh4AjmA0uqZ70YPntRrrwHljBNZW
-        SkCIjugWcop25SdDyJYnDXzhyEhgb00cPN5qti+7bNVpIHnAvAVje5vbQBQUisneVwV9XFMAjLDI
-        dt/KYF1aU0KFYsouZkv4Ntu+1prG9Z4P2AhDWj2l+0RHoiqCMCwJ0AOFwGGilJ7sUTodjeYPGP0R
-        a+FaIfkcCg7p+lur2f4zMi/3mJnDInvZBG+lCfTslfbQd2Q4LLK/ScHA/yQZU09tgZd4R1CwaSLl
-        wB4WWYtrkaVK2pXnQHlXMS90L/pTLbJPAI+HesVmtaIo2qW5LQoK5AUMCq04bBK3p3vcnjzG7WXJ
-        hh0KgSPUPwiWzBI/R+tLZlkThmeXjqW0fvVF5D4Izv6d5jLsCxuU5tLGhHy2h/z0MeS/MefkQWdt
-        lboqNqFAQ5/H/lhv/F+99cUMnO0xMHuMgZ9QmoAOCuttLBMHG24COFt/loRvCRvZPLuiENmjg0sM
-        9CUkPBr/n5GgEvVr+5tQDpcl+hWln1GDrwJXtajb9/aOWnXA7v1xqwpo9d3Y0N782hMMYzDaBKVA
-        65pA6tT9wA06+57AisZuZ/NTjHqfV0naTr6vJnDNYCtVxP03agoFhwq9oXE3nTVzMNy4XBMKVFiv
-        s4OBqrrEqK+qo61qDqKBOkv6sdKzF2sytrBGaVR7d3XSrZyiCXZJ+Y4WqoTr8LqjoJB3Qqpakj6O
-        Rm86n5bc+Wi08Ivs0ukuUWzanHytwqWJWC8MVgZuhtf7KQbLDRgMVDTObSDpeU6hXyLaHOvUHf0e
-        MYEr3LTI0AGKLitq72q+S8Ee/Kr1o7zfE5KbMKCzK//guSTrbY2iQCBHd7gzfYfNxG0m8MJHbYs6
-        kLGJN+t7R/se++zIl6lOqaUjio0FdgKcKbXXpY1DBboGIG+4CbjqRLsVHOFWZcCzwLsmiorNLW3W
-        HPKYpAZdZD38lBCrq11O+SP9MO41p0w9V5KrWxiRIjh7SzuNrL66ie1e//SBji2yr0C3Ia0Aev0t
-        rC9cQ958srYMira7hmpLRNRV2DfOdecfh73W8aoOvIydfThvJ91NIIzsdYeNwnWWrB8PAP5M+3Oz
-        txJnLdc3wrfk9cKzs4v2vmy7tu9aZ51VWNBtDdPp9PSgyzGLmyhU3RTWryjUwbYLdVHfmPNzOj7P
-        Z1RkBx8P/gIAAP//AwCfOKInXgwAAA==
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8af83c275da108ce-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Wed, 07 Aug 2024 15:18:05 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '23992'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '500'
-      x-ratelimit-limit-tokens:
-      - '30000'
-      x-ratelimit-remaining-requests:
-      - '499'
-      x-ratelimit-remaining-tokens:
-      - '28329'
-      x-ratelimit-reset-requests:
-      - 120ms
-      x-ratelimit-reset-tokens:
-      - 3.342s
-      x-request-id:
-      - req_49fe18641d7a416c40b94cba454097c9
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
-      expected actions and instructs the large language model (LLM) to generate a
-      specific output. This prompt is concatenated with the input text, and the model
-      then creates the required output.\nThis describes the full template how the
-      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nText:
-      {text}\nCategory: {predicted_category}\n```\n\nHere:\n- \"Text: {text}\" is
-      input template,\n- \"{prompt}\" is the LLM prompt,\n- \"Category: {predicted_category}\"
-      is the output template.\n\nModel can produce erroneous output if a prompt is
-      not well defined. In our collaboration, we\u2019ll work together to refine a
-      prompt. The process consists of two main steps:\n\n## Step 1\nI will provide
-      you with the current prompt along with prediction examples. Each example contains
-      the input text, the final prediction produced by the model, and the user feedback.
-      User feedback indicates whether the model prediction is correct or not. Your
-      task is to analyze the examples and user feedback, determining whether the existing
-      instruction is describing the task reflected by these examples precisely, and
-      suggests changes to the prompt to address the incorrect predictions.\n\n## Step
-      2\nNext, you will carefully review your reasoning in step 1, integrate the insights
-      to refine the prompt, and provide me with the new prompt that improves the model\u2019s
-      performance."}, {"role": "assistant", "content": "Sure, I\u2019d be happy to
-      help you with this prompt engineering problem. Please provide me with the current
-      prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
-      Current prompt\nClassify the input text into its correct product category based
-      on the description provided. Ensure accuracy by closely aligning the description
-      with the most relevant category.\n\n## Examples\n### Example #0\n\nText: Apple
-      product with a sleek design.\n\nCategory: Electronics\n\nUser feedback: Prediction
-      is incorrect. Correct answer: \"Electronics\"\n\n\n### Example #1\n\nText: Laptop
-      stand for the kitchen.\n\nCategory: Electronics\n\nUser feedback: Prediction
-      is incorrect. Correct answer: \"Furniture/Home Decor\"\n\n\n### Example #2\n\nText:
-      Chocolate leather boots.\n\nCategory: Footwear/Clothing\n\nUser feedback: Prediction
-      is incorrect. Correct answer: \"Footwear/Clothing\"\n\n\n### Example #3\n\nText:
-      Wooden cream for surfaces.\n\nCategory: Furniture/Home Decor\n\nUser feedback:
-      Prediction is incorrect. Correct answer: \"Furniture/Home Decor\"\n\n\n### Example
-      #4\n\nText: Natural finish for your lips.\n\nCategory: Beauty/Personal Care\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Beauty/Personal Care\"\n\n\n\nSummarize
-      your analysis about incorrect predictions and suggest changes to the prompt."},
-      {"role": "assistant", "content": "### Analysis of Incorrect Predictions\n\nUpon
-      reviewing the examples provided, it appears that the model''s predictions are
-      mostly accurate, but there are some inconsistencies in the user feedback and
-      the model''s output. Here''s a breakdown:\n\n1. **Example #0**: \n   - **Text**:
-      Apple product with a sleek design.\n   - **Prediction**: Electronics\n   - **User
-      Feedback**: Incorrect, but the feedback incorrectly states the correct answer
-      as \"Electronics\" which matches the prediction.\n   - **Analysis**: The prediction
-      is correct, and the user feedback seems to be an error.\n\n2. **Example #1**:\n   -
-      **Text**: Laptop stand for the kitchen.\n   - **Prediction**: Electronics\n   -
-      **User Feedback**: Correct answer: \"Furniture/Home Decor\"\n   - **Analysis**:
-      The prediction is incorrect. The model seems to have focused on \"Laptop\" but
-      ignored the context of \"for the kitchen,\" which suggests a different category.\n\n3.
-      **Example #2**:\n   - **Text**: Chocolate leather boots.\n   - **Prediction**:
-      Footwear/Clothing\n   - **User Feedback**: Correct answer: \"Footwear/Clothing\"\n   -
-      **Analysis**: The prediction is correct, and the user feedback confirms this.\n\n4.
-      **Example #3**:\n   - **Text**: Wooden cream for surfaces.\n   - **Prediction**:
-      Furniture/Home Decor\n   - **User Feedback**: Correct answer: \"Furniture/Home
-      Decor\"\n   - **Analysis**: The prediction is correct, and the user feedback
-      confirms this.\n\n5. **Example #4**:\n   - **Text**: Natural finish for your
-      lips.\n   - **Prediction**: Beauty/Personal Care\n   - **User Feedback**: Correct
-      answer: \"Beauty/Personal Care\"\n   - **Analysis**: The prediction is correct,
-      and the user feedback confirms this.\n\n### Suggested Changes to the Prompt\n\nGiven
-      the analysis, the main issue seems to be the model''s occasional failure to
-      contextualize items correctly (as seen in Example #1). To improve the model''s
-      performance, the prompt could be refined to emphasize the importance of context
-      and the specific use of the product described. Here''s a revised version of
-      the prompt:\n\n**Revised Prompt:**\n\"Classify the input text into its correct
-      product category by carefully considering the description provided. Pay special
-      attention to the context and specific use mentioned in the text to align the
-      description with the most relevant category accurately. Ensure precision in
-      categorization to enhance user satisfaction.\"\n\nThis revised prompt encourages
-      the model to focus not just on keywords but also on the context and intended
-      use of the product, which should help in cases like Example #1, where the context
-      (\"for the kitchen\") significantly influences the correct category."}, {"role":
-      "user", "content": "\nNow please carefully review your reasoning in Step 1 and
-      help with Step 2: refining the prompt.\n\n## Current prompt\nClassify the input
-      text into its correct product category based on the description provided. Ensure
-      accuracy by closely aligning the description with the most relevant category.\n\n##
-      Follow this guidance to refine the prompt:\n\n1. The new prompt should should
-      describe the task precisely, and address the points raised in the user feedback.\n\n2.
-      The new prompt should be similar to the current prompt, and only differ in the
-      parts that address the issues you identified in Step 1.\n    Example:\n    -
-      Current prompt: \"Generate a summary of the input text.\"\n    - New prompt:
-      \"Generate a summary of the input text. Pay attention to the original style.\"\n\n3.
-      Reply only with the new prompt. Do not include input and output templates in
-      the prompt.\n"}], "model": "gpt-4-turbo", "max_tokens": 1000, "seed": 47, "temperature":
-      0.0}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '6613'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//XFJLb9swDL7nVxA6x4GbGM3juK4bdhi2w7AH1iGQJdrWIomCRHcxivz3
-        QY6TdLvowO/Bj6ReZgDCaLEDoTrJygVbbFmZj/bh01t/+PHh+/s3Xw7f3n397FtH4bET86yg+jcq
-        vqgWilywyIb8GVYRJWN2vVsvV2W12mzuR8CRRptlbeCiKriPNRXLclkVZVWU20ndkVGYxA5+zgAA
-        XsY35/Qaj2IH5fxScZiSbFHsriQAEcnmipApmcTSs5jfQEWe0Y/Rn8SDzZxmAO4QjA89A+ORwXgm
-        MJxAUYyoGEIk3SsGJRlbigPUMqEG8qNSY1LRhDx/Zj4bjXoBjz71EUEq1UepBqgHUJYS2gHwKJ3x
-        xrdQE3ejRwqoTGMUGEaXwKHPdqhBej0SxuBHBoo5HnqNGvp0aV6jBnNOk1lzkNa0Y4f/A/4xU0dH
-        iSGixWfpb5MtnsTrdUVs+iTzyXxv7VQ/XfdvqQ2R6jTh13pjvEndPqJM5POuE1MQI3qaAfwa79z/
-        czoRIrnAe6YD+mx4t9zenw3F7X/d4GozgUws7SvZqqpmU0aRhsTo9o3xLcYQzfnwTdir9RrLta6w
-        EbPT7C8AAAD//wMAyowghAYDAAA=
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8af83cbeef3508ce-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Wed, 07 Aug 2024 15:18:09 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '3682'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '500'
-      x-ratelimit-limit-tokens:
-      - '30000'
-      x-ratelimit-remaining-requests:
-      - '499'
-      x-ratelimit-remaining-tokens:
-      - '27460'
-      x-ratelimit-reset-requests:
-      - 120ms
-      x-ratelimit-reset-tokens:
-      - 5.08s
-      x-request-id:
-      - req_5d52d99792f43ec73369be417e2a09f3
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "\"Classify the input text
-      into its correct product category based on the description provided. Ensure
-      accuracy by closely examining both the specific items mentioned and the context
-      or intended use described in the text, aligning the description with the most
-      relevant category.\""}, {"role": "user", "content": "Text: Apple product with
-      a sleek design."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47,
+      the correct product category, considering both the specific items mentioned
+      and their context or intended use."}, {"role": "user", "content": "Text: Chocolate
+      leather boots."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47,
       "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
       "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
       "Correctly extracted `Output` with all the required parameters with correct
-      types", "parameters": {"$defs": {"Labels": {"enum": ["Footwear/Clothing", "Electronics",
-      "Food/Beverages", "Furniture/Home Decor", "Beauty/Personal Care"], "title":
-      "Labels", "type": "string"}}, "properties": {"predicted_category": {"allOf":
-      [{"$ref": "#/$defs/Labels"}], "description": "The classification label"}}, "required":
-      ["predicted_category"], "type": "object"}}}]}'
+      types", "parameters": {"properties": {"predicted_category": {"description":
+      "The classification label", "enum": ["Footwear/Clothing", "Electronics", "Food/Beverages",
+      "Furniture/Home Decor", "Beauty/Personal Care"], "title": "Predicted Category",
+      "type": "string"}}, "required": ["predicted_category"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -1875,18 +1226,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '1077'
+      - '876'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -1898,25 +1249,25 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSy27bMBC86yuIPceBH0ns6N5DkLZOe2jR1oVAUyuZMcllyRVc1/C/F5RVSTGq
-        g0DsaB6c1SkTAnQJuQC1k6ysN5NHVvrTejU1x/U6qKfv22f78GT376v5IiDcJAZtX1HxP9atIusN
-        siZ3gVVAyZhUZ8v5Ynq3WD1OW8BSiSbRas+Txe39hJuwpcl0Nr/vmDvSCiPk4kcmhBCn9p0yuhJ/
-        Qy5anXZiMUZZI+T9R0JAIJMmIGPUkaVjuBlARY7RpdiuMWYEMJEplDRmML48p9F5KEoaU/z5+nwg
-        e1h9e/ny4eP+1+vdgczLLH4e+V2kj74NVDVO9QWN8H6eX5kJAU7alrtu2Dd8xRQCZKgbi45Tajht
-        wAcstWIsCyUZawrHDeQbeGdQcSCnVdzAGd6onLP/nX+OuglYNVGarrRufu63YKj2gbbxqlSotNNx
-        VwSUsb0cRCZ/8U4+rQM0bxYIPpD1XDDt0SXB2UO3bRh+sAFddhgTSzMmLbMuIMRjZLRFpV2NwQfd
-        7z47Z38BAAD//wMADnNRfPoCAAA=
+        H4sIAAAAAAAAA2xSTWvbQBC961csc7ZTK7axo1sSaC4F00Abk7qI1Wokb7LaWXZHdY3xfy/6iKyY
+        6iCW9/Q+NDunSAjQOSQC1F6yqpyZ3v3x5eEh37w9/XjK/MMjPt9l623+/vPgzTeYNArK3lDxh+pG
+        UeUMsibb0cqjZGxc49XtfLlax/GiJSrK0TSy0vF0frOccu0zms7i22Wv3JNWGCARvyIhhDi176aj
+        zfEvJGI2+UAqDEGWCMnwkRDgyTQIyBB0YGkZJhdSkWW0TW1bGzMimMikShpzCe6e0+h8GZQ0Jq2W
+        r+vt6/far7f3L2ETZs9Ftlndv4zyOuujawsVtVXDgEb8gCdXYUKAlVWr3dTsar5SCgHSl3WFlpvW
+        cNqB85hrxZinSjKW5I87SHbwlYgPKP2XR0O817bcwRk+eZ2j/51/jybksaiDNP3oevw83IWh0nnK
+        wtVoodBWh33qUYb2FyEwuS67yWkToP50jeA8VY5Tpne0jWE8X3R+cFmzEdsvBDCxNCN8sYj6hhCO
+        gbFKC21L9M7rYQWic/QPAAD//wMAYTObnwEDAAA=
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83cd70d6808ce-LAX
+      - 8b2b2f7098b24892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -1924,7 +1275,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:18:10 GMT
+      - Tue, 13 Aug 2024 19:41:55 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -1934,9 +1285,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '393'
+      - '213'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -1944,35 +1295,32 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '200000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9995'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '198918'
+      - '49998954'
       x-ratelimit-reset-requests:
-      - 38.217s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 324ms
+      - 1ms
       x-request-id:
-      - req_b0b419f5d8c40d7a1c29a267d7a7dc34
+      - req_c8c4215b1683f7dbb189383d417fdd4c
     status:
       code: 200
       message: OK
 - request:
-    body: '{"messages": [{"role": "system", "content": "\"Classify the input text
-      into its correct product category based on the description provided. Ensure
-      accuracy by closely examining both the specific items mentioned and the context
-      or intended use described in the text, aligning the description with the most
-      relevant category.\""}, {"role": "user", "content": "Text: Laptop stand for
-      the kitchen."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47, "temperature":
-      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
-      [{"type": "function", "function": {"name": "Output", "description": "Correctly
-      extracted `Output` with all the required parameters with correct types", "parameters":
-      {"$defs": {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages",
-      "Furniture/Home Decor", "Beauty/Personal Care"], "title": "Labels", "type":
-      "string"}}, "properties": {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}],
-      "description": "The classification label"}}, "required": ["predicted_category"],
-      "type": "object"}}}]}'
+    body: '{"messages": [{"role": "system", "content": "Classify the input text into
+      the correct product category, considering both the specific items mentioned
+      and their context or intended use."}, {"role": "user", "content": "Text: Wooden
+      cream for surfaces."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed":
+      47, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
+      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
+      "Correctly extracted `Output` with all the required parameters with correct
+      types", "parameters": {"properties": {"predicted_category": {"description":
+      "The classification label", "enum": ["Footwear/Clothing", "Electronics", "Food/Beverages",
+      "Furniture/Home Decor", "Beauty/Personal Care"], "title": "Predicted Category",
+      "type": "string"}}, "required": ["predicted_category"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -1981,18 +1329,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '1072'
+      - '878'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -2004,25 +1352,25 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSXW/TMBR9z6+w7vM6tevarXkDNMQEZZpALRpFkevcph6Or2XfoHVV/ztyEpKs
-        Ig+RdU/Oh8/NMRECdA6pALWXrEpnRgtW+vE+vCx/vMvD6onubu9X5oEf8xUu1nARGbR9RsX/WJeK
-        SmeQNdkGVh4lY1Sd3FxNx9fT28W4BkrK0URa4Xg0vZyNuPJbGo0nV7OWuSetMEAqfiZCCHGs3zGj
-        zfEFUlHr1JMSQ5AFQtp9JAR4MnECMgQdWFqGix5UZBltjG0rYwYAE5lMSWN64+Y5Ds59UdKY7INe
-        riffPv15fp1/158/rpfv1/rL9dPXgV8jfXB1oF1lVVfQAO/m6ZmZEGBlWXMfKnYVnzGFAOmLqkTL
-        MTUcN+A85lox5pmSjAX5wwbSDdwZVOzJahU2cII3Kqfkf+dfg2487qogTVtaOz91WzBUOE/bcFYq
-        7LTVYZ95lKG+HAQm13hHn9oBqjcLBOepdJwx/UYbBSezRaMH/Q/WozctxsTSDEjzedIGhHAIjGW2
-        07ZA77zudp+ckr8AAAD//wMAYBhsyfoCAAA=
+        H4sIAAAAAAAAA2xSXW/TMBR9z6+w7nM7mrZhW95GASEE4wWkITpFrnOTmvlr9vVoV/W/o6RZklXz
+        Q2Td4/ORYx8SxkCWkDMQW05COzW9fvL17vZO3Dy72Sd8/xOvHn/Rbfw63z7ebGDSMOzmLwp6YV0I
+        q51CktacYOGREzaq6eV8kV1epWnWAtqWqBpa7Wi6uMimFP3GTmfpPOuYWysFBsjZn4Qxxg7tt8lo
+        StxBzmaTl4nGEHiNkPeHGANvVTMBHoIMxA3BZACFNYSmiW2iUiOArFWF4EoNxqd1GO2HorhSxe4u
+        rJ4+iOqf3eHvB/XdL7+t9FKsRn4n6b1rA1XRiL6gEd7P8zMzxsBw3XJ/RHKRzpiMAfd11GioSQ2H
+        NTiPpRSEZSE4YW39fg35Gj5HbyRFj+++WI3sIwrr13CEV3LH5K39/agkj1UMXHXtdfNjfx3K1s7b
+        TThrFyppZNgWHnlo/xICWXfybnxaB4ivbhKct9pRQfYBTSOYLrKTHgwvbUCvO4wscTUiLZdJFxDC
+        PhDqopKmRu+87B9Bckz+AwAA//8DAGBRewUDAwAA
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83cdbfba708ce-LAX
+      - 8b2b2f7498c84892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -2030,7 +1378,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:18:11 GMT
+      - Tue, 13 Aug 2024 19:41:55 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -2040,9 +1388,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '515'
+      - '253'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -2050,35 +1398,32 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '200000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9994'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '198918'
+      - '49998955'
       x-ratelimit-reset-requests:
-      - 46.071s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 324ms
+      - 1ms
       x-request-id:
-      - req_4642505077d650b221cb6140e2e605f5
+      - req_708332a95272480c5941cf3d5d14a6b9
     status:
       code: 200
       message: OK
 - request:
-    body: '{"messages": [{"role": "system", "content": "\"Classify the input text
-      into its correct product category based on the description provided. Ensure
-      accuracy by closely examining both the specific items mentioned and the context
-      or intended use described in the text, aligning the description with the most
-      relevant category.\""}, {"role": "user", "content": "Text: Chocolate leather
-      boots."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47, "temperature":
-      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
-      [{"type": "function", "function": {"name": "Output", "description": "Correctly
-      extracted `Output` with all the required parameters with correct types", "parameters":
-      {"$defs": {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages",
-      "Furniture/Home Decor", "Beauty/Personal Care"], "title": "Labels", "type":
-      "string"}}, "properties": {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}],
-      "description": "The classification label"}}, "required": ["predicted_category"],
-      "type": "object"}}}]}'
+    body: '{"messages": [{"role": "system", "content": "Classify the input text into
+      the correct product category, considering both the specific items mentioned
+      and their context or intended use."}, {"role": "user", "content": "Text: Natural
+      finish for your lips."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed":
+      47, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
+      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
+      "Correctly extracted `Output` with all the required parameters with correct
+      types", "parameters": {"properties": {"predicted_category": {"description":
+      "The classification label", "enum": ["Footwear/Clothing", "Electronics", "Food/Beverages",
+      "Furniture/Home Decor", "Beauty/Personal Care"], "title": "Predicted Category",
+      "type": "string"}}, "required": ["predicted_category"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -2087,18 +1432,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '1067'
+      - '881'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -2110,25 +1455,25 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSyW7bMBC96yuIOdupZNd1o2sSB+klReEAXVwIFDWS2VAchhyhNQz/e6ElsmJE
-        B4F4T2/RcI6REKALSAWovWRVOzO/ZqW/3b64+/JxeVu+PN2pzVd/Hz8smvxLA7NWQfkfVPyqulJU
-        O4Osyfa08igZW9dkvVjGH5efr5OOqKlA08oqx/Pl1WrOjc9pHieL1aDck1YYIBW/IiGEOHbvtqMt
-        8B+kIp69IjWGICuEdPxICPBkWgRkCDqwtAyzM6nIMtq2tm2MmRBMZDIljTkH989xcj4PShqTlVW+
-        jZP8brv+rn8++M3Tjw0mz1s9yeutD64rVDZWjQOa8COeXoQJAVbWnfaxYdfwhVIIkL5qarTctobj
-        DpzHQivGIlOSsSJ/2EG6gw0R/0XpP9wY4r221Q5O8MbrFL13/j2ZkMeyCdIMoxvw03gXhirnKQ8X
-        o4VSWx32mUcZul+EwOT67DanS4DmzTWC81Q7zpie0baGyWrd+8F5zSbssBDAxNJM8E/raGgI4RAY
-        66zUtkLvvB5XIDpF/wEAAP//AwBcHVnBAQMAAA==
+        H4sIAAAAAAAAAwAAAP//bFLJbtswEL3rK4g526ll10mtW2O0QJamToD2UhcCTY1kxhRJkMMgiuF/
+        L7REUozyIBDz+BY98hgxBjKDhIHYcxKlVdPViyuq35vbe3UbP38zm/2By+8P+d3h14+NgEnNMLtn
+        FPTOuhCmtApJGt3CwiEnrFXjq/liefUlji8boDQZqppWWJouLpZTCm5nprN4vuyYeyMFekjYn4gx
+        xo7Nt86oM3yFhM0m75MSvecFQtIfYgycUfUEuPfSE9cEkwEURhPqOrYOSo0AMkalgis1GLfrONoP
+        RXGl0sPN6+PbfOXX1dPLbH1/PX/7enfz9LAb+bXSlW0C5UGLvqAR3s+TMzPGQPOy4f4MZAOdMRkD
+        7opQoqY6NRy3YB1mUhBmqeCEhXHVFpItXCMPVH3aoPNGc8XW3OEWTvBB7hT9b/93VJLDPHiuuva6
+        +am/DmUK68zOn7ULudTS71OH3Dd/CZ6Mbb1rn8YBwoebBOtMaSklc0BdC8aLy1YPhpc2oKsOI0Nc
+        jUifl1EXEHzlCcs0l7pAZ53sH0F0iv4BAAD//wMABQPrMwMDAAA=
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83ce18b3b08ce-LAX
+      - 8b2b2f78d87e4892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -2136,7 +1481,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:18:12 GMT
+      - Tue, 13 Aug 2024 19:41:56 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -2146,9 +1491,9 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '484'
+      - '243'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -2156,229 +1501,17 @@ interactions:
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '200000'
+      - '50000000'
       x-ratelimit-remaining-requests:
-      - '9993'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '198921'
+      - '49998954'
       x-ratelimit-reset-requests:
-      - 53.811s
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 323ms
+      - 1ms
       x-request-id:
-      - req_499400e2a946be4b970b9b8b53bf7105
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "\"Classify the input text
-      into its correct product category based on the description provided. Ensure
-      accuracy by closely examining both the specific items mentioned and the context
-      or intended use described in the text, aligning the description with the most
-      relevant category.\""}, {"role": "user", "content": "Text: Wooden cream for
-      surfaces."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47, "temperature":
-      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
-      [{"type": "function", "function": {"name": "Output", "description": "Correctly
-      extracted `Output` with all the required parameters with correct types", "parameters":
-      {"$defs": {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages",
-      "Furniture/Home Decor", "Beauty/Personal Care"], "title": "Labels", "type":
-      "string"}}, "properties": {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}],
-      "description": "The classification label"}}, "required": ["predicted_category"],
-      "type": "object"}}}]}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '1069'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA2xSy47aMBTd5yusu4YpkDJAlsMUhaKqaruqShUZ5xJMHdtjX6uDEP9e5TFJBtWL
-        yLrH55FjXyPGQOaQMBAnTqK0arwiIX/sztv5IrXx086L749mm/58+bIS+QuMKoY5nFHQG+tBmNIq
-        JGl0AwuHnLBSnS5m8eRjvFzNaqA0OaqKVlgaxw/zMQV3MOPJdDZvmScjBXpI2K+IMcau9bfKqHN8
-        hYRNRm+TEr3nBULSHWIMnFHVBLj30hPXBKMeFEYT6iq2DkoNADJGZYIr1Rs36zrY90VxpbI43bzm
-        3z6v8802pJ/k7vB3mdJ5vR74NdIXWwc6Bi26ggZ4N0/uzBgDzcua+zWQDXTHZAy4K0KJmqrUcN2D
-        dZhLQZhnghMWxl32kOxhE5yWFBx+SE2J7BmFcXu4wTu5W/S//e9BSQ6PwXPVttfOb911KFNYZw7+
-        rl04Si39KXPIff2X4MnYxrvyqR0gvLtJsM6UljIyf1BXgtP5stGD/qX16KrFyBBXA9LjImoDgr94
-        wjI7Sl2gs052jyC6Rf8AAAD//wMAn0h4PQMDAAA=
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8af83ce63ade08ce-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Wed, 07 Aug 2024 15:18:12 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '509'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '200000'
-      x-ratelimit-remaining-requests:
-      - '9992'
-      x-ratelimit-remaining-tokens:
-      - '198920'
-      x-ratelimit-reset-requests:
-      - 1m1.709s
-      x-ratelimit-reset-tokens:
-      - 324ms
-      x-request-id:
-      - req_7225ca83e598809a4b4bc08e249be396
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "system", "content": "\"Classify the input text
-      into its correct product category based on the description provided. Ensure
-      accuracy by closely examining both the specific items mentioned and the context
-      or intended use described in the text, aligning the description with the most
-      relevant category.\""}, {"role": "user", "content": "Text: Natural finish for
-      your lips."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47, "temperature":
-      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
-      [{"type": "function", "function": {"name": "Output", "description": "Correctly
-      extracted `Output` with all the required parameters with correct types", "parameters":
-      {"$defs": {"Labels": {"enum": ["Footwear/Clothing", "Electronics", "Food/Beverages",
-      "Furniture/Home Decor", "Beauty/Personal Care"], "title": "Labels", "type":
-      "string"}}, "properties": {"predicted_category": {"allOf": [{"$ref": "#/$defs/Labels"}],
-      "description": "The classification label"}}, "required": ["predicted_category"],
-      "type": "object"}}}]}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '1072'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - x64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.10.5
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//bFJdb5swFH3nV1j3OemSptkS3rZ2WlW1XaX2KcuEbswFvBnbtS9aWZT/
-        PgEJ0Gh+QNY9Ph8cex8JASqFWIAskGXp9HTNUr2k6vbtObu7efj8VOhNfpM/7v58ndEVTBqG3f0i
-        ySfWhbSl08TKmg6WnpCpUZ1/ulzMrhar9aIFSpuSbmi54+niYjnlyu/sdDa/XB6ZhVWSAsTiRySE
-        EPv222Q0Kb1BLGaT06SkEDAniPtDQoC3upkAhqACo2GYDKC0hsk0sU2l9Qhga3UiUevBuFv70X4o
-        CrVOvuHyRd1v8Po+1Fi8slab1S35vyO/Trp2baCsMrIvaIT38/jMTAgwWLbc7xW7is+YQgD6vCrJ
-        cJMa9ltwnlIlmdJEIlNufb2FeAtfCCuuPzyRD9agFtfoaQsHeCd3iP63/zkqyVNWBdTH9o7zQ38d
-        2ubO2104axcyZVQoEk8Y2r+EwNZ13o1P6wDVu5sE523pOGH7m0wjOF+uOz0YXtqAnjC2jHpE+riK
-        jgEh1IGpTDJlcvLOq/4RRIfoHwAAAP//AwCsPVuyAwMAAA==
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8af83cebb9fc08ce-LAX
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Wed, 07 Aug 2024 15:18:13 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
-      openai-processing-ms:
-      - '514'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '10000'
-      x-ratelimit-limit-tokens:
-      - '200000'
-      x-ratelimit-remaining-requests:
-      - '9991'
-      x-ratelimit-remaining-tokens:
-      - '198918'
-      x-ratelimit-reset-requests:
-      - 1m9.458s
-      x-ratelimit-reset-tokens:
-      - 324ms
-      x-request-id:
-      - req_83a9e783dd3ccc9d87fc204f80bcb60d
+      - req_34e5e25c850f4fdbd53002783c0ac450
     status:
       code: 200
       message: OK
@@ -2405,23 +1538,19 @@ interactions:
       performance."}, {"role": "assistant", "content": "Sure, I\u2019d be happy to
       help you with this prompt engineering problem. Please provide me with the current
       prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
-      Current prompt\n\"Classify the input text into its correct product category
-      based on the description provided. Ensure accuracy by closely examining both
-      the specific items mentioned and the context or intended use described in the
-      text, aligning the description with the most relevant category.\"\n\n## Examples\n###
+      Current prompt\nClassify the input text into the correct product category, considering
+      both the specific items mentioned and their context or intended use.\n\n## Examples\n###
       Example #0\n\nText: Apple product with a sleek design.\n\nCategory: Electronics\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Electronics\"\n\n\n###
-      Example #1\n\nText: Laptop stand for the kitchen.\n\nCategory: Electronics\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Furniture/Home Decor\"\n\n\n###
-      Example #2\n\nText: Chocolate leather boots.\n\nCategory: Footwear/Clothing\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Footwear/Clothing\"\n\n\n###
-      Example #3\n\nText: Wooden cream for surfaces.\n\nCategory: Furniture/Home Decor\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Furniture/Home Decor\"\n\n\n###
-      Example #4\n\nText: Natural finish for your lips.\n\nCategory: Beauty/Personal
-      Care\n\nUser feedback: Prediction is incorrect. Correct answer: \"Beauty/Personal
-      Care\"\n\n\n\nSummarize your analysis about incorrect predictions and suggest
-      changes to the prompt."}], "model": "gpt-4-turbo", "max_tokens": 1000, "seed":
-      47, "temperature": 0.0}'
+      feedback: Prediction is correct.\n\n\n### Example #1\n\nText: Laptop stand for
+      the kitchen.\n\nCategory: Electronics\n\nUser feedback: Prediction is incorrect.
+      Correct answer: \"Furniture/Home Decor\"\n\n\n### Example #2\n\nText: Chocolate
+      leather boots.\n\nCategory: Footwear/Clothing\n\nUser feedback: Prediction is
+      correct.\n\n\n### Example #3\n\nText: Wooden cream for surfaces.\n\nCategory:
+      Furniture/Home Decor\n\nUser feedback: Prediction is correct.\n\n\n### Example
+      #4\n\nText: Natural finish for your lips.\n\nCategory: Beauty/Personal Care\n\nUser
+      feedback: Prediction is correct.\n\n\n\nSummarize your analysis about incorrect
+      predictions and suggest changes to the prompt."}], "model": "gpt-4-turbo", "max_tokens":
+      1000, "seed": 47, "temperature": 0.0}'
     headers:
       accept:
       - application/json
@@ -2430,18 +1559,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '3096'
+      - '2795'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -2453,43 +1582,41 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA6RX32/bRgx+z19BKA9uA8dzEgdp8lZkLZZiD0HXYtjmITifKInN6U67o+KoRf/3
-        gXeSJbdpUaAvNnA/yO8+kh+pTwcAGeXZFWS6Uqzrxhxfsqb3NZ5+sH/+rcvLVp3fnryt3vx1sXzj
-        /svmcsNtPqDm4dZCu7oxyORs2tYeFaNYPbk4PVuuzl5cruJG7XI0cq1s+Hh1zK3fuOPT5enqeLk6
-        Xl72tytHGkN2Bf8cAAB8ir+C0+b4mF3Bcj6s1BiCKjG72h0CyLwzspKpECiwspzNx03tLKON0A8P
-        D+GlVaYLFMAVcGO18x41w63HnLS8J6zt2r72rgauEPBRyUMDNN49UI75HIhBNQ0qH4ArxfFYfOVM
-        Tu3MgPKyHth0oLRuvWKcw6aNFzzG7eBqBLLaWcGNVhMGIAutzdHLQ3KyZXQQH/HI4DyQPCfHHNqA
-        8gjZJsY6QI5Be9pgfiVvOFnA0dGrhB8Ol0dHV/CuwglE2KoA6+yVQc3eWdJhnYGyebTYBvRQIOYb
-        pe9BmeCAbE5aovz1pdCDTGTKodL5bgHvKgoDhxBQQLKDze6o6UAbiVpBQm3PzhfOAysWXlj80BCy
-        OWwr0hXUVFYsJhXUEvx7YTRa2RkgDmiKhZByukfKyUBK5Had/a4adg1E5qFwPpq5J9YV2nUW+Rrh
-        wpfszeVIxEQTnIvo4FtBg2cquXsuqBWEBjUVpCEgswT/We/+OYS2LDFwJCJUrjV5JDJxTR/FtqQN
-        rLPXrbfErcdffpME+xW184t1lqIxRDEkwvZTbdON6TzAbDzVyndQtDaljZDTGKWxRsvTx0SGz/YY
-        Pv1G2g2pogI06L8OejS12jN19jOmzvdMrX7GlIjIHykWmMN1pWyJMa3l+K13dcNy7J0DqkU1cF8h
-        0BfO18pqjER6zFudjohCCJ271BmDq6KkzFNaO2PcVqKl93030TfoXWqIrOTop3pwbZSnIkX5pm6c
-        54jEFXDdK4yAei8SKxy9slXcn5hnB1g3lQr0Ma3TnpnB6Q8KV+Nd3moepWsoXrnU68eWjIEKTTPJ
-        zagizOgnWhmhj/XQi2LU6EEkjBNYDurWMEkqDMcxwEYFzMFF9+R7RE3KeOMsfqUfIUpEZJQ7YevG
-        atPmk6bRv2VgTpCQMW3gGOrKbQVLTkWBHi2TLD4FqJVwCIM9mQt4HekMkfU5KJu0xNC9yOA6MxMd
-        W2eTjJiIxc6t6SDHBpMAODEV9kNFdjw86FKAZ64oSCM8hMUgkc9HAXiLBVmE35UtWwGfmELl0cON
-        Dezb1CXHQowU9bqGj40hTQKN+sP7sW88OU88pOAgTcpEwJIHg34+mVjgHvryLtGiV6bv6CmJPagQ
-        2hp3ydSNodDoWZGFe+y2zudhUIRDeIsPJIdGBVhn16lZpHIj20h7E/dk2UWeh0IfymB02EHhdBv6
-        mMj9aUIO08gCblWXmoY8gmXQkf1eEX6s+Oaid1s0Rv53DShVT50MiqeXhsqvkWyJqz42gcGjwQdl
-        +QnmJNslMNs4/Uxrnyb5lqaDNsg04JVMSlI2Fj60gYfuNNzjrsG+NGNB9GU3BwUz851OPvtu+5w9
-        1T1nkLcIfdC+LA4FlRzsM24u9DTEOICYCVDSyphu6OESVWVhNhkeZuPUtM5i/xDp831S7ZdH2VI+
-        6SpQO4+ARYGa6QFj0UBO0U1LoYqNHXmLaL+ld7tMEbqS3DxZOHMwqNJQ6pLbYbSdjr6L6fjtsWiD
-        kk8A2xrTr3/ezfPGlY13m9Dv79YLshSqO48qOCuze2DXZHH38wHAv/G7od37FMgSS3fs7tGKwfOL
-        i2QvGz9XJrvnL/pddqzMuHFycnZ+0GPMQhcY67uCbIm+8ZQ+JIrmTl9c4PIiX2GRHXw++B8AAP//
-        AwAncz6OVg0AAA==
+        H4sIAAAAAAAAAwAAAP//rFZNb9w2EL37Vwzkgxtj1/VX6nhvrpvAQYI2bZ2iQbcwuORImpgiBQ61
+        9ibIfy+GolZap+ih7WH3IA45b968+fi8B1CQKRZQ6FpF3bR2frkO1eb3D69+fn784erN9f3pm8fm
+        t/Dm7Mfme3NczOSGX31EHYdbR9o3rcVI3vXHOqCKKK+eXJyePb94cXLyXTpovEEr16o2zs/nsQsr
+        Pz89Pj2fH5/Pjy/z7dqTRi4W8MceAMDn9C84ncHHYgHHs+FLg8yqwmKxNQIogrfypVDMxFG5WMzG
+        Q+1dRJeg7+/vw5VTdsPE4Et47bQPAXWEdwENaYmHl27p9sXy5aOSIGH/ZOnmcHh4i49xcXgIb1Ub
+        fQviyEDpA8Qa4Z6irtEd9abXXQjoIlyriJUPG7n20qKOwTvSnI2y76nRqy44il3Ab298g/ADah96
+        6wG3WN3WCIlYaIi1lbBLQgOxJoaIjxEUw7KYeizA0j3aDaxQq44RKELpdcdowLsUwoMPBpaFTeHN
+        lgU81KRrkCc3LWll7QYUs9ckqYYHijXg6OIIbvwDrjHM0muJ9scI3yyLJxwti2fAXVUhR4ZYq5gO
+        KWIjvhofEALa5CN6qIUHIzyAD1AO/MwkRIpygyS/prdeIaSQFIPKGSIHanANjDGSq2bgfCJJuUkI
+        YHBNWqAw2vIoCwF+7bGigetauQpZHAnkd8E3bRQzSYjOOW/TVyDHMXQ6hThkK3rI2dr0Mbu2i33C
+        yOVHB0W2wZtOR9BZHbDaCKdMBgO5ClY+1ukCt6ipJJ0YZGjQiYyFAyeKQArbXPgwktUxPskYZr37
+        EsiNMIbCAHKGBM0kaYMIqzqCX2Owm15UIqktrnvciLT4K/GoMbigYo2iEuWg7ERpArQKSrK1o6cn
+        MUyIy3WgVULbBq+ROWXx1oMyJiBzKpE+3Jwn7TtrRDcBS3K9irBpa8X0CfssNa0PUTmdqBlw9NKa
+        AEnCxcfWkqZoN0dwgwFByQ9KfBgkLy1mIaBOjqQHWBUGNbze8XM98fN68POecXF4uHQAMIefAlXk
+        lF3Asrj+t7Ka/e+iWhYZ3y+4Jkbzn+CJ6ttAPlCkT0+l8FUKfLltJRPMM8A1OqASNIaoyI2KHBtb
+        zg4oMFSWmCp5AJFCWrpTSdi74NdkUBrHMB/ITbrBmJ4rYwSwdJhsKKLPxoP4lIOqk/fGavIOav8g
+        MnxAqupttElfNao1ibheJdo5yWWRPS4L+Zq9zUDBgf2HUXUAXA/an8wQxXDwd1PoYKdGDyaz5WA7
+        U3b6/sFTf88mHYQip4wpHlt6pvlMaH7ptO+CqhBuvCWOpOG9MxhSJOSqkebRcqfPKhmXuYATnjq/
+        k7I9DeVj17RJWV6wa9uxlCisVB6N21KIgaoKQ5qTPHJ+NfEkkgvZYfTQbSGn0wFCH7kzW65WWEpy
+        DWpKmskDeazRnfYoDTZbCaFrMp2yW01nFm9rZASdB5aiRvA06n5KU1IUo2OKtMZhqrlONJX2I9Fh
+        rkhOncwg60CrnT4wrUCe5aUhS6tG20p9BDSdFsyTfaXv05z2kuTYOwS/YgxrNEfTDS5g2bGSLdJ1
+        1ubvX7YrofVVG/yK8/n2e0mOuL4LqNg7Wf84+rZIp1/2AP5Mq2e3s00WfV3eRX+PTh58fvKif68Y
+        N97x9PziLJ9GH5UdDy4vT/YyxII3HLG5K8lVGNpA/Spatnf64gKPL8w5lsXel72/AAAA//8DAKbk
+        72+YCwAA
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83cf0c92708ce-LAX
+      - 8b2b2f7cf8924892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -2497,7 +1624,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:18:41 GMT
+      - Tue, 13 Aug 2024 19:42:15 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -2507,27 +1634,27 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '27845'
+      - '18474'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
       - max-age=15552000; includeSubDomains; preload
       x-ratelimit-limit-requests:
-      - '500'
+      - '10000'
       x-ratelimit-limit-tokens:
-      - '30000'
+      - '2000000'
       x-ratelimit-remaining-requests:
-      - '499'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '28304'
+      - '1998377'
       x-ratelimit-reset-requests:
-      - 120ms
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 3.392s
+      - 48ms
       x-request-id:
-      - req_b12c4ae311effa2bb005e8bf1f10bc93
+      - req_5cdf5afb67e29a5a40d19ab53dd580a7
     status:
       code: 200
       message: OK
@@ -2554,66 +1681,55 @@ interactions:
       performance."}, {"role": "assistant", "content": "Sure, I\u2019d be happy to
       help you with this prompt engineering problem. Please provide me with the current
       prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
-      Current prompt\n\"Classify the input text into its correct product category
-      based on the description provided. Ensure accuracy by closely examining both
-      the specific items mentioned and the context or intended use described in the
-      text, aligning the description with the most relevant category.\"\n\n## Examples\n###
+      Current prompt\nClassify the input text into the correct product category, considering
+      both the specific items mentioned and their context or intended use.\n\n## Examples\n###
       Example #0\n\nText: Apple product with a sleek design.\n\nCategory: Electronics\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Electronics\"\n\n\n###
-      Example #1\n\nText: Laptop stand for the kitchen.\n\nCategory: Electronics\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Furniture/Home Decor\"\n\n\n###
-      Example #2\n\nText: Chocolate leather boots.\n\nCategory: Footwear/Clothing\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Footwear/Clothing\"\n\n\n###
-      Example #3\n\nText: Wooden cream for surfaces.\n\nCategory: Furniture/Home Decor\n\nUser
-      feedback: Prediction is incorrect. Correct answer: \"Furniture/Home Decor\"\n\n\n###
-      Example #4\n\nText: Natural finish for your lips.\n\nCategory: Beauty/Personal
-      Care\n\nUser feedback: Prediction is incorrect. Correct answer: \"Beauty/Personal
-      Care\"\n\n\n\nSummarize your analysis about incorrect predictions and suggest
-      changes to the prompt."}, {"role": "assistant", "content": "### Analysis of
-      Incorrect Predictions\n\nFrom the examples provided, it appears that the model''s
-      predictions are mostly accurate, but there are some inconsistencies in understanding
-      the context or intended use of the items described:\n\n1. **Example #0**: The
-      prediction was \"Electronics\" and the user feedback also indicated \"Electronics\"
-      as the correct category. This example seems to be correctly classified, but
-      the user feedback states it as incorrect, which might be a mistake in the feedback
-      itself.\n\n2. **Example #1**: The text \"Laptop stand for the kitchen\" was
-      classified as \"Electronics,\" which is incorrect. The intended use of the item
-      (a stand) in a specific setting (kitchen) suggests it should be categorized
-      under \"Furniture/Home Decor.\" This indicates a misunderstanding by the model
-      of the primary function and placement of the item.\n\n3. **Example #2**: The
-      prediction was correct as per the user feedback.\n\n4. **Example #3**: The prediction
-      was correct as per the user feedback.\n\n5. **Example #4**: The prediction was
-      correct as per the user feedback.\n\n### Suggested Changes to the Prompt\n\nTo
-      improve the model''s performance and reduce the rate of incorrect categorizations,
-      the following changes to the prompt could be considered:\n\n1. **Clarify the
-      Importance of Context and Usage**: Enhance the prompt to emphasize the importance
-      of considering the context or intended use of the product described in the text.
-      This will help the model to better understand and categorize items that might
-      belong to multiple categories based on their description alone.\n\n2. **Examples
-      for Clarity**: Include examples in the prompt that illustrate how to differentiate
-      categories based on usage or context. For instance, an item like a \"laptop
-      stand\" could be categorized differently depending on its intended use in different
-      settings (office vs. kitchen).\n\n3. **Refine Language for Clearer Instructions**:
-      The prompt should explicitly instruct the model to prioritize the functional
-      use and setting described in the text over the general appearance or assumed
-      category based on certain keywords.\n\n#### Revised Prompt\n\n\"Classify the
-      input text into its correct product category by focusing on the description
-      provided. Pay special attention to the context or intended use of the product,
-      as well as specific items mentioned. Align the description with the most relevant
-      category based on how and where the product is intended to be used, rather than
-      just by the product type alone. For example, a ''laptop stand for the kitchen''
-      should be categorized under ''Furniture/Home Decor'' due to its intended use
-      in a home setting, despite ''laptop'' typically suggesting an ''Electronics''
-      category.\"\n\nThis revised prompt should guide the model more effectively in
-      distinguishing between categories based on the context and usage described in
-      the text, leading to more accurate predictions."}, {"role": "user", "content":
-      "\nNow please carefully review your reasoning in Step 1 and help with Step 2:
-      refining the prompt.\n\n## Current prompt\n\"Classify the input text into its
-      correct product category based on the description provided. Ensure accuracy
-      by closely examining both the specific items mentioned and the context or intended
-      use described in the text, aligning the description with the most relevant category.\"\n\n##
-      Follow this guidance to refine the prompt:\n\n1. The new prompt should should
-      describe the task precisely, and address the points raised in the user feedback.\n\n2.
+      feedback: Prediction is correct.\n\n\n### Example #1\n\nText: Laptop stand for
+      the kitchen.\n\nCategory: Electronics\n\nUser feedback: Prediction is incorrect.
+      Correct answer: \"Furniture/Home Decor\"\n\n\n### Example #2\n\nText: Chocolate
+      leather boots.\n\nCategory: Footwear/Clothing\n\nUser feedback: Prediction is
+      correct.\n\n\n### Example #3\n\nText: Wooden cream for surfaces.\n\nCategory:
+      Furniture/Home Decor\n\nUser feedback: Prediction is correct.\n\n\n### Example
+      #4\n\nText: Natural finish for your lips.\n\nCategory: Beauty/Personal Care\n\nUser
+      feedback: Prediction is correct.\n\n\n\nSummarize your analysis about incorrect
+      predictions and suggest changes to the prompt."}, {"role": "assistant", "content":
+      "### Analysis of Incorrect Predictions\n\n#### Example #1\n- **Text:** Laptop
+      stand for the kitchen.\n- **Current Category:** Electronics\n- **Correct Category:**
+      Furniture/Home Decor\n- **Analysis:** The model misclassified this text as \"Electronics\"
+      likely because it focused on the word \"laptop,\" which is typically associated
+      with electronics. However, the context (\"for the kitchen\") suggests that the
+      item is more related to home decor or furniture, as it is intended to be used
+      as a stand in a kitchen setting, not as an electronic device itself.\n\n###
+      Suggested Changes to the Prompt\n\nThe current prompt instructs the model to
+      classify the input text into the correct product category by considering both
+      the specific items mentioned and their context or intended use. However, the
+      example of incorrect prediction indicates that the model might overly focus
+      on specific keywords associated with a category rather than fully integrating
+      the context or intended use into the classification process.\n\nTo address this,
+      the prompt could be refined to emphasize the importance of context and intended
+      use more explicitly. Here are a few suggestions:\n\n1. **Clarify the Importance
+      of Context and Intended Use:**\n   - Original: \"Classify the input text into
+      the correct product category, considering both the specific items mentioned
+      and their context or intended use.\"\n   - Revised: \"Classify the input text
+      into the correct product category by prioritizing the context and intended use
+      of the items mentioned, even if certain keywords typically suggest a different
+      category.\"\n\n2. **Provide an Example in the Prompt:**\n   - Adding an example
+      within the prompt can guide the model on how to weigh context more heavily.
+      For instance:\n   - \"For example, a ''laptop stand for the kitchen'' should
+      be classified as ''Furniture/Home Decor'' rather than ''Electronics'' because
+      the context (''for the kitchen'') indicates its use as furniture.\"\n\n3. **Encourage
+      Holistic Understanding:**\n   - Encourage the model to analyze the text holistically
+      rather than jumping to conclusions based on specific trigger words:\n   - \"Analyze
+      the entire text to understand the holistic use and context before deciding on
+      the category, rather than focusing on individual keywords.\"\n\nThese changes
+      aim to make the model more sensitive to the nuances of how products are described
+      and their intended uses, which should help in reducing misclassifications like
+      the one observed."}, {"role": "user", "content": "\nNow please carefully review
+      your reasoning in Step 1 and help with Step 2: refining the prompt.\n\n## Current
+      prompt\nClassify the input text into the correct product category, considering
+      both the specific items mentioned and their context or intended use.\n\n## Follow
+      this guidance to refine the prompt:\n\n1. The new prompt should should describe
+      the task precisely, and address the points raised in the user feedback.\n\n2.
       The new prompt should be similar to the current prompt, and only differ in the
       parts that address the issues you identified in Step 1.\n    Example:\n    -
       Current prompt: \"Generate a summary of the input text.\"\n    - New prompt:
@@ -2629,18 +1745,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '7067'
+      - '6180'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=MoCuiOk5CmyB5u9IMWLcCs8yzZB5TdilJgUFket7cpI-1723043823-1.0.1.1-6eBD53hhWf2tCcm0c7WKfVf6fRMhVOQ7HKz_nEjsSau0elhp.Iu.bk5QPPlGzwRJdoAbU_WSb7ka7X8cX3FcHg;
-        _cfuvid=MU0ZYpHBIPsmbjFJV7NtbigIGQZIlAbejeO8kto7SA4-1723043823738-0.0.1.1-604800000
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
       - OpenAI/Python 1.34.0
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
@@ -2652,27 +1768,26 @@ interactions:
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.10.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSwW7bMAy95ysInZPAdYKkyW0YtnMHDBiGdQhkiba5yaIm0W3cIv8+yHGSdthF
-        B773yEfqvc4AFFm1B2VaLaYLbrETQ887uv/+4eGL0+WL/nZvfInb8Hnz56uaZwVXv9DIRbU03AWH
-        QuzPsImoBXPXu225KtarXVmOQMcWXZY1QRbrhfSx4kVZlOtFsV4Uu0ndMhlMag8/ZgAAr+ObfXqL
-        R7WHYn6pdJiSblDtryQAFdnlitIpURLtRc1voGEv6Efrj+qjy5x6AGkRyIdeQPAoQF4YSBIYjhGN
-        QIhseyNgtGDDcYBKJ7TAflRaTCZSyPtn5hNZtEv45FMfEbQxfdRmgGoA4zihGwCPuiNPvoGKpR17
-        pICGajJAgl2CDn1uhxa0tyNhNH4U4JjtobdooU+X4RVaoLObzFrCQySOJPSCoB0147B/vT7TNLzj
-        JBDR4ZP2/1syn6Luvckq7cax2VZCEfLNHKKWFiNIqz0kdnnF6TQyBASurwe87rV8VG+/JWLdJ52j
-        4Xvnpvrp+s+OmxC5ShN+rdfkKbWHiDqxz3+ahIMa0dMM4OeYp/5dRFSI3AU5CP9GnxverVabc0N1
-        y/EN3mwnUFi0eyNbF6vZ5FGlIQl2h5p8gzFEOgesDgez3WKxtWus1ew0+wsAAP//AwCthGflbgMA
-        AA==
+        H4sIAAAAAAAAA1RSTW/bMAy951cQOsdFnCZLmtu6w4p1Q09BBwxDoEi0rVYmBYnu6hT574PsfGwX
+        HUi+x8f39DEBUM6qDSjTaDFt8MXdW2we7r/+fHrYbp+3/fcn+/j47fm+/CEv7qCmGcH7FzRyRt0Y
+        boNHcUxj20TUgpm1XM1vl6t1ebscGi1b9BlWBykWhXRxz8V8Nl8Us0UxuzuhG3YGk9rArwkAwMfw
+        Zp1k8V1tYDY9V1pMSdeoNpchABXZ54rSKbkkmkRNr03DJEiD9C8+T1Q9SIPgKHQCgu8CjoSHmuEY
+        0QiEyLYzAkYL1hx72PeAbWh0cgdH9WmWBrAmmwmQLFroEgJXI79gm6BFyi6hnQK+IYGrwGAU7Qhe
+        sf/D0SZoXd0IpK6uMQlosK6qMCJd99/AZ9K+P+DAnCkjjtIb9i6JM9r7HoShI4sxe2DBSYKq8/6i
+        dI8VRwSLxtl8BdN4yHmJOpl2vLjtuQ6R9zkZ6ry/1CtHLjW7iDoxZWeTcBjhxwnA7yHV7r+gVIjc
+        BtkJvyJlwrL8tB4J1fU3XdvLU+ZKWLT/BzYv15OTRpX6JNjuKkc1xhDdGHMVdma1wtnKLrBSk+Pk
+        LwAAAP//AwBqPefo9AIAAA==
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8af83da03e6008ce-LAX
+      - 8b2b2ff2298d4892-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -2680,7 +1795,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 07 Aug 2024 15:18:44 GMT
+      - Tue, 13 Aug 2024 19:42:18 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -2690,27 +1805,878 @@ interactions:
       alt-svc:
       - h3=":443"; ma=86400
       openai-organization:
-      - user-jt0khdjhkecks0yodhgozy8e
+      - heartex
       openai-processing-ms:
-      - '2668'
+      - '2474'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
       - max-age=15552000; includeSubDomains; preload
       x-ratelimit-limit-requests:
-      - '500'
+      - '10000'
       x-ratelimit-limit-tokens:
-      - '30000'
+      - '2000000'
       x-ratelimit-remaining-requests:
-      - '499'
+      - '9999'
       x-ratelimit-remaining-tokens:
-      - '27343'
+      - '1997561'
       x-ratelimit-reset-requests:
-      - 120ms
+      - 6ms
       x-ratelimit-reset-tokens:
-      - 5.314s
+      - 73ms
       x-request-id:
-      - req_7e95b9e429dbd9028dc141987a841843
+      - req_5af0f5d8ad7c6a8b0b98528d11e3f504
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify the input text into
+      the correct product category by emphasizing the context and intended use of
+      the items mentioned, even if certain keywords might suggest a different category.
+      Analyze the entire text holistically to understand its full context before deciding
+      on the category."}, {"role": "user", "content": "Text: Apple product with a
+      sleek design."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47,
+      "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
+      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
+      "Correctly extracted `Output` with all the required parameters with correct
+      types", "parameters": {"properties": {"predicted_category": {"description":
+      "The classification label", "enum": ["Footwear/Clothing", "Electronics", "Food/Beverages",
+      "Furniture/Home Decor", "Beauty/Personal Care"], "title": "Predicted Category",
+      "type": "string"}}, "required": ["predicted_category"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1034'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA2xSTYvbMBC9+1eIOSdLnJAm62O/Dg20C6UE2hSjyGNFu7KkSqNt05D/XmR7bW+o
+        D0bM8/vQG18yxkBVUDAQJ06icXp+/+xPu7r28uHx2/3XZf43Gonv3uv9tto/wCwx7PERBb2w7oRt
+        nEZS1nSw8MgJk2q+Wa7Wm22+2rZAYyvUiSYdzVd36zlFf7TzRb5c98yTVQIDFOxHxhhjl/adMpoK
+        /0DBFrOXSYMhcIlQDB8xBt7qNAEeggrEDcFsBIU1hCbFNlHrCUDW6lJwrUfj7rlMzmNRXOty8fbz
+        7hN9/+3zj/iU76XcqfDr+Tz166TPrg1URyOGgib4MC9uzBgDw5uW+yWSi7fKjAH3MjZoKKWGywGc
+        x0oJwqoUnFBafz5AcYAPGgV5a5QIB7jCK5Vr9r/zz0k3HusYuO5L6+fXYQvaSuftMdyUCrUyKpxK
+        jzy0l4NA1nXeyad1gPhqgeC8bRyVZJ/QJMH8zarTg/EHG9FNj5ElriekzSLrA0I4B8KmrJWR6J1X
+        w+6za/YPAAD//wMAarcfA/oCAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8b2b3004296d4892-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 13 Aug 2024 19:42:18 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '230'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998916'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_e2464c23aecea2e42c88277f0430f0ee
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify the input text into
+      the correct product category by emphasizing the context and intended use of
+      the items mentioned, even if certain keywords might suggest a different category.
+      Analyze the entire text holistically to understand its full context before deciding
+      on the category."}, {"role": "user", "content": "Text: Laptop stand for the
+      kitchen."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47, "temperature":
+      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"predicted_category": {"description": "The classification label",
+      "enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
+      Decor", "Beauty/Personal Care"], "title": "Predicted Category", "type": "string"}},
+      "required": ["predicted_category"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1029'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//bFLLattAFN3rK4a7toNl48rWriZNSgk0dRYp1EWMRlfypPPqzFWIMf73
+        okckxVQLMdyj85hzdY4YA1lAykAcOQnt1Hz76o8PT3S/+vpyt9ioYn/3Td8+73cPdf4jhlnDsPkL
+        Cnpn3QirnUKS1nSw8MgJG9U4Wa7WySZebVtA2wJVQ6sczVc36znVPrfzRbxc98yjlQIDpOxXxBhj
+        5/bdZDQFvkHKFrP3icYQeIWQDh8xBt6qZgI8BBmIG4LZCAprCE0T29RKTQCyVmWCKzUad895ch6L
+        4kplt8n65+Mm//xY7p92yVK+vt0/7/5qPfHrpE+uDVTWRgwFTfBhnl6ZMQaG65b7vSZX0xWTMeC+
+        qjUaalLD+QDOYyEFYZEJTlhZfzpAeoAvCgV5a6QIB7jAB5VL9L/z70k3Hss6cNWX1s8vwxaUrZy3
+        ebgqFUppZDhmHnloLweBrOu8G5/WAeoPCwTnrXaUkf2DphGMPy07PRh/sBFNeowscTUlbaM+IIRT
+        INRZKU2F3nk57D66RP8AAAD//wMA/ntLq/oCAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8b2b300829154892-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 13 Aug 2024 19:42:19 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '390'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998917'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_f95fef1f865f8e27d9455fd2f7c53364
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify the input text into
+      the correct product category by emphasizing the context and intended use of
+      the items mentioned, even if certain keywords might suggest a different category.
+      Analyze the entire text holistically to understand its full context before deciding
+      on the category."}, {"role": "user", "content": "Text: Chocolate leather boots."}],
+      "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47, "temperature": 0.0,
+      "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"predicted_category": {"description": "The classification label",
+      "enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
+      Decor", "Beauty/Personal Care"], "title": "Predicted Category", "type": "string"}},
+      "required": ["predicted_category"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1024'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA2xSTY/aMBC951dYc162JMBCc+226h4oalVV2y1VZJwh8eJ4LHtSliL+e5WQDVnU
+        HCLrvbyPzPgYCQE6h1SAKiWrypnR+z++XH59vtvNHmg6+Z58fgpPOzVd3Zer5U+4aRS0eUbFr6pb
+        RZUzyJrsmVYeJWPjGs+TyWy+iKfjlqgoR9PICsejye1sxLXf0GgcJ7NOWZJWGCAVvyIhhDi276aj
+        zfEFUtH6tEiFIcgCIe0/EgI8mQYBGYIOLC3DzYVUZBltU9vWxgwIJjKZksZcgs/PcXC+DEoak+XJ
+        ahl/+7HYL/4+2oePL1+S+/1SH/wg72x9cG2hbW1VP6AB3+PpVZgQYGXValc1u5qvlEKA9EVdoeWm
+        NRzX4DzmWjHmmZKMBfnDGtI1fCLiPUr/7oMhLrUt1nCCN16n6H/n34MJedzWQZpudB1+6ndhqHCe
+        NuFqtLDVVocy8yhD+4sQmNw5u8lpE6B+s0ZwnirHGdMObWMY33U7h8s1G7CvJBNLM8Dn46hrCOEQ
+        GKtsq22B3nndX4HoFP0DAAD//wMAlKjCxgEDAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8b2b300f9ead4892-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 13 Aug 2024 19:42:20 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '320'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998918'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_41bd5f7050951d5a5c35e4620a49bdc3
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify the input text into
+      the correct product category by emphasizing the context and intended use of
+      the items mentioned, even if certain keywords might suggest a different category.
+      Analyze the entire text holistically to understand its full context before deciding
+      on the category."}, {"role": "user", "content": "Text: Wooden cream for surfaces."}],
+      "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47, "temperature": 0.0,
+      "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"predicted_category": {"description": "The classification label",
+      "enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
+      Decor", "Beauty/Personal Care"], "title": "Predicted Category", "type": "string"}},
+      "required": ["predicted_category"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1026'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//bFJdb5swFH3nV1j3OelCkywNz2nFKi2bokp9WCbkmAu4M7ZrX2/Lovz3
+        CkKBRvMDsu7x+eDYp4gxkDkkDETFSdRWTde/XbV9fZpVC7t2O0ofZbH5Ot+mj/fr+wVMGoY5vKCg
+        d9aNMLVVSNLoCywccsJGNV7dzperu3gRt0BtclQNrbQ0nd8spxTcwUxn8e2yY1ZGCvSQsB8RY4yd
+        2m+TUef4FxI2m7xPavSelwhJf4gxcEY1E+DeS09cE0wGUBhNqJvYOig1AsgYlQmu1GB8WafRfiiK
+        K5U9b6s/zzuzS7/PXx/u6GWZxvG/L5unkd9F+mjbQEXQoi9ohPfz5MqMMdC8brnfAtlAV0zGgLsy
+        1KipSQ2nPViHuRSEeSY4YWnccQ/JHh6C05KCw0+pqZFtUBi3hzN8kDtH/9v/HJXksAieq669bn7u
+        r0OZ0jpz8FftQiG19FXmkPv2L8GTsRfvxqd1gPDhJsE6U1vKyPxC3QjGn+OLHgwvbUDXHUaGuBqR
+        VrOoCwj+6AnrrJC6RGed7B9BdI7eAAAA//8DANpBokwDAwAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8b2b30141e8b4892-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 13 Aug 2024 19:42:21 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '523'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998918'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_59a62e7f0ee1047a0dc8912be5e1abcf
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify the input text into
+      the correct product category by emphasizing the context and intended use of
+      the items mentioned, even if certain keywords might suggest a different category.
+      Analyze the entire text holistically to understand its full context before deciding
+      on the category."}, {"role": "user", "content": "Text: Natural finish for your
+      lips."}], "model": "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47, "temperature":
+      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"properties": {"predicted_category": {"description": "The classification label",
+      "enum": ["Footwear/Clothing", "Electronics", "Food/Beverages", "Furniture/Home
+      Decor", "Beauty/Personal Care"], "title": "Predicted Category", "type": "string"}},
+      "required": ["predicted_category"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1029'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//bFLLbtswELzrK4g922nk2HGiY5yiQJC2QU9N60KgqZWshOIS5NK1a/jf
+        Az0iKUZ5EIgdzkNDHiMhoMwgEaC2klVl9fR257bfgnu5//H8dPN4uP63e/hiFvf4a6kfPsOkZtDm
+        BRW/sy4UVVYjl2RaWDmUjLVqvJxdLZY38TxugIoy1DWtsDy9ulhMObgNTS/j2aJjbqlU6CERvyMh
+        hDg23zqjyXAPibicvE8q9F4WCEl/SAhwpOsJSO9Lz9IwTAZQkWE0dWwTtB4BTKRTJbUejNt1HO2H
+        oqTW6f6nX+3uVP6X9vj8qr+6+eOqmqvVyK+VPtgmUB6M6gsa4f08OTMTAoysGu73wDbwGVMIkK4I
+        FRquU8NxDdZhVirGLFWSsSB3WEOyhjuUgQ+fntB5MlKLlXS4hhN8kDtF/9v/GZXkMA9e6q69bn7q
+        r0NTYR1t/Fm7kJem9NvUofTNX4Jnsq137dM4QPhwk2AdVZZTplc0tWB8PWv1YHhpA3rbYUws9Yi0
+        jKMuIPiDZ6zSvDQFOuvK/hFEp+gNAAD//wMAZxokOgMDAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8b2b301998aa4892-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 13 Aug 2024 19:42:22 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '270'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49998917'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 1ms
+      x-request-id:
+      - req_1191f7b98fcc1d3ffa4069217c8a9c8c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
+      expected actions and instructs the large language model (LLM) to generate a
+      specific output. This prompt is concatenated with the input text, and the model
+      then creates the required output.\nThis describes the full template how the
+      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nText:
+      {text}\nCategory: {predicted_category}\n```\n\nHere:\n- \"Text: {text}\" is
+      input template,\n- \"{prompt}\" is the LLM prompt,\n- \"Category: {predicted_category}\"
+      is the output template.\n\nModel can produce erroneous output if a prompt is
+      not well defined. In our collaboration, we\u2019ll work together to refine a
+      prompt. The process consists of two main steps:\n\n## Step 1\nI will provide
+      you with the current prompt along with prediction examples. Each example contains
+      the input text, the final prediction produced by the model, and the user feedback.
+      User feedback indicates whether the model prediction is correct or not. Your
+      task is to analyze the examples and user feedback, determining whether the existing
+      instruction is describing the task reflected by these examples precisely, and
+      suggests changes to the prompt to address the incorrect predictions.\n\n## Step
+      2\nNext, you will carefully review your reasoning in step 1, integrate the insights
+      to refine the prompt, and provide me with the new prompt that improves the model\u2019s
+      performance."}, {"role": "assistant", "content": "Sure, I\u2019d be happy to
+      help you with this prompt engineering problem. Please provide me with the current
+      prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
+      Current prompt\nClassify the input text into the correct product category by
+      emphasizing the context and intended use of the items mentioned, even if certain
+      keywords might suggest a different category. Analyze the entire text holistically
+      to understand its full context before deciding on the category.\n\n## Examples\n###
+      Example #0\n\nText: Apple product with a sleek design.\n\nCategory: Electronics\n\nUser
+      feedback: Prediction is correct.\n\n\n### Example #1\n\nText: Laptop stand for
+      the kitchen.\n\nCategory: Electronics\n\nUser feedback: Prediction is incorrect.
+      Correct answer: \"Furniture/Home Decor\"\n\n\n### Example #2\n\nText: Chocolate
+      leather boots.\n\nCategory: Footwear/Clothing\n\nUser feedback: Prediction is
+      correct.\n\n\n### Example #3\n\nText: Wooden cream for surfaces.\n\nCategory:
+      Furniture/Home Decor\n\nUser feedback: Prediction is correct.\n\n\n### Example
+      #4\n\nText: Natural finish for your lips.\n\nCategory: Beauty/Personal Care\n\nUser
+      feedback: Prediction is correct.\n\n\n\nSummarize your analysis about incorrect
+      predictions and suggest changes to the prompt."}], "model": "gpt-4-turbo", "max_tokens":
+      1000, "seed": 47, "temperature": 0.0}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '2943'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//rFdNb9w2EL37VwzkQ1pjvfE6mzjxLXaSBkjTGm6Kou0WBpccSawpjsCh
+        vFaC/PdiKEq73gRtDr3sQeRw3rx587GfDgAKa4pzKHStom5ad/ziLtQ/r394hr+jf9a9v1j8cfax
+        ulpcq1fv370rZmJB679Rx9FqrqlpHUZLfjjWAVVEeXVxdvrk6dnzxfI0HTRk0IlZ1cbj5XHswpqO
+        T09Ol8cny+OTF9m6JquRi3P48wAA4FP6FZze4H1xDiez8UuDzKrC4ny6BFAEcvKlUMyWo/KxmG0P
+        NfmIPkE/PDyEl165ni0DlRBrhMsuBPQRrgI1bQTlDby+VxIdr/zKf6gRdL7SDles5xg6HTnZpwAh
+        Emgn7ss+fbW+7SJEvJfrkdI3TSGgTs+YTkfQKmJFoYd1D9i0tWL70foq3/XJWOBYwW/QQMc4orYR
+        G4YGvaQAzQyUhDWZJ9uanOVotXKun8OH2jKotg2kdA2WoUKPQc4AyxJ1tHc4A8XAiB6sh4Y4ju4w
+        MyLY76xBM4e3tME7DDM5DygPKvAU1drJdY2tIJN3MptwuJjBprbi3BsrwYtJS5IcqxyogApKCmAb
+        8YISnNiL/4H5uSTkUJJ4EVDdGtp4ATim63zlj+HoaPJ3cnR0Dh9GNlbFy1Y+j+xvbKxBATvEWzDI
+        tvKrAjaKxzy5fsyQ/YhGmFkVrx3qGMhbzbNVAc7eouvBdAg5x7fYbyiY0ZtcyjEzsFhWrgfFTNpK
+        vQwocPvqfC+GxV4MP6o2UgsicpPISk5t1DWO8K3/tgDmq2IQBYZAAUgnmRvhorURB3EPAhOWV4VL
+        viWkNWolYhyUvqPO71bFF6C+B+6qCjlKuo0tS0zFNKp/Bg0FBOVs5UdCVsWbLngbu4CP31KD8Ao1
+        hfmq2GPnVNhZFZc1aXIqIjhUIkdYE0X+73S+IYobVOHxpaNYW19JcFzTRupoqoqxGDvloPMGQ2Lf
+        +mo/WU8GOL8RGfQgLbFJOeIulErjtwD6StiCKVeMwFJQERmoguJ2LM+s6UcsSdhHtRxQ/aRiF5SD
+        0nrLdcLVUxfA2fYbgF2g6mL/+AoDk1cOLlVI4jbYkLTDjM0/JGgPn7Qfl+IgP9Yy/DKIAw1c1spX
+        yGMpDQ156MCNsh4sc4eggmXkQSdT/33EUCtvXPaZ/UmDVhFqdYfSaYJtVOih7LxOot4vQwXcoral
+        1TutuYvSmLYqF95E6daDmrp07NuhzX75pqckyPHBeSrmPEi4ps4ZwHthxQrvypiALLilX2j0KlgS
+        QnJPBCVVqnS/bYXXeGcZTabrfOVXxeX/NYnWlEn+grudMTTMqMhbjkZaqEx6hEvybA2GsTvmvOS2
+        AGrkb492x5THGkJNmwdzUapqTFYnC8F2Fo4zI91rbFXHaeB8tQHN4bXnLqQWvlVveqLsnHswine5
+        aLvQ0sOJ/GDkwhpL6WwGtR2KYcA1+ZV2NtTANSomL3dEXrkOxnE25IPF/Cq7fjNJ2BthV/BJlV/0
+        UNuqdhL0sAqo+C9JHCMaI8x6XKcvKWOyWWyXHFkaOpn+QpWnCExO5l+QH/JJ1tYLt1Oip0Tm4Idc
+        jQ7HbWI3Zbl9vc1Mwq+7DUWCvEbrSwp63HU85rJUE/17XQi9pi6o1Ft2NzYRbBWSLpyDVoU4bYUJ
+        XhiGSayVh5J0xzmLltO0MVOY82FTtAwhV+PDCq/RtRJjQNMl3GnkctofkjvyOO1du/uSQ5UiiJSn
+        ZCr/iNsGnZopg9KBmOFOhV7uZ4J5XuQ9+PO0QDuq2kBrWbZ959z0fZgLNyFJUZZljtQO5p8PAP5K
+        i3r3YPcuhihvIt2ilwefLpfDe8X2/8HO6eJ5Po0UldseLE6enR5kjAX3HLG5Ka2vMLTBDpt72d7o
+        szM8OTNLLIuDzwf/AAAA//8DANN7dnnHDAAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8b2b301dc8334892-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 13 Aug 2024 19:42:42 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '19462'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '1998339'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 49ms
+      x-request-id:
+      - req_f45a8251cbdd1498371f40c4e43987de
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "\nA prompt is a text paragraph that outlines the
+      expected actions and instructs the large language model (LLM) to generate a
+      specific output. This prompt is concatenated with the input text, and the model
+      then creates the required output.\nThis describes the full template how the
+      prompt is concatenated with the input to produce the output:\n\n```\n\n{prompt}\nText:
+      {text}\nCategory: {predicted_category}\n```\n\nHere:\n- \"Text: {text}\" is
+      input template,\n- \"{prompt}\" is the LLM prompt,\n- \"Category: {predicted_category}\"
+      is the output template.\n\nModel can produce erroneous output if a prompt is
+      not well defined. In our collaboration, we\u2019ll work together to refine a
+      prompt. The process consists of two main steps:\n\n## Step 1\nI will provide
+      you with the current prompt along with prediction examples. Each example contains
+      the input text, the final prediction produced by the model, and the user feedback.
+      User feedback indicates whether the model prediction is correct or not. Your
+      task is to analyze the examples and user feedback, determining whether the existing
+      instruction is describing the task reflected by these examples precisely, and
+      suggests changes to the prompt to address the incorrect predictions.\n\n## Step
+      2\nNext, you will carefully review your reasoning in step 1, integrate the insights
+      to refine the prompt, and provide me with the new prompt that improves the model\u2019s
+      performance."}, {"role": "assistant", "content": "Sure, I\u2019d be happy to
+      help you with this prompt engineering problem. Please provide me with the current
+      prompt and the examples with user feedback."}, {"role": "user", "content": "\n##
+      Current prompt\nClassify the input text into the correct product category by
+      emphasizing the context and intended use of the items mentioned, even if certain
+      keywords might suggest a different category. Analyze the entire text holistically
+      to understand its full context before deciding on the category.\n\n## Examples\n###
+      Example #0\n\nText: Apple product with a sleek design.\n\nCategory: Electronics\n\nUser
+      feedback: Prediction is correct.\n\n\n### Example #1\n\nText: Laptop stand for
+      the kitchen.\n\nCategory: Electronics\n\nUser feedback: Prediction is incorrect.
+      Correct answer: \"Furniture/Home Decor\"\n\n\n### Example #2\n\nText: Chocolate
+      leather boots.\n\nCategory: Footwear/Clothing\n\nUser feedback: Prediction is
+      correct.\n\n\n### Example #3\n\nText: Wooden cream for surfaces.\n\nCategory:
+      Furniture/Home Decor\n\nUser feedback: Prediction is correct.\n\n\n### Example
+      #4\n\nText: Natural finish for your lips.\n\nCategory: Beauty/Personal Care\n\nUser
+      feedback: Prediction is correct.\n\n\n\nSummarize your analysis about incorrect
+      predictions and suggest changes to the prompt."}, {"role": "assistant", "content":
+      "### Analysis of the Current Prompt and Examples\n\nThe current prompt instructs
+      the model to classify the input text into the correct product category by emphasizing
+      the context and intended use of the items mentioned, analyzing the text holistically.
+      This approach is generally effective, as seen in most of the examples provided.
+      However, there is a notable exception in Example #1, which indicates a potential
+      area for improvement in the prompt.\n\n#### Breakdown of Examples:\n- **Example
+      #0**: The text \"Apple product with a sleek design\" was correctly categorized
+      as \"Electronics,\" likely due to the keyword \"Apple,\" which is strongly associated
+      with electronics.\n- **Example #1**: The text \"Laptop stand for the kitchen\"
+      was incorrectly categorized as \"Electronics.\" This error occurred despite
+      the mention of \"laptop,\" because the intended use (\"for the kitchen\") suggests
+      a different category, more aligned with \"Furniture/Home Decor.\"\n- **Example
+      #2**: \"Chocolate leather boots\" was correctly categorized as \"Footwear/Clothing,\"
+      showing effective contextual understanding.\n- **Example #3**: \"Wooden cream
+      for surfaces\" was correctly categorized as \"Furniture/Home Decor,\" indicating
+      a good grasp of the product''s use.\n- **Example #4**: \"Natural finish for
+      your lips\" was correctly categorized as \"Beauty/Personal Care,\" demonstrating
+      an understanding of the product application.\n\n### Suggested Changes to the
+      Prompt\nThe main issue arises with the model''s handling of products that have
+      a primary function associated with a specific category but are intended for
+      use in a context typically associated with another category. The prompt should
+      explicitly address this scenario to improve accuracy.\n\n#### Revised Prompt:\n\"Classify
+      the input text into the correct product category by emphasizing both the primary
+      function of the item and its intended context of use. Consider keywords that
+      suggest a typical category but also analyze how the context or specific usage
+      mentioned in the text might indicate a different category. Ensure to understand
+      the full context and the primary purpose of the item holistically before deciding
+      on the category.\"\n\n### Reasoning for Changes:\n- **Emphasis on Primary Function
+      and Context**: By highlighting that both the primary function and the context
+      should be considered, the model is guided to not solely rely on prominent keywords
+      but also on the usage context provided in the text.\n- **Holistic Understanding**:
+      Reinforcing the need for a holistic understanding encourages the model to integrate
+      all parts of the text rather than focusing on isolated keywords.\n\nThis revised
+      prompt should help in reducing errors like the one seen in Example #1, leading
+      to more accurate categorizations across varying contexts."}, {"role": "user",
+      "content": "\nNow please carefully review your reasoning in Step 1 and help
+      with Step 2: refining the prompt.\n\n## Current prompt\nClassify the input text
+      into the correct product category by emphasizing the context and intended use
+      of the items mentioned, even if certain keywords might suggest a different category.
+      Analyze the entire text holistically to understand its full context before deciding
+      on the category.\n\n## Follow this guidance to refine the prompt:\n\n1. The
+      new prompt should should describe the task precisely, and address the points
+      raised in the user feedback.\n\n2. The new prompt should be similar to the current
+      prompt, and only differ in the parts that address the issues you identified
+      in Step 1.\n    Example:\n    - Current prompt: \"Generate a summary of the
+      input text.\"\n    - New prompt: \"Generate a summary of the input text. Pay
+      attention to the original style.\"\n\n3. Reply only with the new prompt. Do
+      not include input and output templates in the prompt.\n"}], "model": "gpt-4-turbo",
+      "max_tokens": 1000, "seed": 47, "temperature": 0.0}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '6803'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
+        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.34.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.34.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//VFLLbtswELz7KxY824afUeJb0RYFcukHFIVBkUuJDcUlyKVtJfC/F5Rk
+        O7noMMMZDYfzMQMQVosDCNVKVl1wi5dTbO0em+cf5+2vPu5fdxmNq39Xp9fdRcyLgup/qPimWirq
+        gkO25EdaRZSMxXVdbbb76nn9tBmIjjS6ImsCL3YLzrGmxWa12S1Wu8XqZVK3ZBUmcYA/MwCAj+Fb
+        cnqNF3GA1fyGdJiSbFAc7ocARCRXECFTsomlZzF/kIo8ox+if3flhOmBWwTrQ2ZgvDBYzzRgimJE
+        xRAi6awYlGRsKPZQ94BdaGWy79Y3UBO3gyBE28nYg8lelTaAzGjO2IH0GiynYo9eo4YhyoXLoZxw
+        CT9P6MEaUBhZWg9v2J8p6gSdbVqGlJsGE4ME7oNV0t3zzEF66fp3hJbOU/LJOkIKqKyxCnJpCjr0
+        JRnqydV6bYsPSNDWGIzoHxddwrfJuJgWZcSxo5acTVxSuB6YIHuNsZQ93tFk5+4hCnhrJuQYKCHU
+        aCgiaFRWlwrJj7lvP/78ZBFNTrLMxmfnJvx634CjJkSq08TfcWO9Te0xokzky3snpiAG9joD+Dts
+        LX+ZjwiRusBHpjf0xXC9edqPhuKx8QddrSeSiaX7JNtun2ZTRpH6xNgdjfUNxhDtOD4TjqqqcFXp
+        HRoxu87+AwAA//8DAF4jiOCKAwAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8b2b30996a4f4892-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 13 Aug 2024 19:42:45 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '2999'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=15552000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '1997407'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 77ms
+      x-request-id:
+      - req_5b7674670c289b9f43d5c4258255bec4
     status:
       code: 200
       message: OK

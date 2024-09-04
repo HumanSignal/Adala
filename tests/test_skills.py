@@ -3,12 +3,17 @@ import re
 import pandas as pd
 import pytest
 from adala.agents import Agent
-from adala.environments import (SimpleCodeValidationEnvironment,
-                                StaticEnvironment)
+from adala.environments import SimpleCodeValidationEnvironment, StaticEnvironment
 from adala.runtimes import OpenAIChatRuntime
-from adala.skills import (AnalysisSkill, ClassificationSkill, LinearSkillSet,
-                          OntologyCreator, OntologyMerger, ParallelSkillSet,
-                          TransformSkill)
+from adala.skills import (
+    AnalysisSkill,
+    ClassificationSkill,
+    LinearSkillSet,
+    OntologyCreator,
+    OntologyMerger,
+    ParallelSkillSet,
+    TransformSkill,
+)
 from adala.skills.collection.qa import QuestionAnsweringSkill
 from adala.skills.collection.summarization import SummarizationSkill
 from adala.skills.collection.translation import TranslationSkill
@@ -33,20 +38,33 @@ def test_classification_skill():
         ]
     )
 
+    field_schema = {
+        "predicted_category": {
+            "type": "string",
+            "enum": [
+                "Footwear/Clothing",
+                "Electronics",
+                "Food/Beverages",
+                "Furniture/Home Decor",
+                "Beauty/Personal Care",
+            ],
+        }
+    }
+
     agent = Agent(
         skills=ClassificationSkill(
-            name="product_category_classification",
+            name="Output",
             input_template="Text: {text}",
             output_template="Category: {predicted_category}",
-            labels={
-                "predicted_category": [
-                    "Footwear/Clothing",
-                    "Electronics",
-                    "Food/Beverages",
-                    "Furniture/Home Decor",
-                    "Beauty/Personal Care",
-                ]
-            },
+            labels=[
+                "Footwear/Clothing",
+                "Electronics",
+                "Food/Beverages",
+                "Furniture/Home Decor",
+                "Beauty/Personal Care",
+            ],
+            # note that if correct `field_schema` is provided, `output_template` and `labels` will be ignored
+            field_schema=field_schema,
         ),
         environment=StaticEnvironment(
             df=df, ground_truth_columns={"predicted_category": "category"}
@@ -56,9 +74,8 @@ def test_classification_skill():
 
     agent.learn()
     assert (
-        agent.skills["product_category_classification"].instructions
-        == """\
-\"Classify the input text into its correct product category based on the description provided. Ensure accuracy by closely examining both the specific items mentioned and the context or intended use described in the text. Prioritize aligning the description with the most relevant category based on its functional use and setting, rather than solely on the type of product mentioned.\""""
+        agent.skills["Output"].instructions
+        == "Classify the input text into the correct product category by emphasizing both the primary function of the item and its intended context of use. Even if certain keywords might suggest a typical category, analyze how the context or specific usage mentioned might indicate a different category. Analyze the entire text holistically to understand its full context and primary purpose before deciding on the category."
     )
 
 
@@ -87,7 +104,7 @@ def test_parallel_skillset_with_analysis():
     skillset = ParallelSkillSet(
         skills=[
             AnalysisSkill(
-                name="code_generation",
+                name="Output",
                 input_template="Input JSON: {payload}",
                 output_template="Code: {code}",
                 instructions="""
@@ -135,39 +152,37 @@ input_json = json.loads(input_data)
 
 # Initialize the output structure
 output_json = {
-    "id": None,
-    "data": input_json,
-    "project": None,
+    "id": "",
+    "data": {
+        "text": input_json["inputs"]
+    },
+    "project": "",
     "predictions": [
         {
-            "id": None,
-            "lead_time": None,
-            "result": [],
-            "score": None
+            "id": "",
+            "lead_time": 0,
+            "result": [
+                {
+                    "id": str(i),
+                    "from_name": "label",
+                    "to_name": "text",
+                    "type": "labels",
+                    "value": {
+                        "start": entity["start"],
+                        "end": entity["end"],
+                        "score": entity["score"],
+                        "text": entity["word"],
+                        "labels": [entity["entity_group"]]
+                    }
+                } for i, entity in enumerate(input_json["outputs"])
+            ],
+            "score": 0
         }
     ]
 }
 
-# Populate the result field
-for entity in input_json.get("outputs", []):
-    result_entry = {
-        "id": None,
-        "from_name": "label",
-        "to_name": "text",
-        "type": "labels",
-        "value": {
-            "start": entity["start"],
-            "end": entity["end"],
-            "text": entity["word"],
-            "labels": [entity["entity_group"]]
-        }
-    }
-    output_json["predictions"][0]["result"].append(result_entry)
-
 # Output the transformed JSON
 print(json.dumps(output_json, indent=4))"""
-    # temp hack to compare strings properly
-    expected_code = expected_code.replace("'\n'", "'\\n'")
     assert predictions.code[0] == expected_code
 
 
@@ -182,9 +197,7 @@ def test_summarization_skill():
         columns=["text"],
     )
 
-    agent = Agent(
-        skills=SummarizationSkill(name="summarization", input_data_field="text")
-    )
+    agent = Agent(skills=SummarizationSkill(name="Output", input_data_field="text"))
 
     predictions = agent.run(df)
     # breakpoint()
@@ -233,7 +246,7 @@ def test_transform_skill():
     skills = LinearSkillSet(
         skills=[
             TransformSkill(
-                name="math_solver",
+                name="Output",
                 # we start with no instructions then explain how agent can learn more details
                 instructions="",
                 # instructions=prompt,
@@ -305,7 +318,7 @@ def test_question_answering_skill():
         ]
     )
 
-    agent = Agent(skills=QuestionAnsweringSkill())
+    agent = Agent(skills=QuestionAnsweringSkill(name="Output"))
 
     predictions = agent.run(df)
     assert (predictions.answer == predictions.expected_answer).mean() == 3 / 5
@@ -364,8 +377,7 @@ def test_linear_skillset():
     agent.learn(learning_iterations=2)
     assert (
         agent.skills["skill_0"].instructions
-        == '''\
-"Provide specific examples that fall under the given category. If possible, list them in the order of their commonality or importance."'''
+        == "\"Given a category, your task is to generate a list of at least three specific items or elements that belong to this category. The output should not be the same as the input category. Instead, provide detailed and distinct examples within that category. For instance, if the category is 'Macronutrients', your output should include 'Carbohydrates, Proteins, Fats'. Remember, the goal is to provide unique examples, not to repeat the category name.\""
     )
     # TODO: not learned with 2 iterations, need to increase learning_iterations
     assert agent.skills["skill_1"].instructions == "..."
@@ -388,7 +400,208 @@ def test_translation_skill():
         ]
     )
 
-    agent = Agent(skills=TranslationSkill(target_language="Swahili"))
+    agent = Agent(
+        skills=TranslationSkill(
+            name="Output", description="", target_language="Swahili"
+        )
+    )
 
     predictions = agent.run(df)
-    assert predictions.translation.tolist() == ["Jua huzidi kung'aa daima", 'Maisha ni mazuri', 'Msitu unaniita', 'Napenda pizza ya Napolitana', 'Maua ya spring ni mazuri sana', "Nyota zinang'aa usiku", 'Upinde wa mvua baada ya mvua', 'Ninahitaji kahawa', 'Muziki huchezesha roho', 'Ndoto zinakuwa kweli']
+
+    assert predictions.translation.tolist() == [
+        "Jua huzidi kung'aa daima",
+        "Maisha ni mazuri",
+        "Msitu unaniita",
+        "Napenda pizza ya Napolitana",
+        "Maua ya spring ni mazuri",
+        "Nyota zinang'aa usiku",
+        "Upinde wa mvua baada ya mvua",
+        "Nahitaji kahawa",
+        "Muziki huchezesha roho",
+        "Ndoto zinakuwa kweli",
+    ]
+
+
+@pytest.mark.vcr
+def test_entity_extraction():
+    from adala.skills.collection.entity_extraction import EntityExtraction
+
+    # documents that contain entities
+    df = pd.DataFrame(
+        [
+            {
+                "text": "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services."
+            },
+            {"text": "The iPhone 14 is the latest smartphone from Apple Inc."},
+            {
+                "text": "The MacBook Pro is a line of Macintosh portable computers introduced in January 2006 by Apple Inc."
+            },
+            {
+                "text": "The Apple Watch is a line of smartwatches produced by Apple Inc."
+            },
+            {
+                "text": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."
+            },
+        ]
+    )
+
+    field_schema = {
+        "entities": {
+            "type": "array",
+            "description": "Extracted entities:",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "quote_string": {
+                        "type": "string",
+                        "description": "The text of the entity extracted from the input document.",
+                    },
+                    "label": {
+                        "type": "string",
+                        "description": "The label assigned to the entity.",
+                        "enum": ["Organization", "Person", "Product", "Version"],
+                    },
+                },
+            },
+        }
+    }
+
+    agent = Agent(
+        skills=EntityExtraction(name="Output", field_schema=field_schema),
+        runtimes={"default": OpenAIChatRuntime(model="gpt-4o-mini")},
+    )
+    predictions = agent.run(df)
+    assert predictions.entities.tolist() == [
+        [
+            {
+                "quote_string": "Apple Inc.",
+                "label": "Organization",
+                "start": 0,
+                "end": 10,
+            }
+        ],
+        [
+            {"quote_string": "iPhone 14", "label": "Product", "start": 4, "end": 13},
+            {
+                "quote_string": "Apple Inc.",
+                "label": "Organization",
+                "start": 44,
+                "end": 54,
+            },
+        ],
+        [
+            {"quote_string": "MacBook Pro", "label": "Product", "start": 4, "end": 15},
+            {"quote_string": "Macintosh", "label": "Product", "start": 29, "end": 38},
+            {
+                "quote_string": "January 2006",
+                "label": "Version",
+                "start": 72,
+                "end": 84,
+            },
+            {
+                "quote_string": "Apple Inc.",
+                "label": "Organization",
+                "start": 88,
+                "end": 98,
+            },
+        ],
+        [
+            {"quote_string": "Apple Watch", "label": "Product", "start": 4, "end": 15},
+            {
+                "quote_string": "Apple Inc.",
+                "label": "Organization",
+                "start": 54,
+                "end": 64,
+            },
+        ],
+        [
+            {"quote_string": "iPad", "label": "Product", "start": 4, "end": 8},
+            {
+                "quote_string": "Apple Inc.",
+                "label": "Organization",
+                "start": 76,
+                "end": 86,
+            },
+        ],
+    ]
+
+
+@pytest.mark.vcr
+def test_entity_extraction_no_labels():
+    from adala.skills.collection.entity_extraction import EntityExtraction
+
+    # documents that contain entities
+    df = pd.DataFrame(
+        [
+            {
+                "tweet": "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services."
+            },
+            {"tweet": "The iPhone 14 is the latest smartphone from Apple Inc."},
+            {
+                "tweet": "The MacBook Pro is a line of Macintosh portable computers introduced in January 2006 by Apple Inc."
+            },
+            {
+                "tweet": "The Apple Watch is a line of smartwatches produced by Apple Inc."
+            },
+            {
+                "tweet": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."
+            },
+        ]
+    )
+
+    agent = Agent(
+        skills=EntityExtraction(
+            name="Output",
+            input_template='Extract entities from the input text that represents the main points of discussion.\n\nInput:\n"""\n{tweet}\n"""',
+            field_schema={
+                "label": {
+                    "type": "array",
+                    "description": "Extracted entities:",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "quote_string": {
+                                "type": "string",
+                                "description": "The text of the entity extracted from the input document.",
+                            }
+                        },
+                    },
+                }
+            },
+        ),
+        runtimes={"default": OpenAIChatRuntime(model="gpt-4o")},
+    )
+    predictions = agent.run(df)
+    assert predictions.label.tolist() == [
+        [
+            {"quote_string": "Apple Inc.", "start": 0, "end": 10},
+            {
+                "quote_string": "American multinational technology company",
+                "start": 17,
+                "end": 58,
+            },
+            {"quote_string": "consumer electronics", "start": 79, "end": 99},
+            {"quote_string": "computer software", "start": 101, "end": 118},
+            {"quote_string": "online services", "start": 124, "end": 139},
+        ],
+        [
+            {"quote_string": "iPhone 14", "start": 4, "end": 13},
+            {"quote_string": "Apple Inc.", "start": 44, "end": 54},
+        ],
+        [
+            {"quote_string": "MacBook Pro", "start": 4, "end": 15},
+            {"quote_string": "Macintosh portable computers", "start": 29, "end": 57},
+            {"quote_string": "January 2006", "start": 72, "end": 84},
+            {"quote_string": "Apple Inc.", "start": 88, "end": 98},
+        ],
+        [
+            {"quote_string": "The Apple Watch", "start": 0, "end": 15},
+            {"quote_string": "a line of smartwatches", "start": 19, "end": 41},
+            {"quote_string": "produced by Apple Inc.", "start": 42, "end": 64},
+        ],
+        [
+            {"quote_string": "iPad", "start": 4, "end": 8},
+            {"quote_string": "tablet computers", "start": 22, "end": 38},
+            {"quote_string": "Apple Inc.", "start": 76, "end": 86},
+        ],
+    ]

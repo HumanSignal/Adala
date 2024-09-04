@@ -1,21 +1,29 @@
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union, Type
 
 import litellm
 from litellm.exceptions import AuthenticationError
 import instructor
 from instructor.exceptions import InstructorRetryException
 import traceback
+from adala.utils.exceptions import ConstrainedGenerationError
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.logs import print_error
 from adala.utils.parse import (
     parse_template,
     partial_str_format,
-    parse_template_to_pydantic_class,
 )
-from pydantic import ConfigDict, field_validator
+from openai import NotFoundError
+from pydantic import ConfigDict, field_validator, BaseModel
 from rich import print
+from tenacity import (
+    AsyncRetrying,
+    Retrying,
+    retry_if_not_exception_type,
+    stop_after_attempt,
+)
+from pydantic_core._pydantic_core import ValidationError
 
 from .base import AsyncRuntime, Runtime
 
@@ -127,7 +135,10 @@ class LiteLLMChatRuntime(Runtime):
         record: Dict[str, str],
         input_template: str,
         instructions_template: str,
-        output_template: str,
+        response_model: Type[BaseModel],
+        output_template: Optional[
+            str
+        ] = None,  # TODO: deprecated in favor of response_model, can be removed
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = False,
@@ -139,10 +150,11 @@ class LiteLLMChatRuntime(Runtime):
             record: Record to be used for input, instructions and output templates.
             input_template: Template for input message.
             instructions_template: Template for instructions message.
-            output_template: Template for output message.
+            output_template: Template for output message (deprecated, not used).
             extra_fields: Extra fields to be used in templates.
             field_schema: Field schema to be used for parsing templates.
             instructions_first: If True, instructions will be sent before input.
+            response_model: Pydantic model for response.
 
         Returns:
             Dict[str, str]: Output record.
@@ -150,13 +162,20 @@ class LiteLLMChatRuntime(Runtime):
 
         extra_fields = extra_fields or {}
 
-        response_model = parse_template_to_pydantic_class(
-            output_template, provided_field_schema=field_schema
-        )
+        if not response_model:
+            raise ValueError(
+                "You must explicitly specify the `response_model` in runtime."
+            )
+
         messages = get_messages(
             input_template.format(**record, **extra_fields),
             instructions_template,
             instructions_first,
+        )
+
+        retries = Retrying(
+            retry=retry_if_not_exception_type((ValidationError)),
+            stop=stop_after_attempt(3),
         )
 
         try:
@@ -168,6 +187,7 @@ class LiteLLMChatRuntime(Runtime):
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
                 seed=self.seed,
+                max_retries=retries,
                 # extra inference params passed to this runtime
                 **self.model_extra,
             )
@@ -181,6 +201,9 @@ class LiteLLMChatRuntime(Runtime):
             logger.debug(tb)
             return dct
         except Exception as e:
+            # Catch case where the model does not return a properly formatted output
+            if type(e).__name__ == "ValidationError" and "Invalid JSON" in str(e):
+                e = ConstrainedGenerationError()
             # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
             dct = _format_error_dict(e)
             print_error(f"Inference error {dct['_adala_message']}")
@@ -259,21 +282,32 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         batch: InternalDataFrame,
         input_template: str,
         instructions_template: str,
-        output_template: str,
+        response_model: Type[BaseModel],
+        output_template: Optional[
+            str
+        ] = None,  # TODO: deprecated in favor of response_model, can be removed
         extra_fields: Optional[Dict[str, str]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
     ) -> InternalDataFrame:
         """Execute batch of requests with async calls to OpenAI API"""
 
-        response_model = parse_template_to_pydantic_class(
-            output_template, provided_field_schema=field_schema
-        )
+        if not response_model:
+            raise ValueError(
+                "You must explicitly specify the `response_model` in runtime."
+            )
 
         extra_fields = extra_fields or {}
         user_prompts = batch.apply(
-            lambda row: input_template.format(**row, **extra_fields), axis=1
+            # TODO: remove "extra_fields" to avoid name collisions
+            lambda row: input_template.format(**row, **extra_fields),
+            axis=1,
         ).tolist()
+
+        retries = AsyncRetrying(
+            retry=retry_if_not_exception_type((ValidationError)),
+            stop=stop_after_attempt(3),
+        )
 
         tasks = [
             asyncio.ensure_future(
@@ -288,6 +322,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                     max_tokens=self.max_tokens,
                     temperature=self.temperature,
                     seed=self.seed,
+                    max_retries=retries,
                     # extra inference params passed to this runtime
                     **self.model_extra,
                 )
@@ -313,6 +348,9 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                 df_data.append(dct)
             elif isinstance(response, Exception):
                 e = response
+                # Catch case where the model does not return a properly formatted output
+                if type(e).__name__ == "ValidationError" and "Invalid JSON" in str(e):
+                    e = ConstrainedGenerationError()
                 # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
                 dct = _format_error_dict(e)
                 print_error(f"Inference error {dct['_adala_message']}")
