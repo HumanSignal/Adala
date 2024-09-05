@@ -114,7 +114,10 @@ class LSEBatchItem(BaseModel):
         prepared_result = {
             k: v
             for k, v in result.items()
-            if k in ("task_id", "_adala_error", "_adala_message", "_adala_details")
+            if k in (
+                "task_id", "_adala_error", "_adala_message", "_adala_details",
+                "_prompt_tokens", "_completion_tokens", "_prompt_cost_usd", "_completion_cost_usd", "_total_cost_usd"
+            )
         }
 
         # Normalize results if they contain NaN

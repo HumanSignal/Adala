@@ -45,7 +45,7 @@ services:
         condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - MODULE_NAME=process_file.app
+      - MODULE_NAME=stream_inference.app
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9093
       - LOG_LEVEL=DEBUG
       - C_FORCE_ROOT=true # needed when using pickle serializer in celery + running as root - remove when we dont run as root
