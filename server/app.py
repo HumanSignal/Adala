@@ -19,7 +19,7 @@ import uvicorn
 
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
-from server.tasks.process_file import streaming_parent_task
+from server.tasks.stream_inference import streaming_parent_task
 from server.utils import (
     Settings,
     delete_topic,

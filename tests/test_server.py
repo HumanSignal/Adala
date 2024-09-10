@@ -7,7 +7,6 @@ from tempfile import NamedTemporaryFile
 import pandas as pd
 from copy import deepcopy
 
-
 # TODO manage which keys correspond to which models/deployments, probably using a litellm Router
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 AZURE_API_KEY = os.getenv("AZURE_API_KEY")
@@ -29,15 +28,13 @@ SUBMIT_PAYLOAD = {
                 "instructions": "Always return the answer 'Feature Lack'.",
                 "input_template": "{text}",
                 "output_template": "{output}",
-                "labels": {
-                    "output": [
-                        "Feature Lack",
-                        "Price",
-                        "Integration Issues",
-                        "Usability Concerns",
-                        "Competitor Advantage",
-                    ]
-                },
+                "labels": [
+                    "Feature Lack",
+                    "Price",
+                    "Integration Issues",
+                    "Usability Concerns",
+                    "Competitor Advantage",
+                ],
             }
         ],
         "runtimes": {
@@ -102,9 +99,7 @@ async def arun_job_and_get_output(
     timeout_sec=10,
     poll_interval_sec=1,
 ) -> pd.DataFrame:
-
     with NamedTemporaryFile(mode="r") as f:
-
         streaming_payload = {
             "agent": streaming_payload_agent,
             "result_handler": {"type": "CSVHandler", "output_path": f.name},
@@ -163,15 +158,13 @@ def test_ready_endpoint(client, redis_mock):
                     "instructions": "Always return the answer 'Feature Lack'.",
                     "input_template": "{text}",
                     "output_template": "{output}",
-                    "labels": {
-                        "output": [
-                            "Feature Lack",
-                            "Price",
-                            "Integration Issues",
-                            "Usability Concerns",
-                            "Competitor Advantage",
-                        ]
-                    },
+                    "labels": [
+                        "Feature Lack",
+                        "Price",
+                        "Integration Issues",
+                        "Usability Concerns",
+                        "Competitor Advantage",
+                    ],
                 }
             ],
             "output",
@@ -231,7 +224,6 @@ def test_ready_endpoint(client, redis_mock):
 @pytest.mark.use_openai
 @pytest.mark.use_server
 def test_streaming_use_cases(client, input_data, skills, output_column):
-
     data = pd.DataFrame.from_records(input_data)
     batch_data = data.drop(output_column, axis=1).to_dict(orient="records")
     submit_payload = deepcopy(SUBMIT_PAYLOAD)
@@ -341,7 +333,6 @@ async def test_streaming_n_concurrent_requests(async_client):
 @pytest.mark.use_server
 @pytest.mark.asyncio
 async def test_streaming_submit_edge_cases(client, async_client):
-
     job_id = "nonexistent"
 
     # get status
@@ -415,7 +406,6 @@ async def test_streaming_submit_edge_cases(client, async_client):
 @pytest.mark.use_azure
 @pytest.mark.use_server
 def test_streaming_azure(client):
-
     data = pd.DataFrame.from_records(
         [
             {"task_id": 1, "text": "anytexthere", "output": "Feature Lack"},

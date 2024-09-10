@@ -33,7 +33,7 @@ import argparse
 import logging
 import sys
 from celery.app.control import Control
-from process_file import app as celery
+from stream_inference import app as celery
 
 logger = logging.getLogger(__name__)
 
