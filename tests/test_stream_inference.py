@@ -127,6 +127,7 @@ def mock_lse_client():
         yield mock_client
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_run_streaming(agent, mock_kafka_consumer_input, mock_kafka_producer, mock_kafka_consumer_output, mock_lse_client):
 
