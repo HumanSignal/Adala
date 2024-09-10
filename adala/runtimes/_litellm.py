@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 # https://docs.litellm.ai/docs/exception_mapping#custom-mapping-list
 # NOTE: token usage is only correctly calculated if we only use instructor retries, not litellm retries
 # https://github.com/jxnl/instructor/pull/763
-retry_policy = dict(
+RETRY_POLICY = dict(
     retry=retry_if_not_exception_type(
         (
             ValidationError,
@@ -92,7 +92,8 @@ def _log_llm_exception(e) -> dict:
     return dct
 
 
-def _update_with_usage(data: Dict, usage: Usage, model: str) -> None:
+def _get_usage_dict(usage: Usage, model: str) -> Dict:
+    data = dict()
     data["_prompt_tokens"] = usage.prompt_tokens
     # will not exist if there is no completion
     data["_completion_tokens"] = usage.get("completion_tokens", 0)
@@ -111,6 +112,7 @@ def _update_with_usage(data: Dict, usage: Usage, model: str) -> None:
         data["_prompt_cost_usd"] = None
         data["_completion_cost_usd"] = None
         data["_total_cost_usd"] = None
+    return data
 
 
 class LiteLLMChatRuntime(Runtime):
@@ -227,7 +229,7 @@ class LiteLLMChatRuntime(Runtime):
             instructions_first,
         )
 
-        retries = Retrying(**retry_policy)
+        retries = Retrying(**RETRY_POLICY)
 
         try:
             # returns a pydantic model named Output
@@ -276,7 +278,9 @@ class LiteLLMChatRuntime(Runtime):
             # there are no other known errors to catch
             dct = _log_llm_exception(e)
 
-        _update_with_usage(dct, usage, model=self.model)
+        # Add usage data to the response (e.g. token counts, cost)
+        dct.update(_get_usage_dict(usage, model=self.model))
+
         return dct
 
 
@@ -370,7 +374,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             axis=1,
         ).tolist()
 
-        retries = AsyncRetrying(**retry_policy)
+        retries = AsyncRetrying(**RETRY_POLICY)
 
         tasks = [
             asyncio.ensure_future(
@@ -435,7 +439,9 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                 usage = completion.usage
                 dct = resp.dict()
 
-            _update_with_usage(dct, usage, model=self.model)
+            # Add usage data to the response (e.g. token counts, cost)
+            dct.update(_get_usage_dict(usage, model=self.model))
+
             df_data.append(dct)
 
         output_df = InternalDataFrame(df_data)
