@@ -1,7 +1,6 @@
 import pytest
 import os
 import asyncio
-import responses
 from unittest.mock import AsyncMock, patch
 from adala.environments.kafka import AsyncKafkaEnvironment
 from server.tasks.stream_inference import run_streaming
@@ -76,6 +75,7 @@ def mock_kafka_consumer_input():
 
 
 PRODUCER_SENT_DATA = asyncio.Event()
+
 
 @pytest.fixture
 def mock_kafka_consumer_output():
