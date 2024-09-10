@@ -26,7 +26,7 @@ TEST_AGENT = {
         "kafka_bootstrap_servers": "localhost:9092",
         "kafka_input_topic": "input_topic",
         "kafka_output_topic": "output_topic",
-        "timeout_ms": 1000
+        "timeout_ms": 1000,
     },
     "skills": [
         {
@@ -41,22 +41,24 @@ TEST_AGENT = {
                 }
             },
         }
-    ]
+    ],
 }
 
 TEST_INPUT_DATA = [
     {"task_id": 100, "input": "I am happy"},
 ]
-TEST_OUTPUT_DATA = [{
-    "task_id": 100,
-    "input": "I am happy",
-    "output": "positive",
-    '_completion_cost_usd': 3e-06,
-    '_completion_tokens': 5,
-    '_prompt_cost_usd': 1.365e-05,
-    '_prompt_tokens': 91,
-    '_total_cost_usd': 1.6649999999999998e-05,
-}]
+TEST_OUTPUT_DATA = [
+    {
+        "task_id": 100,
+        "input": "I am happy",
+        "output": "positive",
+        "_completion_cost_usd": 3e-06,
+        "_completion_tokens": 5,
+        "_prompt_cost_usd": 1.365e-05,
+        "_prompt_tokens": 91,
+        "_total_cost_usd": 1.6649999999999998e-05,
+    }
+]
 
 
 @pytest.fixture
@@ -65,12 +67,14 @@ def mock_kafka_consumer_input():
         mock_consumer = MockConsumer.return_value
         mock_consumer.start = AsyncMock()
         mock_consumer.stop = AsyncMock()
-        mock_consumer.getmany = AsyncMock(side_effect=[
-            # first call return batch
-            {'topic_partition': [AsyncMock(value=row) for row in TEST_INPUT_DATA]},
-            # second call - end of the stream
-            {}
-        ])
+        mock_consumer.getmany = AsyncMock(
+            side_effect=[
+                # first call return batch
+                {"topic_partition": [AsyncMock(value=row) for row in TEST_INPUT_DATA]},
+                # second call - end of the stream
+                {},
+            ]
+        )
         yield mock_consumer
 
 
@@ -83,7 +87,9 @@ def mock_kafka_consumer_output():
     async def getmany_side_effect(*args, **kwargs):
         await PRODUCER_SENT_DATA.wait()
         return {
-            AsyncMock(topic='output_topic_partition'): [AsyncMock(value=row) for row in TEST_OUTPUT_DATA]
+            AsyncMock(topic="output_topic_partition"): [
+                AsyncMock(value=row) for row in TEST_OUTPUT_DATA
+            ]
         }
 
     with patch("server.tasks.stream_inference.AIOKafkaConsumer") as MockConsumer:
@@ -112,7 +118,7 @@ def mock_kafka_producer():
 @pytest.fixture
 def agent(mock_kafka_consumer_input, mock_kafka_producer):
 
-    with patch.object(AsyncKafkaEnvironment, 'initialize', AsyncMock()) as mock_init:
+    with patch.object(AsyncKafkaEnvironment, "initialize", AsyncMock()) as mock_init:
         agent = Agent(**TEST_AGENT)
         agent.environment.consumer = mock_kafka_consumer_input
         agent.environment.producer = mock_kafka_producer
@@ -129,12 +135,16 @@ def mock_lse_client():
 
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_run_streaming(agent, mock_kafka_consumer_input, mock_kafka_producer, mock_kafka_consumer_output, mock_lse_client):
+async def test_run_streaming(
+    agent,
+    mock_kafka_consumer_input,
+    mock_kafka_producer,
+    mock_kafka_consumer_output,
+    mock_lse_client,
+):
 
     result_handler = LSEHandler(
-        api_key="api_key",
-        url="http://fakeapp.humansignal.com",
-        modelrun_id=123
+        api_key="api_key", url="http://fakeapp.humansignal.com", modelrun_id=123
     )
 
     # Call the run_streaming function
@@ -142,7 +152,7 @@ async def test_run_streaming(agent, mock_kafka_consumer_input, mock_kafka_produc
         agent=agent,
         result_handler=result_handler,
         batch_size=10,
-        output_topic_name="output_topic"
+        output_topic_name="output_topic",
     )
 
     # Verify that producer is called with the correct amount of send_and_wait calls and data

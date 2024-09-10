@@ -45,10 +45,7 @@ def parent_job_error_handler(self, exc, task_id, args, kwargs, einfo):
 
 
 async def run_streaming(
-    agent: Agent,
-    result_handler: ResultHandler,
-    batch_size: int,
-    output_topic_name: str
+    agent: Agent, result_handler: ResultHandler, batch_size: int, output_topic_name: str
 ):
     """
     This function is used to launch the two streaming tasks:
@@ -57,9 +54,7 @@ async def run_streaming(
     """
     input_task_done = asyncio.Event()
     async with asyncio.TaskGroup() as task_group:
-        task_group.create_task(
-            async_process_streaming_input(input_task_done, agent)
-        )
+        task_group.create_task(async_process_streaming_input(input_task_done, agent))
         task_group.create_task(
             async_process_streaming_output(
                 input_task_done, output_topic_name, result_handler, batch_size
@@ -119,7 +114,9 @@ async def async_process_streaming_input(input_task_done: asyncio.Event, agent: A
         # shut down kaka producer and consumer
         await agent.environment.finalize()
     except Exception as e:
-        logger.error(f'Error in async_process_streaming_input: {e}. Traceback: {traceback.format_exc()}')
+        logger.error(
+            f"Error in async_process_streaming_input: {e}. Traceback: {traceback.format_exc()}"
+        )
     # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_output
     finally:
         await agent.environment.finalize()
