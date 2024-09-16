@@ -267,6 +267,9 @@ class EntityExtraction(TransformSkill):
         input_field_name = self._get_input_field_name()
         output_field_name = self._get_output_field_name()
         for i, row in df.iterrows():
+            if row.get('_adala_error'):
+                logger.warning(f"Error in row {i}: {row['_adala_message']}")
+                continue
             text = row[input_field_name]
             entities = row[output_field_name]
             to_remove = []

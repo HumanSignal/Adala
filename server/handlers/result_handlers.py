@@ -1,4 +1,4 @@
-from typing import Optional, Any, List, Dict
+from typing import Optional, List, Dict
 import json
 from abc import abstractmethod
 from pydantic import BaseModel, Field, computed_field, ConfigDict, model_validator
@@ -80,6 +80,14 @@ class LSEBatchItem(BaseModel):
     message: Optional[str] = Field(None, alias="_adala_message")
     details: Optional[str] = Field(None, alias="_adala_details")
 
+    prompt_tokens: int = Field(alias="_prompt_tokens")
+    completion_tokens: int = Field(alias="_completion_tokens")
+
+    # these can fail to calculate
+    prompt_cost_usd: Optional[float] = Field(alias="_prompt_cost_usd")
+    completion_cost_usd: Optional[float] = Field(alias="_completion_cost_usd")
+    total_cost_usd: Optional[float] = Field(alias="_total_cost_usd")
+
     @model_validator(mode="after")
     def check_error_consistency(self):
         has_error = self.error
@@ -106,7 +114,18 @@ class LSEBatchItem(BaseModel):
         prepared_result = {
             k: v
             for k, v in result.items()
-            if k in ("task_id", "_adala_error", "_adala_message", "_adala_details")
+            if k
+            in (
+                "task_id",
+                "_adala_error",
+                "_adala_message",
+                "_adala_details",
+                "_prompt_tokens",
+                "_completion_tokens",
+                "_prompt_cost_usd",
+                "_completion_cost_usd",
+                "_total_cost_usd",
+            )
         }
 
         # Normalize results if they contain NaN

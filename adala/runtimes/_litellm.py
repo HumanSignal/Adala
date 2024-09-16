@@ -1,11 +1,17 @@
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional, Union, Type
+from typing import Any, Dict, List, Optional, Type
 
 import litellm
-from litellm.exceptions import AuthenticationError
+from litellm.exceptions import (
+    AuthenticationError,
+    ContentPolicyViolationError,
+    BadRequestError,
+    NotFoundError,
+)
+from litellm.types.utils import Usage
 import instructor
-from instructor.exceptions import InstructorRetryException
+from instructor.exceptions import InstructorRetryException, IncompleteOutputException
 import traceback
 from adala.utils.exceptions import ConstrainedGenerationError
 from adala.utils.internal_data import InternalDataFrame
@@ -14,7 +20,6 @@ from adala.utils.parse import (
     parse_template,
     partial_str_format,
 )
-from openai import NotFoundError
 from pydantic import ConfigDict, field_validator, BaseModel
 from rich import print
 from tenacity import (
@@ -22,6 +27,7 @@ from tenacity import (
     Retrying,
     retry_if_not_exception_type,
     stop_after_attempt,
+    wait_random_exponential,
 )
 from pydantic_core._pydantic_core import ValidationError
 
@@ -31,6 +37,25 @@ instructor_client = instructor.from_litellm(litellm.completion)
 async_instructor_client = instructor.from_litellm(litellm.acompletion)
 
 logger = logging.getLogger(__name__)
+
+
+# basically only retrying on timeout, incomplete output, or rate limit
+# https://docs.litellm.ai/docs/exception_mapping#custom-mapping-list
+# NOTE: token usage is only correctly calculated if we only use instructor retries, not litellm retries
+# https://github.com/jxnl/instructor/pull/763
+RETRY_POLICY = dict(
+    retry=retry_if_not_exception_type(
+        (
+            ValidationError,
+            ContentPolicyViolationError,
+            AuthenticationError,
+            BadRequestError,
+        )
+    ),
+    # should stop earlier on ValidationError and later on other errors, but couldn't figure out how to do that cleanly
+    stop=stop_after_attempt(3),
+    wait=wait_random_exponential(multiplier=1, max=60),
+)
 
 
 def get_messages(
@@ -57,6 +82,37 @@ def _format_error_dict(e: Exception) -> dict:
         "_adala_details": error_details,
     }
     return error_dct
+
+
+def _log_llm_exception(e) -> dict:
+    dct = _format_error_dict(e)
+    base_error = f"Inference error {dct['_adala_message']}"
+    tb = traceback.format_exc()
+    logger.error(f"{base_error}\nTraceback:\n{tb}")
+    return dct
+
+
+def _get_usage_dict(usage: Usage, model: str) -> Dict:
+    data = dict()
+    data["_prompt_tokens"] = usage.prompt_tokens
+    # will not exist if there is no completion
+    data["_completion_tokens"] = usage.get("completion_tokens", 0)
+    # can't use litellm.completion_cost bc it only takes the most recent completion, and .usage is summed over retries
+    # TODO make sure this is calculated correctly after we turn on caching
+    # litellm will register the cost of an azure model on first successful completion. If there hasn't been a successful completion, the model will not be registered
+    try:
+        prompt_cost, completion_cost = litellm.cost_per_token(
+            model, usage.prompt_tokens, usage.get("completion_tokens", 0)
+        )
+        data["_prompt_cost_usd"] = prompt_cost
+        data["_completion_cost_usd"] = completion_cost
+        data["_total_cost_usd"] = prompt_cost + completion_cost
+    except NotFoundError:
+        logger.error(f"Failed to get cost for model {model}")
+        data["_prompt_cost_usd"] = None
+        data["_completion_cost_usd"] = None
+        data["_total_cost_usd"] = None
+    return data
 
 
 class LiteLLMChatRuntime(Runtime):
@@ -174,45 +230,59 @@ class LiteLLMChatRuntime(Runtime):
             instructions_first,
         )
 
-        retries = Retrying(
-            retry=retry_if_not_exception_type((ValidationError)),
-            stop=stop_after_attempt(3),
-        )
+        retries = Retrying(**RETRY_POLICY)
 
         try:
             # returns a pydantic model named Output
-            response = instructor_client.chat.completions.create(
-                messages=messages,
-                response_model=response_model,
-                model=self.model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                seed=self.seed,
-                max_retries=retries,
-                # extra inference params passed to this runtime
-                **self.model_extra,
+            response, completion = (
+                instructor_client.chat.completions.create_with_completion(
+                    messages=messages,
+                    response_model=response_model,
+                    model=self.model,
+                    max_tokens=self.max_tokens,
+                    temperature=self.temperature,
+                    seed=self.seed,
+                    max_retries=retries,
+                    # extra inference params passed to this runtime
+                    **self.model_extra,
+                )
             )
+            usage = completion.usage
+            dct = response.dict()
+        except IncompleteOutputException as e:
+            usage = e.total_usage
+            dct = _log_llm_exception(e)
         except InstructorRetryException as e:
+            usage = e.total_usage
             # get root cause error from retries
             n_attempts = e.n_attempts
             e = e.__cause__.last_attempt.exception()
-            dct = _format_error_dict(e)
-            print_error(f"Inference error {dct['_adala_message']} after {n_attempts=}")
-            tb = traceback.format_exc()
-            logger.debug(tb)
-            return dct
+            dct = _log_llm_exception(e)
         except Exception as e:
+            # usage = e.total_usage
+            # not available here, so have to approximate by hand, assuming the same error occurred each time
+            n_attempts = retries.stop.max_attempt_number
+            prompt_tokens = n_attempts * litellm.token_counter(
+                model=self.model, messages=messages[:-1]
+            )  # response is appended as the last message
+            # TODO a pydantic validation error may be appended as the last message, don't know how to get the raw response in this case
+            completion_tokens = 0
+            usage = Usage(
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                total_tokens=(prompt_tokens + completion_tokens),
+            )
+
             # Catch case where the model does not return a properly formatted output
             if type(e).__name__ == "ValidationError" and "Invalid JSON" in str(e):
                 e = ConstrainedGenerationError()
-            # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
-            dct = _format_error_dict(e)
-            print_error(f"Inference error {dct['_adala_message']}")
-            tb = traceback.format_exc()
-            logger.debug(tb)
-            return dct
+            # there are no other known errors to catch
+            dct = _log_llm_exception(e)
 
-        return response.dict()
+        # Add usage data to the response (e.g. token counts, cost)
+        dct.update(_get_usage_dict(usage, model=self.model))
+
+        return dct
 
 
 class AsyncLiteLLMChatRuntime(AsyncRuntime):
@@ -306,14 +376,11 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             axis=1,
         ).tolist()
 
-        retries = AsyncRetrying(
-            retry=retry_if_not_exception_type((ValidationError)),
-            stop=stop_after_attempt(3),
-        )
+        retries = AsyncRetrying(**RETRY_POLICY)
 
         tasks = [
             asyncio.ensure_future(
-                async_instructor_client.chat.completions.create(
+                async_instructor_client.chat.completions.create_with_completion(
                     messages=get_messages(
                         user_prompt,
                         instructions_template,
@@ -336,31 +403,48 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         # convert list of LLMResponse objects to the dataframe records
         df_data = []
         for response in responses:
-            if isinstance(response, InstructorRetryException):
+            if isinstance(response, IncompleteOutputException):
                 e = response
+                usage = e.total_usage
+                dct = _log_llm_exception(e)
+            elif isinstance(response, InstructorRetryException):
+                e = response
+                usage = e.total_usage
                 # get root cause error from retries
                 n_attempts = e.n_attempts
                 e = e.__cause__.last_attempt.exception()
-                dct = _format_error_dict(e)
-                print_error(
-                    f"Inference error {dct['_adala_message']} after {n_attempts=}"
-                )
-                tb = traceback.format_exc()
-                logger.debug(tb)
-                df_data.append(dct)
+                dct = _log_llm_exception(e)
             elif isinstance(response, Exception):
                 e = response
+                # usage = e.total_usage
+                # not available here, so have to approximate by hand, assuming the same error occurred each time
+                n_attempts = retries.stop.max_attempt_number
+                messages = []  # TODO how to get these?
+                prompt_tokens = n_attempts * litellm.token_counter(
+                    model=self.model, messages=messages[:-1]
+                )  # response is appended as the last message
+                # TODO a pydantic validation error may be appended as the last message, don't know how to get the raw response in this case
+                completion_tokens = 0
+                usage = Usage(
+                    prompt_tokens,
+                    completion_tokens,
+                    total_tokens=(prompt_tokens + completion_tokens),
+                )
+
                 # Catch case where the model does not return a properly formatted output
                 if type(e).__name__ == "ValidationError" and "Invalid JSON" in str(e):
                     e = ConstrainedGenerationError()
                 # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
-                dct = _format_error_dict(e)
-                print_error(f"Inference error {dct['_adala_message']}")
-                tb = traceback.format_exc()
-                logger.debug(tb)
-                df_data.append(dct)
+                dct = _log_llm_exception(e)
             else:
-                df_data.append(response.dict())
+                resp, completion = response
+                usage = completion.usage
+                dct = resp.dict()
+
+            # Add usage data to the response (e.g. token counts, cost)
+            dct.update(_get_usage_dict(usage, model=self.model))
+
+            df_data.append(dct)
 
         output_df = InternalDataFrame(df_data)
         return output_df.set_index(batch.index)

@@ -25,7 +25,7 @@ poetry run uvicorn app:app --host 0.0.0.0 --port 30001
 
 ```bash
 cd tasks/
-poetry run celery -A process_file worker --loglevel=info
+poetry run celery -A stream_inference worker --loglevel=info
 ```
 
 # run in Docker
