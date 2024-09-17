@@ -71,6 +71,46 @@ class ClassificationSkill(TransformSkill):
 
         if self.response_model:
             # TODO validate schema above against response_model.schema()
+            '''
+            Example schema generated for multilabel:
+
+                {'$defs': {'SupportTag': {'enum': ['Account Access',
+                    'Login Issues',
+                    'App Functionality',
+                    'Bug Report',
+                    'Billing',
+                    'Account Management',
+                    'User Settings',
+                    'Notifications',
+                    'Performance',
+                    'Website Issues'],
+                   'title': 'SupportTag',
+                   'type': 'string'}},
+                 'properties': {'predicted_tags': {'items': {'$ref': '#/$defs/SupportTag'},
+                   'minItems': 1,
+                   'title': 'Predicted Tags',
+                   'type': 'array',
+                   'uniqueItems': True}},
+                 'required': ['predicted_tags'],
+                 'title': 'Output',
+                 'type': 'object'}
+
+            Example schema generated for single label:
+
+                {'properties': {'predicted_category': {'description': 'The classification label',
+                   'enum': ['Footwear/Clothing',
+                    'Electronics',
+                    'Food/Beverages',
+                    'Furniture/Home Decor',
+                    'Beauty/Personal Care'],
+                   'title': 'Predicted Category',
+                   'type': 'string'}},
+                 'required': ['predicted_category'],
+                 'title': 'Output',
+                 'type': 'object'}
+
+            this doesn't pass validate_schema(), so models and schemas don't roundtrip correctly.
+            '''
             return self
 
         if self.field_schema:
