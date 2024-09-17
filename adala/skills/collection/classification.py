@@ -70,9 +70,8 @@ class ClassificationSkill(TransformSkill):
     def validate_response_model(self):
 
         if self.response_model:
-            raise NotImplementedError(
-                "Classification skill does not support custom response model yet."
-            )
+            # TODO validate schema above against response_model.schema()
+            return self
 
         if self.field_schema:
             # in case field_schema is already provided, we don't need to parse output template and validate labels
