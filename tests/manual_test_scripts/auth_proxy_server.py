@@ -9,8 +9,17 @@ This script is a simple HTTP proxy server that forwards requests to a target URL
 It requires the TARGET_URL environment variable to be set to the target URL.
 It also requires the EXPECTED_HEADER environment variable to be set to the expected Authorization header value.
 
-To run the server, execute the following command:
-$ TARGET_URL=https://example.com EXPECTED_HEADER=secret uvicorn auth_proxy_server:app
+To install the dependencies, run the following command:
+```
+pip install fastapi httpx loguru
+```
+
+To run the server:
+```
+TARGET_URL=https://example.com EXPECTED_HEADER=secret uvicorn auth_proxy_server:app
+```
+
+This will forward all requests to `https://example.com` and check for the `Authorization` header to be equal to `secret`.
 """
 app = FastAPI()
 
