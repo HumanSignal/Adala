@@ -31,6 +31,7 @@ Entry Point:
 import time
 import argparse
 import logging
+import os
 import sys
 from celery.app.control import Control
 from stream_inference import app as celery
@@ -41,8 +42,10 @@ logger = logging.getLogger(__name__)
 def stop_consumer_for_queues(queues):
     control = Control(celery)
 
+    local_celery_host = f"celery@{os.environ['HOSTNAME']}"
+
     if not queues:
-        inspect = control.inspect()
+        inspect = control.inspect(destination=[local_celery_host])
         queues_info = inspect.active_queues()
         if queues_info:
             queues = {
@@ -55,10 +58,10 @@ def stop_consumer_for_queues(queues):
             return
 
     for queue_name in queues:
-        logger.info(f"Cancel consumer for queue: {queue_name}")
-        control.cancel_consumer(queue_name)
+        logger.info(f"Cancel consumer {local_celery_host} for queue: {queue_name}")
+        control.cancel_consumer(queue_name, destination=[local_celery_host])
 
-    inspect = control.inspect()
+    inspect = control.inspect(destination=[local_celery_host])
     while True:
         active = inspect.active()
         running_jobs = [job for value in active.values() for job in value]
