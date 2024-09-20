@@ -57,7 +57,7 @@ COPY pyproject.toml poetry.lock ./
 
 # Install dependencies
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR} \
-    poetry install --no-interaction --no-ansi --no-root --with label-studio
+    poetry install --no-interaction --no-ansi --no-root --without dev --with label-studio
 
 COPY . .
 
@@ -66,7 +66,7 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR} \
     poetry install --no-interaction --no-ansi --only-root
 
 ################################### Stage: prod
-FROM python-base as production
+FROM python-base AS production
 
 # Copy artifacts from other stages
 COPY --from=venv-builder /usr/src/app /usr/src/app
