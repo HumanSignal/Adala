@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Type, Union, Tuple, Literal
+from typing import Any, Dict, List, Optional, Type, Union, Tuple, Literal, Set
 from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel, Field, create_model
@@ -89,6 +89,11 @@ def json_schema_to_pydantic_field(json_schema: Dict[str, Any]) -> Tuple[Any, Fie
     examples = json_schema.get("examples")
     if examples:
         field_params["examples"] = examples
+    
+    # Get the item constraints
+    for constraint in ["minItems", "maxItems", "uniqueItems"]:
+        if constraint in json_schema:
+            field_params[constraint] = json_schema[constraint]
 
     # Create a Field object with the type and optional parameters.
     return type_, Field(..., **field_params)
@@ -127,12 +132,13 @@ def json_schema_to_pydantic_type(
     elif type_ == "boolean":
         return bool
     elif type_ == "array":
+        container_type = Set if json_schema.get("uniqueItems", False) else List
         items_schema = json_schema.get("items")
         if items_schema:
             item_type = json_schema_to_pydantic_type(items_schema)
-            return List[item_type]
+            return container_type[item_type]
         else:
-            return List
+            return container_type
     elif type_ == "object":
         # Handle nested models.
         properties = json_schema.get("properties")
