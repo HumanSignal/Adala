@@ -94,6 +94,10 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         record_no = 0
         try:
             for record in data:
+                # Hacky fix for when using uniqueItems for multi-label classification, returns a set and need to convert to list
+                for k, v in record.items():
+                    if type(v) == set:
+                        record[k] = list(v)
                 await producer.send_and_wait(topic, value=record)
                 record_no += 1
                 # print_text(f"Sent message: {record} to {topic=}")
