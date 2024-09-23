@@ -2,23 +2,27 @@ from enum import Enum
 from typing import Any, Dict, Generic, List, Optional, TypeVar
 import os
 import json
+import pandas as pd
 
 import fastapi
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from adala.agents import Agent
+from adala.skills import Skill
+from adala.runtimes import AsyncRuntime
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import UnknownTopicOrPartitionError
 from fastapi import HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, SerializeAsAny, field_validator
+from pydantic import BaseModel, SerializeAsAny, field_validator, Field
 from redis import Redis
 import time
 import uvicorn
 
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
+from server.prompt_improvement_skill import PromptImprovementSkillResponseModel, get_prompt_improvement_inputs, get_prompt_improvement_skill
 from server.tasks.stream_inference import streaming_parent_task
 from server.utils import (
     Settings,
@@ -305,6 +309,81 @@ async def ready(redis_conn: Redis = Depends(_get_redis_conn)):
         )
 
     return {"status": "ok"}
+
+
+class ImprovedPromptRequest(BaseModel):
+    """
+    Request model for improving a prompt.
+    """
+    student_skill: Skill
+    student_model: str
+    teacher_runtime: AsyncRuntime
+    input_variables: List[str]
+    
+    # same code as for ResultHandler in SubmitStreamingRequest
+    @field_validator("student_skill", mode="before")
+    def validate_skill(cls, value: Dict) -> Skill:
+        if "type" not in value:
+            raise HTTPException(
+                status_code=400, detail="Missing type in student_skill"
+            )
+        skill = Skill.create_from_registry(value.pop("type"), **value)
+        return skill
+    
+    # same code as for ResultHandler in SubmitStreamingRequest
+    @field_validator("teacher_runtime", mode="before")
+    def validate_teacher_runtime(cls, value: Dict) -> AsyncRuntime:
+        if "type" not in value:
+            raise HTTPException(
+                status_code=400, detail="Missing type in teacher_runtime"
+            )
+        runtime = AsyncRuntime.create_from_registry(value.pop("type"), **value)
+        return runtime
+
+class ImprovedPromptResponse(BaseModel):
+    
+    output: Optional[PromptImprovementSkillResponseModel] = None
+    
+    prompt_tokens: int = Field(alias="_prompt_tokens")
+    completion_tokens: int = Field(alias="_completion_tokens")
+
+    # these can fail to calculate
+    prompt_cost_usd: Optional[float] = Field(alias="_prompt_cost_usd")
+    completion_cost_usd: Optional[float] = Field(alias="_completion_cost_usd")
+    total_cost_usd: Optional[float] = Field(alias="_total_cost_usd")
+
+@app.post("/improved-prompt", response_model=Response[ImprovedPromptResponse])
+async def improved_prompt(request: ImprovedPromptRequest):
+    """
+    Improve a given prompt using the specified model and variables.
+
+    Args:
+        request (ImprovedPromptRequest): The request model for improving a prompt.
+
+    Returns:
+        Response: Response model for prompt improvement skill
+    """
+    
+    inputs = get_prompt_improvement_inputs(request.student_skill, request.input_variables, request.student_model)
+    prompt_improvement_skill = get_prompt_improvement_skill(request.input_variables)
+    # someday we can stop doing this...
+    df = pd.DataFrame.from_records([inputs])
+    response_df = await prompt_improvement_skill.aapply(
+        input=df,
+        runtime=request.teacher_runtime,
+    )
+    response_dct = response_df.iloc[0].to_dict()
+    
+    # get tokens and token cost
+    data = ImprovedPromptResponse(**response_dct)
+
+    if response_dct.get("_adala_error", False):
+        # insert error into Response
+        return Response(success=False, data=data, message=response_dct["_adala_details"], errors=[response_dct["_adala_message"]])
+    else:
+        # insert output into Response
+        data.output = PromptImprovementSkillResponseModel(**response_dct)
+        return Response(data=data)
 
 
 if __name__ == "__main__":
