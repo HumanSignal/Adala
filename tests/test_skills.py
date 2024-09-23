@@ -21,7 +21,7 @@ from datasets import load_dataset
 
 from enum import Enum
 from pydantic import BaseModel, Field
-from typing import Set
+from typing import Set, Literal
 
 
 @pytest.mark.vcr
@@ -93,42 +93,54 @@ def test_classification_skill_multilabel():
             {"text": "I'm experiencing slow performance on the website.", "tags": ["Performance", "Website Issues"]},
         ]
     )
+    
+    tag_names = [
+        "Account Access",
+        "Login Issues",
+        "App Functionality",
+        "Bug Report",
+        "Billing",
+        "Account Management",
+        "User Settings",
+        "Notifications",
+        "Performance",
+        "Website Issues",
+    ]
+    
+    # define skill with field_schema
 
     field_schema = {
         "predicted_tags": {
-            "type": "string",
-            "enum": [
-                "Account Access",
-                "Login Issues",
-                "App Functionality",
-                "Bug Report",
-                "Billing",
-                "Account Management",
-                "User Settings",
-                "Notifications",
-                "Performance",
-                "Website Issues",
-            ],
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": tag_names,
+            },
+            "minItems": 1,
+            "uniqueItems": True,
         }
     }
+    
+    agent1 = Agent(
+        skills=ClassificationSkill(
+            name="Output",
+            input_template="Support Ticket: {text}",
+            field_schema=field_schema,
+        ),
+        environment=StaticEnvironment(
+            df=df, ground_truth_columns={"predicted_tags": "tags"}
+        ),
+    )
 
-    class SupportTag(Enum):
-        ACCOUNT_ACCESS = "Account Access"
-        LOGIN_ISSUES = "Login Issues"
-        APP_FUNCTIONALITY = "App Functionality"
-        BUG_REPORT = "Bug Report"
-        BILLING = "Billing"
-        ACCOUNT_MANAGEMENT = "Account Management"
-        USER_SETTINGS = "User Settings"
-        NOTIFICATIONS = "Notifications"
-        PERFORMANCE = "Performance"
-        WEBSITE_ISSUES = "Website Issues"
+    out_df1 = agent1.run()
+
+    # define skill with response_model
 
     class Output(BaseModel):
-        predicted_tags: Set[SupportTag] = Field(..., min_items=1)
+        predicted_tags: Set[Literal[*tag_names]] = Field(..., min_items=1, description="The classification label")
 
 
-    agent = Agent(
+    agent2 = Agent(
         skills=ClassificationSkill(
             name="Output",
             input_template="Support Ticket: {text}",
@@ -140,9 +152,18 @@ def test_classification_skill_multilabel():
         teacher_runtimes={"default": OpenAIChatRuntime(model="gpt-4-turbo")},
     )
     
-    out_df = agent.run()
+    out_df2 = agent2.run()
+    
+    # assert they have the same response_model and make the same predictions
 
-    assert (out_df['tags'] == df['tags']).all()
+    generated_response_model = agent1.skills["Output"].response_model
+    
+    assert Output.model_json_schema() == generated_response_model.model_json_schema()
+    assert (out_df1['tags'] == out_df2['tags']).all()
+    
+    # assert they make correct predictions
+
+    assert (out_df2['tags'] == df['tags']).all()
     
 
 @pytest.mark.vcr
