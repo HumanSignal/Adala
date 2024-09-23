@@ -11,15 +11,15 @@ logger = logging.getLogger(__name__)
 
 
 def validate_schema(schema: Dict[str, Any]):
-    
+
     single_label_schema = {
         "type": "object",
         "patternProperties": {
             ".*": {
                 "type": "object",
                 "properties": {
-                        "type": {"type": "string", "enum": ["string"]},
-                        "enum": {
+                    "type": {"type": "string", "enum": ["string"]},
+                    "enum": {
                         "type": "array",
                         "items": {"type": "string"},
                         "minItems": 1,
@@ -34,7 +34,7 @@ def validate_schema(schema: Dict[str, Any]):
         "maxProperties": 1,
         "additionalProperties": False,
     }
-    
+
     multi_label_schema = {
         "type": "object",
         "patternProperties": {
@@ -61,8 +61,8 @@ def validate_schema(schema: Dict[str, Any]):
                     "maxItems": {"type": "integer"},
                     "description": {"type": "string"},
                 },
-            "required": ["type", "items"],
-            "additionalProperties": False,
+                "required": ["type", "items"],
+                "additionalProperties": False,
             },
         },
         "minProperties": 1,
@@ -72,7 +72,7 @@ def validate_schema(schema: Dict[str, Any]):
 
     expected_schema = {
         "type": "object",
-        "oneOf": [single_label_schema, multi_label_schema]
+        "oneOf": [single_label_schema, multi_label_schema],
     }
 
     try:
@@ -110,47 +110,7 @@ class ClassificationSkill(TransformSkill):
     def validate_response_model(self):
 
         if self.response_model:
-            # TODO validate schema above against response_model.schema()
-            '''
-            Example schema generated for multilabel:
-
-                {'$defs': {'SupportTag': {'enum': ['Account Access',
-                    'Login Issues',
-                    'App Functionality',
-                    'Bug Report',
-                    'Billing',
-                    'Account Management',
-                    'User Settings',
-                    'Notifications',
-                    'Performance',
-                    'Website Issues'],
-                   'title': 'SupportTag',
-                   'type': 'string'}},
-                 'properties': {'predicted_tags': {'items': {'$ref': '#/$defs/SupportTag'},
-                   'minItems': 1,
-                   'title': 'Predicted Tags',
-                   'type': 'array',
-                   'uniqueItems': True}},
-                 'required': ['predicted_tags'],
-                 'title': 'Output',
-                 'type': 'object'}
-
-            Example schema generated for single label:
-
-                {'properties': {'predicted_category': {'description': 'The classification label',
-                   'enum': ['Footwear/Clothing',
-                    'Electronics',
-                    'Food/Beverages',
-                    'Furniture/Home Decor',
-                    'Beauty/Personal Care'],
-                   'title': 'Predicted Category',
-                   'type': 'string'}},
-                 'required': ['predicted_category'],
-                 'title': 'Output',
-                 'type': 'object'}
-
-            this doesn't pass validate_schema(), so models and schemas don't roundtrip correctly.
-            '''
+            # NOTE: the field_schemas provided are not the same as response_model.schema() (json schemas don't roundtrip), so can't validate here
             return self
 
         if self.field_schema:

@@ -89,7 +89,7 @@ def json_schema_to_pydantic_field(json_schema: Dict[str, Any]) -> Tuple[Any, Fie
     examples = json_schema.get("examples")
     if examples:
         field_params["examples"] = examples
-    
+
     # Get the item constraints
     for constraint in ["minItems", "maxItems", "uniqueItems"]:
         if constraint in json_schema:
