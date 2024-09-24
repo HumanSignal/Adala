@@ -118,13 +118,12 @@ def test_llm_async():
         )
     )
 
-    # note sync and async error handling behave differently in instructor. After a retry, async only returns the message while sync returns the full error object
     expected_result = pd.DataFrame.from_records(
         [
             {
                 "_adala_error": True,
                 "_adala_message": "AuthenticationError",
-                "_adala_details": "litellm.AuthenticationError: AuthenticationError: OpenAIException - Incorrect API key provided: fake_api_key. You can find your API key at https://platform.openai.com/account/api-keys.",
+                "_adala_details": "litellm.AuthenticationError: AuthenticationError: OpenAIException - Error code: 401 - {'error': {'message': 'Incorrect API key provided: fake_api_key. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}",
                 "_prompt_tokens": 9,
                 "_completion_tokens": 0,
                 "_prompt_cost_usd": 1.35e-06,
