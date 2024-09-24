@@ -21,6 +21,7 @@ from adala.utils.parse import (
     partial_str_format,
 )
 from pydantic import ConfigDict, field_validator, BaseModel
+from pydantic_core import to_jsonable_python
 from rich import print
 from tenacity import (
     AsyncRetrying,
@@ -254,7 +255,7 @@ class LiteLLMChatRuntime(Runtime):
                 )
             )
             usage = completion.usage
-            dct = response.dict()
+            dct = to_jsonable_python(response)
         except IncompleteOutputException as e:
             usage = e.total_usage
             dct = _log_llm_exception(e)
@@ -444,7 +445,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             else:
                 resp, completion = response
                 usage = completion.usage
-                dct = resp.dict()
+                dct = to_jsonable_python(resp)
 
             # Add usage data to the response (e.g. token counts, cost)
             dct.update(_get_usage_dict(usage, model=self.model))

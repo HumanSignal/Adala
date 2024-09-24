@@ -4,15 +4,6 @@ from datetime import datetime
 from pydantic import BaseModel, Field, create_model
 
 
-class SerializableModel(BaseModel):
-
-    class Config:
-        # Custom json_encoders for non-serializable types
-        json_encoders = {
-            set: lambda v: list(v),
-        }
-
-
 def json_schema_to_model(json_schema: Dict[str, Any]) -> Type[BaseModel]:
     """
     Converts a JSON schema to a Pydantic model.
@@ -64,7 +55,7 @@ def json_schema_to_model(json_schema: Dict[str, Any]) -> Type[BaseModel]:
         fields_def[name] = json_schema_to_pydantic_field(prop)
 
     # Create the BaseModel class using create_model().
-    model = create_model(model_name, **fields_def, __base__=SerializableModel)
+    model = create_model(model_name, **fields_def)
 
     # Set the model docstring.
     model.__doc__ = model_description
