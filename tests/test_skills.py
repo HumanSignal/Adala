@@ -19,6 +19,10 @@ from adala.skills.collection.summarization import SummarizationSkill
 from adala.skills.collection.translation import TranslationSkill
 from datasets import load_dataset
 
+from enum import Enum
+from pydantic import BaseModel, Field
+from typing import Set, Literal
+
 
 @pytest.mark.vcr
 def test_classification_skill():
@@ -77,6 +81,106 @@ def test_classification_skill():
         agent.skills["Output"].instructions
         == "Classify the input text into the correct product category by emphasizing both the primary function of the item and its intended context of use. Even if certain keywords might suggest a typical category, analyze how the context or specific usage mentioned might indicate a different category. Analyze the entire text holistically to understand its full context and primary purpose before deciding on the category."
     )
+
+
+@pytest.mark.vcr
+def test_classification_skill_multilabel():
+    df = pd.DataFrame(
+        [
+            {
+                "text": "My account is locked and I can't log in.",
+                "tags": ["Account Access", "Login Issues"],
+            },
+            {
+                "text": "The app keeps crashing when I try to upload a photo.",
+                "tags": ["App Functionality", "Bug Report"],
+            },
+            {
+                "text": "I need to update my billing information.",
+                "tags": ["Billing", "Account Management"],
+            },
+            {
+                "text": "How do I change my notification settings?",
+                "tags": ["User Settings", "Notifications"],
+            },
+            {
+                "text": "I'm experiencing slow performance on the website.",
+                "tags": ["Performance", "Website Issues"],
+            },
+        ]
+    )
+
+    tag_names = [
+        "Account Access",
+        "Login Issues",
+        "App Functionality",
+        "Bug Report",
+        "Billing",
+        "Account Management",
+        "User Settings",
+        "Notifications",
+        "Performance",
+        "Website Issues",
+    ]
+
+    # define skill with field_schema
+
+    field_schema = {
+        "predicted_tags": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": tag_names,
+            },
+            "minItems": 1,
+            "uniqueItems": True,
+        }
+    }
+
+    agent1 = Agent(
+        skills=ClassificationSkill(
+            name="Output",
+            input_template="Support Ticket: {text}",
+            field_schema=field_schema,
+        ),
+        environment=StaticEnvironment(
+            df=df, ground_truth_columns={"predicted_tags": "tags"}
+        ),
+    )
+
+    out_df1 = agent1.run()
+
+    # define skill with response_model
+
+    class Output(BaseModel):
+        predicted_tags: Set[Literal[*tag_names]] = Field(
+            ..., min_items=1, description="The classification label"
+        )
+
+    agent2 = Agent(
+        skills=ClassificationSkill(
+            name="Output",
+            input_template="Support Ticket: {text}",
+            response_model=Output,
+        ),
+        environment=StaticEnvironment(
+            df=df, ground_truth_columns={"predicted_tags": "tags"}
+        ),
+        teacher_runtimes={"default": OpenAIChatRuntime(model="gpt-4-turbo")},
+    )
+
+    out_df2 = agent2.run()
+
+    # assert they have the same response_model and make the same predictions
+
+    generated_response_model = agent1.skills["Output"].response_model
+
+    assert Output.model_json_schema() == generated_response_model.model_json_schema()
+    assert (out_df1["tags"] == out_df2["tags"]).all()
+
+    # assert they make correct predictions
+
+    assert (out_df2["tags"] == df["tags"]).all()
 
 
 @pytest.mark.vcr

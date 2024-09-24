@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 def validate_schema(schema: Dict[str, Any]):
-    expected_schema = {
+
+    single_label_schema = {
         "type": "object",
         "patternProperties": {
-            # single output field
             ".*": {
                 "type": "object",
                 "properties": {
@@ -28,11 +28,51 @@ def validate_schema(schema: Dict[str, Any]):
                 },
                 "required": ["type", "enum"],
                 "additionalProperties": False,
-            }
+            },
         },
         "minProperties": 1,
         "maxProperties": 1,
         "additionalProperties": False,
+    }
+
+    multi_label_schema = {
+        "type": "object",
+        "patternProperties": {
+            ".*": {
+                "type": "object",
+                "properties": {
+                    "type": {"type": "string", "enum": ["array"]},
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            # label definition has the same format as single label
+                            "type": {"type": "string", "enum": ["string"]},
+                            "enum": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "minItems": 1,
+                            },
+                        },
+                        "required": ["type", "enum"],
+                        "additionalProperties": False,
+                    },
+                    "uniqueItems": {"type": "boolean", "default": True},
+                    "minItems": {"type": "integer", "default": 1},
+                    "maxItems": {"type": "integer"},
+                    "description": {"type": "string"},
+                },
+                "required": ["type", "items"],
+                "additionalProperties": False,
+            },
+        },
+        "minProperties": 1,
+        "maxProperties": 1,
+        "additionalProperties": False,
+    }
+
+    expected_schema = {
+        "type": "object",
+        "oneOf": [single_label_schema, multi_label_schema],
     }
 
     try:
@@ -70,9 +110,8 @@ class ClassificationSkill(TransformSkill):
     def validate_response_model(self):
 
         if self.response_model:
-            raise NotImplementedError(
-                "Classification skill does not support custom response model yet."
-            )
+            # NOTE: the field_schemas provided are not the same as response_model.schema() (json schemas don't roundtrip), so can't validate here
+            return self
 
         if self.field_schema:
             # in case field_schema is already provided, we don't need to parse output template and validate labels

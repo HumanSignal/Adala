@@ -21,6 +21,7 @@ from adala.utils.parse import (
     partial_str_format,
 )
 from pydantic import ConfigDict, field_validator, BaseModel
+from pydantic_core import to_jsonable_python
 from rich import print
 from tenacity import (
     AsyncRetrying,
@@ -95,14 +96,21 @@ def _log_llm_exception(e) -> dict:
 def _get_usage_dict(usage: Usage, model: str) -> Dict:
     data = dict()
     data["_prompt_tokens"] = usage.prompt_tokens
+
     # will not exist if there is no completion
-    data["_completion_tokens"] = usage.get("completion_tokens", 0)
+    # sometimes the response will have a CompletionUsage instead of a Usage, which doesn't have a .get() method
+    # data["_completion_tokens"] = usage.get("completion_tokens", 0)
+    try:
+        data["_completion_tokens"] = usage.completion_tokens
+    except AttributeError:
+        data["_completion_tokens"] = 0
+
     # can't use litellm.completion_cost bc it only takes the most recent completion, and .usage is summed over retries
     # TODO make sure this is calculated correctly after we turn on caching
     # litellm will register the cost of an azure model on first successful completion. If there hasn't been a successful completion, the model will not be registered
     try:
         prompt_cost, completion_cost = litellm.cost_per_token(
-            model, usage.prompt_tokens, usage.get("completion_tokens", 0)
+            model, data["_prompt_tokens"], data["_completion_tokens"]
         )
         data["_prompt_cost_usd"] = prompt_cost
         data["_completion_cost_usd"] = completion_cost
@@ -247,7 +255,7 @@ class LiteLLMChatRuntime(Runtime):
                 )
             )
             usage = completion.usage
-            dct = response.dict()
+            dct = to_jsonable_python(response)
         except IncompleteOutputException as e:
             usage = e.total_usage
             dct = _log_llm_exception(e)
@@ -437,7 +445,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             else:
                 resp, completion = response
                 usage = completion.usage
-                dct = resp.dict()
+                dct = to_jsonable_python(resp)
 
             # Add usage data to the response (e.g. token counts, cost)
             dct.update(_get_usage_dict(usage, model=self.model))
