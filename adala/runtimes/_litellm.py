@@ -174,6 +174,7 @@ class LiteLLMChatRuntime(Runtime):
             raise ValueError(
                 f'Failed to check availability of requested model "{self.model}": {e}'
             )
+
         return self
 
     def get_llm_response(self, messages: List[Dict[str, str]]) -> str:
@@ -343,6 +344,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             raise ValueError(
                 f'Failed to check availability of requested model "{self.model}": {e}'
             )
+
         return self
 
     @field_validator("concurrency", mode="before")
@@ -354,6 +356,10 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                 "Set `AsyncOpenAIChatRuntime(concurrency=10, ...)` or any other positive integer. "
             )
         return value
+
+    @property
+    def is_custom_openai_endpoint(self) -> bool:
+        return self.model.startswith("openai/") and self.model_extra.get("base_url")
 
     async def batch_to_batch(
         self,
@@ -383,6 +389,12 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         ).tolist()
 
         retries = AsyncRetrying(**RETRY_POLICY)
+        if self.is_custom_openai_endpoint:
+            # TODO: most of the custom openai endpoints do not support tools mode but json mode
+            # we should make it more performant by not creating instructor client on every request
+            async_instructor_client = instructor.from_litellm(
+                litellm.acompletion, mode=instructor.Mode.JSON
+            )
 
         tasks = [
             asyncio.ensure_future(
