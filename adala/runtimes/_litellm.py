@@ -139,7 +139,7 @@ class InstructorClientMixin:
 
     def __getstate__(self):
         state = super().__getstate__()
-        state['__dict__']['client'] = None
+        state["__dict__"]["client"] = None
         return state
 
     def __setstate__(self, state):
@@ -274,18 +274,16 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
 
         try:
             # returns a pydantic model named Output
-            response, completion = (
-                self.client.chat.completions.create_with_completion(
-                    messages=messages,
-                    response_model=response_model,
-                    model=self.model,
-                    max_tokens=self.max_tokens,
-                    temperature=self.temperature,
-                    seed=self.seed,
-                    max_retries=retries,
-                    # extra inference params passed to this runtime
-                    **self.model_extra,
-                )
+            response, completion = self.client.chat.completions.create_with_completion(
+                messages=messages,
+                response_model=response_model,
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                seed=self.seed,
+                max_retries=retries,
+                # extra inference params passed to this runtime
+                **self.model_extra,
             )
             usage = completion.usage
             dct = to_jsonable_python(response)
@@ -376,7 +374,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
             raise ValueError(
                 f'Failed to check availability of requested model "{self.model}": {e}'
             )
-        
+
         self.use_instructor_client()
 
         return self

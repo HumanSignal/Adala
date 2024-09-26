@@ -166,4 +166,7 @@ def test_agent_is_pickleable():
     agent = Agent(**agent_json)
     agent_pickle = pickle.dumps(agent)
     agent_roundtrip = pickle.loads(agent_pickle)
-    assert agent_json["skills"][0]["input_template"] == agent_roundtrip.skills["ClassificationResult"].input_template
+    assert (
+        agent_json["skills"][0]["input_template"]
+        == agent_roundtrip.skills["ClassificationResult"].input_template
+    )
