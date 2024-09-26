@@ -4,9 +4,11 @@ import logging
 import os
 from pathlib import Path
 from kafka.admin import KafkaAdminClient, NewTopic
-from kafka.errors import TopicAlreadyExistsError
+from kafka.errors import TopicAlreadyExistsError, UnknownTopicOrPartitionError
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
+
+logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -74,7 +76,10 @@ def delete_topic(topic_name: str):
         api_version=(2, 5, 0),
     )
 
-    admin_client.delete_topics(topics=[topic_name])
+    try:
+        admin_client.delete_topics(topics=[topic_name])
+    except UnknownTopicOrPartitionError:
+        logger.error(f"Topic {topic_name} does not exist and cannot be deleted.")
 
 
 def init_logger(name, level=LOG_LEVEL):
