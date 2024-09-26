@@ -32,7 +32,6 @@ def test_agent_is_serializable():
             "default": {
                 "type": "AsyncLiteLLMChatRuntime",
                 "model": "gpt-4o-mini",
-                "api_key": os.getenv("OPENAI_API_KEY"),
                 "max_tokens": 200,
                 "temperature": 0,
                 "batch_size": 100,
