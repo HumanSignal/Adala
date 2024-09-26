@@ -2,6 +2,7 @@ import asyncio
 import logging
 from typing import Any, Dict, List, Optional, Type
 from copy import deepcopy
+from functools import cached_property
 import litellm
 from litellm.exceptions import (
     AuthenticationError,
@@ -121,30 +122,20 @@ def _get_usage_dict(usage: Usage, model: str) -> Dict:
 
 
 class InstructorClientMixin:
-    client: Any = Field(default=None, exclude=True)
 
     def _from_litellm(self, **kwargs):
         return instructor.from_litellm(litellm.completion, **kwargs)
 
-    def use_instructor_client(self) -> None:
-        if self.client is None:
-            kwargs = {}
-            if self.is_custom_openai_endpoint:
-                kwargs["mode"] = instructor.Mode.JSON
-            self.client = self._from_litellm(**kwargs)
+    @cached_property
+    def client(self):
+        kwargs = {}
+        if self.is_custom_openai_endpoint:
+            kwargs["mode"] = instructor.Mode.JSON
+        return self._from_litellm(**kwargs)
 
     @property
     def is_custom_openai_endpoint(self) -> bool:
         return self.model.startswith("openai/") and self.model_extra.get("base_url")
-
-    def __getstate__(self):
-        state = super().__getstate__()
-        state["__dict__"]["client"] = None
-        return state
-
-    def __setstate__(self, state):
-        super().__setstate__(state)
-        self.use_instructor_client()
 
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
@@ -204,8 +195,6 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
             raise ValueError(
                 f'Failed to check availability of requested model "{self.model}": {e}'
             )
-
-        self.use_instructor_client()
 
         return self
 
@@ -374,8 +363,6 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
             raise ValueError(
                 f'Failed to check availability of requested model "{self.model}": {e}'
             )
-
-        self.use_instructor_client()
 
         return self
 
