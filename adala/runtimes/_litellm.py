@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from typing import Any, Dict, List, Optional, Type
-
+from functools import cached_property
 import litellm
 from litellm.exceptions import (
     AuthenticationError,
@@ -15,7 +15,6 @@ from instructor.exceptions import InstructorRetryException, IncompleteOutputExce
 import traceback
 from adala.utils.exceptions import ConstrainedGenerationError
 from adala.utils.internal_data import InternalDataFrame
-from adala.utils.logs import print_error
 from adala.utils.parse import (
     parse_template,
     partial_str_format,
@@ -33,9 +32,6 @@ from tenacity import (
 from pydantic_core._pydantic_core import ValidationError
 
 from .base import AsyncRuntime, Runtime
-
-instructor_client = instructor.from_litellm(litellm.completion)
-async_instructor_client = instructor.from_litellm(litellm.acompletion)
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +119,30 @@ def _get_usage_dict(usage: Usage, model: str) -> Dict:
     return data
 
 
-class LiteLLMChatRuntime(Runtime):
+class InstructorClientMixin:
+
+    def _from_litellm(self, **kwargs):
+        return instructor.from_litellm(litellm.completion, **kwargs)
+
+    @cached_property
+    def client(self):
+        kwargs = {}
+        if self.is_custom_openai_endpoint:
+            kwargs["mode"] = instructor.Mode.JSON
+        return self._from_litellm(**kwargs)
+
+    @property
+    def is_custom_openai_endpoint(self) -> bool:
+        return self.model.startswith("openai/") and self.model_extra.get("base_url")
+
+
+class InstructorAsyncClientMixin(InstructorClientMixin):
+
+    def _from_litellm(self, **kwargs):
+        return instructor.from_litellm(litellm.acompletion, **kwargs)
+
+
+class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
     """
     Runtime that uses [LiteLLM API](https://litellm.vercel.app/docs) and chat
     completion models to perform the skill.
@@ -242,18 +261,16 @@ class LiteLLMChatRuntime(Runtime):
 
         try:
             # returns a pydantic model named Output
-            response, completion = (
-                instructor_client.chat.completions.create_with_completion(
-                    messages=messages,
-                    response_model=response_model,
-                    model=self.model,
-                    max_tokens=self.max_tokens,
-                    temperature=self.temperature,
-                    seed=self.seed,
-                    max_retries=retries,
-                    # extra inference params passed to this runtime
-                    **self.model_extra,
-                )
+            response, completion = self.client.chat.completions.create_with_completion(
+                messages=messages,
+                response_model=response_model,
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                seed=self.seed,
+                max_retries=retries,
+                # extra inference params passed to this runtime
+                **self.model_extra,
             )
             usage = completion.usage
             dct = to_jsonable_python(response)
@@ -293,7 +310,7 @@ class LiteLLMChatRuntime(Runtime):
         return dct
 
 
-class AsyncLiteLLMChatRuntime(AsyncRuntime):
+class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
     """
     Runtime that uses [OpenAI API](https://openai.com/) and chat completion
     models to perform the skill. It uses async calls to OpenAI API.
@@ -357,10 +374,6 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
             )
         return value
 
-    @property
-    def is_custom_openai_endpoint(self) -> bool:
-        return self.model.startswith("openai/") and self.model_extra.get("base_url")
-
     async def batch_to_batch(
         self,
         batch: InternalDataFrame,
@@ -389,16 +402,10 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
         ).tolist()
 
         retries = AsyncRetrying(**RETRY_POLICY)
-        if self.is_custom_openai_endpoint:
-            # TODO: most of the custom openai endpoints do not support tools mode but json mode
-            # we should make it more performant by not creating instructor client on every request
-            async_instructor_client = instructor.from_litellm(
-                litellm.acompletion, mode=instructor.Mode.JSON
-            )
 
         tasks = [
             asyncio.ensure_future(
-                async_instructor_client.chat.completions.create_with_completion(
+                self.client.chat.completions.create_with_completion(
                     messages=get_messages(
                         user_prompt,
                         instructions_template,
