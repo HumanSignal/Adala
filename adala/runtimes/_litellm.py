@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from typing import Any, Dict, List, Optional, Type
-from copy import deepcopy
 from functools import cached_property
 import litellm
 from litellm.exceptions import (
@@ -16,12 +15,11 @@ from instructor.exceptions import InstructorRetryException, IncompleteOutputExce
 import traceback
 from adala.utils.exceptions import ConstrainedGenerationError
 from adala.utils.internal_data import InternalDataFrame
-from adala.utils.logs import print_error
 from adala.utils.parse import (
     parse_template,
     partial_str_format,
 )
-from pydantic import ConfigDict, field_validator, BaseModel, Field
+from pydantic import ConfigDict, field_validator, BaseModel
 from pydantic_core import to_jsonable_python
 from rich import print
 from tenacity import (
