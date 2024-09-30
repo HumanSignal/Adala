@@ -54,7 +54,7 @@ class Agent(BaseModel, ABC):
     """
 
     environment: Optional[SerializeAsAny[Union[Environment, AsyncEnvironment]]] = None
-    skills: Union[Skill, SkillSet]
+    skills: SerializeAsAny[Union[Skill, SkillSet]]
 
     memory: Memory = Field(default=None)
     runtimes: Dict[str, SerializeAsAny[Union[Runtime, AsyncRuntime]]] = Field(

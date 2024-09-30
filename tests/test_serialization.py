@@ -1,4 +1,5 @@
 import pytest
+import os
 
 
 @pytest.mark.vcr
@@ -119,3 +120,53 @@ def test_agent_is_serializable():
 
     assert unpickled_agent.skills["text_classifier"].response_model is not None
     assert serialized_agent == unpickled_agent.model_dump()
+
+
+@pytest.mark.vcr
+def test_agent_is_pickleable():
+    from adala.agents import Agent
+    import pickle
+
+    agent_json = {
+        "runtimes": {
+            "default": {
+                "type": "AsyncLiteLLMChatRuntime",
+                "model": "gpt-4o-mini",
+                "api_key": os.getenv("OPENAI_API_KEY"),
+                "max_tokens": 200,
+                "temperature": 0,
+                "batch_size": 100,
+                "timeout": 10,
+                "verbose": False,
+            }
+        },
+        "environment": {
+            "type": "AsyncKafkaEnvironment",
+            "kafka_bootstrap_servers": "localhost:9092",
+            "kafka_input_topic": "input_topic",
+            "kafka_output_topic": "output_topic",
+            "timeout_ms": 1000,
+        },
+        "skills": [
+            {
+                "type": "ClassificationSkill",
+                "name": "ClassificationResult",
+                "instructions": "",
+                "input_template": "Classify sentiment of the input text: {input}",
+                "field_schema": {
+                    "output": {
+                        "type": "string",
+                        "enum": ["positive", "negative", "neutral"],
+                    }
+                },
+            }
+        ],
+    }
+
+    agent = Agent(**agent_json)
+    agent_pickle = pickle.dumps(agent)
+    agent_roundtrip = pickle.loads(agent_pickle)
+    assert (
+        agent_json["skills"][0]["input_template"]
+        == agent_roundtrip.skills["ClassificationResult"].input_template
+    )
