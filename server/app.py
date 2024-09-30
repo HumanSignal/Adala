@@ -15,14 +15,14 @@ from aiokafka import AIOKafkaProducer
 from aiokafka.errors import UnknownTopicOrPartitionError
 from fastapi import HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, SerializeAsAny, field_validator, Field
+from pydantic import BaseModel, SerializeAsAny, field_validator, Field, model_validator
 from redis import Redis
 import time
 import uvicorn
 
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
-from server.prompt_improvement_skill import PromptImprovementSkillResponseModel, get_prompt_improvement_inputs, get_prompt_improvement_skill
+from adala.skills.collection.prompt_improvement import ImprovedPromptResponse, ErrorResponseModel
 from server.tasks.stream_inference import streaming_parent_task
 from server.utils import (
     Settings,
@@ -315,42 +315,27 @@ class ImprovedPromptRequest(BaseModel):
     """
     Request model for improving a prompt.
     """
-    student_skill: Skill
-    student_model: str
-    teacher_runtime: AsyncRuntime
-    input_variables: List[str]
-    
-    # same code as for ResultHandler in SubmitStreamingRequest
-    @field_validator("student_skill", mode="before")
-    def validate_skill(cls, value: Dict) -> Skill:
-        if "type" not in value:
-            raise HTTPException(
-                status_code=400, detail="Missing type in student_skill"
-            )
-        skill = Skill.create_from_registry(value.pop("type"), **value)
-        return skill
-    
-    # same code as for ResultHandler in SubmitStreamingRequest
-    @field_validator("teacher_runtime", mode="before")
-    def validate_teacher_runtime(cls, value: Dict) -> AsyncRuntime:
-        if "type" not in value:
-            raise HTTPException(
-                status_code=400, detail="Missing type in teacher_runtime"
-            )
-        runtime = AsyncRuntime.create_from_registry(value.pop("type"), **value)
-        return runtime
+    agent: Agent
+    skill_to_improve: str
+    input_variables: Optional[Dict[str, List[str]]] = Field(
+        default=None,
+        description="List of variables available to use in the input template of the skill, in case any exist that are not currently used"
+    )
 
-class ImprovedPromptResponse(BaseModel):
+    @field_validator("agent", mode="after")
+    def validate_teacher_runtime(cls, agent: Agent) -> Agent:
+        if not isinstance(agent.get_teacher_runtime(), AsyncRuntime):
+            raise ValueError("Default teacher runtime must be an AsyncRuntime")
+        return agent
     
-    output: Optional[PromptImprovementSkillResponseModel] = None
-    
-    prompt_tokens: int = Field(alias="_prompt_tokens")
-    completion_tokens: int = Field(alias="_completion_tokens")
+    @model_validator(mode="after")
+    def set_input_variable_list(self):
+        skill = self.agent.skills[self.skill_to_improve]
+        if self.input_variables is None:
+            self.input_variables = skill.get_input_fields()
+        return self
+            
 
-    # these can fail to calculate
-    prompt_cost_usd: Optional[float] = Field(alias="_prompt_cost_usd")
-    completion_cost_usd: Optional[float] = Field(alias="_completion_cost_usd")
-    total_cost_usd: Optional[float] = Field(alias="_total_cost_usd")
 
 @app.post("/improved-prompt", response_model=Response[ImprovedPromptResponse])
 async def improved_prompt(request: ImprovedPromptRequest):
@@ -364,25 +349,14 @@ async def improved_prompt(request: ImprovedPromptRequest):
         Response: Response model for prompt improvement skill
     """
     
-    inputs = get_prompt_improvement_inputs(request.student_skill, request.input_variables, request.student_model)
-    prompt_improvement_skill = get_prompt_improvement_skill(request.input_variables)
-    # someday we can stop doing this...
-    df = pd.DataFrame.from_records([inputs])
-    response_df = await prompt_improvement_skill.aapply(
-        input=df,
-        runtime=request.teacher_runtime,
-    )
-    response_dct = response_df.iloc[0].to_dict()
-    
-    # get tokens and token cost
-    data = ImprovedPromptResponse(**response_dct)
+    agent = request.agent
+    data = await agent.arefine_skill(request.skill_to_improve, request.input_variables)
 
-    if response_dct.get("_adala_error", False):
+    if isinstance(data.output, ErrorResponseModel):
         # insert error into Response
-        return Response(success=False, data=data, message=response_dct["_adala_details"], errors=[response_dct["_adala_message"]])
+        return Response(success=False, data=data, message=data.output.details, errors=[data.output.message])
     else:
-        # insert output into Response
-        data.output = PromptImprovementSkillResponseModel(**response_dct)
+        # return output
         return Response(data=data)
 
 

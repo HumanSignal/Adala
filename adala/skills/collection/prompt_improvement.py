@@ -1,8 +1,10 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field, ConfigDict
 from adala.skills import Skill
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Union
 from adala.skills.collection.text_generation import TextGenerationSkill
 
+
+# NOTE: these response models are converging with the LSE ResultHandler, slowly pushing typing deeper into the lib with the end goal of combining them
 
 class PromptImprovementSkillResponseModel(BaseModel):
     
@@ -13,7 +15,13 @@ class PromptImprovementSkillResponseModel(BaseModel):
     # NOTE: not exposed in LSE yet, so default is always used. Should improve this as well when we expose it.
     # improved_system_prompt: str
 
-
+    model_config = ConfigDict(
+        # omit other fields
+        extra="ignore",
+        # guard against name collisions with other fields
+        populate_by_name=False,
+    )
+    
     @field_validator("improved_user_prompt", mode="after")
     def validate_used_variables(cls, value: str) -> str:
 
@@ -28,6 +36,31 @@ class PromptImprovementSkillResponseModel(BaseModel):
             raise ValueError(f"Invalid variable used in prompt: {e}. Valid variables are: {cls._input_variables}")
 
         return value
+
+class ErrorResponseModel(BaseModel):
+    message: str = Field(..., alias="_adala_message")
+    details: str = Field(..., alias="_adala_details")
+
+    model_config = ConfigDict(
+        # omit other fields
+        extra="ignore",
+        # guard against name collisions with other fields
+        populate_by_name=False,
+    )
+
+class ImprovedPromptResponse(BaseModel):
+    
+    output: Union[PromptImprovementSkillResponseModel, ErrorResponseModel]
+    
+    prompt_tokens: int = Field(alias="_prompt_tokens")
+    completion_tokens: int = Field(alias="_completion_tokens")
+
+    # these can fail to calculate
+    prompt_cost_usd: Optional[float] = Field(alias="_prompt_cost_usd")
+    completion_cost_usd: Optional[float] = Field(alias="_completion_cost_usd")
+    total_cost_usd: Optional[float] = Field(alias="_total_cost_usd")
+
+
     
 
 def get_prompt_improvement_inputs(student_skill: Skill, input_variables: List[str], student_model: str) -> Dict[str, Any]:

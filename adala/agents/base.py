@@ -7,7 +7,7 @@ from pydantic import (
     SerializeAsAny,
 )
 from abc import ABC
-from typing import Optional, Dict, Union, Tuple
+from typing import Optional, Dict, Union, Tuple, List
 from rich import print
 import yaml
 
@@ -16,8 +16,10 @@ from adala.environments.static_env import StaticEnvironment
 from adala.runtimes.base import Runtime, AsyncRuntime
 from adala.runtimes._openai import OpenAIChatRuntime
 from adala.skills._base import Skill
+from adala.skills.collection.text_generation import TextGenerationSkill
 from adala.memories.base import Memory
 from adala.skills.skillset import SkillSet, LinearSkillSet
+from adala.skills.collection.prompt_improvement import PromptImprovementSkillResponseModel, ErrorResponseModel, get_prompt_improvement_inputs, get_prompt_improvement_skill, ImprovedPromptResponse
 from adala.utils.logs import (
     print_dataframe,
     print_text,
@@ -61,7 +63,7 @@ class Agent(BaseModel, ABC):
         default_factory=lambda: {"default": OpenAIChatRuntime(model="gpt-3.5-turbo")}
     )
     default_runtime: str = "default"
-    teacher_runtimes: Dict[str, SerializeAsAny[Runtime]] = Field(
+    teacher_runtimes: Dict[str, SerializeAsAny[Union[Runtime, AsyncRuntime]]] = Field(
         default_factory=lambda: {"default": None}
     )
     default_teacher_runtime: str = "default"
@@ -118,7 +120,7 @@ class Agent(BaseModel, ABC):
                 f"skills must be of type SkillSet or Skill, but received type {type(v)}"
             )
 
-    @field_validator("runtimes", mode="before")
+    @field_validator("runtimes", "teacher_runtimes", mode="before")
     def runtimes_validator(cls, v) -> Dict[str, Union[Runtime, AsyncRuntime]]:
         """
         Validates and creates runtimes
@@ -392,6 +394,48 @@ class Agent(BaseModel, ABC):
                     break
 
         print_text("Train is done!")
+        
+
+    async def arefine_skill(self, skill_name: str, input_variables: List[str]) -> ImprovedPromptResponse:
+        """
+        beta v2 of Agent.learn() that is:
+        - compatible with the newer LiteLLM runtimes
+        - compatible with the newer response_model output formats for skills
+        - returns chain of thought reasoning in a legible format
+
+        Limitations so far:
+        - single skill at a time
+        - only returns the improved input_template, doesn't modify the skill in place
+        - doesn't use examples/feedback
+        - no iterations/variable cost
+        """
+        
+        skill = self.skills[skill_name]
+        if not isinstance(skill, TextGenerationSkill):
+            raise ValueError(f"Skill {skill_name} is not a TextGenerationSkill")
+        
+        inputs = get_prompt_improvement_inputs(skill, input_variables, self.get_runtime().model)
+        # this is why this function cannot be parallelized over skills - input variables are injected into the response model so that they can be validated with LLM feedback within a single Instructor call
+        # TODO find a way to get around this and use batch_to_batch or a higher-level optimizer over all skills in the skillset
+        prompt_improvement_skill = get_prompt_improvement_skill(input_variables)
+        # awkward to go from response model -> dict -> df -> dict -> response model
+        df = InternalDataFrame.from_records([inputs])
+        response_df = await prompt_improvement_skill.aapply(
+            input=df,
+            runtime=self.get_teacher_runtime(),
+        )
+        response_dct = response_df.iloc[0].to_dict()
+        
+        # get tokens and token cost
+        data = ImprovedPromptResponse(**response_dct)
+
+        if response_dct.get("_adala_error", False):
+            # insert error into Response
+            data.output = ErrorResponseModel(**response_dct)
+        else:
+            # insert output into Response
+            data.output = PromptImprovementSkillResponseModel(**response_dct)
+        return data
 
 
 def create_agent_from_dict(json_dict: Dict):

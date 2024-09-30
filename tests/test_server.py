@@ -474,3 +474,15 @@ def test_streaming_azure(client):
             assert (
                 actual_output == expected_output
             ), "adala did not return expected output"
+
+
+def test_prompt_improvement_endpoint(client):
+    agent = SUBMIT_PAYLOAD["agent"]
+    agent['teacher_runtimes'] = agent['runtimes']
+    agent['teacher_runtimes']['default']['model'] = 'gpt-4o'
+    resp = client.post("/improved-prompt", json={
+        "agent": agent,
+        "skill_to_improve": "text_classifier",
+        "input_variables": ["text"],
+    })
+    resp.raise_for_status()
