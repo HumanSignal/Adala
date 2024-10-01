@@ -18,7 +18,13 @@ from adala.runtimes._openai import OpenAIChatRuntime
 from adala.skills._base import Skill, TransformSkill
 from adala.memories.base import Memory
 from adala.skills.skillset import SkillSet, LinearSkillSet
-from adala.skills.collection.prompt_improvement import PromptImprovementSkillResponseModel, ErrorResponseModel, get_prompt_improvement_inputs, get_prompt_improvement_skill, ImprovedPromptResponse
+from adala.skills.collection.prompt_improvement import (
+    PromptImprovementSkillResponseModel,
+    ErrorResponseModel,
+    get_prompt_improvement_inputs,
+    get_prompt_improvement_skill,
+    ImprovedPromptResponse,
+)
 from adala.utils.logs import (
     print_dataframe,
     print_text,
@@ -393,9 +399,10 @@ class Agent(BaseModel, ABC):
                     break
 
         print_text("Train is done!")
-        
 
-    async def arefine_skill(self, skill_name: str, input_variables: List[str]) -> ImprovedPromptResponse:
+    async def arefine_skill(
+        self, skill_name: str, input_variables: List[str]
+    ) -> ImprovedPromptResponse:
         """
         beta v2 of Agent.learn() that is:
         - compatible with the newer LiteLLM runtimes
@@ -408,12 +415,14 @@ class Agent(BaseModel, ABC):
         - doesn't use examples/feedback
         - no iterations/variable cost
         """
-        
+
         skill = self.skills[skill_name]
         if not isinstance(skill, TransformSkill):
             raise ValueError(f"Skill {skill_name} is not a TransformSkill")
-        
-        inputs = get_prompt_improvement_inputs(skill, input_variables, self.get_runtime().model)
+
+        inputs = get_prompt_improvement_inputs(
+            skill, input_variables, self.get_runtime().model
+        )
         # this is why this function cannot be parallelized over skills - input variables are injected into the response model so that they can be validated with LLM feedback within a single Instructor call
         # TODO get around this and use batch_to_batch or a higher-level optimizer over all skills in the skillset
         prompt_improvement_skill = get_prompt_improvement_skill(input_variables)
@@ -424,7 +433,7 @@ class Agent(BaseModel, ABC):
             runtime=self.get_teacher_runtime(),
         )
         response_dct = response_df.iloc[0].to_dict()
-        
+
         # unflatten the response
         if response_dct.pop("_adala_error", False):
             output = ErrorResponseModel(**response_dct)

@@ -22,7 +22,10 @@ import uvicorn
 
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
-from adala.skills.collection.prompt_improvement import ImprovedPromptResponse, ErrorResponseModel
+from adala.skills.collection.prompt_improvement import (
+    ImprovedPromptResponse,
+    ErrorResponseModel,
+)
 from server.tasks.stream_inference import streaming_parent_task
 from server.utils import (
     Settings,
@@ -315,11 +318,12 @@ class ImprovedPromptRequest(BaseModel):
     """
     Request model for improving a prompt.
     """
+
     agent: Agent
     skill_to_improve: str
     input_variables: Optional[List[str]] = Field(
         default=None,
-        description="List of variables available to use in the input template of the skill, in case any exist that are not currently used"
+        description="List of variables available to use in the input template of the skill, in case any exist that are not currently used",
     )
 
     @field_validator("agent", mode="after")
@@ -327,14 +331,13 @@ class ImprovedPromptRequest(BaseModel):
         if not isinstance(agent.get_teacher_runtime(), AsyncRuntime):
             raise ValueError("Default teacher runtime must be an AsyncRuntime")
         return agent
-    
+
     @model_validator(mode="after")
     def set_input_variable_list(self):
         skill = self.agent.skills[self.skill_to_improve]
         if self.input_variables is None:
             self.input_variables = skill.get_input_fields()
         return self
-            
 
 
 @app.post("/improved-prompt", response_model=Response[ImprovedPromptResponse])
@@ -348,13 +351,18 @@ async def improved_prompt(request: ImprovedPromptRequest):
     Returns:
         Response: Response model for prompt improvement skill
     """
-    
+
     agent = request.agent
     data = await agent.arefine_skill(request.skill_to_improve, request.input_variables)
 
     if isinstance(data.output, ErrorResponseModel):
         # insert error into Response
-        return Response(success=False, data=data, message=data.output.details, errors=[data.output.message])
+        return Response(
+            success=False,
+            data=data,
+            message=data.output.details,
+            errors=[data.output.message],
+        )
     else:
         # return output
         return Response(data=data)
