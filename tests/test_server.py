@@ -477,6 +477,8 @@ def test_streaming_azure(client):
             ), "adala did not return expected output"
 
 
+# can't use vcr here because server makes async requests
+@pytest.mark.use_openai
 def test_prompt_improvement_endpoint(client):
 
     # test success
