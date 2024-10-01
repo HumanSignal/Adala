@@ -15,8 +15,7 @@ from adala.environments.base import Environment, AsyncEnvironment, EnvironmentFe
 from adala.environments.static_env import StaticEnvironment
 from adala.runtimes.base import Runtime, AsyncRuntime
 from adala.runtimes._openai import OpenAIChatRuntime
-from adala.skills._base import Skill
-from adala.skills.collection.text_generation import TextGenerationSkill
+from adala.skills._base import Skill, TransformSkill
 from adala.memories.base import Memory
 from adala.skills.skillset import SkillSet, LinearSkillSet
 from adala.skills.collection.prompt_improvement import PromptImprovementSkillResponseModel, ErrorResponseModel, get_prompt_improvement_inputs, get_prompt_improvement_skill, ImprovedPromptResponse
@@ -411,12 +410,12 @@ class Agent(BaseModel, ABC):
         """
         
         skill = self.skills[skill_name]
-        if not isinstance(skill, TextGenerationSkill):
-            raise ValueError(f"Skill {skill_name} is not a TextGenerationSkill")
+        if not isinstance(skill, TransformSkill):
+            raise ValueError(f"Skill {skill_name} is not a TransformSkill")
         
         inputs = get_prompt_improvement_inputs(skill, input_variables, self.get_runtime().model)
         # this is why this function cannot be parallelized over skills - input variables are injected into the response model so that they can be validated with LLM feedback within a single Instructor call
-        # TODO find a way to get around this and use batch_to_batch or a higher-level optimizer over all skills in the skillset
+        # TODO get around this and use batch_to_batch or a higher-level optimizer over all skills in the skillset
         prompt_improvement_skill = get_prompt_improvement_skill(input_variables)
         # awkward to go from response model -> dict -> df -> dict -> response model
         df = InternalDataFrame.from_records([inputs])
@@ -426,16 +425,15 @@ class Agent(BaseModel, ABC):
         )
         response_dct = response_df.iloc[0].to_dict()
         
-        # get tokens and token cost
-        data = ImprovedPromptResponse(**response_dct)
-
-        if response_dct.get("_adala_error", False):
-            # insert error into Response
-            data.output = ErrorResponseModel(**response_dct)
+        # unflatten the response
+        if response_dct.pop("_adala_error", False):
+            output = ErrorResponseModel(**response_dct)
         else:
-            # insert output into Response
-            data.output = PromptImprovementSkillResponseModel(**response_dct)
-        return data
+            output = PromptImprovementSkillResponseModel(**response_dct)
+
+        # get tokens and token cost
+        resp = ImprovedPromptResponse(output=output, **response_dct)
+        return resp
 
 
 def create_agent_from_dict(json_dict: Dict):

@@ -6,6 +6,7 @@ import pytest
 from tempfile import NamedTemporaryFile
 import pandas as pd
 from copy import deepcopy
+from unittest.mock import patch
 
 # TODO manage which keys correspond to which models/deployments, probably using a litellm Router
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -477,6 +478,8 @@ def test_streaming_azure(client):
 
 
 def test_prompt_improvement_endpoint(client):
+    
+    # test success
     agent = SUBMIT_PAYLOAD["agent"]
     agent['teacher_runtimes'] = agent['runtimes']
     agent['teacher_runtimes']['default']['model'] = 'gpt-4o'
@@ -486,3 +489,33 @@ def test_prompt_improvement_endpoint(client):
         "input_variables": ["text"],
     })
     resp.raise_for_status()
+    assert resp.json()['success']
+    assert resp.json()["data"]["output"]["improved_user_prompt"] is not None
+
+    # test failure in payload
+    agent['teacher_runtimes']['default']['model'] = 'nonexistent'
+    resp = client.post("/improved-prompt", json={
+        "agent": agent,
+        "skill_to_improve": "text_classifier",
+        "input_variables": ["text"],
+    })
+    assert resp.status_code == 422
+
+    # test runtime failure
+    agent['teacher_runtimes']['default']['model'] = 'gpt-4o'
+    with patch('instructor.AsyncInstructor.create_with_completion') as mock_create:
+        def side_effect(*args, **kwargs):
+            if 'text_classifier' in str(kwargs):
+                raise Exception("Simulated OpenAI API failure for text_classifier")
+            return mock_create.return_value
+        
+        mock_create.side_effect = side_effect
+        
+        resp = client.post("/improved-prompt", json={
+            "agent": agent,
+            "skill_to_improve": "text_classifier",
+            "input_variables": ["text"],
+        })
+    resp.raise_for_status()
+    assert not resp.json()['success']
+    assert "Simulated OpenAI API failure for text_classifier" == resp.json()["message"]

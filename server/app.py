@@ -317,7 +317,7 @@ class ImprovedPromptRequest(BaseModel):
     """
     agent: Agent
     skill_to_improve: str
-    input_variables: Optional[Dict[str, List[str]]] = Field(
+    input_variables: Optional[List[str]] = Field(
         default=None,
         description="List of variables available to use in the input template of the skill, in case any exist that are not currently used"
     )
