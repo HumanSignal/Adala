@@ -86,15 +86,63 @@ def get_prompt_improvement_skill(input_variables: List[str]) -> TextGenerationSk
 
     prompt_improvement_skill = TextGenerationSkill(
         name="prompt_improvement",
-        instructions="Improve the user prompt for the provided LLM model to complete the task using the provided input variables, with the provided user prompt as a starting point. Variables can be accessed in the user prompt using the format {variable_name} (only the variable values are used, not their names). Make sure your prompt produces output that will continue to conform to the provided json schema. Provide your reasoning for the changes you made to the prompt.",
+        # system prompt
+        # TODO add fewshot examples
+        instructions="""
+        You are a prompt improvement agent.
+        
+        # Instructions
+
+        Improve the user prompt for an LLM model to complete a task using input variables, with the provided prompt improvement inputs as a starting point. Provide your reasoning for the changes you made to the prompt.
+
+
+        # Notes
+
+        - The inputs available to you are: Model, Task Name, Task Description, Input Variables, Current System Prompt, Current User Prompt, Response JSON Schema.
+        - Input Variables can be accessed in the user prompt using the format {variable_name} (only the variable values are used, not their names).
+        - Make sure your prompt produces output that will continue to conform to the Response JSON Schema.
+        - Provide your reasoning for the changes you made to the prompt. Provide the reasoning before providing the improved prompt.
+
+        """,
+        # user prompt
         input_template="""
-        Model: {model}
-        Task Name: {task_name}
-        Task Description: {task_description}
-        Input Variables: {input_variables}
-        Current System Prompt: {current_system_prompt}
-        Current User Prompt: {current_user_prompt}
-        Response JSON Schema: {response_json_schema}""",
+        # Prompt Improvement Inputs
+
+        ## Model
+         
+        {model}
+
+
+        ## Task Name
+        
+        {task_name}
+        
+
+        ## Task Description
+        
+        {task_description}
+        
+
+        ## Input Variables
+        
+        {input_variables}
+        
+
+        ## Current System Prompt
+        
+        {current_system_prompt}
+        
+
+        ## Current User Prompt
+        
+        {current_user_prompt}
+        
+        
+        ## Response JSON Schema
+        
+        {response_json_schema}
+        
+        """,
         response_model=PromptImprovementSkillResponseModel,
     )
 
