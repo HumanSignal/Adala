@@ -19,7 +19,7 @@ on:
         type: string
       namespace:
         required: false
-        default: "dev"
+        default: "prompt"
         type: string
   workflow_dispatch:
     inputs:
@@ -44,7 +44,7 @@ on:
       namespace:
         description: "Namespace"
         required: false
-        default: "dev"
+        default: "prompt"
         type: string
 
 env:

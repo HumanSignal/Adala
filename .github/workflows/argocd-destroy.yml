@@ -16,7 +16,7 @@ on:
         type: string
       namespace:
         required: false
-        default: "dev"
+        default: "prompt"
         type: string
   workflow_dispatch:
     inputs:
@@ -37,7 +37,7 @@ on:
       namespace:
         description: "Namespace"
         required: false
-        default: "dev"
+        default: "prompt"
         type: string
   pull_request_target:
     types:
@@ -118,7 +118,7 @@ jobs:
         with:
           app_name: "${{ inputs.app_name || steps.version.outputs.pretty_branch_name }}-${{ inputs.template_name || 'adala' }}"
           cluster: "${{ inputs.cluster || 'dev.heartex.com' }}"
-          namespace: "${{ inputs.namespace || 'dev' }}"
+          namespace: "${{ inputs.namespace || 'prompt' }}"
           github_token: ${{ secrets.GIT_PAT }}
 
       - name: Git Push
