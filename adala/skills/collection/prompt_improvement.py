@@ -2,6 +2,7 @@ from pydantic import BaseModel, field_validator, Field, ConfigDict
 from adala.skills import Skill
 from typing import Any, Dict, List, Optional, Union
 from adala.skills.collection.text_generation import TextGenerationSkill
+from adala.utils.parse import parse_template
 
 
 # NOTE: these response models are converging with the LSE ResultHandler, slowly pushing typing deeper into the lib with the end goal of combining them
@@ -26,20 +27,14 @@ class PromptImprovementSkillResponseModel(BaseModel):
     @field_validator("improved_user_prompt", mode="after")
     def validate_used_variables(cls, value: str) -> str:
 
-        start_variable_idx = value.find("{")
-        end_variable_idx = value.rfind("}")
-        if (
-            start_variable_idx == -1
-            or end_variable_idx == -1
-            or start_variable_idx >= end_variable_idx
-        ):
+        templates = parse_template(value, include_texts=False)
+        if not templates:
             raise ValueError("At least one input variable must be used in the prompt")
 
-        try:
-            value.format(**{var: "value" for var in cls._input_variables})
-        except KeyError as e:
+        input_vars_used = [t["text"] for t in templates]
+        if extra_vars_used := set(input_vars_used) - set(cls._input_variables):
             raise ValueError(
-                f"Invalid variable used in prompt: {e}. Valid variables are: {cls._input_variables}"
+                f"Invalid variable used in prompt: {extra_vars_used}. Valid variables are: {cls._input_variables}"
             )
 
         return value
