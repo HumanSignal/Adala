@@ -221,7 +221,7 @@ class Skill(BaseModelInRegistry):
                         "type": field_type,
                         "description": field_description,
                     }
-
+        
         self._create_response_model_from_field_schema()
         return self
 
