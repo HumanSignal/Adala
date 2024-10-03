@@ -1,5 +1,6 @@
 import logging
 import string
+import traceback
 from pydantic import (
     BaseModel,
     Field,
@@ -18,6 +19,7 @@ from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.pydantic_generator import field_schema_to_pydantic_class
 from adala.utils.logs import print_dataframe, print_text
 from adala.utils.registry import BaseModelInRegistry
+from adala.utils.types import ImprovedPromptResponse
 from adala.runtimes.base import Runtime, AsyncRuntime
 from tqdm import tqdm
 
@@ -479,6 +481,44 @@ Instruct the model to give the final answer at the end of the prompt, using the 
         self.instructions = new_prompt
 
 
+    async def aimprove(self, predictions: InternalDataFrame, teacher_runtime: AsyncRuntime, target_input_variables: List[str]) -> ImprovedPromptResponse:
+        """
+        Improves the skill.
+        """
+
+        from adala.skills.collection.prompt_improvement import PromptImprovementSkill, ImprovedPromptResponse, ErrorResponseModel, PromptImprovementSkillResponseModel
+
+        try:
+            prompt_improvement_skill = PromptImprovementSkill(
+                skill_to_improve=self,
+                input_variables=target_input_variables,
+            )
+            response_df = await prompt_improvement_skill.aapply(
+                input=predictions,
+                runtime=teacher_runtime,
+            )
+            
+            # awkward to go from response model -> dict -> df -> dict -> response model
+            response_dct = response_df.iloc[0].to_dict()
+
+            # unflatten the response
+            if response_dct.pop("_adala_error", False):
+                output = ErrorResponseModel(**response_dct)
+            else:
+                output = PromptImprovementSkillResponseModel(**response_dct)
+
+        except Exception as e:
+            logger.error(f"Error improving skill: {e}. Traceback: {traceback.format_exc()}")
+            output = ErrorResponseModel(
+                adala_error=True,
+                adala_message=str(e),
+            )
+        
+        # get tokens and token cost
+        resp = ImprovedPromptResponse(output=output, **response_dct)
+        return resp
+
+
 class SampleTransformSkill(TransformSkill):
     sample_size: int
 
@@ -548,9 +588,40 @@ class AnalysisSkill(Skill):
     Analysis skill that analyzes a dataframe and returns a record (e.g. for data analysis purposes).
     See base class Skill for more information about the attributes.
     """
-
+    input_prefix: str = ""
     input_separator: str = "\n"
     chunk_size: Optional[int] = None
+
+    def _iter_over_chunks(self, input: InternalDataFrame, chunk_size: Optional[int] = None):
+        if isinstance(input, InternalSeries):
+            input = input.to_frame()
+        elif isinstance(input, dict):
+            input = InternalDataFrame([input])
+
+        extra_fields = self._get_extra_fields()
+
+        # if chunk_size is specified, split the input into chunks and process each chunk separately
+        if self.chunk_size is not None:
+            chunks = (
+                input.iloc[i : i + self.chunk_size]
+                for i in range(0, len(input), self.chunk_size)
+            )
+        else:
+            chunks = [input]
+
+        total = input.shape[0] // self.chunk_size if self.chunk_size is not None else 1
+        for chunk in tqdm(chunks, desc="Processing chunks", total=total):
+            agg_chunk = (
+                chunk.reset_index()
+                .apply(
+                    lambda row: self.input_template.format(
+                        **row, **extra_fields, i=int(row.name) + 1
+                    ),
+                    axis=1,
+                )
+                .str.cat(sep=self.input_separator)
+            )
+            yield agg_chunk
 
     def apply(
         self,
@@ -567,40 +638,36 @@ class AnalysisSkill(Skill):
         Returns:
             InternalSeries: The record containing the analysis results.
         """
-        if isinstance(input, InternalSeries):
-            input = input.to_frame()
-        elif isinstance(input, dict):
-            input = InternalDataFrame([input])
-
-        extra_fields = self._get_extra_fields()
-
-        # if chunk_size is specified, split the input into chunks and process each chunk separately
-        if self.chunk_size is not None:
-            chunks = (
-                input.iloc[i : i + self.chunk_size]
-                for i in range(0, len(input), self.chunk_size)
-            )
-        else:
-            chunks = [input]
         outputs = []
-        total = input.shape[0] // self.chunk_size if self.chunk_size is not None else 1
-        for chunk in tqdm(chunks, desc="Processing chunks", total=total):
-            agg_chunk = (
-                chunk.reset_index()
-                .apply(
-                    lambda row: self.input_template.format(
-                        **row, **extra_fields, i=int(row.name) + 1
-                    ),
-                    axis=1,
-                )
-                .str.cat(sep=self.input_separator)
-            )
+        for agg_chunk in self._iter_over_chunks(input):
             output = runtime.record_to_record(
-                {"input": agg_chunk},
+                {"input": f"{self.input_prefix}{agg_chunk}"},
                 input_template="{input}",
                 output_template=self.output_template,
                 instructions_template=self.instructions,
-                extra_fields=extra_fields,
+                instructions_first=self.instructions_first,
+                response_model=self.response_model,
+            )
+            outputs.append(InternalSeries(output))
+        output = InternalDataFrame(outputs)
+
+        return output
+    
+    async def aapply(
+        self,
+        input: Union[InternalDataFrame, InternalSeries, Dict],
+        runtime: AsyncRuntime,
+    ) -> InternalDataFrame:
+        """
+        Applies the skill to a dataframe and returns a record.
+        """
+        outputs = []
+        async for agg_chunk in self._iter_over_chunks(input):
+            output = await runtime.record_to_record(
+                {"input": f"{self.input_prefix}{agg_chunk}"},
+                input_template="{input}",
+                output_template=self.output_template,
+                instructions_template=self.instructions,
                 instructions_first=self.instructions_first,
                 response_model=self.response_model,
             )

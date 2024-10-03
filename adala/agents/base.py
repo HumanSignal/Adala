@@ -1,4 +1,5 @@
 import logging
+import traceback
 from pydantic import (
     BaseModel,
     Field,
@@ -33,7 +34,7 @@ from adala.utils.logs import (
     is_running_in_jupyter,
 )
 from adala.utils.internal_data import InternalDataFrame
-
+from adala.utils.types import BatchData
 logger = logging.getLogger(__name__)
 
 
@@ -401,7 +402,10 @@ class Agent(BaseModel, ABC):
         print_text("Train is done!")
 
     async def arefine_skill(
-        self, skill_name: str, input_variables: List[str]
+        self,
+        skill_name: str,
+        input_variables: List[str],
+        batch_data: Optional[BatchData] = None,
     ) -> ImprovedPromptResponse:
         """
         beta v2 of Agent.learn() that is:
@@ -419,30 +423,24 @@ class Agent(BaseModel, ABC):
         skill = self.skills[skill_name]
         if not isinstance(skill, TransformSkill):
             raise ValueError(f"Skill {skill_name} is not a TransformSkill")
+        
+        # get default runtimes
+        runtime = self.get_runtime()
+        teacher_runtime = self.get_teacher_runtime()
 
-        inputs = get_prompt_improvement_inputs(
-            skill, input_variables, self.get_runtime().model
+        # get inputs
+        # TODO: replace it with async environment.get_data_batch()
+        inputs = InternalDataFrame.from_records(batch_data or [])
+
+        # get predictions
+        predictions = await self.skills.aapply(inputs, runtime=runtime)
+
+        response = await skill.aimprove(
+            input=predictions,
+            runtime=teacher_runtime,
+            target_input_variables=input_variables,
         )
-        # this is why this function cannot be parallelized over skills - input variables are injected into the response model so that they can be validated with LLM feedback within a single Instructor call
-        # TODO get around this and use batch_to_batch or a higher-level optimizer over all skills in the skillset
-        prompt_improvement_skill = get_prompt_improvement_skill(input_variables)
-        # awkward to go from response model -> dict -> df -> dict -> response model
-        df = InternalDataFrame.from_records([inputs])
-        response_df = await prompt_improvement_skill.aapply(
-            input=df,
-            runtime=self.get_teacher_runtime(),
-        )
-        response_dct = response_df.iloc[0].to_dict()
-
-        # unflatten the response
-        if response_dct.pop("_adala_error", False):
-            output = ErrorResponseModel(**response_dct)
-        else:
-            output = PromptImprovementSkillResponseModel(**response_dct)
-
-        # get tokens and token cost
-        resp = ImprovedPromptResponse(output=output, **response_dct)
-        return resp
+        return response
 
 
 def create_agent_from_dict(json_dict: Dict):

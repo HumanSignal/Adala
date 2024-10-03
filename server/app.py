@@ -20,6 +20,7 @@ from redis import Redis
 import time
 import uvicorn
 
+from adala.utils.types import BatchData
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
 from adala.skills.collection.prompt_improvement import (
@@ -131,15 +132,6 @@ class SubmitStreamingRequest(BaseModel):
             )
         result_handler = ResultHandler.create_from_registry(value.pop("type"), **value)
         return result_handler
-
-
-class BatchData(BaseModel):
-    """
-    Model for a batch of data submitted to a streaming job
-    """
-
-    job_id: str
-    data: List[dict]
 
 
 @app.get("/")
@@ -325,6 +317,10 @@ class ImprovedPromptRequest(BaseModel):
         default=None,
         description="List of variables available to use in the input template of the skill, in case any exist that are not currently used",
     )
+    batch_data: Optional[BatchData] = Field(
+        default=None,
+        description="Batch of data to run the skill on",
+    )
 
     @field_validator("agent", mode="after")
     def validate_teacher_runtime(cls, agent: Agent) -> Agent:
@@ -353,7 +349,7 @@ async def improved_prompt(request: ImprovedPromptRequest):
     """
 
     agent = request.agent
-    data = await agent.arefine_skill(request.skill_to_improve, request.input_variables)
+    data = await agent.arefine_skill(request.skill_to_improve, request.input_variables, request.batch_data)
 
     if isinstance(data.output, ErrorResponseModel):
         # insert error into Response
