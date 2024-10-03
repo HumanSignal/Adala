@@ -348,20 +348,11 @@ async def improved_prompt(request: ImprovedPromptRequest):
         Response: Response model for prompt improvement skill
     """
 
-    agent = request.agent
-    data = await agent.arefine_skill(request.skill_to_improve, request.input_variables, request.batch_data)
-
-    if isinstance(data.output, ErrorResponseModel):
-        # insert error into Response
-        return Response(
-            success=False,
-            data=data,
-            message=data.output.details,
-            errors=[data.output.message],
-        )
-    else:
-        # return output
-        return Response(data=data)
+    return await request.agent.arefine_skill(
+        skill_name=request.skill_to_improve,
+        input_variables=request.input_variables,
+        batch_data=request.batch_data,
+    )
 
 
 if __name__ == "__main__":
