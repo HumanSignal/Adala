@@ -45,13 +45,13 @@ class ImprovedPromptResponse(BaseModel):
 
     output: Union[PromptImprovementSkillResponseModel, ErrorResponseModel]
 
-    prompt_tokens: int = Field(alias="_prompt_tokens")
-    completion_tokens: int = Field(alias="_completion_tokens")
+    prompt_tokens: int = Field(alias="_prompt_tokens", default=None)
+    completion_tokens: int = Field(alias="_completion_tokens", default=None)
 
     # these can fail to calculate
-    prompt_cost_usd: Optional[float] = Field(alias="_prompt_cost_usd")
-    completion_cost_usd: Optional[float] = Field(alias="_completion_cost_usd")
-    total_cost_usd: Optional[float] = Field(alias="_total_cost_usd")
+    prompt_cost_usd: Optional[float] = Field(alias="_prompt_cost_usd", default=None)
+    completion_cost_usd: Optional[float] = Field(alias="_completion_cost_usd", default=None)
+    total_cost_usd: Optional[float] = Field(alias="_total_cost_usd", default=None)
 
 
 class PromptImprovementSkill(AnalysisSkill):

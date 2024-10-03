@@ -19,7 +19,6 @@ from adala.utils.parse import parse_template, partial_str_format
 from adala.utils.pydantic_generator import field_schema_to_pydantic_class
 from adala.utils.logs import print_dataframe, print_text
 from adala.utils.registry import BaseModelInRegistry
-from adala.utils.types import ImprovedPromptResponse
 from adala.runtimes.base import Runtime, AsyncRuntime
 from tqdm import tqdm
 
@@ -481,20 +480,20 @@ Instruct the model to give the final answer at the end of the prompt, using the 
         self.instructions = new_prompt
 
 
-    async def aimprove(self, predictions: InternalDataFrame, teacher_runtime: AsyncRuntime, target_input_variables: List[str]) -> ImprovedPromptResponse:
+    async def aimprove(self, teacher_runtime: AsyncRuntime, target_input_variables: List[str], predictions: Optional[InternalDataFrame] = None):
         """
         Improves the skill.
         """
 
         from adala.skills.collection.prompt_improvement import PromptImprovementSkill, ImprovedPromptResponse, ErrorResponseModel, PromptImprovementSkillResponseModel
-
+        response_dct = {}
         try:
             prompt_improvement_skill = PromptImprovementSkill(
                 skill_to_improve=self,
                 input_variables=target_input_variables,
             )
             response_df = await prompt_improvement_skill.aapply(
-                input=predictions,
+                input=predictions or InternalDataFrame(),
                 runtime=teacher_runtime,
             )
             
@@ -510,12 +509,14 @@ Instruct the model to give the final answer at the end of the prompt, using the 
         except Exception as e:
             logger.error(f"Error improving skill: {e}. Traceback: {traceback.format_exc()}")
             output = ErrorResponseModel(
-                adala_error=True,
-                adala_message=str(e),
+                _adala_message=str(e),
+                _adala_details=traceback.format_exc(),
             )
         
         # get tokens and token cost
         resp = ImprovedPromptResponse(output=output, **response_dct)
+        logger.debug(f"resp: {resp}")
+
         return resp
 
 

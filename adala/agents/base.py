@@ -425,14 +425,15 @@ class Agent(BaseModel, ABC):
 
         # get inputs
         # TODO: replace it with async environment.get_data_batch()
-        inputs = InternalDataFrame.from_records(batch_data or [])
-
-        # get predictions
-        predictions = await self.skills.aapply(inputs, runtime=runtime)
+        if batch_data is None:
+            predictions = None
+        else:
+            inputs = InternalDataFrame.from_records(batch_data or [])
+            predictions = await self.skills.aapply(inputs, runtime=runtime)
 
         response = await skill.aimprove(
-            input=predictions,
-            runtime=teacher_runtime,
+            predictions=predictions,
+            teacher_runtime=teacher_runtime,
             target_input_variables=input_variables,
         )
         return response

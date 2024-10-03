@@ -2,7 +2,7 @@ import pytest
 import os
 from adala.agents.base import Agent
 from adala.skills._base import TransformSkill
-from adala.utils.types import ImprovedPromptResponse
+from adala.skills.collection.prompt_improvement import ImprovedPromptResponse
 
 
 @pytest.mark.asyncio
@@ -15,6 +15,18 @@ async def test_arefine_skill_no_input_data():
                 "model": "gpt-4o-mini",
                 "api_key": os.getenv("OPENAI_API_KEY"),
                 "max_tokens": 200,
+                "temperature": 0,
+                "batch_size": 100,
+                "timeout": 10,
+                "verbose": False,
+            }
+        },
+        "teacher_runtimes": {
+            "default": {
+                "type": "AsyncLiteLLMChatRuntime",
+                "model": "gpt-4o-mini",
+                "api_key": os.getenv("OPENAI_API_KEY"),
+                "max_tokens": 1000,
                 "temperature": 0,
                 "batch_size": 100,
                 "timeout": 10,

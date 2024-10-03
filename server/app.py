@@ -23,10 +23,7 @@ import uvicorn
 from adala.utils.types import BatchData
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
-from adala.skills.collection.prompt_improvement import (
-    ImprovedPromptResponse,
-    ErrorResponseModel,
-)
+from adala.skills.collection.prompt_improvement import ImprovedPromptResponse
 from server.tasks.stream_inference import streaming_parent_task
 from server.utils import (
     Settings,
