@@ -594,11 +594,17 @@ class AnalysisSkill(Skill):
     chunk_size: Optional[int] = None
 
     def _iter_over_chunks(self, input: InternalDataFrame, chunk_size: Optional[int] = None):
+
+        if input.empty:
+            yield ""
+            return
+        
         if isinstance(input, InternalSeries):
             input = input.to_frame()
         elif isinstance(input, dict):
             input = InternalDataFrame([input])
 
+        
         extra_fields = self._get_extra_fields()
 
         # if chunk_size is specified, split the input into chunks and process each chunk separately
@@ -612,16 +618,15 @@ class AnalysisSkill(Skill):
 
         total = input.shape[0] // self.chunk_size if self.chunk_size is not None else 1
         for chunk in tqdm(chunks, desc="Processing chunks", total=total):
-            agg_chunk = (
-                chunk.reset_index()
+            agg_chunk = chunk\
+                .reset_index()\
                 .apply(
                     lambda row: self.input_template.format(
                         **row, **extra_fields, i=int(row.name) + 1
                     ),
                     axis=1,
-                )
-                .str.cat(sep=self.input_separator)
-            )
+                ).str.cat(sep=self.input_separator)
+                    
             yield agg_chunk
 
     def apply(
@@ -663,7 +668,7 @@ class AnalysisSkill(Skill):
         Applies the skill to a dataframe and returns a record.
         """
         outputs = []
-        async for agg_chunk in self._iter_over_chunks(input):
+        for agg_chunk in self._iter_over_chunks(input):
             output = await runtime.record_to_record(
                 {"input": f"{self.input_prefix}{agg_chunk}"},
                 input_template="{input}",

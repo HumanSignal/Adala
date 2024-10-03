@@ -12,33 +12,32 @@ logger = logging.getLogger(__name__)
 
 class PromptImprovementSkillResponseModel(BaseModel):
 
-    # hidden variable, used for validation
-    _input_variables: List[str]
+
     reasoning: str = Field(..., description="The reasoning for the changes made to the prompt")
     new_prompt_title: str = Field(..., description="The new short title for the prompt")
     new_prompt_content: str = Field(..., description="The new content for the prompt")
 
-    model_config = ConfigDict(
-        # omit other fields
-        extra="ignore",
-        # guard against name collisions with other fields
-        populate_by_name=False,
-    )
+    # model_config = ConfigDict(
+    #     # omit other fields
+    #     extra="ignore",
+    #     # guard against name collisions with other fields
+    #     populate_by_name=False,
+    # )
 
-    @field_validator("new_prompt_content", mode="after")
-    def validate_used_variables(cls, value: str) -> str:
+    # @field_validator("new_prompt_content", mode="after")
+    # def validate_used_variables(cls, value: str) -> str:
 
-        templates = parse_template(value, include_texts=False)
-        if not templates:
-            raise ValueError("At least one input variable must be used in the prompt")
+    #     templates = parse_template(value, include_texts=False)
+    #     if not templates:
+    #         raise ValueError("At least one input variable must be used in the prompt")
 
-        input_vars_used = [t["text"] for t in templates]
-        if extra_vars_used := set(input_vars_used) - set(cls._input_variables):
-            raise ValueError(
-                f"Invalid variable used in prompt: {extra_vars_used}. Valid variables are: {cls._input_variables}"
-            )
+    #     input_vars_used = [t["text"] for t in templates]
+    #     if extra_vars_used := set(input_vars_used) - set(cls._input_variables):
+    #         raise ValueError(
+    #             f"Invalid variable used in prompt: {extra_vars_used}. Valid variables are: {cls._input_variables}"
+    #         )
 
-        return value
+    #     return value
 
 
 class ImprovedPromptResponse(BaseModel):
@@ -62,9 +61,12 @@ class PromptImprovementSkill(AnalysisSkill):
     input_variables: List[str]
 
     name: str = "prompt_improvement"
-    instructions: str = ""
+    instructions: str = "" # Automatically generated
+    input_template: str = ""  # Not used
     input_prefix: str = "# Input data:\n\n"
     input_separator: str = "\n\n"
+
+    response_model = PromptImprovementSkillResponseModel
 
     
     @model_validator(mode="after")
@@ -155,11 +157,11 @@ Generate a summary of the input text: "{{text}}".
 
 # Prediction examples
 
-Generate a summary of the input text: "The quick brown fox jumps over the lazy dog." --> {"summary": "The quick brown fox jumps over the lazy dog.", "categories": "news"}
+Generate a summary of the input text: "The quick brown fox jumps over the lazy dog." --> {{"summary": "The quick brown fox jumps over the lazy dog.", "categories": "news"}}
 
-Generate a summary of the input text: "When was the Battle of Hastings?" --> {"summary": "The Battle of Hastings was a decisive Norman victory in 1066, marking the end of Anglo-Saxon rule in England.", "categories": "history"}
+Generate a summary of the input text: "When was the Battle of Hastings?" --> {{"summary": "The Battle of Hastings was a decisive Norman victory in 1066, marking the end of Anglo-Saxon rule in England.", "categories": "history"}}
 
-Generate a summary of the input text: "What is the capital of France?" --> {"summary": "The capital of France is Paris.", "categories": "geography"}
+Generate a summary of the input text: "What is the capital of France?" --> {{   "summary": "The capital of France is Paris.", "categories": "geography"}}
 
 
 Your output:
