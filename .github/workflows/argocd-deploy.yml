@@ -120,6 +120,7 @@ jobs:
         id: argocd-app
         with:
           docker_image_tag: "${{ inputs.docker_image_version }}"
+          release_name: "${{ inputs.app_name }}"
           app_name: "${{ inputs.app_name }}-${{ inputs.template_name }}"
           template_name: "${{ inputs.template_name }}"
           cluster: "${{ inputs.cluster }}"
