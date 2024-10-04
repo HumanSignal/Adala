@@ -13,6 +13,9 @@ on:
       image_version:
         description: "Docker tag"
         value: ${{ jobs.docker_build_and_push.outputs.image_version }}
+      pretty_branch_name:
+        description: "Pretty Branch Name"
+        value: ${{ jobs.docker_build_and_push.outputs.pretty_branch_name }}
 
 env:
   DOCKER_CLI_EXPERIMENTAL: enabled
@@ -26,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image_version: ${{ steps.version.outputs.image_version }}
+      pretty_branch_name: ${{ steps.version.outputs.pretty_branch_name }}
     steps:
       - uses: hmarr/debug-action@v3.0.0
 
@@ -97,7 +101,7 @@ jobs:
             core.setOutput("docker-tags", docker_tags);
 
       - name: Push Docker image
-        uses: docker/build-push-action@v6.7.0
+        uses: docker/build-push-action@v6.8.0
         id: docker_build_and_push
         with:
           context: .

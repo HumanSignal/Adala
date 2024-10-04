@@ -84,7 +84,9 @@ def _format_error_dict(e: Exception) -> dict:
 def _log_llm_exception(e) -> dict:
     dct = _format_error_dict(e)
     base_error = f"Inference error {dct['_adala_message']}"
-    tb = traceback.format_exc()
+    tb = "".join(
+        traceback.format_exception(e)
+    )  # format_exception return list of strings ending in new lines
     logger.error(f"{base_error}\nTraceback:\n{tb}")
     return dct
 
