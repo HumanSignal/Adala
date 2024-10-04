@@ -63,7 +63,7 @@ class PromptImprovementSkill(AnalysisSkill):
     name: str = "prompt_improvement"
     instructions: str = "" # Automatically generated
     input_template: str = ""  # Not used
-    input_prefix: str = "# Input data:\n\n"
+    input_prefix: str = "Here are a few prediction results after applying the current prompt for your analysis.\n\n"
     input_separator: str = "\n\n"
 
     response_model = PromptImprovementSkillResponseModel
@@ -87,7 +87,7 @@ First, carefully review the following context information:
 ## Task description
 {self.skill_to_improve.description}
 
-## Allowed input variables
+## Input variables to use
 {input_variables}
 
 ## Target response schema
@@ -99,7 +99,7 @@ Now, examine the current prompt (if provided):
 # Current prompt
 {self.skill_to_improve.input_template}
 
-If a current prompt is provided, analyze it for potential improvements or errors. Consider how well it addresses the task description, input data and if it effectively utilizes the input variables.
+If a current prompt is provided, analyze it for potential improvements or errors. Consider how well it addresses the task description, input data and if it effectively utilizes all provided input variables.
 
 Before creating the new prompt, provide a detailed reasoning for your choices. Include:
 1. How you addressed the context and task description
@@ -110,7 +110,7 @@ Before creating the new prompt, provide a detailed reasoning for your choices. I
 Next, generate a new short prompt title that accurately reflects the task and purpose of the prompt.
 
 Finally, create the new prompt content. Ensure that you:
-1. Incorporate all necessary input variables, formatted with "{{" and "}}" brackets
+1. Incorporate all provided input variables, formatted with "{{" and "}}" brackets
 2. Address the specific task description provided in the context
 3. Consider the target model provider's capabilities and limitations
 4. Maintain or improve upon any relevant information from the current prompt (if provided)
@@ -121,10 +121,11 @@ Present your output in JSON format including the following fields:
 - new_prompt_title
 - new_prompt_content
 
-Example
+
+# Example of the expected input and output:
 
 Input context:
-```
+
 ## Target model provider
 OpenAI
 
@@ -155,7 +156,7 @@ Current prompt:
 Generate a summary of the input text: "{{text}}".
 ```
 
-# Prediction examples
+# Current prompt output
 
 Generate a summary of the input text: "The quick brown fox jumps over the lazy dog." --> {{"summary": "The quick brown fox jumps over the lazy dog.", "categories": "news"}}
 
@@ -167,16 +168,19 @@ Generate a summary of the input text: "What is the capital of France?" --> {{   
 Your output:
 ```json
 {{
-    "reasoning": "The current prompt is too vague. It doesn't specify the format or style of the summary. Addidionally, the categories instructions are not provided. It results in low quality outputs, like "summary" asnwers the question but not summarizes the input text. "history" category is not provided in the response schema, so it is not possible to produce the output. To ensure high quality responses, I need to make the following changes: ...",
+    "reasoning": "The current prompt is too vague. It doesn't specify the format or style of the summary. Addidionally, the categories instructions are not provided. It results in low quality outputs, like "summary" asnwers the question but not summarizes the input text. "history" category is not provided in the response schema, so it is not possible to produce the output. Also, not all requested input variables are used. To ensure high quality responses, I need to make the following changes: ...",
     "new_prompt_title": "Including categories instructions in the summary",
     "new_prompt_content": "Generate a detailed summary of the input text:\n'''{{text}}'''.\nUse the document metadata to guide the model to produce categories.\n#Metadata:\n'''{{document_metadata}}'''.\nEnsure high quality output by asking the model to produce a detailed summary and to categorize the document."
 }}
 ```
 
-Ensure that your refined prompt is clear, concise, and effectively guides the LLM to produce high quality responses."""
+Ensure that your refined prompt is clear, concise, and effectively guides the LLM to produce high quality responses.
+
+"""
         
-        logger.debug(f"Prompt improvement skill instructions:\n\n{self.instructions}")
-        
-        self.input_template = f"{self.input_prefix}{self.skill_to_improve.input_template} --> {self.skill_to_improve.response_model.model_json_schema()}"
-        logger.debug(f"Prompt improvement skill input template:\n\n{self.input_template}")
+        # Create the output template for JSON output based on the response model fields
+        fields = self.skill_to_improve.response_model.model_fields
+        field_template = ", ".join([f'"{field}": "{{{field}}}"'for field in fields])
+        self.output_template = "{{" + field_template + "}}"
+        self.input_template = f"{self.skill_to_improve.input_template} --> {self.output_template}"
         return self

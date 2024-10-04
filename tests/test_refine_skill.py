@@ -3,12 +3,12 @@ import os
 from adala.agents.base import Agent
 from adala.skills._base import TransformSkill
 from adala.skills.collection.prompt_improvement import ImprovedPromptResponse
+from unittest.mock import patch
 
 
-@pytest.mark.asyncio
-async def test_arefine_skill_no_input_data():
-
-    agent_json = {
+@pytest.fixture
+def agent_json():
+    return {
         "runtimes": {
             "default": {
                 "type": "AsyncLiteLLMChatRuntime",
@@ -38,7 +38,7 @@ async def test_arefine_skill_no_input_data():
                 "type": "ClassificationSkill",
                 "name": "my_classification_skill",
                 "instructions": "",
-                "input_template": "Classify text: {input}",
+                "input_template": "{text} {id}",
                 "field_schema": {
                     "output": {
                         "type": "string",
@@ -48,14 +48,108 @@ async def test_arefine_skill_no_input_data():
             }
         ],
     }
-    agent = Agent(**agent_json)
+
+
+@pytest.mark.use_openai
+@pytest.mark.asyncio
+async def test_arefine_skill_no_input_data(client, agent_json):
     skill_name = "my_classification_skill"
 
-    result = await agent.arefine_skill(
-        skill_name,
-        input_variables=["text"],
-        batch_data=None,
-    )
+    payload = {
+        "agent": agent_json,
+        "skill_to_improve": skill_name,
+        "input_variables": ["text", "id"],
+    }
 
-    assert isinstance(result, ImprovedPromptResponse)
-    # Add more specific assertions based on expected behavior
+    response = client.post("/improved-prompt", json=payload)
+    
+    assert response.status_code == 200
+    result = response.json()
+
+    assert "data" in result
+    assert "output" in result["data"]
+    output = result["data"]["output"]
+
+    assert "reasoning" in output
+    assert "new_prompt_title" in output
+    assert "new_prompt_content" in output
+    assert '{text}' in output["new_prompt_content"]
+
+
+@pytest.mark.use_openai
+@pytest.mark.asyncio
+async def test_arefine_skill_with_input_data(client, agent_json):
+    skill_name = "my_classification_skill"
+
+    batch_data = [
+        {"text": "This is a test text", "id": "1"},
+        {"text": "This is another test text", "id": "2"},
+    ]
+
+    payload = {
+        "agent": agent_json,
+        "skill_to_improve": skill_name,
+        "input_variables": ["text", "id"],
+        "batch_data": {
+            'job_id': '123',
+            'data': batch_data,
+        }
+    }
+
+    response = client.post("/improved-prompt", json=payload)
+    
+    assert response.status_code == 200
+    result = response.json()
+
+    assert "data" in result
+    assert "output" in result["data"]
+    output = result["data"]["output"]
+
+    assert "reasoning" in output
+    assert "new_prompt_title" in output
+    assert "new_prompt_content" in output
+    assert '{text}' in output["new_prompt_content"]
+    assert '{id}' in output["new_prompt_content"]
+
+
+@pytest.mark.use_openai
+@pytest.mark.asyncio
+async def test_arefine_skill_error_handling(client, agent_json):
+    skill_name = "my_classification_skill"
+
+    batch_data = None
+
+    agent_json["teacher_runtimes"]["default"]["model"] = "nonexistent"
+
+    payload = {
+        "agent": agent_json,
+        "skill_to_improve": skill_name,
+        "input_variables": ["text", "id"],
+        "batch_data": batch_data,
+    }
+    response = client.post("/improved-prompt", json=payload)
+    assert response.status_code == 422
+
+    # test runtime failure
+    agent_json["teacher_runtimes"]["default"]["model"] = "gpt-4o"
+    with patch("instructor.AsyncInstructor.create_with_completion") as mock_create:
+
+        def side_effect(*args, **kwargs):
+            if skill_name in str(kwargs):
+                raise Exception(f"Simulated OpenAI API failure for {skill_name}")
+            return mock_create.return_value
+
+        mock_create.side_effect = side_effect
+    
+        resp = client.post(
+            "/improved-prompt",
+            json={
+                "agent": agent_json,
+                "skill_to_improve": skill_name,
+                "input_variables": ["text", "id"],
+            },
+        )
+        assert resp.raise_for_status()
+        resp_json = resp.json()
+        assert not resp_json["success"]
+        assert f"Simulated OpenAI API failure for {skill_name}" == resp_json["data"]["output"]["_adala_details"]

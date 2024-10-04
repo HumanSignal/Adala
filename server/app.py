@@ -20,7 +20,7 @@ from redis import Redis
 import time
 import uvicorn
 
-from adala.utils.types import BatchData
+from adala.utils.types import BatchData, ErrorResponseModel
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
 from adala.skills.collection.prompt_improvement import ImprovedPromptResponse
@@ -345,12 +345,16 @@ async def improved_prompt(request: ImprovedPromptRequest):
         Response: Response model for prompt improvement skill
     """
 
-    return await request.agent.arefine_skill(
+    improved_prompt_response = await request.agent.arefine_skill(
         skill_name=request.skill_to_improve,
         input_variables=request.input_variables,
-        batch_data=request.batch_data,
+        batch_data=request.batch_data.data if request.batch_data else None
     )
 
+    return Response[ImprovedPromptResponse](
+        success=not isinstance(improved_prompt_response.output, ErrorResponseModel),
+        data=improved_prompt_response
+    )
 
 if __name__ == "__main__":
     # for debugging

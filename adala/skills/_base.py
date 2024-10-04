@@ -492,8 +492,12 @@ Instruct the model to give the final answer at the end of the prompt, using the 
                 skill_to_improve=self,
                 input_variables=target_input_variables,
             )
+            if predictions is None:
+                input_df = InternalDataFrame()
+            else:
+                input_df = predictions
             response_df = await prompt_improvement_skill.aapply(
-                input=predictions or InternalDataFrame(),
+                input=input_df,
                 runtime=teacher_runtime,
             )
             
