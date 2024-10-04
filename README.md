@@ -1,3 +1,4 @@
+# CI TEST
 [![PyPI version](https://badge.fury.io/py/adala.svg)](https://badge.fury.io/py/adala)
 ![Python Version](https://img.shields.io/badge/supported_python_version_-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
 ![GitHub](https://img.shields.io/github/license/HumanSignal/Adala)
