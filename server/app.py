@@ -2,23 +2,28 @@ from enum import Enum
 from typing import Any, Dict, Generic, List, Optional, TypeVar
 import os
 import json
+import pandas as pd
 
 import fastapi
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from adala.agents import Agent
+from adala.skills import Skill
+from adala.runtimes import AsyncRuntime
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import UnknownTopicOrPartitionError
 from fastapi import HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, SerializeAsAny, field_validator
+from pydantic import BaseModel, SerializeAsAny, field_validator, Field, model_validator
 from redis import Redis
 import time
 import uvicorn
 
+from adala.utils.types import BatchData, ErrorResponseModel
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
+from adala.skills.collection.prompt_improvement import ImprovedPromptResponse
 from server.tasks.stream_inference import streaming_parent_task
 from server.utils import (
     Settings,
@@ -124,15 +129,6 @@ class SubmitStreamingRequest(BaseModel):
             )
         result_handler = ResultHandler.create_from_registry(value.pop("type"), **value)
         return result_handler
-
-
-class BatchData(BaseModel):
-    """
-    Model for a batch of data submitted to a streaming job
-    """
-
-    job_id: str
-    data: List[dict]
 
 
 @app.get("/")
@@ -306,6 +302,59 @@ async def ready(redis_conn: Redis = Depends(_get_redis_conn)):
 
     return {"status": "ok"}
 
+
+class ImprovedPromptRequest(BaseModel):
+    """
+    Request model for improving a prompt.
+    """
+
+    agent: Agent
+    skill_to_improve: str
+    input_variables: Optional[List[str]] = Field(
+        default=None,
+        description="List of variables available to use in the input template of the skill, in case any exist that are not currently used",
+    )
+    batch_data: Optional[BatchData] = Field(
+        default=None,
+        description="Batch of data to run the skill on",
+    )
+
+    @field_validator("agent", mode="after")
+    def validate_teacher_runtime(cls, agent: Agent) -> Agent:
+        if not isinstance(agent.get_teacher_runtime(), AsyncRuntime):
+            raise ValueError("Default teacher runtime must be an AsyncRuntime")
+        return agent
+
+    @model_validator(mode="after")
+    def set_input_variable_list(self):
+        skill = self.agent.skills[self.skill_to_improve]
+        if self.input_variables is None:
+            self.input_variables = skill.get_input_fields()
+        return self
+
+
+@app.post("/improved-prompt", response_model=Response[ImprovedPromptResponse])
+async def improved_prompt(request: ImprovedPromptRequest):
+    """
+    Improve a given prompt using the specified model and variables.
+
+    Args:
+        request (ImprovedPromptRequest): The request model for improving a prompt.
+
+    Returns:
+        Response: Response model for prompt improvement skill
+    """
+
+    improved_prompt_response = await request.agent.arefine_skill(
+        skill_name=request.skill_to_improve,
+        input_variables=request.input_variables,
+        batch_data=request.batch_data.data if request.batch_data else None
+    )
+
+    return Response[ImprovedPromptResponse](
+        success=not isinstance(improved_prompt_response.output, ErrorResponseModel),
+        data=improved_prompt_response
+    )
 
 if __name__ == "__main__":
     # for debugging
