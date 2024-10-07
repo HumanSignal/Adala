@@ -1,4 +1,5 @@
 import logging
+import traceback
 from pydantic import (
     BaseModel,
     Field,
@@ -7,7 +8,7 @@ from pydantic import (
     SerializeAsAny,
 )
 from abc import ABC
-from typing import Optional, Dict, Union, Tuple
+from typing import Optional, Dict, Union, Tuple, List
 from rich import print
 import yaml
 
@@ -15,9 +16,11 @@ from adala.environments.base import Environment, AsyncEnvironment, EnvironmentFe
 from adala.environments.static_env import StaticEnvironment
 from adala.runtimes.base import Runtime, AsyncRuntime
 from adala.runtimes._openai import OpenAIChatRuntime
-from adala.skills._base import Skill
+from adala.skills._base import Skill, TransformSkill
 from adala.memories.base import Memory
 from adala.skills.skillset import SkillSet, LinearSkillSet
+from adala.skills.collection.prompt_improvement import ImprovedPromptResponse
+
 from adala.utils.logs import (
     print_dataframe,
     print_text,
@@ -26,7 +29,7 @@ from adala.utils.logs import (
     is_running_in_jupyter,
 )
 from adala.utils.internal_data import InternalDataFrame
-
+from adala.utils.types import BatchData
 logger = logging.getLogger(__name__)
 
 
@@ -61,7 +64,7 @@ class Agent(BaseModel, ABC):
         default_factory=lambda: {"default": OpenAIChatRuntime(model="gpt-3.5-turbo")}
     )
     default_runtime: str = "default"
-    teacher_runtimes: Dict[str, SerializeAsAny[Runtime]] = Field(
+    teacher_runtimes: Dict[str, SerializeAsAny[Union[Runtime, AsyncRuntime]]] = Field(
         default_factory=lambda: {"default": None}
     )
     default_teacher_runtime: str = "default"
@@ -118,7 +121,7 @@ class Agent(BaseModel, ABC):
                 f"skills must be of type SkillSet or Skill, but received type {type(v)}"
             )
 
-    @field_validator("runtimes", mode="before")
+    @field_validator("runtimes", "teacher_runtimes", mode="before")
     def runtimes_validator(cls, v) -> Dict[str, Union[Runtime, AsyncRuntime]]:
         """
         Validates and creates runtimes
@@ -392,6 +395,48 @@ class Agent(BaseModel, ABC):
                     break
 
         print_text("Train is done!")
+
+    async def arefine_skill(
+        self,
+        skill_name: str,
+        input_variables: List[str],
+        batch_data: Optional[BatchData] = None,
+    ) -> ImprovedPromptResponse:
+        """
+        beta v2 of Agent.learn() that is:
+        - compatible with the newer LiteLLM runtimes
+        - compatible with the newer response_model output formats for skills
+        - returns chain of thought reasoning in a legible format
+
+        Limitations so far:
+        - single skill at a time
+        - only returns the improved input_template, doesn't modify the skill in place
+        - doesn't use examples/feedback
+        - no iterations/variable cost
+        """
+
+        skill = self.skills[skill_name]
+        if not isinstance(skill, TransformSkill):
+            raise ValueError(f"Skill {skill_name} is not a TransformSkill")
+        
+        # get default runtimes
+        runtime = self.get_runtime()
+        teacher_runtime = self.get_teacher_runtime()
+
+        # get inputs
+        # TODO: replace it with async environment.get_data_batch()
+        if batch_data is None:
+            predictions = None
+        else:
+            inputs = InternalDataFrame.from_records(batch_data or [])
+            predictions = await self.skills.aapply(inputs, runtime=runtime)
+
+        response = await skill.aimprove(
+            predictions=predictions,
+            teacher_runtime=teacher_runtime,
+            target_input_variables=input_variables,
+        )
+        return response
 
 
 def create_agent_from_dict(json_dict: Dict):

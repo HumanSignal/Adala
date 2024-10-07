@@ -6,6 +6,7 @@ import pytest
 from tempfile import NamedTemporaryFile
 import pandas as pd
 from copy import deepcopy
+from unittest.mock import patch
 
 # TODO manage which keys correspond to which models/deployments, probably using a litellm Router
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")

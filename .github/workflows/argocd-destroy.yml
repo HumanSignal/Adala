@@ -1,0 +1,134 @@
+name: "ArgoCD: Destroy"
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      template_name:
+        required: false
+        default: "adala"
+        type: string
+      cluster:
+        required: false
+        default: "dev.heartex.com"
+        type: string
+      namespace:
+        required: false
+        default: "prompt"
+        type: string
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: "ArgoCD App name"
+        required: true
+        type: string
+      template_name:
+        description: "ArgoCD template name"
+        required: false
+        default: "adala"
+        type: string
+      cluster:
+        description: "Cluster name"
+        required: false
+        default: "dev.heartex.com"
+        type: string
+      namespace:
+        description: "Namespace"
+        required: false
+        default: "prompt"
+        type: string
+  pull_request_target:
+    types:
+      - closed
+    branches:
+      - master
+      - '**'
+
+env:
+  INFRA_REPO: "HumanSignal/infra"
+
+jobs:
+
+  destroy:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hmarr/debug-action@v3.0.0
+
+      - name: Get GitHub user details
+        id: get-github-user
+        uses: actions/github-script@v7
+        env:
+          ACTOR_USERNAME: ${{ github.event.sender.login }}
+        with:
+          github-token: ${{ secrets.GIT_PAT }}
+          script: |
+            const actor_username = process.env.ACTOR_USERNAME;
+            
+            let user_name = 'robot-ci-heartex';
+            let user_email = 'robot-ci-heartex@users.noreply.github.com';
+            
+            try {
+              const {data: user} = await github.rest.users.getByUsername({
+                username: actor_username,
+              });
+              user_name = user.login;
+              user_email = user.email;
+            } catch (e) {
+              console.log(e)
+            }
+            
+            core.setOutput('user_name', user_name);
+            core.setOutput('user_email', user_email);
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.INFRA_REPO }}
+          token: ${{ secrets.GIT_PAT }}
+          fetch-depth: 1
+
+      - name: Checkout Actions Hub
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          repository: HumanSignal/actions-hub
+          path: ./.github/actions-hub
+
+      - name: Git Configure
+        uses: ./.github/actions-hub/actions/git-configure
+        with:
+          username: "${{ steps.get-github-user.outputs.user_name }}"
+          email: "${{ steps.get-github-user.outputs.user_email }}"
+
+      - name: Calculate version
+        id: version
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        run: |
+          set -x
+          pretty_branch_name="$(echo -n "${BRANCH_NAME#refs/heads/}" | sed 's#/#-#g' | sed 's#_#-#g'| sed 's#\.#-#g' | tr '[:upper:]' '[:lower:]' | cut -c1-25)"
+          echo "pretty_branch_name=$pretty_branch_name" >> $GITHUB_OUTPUT
+
+      - name: Delete ArgoCD App
+        uses: ./.github/actions-hub/actions/argocd-app-delete
+        id: argocd-app
+        with:
+          app_name: "${{ inputs.app_name || steps.version.outputs.pretty_branch_name }}-${{ inputs.template_name || 'adala' }}"
+          cluster: "${{ inputs.cluster || 'dev.heartex.com' }}"
+          namespace: "${{ inputs.namespace || 'prompt' }}"
+          github_token: ${{ secrets.GIT_PAT }}
+
+      - name: Git Push
+        id: push
+        uses: ./.github/actions-hub/actions/git-push
+
+      - name: "GitHub deployment: Delete"
+        id: github-deployment-delete
+        uses: bobheadxi/deployments@v1
+        with:
+          step: delete-env
+          token: ${{ secrets.GIT_PAT }}
+          env: ${{ inputs.app_name || steps.version.outputs.pretty_branch_name }}

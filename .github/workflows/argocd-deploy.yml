@@ -1,0 +1,144 @@
+name: "ArgoCD: Deploy"
+
+on:
+  workflow_call:
+    inputs:
+      docker_image_version:
+        required: true
+        type: string
+      app_name:
+        required: true
+        type: string
+      template_name:
+        required: false
+        default: "adala"
+        type: string
+      cluster:
+        required: false
+        default: "dev.heartex.com"
+        type: string
+      namespace:
+        required: false
+        default: "prompt"
+        type: string
+  workflow_dispatch:
+    inputs:
+      docker_image_version:
+        description: "Docker image version"
+        required: true
+        type: string
+      app_name:
+        description: "ArgoCD App name"
+        required: true
+        type: string
+      template_name:
+        description: "ArgoCD template name"
+        required: false
+        default: "adala"
+        type: string
+      cluster:
+        description: "Cluster name"
+        required: false
+        default: "dev.heartex.com"
+        type: string
+      namespace:
+        description: "Namespace"
+        required: false
+        default: "prompt"
+        type: string
+
+env:
+  INFRA_REPO: "HumanSignal/infra"
+
+jobs:
+
+  deploy:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hmarr/debug-action@v3.0.0
+
+      - name: "GitHub deployment: Start"
+        id: github-deployment-start
+        continue-on-error: true
+        if: github.event.pull_request.head.ref
+        uses: bobheadxi/deployments@v1
+        with:
+          step: start
+          token: ${{ secrets.GIT_PAT }}
+          env: ${{ inputs.app_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Get GitHub user details
+        id: get-github-user
+        uses: actions/github-script@v7
+        env:
+          ACTOR_USERNAME: ${{ github.event.sender.login }}
+        with:
+          github-token: ${{ secrets.GIT_PAT }}
+          script: |
+            const actor_username = process.env.ACTOR_USERNAME;
+            
+            let user_name = 'robot-ci-heartex';
+            let user_email = 'robot-ci-heartex@users.noreply.github.com';
+            
+            try {
+              const {data: user} = await github.rest.users.getByUsername({
+                username: actor_username,
+              });
+              user_name = user.login;
+              user_email = user.email;
+            } catch (e) {
+              console.log(e)
+            }
+            
+            core.setOutput('user_name', user_name);
+            core.setOutput('user_email', user_email);
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.INFRA_REPO }}
+          token: ${{ secrets.GIT_PAT }}
+          fetch-depth: 1
+
+      - name: Checkout Actions Hub
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          repository: HumanSignal/actions-hub
+          path: ./.github/actions-hub
+
+      - name: Git Configure
+        uses: ./.github/actions-hub/actions/git-configure
+        with:
+          username: "${{ steps.get-github-user.outputs.user_name }}"
+          email: "${{ steps.get-github-user.outputs.user_email }}"
+
+      - name: Create ArgoCD App
+        uses: ./.github/actions-hub/actions/argocd-app-create
+        id: argocd-app
+        with:
+          docker_image_tag: "${{ inputs.docker_image_version }}"
+          release_name: "${{ inputs.app_name }}"
+          app_name: "${{ inputs.app_name }}-${{ inputs.template_name }}"
+          template_name: "${{ inputs.template_name }}"
+          cluster: "${{ inputs.cluster }}"
+          namespace: "${{ inputs.namespace }}"
+          github_token: ${{ secrets.GIT_PAT }}
+
+      - name: Git Push
+        id: push
+        uses: ./.github/actions-hub/actions/git-push
+
+      - name: "GitHub deployment: Finish"
+        id: github-deployment-finish
+        if: always() && github.event.pull_request.head.ref
+        uses: bobheadxi/deployments@v1
+        with:
+          step: finish
+          token: ${{ secrets.GIT_PAT }}
+          status: ${{ job.status }}
+          deployment_id: ${{ steps.github-deployment-start.outputs.deployment_id }}
+          env: ${{ steps.github-deployment-start.outputs.env }}
+          env_url: "https://${{ steps.argocd-app.outputs.url }}"
