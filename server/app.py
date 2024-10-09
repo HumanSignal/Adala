@@ -246,7 +246,7 @@ def _estimate_cost(user_prompt: str, model: str, output_fields: List[str]):
     prompt_tokens = get_prompt_tokens(user_prompt, model, output_fields)
     completion_tokens = get_completion_tokens(model, output_fields)
     prompt_cost, completion_cost = litellm.cost_per_token(
-        model="gpt-3.5-turbo",
+        model=model,
         prompt_tokens=prompt_tokens,
         completion_tokens=completion_tokens,
     )
@@ -260,14 +260,19 @@ async def estimate_cost(
     request: CostEstimateRequest,
 ):
     """
-    Submits a batch of data to an existing streaming job.
-    Will push the batch of data into Kafka in a topic specific to the job ID
+    Estimates what it would cost to run inference on the batch of data in
+    `request` (using the run params from `request`)
 
     Args:
-        batch (BatchData): The data to push to Kafka queue to be processed by agent.arun()
+        request (CostEstimateRequest): Specification for the inference run to
+            make an estimate for, includes:
+                prompt (str): The prompt template that will be used for each task
+                substitutions (List[Dict]): Mappings to substitute (simply using str.format)
+                model (str): Name of the LLM model to use
+                output_fields (List[str]): The output fields expected in the output from the inference run
 
     Returns:
-        Response: Generic response indicating status of request
+        Response[CostEstimate]: The cost estimate, including the prompt/completion/total costs (in USD)
     """
     prompt = request.prompt
     substitutions = request.substitutions
