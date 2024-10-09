@@ -216,6 +216,16 @@ class Agent(BaseModel, ABC):
             )
         return runtime
 
+    def get_skills(self) -> List[Skill]:
+        if isinstance(self.skills, SkillSet):
+            if isinstance(self.skills.skills, Dict):
+                skills = list(self.skills.skills.values())
+            else:
+                skills = self.skills.skills
+        else:
+            skills = [self.skills]
+        return skills
+
     def run(
         self, input: InternalDataFrame = None, runtime: Optional[str] = None, **kwargs
     ) -> InternalDataFrame:

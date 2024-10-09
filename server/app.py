@@ -25,6 +25,7 @@ from adala.utils.types import BatchData, ErrorResponseModel
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
 from adala.skills.collection.prompt_improvement import ImprovedPromptResponse
+from adala.runtimes.base import CostEstimate
 from server.tasks.stream_inference import streaming_parent_task
 from server.utils import (
     Settings,
@@ -82,17 +83,10 @@ class BatchSubmitted(BaseModel):
     job_id: str
 
 
-class CostEstimate(BaseModel):
-    prompt_cost_usd: Optional[float]
-    completion_cost_usd: Optional[float]
-    total_cost_usd: Optional[float]
-
-
 class CostEstimateRequest(BaseModel):
+    agent: Agent
     prompt: str
     substitutions: List[Dict]
-    model: str
-    output_fields: List[str]
 
 
 class Status(Enum):
@@ -224,37 +218,6 @@ async def submit_batch(batch: BatchData):
     return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
 
-def get_prompt_tokens(string: str, model: str, output_fields: List[str]) -> int:
-    user_tokens = litellm.token_counter(model=model, text=string)
-    # FIXME surprisingly difficult to get function call tokens, and doesn't add a ton of value, so hard-coding until something like litellm supports doing this for us.
-    #       currently seems like we'd need to scrape the instructor logs to get the function call info, then use (at best) an openai-specific 3rd party lib to get a token estimate from that.
-    system_tokens = 56 + (6 * len(output_fields))
-    return user_tokens + system_tokens
-
-
-def get_completion_tokens(model: str, output_fields: List[str]) -> int:
-    max_tokens = litellm.get_model_info(model=model, custom_llm_provider="openai").get(
-        "max_tokens", None
-    )
-    if not max_tokens:
-        raise ValueError
-    # extremely rough heuristic, from testing on some anecdotal examples
-    return min(max_tokens, 4 * len(output_fields))
-
-
-def _estimate_cost(user_prompt: str, model: str, output_fields: List[str]):
-    prompt_tokens = get_prompt_tokens(user_prompt, model, output_fields)
-    completion_tokens = get_completion_tokens(model, output_fields)
-    prompt_cost, completion_cost = litellm.cost_per_token(
-        model=model,
-        prompt_tokens=prompt_tokens,
-        completion_tokens=completion_tokens,
-    )
-    total_cost = prompt_cost + completion_cost
-
-    return prompt_cost, completion_cost, total_cost
-
-
 @app.post("/estimate-cost", response_model=Response[CostEstimate])
 async def estimate_cost(
     request: CostEstimateRequest,
@@ -266,42 +229,36 @@ async def estimate_cost(
     Args:
         request (CostEstimateRequest): Specification for the inference run to
             make an estimate for, includes:
+                agent (adala.agent.Agent): The agent definition, used to get the model
+                    and any other params necessary to estimate cost
                 prompt (str): The prompt template that will be used for each task
                 substitutions (List[Dict]): Mappings to substitute (simply using str.format)
-                model (str): Name of the LLM model to use
-                output_fields (List[str]): The output fields expected in the output from the inference run
 
     Returns:
         Response[CostEstimate]: The cost estimate, including the prompt/completion/total costs (in USD)
     """
     prompt = request.prompt
     substitutions = request.substitutions
-    model = request.model
-    output_fields = request.output_fields
-    try:
-        user_prompts = [prompt.format(**substitution) for substitution in substitutions]
-        cumulative_prompt_cost = 0
-        cumulative_completion_cost = 0
-        cumulative_total_cost = 0
-        for user_prompt in user_prompts:
-            prompt_cost, completion_cost, total_cost = _estimate_cost(
-                user_prompt=user_prompt,
-                model=model,
-                output_fields=output_fields,
-            )
-            cumulative_prompt_cost += prompt_cost
-            cumulative_completion_cost += completion_cost
-            cumulative_total_cost += total_cost
-        return Response[CostEstimate](
-            data=CostEstimate(
-                prompt_cost_usd=cumulative_prompt_cost,
-                completion_cost_usd=cumulative_completion_cost,
-                total_cost_usd=cumulative_total_cost,
-            )
-        )
+    agent = request.agent
+    runtime = agent.get_runtime()
 
-    except Exception as e:
-        logger.error("Failed to estimate cost: %s", e)
+    try:
+        cost_estimates = []
+        for skill in agent.get_skills():
+            output_fields = (
+                list(skill.field_schema.keys()) if skill.field_schema else None
+            )
+            cost_estimate = runtime.get_cost_estimate(
+                prompt=prompt, substitutions=substitutions, output_fields=output_fields
+            )
+            cost_estimates.append(cost_estimate)
+        total_cost_estimate = sum(
+            cost_estimates,
+            CostEstimate(
+                prompt_cost_usd=None, completion_cost_usd=None, total_cost_usd=None
+            ),
+        )
+    except NotImplementedError:
         return Response[CostEstimate](
             data=CostEstimate(
                 prompt_cost_usd=None,
@@ -309,6 +266,7 @@ async def estimate_cost(
                 total_cost_usd=None,
             )
         )
+    return Response[CostEstimate](data=total_cost_estimate)
 
 
 @app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])
