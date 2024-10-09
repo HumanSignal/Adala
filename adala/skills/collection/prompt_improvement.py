@@ -101,7 +101,7 @@ Now, examine the current prompt (if provided):
 
 If a current prompt is provided, analyze it for potential improvements or errors. Consider how well it addresses the task description, input data and if it effectively utilizes all provided input variables.
 
-Before creating the new prompt, provide a detailed reasoning for your choices. List the changes to be made and explain why each change is necessary. Include:
+Before creating the new prompt, provide a detailed reasoning for your choices. Using only bullet points, list the changes to be made and concisely explain why each change is necessary. Include:
 1. How you plan to address the context and task description
 2. Specific errors or improvements you've identified in the previous prompt (if applicable)
 3. How you intend to tailor the new prompt to better suit the target model provider
