@@ -101,11 +101,11 @@ Now, examine the current prompt (if provided):
 
 If a current prompt is provided, analyze it for potential improvements or errors. Consider how well it addresses the task description, input data and if it effectively utilizes all provided input variables.
 
-Before creating the new prompt, provide a detailed reasoning for your choices. Include:
-1. How you addressed the context and task description
-2. Any potential errors or improvements you identified in the previous prompt (if applicable)
-3. How your new prompt better suits the target model provider
-4. How your prompt is designed to generate responses matching the provided schema
+Before creating the new prompt, provide a detailed reasoning for your choices. Using only bullet points, list the changes to be made and concisely explain why each change is necessary. Include:
+1. How you plan to address the context and task description
+2. Specific errors or improvements you've identified in the previous prompt (if applicable)
+3. How you intend to tailor the new prompt to better suit the target model provider
+4. Your strategy for designing the prompt to generate responses matching the provided schema
 
 Next, generate a new short prompt title that accurately reflects the task and purpose of the prompt.
 
@@ -168,7 +168,13 @@ Generate a summary of the input text: "What is the capital of France?" --> {{   
 Your output:
 ```json
 {{
-    "reasoning": "The current prompt is too vague. It doesn't specify the format or style of the summary. Addidionally, the categories instructions are not provided. It results in low quality outputs, like "summary" asnwers the question but not summarizes the input text. "history" category is not provided in the response schema, so it is not possible to produce the output. Also, not all requested input variables are used. To ensure high quality responses, I need to make the following changes: ...",
+    "reasoning": "Changes needed:
+• Specify format and style of summary: The current prompt is vague, leading to inconsistent outputs.
+• Add categories instructions: The prompt doesn't mention categorization, resulting in missing or incorrect categories.
+• Use all input variables: The 'document_metadata' variable is not utilized in the current prompt.
+• Align with response schema: Ensure only allowed categories are used (e.g., remove 'history').
+• Improve clarity: Guide the model to summarize the text rather than answering questions.
+These changes will ensure higher quality, more consistent responses that meet the specified requirements.",
     "new_prompt_title": "Including categories instructions in the summary",
     "new_prompt_content": "Generate a detailed summary of the input text:\n'''{{text}}'''.\nUse the document metadata to guide the model to produce categories.\n#Metadata:\n'''{{document_metadata}}'''.\nEnsure high quality output by asking the model to produce a detailed summary and to categorize the document."
 }}
