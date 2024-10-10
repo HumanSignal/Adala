@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import pytest
 from adala.runtimes._litellm import AsyncLiteLLMChatRuntime
 from adala.runtimes.base import CostEstimate
 from adala.agents import Agent
@@ -11,6 +12,7 @@ from server.app import app, CostEstimateRequest
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 
+@pytest.mark.use_openai
 def test_simple_estimate_cost():
     runtime = AsyncLiteLLMChatRuntime(model="gpt-4o-mini", api_key=OPENAI_API_KEY)
 
@@ -30,6 +32,7 @@ def test_simple_estimate_cost():
     )
 
 
+@pytest.mark.use_openai
 def test_estimate_cost_endpoint():
     test_client = TestClient(app)
     req = {
