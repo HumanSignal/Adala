@@ -537,17 +537,20 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         return user_tokens + system_tokens
 
     @staticmethod
-    def _get_completion_tokens(model: str, output_fields: List[str]) -> int:
+    def _get_completion_tokens(model: str, output_fields: Optional[List[str]]) -> int:
         max_tokens = litellm.get_model_info(
             model=model, custom_llm_provider="openai"
         ).get("max_tokens", None)
         if not max_tokens:
             raise ValueError
         # extremely rough heuristic, from testing on some anecdotal examples
-        return min(max_tokens, 4 * len(output_fields))
+        n_outputs = len(output_fields) if output_fields else 1
+        return min(max_tokens, 4 * n_outputs)
 
     @classmethod
-    def _estimate_cost(cls, user_prompt: str, model: str, output_fields: List[str]):
+    def _estimate_cost(
+        cls, user_prompt: str, model: str, output_fields: Optional[List[str]]
+    ):
         prompt_tokens = cls._get_prompt_tokens(user_prompt, model, output_fields)
         completion_tokens = cls._get_completion_tokens(model, output_fields)
         prompt_cost, completion_cost = litellm.cost_per_token(
