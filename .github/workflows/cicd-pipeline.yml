@@ -56,7 +56,7 @@ jobs:
   deploy:
     name: "Deploy"
     if: github.event_name == 'pull_request' && needs.details.outputs.membership || github.event_name == 'push' && needs.details.outputs.membership
-    uses: ./.github/workflows/argocd-create-app.yml
+    uses: ./.github/workflows/argocd-deploy.yml
     needs:
       - details
       - build
@@ -65,5 +65,5 @@ jobs:
       deployments: write
     with:
       docker_image_version: ${{ needs.build.outputs.image_version }}
-      branch_name: ${{ github.event.pull_request.head.ref || github.ref_name }}
+      app_name: ${{ needs.build.outputs.pretty_branch_name }}
     secrets: inherit

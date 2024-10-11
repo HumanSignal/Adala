@@ -84,7 +84,9 @@ def _format_error_dict(e: Exception) -> dict:
 def _log_llm_exception(e) -> dict:
     dct = _format_error_dict(e)
     base_error = f"Inference error {dct['_adala_message']}"
-    tb = traceback.format_exc()
+    tb = "".join(
+        traceback.format_exception(e)
+    )  # format_exception return list of strings ending in new lines
     logger.error(f"{base_error}\nTraceback:\n{tb}")
     return dct
 
@@ -275,15 +277,21 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
             usage = completion.usage
             dct = to_jsonable_python(response)
         except IncompleteOutputException as e:
+            logger.error(f"Incomplete output error: {str(e)}")
+            logger.error(f"Traceback:\n{traceback.format_exc()}")
             usage = e.total_usage
             dct = _log_llm_exception(e)
         except InstructorRetryException as e:
+            logger.error(f"Instructor retry error: {str(e)}")
+            logger.error(f"Traceback:\n{traceback.format_exc()}")
             usage = e.total_usage
             # get root cause error from retries
             n_attempts = e.n_attempts
             e = e.__cause__.last_attempt.exception()
             dct = _log_llm_exception(e)
         except Exception as e:
+            logger.error(f"Other error: {str(e)}")
+            logger.error(f"Traceback:\n{traceback.format_exc()}")
             # usage = e.total_usage
             # not available here, so have to approximate by hand, assuming the same error occurred each time
             n_attempts = retries.stop.max_attempt_number
@@ -483,8 +491,41 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         extra_fields: Optional[Dict[str, Any]] = None,
         field_schema: Optional[Dict] = None,
         instructions_first: bool = True,
+        response_model: Optional[Type[BaseModel]] = None,
     ) -> Dict[str, str]:
-        raise NotImplementedError("record_to_record is not implemented")
+        """
+        Execute LiteLLM request given record and templates for input,
+        instructions and output.
+
+        Args:
+            record: Record to be used for input, instructions and output templates.
+            input_template: Template for input message.
+            instructions_template: Template for instructions message.
+            output_template: Template for output message.
+            extra_fields: Extra fields to be used in templates.
+            field_schema: Field jsonschema to be used for parsing templates.
+            instructions_first: If True, instructions will be sent before input.
+
+        Returns:
+            Dict[str, str]: The processed record.
+        """
+        # Create a single-row DataFrame from the input record
+        input_df = InternalDataFrame([record])
+
+        # Use the batch_to_batch method to process the single-row DataFrame
+        output_df = await self.batch_to_batch(
+            input_df,
+            input_template=input_template,
+            instructions_template=instructions_template,
+            output_template=output_template,
+            extra_fields=extra_fields,
+            field_schema=field_schema,
+            instructions_first=instructions_first,
+            response_model=response_model,
+        )
+
+        # Extract the single row from the output DataFrame and convert it to a dictionary
+        return output_df.iloc[0].to_dict()
 
 
 class LiteLLMVisionRuntime(LiteLLMChatRuntime):
