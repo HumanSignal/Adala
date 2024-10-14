@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, model_validator
 from adala.runtimes import Runtime, AsyncRuntime
 from adala.utils.internal_data import InternalDataFrame
 
-from label_studio_sdk.label_interface.interface import LabelInterface
+from label_studio_sdk.label_interface import LabelInterface
 from label_studio_sdk._extensions.label_studio_tools.core.utils.json_schema import json_schema_to_pydantic
 
 
