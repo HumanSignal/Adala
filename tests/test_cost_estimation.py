@@ -33,8 +33,7 @@ def test_simple_estimate_cost():
 
 
 @pytest.mark.use_openai
-def test_estimate_cost_endpoint():
-    test_client = TestClient(app)
+def test_estimate_cost_endpoint(client):
     req = {
         "agent": {
             "skills": [
@@ -64,7 +63,7 @@ def test_estimate_cost_endpoint():
         "prompt": "test {text}",
         "substitutions": [{"text": "test"}],
     }
-    resp = test_client.post(
+    resp = client.post(
         "/estimate-cost",
         json=req,
     )
