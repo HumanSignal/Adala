@@ -57,7 +57,7 @@ COPY pyproject.toml poetry.lock ./
 
 # Install dependencies
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR} \
-    poetry install --no-interaction --no-ansi --no-root --without dev --with label-studio
+    poetry install --no-interaction --no-ansi --no-root --without dev
 
 COPY . .
 
