@@ -66,12 +66,6 @@ openai-responses = "^0.10.1"
 pytest-recording = "^0.13.1"
 mockafka-py = "^0.1.57"
 
-[tool.poetry.group.label-studio]
-optional = true
-
-[tool.poetry.group.label-studio.dependencies]
-label-studio-sdk = {url = "https://github.com/HumanSignal/label-studio-sdk/archive/76b8f65c485456a74e34d0a7d970d0a8bb29ef4f.zip"}
-
 [tool.poetry.scripts]
 adala = "adala.cli:main"
 
