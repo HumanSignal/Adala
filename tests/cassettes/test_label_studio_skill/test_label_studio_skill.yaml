@@ -1,0 +1,326 @@
+interactions:
+- request:
+    body: '{"messages": [{"role": "user", "content": "Hey, how''s it going?"}], "model":
+      "gpt-4o-mini", "max_tokens": 200, "seed": 47, "temperature": 0.0}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '142'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.42.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.42.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//dJHBahsxEIbv+xRTXXrxhrWz9bq+hJAeGgIthAZDQ1jk3dldxZJGkWZx
+        XGPIa/T1+iRFa8d2D70I9H/6f/4ZbRMAoWoxB1F1kivjdHr95cf3m4fnzNDdVPlu8XCzmr7cfzY/
+        r7+Nf4lRdNDyGSt+d11UZJxGVmT3uPIoGWPquJgURZFPs2wAhmrU0dY6TnNKjbIqnWSTPM2KdDw7
+        uDtSFQYxh8cEAGA7nLGnrfFVzGHIGhSDIcgWxfz4CEB40lERMgQVWFoWoxOsyDLaofrtRwM1KdvC
+        GrUeAXfSrmBD/Qf4SmuQS+o5Xq9g0Un+8/Y7ANkoeDDK1sBUy83VebjHpg8yDmh7rQ/67thWU+s8
+        LcOBH/VGWRW60qMMZGOzwOTEQHcJwNOwlf6fQYXzZByXTCu0MXCc7+PE6S/O4OwAmVjqk345+Z+p
+        rJGl0uFss2LfT9n2FJAdSw5TirAJjKZslG3RO6/2i25c2cw+LVFOi1kukl3yFwAA//8DAHJc2uh2
+        AgAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8cbb64b07a8d5bea-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 01 Oct 2024 09:23:20 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=Ge.6o0zQTJh3cDJQ1jrUh.Nv7L8SwPq9FqdDnZi2Zuk-1727774600-1.0.1.1-yMDapU6hKi.R951kFFJiz92vCDygnthGoaXq1jH5H7HJ6ur1vi.ThTKaDDmjekuCK02HlbQjs3MBSObyn5DHqQ;
+        path=/; expires=Tue, 01-Oct-24 09:53:20 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=r5BE69RCyHldVdLvMt_2PhLdFLeAGde6Gfp0.XPH9iQ-1727774600680-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '324'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '30000'
+      x-ratelimit-limit-tokens:
+      - '150000000'
+      x-ratelimit-remaining-requests:
+      - '29999'
+      x-ratelimit-remaining-tokens:
+      - '149999793'
+      x-ratelimit-reset-requests:
+      - 2ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_a416ffb855f500cc512869aff0138f12
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "user", "content": "\n                    Given
+      the github issue title:\nI can''t login\n and the description:\nI can''t login
+      to the platform\n, \n                    classify the issue. Provide a rationale
+      for your classification. \n                    Evaluate the final classification
+      on a Likert scale from 1 to 5, \n                    where 1 is \"Completely
+      irrelevant\" and 5 is \"Completely relevant\"."}], "model": "gpt-4o-mini", "max_tokens":
+      200, "seed": 47, "temperature": 0.0, "tool_choice": {"type": "function", "function":
+      {"name": "MyModel"}}, "tools": [{"type": "function", "function": {"name": "MyModel",
+      "description": "Correctly extracted `MyModel` with all the required parameters
+      with correct types", "parameters": {"properties": {"title": {"title": "Title",
+      "type": "string"}, "description": {"description": "Text for description", "title":
+      "Description", "type": "string"}, "classification": {"description": "Choices
+      for title", "enum": ["Bug report", "Feature request", "Question", "Other"],
+      "title": "Classification", "type": "string"}, "rationale": {"description": "Text
+      for title", "title": "Rationale", "type": "string"}, "evaluation": {"description":
+      "Rating for title (0 to 5)", "maximum": 5, "minimum": 0, "title": "Evaluation",
+      "type": "integer"}}, "required": ["classification", "description", "evaluation",
+      "rationale", "title"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1409'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=Ge.6o0zQTJh3cDJQ1jrUh.Nv7L8SwPq9FqdDnZi2Zuk-1727774600-1.0.1.1-yMDapU6hKi.R951kFFJiz92vCDygnthGoaXq1jH5H7HJ6ur1vi.ThTKaDDmjekuCK02HlbQjs3MBSObyn5DHqQ;
+        _cfuvid=r5BE69RCyHldVdLvMt_2PhLdFLeAGde6Gfp0.XPH9iQ-1727774600680-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.42.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.42.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//dFNNb9swDL3nVxC67JIUSZbGQW4b0gIb0K0r2g3DMhiMTMtqZMmT6HVB
+        kP9eSM5Xu80HQ+bT43ukyW0PQOhCzEHIClnWjRm8W9x/Xky+L+5YrexwfPXFrR+frpX+6q7MtehH
+        hls9kuQD60K6ujHE2tkOlp6QKWYdZeMsyybT4SgBtSvIRJpqeDBxg1pbPRgPx5PBMBuMZnt25bSk
+        IObwowcAsE3v6NMW9EfMYdg/RGoKARWJ+fESgPDOxIjAEHRgtCz6J1A6y2SjddsacwawcyaXaMxJ
+        uHu2Z+dTs9CY/Lb+tq4Wnx4+3gZXsB2PxpO7za/11Zlel3rTJENla+WxSWf4MT5/JQYgLNaJe7O5
+        Sb3rv76AXrU1WY62xXYpWLOhpZgvxQeQaN8wGKe0XYr+UhQUpNdN1Pr7BrADrggag1w6XyeGNLGL
+        pZZ4JL1vFXhqnOd0wycE95r3FYEOoSWQhtCbDWhbRDYFQGi8Wxmq4UlzlbQ64UP9aDRvwJUvbPTh
+        qdKyAh0TSK9ZSzRQEnLr6QIeAvkA6AlaiytDsQqUkkKIWbSPH661HPoQWqUosLYqWnFxDDQaWLUK
+        uEIGS1SEyF8RYFF4CoGKi1Qk/UbTHlpwuRMvfsKu96/zz7PZ8lS2Ac1+6Pbx3XGKjVOxM+HVUIpS
+        Wx2q3BOGNBwisGs67aiTFET7YgFE413dcM5uTTYmHI+yLp84LekJnU73IDtGc8aavf0fKy+IUact
+        OS5m51BbdcowPNpMdYqwCUx1XmqryDdepxUUZZOXs8sV4TSbTURv13sGAAD//wMAvFJt85AEAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8cbb64b67b605bea-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 01 Oct 2024 09:23:22 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '1055'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '30000'
+      x-ratelimit-limit-tokens:
+      - '150000000'
+      x-ratelimit-remaining-requests:
+      - '29999'
+      x-ratelimit-remaining-tokens:
+      - '149999703'
+      x-ratelimit-reset-requests:
+      - 2ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_d13baf76f1a0c3c4ad83c3e343bbb5c5
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "user", "content": "\n                    Given
+      the github issue title:\nSupport new file types\n and the description:\nIt would
+      be great if we could upload files of type .docx\n, \n                    classify
+      the issue. Provide a rationale for your classification. \n                    Evaluate
+      the final classification on a Likert scale from 1 to 5, \n                    where
+      1 is \"Completely irrelevant\" and 5 is \"Completely relevant\"."}], "model":
+      "gpt-4o-mini", "max_tokens": 200, "seed": 47, "temperature": 0.0, "tool_choice":
+      {"type": "function", "function": {"name": "MyModel"}}, "tools": [{"type": "function",
+      "function": {"name": "MyModel", "description": "Correctly extracted `MyModel`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"title": {"title": "Title", "type": "string"}, "description": {"description":
+      "Text for description", "title": "Description", "type": "string"}, "classification":
+      {"description": "Choices for title", "enum": ["Bug report", "Feature request",
+      "Question", "Other"], "title": "Classification", "type": "string"}, "rationale":
+      {"description": "Text for title", "title": "Rationale", "type": "string"}, "evaluation":
+      {"description": "Rating for title (0 to 5)", "maximum": 5, "minimum": 0, "title":
+      "Evaluation", "type": "integer"}}, "required": ["classification", "description",
+      "evaluation", "rationale", "title"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1445'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=Ge.6o0zQTJh3cDJQ1jrUh.Nv7L8SwPq9FqdDnZi2Zuk-1727774600-1.0.1.1-yMDapU6hKi.R951kFFJiz92vCDygnthGoaXq1jH5H7HJ6ur1vi.ThTKaDDmjekuCK02HlbQjs3MBSObyn5DHqQ;
+        _cfuvid=r5BE69RCyHldVdLvMt_2PhLdFLeAGde6Gfp0.XPH9iQ-1727774600680-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.42.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.42.0
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA3RTwW4aMRC98xUjn1oJEKEkUG60SaS2oknbVJFaKmTs2d1JvLZre0sI4t8rm2UX
+        onYP1mpm3ps3z55tB4CRZFNgouBBlFb1Zpd3N1dvP/+4fXj4cOnu8XI1e3cuv0hx/3F+xboRYVYP
+        KMIB1RemtAoDGb1PC4c8YGQ9Gw/H4/HoYjBMidJIVBGW29AbmV5JmnrDwXDUG4x7Z5MaXRgS6NkU
+        fnYAALbpjDq1xCc2hUH3ECnRe54jmzZFAMwZFSOMe08+cB1Yt00KowPqKF1XSh0lgjFqKbhSbeP9
+        tz36b83iSi2frvUom1n1PL/59JwJefN9pm7fP3496ren3tgkKKu0aEw6yjfx6YtmAEzzMmHnm3ny
+        rvuygLu8KlGHKJttFyxQULhg0wX7VllrXACNa8hIIUQdfsG6CybRC0c2Nk2lHwKsTaUkrBDyeHlA
+        GawRRApWVhkuE4cHkyUe6EsjnhKZUNHpjARv+K6Rh8ohOPxdoQ+pzKU0r8XdFQjkfRXPQxnpHEKB
+        wKWkWBt7+XqIzDjgp6PAq6ThdRfWBYkCSMuoAT1wkOjJYUIlTO0wVxQ2QDq18RsfsOzDXUEeuKJc
+        e1hTKFJSYka6UcEhO52oC9wDBfCIjx6CAdQF1wITVnDLV6QoUO1XnMlaVTvUT3bgH66qg2PnO3Zy
+        r7vOv/5/HT1Xh1nluarfcR3fNYuhTG6dWfkX75zFoXyxdMh9em/MB2P3vWOf1IFVJzvFrDOlDctg
+        HlFHwuHwYs/H2r1vs5NDMpjAVRt/czb8H2opMXBKi9fs+l4h6bxlGDQy05xsf3/LjHSOzjpKW80y
+        u8wm5yvkF+PJiHV2nb8AAAD//wMAg8II9OMEAAA=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 8cbb64bf88f35bea-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 01 Oct 2024 09:23:23 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '1161'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '30000'
+      x-ratelimit-limit-tokens:
+      - '150000000'
+      x-ratelimit-remaining-requests:
+      - '29999'
+      x-ratelimit-remaining-tokens:
+      - '149999694'
+      x-ratelimit-reset-requests:
+      - 2ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_67296f7dd7db4a6795498f1aac9d8f52
+    status:
+      code: 200
+      message: OK
+version: 1
