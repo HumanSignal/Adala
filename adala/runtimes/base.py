@@ -13,11 +13,20 @@ tqdm.pandas()
 
 
 class CostEstimate(BaseModel):
-    prompt_cost_usd: Optional[float]
-    completion_cost_usd: Optional[float]
-    total_cost_usd: Optional[float]
+    prompt_cost_usd: Optional[float] = None
+    completion_cost_usd: Optional[float] = None
+    total_cost_usd: Optional[float] = None
+    error: bool = False
+    error_type: Optional[str] = None
+    error_message: Optional[str] = None
 
     def __add__(self, other: "CostEstimate") -> "CostEstimate":
+        # if either has an error, it takes precedence
+        if self.error:
+            return self
+        if other.error:
+            return other
+
         def _safe_add(lhs: Optional[float], rhs: Optional[float]) -> Optional[float]:
             if lhs is None and rhs is None:
                 return None

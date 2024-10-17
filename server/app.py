@@ -244,7 +244,7 @@ async def estimate_cost(
 
     try:
         cost_estimates = []
-        for skill in agent.get_skills():
+        for skill in agent.skills.skills.values():
             output_fields = (
                 list(skill.field_schema.keys()) if skill.field_schema else None
             )
@@ -258,12 +258,12 @@ async def estimate_cost(
                 prompt_cost_usd=None, completion_cost_usd=None, total_cost_usd=None
             ),
         )
-    except NotImplementedError:
+    except NotImplementedError as e:
         return Response[CostEstimate](
             data=CostEstimate(
-                prompt_cost_usd=None,
-                completion_cost_usd=None,
-                total_cost_usd=None,
+                error=True,
+                error_type=type(e).__name__,
+                error_message=str(e),
             )
         )
     return Response[CostEstimate](data=total_cost_estimate)

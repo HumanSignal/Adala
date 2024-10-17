@@ -123,7 +123,6 @@ def _get_usage_dict(usage: Usage, model: str) -> Dict:
 
 
 class InstructorClientMixin:
-
     def _from_litellm(self, **kwargs):
         return instructor.from_litellm(litellm.completion, **kwargs)
 
@@ -140,7 +139,6 @@ class InstructorClientMixin:
 
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
-
     def _from_litellm(self, **kwargs):
         return instructor.from_litellm(litellm.acompletion, **kwargs)
 
@@ -590,9 +588,9 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         except Exception as e:
             logger.error("Failed to estimate cost: %s", e)
             return CostEstimate(
-                prompt_cost_usd=None,
-                completion_cost_usd=None,
-                total_cost_usd=None,
+                error=True,
+                error_type=type(e).__name__,
+                error_message=str(e),
             )
 
 
