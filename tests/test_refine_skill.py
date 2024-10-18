@@ -62,7 +62,7 @@ async def test_arefine_skill_no_input_data(client, agent_json):
     }
 
     response = client.post("/improved-prompt", json=payload)
-    
+
     assert response.status_code == 200
     result = response.json()
 
@@ -73,7 +73,7 @@ async def test_arefine_skill_no_input_data(client, agent_json):
     assert "reasoning" in output
     assert "new_prompt_title" in output
     assert "new_prompt_content" in output
-    assert '{text}' in output["new_prompt_content"]
+    assert "{text}" in output["new_prompt_content"]
 
 
 @pytest.mark.use_openai
@@ -91,13 +91,13 @@ async def test_arefine_skill_with_input_data(client, agent_json):
         "skill_to_improve": skill_name,
         "input_variables": ["text", "id"],
         "batch_data": {
-            'job_id': '123',
-            'data': batch_data,
-        }
+            "job_id": "123",
+            "data": batch_data,
+        },
     }
 
     response = client.post("/improved-prompt", json=payload)
-    
+
     assert response.status_code == 200
     result = response.json()
 
@@ -108,8 +108,8 @@ async def test_arefine_skill_with_input_data(client, agent_json):
     assert "reasoning" in output
     assert "new_prompt_title" in output
     assert "new_prompt_content" in output
-    assert '{text}' in output["new_prompt_content"]
-    assert '{id}' in output["new_prompt_content"]
+    assert "{text}" in output["new_prompt_content"]
+    assert "{id}" in output["new_prompt_content"]
 
 
 @pytest.mark.use_openai
@@ -140,7 +140,7 @@ async def test_arefine_skill_error_handling(client, agent_json):
             return mock_create.return_value
 
         mock_create.side_effect = side_effect
-    
+
         resp = client.post(
             "/improved-prompt",
             json={
@@ -152,4 +152,7 @@ async def test_arefine_skill_error_handling(client, agent_json):
         assert resp.raise_for_status()
         resp_json = resp.json()
         assert not resp_json["success"]
-        assert f"Simulated OpenAI API failure for {skill_name}" == resp_json["data"]["output"]["_adala_details"]
+        assert (
+            f"Simulated OpenAI API failure for {skill_name}"
+            == resp_json["data"]["output"]["_adala_details"]
+        )

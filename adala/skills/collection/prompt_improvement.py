@@ -12,8 +12,9 @@ logger = logging.getLogger(__name__)
 
 class PromptImprovementSkillResponseModel(BaseModel):
 
-
-    reasoning: str = Field(..., description="The reasoning for the changes made to the prompt")
+    reasoning: str = Field(
+        ..., description="The reasoning for the changes made to the prompt"
+    )
     new_prompt_title: str = Field(..., description="The new short title for the prompt")
     new_prompt_content: str = Field(..., description="The new content for the prompt")
 
@@ -49,7 +50,9 @@ class ImprovedPromptResponse(BaseModel):
 
     # these can fail to calculate
     prompt_cost_usd: Optional[float] = Field(alias="_prompt_cost_usd", default=None)
-    completion_cost_usd: Optional[float] = Field(alias="_completion_cost_usd", default=None)
+    completion_cost_usd: Optional[float] = Field(
+        alias="_completion_cost_usd", default=None
+    )
     total_cost_usd: Optional[float] = Field(alias="_total_cost_usd", default=None)
 
 
@@ -61,18 +64,19 @@ class PromptImprovementSkill(AnalysisSkill):
     input_variables: List[str]
 
     name: str = "prompt_improvement"
-    instructions: str = "" # Automatically generated
+    instructions: str = ""  # Automatically generated
     input_template: str = ""  # Not used
-    input_prefix: str = "Here are a few prediction results after applying the current prompt for your analysis.\n\n"
+    input_prefix: str = (
+        "Here are a few prediction results after applying the current prompt for your analysis.\n\n"
+    )
     input_separator: str = "\n\n"
 
     response_model = PromptImprovementSkillResponseModel
 
-    
     @model_validator(mode="after")
     def validate_prompts(self):
-        input_variables = '\n'.join(self.input_variables)
-        
+        input_variables = "\n".join(self.input_variables)
+
         # rewrite the instructions with the actual values
         self.instructions = f"""\
 You are a prompt engineer tasked with generating or enhancing a prompt for a Language Learning Model (LLM). Your goal is to create an effective prompt based on the given context, input data and requirements.
@@ -183,10 +187,12 @@ These changes will ensure higher quality, more consistent responses that meet th
 Ensure that your refined prompt is clear, concise, and effectively guides the LLM to produce high quality responses.
 
 """
-        
+
         # Create the output template for JSON output based on the response model fields
         fields = self.skill_to_improve.response_model.model_fields
-        field_template = ", ".join([f'"{field}": "{{{field}}}"'for field in fields])
+        field_template = ", ".join([f'"{field}": "{{{field}}}"' for field in fields])
         self.output_template = "{{" + field_template + "}}"
-        self.input_template = f"{self.skill_to_improve.input_template} --> {self.output_template}"
+        self.input_template = (
+            f"{self.skill_to_improve.input_template} --> {self.output_template}"
+        )
         return self
