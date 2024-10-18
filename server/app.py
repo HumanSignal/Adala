@@ -348,7 +348,7 @@ async def improved_prompt(request: ImprovedPromptRequest):
     improved_prompt_response = await request.agent.arefine_skill(
         skill_name=request.skill_to_improve,
         input_variables=request.input_variables,
-        batch_data=request.data,
+        data=request.data,
     )
 
     return Response[ImprovedPromptResponse](

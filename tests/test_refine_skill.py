@@ -90,10 +90,7 @@ async def test_arefine_skill_with_input_data(client, agent_json):
         "agent": agent_json,
         "skill_to_improve": skill_name,
         "input_variables": ["text", "id"],
-        "batch_data": {
-            "job_id": "123",
-            "data": batch_data,
-        },
+        "data": batch_data,
     }
 
     response = client.post("/improved-prompt", json=payload)
