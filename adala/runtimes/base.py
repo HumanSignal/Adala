@@ -1,12 +1,12 @@
 import logging
+from abc import abstractmethod
+from typing import Any, Dict, List, Optional, Type
 
-from tqdm import tqdm
-from abc import ABC, abstractmethod
-from pydantic import BaseModel, model_validator, Field
-from typing import List, Dict, Optional, Tuple, Any, Callable, ClassVar, Type
-from adala.utils.internal_data import InternalDataFrame, InternalSeries
+from adala.utils.internal_data import InternalDataFrame
 from adala.utils.registry import BaseModelInRegistry
 from pandarallel import pandarallel
+from pydantic import BaseModel, Field, model_validator
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 tqdm.pandas()
@@ -22,9 +22,9 @@ class CostEstimate(BaseModel):
 
     def __add__(self, other: "CostEstimate") -> "CostEstimate":
         # if either has an error, it takes precedence
-        if self.error:
+        if self.is_error:
             return self
-        if other.error:
+        if other.is_error:
             return other
 
         def _safe_add(lhs: Optional[float], rhs: Optional[float]) -> Optional[float]:
