@@ -12,6 +12,40 @@ logger = logging.getLogger(__name__)
 tqdm.pandas()
 
 
+class CostEstimate(BaseModel):
+    prompt_cost_usd: Optional[float] = None
+    completion_cost_usd: Optional[float] = None
+    total_cost_usd: Optional[float] = None
+    is_error: bool = False
+    error_type: Optional[str] = None
+    error_message: Optional[str] = None
+
+    def __add__(self, other: "CostEstimate") -> "CostEstimate":
+        # if either has an error, it takes precedence
+        if self.error:
+            return self
+        if other.error:
+            return other
+
+        def _safe_add(lhs: Optional[float], rhs: Optional[float]) -> Optional[float]:
+            if lhs is None and rhs is None:
+                return None
+            _lhs = lhs or 0.0
+            _rhs = rhs or 0.0
+            return _lhs + _rhs
+
+        prompt_cost_usd = _safe_add(self.prompt_cost_usd, other.prompt_cost_usd)
+        completion_cost_usd = _safe_add(
+            self.completion_cost_usd, other.completion_cost_usd
+        )
+        total_cost_usd = _safe_add(self.total_cost_usd, other.total_cost_usd)
+        return CostEstimate(
+            prompt_cost_usd=prompt_cost_usd,
+            completion_cost_usd=completion_cost_usd,
+            total_cost_usd=total_cost_usd,
+        )
+
+
 class Runtime(BaseModelInRegistry):
     """
     Base class representing a generic runtime environment.
@@ -190,6 +224,11 @@ class Runtime(BaseModelInRegistry):
             instructions_first=instructions_first,
             response_model=response_model,
         )
+
+    def get_cost_estimate(
+        self, prompt: str, substitutions: List[Dict], output_fields: Optional[List[str]]
+    ) -> CostEstimate:
+        raise NotImplementedError("This runtime does not support cost estimates")
 
 
 class AsyncRuntime(Runtime):
