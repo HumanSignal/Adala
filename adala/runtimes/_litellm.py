@@ -588,7 +588,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         except Exception as e:
             logger.error("Failed to estimate cost: %s", e)
             return CostEstimate(
-                error=True,
+                is_error=True,
                 error_type=type(e).__name__,
                 error_message=str(e),
             )

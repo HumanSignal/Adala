@@ -258,10 +258,11 @@ async def estimate_cost(
                 prompt_cost_usd=None, completion_cost_usd=None, total_cost_usd=None
             ),
         )
+
     except NotImplementedError as e:
         return Response[CostEstimate](
             data=CostEstimate(
-                error=True,
+                is_error=True,
                 error_type=type(e).__name__,
                 error_message=str(e),
             )

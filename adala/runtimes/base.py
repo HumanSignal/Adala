@@ -16,7 +16,7 @@ class CostEstimate(BaseModel):
     prompt_cost_usd: Optional[float] = None
     completion_cost_usd: Optional[float] = None
     total_cost_usd: Optional[float] = None
-    error: bool = False
+    is_error: bool = False
     error_type: Optional[str] = None
     error_message: Optional[str] = None
 
