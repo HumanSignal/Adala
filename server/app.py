@@ -15,6 +15,7 @@ from aiokafka import AIOKafkaProducer
 from aiokafka.errors import UnknownTopicOrPartitionError
 from fastapi import HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+import litellm
 from pydantic import BaseModel, SerializeAsAny, field_validator, Field, model_validator
 from redis import Redis
 import time
@@ -24,6 +25,7 @@ from adala.utils.types import BatchData, ErrorResponseModel
 from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
 from adala.skills.collection.prompt_improvement import ImprovedPromptResponse
+from adala.runtimes.base import CostEstimate
 from server.tasks.stream_inference import streaming_parent_task
 from server.utils import (
     Settings,
@@ -79,6 +81,12 @@ class BatchSubmitted(BaseModel):
     """
 
     job_id: str
+
+
+class CostEstimateRequest(BaseModel):
+    agent: Agent
+    prompt: str
+    substitutions: List[Dict]
 
 
 class Status(Enum):
@@ -208,6 +216,58 @@ async def submit_batch(batch: BatchData):
         await producer.stop()
 
     return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
+
+
+@app.post("/estimate-cost", response_model=Response[CostEstimate])
+async def estimate_cost(
+    request: CostEstimateRequest,
+):
+    """
+    Estimates what it would cost to run inference on the batch of data in
+    `request` (using the run params from `request`)
+
+    Args:
+        request (CostEstimateRequest): Specification for the inference run to
+            make an estimate for, includes:
+                agent (adala.agent.Agent): The agent definition, used to get the model
+                    and any other params necessary to estimate cost
+                prompt (str): The prompt template that will be used for each task
+                substitutions (List[Dict]): Mappings to substitute (simply using str.format)
+
+    Returns:
+        Response[CostEstimate]: The cost estimate, including the prompt/completion/total costs (in USD)
+    """
+    prompt = request.prompt
+    substitutions = request.substitutions
+    agent = request.agent
+    runtime = agent.get_runtime()
+
+    try:
+        cost_estimates = []
+        for skill in agent.skills.skills.values():
+            output_fields = (
+                list(skill.field_schema.keys()) if skill.field_schema else None
+            )
+            cost_estimate = runtime.get_cost_estimate(
+                prompt=prompt, substitutions=substitutions, output_fields=output_fields
+            )
+            cost_estimates.append(cost_estimate)
+        total_cost_estimate = sum(
+            cost_estimates,
+            CostEstimate(
+                prompt_cost_usd=None, completion_cost_usd=None, total_cost_usd=None
+            ),
+        )
+
+    except NotImplementedError as e:
+        return Response[CostEstimate](
+            data=CostEstimate(
+                is_error=True,
+                error_type=type(e).__name__,
+                error_message=str(e),
+            )
+        )
+    return Response[CostEstimate](data=total_cost_estimate)
 
 
 @app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])
