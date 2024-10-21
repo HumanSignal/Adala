@@ -273,6 +273,20 @@ files = [
 ]
 
 [[package]]
+name = "argcomplete"
+version = "3.5.1"
+description = "Bash tab completion for argparse"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "argcomplete-3.5.1-py3-none-any.whl", hash = "sha256:1a1d148bdaa3e3b93454900163403df41448a248af01b6e849edc5ac08e6c363"},
+    {file = "argcomplete-3.5.1.tar.gz", hash = "sha256:eb1ee355aa2557bd3d0145de7b06b2a45b0ce461e1e7813f5d066039ab4177b4"},
+]
+
+[package.extras]
+test = ["coverage", "mypy", "pexpect", "ruff", "wheel"]
+
+[[package]]
 name = "argon2-cffi"
 version = "23.1.0"
 description = "Argon2 for Python"
@@ -1389,6 +1403,39 @@ docs = ["ipython", "matplotlib", "numpydoc", "sphinx"]
 tests = ["pytest", "pytest-cov", "pytest-xdist"]
 
 [[package]]
+name = "datamodel-code-generator"
+version = "0.26.1"
+description = "Datamodel Code Generator"
+optional = false
+python-versions = "<4.0,>=3.8"
+files = [
+    {file = "datamodel_code_generator-0.26.1-py3-none-any.whl", hash = "sha256:bbe8a6cc0b9cfdbfd294e336e02b4c50b481ffc3b3c608b5578b6d7aa02cc8ae"},
+    {file = "datamodel_code_generator-0.26.1.tar.gz", hash = "sha256:3b7b49c4230fa197ca28847e1e8996cd664638a7e91796c826a61c60d4ccd8a2"},
+]
+
+[package.dependencies]
+argcomplete = ">=1.10,<4.0"
+black = ">=19.10b0"
+genson = ">=1.2.1,<2.0"
+inflect = ">=4.1.0,<6.0"
+isort = ">=4.3.21,<6.0"
+jinja2 = ">=2.10.1,<4.0"
+packaging = "*"
+pydantic = [
+    {version = ">=1.5.1,<2.4.0 || >2.4.0,<3.0", extras = ["email"], markers = "python_version < \"3.10\""},
+    {version = ">=1.9.0,<2.4.0 || >2.4.0,<3.0", extras = ["email"], markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
+    {version = ">=1.10.0,<2.4.0 || >2.4.0,<3.0", extras = ["email"], markers = "python_version >= \"3.11\" and python_version < \"4.0\""},
+]
+pyyaml = ">=6.0.1"
+toml = {version = ">=0.10.0,<1.0.0", markers = "python_version < \"3.11\""}
+
+[package.extras]
+debug = ["PySnooper (>=0.4.1,<2.0.0)"]
+graphql = ["graphql-core (>=3.2.3,<4.0.0)"]
+http = ["httpx"]
+validation = ["openapi-spec-validator (>=0.2.8,<0.7.0)", "prance (>=0.18.2)"]
+
+[[package]]
 name = "datasets"
 version = "2.19.1"
 description = "HuggingFace community-driven open-source library of datasets"
@@ -1540,6 +1587,26 @@ files = [
 ]
 
 [[package]]
+name = "dnspython"
+version = "2.7.0"
+description = "DNS toolkit"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "dnspython-2.7.0-py3-none-any.whl", hash = "sha256:b4c34b7d10b51bcc3a5071e7b8dee77939f1e878477eeecc965e9835f63c6c86"},
+    {file = "dnspython-2.7.0.tar.gz", hash = "sha256:ce9c432eda0dc91cf618a5cedf1a4e142651196bbcd2c80e89ed5a907e5cfaf1"},
+]
+
+[package.extras]
+dev = ["black (>=23.1.0)", "coverage (>=7.0)", "flake8 (>=7)", "hypercorn (>=0.16.0)", "mypy (>=1.8)", "pylint (>=3)", "pytest (>=7.4)", "pytest-cov (>=4.1.0)", "quart-trio (>=0.11.0)", "sphinx (>=7.2.0)", "sphinx-rtd-theme (>=2.0.0)", "twine (>=4.0.0)", "wheel (>=0.42.0)"]
+dnssec = ["cryptography (>=43)"]
+doh = ["h2 (>=4.1.0)", "httpcore (>=1.0.0)", "httpx (>=0.26.0)"]
+doq = ["aioquic (>=1.0.0)"]
+idna = ["idna (>=3.7)"]
+trio = ["trio (>=0.23)"]
+wmi = ["wmi (>=1.5.1)"]
+
+[[package]]
 name = "docker"
 version = "7.1.0"
 description = "A Python library for the Docker Engine API."
@@ -1581,6 +1648,21 @@ python-versions = "*"
 files = [
     {file = "durationpy-0.7.tar.gz", hash = "sha256:8447c43df4f1a0b434e70c15a38d77f5c9bd17284bfc1ff1d430f233d5083732"},
 ]
+
+[[package]]
+name = "email-validator"
+version = "2.2.0"
+description = "A robust email address syntax and deliverability validation library."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "email_validator-2.2.0-py3-none-any.whl", hash = "sha256:561977c2d73ce3611850a06fa56b414621e0c8faa9d66f2611407d87465da631"},
+    {file = "email_validator-2.2.0.tar.gz", hash = "sha256:cb690f344c617a714f22e66ae771445a1ceb46821152df8e165c5f9a364582b7"},
+]
+
+[package.dependencies]
+dnspython = ">=2.0.0"
+idna = ">=2.0.0"
 
 [[package]]
 name = "exceptiongroup"
@@ -1916,6 +1998,17 @@ sftp = ["paramiko"]
 smb = ["smbprotocol"]
 ssh = ["paramiko"]
 tqdm = ["tqdm"]
+
+[[package]]
+name = "genson"
+version = "1.3.0"
+description = "GenSON is a powerful, user-friendly JSON Schema generator."
+optional = false
+python-versions = "*"
+files = [
+    {file = "genson-1.3.0-py3-none-any.whl", hash = "sha256:468feccd00274cc7e4c09e84b08704270ba8d95232aa280f65b986139cec67f7"},
+    {file = "genson-1.3.0.tar.gz", hash = "sha256:e02db9ac2e3fd29e65b5286f7135762e2cd8a986537c075b06fc5f1517308e37"},
+]
 
 [[package]]
 name = "ghp-import"
@@ -2553,6 +2646,21 @@ test = ["jaraco.test (>=5.4)", "pytest (>=6,!=8.1.*)", "zipp (>=3.17)"]
 type = ["pytest-mypy"]
 
 [[package]]
+name = "inflect"
+version = "5.6.2"
+description = "Correctly generate plurals, singular nouns, ordinals, indefinite articles; convert numbers to words"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "inflect-5.6.2-py3-none-any.whl", hash = "sha256:b45d91a4a28a4e617ff1821117439b06eaa86e2a4573154af0149e9be6687238"},
+    {file = "inflect-5.6.2.tar.gz", hash = "sha256:aadc7ed73928f5e014129794bbac03058cca35d0a973a5fc4eb45c7fa26005f9"},
+]
+
+[package.extras]
+docs = ["jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx"]
+testing = ["pygments", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
+
+[[package]]
 name = "iniconfig"
 version = "2.0.0"
 description = "brain-dead simple config-ini parsing"
@@ -2699,6 +2807,20 @@ files = [
 
 [package.dependencies]
 arrow = ">=0.15.0"
+
+[[package]]
+name = "isort"
+version = "5.13.2"
+description = "A Python utility / library to sort Python imports."
+optional = false
+python-versions = ">=3.8.0"
+files = [
+    {file = "isort-5.13.2-py3-none-any.whl", hash = "sha256:8ca5e72a8d85860d5a3fa69b8745237f2939afe12dbf656afbcb47fe72d947a6"},
+    {file = "isort-5.13.2.tar.gz", hash = "sha256:48fdfcb9face5d58a4f6dde2e72a1fb8dcaf8ab26f95ab49fab84c2ddefb0109"},
+]
+
+[package.extras]
+colors = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "jedi"
@@ -3391,11 +3513,12 @@ description = ""
 optional = false
 python-versions = "^3.8"
 files = [
-    {file = "81ab3bbed0373fca1fd9166f186bfd0817512331.zip", hash = "sha256:46619542f192af938d47ee233c2b96133d8a77e3f998e7e8785b0458e2fff5aa"},
+    {file = "e94072130d90f7b89701b9234ce175425f36f23e.zip", hash = "sha256:436834d571972327d9a24c96db19e0de8204c028f7cc01e5e36cece2a550ef91"},
 ]
 
 [package.dependencies]
 appdirs = ">=1.4.3"
+datamodel-code-generator = ">=0.26.0,<0.27.0"
 httpx = ">=0.21.2"
 ijson = ">=3.2.3"
 jsonschema = ">=4.23.0"
@@ -3413,7 +3536,7 @@ xmljson = "0.2.1"
 
 [package.source]
 type = "url"
-url = "https://github.com/HumanSignal/label-studio-sdk/archive/81ab3bbed0373fca1fd9166f186bfd0817512331.zip"
+url = "https://github.com/HumanSignal/label-studio-sdk/archive/e94072130d90f7b89701b9234ce175425f36f23e.zip"
 
 [[package]]
 name = "litellm"
@@ -5418,6 +5541,7 @@ files = [
 
 [package.dependencies]
 annotated-types = ">=0.6.0"
+email-validator = {version = ">=2.0.0", optional = true, markers = "extra == \"email\""}
 pydantic-core = "2.23.4"
 typing-extensions = {version = ">=4.6.1", markers = "python_version < \"3.13\""}
 
@@ -7956,4 +8080,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "75df2caa226c9646dc7e28703ca4a094e16b24f075e4e4eec5699db2611bc10a"
+content-hash = "a89c50ecdcd1b6da14dd1483dcd7b16e7e36355ef779eb07606e01041c1c67ee"
