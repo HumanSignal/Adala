@@ -66,3 +66,115 @@ async def test_label_studio_skill():
         "The issue clearly indicates a problem with the login functionality of the platform, which is a critical feature. Users are unable to access their accounts, suggesting a potential bug that needs to be addressed.",
         "The issue is requesting the addition of support for a new file type (.docx), which indicates a desire for new functionality in the system. This aligns with the definition of a feature request, as it seeks to enhance the capabilities of the application."
     ]
+
+
+@pytest.mark.asyncio
+# @pytest.mark.vcr
+async def test_label_studio_skill_with_ner():
+    # documents that contain entities
+    df = pd.DataFrame(
+        [
+            {
+                "text": "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services."
+            },
+            {"text": "The iPhone 14 is the latest smartphone from Apple Inc."},
+            {
+                "text": "The MacBook Pro is a line of Macintosh portable computers introduced in January 2006 by Apple Inc."
+            },
+            {
+                "text": "The Apple Watch is a line of smartwatches produced by Apple Inc."
+            },
+            {
+                "text": "The iPad is a line of tablet computers designed, developed, and marketed by Apple Inc."
+            },
+        ]
+    )
+
+    agent_payload = {
+        "runtimes": {
+            "default": {
+                "type": "AsyncLiteLLMChatRuntime",
+                "model": "gpt-4o-mini",
+                "api_key": os.getenv("OPENAI_API_KEY"),
+                "max_tokens": 200,
+                "temperature": 0,
+                "batch_size": 100,
+                "timeout": 10,
+                "verbose": False,
+            }
+        },
+        "skills": [
+            {
+                "type": "LabelStudioSkill",
+                "name": "AnnotationResult",
+                "input_template": 'Extract entities from the input text:\n{text}',
+                "label_config": """
+                <View>
+                    <Text name="input" value="$text"/>
+                    <Labels name="entities" toName="input">
+                        <Label value="Organization"/>
+                        <Label value="Product"/>
+                        <Label value="Version"/>
+                    </Labels>
+                </View>
+                """
+            }
+        ],
+    }
+
+    agent = Agent(**agent_payload)
+    predictions = await agent.arun(df)
+
+    assert predictions.entities.tolist() == [
+        [
+            {
+                "text": "Apple Inc.",
+                "labels": ["Organization"],
+                "start": 0,
+                "end": 10,
+            }
+        ],
+        [
+            {"text": "iPhone 14", "labels": ["Product"], "start": 4, "end": 13},
+            {
+                "text": "Apple Inc.",
+                "labels": ["Organization"],
+                "start": 44,
+                "end": 54,
+            },
+        ],
+        [
+            {"text": "MacBook Pro", "labels": ["Product"], "start": 4, "end": 15},
+            {"text": "Macintosh", "labels": ["Product"], "start": 29, "end": 38},
+            {
+                "text": "January 2006",
+                "labels": ["Version"],
+                "start": 72,
+                "end": 84,
+            },
+            {
+                "text": "Apple Inc.",
+                "labels": ["Organization"],
+                "start": 88,
+                "end": 98,
+            },
+        ],
+        [
+            {"text": "Apple Watch", "labels": ["Product"], "start": 4, "end": 15},
+            {
+                "text": "Apple Inc.",
+                "labels": ["Organization"],
+                "start": 54,
+                "end": 64,
+            },
+        ],
+        [
+            {"text": "iPad", "labels": ["Product"], "start": 4, "end": 8},
+            {
+                "text": "Apple Inc.",
+                "labels": ["Organization"],
+                "start": 76,
+                "end": 86,
+            },
+        ],
+    ]
