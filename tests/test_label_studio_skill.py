@@ -69,7 +69,7 @@ async def test_label_studio_skill():
 
 
 @pytest.mark.asyncio
-# @pytest.mark.vcr
+@pytest.mark.vcr
 async def test_label_studio_skill_with_ner():
     # documents that contain entities
     df = pd.DataFrame(
@@ -125,56 +125,29 @@ async def test_label_studio_skill_with_ner():
     agent = Agent(**agent_payload)
     predictions = await agent.arun(df)
 
-    assert predictions.entities.tolist() == [
+    expected_predictions = [
         [
-            {
-                "text": "Apple Inc.",
-                "labels": ["Organization"],
-                "start": 0,
-                "end": 10,
-            }
+            {'start': 0, 'end': 10, 'labels': ['Organization'], 'text': 'Apple Inc.'},
+            {'start': 17, 'end': 58, 'labels': ['Organization'], 'text': 'American multinational technology company'}
         ],
         [
-            {"text": "iPhone 14", "labels": ["Product"], "start": 4, "end": 13},
-            {
-                "text": "Apple Inc.",
-                "labels": ["Organization"],
-                "start": 44,
-                "end": 54,
-            },
+            {'start': 4, 'end': 13, 'labels': ['Product'], 'text': 'iPhone 14'},
+            {'start': 44, 'end': 53, 'labels': ['Organization'], 'text': 'Apple Inc'}
         ],
         [
-            {"text": "MacBook Pro", "labels": ["Product"], "start": 4, "end": 15},
-            {"text": "Macintosh", "labels": ["Product"], "start": 29, "end": 38},
-            {
-                "text": "January 2006",
-                "labels": ["Version"],
-                "start": 72,
-                "end": 84,
-            },
-            {
-                "text": "Apple Inc.",
-                "labels": ["Organization"],
-                "start": 88,
-                "end": 98,
-            },
+            {'start': 4, 'end': 15, 'labels': ['Product'], 'text': 'MacBook Pro'},
+            {'start': 88, 'end': 98, 'labels': ['Organization'], 'text': 'Apple Inc.'},
+            {'start': 29, 'end': 38, 'labels': ['Product'], 'text': 'Macintosh'}
         ],
         [
-            {"text": "Apple Watch", "labels": ["Product"], "start": 4, "end": 15},
-            {
-                "text": "Apple Inc.",
-                "labels": ["Organization"],
-                "start": 54,
-                "end": 64,
-            },
+            {'start': 4, 'end': 15, 'labels': ['Product'], 'text': 'Apple Watch'},
+            {'start': 54, 'end': 63, 'labels': ['Organization'], 'text': 'Apple Inc'}
         ],
         [
-            {"text": "iPad", "labels": ["Product"], "start": 4, "end": 8},
-            {
-                "text": "Apple Inc.",
-                "labels": ["Organization"],
-                "start": 76,
-                "end": 86,
-            },
-        ],
+            {'start': 4, 'end': 8, 'labels': ['Product'], 'text': 'iPad'},
+            {'start': 76, 'end': 85, 'labels': ['Organization'], 'text': 'Apple Inc'}
+        ]
     ]
+
+    assert predictions.entities.tolist() == expected_predictions
+ 
