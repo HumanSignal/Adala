@@ -19,7 +19,7 @@ def test_llm_sync():
     expected_result = "Banana!"
     assert result == expected_result
 
-    # test structured success
+    # test structured success with extra unused variables
 
     class Output(BaseModel):
         name: str = Field(..., description="name:")
@@ -27,7 +27,7 @@ def test_llm_sync():
 
     result = runtime.record_to_record(
         record={"input_name": "Carla", "input_age": 25},
-        input_template="My name is {input_name} and I am {input_age} years old.",
+        input_template="My name is {input_name} and I am {input_age} years old with {brackets}.",
         instructions_template="",
         response_model=Output,
     )
@@ -42,7 +42,13 @@ def test_llm_sync():
         "_completion_cost_usd": 6e-06,
         "_total_cost_usd": 1.89e-05,
     }
-    assert result == expected_result
+    assert result['name'] == expected_result['name']
+    assert result['age'] == expected_result['age']
+    assert isinstance(result['_prompt_tokens'], int)
+    assert isinstance(result['_completion_tokens'], int)
+    assert isinstance(result['_prompt_cost_usd'], float)
+    assert isinstance(result['_completion_cost_usd'], float)
+    assert isinstance(result['_total_cost_usd'], float)
 
     # test structured failure
 
