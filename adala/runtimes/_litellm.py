@@ -254,7 +254,7 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
             )
 
         messages = get_messages(
-            input_template.format(**record, **extra_fields),
+            partial_str_format(input_template, **record, **extra_fields),
             instructions_template,
             instructions_first,
         )
@@ -405,7 +405,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         extra_fields = extra_fields or {}
         user_prompts = batch.apply(
             # TODO: remove "extra_fields" to avoid name collisions
-            lambda row: input_template.format(**row, **extra_fields),
+            lambda row: partial_str_format(input_template, **row, **extra_fields),
             axis=1,
         ).tolist()
 

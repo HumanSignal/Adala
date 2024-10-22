@@ -2,6 +2,7 @@ from pydantic import model_validator
 from typing import Optional
 from adala.skills._base import TransformSkill
 from adala.utils.internal_data import InternalDataFrame
+from adala.utils.parse import partial_str_format
 from adala.runtimes.base import Runtime
 from adala.memories import Memory
 from adala.memories.vectordb import VectorDBMemory
@@ -66,13 +67,13 @@ class RAGSkill(TransformSkill):
                         If instructions are given, the output field contains the generated output.
         """
         input_strings = input.apply(
-            lambda r: self.input_template.format(**r), axis=1
+            lambda r: partial_str_format(self.input_template, **r), axis=1
         ).tolist()
         rag_input_data = self.memory.retrieve_many(
             input_strings, num_results=self.num_results
         )
         rag_input_strings = [
-            "\n\n".join(self.rag_input_template.format(**i) for i in rag_items)
+            "\n\n".join(partial_str_format(self.rag_input_template, **i) for i in rag_items)
             for rag_items in rag_input_data
         ]
         output_fields = self.get_output_fields()
@@ -122,7 +123,7 @@ class RAGSkill(TransformSkill):
             indices = feedback.match.index
         inputs = predictions.loc[indices]
         input_strings = inputs.apply(
-            lambda r: self.input_template.format(**r), axis=1
+            lambda r: partial_str_format(self.input_template, **r), axis=1
         ).tolist()
         fb = feedback.feedback.loc[indices].rename(columns=lambda c: f"{c}__fb")
         inputs = inputs.join(fb)
