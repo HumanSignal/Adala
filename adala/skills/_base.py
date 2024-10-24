@@ -363,8 +363,8 @@ class TransformSkill(Skill):
                 )
             examples.append(
                 f"### Example #{i}\n\n"
-                f"{self.input_template.format(**row)}\n\n"
-                f"{self.output_template.format(**row)}\n\n"
+                f"{partial_str_format(self.input_template, **row)}\n\n"
+                f"{partial_str_format(self.output_template, **row)}\n\n"
                 f'User feedback: {row[f"{train_skill_output}__fb"]}\n\n'
             )
 
@@ -639,7 +639,8 @@ class AnalysisSkill(Skill):
             agg_chunk = (
                 chunk.reset_index()
                 .apply(
-                    lambda row: self.input_template.format(
+                    lambda row: partial_str_format(
+                        self.input_template,
                         **row, **extra_fields, i=int(row.name) + 1
                     ),
                     axis=1,
