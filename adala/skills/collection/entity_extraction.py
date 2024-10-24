@@ -13,6 +13,67 @@ from adala.utils.pydantic_generator import field_schema_to_pydantic_class
 logger = logging.getLogger(__name__)
 
 
+def extract_indices(
+        df, 
+        input_field_name, 
+        output_field_name, 
+        quote_string_field_name='quote_string', 
+        labels_field_name='label'
+    ):
+    """
+    Give the input dataframe with "text" column and "entities" column of the format
+    ```
+    [{"quote_string": "entity_1"}, {"quote_string": "entity_2"}, ...]
+    ```
+        extract the indices of the entities in the input text and put indices in the "entities" column:
+        ```
+        [{"quote_string": "entity_1", "start": 0, "end": 5}, {"quote_string": "entity_2", "start": 10, "end": 15}, ...]
+        ```
+    """
+    for i, row in df.iterrows():
+        if row.get("_adala_error"):
+            logger.warning(f"Error in row {i}: {row['_adala_message']}")
+            continue
+        text = row[input_field_name]
+        entities = row[output_field_name]
+        to_remove = []
+        found_entities_ends = {}
+        for entity in entities:
+            # TODO: current naive implementation uses exact string matching which can seem to be a baseline
+            # we can improve this further by handling ambiguity, for example:
+            # - requesting surrounding context from LLM
+            # - perform fuzzy matching over strings if model still hallucinates when copying the text
+            ent_str = entity[quote_string_field_name]
+            # to avoid overlapping entities, start from the end of the last entity with the same prefix
+            matching_end_indices = [
+                found_entities_ends[found_ent]
+                for found_ent in found_entities_ends
+                if found_ent.startswith(ent_str)
+            ]
+            if matching_end_indices:
+                # start searching from the end of the last entity with the same prefix
+                start_search_idx = max(matching_end_indices)
+            else:
+                # start searching from the beginning
+                start_search_idx = 0
+
+            start_idx = text.lower().find(
+                entity[quote_string_field_name].lower(),
+                start_search_idx,
+            )
+            if start_idx == -1:
+                # we need to remove the entity if it is not found in the text
+                to_remove.append(entity)
+            else:
+                end_index = start_idx + len(entity[quote_string_field_name])
+                entity["start"] = start_idx
+                entity["end"] = end_index
+                found_entities_ends[ent_str] = end_index
+        for entity in to_remove:
+            entities.remove(entity)
+    return df
+
+
 def validate_schema(schema: Dict[str, Any]):
     expected_schema = {
         "type": "object",
@@ -266,47 +327,7 @@ class EntityExtraction(TransformSkill):
         """
         input_field_name = self._get_input_field_name()
         output_field_name = self._get_output_field_name()
-        for i, row in df.iterrows():
-            if row.get("_adala_error"):
-                logger.warning(f"Error in row {i}: {row['_adala_message']}")
-                continue
-            text = row[input_field_name]
-            entities = row[output_field_name]
-            to_remove = []
-            found_entities_ends = {}
-            for entity in entities:
-                # TODO: current naive implementation uses exact string matching which can seem to be a baseline
-                # we can improve this further by handling ambiguity, for example:
-                # - requesting surrounding context from LLM
-                # - perform fuzzy matching over strings if model still hallucinates when copying the text
-                ent_str = entity[self._quote_string_field_name]
-                # to avoid overlapping entities, start from the end of the last entity with the same prefix
-                matching_end_indices = [
-                    found_entities_ends[found_ent]
-                    for found_ent in found_entities_ends
-                    if found_ent.startswith(ent_str)
-                ]
-                if matching_end_indices:
-                    # start searching from the end of the last entity with the same prefix
-                    start_search_idx = max(matching_end_indices)
-                else:
-                    # start searching from the beginning
-                    start_search_idx = 0
-
-                start_idx = text.lower().find(
-                    entity[self._quote_string_field_name].lower(),
-                    start_search_idx,
-                )
-                if start_idx == -1:
-                    # we need to remove the entity if it is not found in the text
-                    to_remove.append(entity)
-                else:
-                    end_index = start_idx + len(entity[self._quote_string_field_name])
-                    entity["start"] = start_idx
-                    entity["end"] = end_index
-                    found_entities_ends[ent_str] = end_index
-            for entity in to_remove:
-                entities.remove(entity)
+        df = extract_indices(df, input_field_name, output_field_name, self._quote_string_field_name, self._labels_field_name)
         return df
 
     def apply(

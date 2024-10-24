@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Union
 from adala.skills import AnalysisSkill
 from adala.utils.parse import parse_template
 from adala.utils.types import ErrorResponseModel
+from adala.skills.collection.label_studio import LabelStudioSkill
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +73,10 @@ class PromptImprovementSkill(AnalysisSkill):
     @model_validator(mode="after")
     def validate_prompts(self):
         input_variables = '\n'.join(self.input_variables)
+        if isinstance(self.skill_to_improve, LabelStudioSkill):
+            model_json_schema = self.skill_to_improve.field_schema
+        else:
+            model_json_schema = self.skill_to_improve.response_model.model_json_schema()
         
         # rewrite the instructions with the actual values
         self.instructions = f"""\
@@ -92,7 +97,7 @@ First, carefully review the following context information:
 
 ## Target response schema
 ```json
-{json.dumps(self.skill_to_improve.response_model.model_json_schema(), indent=2)}
+{json.dumps(model_json_schema, indent=2)}
 ```
 Now, examine the current prompt (if provided):
 
