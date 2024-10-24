@@ -13,6 +13,7 @@ from litellm.types.utils import Usage
 import instructor
 from instructor.exceptions import InstructorRetryException, IncompleteOutputException
 import traceback
+from adala.runtimes.base import CostEstimate
 from adala.utils.exceptions import ConstrainedGenerationError
 from adala.utils.internal_data import InternalDataFrame
 from adala.utils.parse import (
@@ -122,7 +123,6 @@ def _get_usage_dict(usage: Usage, model: str) -> Dict:
 
 
 class InstructorClientMixin:
-
     def _from_litellm(self, **kwargs):
         return instructor.from_litellm(litellm.completion, **kwargs)
 
@@ -139,7 +139,6 @@ class InstructorClientMixin:
 
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
-
     def _from_litellm(self, **kwargs):
         return instructor.from_litellm(litellm.acompletion, **kwargs)
 
@@ -526,6 +525,73 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
 
         # Extract the single row from the output DataFrame and convert it to a dictionary
         return output_df.iloc[0].to_dict()
+
+    @staticmethod
+    def _get_prompt_tokens(string: str, model: str, output_fields: List[str]) -> int:
+        user_tokens = litellm.token_counter(model=model, text=string)
+        # FIXME surprisingly difficult to get function call tokens, and doesn't add a ton of value, so hard-coding until something like litellm supports doing this for us.
+        #       currently seems like we'd need to scrape the instructor logs to get the function call info, then use (at best) an openai-specific 3rd party lib to get a token estimate from that.
+        system_tokens = 56 + (6 * len(output_fields))
+        return user_tokens + system_tokens
+
+    @staticmethod
+    def _get_completion_tokens(model: str, output_fields: Optional[List[str]]) -> int:
+        max_tokens = litellm.get_model_info(
+            model=model, custom_llm_provider="openai"
+        ).get("max_tokens", None)
+        if not max_tokens:
+            raise ValueError
+        # extremely rough heuristic, from testing on some anecdotal examples
+        n_outputs = len(output_fields) if output_fields else 1
+        return min(max_tokens, 4 * n_outputs)
+
+    @classmethod
+    def _estimate_cost(
+        cls, user_prompt: str, model: str, output_fields: Optional[List[str]]
+    ):
+        prompt_tokens = cls._get_prompt_tokens(user_prompt, model, output_fields)
+        completion_tokens = cls._get_completion_tokens(model, output_fields)
+        prompt_cost, completion_cost = litellm.cost_per_token(
+            model=model,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+        )
+        total_cost = prompt_cost + completion_cost
+
+        return prompt_cost, completion_cost, total_cost
+
+    def get_cost_estimate(
+        self, prompt: str, substitutions: List[Dict], output_fields: Optional[List[str]]
+    ) -> CostEstimate:
+        try:
+            user_prompts = [
+                prompt.format(**substitution) for substitution in substitutions
+            ]
+            cumulative_prompt_cost = 0
+            cumulative_completion_cost = 0
+            cumulative_total_cost = 0
+            for user_prompt in user_prompts:
+                prompt_cost, completion_cost, total_cost = self._estimate_cost(
+                    user_prompt=user_prompt,
+                    model=self.model,
+                    output_fields=output_fields,
+                )
+                cumulative_prompt_cost += prompt_cost
+                cumulative_completion_cost += completion_cost
+                cumulative_total_cost += total_cost
+            return CostEstimate(
+                prompt_cost_usd=cumulative_prompt_cost,
+                completion_cost_usd=cumulative_completion_cost,
+                total_cost_usd=cumulative_total_cost,
+            )
+
+        except Exception as e:
+            logger.error("Failed to estimate cost: %s", e)
+            return CostEstimate(
+                is_error=True,
+                error_type=type(e).__name__,
+                error_message=str(e),
+            )
 
 
 class LiteLLMVisionRuntime(LiteLLMChatRuntime):
