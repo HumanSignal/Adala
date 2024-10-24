@@ -21,7 +21,7 @@ jobs:
       github.event.client_payload.event_action == 'opened' ||
       github.event.client_payload.event_action == 'synchronize' ||
       github.event.client_payload.event_action == 'merged'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: hmarr/debug-action@v3.0.0
 
