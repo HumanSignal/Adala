@@ -41,7 +41,7 @@ class Agent(BaseModel, ABC):
 
     Attributes:
         environment (Environment): The environment with which the agent interacts.
-        skills (Union[SkillSet, List[Skill]]): The skills possessed by the agent.
+        skills (SkillSet): The skills possessed by the agent.
         memory (LongTermMemory, optional): The agent's long-term memory. Defaults to None.
         runtimes (Dict[str, Runtime], optional): The runtimes available to the agent. Defaults to predefined runtimes.
         default_runtime (str): The default runtime used by the agent. Defaults to 'openai'.
@@ -58,7 +58,7 @@ class Agent(BaseModel, ABC):
     """
 
     environment: Optional[SerializeAsAny[Union[Environment, AsyncEnvironment]]] = None
-    skills: SerializeAsAny[Union[Skill, SkillSet]]
+    skills: SerializeAsAny[SkillSet]
 
     memory: Memory = Field(default=None)
     runtimes: Dict[str, SerializeAsAny[Union[Runtime, AsyncRuntime]]] = Field(

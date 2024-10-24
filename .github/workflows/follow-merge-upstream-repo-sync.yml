@@ -21,7 +21,7 @@ jobs:
       github.event.client_payload.event_action == 'opened' ||
       github.event.client_payload.event_action == 'synchronize' ||
       github.event.client_payload.event_action == 'merged'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: hmarr/debug-action@v3.0.0
 
@@ -87,9 +87,15 @@ jobs:
           our_files: "pyproject.toml poetry.lock web/package.json web/yarn.lock"
           working_directory: "${{ env.UPSTREAM_REPO_WORKDIR }}"
 
-      - name: "Poetry: Set up"
-        if: steps.details.outputs.poetry
-        uses: Gr1N/setup-poetry@v9
+      - name: "Install poetry"
+        run: pipx install poetry
+
+      - name: "Set up Python"
+        id: setup_python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'poetry'
 
       - name: Commit submodule
         shell: bash
