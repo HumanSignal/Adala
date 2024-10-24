@@ -479,13 +479,23 @@ Instruct the model to give the final answer at the end of the prompt, using the 
         new_prompt = runtime.get_llm_response(messages)
         self.instructions = new_prompt
 
-
-    async def aimprove(self, teacher_runtime: AsyncRuntime, target_input_variables: List[str], predictions: Optional[InternalDataFrame] = None):
+    async def aimprove(
+        self,
+        teacher_runtime: AsyncRuntime,
+        target_input_variables: List[str],
+        predictions: Optional[InternalDataFrame] = None,
+    ):
         """
         Improves the skill.
         """
 
-        from adala.skills.collection.prompt_improvement import PromptImprovementSkill, ImprovedPromptResponse, ErrorResponseModel, PromptImprovementSkillResponseModel
+        from adala.skills.collection.prompt_improvement import (
+            PromptImprovementSkill,
+            ImprovedPromptResponse,
+            ErrorResponseModel,
+            PromptImprovementSkillResponseModel,
+        )
+
         response_dct = {}
         try:
             prompt_improvement_skill = PromptImprovementSkill(
@@ -500,7 +510,7 @@ Instruct the model to give the final answer at the end of the prompt, using the 
                 input=input_df,
                 runtime=teacher_runtime,
             )
-            
+
             # awkward to go from response model -> dict -> df -> dict -> response model
             response_dct = response_df.iloc[0].to_dict()
 
@@ -511,12 +521,14 @@ Instruct the model to give the final answer at the end of the prompt, using the 
                 output = PromptImprovementSkillResponseModel(**response_dct)
 
         except Exception as e:
-            logger.error(f"Error improving skill: {e}. Traceback: {traceback.format_exc()}")
+            logger.error(
+                f"Error improving skill: {e}. Traceback: {traceback.format_exc()}"
+            )
             output = ErrorResponseModel(
                 _adala_message=str(e),
                 _adala_details=traceback.format_exc(),
             )
-        
+
         # get tokens and token cost
         resp = ImprovedPromptResponse(output=output, **response_dct)
         logger.debug(f"resp: {resp}")
@@ -593,22 +605,24 @@ class AnalysisSkill(Skill):
     Analysis skill that analyzes a dataframe and returns a record (e.g. for data analysis purposes).
     See base class Skill for more information about the attributes.
     """
+
     input_prefix: str = ""
     input_separator: str = "\n"
     chunk_size: Optional[int] = None
 
-    def _iter_over_chunks(self, input: InternalDataFrame, chunk_size: Optional[int] = None):
+    def _iter_over_chunks(
+        self, input: InternalDataFrame, chunk_size: Optional[int] = None
+    ):
 
         if input.empty:
             yield ""
             return
-        
+
         if isinstance(input, InternalSeries):
             input = input.to_frame()
         elif isinstance(input, dict):
             input = InternalDataFrame([input])
 
-        
         extra_fields = self._get_extra_fields()
 
         # if chunk_size is specified, split the input into chunks and process each chunk separately
@@ -622,16 +636,18 @@ class AnalysisSkill(Skill):
 
         total = input.shape[0] // self.chunk_size if self.chunk_size is not None else 1
         for chunk in tqdm(chunks, desc="Processing chunks", total=total):
-            agg_chunk = chunk\
-                .reset_index()\
+            agg_chunk = (
+                chunk.reset_index()
                 .apply(
                     lambda row: partial_str_format(
                         self.input_template,
                         **row, **extra_fields, i=int(row.name) + 1
                     ),
                     axis=1,
-                ).str.cat(sep=self.input_separator)
-                    
+                )
+                .str.cat(sep=self.input_separator)
+            )
+
             yield agg_chunk
 
     def apply(
@@ -663,7 +679,7 @@ class AnalysisSkill(Skill):
         output = InternalDataFrame(outputs)
 
         return output
-    
+
     async def aapply(
         self,
         input: Union[InternalDataFrame, InternalSeries, Dict],

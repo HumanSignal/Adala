@@ -374,7 +374,7 @@ class ImprovedPromptRequest(BaseModel):
         default=None,
         description="List of variables available to use in the input template of the skill, in case any exist that are not currently used",
     )
-    batch_data: Optional[BatchData] = Field(
+    data: Optional[List[Dict]] = Field(
         default=None,
         description="Batch of data to run the skill on",
     )
@@ -408,13 +408,14 @@ async def improved_prompt(request: ImprovedPromptRequest):
     improved_prompt_response = await request.agent.arefine_skill(
         skill_name=request.skill_to_improve,
         input_variables=request.input_variables,
-        batch_data=request.batch_data.data if request.batch_data else None
+        data=request.data,
     )
 
     return Response[ImprovedPromptResponse](
         success=not isinstance(improved_prompt_response.output, ErrorResponseModel),
-        data=improved_prompt_response
+        data=improved_prompt_response,
     )
+
 
 if __name__ == "__main__":
     # for debugging
