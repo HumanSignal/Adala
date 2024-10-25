@@ -16,6 +16,14 @@ class PartialStringFormatter(string.Formatter):
                 return "{" + key + "}"
         else:
             Formatter.get_value(key, args, kwds)
+    
+    def format_field(self, value, format_spec):
+        try:
+            return super().format_field(value, format_spec)
+        except ValueError:
+            # HACK: the value was an unfilled variable or not a variable at all, so the format spec should be considered part of the variable name
+            if value.startswith("{") and value.endswith("}"):
+                return value[:-1] + ":" + format_spec + "}"
 
 
 PartialStringFormat = PartialStringFormatter()
