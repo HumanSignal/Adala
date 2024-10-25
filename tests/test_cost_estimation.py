@@ -2,12 +2,8 @@
 import pytest
 from adala.runtimes._litellm import AsyncLiteLLMChatRuntime
 from adala.runtimes.base import CostEstimate
-from adala.agents import Agent
-from adala.skills import ClassificationSkill
 import numpy as np
 import os
-from fastapi.testclient import TestClient
-from server.app import app, CostEstimateRequest
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -60,7 +56,19 @@ def test_estimate_cost_endpoint(client):
                 }
             },
         },
-        "prompt": "test {text}",
+        "prompt": """
+        test {text}
+
+        Use the following JSON format:
+        {
+            "data": [
+                {
+                    "output": "<output>",
+                    "reasoning": "<reasoning>",
+                }
+            ]
+        }
+        """,
         "substitutions": [{"text": "test"}],
     }
     resp = client.post(

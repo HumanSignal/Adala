@@ -565,7 +565,8 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
     ) -> CostEstimate:
         try:
             user_prompts = [
-                prompt.format(**substitution) for substitution in substitutions
+                partial_str_format(prompt, **substitution)
+                for substitution in substitutions
             ]
             cumulative_prompt_cost = 0
             cumulative_completion_cost = 0
