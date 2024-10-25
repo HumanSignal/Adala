@@ -60,7 +60,19 @@ def test_estimate_cost_endpoint(client):
                 }
             },
         },
-        "prompt": "test {text}",
+        "prompt": '''
+        test {text}
+
+        Use the following JSON format:
+        {
+            "data": [
+                {
+                    "output": "<output>",
+                    "reasoning": "<reasoning>",
+                }
+            ]
+        }
+        ''',
         "substitutions": [{"text": "test"}],
     }
     resp = client.post(
