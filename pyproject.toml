@@ -36,7 +36,7 @@ celery = {version = "^5.3.6", extras = ["redis"]}
 kombu = ">=5.4.0rc2" # Pin version to fix https://github.com/celery/celery/issues/8030. TODO: remove when this fix will be included in celery
 uvicorn = "*"
 pydantic-settings = "^2.2.1"
-label-studio-sdk = {url = "https://github.com/HumanSignal/label-studio-sdk/archive/55a05efc40cb44402ed912864461e753d205e727.zip"}
+label-studio-sdk = {url = "https://github.com/HumanSignal/label-studio-sdk/archive/238b0f48dcac00d78a6e97862ea82011527307ce.zip"}
 kafka-python = "^2.0.2"
 # https://github.com/geerlingguy/ansible-role-docker/issues/462#issuecomment-2144121102
 requests = "2.31.0"
