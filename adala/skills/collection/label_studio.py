@@ -1,5 +1,6 @@
 import logging
-from typing import Dict, Any, Type
+import pandas as pd
+from typing import Optional, Type
 from functools import cached_property
 from adala.skills._base import TransformSkill
 from pydantic import BaseModel, Field, model_validator
@@ -8,8 +9,10 @@ from adala.runtimes import Runtime, AsyncRuntime
 from adala.utils.internal_data import InternalDataFrame
 
 from label_studio_sdk.label_interface import LabelInterface
+from label_studio_sdk.label_interface.control_tags import ControlTag
 from label_studio_sdk._extensions.label_studio_tools.core.utils.json_schema import json_schema_to_pydantic
 
+from .entity_extraction import extract_indices
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +27,14 @@ class LabelStudioSkill(TransformSkill):
     # ------------------------------
     label_config: str = "<View></View>"
 
-    # TODO: implement postprocessing like in EntityExtractionSkill or to verify Taxonomy
+    # TODO: implement postprocessing to verify Taxonomy
+
+    def has_ner_tag(self) -> Optional[ControlTag]:
+        # check if the input config has NER tag (<Labels> + <Text>), and return its `from_name` and `to_name`
+        interface = LabelInterface(self.label_config)
+        for tag in interface.controls:
+            if tag.tag == 'Labels':
+                return tag
 
     @model_validator(mode='after')
     def validate_response_model(self):
@@ -62,10 +72,17 @@ class LabelStudioSkill(TransformSkill):
     ) -> InternalDataFrame:
 
         with json_schema_to_pydantic(self.field_schema) as ResponseModel:
-            return await runtime.batch_to_batch(
+            output = await runtime.batch_to_batch(
                 input,
                 input_template=self.input_template,
                 output_template="",
                 instructions_template=self.instructions,
                 response_model=ResponseModel,
             )
+            ner_tag = self.has_ner_tag()
+            if ner_tag:
+                input_field_name = ner_tag.objects[0].value.lstrip('$')
+                output_field_name = ner_tag.name
+                quote_string_field_name = 'text'
+                output = extract_indices(pd.concat([input, output], axis=1), input_field_name, output_field_name, quote_string_field_name)
+            return output
