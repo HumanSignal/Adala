@@ -401,7 +401,7 @@ class Agent(BaseModel, ABC):
         self,
         skill_name: str,
         input_variables: List[str],
-        batch_data: Optional[BatchData] = None,
+        data: Optional[List[Dict]] = None,
     ) -> ImprovedPromptResponse:
         """
         beta v2 of Agent.learn() that is:
@@ -412,7 +412,6 @@ class Agent(BaseModel, ABC):
         Limitations so far:
         - single skill at a time
         - only returns the improved input_template, doesn't modify the skill in place
-        - doesn't use examples/feedback
         - no iterations/variable cost
         """
 
@@ -426,10 +425,10 @@ class Agent(BaseModel, ABC):
 
         # get inputs
         # TODO: replace it with async environment.get_data_batch()
-        if batch_data is None:
+        if data is None:
             predictions = None
         else:
-            inputs = InternalDataFrame.from_records(batch_data or [])
+            inputs = InternalDataFrame.from_records(data or [])
             predictions = await self.skills.aapply(inputs, runtime=runtime)
 
         response = await skill.aimprove(
