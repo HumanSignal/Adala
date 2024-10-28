@@ -378,6 +378,14 @@ class ImprovedPromptRequest(BaseModel):
         default=None,
         description="Batch of data to run the skill on",
     )
+    reapply: bool = Field(
+        default=False,
+        description="Whether to reapply the skill to the data before improving the prompt",
+    )
+    instructions: Optional[str] = Field(
+        default='Improve current prompt',
+        description="Instructions for the prompt improvement task",
+    )
 
     @field_validator("agent", mode="after")
     def validate_teacher_runtime(cls, agent: Agent) -> Agent:
@@ -409,6 +417,8 @@ async def improved_prompt(request: ImprovedPromptRequest):
         skill_name=request.skill_to_improve,
         input_variables=request.input_variables,
         data=request.data,
+        reapply=request.reapply,
+        instructions=request.instructions,
     )
 
     return Response[ImprovedPromptResponse](

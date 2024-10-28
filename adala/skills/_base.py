@@ -484,6 +484,7 @@ Instruct the model to give the final answer at the end of the prompt, using the 
         teacher_runtime: AsyncRuntime,
         target_input_variables: List[str],
         predictions: Optional[InternalDataFrame] = None,
+        instructions: Optional[str] = None,
     ):
         """
         Improves the skill.
@@ -501,6 +502,7 @@ Instruct the model to give the final answer at the end of the prompt, using the 
             prompt_improvement_skill = PromptImprovementSkill(
                 skill_to_improve=self,
                 input_variables=target_input_variables,
+                instructions=instructions,
             )
             if predictions is None:
                 input_df = InternalDataFrame()
@@ -624,6 +626,8 @@ class AnalysisSkill(Skill):
             input = InternalDataFrame([input])
 
         extra_fields = self._get_extra_fields()
+        
+        
 
         # if chunk_size is specified, split the input into chunks and process each chunk separately
         if self.chunk_size is not None:
@@ -633,21 +637,19 @@ class AnalysisSkill(Skill):
             )
         else:
             chunks = [input]
+            
+        # define the row preprocessing function
+        def row_preprocessing(row):
+            return partial_str_format(self.input_template, **row, **extra_fields, i=int(row.name) + 1)
 
         total = input.shape[0] // self.chunk_size if self.chunk_size is not None else 1
         for chunk in tqdm(chunks, desc="Processing chunks", total=total):
             agg_chunk = (
                 chunk.reset_index()
-                .apply(
-                    lambda row: partial_str_format(
-                        self.input_template,
-                        **row, **extra_fields, i=int(row.name) + 1
-                    ),
-                    axis=1,
-                )
+                .apply(row_preprocessing, axis=1)
                 .str.cat(sep=self.input_separator)
             )
-
+            chunk.to_csv('chunk.csv', index=False)
             yield agg_chunk
 
     def apply(
