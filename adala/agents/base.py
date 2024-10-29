@@ -402,6 +402,8 @@ class Agent(BaseModel, ABC):
         skill_name: str,
         input_variables: List[str],
         data: Optional[List[Dict]] = None,
+        reapply: bool = False,
+        instructions: Optional[str] = None,
     ) -> ImprovedPromptResponse:
         """
         beta v2 of Agent.learn() that is:
@@ -429,12 +431,16 @@ class Agent(BaseModel, ABC):
             predictions = None
         else:
             inputs = InternalDataFrame.from_records(data or [])
-            predictions = await self.skills.aapply(inputs, runtime=runtime)
-
+            if reapply:
+                predictions = await self.skills.aapply(inputs, runtime=runtime)
+            else:
+                predictions = inputs
+                
         response = await skill.aimprove(
             predictions=predictions,
             teacher_runtime=teacher_runtime,
             target_input_variables=input_variables,
+            instructions=instructions,
         )
         return response
 
