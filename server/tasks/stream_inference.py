@@ -141,6 +141,7 @@ async def async_process_streaming_output(
                 bootstrap_servers=settings.kafka_bootstrap_servers,
                 value_deserializer=lambda v: json.loads(v.decode("utf-8")),
                 auto_offset_reset="earliest",
+                group_id=output_topic_name,
             )
             await consumer.start()
             logger.info(f"consumer started {output_topic_name=}")

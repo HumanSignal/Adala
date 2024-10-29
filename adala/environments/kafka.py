@@ -56,13 +56,14 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_deserializer=lambda v: json.loads(v.decode("utf-8")),
             auto_offset_reset="earliest",
-            group_id="adala-consumer-group",  # TODO: make it configurable based on the environment
+            group_id=self.kafka_input_topic,
         )
         await self.consumer.start()
 
         self.producer = AIOKafkaProducer(
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+            acks='all'
         )
         await self.producer.start()
 
