@@ -615,6 +615,11 @@ class AnalysisSkill(Skill):
     def _iter_over_chunks(
         self, input: InternalDataFrame, chunk_size: Optional[int] = None
     ):
+        """
+        Iterates over chunks of the input dataframe.
+        Returns a generator of strings that are the concatenation of the rows of the chunk with `input_separator`
+        interpolated with the `input_template` and `extra_fields`.
+        """
 
         if input.empty:
             yield ""
@@ -627,8 +632,6 @@ class AnalysisSkill(Skill):
 
         extra_fields = self._get_extra_fields()
         
-        
-
         # if chunk_size is specified, split the input into chunks and process each chunk separately
         if self.chunk_size is not None:
             chunks = (
@@ -644,12 +647,12 @@ class AnalysisSkill(Skill):
 
         total = input.shape[0] // self.chunk_size if self.chunk_size is not None else 1
         for chunk in tqdm(chunks, desc="Processing chunks", total=total):
+            # interpolate every row with input_template and concatenate them with input_separator to produce a single string
             agg_chunk = (
                 chunk.reset_index()
                 .apply(row_preprocessing, axis=1)
                 .str.cat(sep=self.input_separator)
             )
-            chunk.to_csv('chunk.csv', index=False)
             yield agg_chunk
 
     def apply(
