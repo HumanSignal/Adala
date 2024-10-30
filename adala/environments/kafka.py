@@ -55,6 +55,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             self.kafka_input_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+            enable_auto_commit=False,
             auto_offset_reset="earliest",
             group_id=self.kafka_input_topic,
         )
@@ -109,6 +110,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         batch = await self.consumer.getmany(
             timeout_ms=self.timeout_ms, max_records=batch_size
         )
+        await self.consumer.commit()
 
         if len(batch) == 0:
             batch_data = []
