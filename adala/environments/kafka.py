@@ -96,7 +96,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         record_no = 0
         try:
             for record in data:
-                await producer.send_and_wait(topic, value=record)
+                await producer.send(topic, value=record)
                 record_no += 1
                 # print_text(f"Sent message: {record} to {topic=}")
             logger.info(

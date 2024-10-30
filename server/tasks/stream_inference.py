@@ -71,7 +71,7 @@ async def run_streaming(
     task_time_limit=settings.task_time_limit_sec,
 )
 def streaming_parent_task(
-    self, agent: Agent, result_handler: ResultHandler, batch_size: int = 10
+    self, agent: Agent, result_handler: ResultHandler, batch_size: int = 50
 ):
     """
     This task is used to launch the two tasks that are doing the real work, so that
