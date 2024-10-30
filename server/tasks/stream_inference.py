@@ -140,8 +140,9 @@ async def async_process_streaming_output(
                 output_topic_name,
                 bootstrap_servers=settings.kafka_bootstrap_servers,
                 value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+                enable_auto_commit=False, # True by default which causes messages to be missed when using getmany()
                 auto_offset_reset="earliest",
-                group_id=output_topic_name,
+                group_id=output_topic_name, # ensuring unique group_id to not mix up offsets between topics
             )
             await consumer.start()
             logger.info(f"consumer started {output_topic_name=}")
@@ -157,6 +158,7 @@ async def async_process_streaming_output(
     try:
         while not input_done.is_set():
             data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
+            await self.consumer.commit()
             for topic_partition, messages in data.items():
                 topic = topic_partition.topic
                 if messages:
