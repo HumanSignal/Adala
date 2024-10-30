@@ -71,7 +71,7 @@ async def run_streaming(
     task_time_limit=settings.task_time_limit_sec,
 )
 def streaming_parent_task(
-    self, agent: Agent, result_handler: ResultHandler, batch_size: int = 10
+    self, agent: Agent, result_handler: ResultHandler, batch_size: int = 50
 ):
     """
     This task is used to launch the two tasks that are doing the real work, so that
@@ -140,7 +140,9 @@ async def async_process_streaming_output(
                 output_topic_name,
                 bootstrap_servers=settings.kafka_bootstrap_servers,
                 value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+                enable_auto_commit=False, # True by default which causes messages to be missed when using getmany()
                 auto_offset_reset="earliest",
+                group_id=output_topic_name, # ensuring unique group_id to not mix up offsets between topics
             )
             await consumer.start()
             logger.info(f"consumer started {output_topic_name=}")
@@ -156,6 +158,7 @@ async def async_process_streaming_output(
     try:
         while not input_done.is_set():
             data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
+            await consumer.commit()
             for topic_partition, messages in data.items():
                 topic = topic_partition.topic
                 if messages:

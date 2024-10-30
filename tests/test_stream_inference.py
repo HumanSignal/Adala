@@ -67,6 +67,7 @@ def mock_kafka_consumer_input():
         mock_consumer = MockConsumer.return_value
         mock_consumer.start = AsyncMock()
         mock_consumer.stop = AsyncMock()
+        mock_consumer.commit = AsyncMock()
         mock_consumer.getmany = AsyncMock(
             side_effect=[
                 # first call return batch
@@ -96,6 +97,7 @@ def mock_kafka_consumer_output():
         mock_consumer = MockConsumer.return_value
         mock_consumer.start = AsyncMock()
         mock_consumer.stop = AsyncMock()
+        mock_consumer.commit = AsyncMock()
         mock_consumer.getmany = AsyncMock(side_effect=getmany_side_effect)
         yield mock_consumer
 
@@ -111,7 +113,13 @@ def mock_kafka_producer():
             PRODUCER_SENT_DATA.set()
             return AsyncMock()
 
+        async def send_side_effect(*args, **kwargs):
+            PRODUCER_SENT_DATA.set()
+            return AsyncMock()
+
         mock_producer.send_and_wait = AsyncMock(side_effect=send_and_wait_side_effect)
+        mock_producer.send = AsyncMock(side_effect=send_side_effect)
+
         yield mock_producer
 
 
@@ -156,6 +164,6 @@ async def test_run_streaming(
     )
 
     # Verify that producer is called with the correct amount of send_and_wait calls and data
-    assert mock_kafka_producer.send_and_wait.call_count == 1
+    assert mock_kafka_producer.send.call_count == 1
     for row in TEST_OUTPUT_DATA:
-        mock_kafka_producer.send_and_wait.assert_any_call("output_topic", value=row)
+        mock_kafka_producer.send.assert_any_call("output_topic", value=row)
