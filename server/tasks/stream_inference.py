@@ -158,7 +158,7 @@ async def async_process_streaming_output(
     try:
         while not input_done.is_set():
             data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
-            await self.consumer.commit()
+            await consumer.commit()
             for topic_partition, messages in data.items():
                 topic = topic_partition.topic
                 if messages:
