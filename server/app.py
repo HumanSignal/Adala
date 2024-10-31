@@ -190,6 +190,7 @@ async def submit_batch(batch: BatchData):
     producer = AIOKafkaProducer(
         bootstrap_servers=settings.kafka_bootstrap_servers,
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+        acks='all' # waits for all replicas to respond that they have written the message
     )
     await producer.start()
 
@@ -378,6 +379,14 @@ class ImprovedPromptRequest(BaseModel):
         default=None,
         description="Batch of data to run the skill on",
     )
+    reapply: bool = Field(
+        default=False,
+        description="Whether to reapply the skill to the data before improving the prompt",
+    )
+    instructions: Optional[str] = Field(
+        default='Improve current prompt',
+        description="Instructions for the prompt improvement task",
+    )
 
     @field_validator("agent", mode="after")
     def validate_teacher_runtime(cls, agent: Agent) -> Agent:
@@ -404,11 +413,12 @@ async def improved_prompt(request: ImprovedPromptRequest):
     Returns:
         Response: Response model for prompt improvement skill
     """
-
     improved_prompt_response = await request.agent.arefine_skill(
         skill_name=request.skill_to_improve,
         input_variables=request.input_variables,
         data=request.data,
+        reapply=request.reapply,
+        instructions=request.instructions,
     )
 
     return Response[ImprovedPromptResponse](

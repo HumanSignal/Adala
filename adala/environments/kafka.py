@@ -55,14 +55,16 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             self.kafka_input_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+            enable_auto_commit=False, # True by default which causes messages to be missed when using getmany()
             auto_offset_reset="earliest",
-            group_id="adala-consumer-group",  # TODO: make it configurable based on the environment
+            group_id=self.kafka_input_topic, # ensuring unique group_id to not mix up offsets between topics
         )
         await self.consumer.start()
 
         self.producer = AIOKafkaProducer(
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+            acks='all' # waits for all replicas to respond that they have written the message
         )
         await self.producer.start()
 
@@ -94,7 +96,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         record_no = 0
         try:
             for record in data:
-                await producer.send_and_wait(topic, value=record)
+                await producer.send(topic, value=record)
                 record_no += 1
                 # print_text(f"Sent message: {record} to {topic=}")
             logger.info(
@@ -108,6 +110,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         batch = await self.consumer.getmany(
             timeout_ms=self.timeout_ms, max_records=batch_size
         )
+        await self.consumer.commit()
 
         if len(batch) == 0:
             batch_data = []
