@@ -71,7 +71,7 @@ class PromptImprovementSkill(AnalysisSkill):
             model_json_schema = self.skill_to_improve.response_model.model_json_schema()
 
         # TODO: can remove this when only LabelStudioSkill is supported
-        label_config = self.skill_to_improve.getattr('label_config', '<View>Not available</View>')
+        label_config = getattr(self.skill_to_improve, 'label_config', '<View>Not available</View>')
 
         input_variables = self.input_variables
         output_variables = list(model_json_schema['properties'].keys())
