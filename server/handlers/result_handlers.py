@@ -195,6 +195,7 @@ class LSEHandler(ResultHandler):
 
     def __call__(self, result_batch: list[Dict]):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
+        logger.info("LSEHandler received batch")
 
         # coerce dicts to LSEBatchItems for validation
         norm_result_batch = [
@@ -207,6 +208,7 @@ class LSEHandler(ResultHandler):
         # coerce back to dicts for sending
         result_batch = [record.dict() for record in result_batch]
         if result_batch:
+            logger.info(f"LSEHandler sending {len(result_batch)} predictions to LSE")
             self.client.make_request(
                 "POST",
                 "/api/model-run/batch-predictions",
@@ -217,6 +219,7 @@ class LSEHandler(ResultHandler):
                     }
                 ),
             )
+            logger.info(f"LSEHandler sent {len(result_batch)} predictions to LSE")
         else:
             logger.error(
                 f"No valid results to send to LSE for modelrun_id {self.modelrun_id}"
@@ -225,6 +228,7 @@ class LSEHandler(ResultHandler):
         # Send failed predictions back to LSE
         if error_batch:
             error_batch = self.prepare_errors_payload(error_batch)
+            logger.info(f"LSEHandler sending {len(error_batch)} failed predictions to LSE")
             self.client.make_request(
                 "POST",
                 "/api/model-run/batch-failed-predictions",
@@ -235,6 +239,7 @@ class LSEHandler(ResultHandler):
                     }
                 ),
             )
+            logger.info(f"LSEHandler sent {len(error_batch)} failed predictions to LSE")
         else:
             logger.debug(f"No errors to send to LSE for modelrun_id {self.modelrun_id}")
 
