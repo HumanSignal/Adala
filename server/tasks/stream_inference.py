@@ -162,16 +162,17 @@ async def async_process_streaming_output(
             for topic_partition, messages in data.items():
                 topic = topic_partition.topic
                 if messages:
-                    logger.debug(f"Handling {messages=} in {topic=}")
+                    logger.info(f"Processing messages in output job {topic=} number of messages: {len(messages)}")
                     data = [msg.value for msg in messages]
                     result_handler(data)
-                    logger.debug(f"Handled {len(messages)} messages in {topic=}")
+                    logger.info(f"Processed messages in output job {topic=} number of messages: {len(messages)}")
                 else:
-                    logger.debug(f"No messages in topic {topic=}")
+                    logger.info(f"Consumer pulled data, but no messages in {topic=}")
 
             if not data:
-                logger.info("No messages in any topic")
+                logger.info(f"Consumer pulled no data from {output_topic_name=}")
 
     # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_input
     finally:
+        logger.info("No more data in output job and input job is done, stopping output job")
         await consumer.stop()
