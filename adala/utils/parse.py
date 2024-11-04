@@ -78,7 +78,7 @@ class PartialStringFormatter(string.Formatter):
                 # HACK: if the format_spec is invalid, assume this field_name was not meant to be a variable, and don't substitute anything
                 formatted_field = self.format_field(obj, format_spec)
                 if formatted_field is None:
-                    result.append(':'.join([field_name, format_spec]))
+                    result.append('{' + ':'.join([field_name, format_spec]) + '}')
                 else:
                     result.append(formatted_field)
 
