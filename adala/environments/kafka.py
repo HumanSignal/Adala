@@ -95,12 +95,9 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     ):
         record_no = 0
         try:
-            for record in data:
-                await producer.send(topic, value=record)
-                record_no += 1
-                # print_text(f"Sent message: {record} to {topic=}")
+            await producer.send_and_wait(topic, value=data)
             logger.info(
-                f"The number of records sent to topic:{topic}, record_no:{record_no}"
+                f"The number of records sent to topic:{topic}, record_no:{len(data)}"
             )
         finally:
             pass
@@ -129,7 +126,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         return InternalDataFrame(batch_data)
 
     async def set_predictions(self, predictions: InternalDataFrame):
-        predictions_iter = (r.to_dict() for _, r in predictions.iterrows())
+        predictions = [r.to_dict() for _, r in predictions.iterrows()]
         await self.message_sender(
-            self.producer, predictions_iter, self.kafka_output_topic
+            self.producer, predictions, self.kafka_output_topic
         )

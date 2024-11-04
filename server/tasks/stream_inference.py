@@ -71,7 +71,7 @@ async def run_streaming(
     task_time_limit=settings.task_time_limit_sec,
 )
 def streaming_parent_task(
-    self, agent: Agent, result_handler: ResultHandler, batch_size: int = 10
+    self, agent: Agent, result_handler: ResultHandler, batch_size: int = 1
 ):
     """
     This task is used to launch the two tasks that are doing the real work, so that
@@ -161,11 +161,15 @@ async def async_process_streaming_output(
             await consumer.commit()
             for topic_partition, messages in data.items():
                 topic = topic_partition.topic
+                # messages is a list of ConsumerRecord
                 if messages:
-                    logger.info(f"Processing messages in output job {topic=} number of messages: {len(messages)}")
-                    data = [msg.value for msg in messages]
-                    result_handler(data)
-                    logger.info(f"Processed messages in output job {topic=} number of messages: {len(messages)}")
+                    # batches is a list of lists
+                    batches = [msg.value for msg in messages]
+                    # records is a list of records to send to LSE
+                    for records in batches:
+                        logger.info(f"Processing messages in output job {topic=} number of messages: {len(records)}")
+                        result_handler(records)
+                        logger.info(f"Processed messages in output job {topic=} number of messages: {len(records)}")
                 else:
                     logger.info(f"Consumer pulled data, but no messages in {topic=}")
 
