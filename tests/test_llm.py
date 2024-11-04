@@ -27,7 +27,7 @@ def test_llm_sync():
 
     result = runtime.record_to_record(
         record={"input_name": "Carla", "input_age": 25},
-        input_template="My name is {input_name} and I am {input_age:02d} years old with {brackets:.2f} and {brackets2:invalid_format_spec}.",
+        input_template="My name is {input_name} and I am {input_age:02d} years old with {brackets:.2f} and {brackets2:invalid_format_spec} and {input_name:invalid_format_spec}.",
         instructions_template="",
         response_model=Output,
     )
