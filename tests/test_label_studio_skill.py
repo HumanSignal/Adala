@@ -290,8 +290,41 @@ async def test_label_studio_skill_valid_predictions():
         """,
         # TODO: test value=$task_column
     ]
+    
+    textarea_label_configs = [
+        # test basic textarea
+        """
+        <View>
+          <Text name="text" value="$text" />
+          <TextArea name="input" toName="text" />
+        </View>
+        """,
+        # test required
+        """
+        <View>
+          <Text name="text" value="$text" />
+          <TextArea name="feedback" toName="text" required="true" requiredMessage="Feedback is required." />
+        </View>
+        """,
+        # test max submissions and duplicates
+        # TODO are these meaningful without perRegion?
+        """
+        <View>
+          <Text name="text" value="$text" />
+          <TextArea name="editText" toName="text" maxSubmissions="2" skipDuplicates="true" />
+        </View>
+        """,
+        # test default value
+        """
+        <View>
+          <Text name="text" value="$text" />
+          <TextArea name="prefilled" toName="text" value="prefilled with $text"/>
+        </View>
+        """,
+        # TODO text perRegion
+    ]
 
-    all_label_configs = choices_label_configs + labels_label_configs
+    all_label_configs = choices_label_configs + labels_label_configs + textarea_label_configs
 
     # add configs for object tags besides Text
     for label_config in all_label_configs.copy():
