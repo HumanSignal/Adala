@@ -156,21 +156,26 @@ async def async_process_streaming_output(
             time.sleep(1)
 
     try:
-        while not input_done.is_set():
+        while True:
             data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
-            await consumer.commit()
-            for topic_partition, messages in data.items():
-                topic = topic_partition.topic
-                if messages:
-                    logger.info(f"Processing messages in output job {topic=} number of messages: {len(messages)}")
-                    data = [msg.value for msg in messages]
-                    result_handler(data)
-                    logger.info(f"Processed messages in output job {topic=} number of messages: {len(messages)}")
-                else:
-                    logger.info(f"Consumer pulled data, but no messages in {topic=}")
-
-            if not data:
+        
+            if data:
+                for topic_partition, messages in data.items():
+                    topic = topic_partition.topic
+                    if messages:
+                        logger.info(f"Processing messages in output job {topic=} number of messages: {len(messages)}")
+                        data = [msg.value for msg in messages]
+                        result_handler(data)
+                        logger.info(f"Processed messages in output job {topic=} number of messages: {len(messages)}")
+                    else:
+                        logger.info(f"Consumer pulled data, but no messages in {topic=}")
+                # commit offsets only after successfully processing messages
+                await consumer.commit()
+            else:
                 logger.info(f"Consumer pulled no data from {output_topic_name=}")
+                # Exit only if input is done AND we have no more messages
+                if input_done.is_set():
+                    break
 
     # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_input
     finally:
