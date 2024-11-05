@@ -4,15 +4,19 @@ import pandas as pd
 from adala.agents import Agent
 
 
-
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill():
 
-    df = pd.DataFrame([
-        {"title": "I can't login", "description": "I can't login to the platform"},
-        {"title": "Support new file types", "description": "It would be great if we could upload files of type .docx"},
-    ])
+    df = pd.DataFrame(
+        [
+            {"title": "I can't login", "description": "I can't login to the platform"},
+            {
+                "title": "Support new file types",
+                "description": "It would be great if we could upload files of type .docx",
+            },
+        ]
+    )
 
     agent_payload = {
         "runtimes": {
@@ -31,11 +35,11 @@ async def test_label_studio_skill():
             {
                 "type": "LabelStudioSkill",
                 "name": "AnnotationResult",
-                "input_template": '''
+                "input_template": """
                     Given the github issue title:\n{title}\n and the description:\n{description}\n, 
                     classify the issue. Provide a rationale for your classification. 
                     Evaluate the final classification on a Likert scale from 1 to 5, 
-                    where 1 is "Completely irrelevant" and 5 is "Completely relevant".''',
+                    where 1 is "Completely irrelevant" and 5 is "Completely relevant".""",
                 "label_config": """
                 <View>
                     <Header value="GitHub Issue Classification"/>
@@ -52,7 +56,7 @@ async def test_label_studio_skill():
                     <TextArea name="rationale" toName="title"/>
                     <Rating name="evaluation" toName="title" maxRating="5" required="true"/>
                 </View>
-                """
+                """,
             }
         ],
     }
@@ -64,7 +68,7 @@ async def test_label_studio_skill():
     assert predictions.evaluation.tolist() == [5, 5]
     assert predictions.rationale.tolist() == [
         "The issue clearly indicates a problem with the login functionality of the platform, which is a critical feature. Users are unable to access their accounts, suggesting a potential bug that needs to be addressed.",
-        "The issue is requesting the addition of support for a new file type (.docx), which indicates a desire for new functionality in the system. This aligns with the definition of a feature request, as it seeks to enhance the capabilities of the application."
+        "The issue is requesting the addition of support for a new file type (.docx), which indicates a desire for new functionality in the system. This aligns with the definition of a feature request, as it seeks to enhance the capabilities of the application.",
     ]
 
 
@@ -107,7 +111,7 @@ async def test_label_studio_skill_with_ner():
             {
                 "type": "LabelStudioSkill",
                 "name": "AnnotationResult",
-                "input_template": 'Extract entities from the input text:\n{text}',
+                "input_template": "Extract entities from the input text:\n{text}",
                 "label_config": """
                 <View>
                     <Text name="input" value="$text"/>
@@ -117,7 +121,7 @@ async def test_label_studio_skill_with_ner():
                         <Label value="Version"/>
                     </Labels>
                 </View>
-                """
+                """,
             }
         ],
     }
@@ -127,27 +131,219 @@ async def test_label_studio_skill_with_ner():
 
     expected_predictions = [
         [
-            {'start': 0, 'end': 10, 'labels': ['Organization'], 'text': 'Apple Inc.'},
-            {'start': 17, 'end': 58, 'labels': ['Organization'], 'text': 'American multinational technology company'}
+            {"start": 0, "end": 10, "labels": ["Organization"], "text": "Apple Inc."},
+            {
+                "start": 17,
+                "end": 58,
+                "labels": ["Organization"],
+                "text": "American multinational technology company",
+            },
         ],
         [
-            {'start': 4, 'end': 13, 'labels': ['Product'], 'text': 'iPhone 14'},
-            {'start': 44, 'end': 53, 'labels': ['Organization'], 'text': 'Apple Inc'}
+            {"start": 4, "end": 13, "labels": ["Product"], "text": "iPhone 14"},
+            {"start": 44, "end": 53, "labels": ["Organization"], "text": "Apple Inc"},
         ],
         [
-            {'start': 4, 'end': 15, 'labels': ['Product'], 'text': 'MacBook Pro'},
-            {'start': 88, 'end': 98, 'labels': ['Organization'], 'text': 'Apple Inc.'},
-            {'start': 29, 'end': 38, 'labels': ['Product'], 'text': 'Macintosh'}
+            {"start": 4, "end": 15, "labels": ["Product"], "text": "MacBook Pro"},
+            {"start": 88, "end": 98, "labels": ["Organization"], "text": "Apple Inc."},
+            {"start": 29, "end": 38, "labels": ["Product"], "text": "Macintosh"},
         ],
         [
-            {'start': 4, 'end': 15, 'labels': ['Product'], 'text': 'Apple Watch'},
-            {'start': 54, 'end': 63, 'labels': ['Organization'], 'text': 'Apple Inc'}
+            {"start": 4, "end": 15, "labels": ["Product"], "text": "Apple Watch"},
+            {"start": 54, "end": 63, "labels": ["Organization"], "text": "Apple Inc"},
         ],
         [
-            {'start': 4, 'end': 8, 'labels': ['Product'], 'text': 'iPad'},
-            {'start': 76, 'end': 85, 'labels': ['Organization'], 'text': 'Apple Inc'}
-        ]
+            {"start": 4, "end": 8, "labels": ["Product"], "text": "iPad"},
+            {"start": 76, "end": 85, "labels": ["Organization"], "text": "Apple Inc"},
+        ],
     ]
 
     assert predictions.entities.tolist() == expected_predictions
- 
+
+
+from label_studio_sdk.label_interface import LabelInterface
+from label_studio_sdk.label_interface.objects import PredictionValue
+
+
+@pytest.mark.asyncio
+async def test_label_studio_skill_valid_predictions():
+
+    ALLOWED_OBJECT_TAGS = {"Text", "HyperText"}
+    # ALLOWED_CONTROL_TAGS = {'Choices', 'Labels', 'TextArea', 'Rating', 'Number', 'Pairwise'}
+    MODELS = {"gpt-4o-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"}
+    RUNS_PER_MODEL = 5
+
+    sample_text = """
+    <h1>Product Review: iPhone 14 Pro</h1>
+    
+    <p>The new iPhone 14 Pro represents a significant upgrade over previous models. The build quality is exceptional, with premium materials used throughout. Key features include:</p>
+    
+    <ul>
+        <li>Dynamic Island display integration</li>
+        <li>48MP main camera</li>
+        <li>A16 Bionic chip</li>
+    </ul>
+    
+    <p>Battery life is impressive, lasting a full day of heavy use. The camera system produces stunning photos in both daylight and low-light conditions.</p>
+    
+    <p>Overall, while expensive at $999, this device delivers excellent value for power users and photography enthusiasts.</p>
+    """
+
+    choices_label_configs = [
+        # test defaults
+        """
+        <View>
+            <Text name="text" value="$text" />
+            <Choices name="choice2" toName="text" choice="single-radio" required="true">
+                <Choice value="Red" />
+                <Choice value="Green" />
+                <Choice value="Blue" />
+            </Choices>
+        </View>
+        """,
+        # test required=false and choices=multiple
+        """
+        <View>
+            <Text name="text" value="$text" />
+            <Choices name="choice2" toName="text" choice="multiple" required="false">
+                <Choice value="Red" />
+                <Choice value="Green" />
+                <Choice value="Blue" />
+            </Choices>
+        </View>
+        """,
+        # test nested choices
+        """
+        <View>
+            <Text name="text" value="$text" />
+            <Choices name="choice2" toName="text" >
+                <Choice value="Red" />
+                <Choice value="Green" />
+                <Choice value="Blue" />
+            </Choices>
+            <Choices name="shadeOfRed" toName="text" visibleWhen="choice-selected" whenTagName="choice2" whenChoiceValue="Red">
+                <Choice value="Maroon" />
+                <Choice value="Burgundy" />
+            </Choices>
+        </View>
+        """,
+        # TODO: test value=$task_column
+        # TODO: perRegion is not supported
+        # TODO: perItem is not supported?
+    ]
+
+    labels_label_configs = [
+        # test basic NER
+        """
+        <View>
+          <Text name="text" value="$text" />
+          <Labels name="label" toName="text">
+            <Label value="Person" />
+            <Label value="Organization" />
+            <Label value="Location" />
+          </Labels>
+        </View>
+        """,
+        # test alias and preselection
+        """
+        <View>
+          <Text name="text" value="$text" />
+          <Labels name="label" toName="text">
+            <Label value="Positive Sentiment" alias="POS" />
+            <Label value="Negative Sentiment" alias="NEG" />
+            <Label value="Neutral Sentiment" alias="NEU" selected="true"/>
+          </Labels>
+        </View>
+        """,
+        # test multiple selection
+        """
+        <View>
+          <Text name="text" value="$text" />
+          <Labels name="label" toName="text" choice="multiple">
+            <Label value="Option 1" />
+            <Label value="Option 2" />
+            <Label value="Option 3" />
+          </Labels>
+        </View>
+        """,
+        # test max usages
+        """
+        <View>
+          <Text name="text" value="$text" />
+          <Labels name="label" toName="text" maxUsages="2">
+            <Label value="Option 1" />
+            <Label value="Option 2" maxUsages="1"/>
+            <Label value="Option 3" />
+          </Labels>
+        </View>
+        """,
+        # test granularity
+        """
+        <View>
+          <Text name="text" value="$text" />
+          <Labels name="label" toName="text">
+            <Label value="Positive Sentiment" alias="POS" granularity="word"/>
+            <Label value="Negative Sentiment" alias="NEG" granularity="symbol"/>
+            <Label value="Neutral Sentiment" alias="NEU" granularity="symbol"/>
+          </Labels>
+        </View>
+        """,
+        # TODO: test value=$task_column
+    ]
+
+    all_label_configs = choices_label_configs + labels_label_configs
+
+    for label_config in all_label_configs.copy():
+        hypertext_config = label_config.replace("<Text", "<HyperText")
+        all_label_configs.append(hypertext_config)
+
+    for label_config in all_label_configs:
+        li = LabelInterface(label_config)
+        li.validate()  # throws errors, doesn't return a bool
+        assert li.validate_task({"data": {"text": sample_text}})
+
+        for model in MODELS:
+
+            agent_payload = {
+                "runtimes": {
+                    "default": {
+                        "type": "AsyncLiteLLMChatRuntime",
+                        "model": model,
+                        "api_key": os.getenv("OPENAI_API_KEY"),
+                        "max_tokens": 4000,
+                        "temperature": 0.5,  # higher temperature for more nondeterminism
+                        "batch_size": 100,
+                        "timeout": 10,
+                        "verbose": False,
+                    }
+                },
+                "skills": [
+                    {
+                        "type": "LabelStudioSkill",
+                        "name": "AnnotationResult",
+                        "input_template": "Do the task described in the label config for the input text:\n{text}",
+                        "label_config": label_config,
+                    }
+                ],
+            }
+
+            agent = Agent(**agent_payload)
+
+            predictions = await agent.arun(
+                pd.DataFrame([{"text": sample_text}] * RUNS_PER_MODEL)
+            )
+            # filter out adala fields and input field
+            predictions = predictions[
+                [
+                    c
+                    for c in predictions.columns
+                    if not c.startswith("_") and c != "text"
+                ]
+            ]
+            predictions = predictions.to_dict(orient="records")
+
+            # convert to LS format with from_name, to_name etc
+            for prediction in predictions:
+                assert li.validate_prediction(
+                    PredictionValue(result=li.create_regions(prediction)).model_dump()
+                )
