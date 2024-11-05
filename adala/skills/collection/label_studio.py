@@ -12,7 +12,7 @@ from label_studio_sdk.label_interface import LabelInterface
 from label_studio_sdk.label_interface.control_tags import ControlTag
 from label_studio_sdk._extensions.label_studio_tools.core.utils.json_schema import json_schema_to_pydantic
 
-from .entity_extraction import extract_indices
+from .entity_extraction import extract_indices, validate_output_format_for_ner_tag
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class LabelStudioSkill(TransformSkill):
         for tag in interface.controls:
             if tag.tag == 'Labels':
                 return tag
-
+            
     @model_validator(mode='after')
     def validate_response_model(self):
 
@@ -79,10 +79,13 @@ class LabelStudioSkill(TransformSkill):
                 instructions_template=self.instructions,
                 response_model=ResponseModel,
             )
+            #FIXME: this is only done for the first NER tag; it should be done for each NER tag
             ner_tag = self.has_ner_tag()
             if ner_tag:
                 input_field_name = ner_tag.objects[0].value.lstrip('$')
                 output_field_name = ner_tag.name
                 quote_string_field_name = 'text'
-                output = extract_indices(pd.concat([input, output], axis=1), input_field_name, output_field_name, quote_string_field_name)
+                df = pd.concat([input, output], axis=1)
+                output = validate_output_format_for_ner_tag(df, input_field_name, output_field_name)
+                output = extract_indices(output, input_field_name, output_field_name, quote_string_field_name)
             return output

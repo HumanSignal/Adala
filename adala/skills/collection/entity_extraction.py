@@ -13,6 +13,35 @@ from adala.utils.pydantic_generator import field_schema_to_pydantic_class
 logger = logging.getLogger(__name__)
 
 
+def validate_output_format_for_ner_tag(df: InternalDataFrame, input_field_name: str, output_field_name: str):
+    '''
+    The output format for Labels is:
+    {
+        "start": start_idx,
+        "end": end_idx,
+        "text": text,
+        "labels": [label1, label2, ...]
+    }
+    Sometimes the model cannot populate "text" correctly, but this can be fixed deterministically.
+    '''
+    for i, row in df.iterrows():
+        if row.get("_adala_error"):
+            logger.warning(f"Error in row {i}: {row['_adala_message']}")
+            continue
+        text = row[input_field_name]
+        entities = row[output_field_name]
+        for entity in entities:
+            corrected_text = text[entity["start"]:entity["end"]]
+            if entity.get("text") is None:
+                # TODO remove this log after testing
+                logger.warning(f"Adding text for entity {entity}: {corrected_text}")
+                entity["text"] = corrected_text
+            elif entity["text"] != corrected_text:
+                # TODO deicde how to handle this case
+                logger.warning(f"text and indices disagree for {entity}: text={entity['text']} indices={corrected_text}")
+    return df
+        
+
 def extract_indices(
         df, 
         input_field_name, 
