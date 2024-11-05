@@ -33,12 +33,10 @@ def validate_output_format_for_ner_tag(df: InternalDataFrame, input_field_name: 
         for entity in entities:
             corrected_text = text[entity["start"]:entity["end"]]
             if entity.get("text") is None:
-                # TODO remove this log after testing
-                logger.warning(f"Adding text for entity {entity}: {corrected_text}")
                 entity["text"] = corrected_text
             elif entity["text"] != corrected_text:
-                # TODO deicde how to handle this case
-                logger.warning(f"text and indices disagree for {entity}: text={entity['text']} indices={corrected_text}")
+                # this seems to happen rarely if at all in testing, but could lead to invalid predictions
+                logger.warning(f"text and indices disagree for a predicted entity")
     return df
         
 
