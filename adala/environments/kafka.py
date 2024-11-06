@@ -55,9 +55,9 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             self.kafka_input_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_deserializer=lambda v: json.loads(v.decode("utf-8")),
-            enable_auto_commit=False, # True by default which causes messages to be missed when using getmany()
+            #enable_auto_commit=False, # True by default which causes messages to be missed when using getmany()
             auto_offset_reset="earliest",
-            group_id=self.kafka_input_topic, # ensuring unique group_id to not mix up offsets between topics
+            #group_id=self.kafka_input_topic, # ensuring unique group_id to not mix up offsets between topics
         )
         await self.consumer.start()
 
@@ -107,7 +107,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         batch = await self.consumer.getmany(
             timeout_ms=self.timeout_ms, max_records=batch_size
         )
-        await self.consumer.commit()
+        #await self.consumer.commit()
 
         if len(batch) == 0:
             batch_data = []
