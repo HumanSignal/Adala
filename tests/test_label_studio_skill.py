@@ -329,7 +329,7 @@ async def test_label_studio_skill_valid_predictions():
     # add configs for object tags besides Text
     for label_config in all_label_configs.copy():
         for tag in ALLOWED_OBJECT_TAGS - {"Text"}:
-            new_config = label_config.replace("<Text", f"<{tag}")
+            new_config = label_config.replace("<Text ", f"<{tag} ")
             all_label_configs.append(new_config)
 
     failed_configs = []
@@ -393,4 +393,4 @@ async def test_label_studio_skill_valid_predictions():
 
     assert len(failed_configs) == 0, f"Failed configs: {failed_configs}"
     # FIXME: still some failures
-    # assert len(errored_configs) == 0, f"Errored configs: {errored_configs}"
+    assert len(errored_configs) == 0, f"Errored configs: {errored_configs}"
