@@ -2,6 +2,8 @@ import pytest
 import os
 import pandas as pd
 from adala.agents import Agent
+from label_studio_sdk.label_interface import LabelInterface
+from label_studio_sdk.label_interface.objects import PredictionValue
 
 
 @pytest.mark.asyncio
@@ -159,10 +161,6 @@ async def test_label_studio_skill_with_ner():
     ]
 
     assert predictions.entities.tolist() == expected_predictions
-
-
-from label_studio_sdk.label_interface import LabelInterface
-from label_studio_sdk.label_interface.objects import PredictionValue
 
 
 @pytest.mark.vcr
