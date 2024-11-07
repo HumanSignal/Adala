@@ -73,7 +73,9 @@ class RAGSkill(TransformSkill):
             input_strings, num_results=self.num_results
         )
         rag_input_strings = [
-            "\n\n".join(partial_str_format(self.rag_input_template, **i) for i in rag_items)
+            "\n\n".join(
+                partial_str_format(self.rag_input_template, **i) for i in rag_items
+            )
             for rag_items in rag_input_data
         ]
         output_fields = self.get_output_fields()

@@ -13,13 +13,42 @@ from adala.utils.pydantic_generator import field_schema_to_pydantic_class
 logger = logging.getLogger(__name__)
 
 
+def validate_output_format_for_ner_tag(
+    df: InternalDataFrame, input_field_name: str, output_field_name: str
+):
+    """
+    The output format for Labels is:
+    {
+        "start": start_idx,
+        "end": end_idx,
+        "text": text,
+        "labels": [label1, label2, ...]
+    }
+    Sometimes the model cannot populate "text" correctly, but this can be fixed deterministically.
+    """
+    for i, row in df.iterrows():
+        if row.get("_adala_error"):
+            logger.warning(f"Error in row {i}: {row['_adala_message']}")
+            continue
+        text = row[input_field_name]
+        entities = row[output_field_name]
+        for entity in entities:
+            corrected_text = text[entity["start"] : entity["end"]]
+            if entity.get("text") is None:
+                entity["text"] = corrected_text
+            elif entity["text"] != corrected_text:
+                # this seems to happen rarely if at all in testing, but could lead to invalid predictions
+                logger.warning(f"text and indices disagree for a predicted entity")
+    return df
+
+
 def extract_indices(
-        df, 
-        input_field_name, 
-        output_field_name, 
-        quote_string_field_name='quote_string', 
-        labels_field_name='label'
-    ):
+    df,
+    input_field_name,
+    output_field_name,
+    quote_string_field_name="quote_string",
+    labels_field_name="label",
+):
     """
     Give the input dataframe with "text" column and "entities" column of the format
     ```
@@ -327,7 +356,13 @@ class EntityExtraction(TransformSkill):
         """
         input_field_name = self._get_input_field_name()
         output_field_name = self._get_output_field_name()
-        df = extract_indices(df, input_field_name, output_field_name, self._quote_string_field_name, self._labels_field_name)
+        df = extract_indices(
+            df,
+            input_field_name,
+            output_field_name,
+            self._quote_string_field_name,
+            self._labels_field_name,
+        )
         return df
 
     def apply(

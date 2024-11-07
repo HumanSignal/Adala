@@ -64,7 +64,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         self.producer = AIOKafkaProducer(
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-            acks='all' # waits for all replicas to respond that they have written the message
+            acks="all",  # waits for all replicas to respond that they have written the message
         )
         await self.producer.start()
 

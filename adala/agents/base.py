@@ -435,7 +435,7 @@ class Agent(BaseModel, ABC):
                 predictions = await self.skills.aapply(inputs, runtime=runtime)
             else:
                 predictions = inputs
-                
+
         response = await skill.aimprove(
             predictions=predictions,
             teacher_runtime=teacher_runtime,

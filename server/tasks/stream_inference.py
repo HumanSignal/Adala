@@ -178,5 +178,7 @@ async def async_process_streaming_output(
 
     # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_input
     finally:
-        logger.info("No more data in output job and input job is done, stopping output job")
+        logger.info(
+            "No more data in output job and input job is done, stopping output job"
+        )
         await consumer.stop()

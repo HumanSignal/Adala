@@ -631,7 +631,7 @@ class AnalysisSkill(Skill):
             input = InternalDataFrame([input])
 
         extra_fields = self._get_extra_fields()
-        
+
         # if chunk_size is specified, split the input into chunks and process each chunk separately
         if self.chunk_size is not None:
             chunks = (
@@ -640,10 +640,12 @@ class AnalysisSkill(Skill):
             )
         else:
             chunks = [input]
-            
+
         # define the row preprocessing function
         def row_preprocessing(row):
-            return partial_str_format(self.input_template, **row, **extra_fields, i=int(row.name) + 1)
+            return partial_str_format(
+                self.input_template, **row, **extra_fields, i=int(row.name) + 1
+            )
 
         total = input.shape[0] // self.chunk_size if self.chunk_size is not None else 1
         for chunk in tqdm(chunks, desc="Processing chunks", total=total):

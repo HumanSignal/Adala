@@ -42,13 +42,13 @@ def test_llm_sync():
         "_completion_cost_usd": 6e-06,
         "_total_cost_usd": 1.89e-05,
     }
-    assert result['name'] == expected_result['name']
-    assert result['age'] == expected_result['age']
-    assert isinstance(result['_prompt_tokens'], int)
-    assert isinstance(result['_completion_tokens'], int)
-    assert isinstance(result['_prompt_cost_usd'], float)
-    assert isinstance(result['_completion_cost_usd'], float)
-    assert isinstance(result['_total_cost_usd'], float)
+    assert result["name"] == expected_result["name"]
+    assert result["age"] == expected_result["age"]
+    assert isinstance(result["_prompt_tokens"], int)
+    assert isinstance(result["_completion_tokens"], int)
+    assert isinstance(result["_prompt_cost_usd"], float)
+    assert isinstance(result["_completion_cost_usd"], float)
+    assert isinstance(result["_total_cost_usd"], float)
 
     # test structured failure
 
