@@ -89,7 +89,7 @@ def mock_kafka_consumer_output():
         await PRODUCER_SENT_DATA.wait()
         return {
             AsyncMock(topic="output_topic_partition"): [
-                AsyncMock(value=row) for row in TEST_OUTPUT_DATA
+                AsyncMock(value=TEST_OUTPUT_DATA)
             ]
         }
 
@@ -159,11 +159,10 @@ async def test_run_streaming(
     await run_streaming(
         agent=agent,
         result_handler=result_handler,
-        batch_size=10,
+        batch_size=1,
         output_topic_name="output_topic",
     )
 
     # Verify that producer is called with the correct amount of send_and_wait calls and data
-    assert mock_kafka_producer.send.call_count == 1
-    for row in TEST_OUTPUT_DATA:
-        mock_kafka_producer.send.assert_any_call("output_topic", value=row)
+    assert mock_kafka_producer.send_and_wait.call_count == 1
+    mock_kafka_producer.send_and_wait.assert_any_call("output_topic", value=TEST_OUTPUT_DATA)
