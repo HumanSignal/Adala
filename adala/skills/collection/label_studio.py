@@ -1,6 +1,6 @@
 import logging
 import pandas as pd
-from typing import Optional, Type
+from typing import Type, Iterator
 from functools import cached_property
 from adala.skills._base import TransformSkill
 from pydantic import BaseModel, Field, model_validator
@@ -12,7 +12,7 @@ from label_studio_sdk.label_interface import LabelInterface
 from label_studio_sdk.label_interface.control_tags import ControlTag
 from label_studio_sdk._extensions.label_studio_tools.core.utils.json_schema import json_schema_to_pydantic
 
-from .entity_extraction import extract_indices
+from .entity_extraction import extract_indices, validate_output_format_for_ner_tag
 
 logger = logging.getLogger(__name__)
 
@@ -29,13 +29,14 @@ class LabelStudioSkill(TransformSkill):
 
     # TODO: implement postprocessing to verify Taxonomy
 
-    def has_ner_tag(self) -> Optional[ControlTag]:
+    def ner_tags(self) -> Iterator[ControlTag]:
         # check if the input config has NER tag (<Labels> + <Text>), and return its `from_name` and `to_name`
         interface = LabelInterface(self.label_config)
         for tag in interface.controls:
+            #TODO: don't need to check object tag because at this point, unusable control tags should have been stripped out of the label config, but confirm this - maybe move this logic to LSE
             if tag.tag == 'Labels':
-                return tag
-
+                yield tag
+            
     @model_validator(mode='after')
     def validate_response_model(self):
 
@@ -79,10 +80,11 @@ class LabelStudioSkill(TransformSkill):
                 instructions_template=self.instructions,
                 response_model=ResponseModel,
             )
-            ner_tag = self.has_ner_tag()
-            if ner_tag:
+            for ner_tag in self.ner_tags():
                 input_field_name = ner_tag.objects[0].value.lstrip('$')
                 output_field_name = ner_tag.name
                 quote_string_field_name = 'text'
-                output = extract_indices(pd.concat([input, output], axis=1), input_field_name, output_field_name, quote_string_field_name)
+                df = pd.concat([input, output], axis=1)
+                output = validate_output_format_for_ner_tag(df, input_field_name, output_field_name)
+                output = extract_indices(output, input_field_name, output_field_name, quote_string_field_name)
             return output
