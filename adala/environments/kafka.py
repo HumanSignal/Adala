@@ -55,16 +55,16 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             self.kafka_input_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_deserializer=lambda v: json.loads(v.decode("utf-8")),
-            enable_auto_commit=False, # True by default which causes messages to be missed when using getmany()
+            enable_auto_commit=False,  # True by default which causes messages to be missed when using getmany()
             auto_offset_reset="earliest",
-            group_id=self.kafka_input_topic, # ensuring unique group_id to not mix up offsets between topics
+            group_id=self.kafka_input_topic,  # ensuring unique group_id to not mix up offsets between topics
         )
         await self.consumer.start()
 
         self.producer = AIOKafkaProducer(
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-            acks='all' # waits for all replicas to respond that they have written the message
+            acks="all",  # waits for all replicas to respond that they have written the message
         )
         await self.producer.start()
 
