@@ -140,9 +140,9 @@ async def async_process_streaming_output(
                 output_topic_name,
                 bootstrap_servers=settings.kafka_bootstrap_servers,
                 value_deserializer=lambda v: json.loads(v.decode("utf-8")),
-                #enable_auto_commit=False, # True by default which causes messages to be missed when using getmany()
                 auto_offset_reset="earliest",
-                #group_id=output_topic_name, # ensuring unique group_id to not mix up offsets between topics
+                # enable_auto_commit=False, # Turned off as its not supported without group ID
+                # group_id=output_topic_name, # No longer using group ID as of DIA-1584 - unclear details but causes problems
             )
             await consumer.start()
             logger.info(f"consumer started {output_topic_name=}")
@@ -158,7 +158,6 @@ async def async_process_streaming_output(
     try:
         while not input_done.is_set():
             data = await consumer.getmany(timeout_ms=timeout_ms, max_records=batch_size)
-            #await consumer.commit()
             for topic_partition, messages in data.items():
                 topic = topic_partition.topic
                 # messages is a list of ConsumerRecord
@@ -167,9 +166,13 @@ async def async_process_streaming_output(
                     batches = [msg.value for msg in messages]
                     # records is a list of records to send to LSE
                     for records in batches:
-                        logger.info(f"Processing messages in output job {topic=} number of messages: {len(records)}")
+                        logger.info(
+                            f"Processing messages in output job {topic=} number of messages: {len(records)}"
+                        )
                         result_handler(records)
-                        logger.info(f"Processed messages in output job {topic=} number of messages: {len(records)}")
+                        logger.info(
+                            f"Processed messages in output job {topic=} number of messages: {len(records)}"
+                        )
                 else:
                     logger.info(f"Consumer pulled data, but no messages in {topic=}")
 

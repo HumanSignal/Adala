@@ -55,9 +55,9 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             self.kafka_input_topic,
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_deserializer=lambda v: json.loads(v.decode("utf-8")),
-            #enable_auto_commit=False, # True by default which causes messages to be missed when using getmany()
             auto_offset_reset="earliest",
-            #group_id=self.kafka_input_topic, # ensuring unique group_id to not mix up offsets between topics
+            # enable_auto_commit=False, # Turned off as its not supported without group ID
+            # group_id=output_topic_name, # No longer using group ID as of DIA-1584 - unclear details but causes problems
         )
         await self.consumer.start()
 
@@ -107,7 +107,6 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         batch = await self.consumer.getmany(
             timeout_ms=self.timeout_ms, max_records=batch_size
         )
-        #await self.consumer.commit()
 
         if len(batch) == 0:
             batch_data = []
@@ -127,6 +126,4 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
 
     async def set_predictions(self, predictions: InternalDataFrame):
         predictions = [r.to_dict() for _, r in predictions.iterrows()]
-        await self.message_sender(
-            self.producer, predictions, self.kafka_output_topic
-        )
+        await self.message_sender(self.producer, predictions, self.kafka_output_topic)
