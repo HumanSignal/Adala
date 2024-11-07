@@ -1,6 +1,13 @@
 import json
 import logging
-from pydantic import BaseModel, field_validator, Field, ConfigDict, model_validator, AfterValidator
+from pydantic import (
+    BaseModel,
+    field_validator,
+    Field,
+    ConfigDict,
+    model_validator,
+    AfterValidator,
+)
 from adala.skills import Skill
 from typing import Any, Dict, List, Optional, Union
 from typing_extensions import Annotated
@@ -15,7 +22,9 @@ logger = logging.getLogger(__name__)
 def validate_used_variables(value: str) -> str:
     templates = parse_template(value, include_texts=False)
     if not templates:
-        raise ValueError("At least one input variable must be used in the prompt, formatted with curly braces like this: {input_variable}")
+        raise ValueError(
+            "At least one input variable must be used in the prompt, formatted with curly braces like this: {input_variable}"
+        )
     return value
 
 
@@ -52,7 +61,9 @@ class PromptImprovementSkill(AnalysisSkill):
 
     name: str = "prompt_improvement"
     instructions: str = "Improve current prompt"
-    input_template: str = ""  # Used to provide a few shot examples of input-output pairs
+    input_template: str = (
+        ""  # Used to provide a few shot examples of input-output pairs
+    )
     input_prefix: str = ""  # Used to provide additional context for the input
     input_separator: str = "\n"
 
@@ -60,26 +71,28 @@ class PromptImprovementSkill(AnalysisSkill):
 
     @model_validator(mode="after")
     def validate_prompts(self):
-        
+
         def get_json_template(fields):
             json_body = ", ".join([f'"{field}": "{{{field}}}"' for field in fields])
             return "{" + json_body + "}"
-        
+
         if isinstance(self.skill_to_improve, LabelStudioSkill):
             model_json_schema = self.skill_to_improve.field_schema
         else:
             model_json_schema = self.skill_to_improve.response_model.model_json_schema()
 
         # TODO: can remove this when only LabelStudioSkill is supported
-        label_config = getattr(self.skill_to_improve, 'label_config', '<View>Not available</View>')
+        label_config = getattr(
+            self.skill_to_improve, "label_config", "<View>Not available</View>"
+        )
 
         input_variables = self.input_variables
-        output_variables = list(model_json_schema['properties'].keys())
+        output_variables = list(model_json_schema["properties"].keys())
         input_json_template = get_json_template(input_variables)
         output_json_template = get_json_template(output_variables)
-        self.input_template = f'{input_json_template} --> {output_json_template}'
-                
-        self.input_prefix = f'''
+        self.input_template = f"{input_json_template} --> {output_json_template}"
+
+        self.input_prefix = f"""
 ## Current prompt:
 ```
 {self.skill_to_improve.input_template}
@@ -102,10 +115,12 @@ class PromptImprovementSkill(AnalysisSkill):
 
 ## Input-Output Examples:
 
-'''
-        
+"""
+
         # TODO: deprecated, leave self.output_template for compatibility
         self.output_template = output_json_template
-        
-        logger.debug(f'Instructions: {self.instructions}\nInput template: {self.input_template}\nInput prefix: {self.input_prefix}')
+
+        logger.debug(
+            f"Instructions: {self.instructions}\nInput template: {self.input_template}\nInput prefix: {self.input_prefix}"
+        )
         return self

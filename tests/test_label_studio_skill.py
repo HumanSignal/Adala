@@ -392,7 +392,7 @@ async def test_label_studio_skill_valid_predictions():
                         f"Failed {n_failed_preds} predictions for {label_config} {model}"
                     )
                     predictions = predictions[is_success]
-            
+
             # filter out adala fields and input field
             predictions = predictions[
                 [

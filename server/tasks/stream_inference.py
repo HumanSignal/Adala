@@ -140,9 +140,9 @@ async def async_process_streaming_output(
                 output_topic_name,
                 bootstrap_servers=settings.kafka_bootstrap_servers,
                 value_deserializer=lambda v: json.loads(v.decode("utf-8")),
-                enable_auto_commit=False, # True by default which causes messages to be missed when using getmany()
+                enable_auto_commit=False,  # True by default which causes messages to be missed when using getmany()
                 auto_offset_reset="earliest",
-                group_id=output_topic_name, # ensuring unique group_id to not mix up offsets between topics
+                group_id=output_topic_name,  # ensuring unique group_id to not mix up offsets between topics
             )
             await consumer.start()
             logger.info(f"consumer started {output_topic_name=}")
@@ -162,10 +162,14 @@ async def async_process_streaming_output(
             for topic_partition, messages in data.items():
                 topic = topic_partition.topic
                 if messages:
-                    logger.info(f"Processing messages in output job {topic=} number of messages: {len(messages)}")
+                    logger.info(
+                        f"Processing messages in output job {topic=} number of messages: {len(messages)}"
+                    )
                     data = [msg.value for msg in messages]
                     result_handler(data)
-                    logger.info(f"Processed messages in output job {topic=} number of messages: {len(messages)}")
+                    logger.info(
+                        f"Processed messages in output job {topic=} number of messages: {len(messages)}"
+                    )
                 else:
                     logger.info(f"Consumer pulled data, but no messages in {topic=}")
 
@@ -174,5 +178,7 @@ async def async_process_streaming_output(
 
     # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_input
     finally:
-        logger.info("No more data in output job and input job is done, stopping output job")
+        logger.info(
+            "No more data in output job and input job is done, stopping output job"
+        )
         await consumer.stop()
