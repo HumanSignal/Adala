@@ -392,7 +392,7 @@ async def test_label_studio_skill_valid_predictions():
                         f"Failed {n_failed_preds} predictions for {label_config} {model}"
                     )
                     predictions = predictions[is_success]
-
+            
             # filter out adala fields and input field
             predictions = predictions[
                 [
@@ -417,5 +417,4 @@ async def test_label_studio_skill_valid_predictions():
                     errored_configs.append((label_config, model, prediction, e))
 
     assert len(failed_configs) == 0, f"Failed configs: {failed_configs}"
-    # TODO DIA-1600: intermittent nans are sneaking through for Labels
-    # assert len(errored_configs) == 0, f"Errored configs: {errored_configs}"
+    assert len(errored_configs) == 0, f"Errored configs: {errored_configs}"

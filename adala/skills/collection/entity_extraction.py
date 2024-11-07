@@ -354,7 +354,6 @@ class EntityExtraction(TransformSkill):
         """
         input_field_name = self._get_input_field_name()
         output_field_name = self._get_output_field_name()
-        df = validate_output_format_for_ner_tag(df, input_field_name, output_field_name)
         df = extract_indices(df, input_field_name, output_field_name, self._quote_string_field_name, self._labels_field_name)
         return df
 
