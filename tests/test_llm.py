@@ -27,7 +27,7 @@ def test_llm_sync():
 
     result = runtime.record_to_record(
         record={"input_name": "Carla", "input_age": 25},
-        input_template="My name is {input_name} and I am {input_age:02d} years old with {brackets:.2f} and {brackets2:invalid_format_spec}.",
+        input_template="My name is {input_name} and I am {input_age:02d} years old with {brackets:.2f} and {brackets2:invalid_format_spec} and {input_name:invalid_format_spec}.",
         instructions_template="",
         response_model=Output,
     )
@@ -42,13 +42,13 @@ def test_llm_sync():
         "_completion_cost_usd": 6e-06,
         "_total_cost_usd": 1.89e-05,
     }
-    assert result['name'] == expected_result['name']
-    assert result['age'] == expected_result['age']
-    assert isinstance(result['_prompt_tokens'], int)
-    assert isinstance(result['_completion_tokens'], int)
-    assert isinstance(result['_prompt_cost_usd'], float)
-    assert isinstance(result['_completion_cost_usd'], float)
-    assert isinstance(result['_total_cost_usd'], float)
+    assert result["name"] == expected_result["name"]
+    assert result["age"] == expected_result["age"]
+    assert isinstance(result["_prompt_tokens"], int)
+    assert isinstance(result["_completion_tokens"], int)
+    assert isinstance(result["_prompt_cost_usd"], float)
+    assert isinstance(result["_completion_cost_usd"], float)
+    assert isinstance(result["_total_cost_usd"], float)
 
     # test structured failure
 

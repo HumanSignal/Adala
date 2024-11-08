@@ -125,52 +125,53 @@ speedups = ["Brotli", "aiodns (>=3.2.0)", "brotlicffi"]
 
 [[package]]
 name = "aiokafka"
-version = "0.10.0"
+version = "0.11.0"
 description = "Kafka integration with asyncio"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "aiokafka-0.10.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:ebe5be9f578e89e6db961121070f7c35662924abee00ba4ccf64557e2cdd7edf"},
-    {file = "aiokafka-0.10.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:007f1c51f440cc07155d2491f4deea6536492324153296aa73736a74cd833d3e"},
-    {file = "aiokafka-0.10.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:22299f8d5269dcb00b1b53fdee44dbe729091d4038e1bb63d0bb2f5cdf9af47a"},
-    {file = "aiokafka-0.10.0-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:fafc95bdaed9e1810fcd80b02ac117e51c72681ffe50353e5d61e2170609e1fc"},
-    {file = "aiokafka-0.10.0-cp310-cp310-win32.whl", hash = "sha256:f2f19dee69c69389f5911e6b23c361c5285366d237f782eaae118d12acc42d7f"},
-    {file = "aiokafka-0.10.0-cp310-cp310-win_amd64.whl", hash = "sha256:99127ab680f9b08b0213d00b7d1e0480c6d08601f52ad42e829350f9599db301"},
-    {file = "aiokafka-0.10.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:5efb63686562809f0f9bf0fa6d1e52f222af2d8f8441f8c412b156f15c98da43"},
-    {file = "aiokafka-0.10.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b91109dc25f79be4d27454cc766239a5368d18b26682d4b5c6b913ca92691220"},
-    {file = "aiokafka-0.10.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d52c25f3d0db7dd340a5d08108da302db1ba64c2190970dbdb768b79629d6add"},
-    {file = "aiokafka-0.10.0-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:1509c1b29cd1d4d920a649f257d72109bbc3d61431135505b8e0d8d488796ff2"},
-    {file = "aiokafka-0.10.0-cp311-cp311-win32.whl", hash = "sha256:ffc30e4c6bfcb00356a002f623c93a51d8336ca67687ea069dd11822da07379c"},
-    {file = "aiokafka-0.10.0-cp311-cp311-win_amd64.whl", hash = "sha256:6e10fdee4189fe7eed36d602df822e9ff4f19535c0a514cf015f78308d206c1a"},
-    {file = "aiokafka-0.10.0-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:82a75ea13d7e6e11c7ee2fb9419e9ea3541744648c69ab27b56fb6bca5b319c1"},
-    {file = "aiokafka-0.10.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:cf9e241766b7f4c305807763330dacf8c220ad9e8fc7f2b22730a2db66fad61d"},
-    {file = "aiokafka-0.10.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:12d703317812262feac6577ff488f2ccddc4408da0ff608a5454062782b5a80d"},
-    {file = "aiokafka-0.10.0-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:8b74aeacfb8ced9764002c63b58e4c78c94809131d89000cb936c25c298ffb1e"},
-    {file = "aiokafka-0.10.0-cp312-cp312-win32.whl", hash = "sha256:de56c503b3d64e24a5b6705e55bc524a8357b0495402f859f921a71d65274cb1"},
-    {file = "aiokafka-0.10.0-cp312-cp312-win_amd64.whl", hash = "sha256:f4b22a31f40493cea50dddb4dfc92750dfb273635ccb094a16fde9678eb38958"},
-    {file = "aiokafka-0.10.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:7068f0beb8478cde09618dcc9a833cc18ff37bd14864fa8b60ad4e4c3dad6489"},
-    {file = "aiokafka-0.10.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f069bda1f31e466d815b631a07bc6fad5190b29dfff5f117bcbf1948cd7a38aa"},
-    {file = "aiokafka-0.10.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e16d8a23f0e173e5ca86c2d1c270e25a529a0eed973c77d7e8a0dfc868699aa4"},
-    {file = "aiokafka-0.10.0-cp38-cp38-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:cf4a47659517000a8fe88e0fb353898b718ee214e21f62a2a949be9bf801cd9e"},
-    {file = "aiokafka-0.10.0-cp38-cp38-win32.whl", hash = "sha256:781ab300214681e40667185a402abf6b31b4c4b8f1cdabbdc3549d8cf383b34d"},
-    {file = "aiokafka-0.10.0-cp38-cp38-win_amd64.whl", hash = "sha256:06060708a4bcf062be496c8641fca382c88782d3c381a34ccb5ac8677bdac695"},
-    {file = "aiokafka-0.10.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:c23ec22fbf26e2f84678f0589076bea1ff26ae6dfd3c601e6de10ad00d605261"},
-    {file = "aiokafka-0.10.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:74229a57c95e2efccec95d9b42554dc168c97a263f013e3e983202bd33ca189d"},
-    {file = "aiokafka-0.10.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e833e4ef7fc5f3f637ba5fb4210acc7e5ea916bb7107e4b619b1b1a3e361bc62"},
-    {file = "aiokafka-0.10.0-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:9728c523f10ac4bb46719cc64f3c1d47625898872bc3901b22b9d48b6e401d1c"},
-    {file = "aiokafka-0.10.0-cp39-cp39-win32.whl", hash = "sha256:05c4a7ced5d6f3dbc289767574d6a5d9b31e1c243e992dcecd34dbc40fcbbf9b"},
-    {file = "aiokafka-0.10.0-cp39-cp39-win_amd64.whl", hash = "sha256:1fe0194ea72524df37369a8cf0837263b55194ac20616e612f0ab7bfb568b76b"},
-    {file = "aiokafka-0.10.0.tar.gz", hash = "sha256:7ce35563f955490b43190e3389b5f3d92d50e22b32d1a40772fd14fb1d50c5db"},
+    {file = "aiokafka-0.11.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:926f93fb6a39891fd4364494432b479c0602f9cac708778d4a262a2c2e20d3b4"},
+    {file = "aiokafka-0.11.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:38e1917e706c1158d5e1f612d1fc1b40f706dc46c534e73ab4de8ae2868a31be"},
+    {file = "aiokafka-0.11.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:516e1d68d9a377860b2e17453580afe304605bc71894f684d3e7b6618f6f939f"},
+    {file = "aiokafka-0.11.0-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:acfd0a5d0aec762ba73eeab73b23edce14f315793f063b6a4b223b6f79e36bb8"},
+    {file = "aiokafka-0.11.0-cp310-cp310-win32.whl", hash = "sha256:0d80590c4ef0ba546a299cee22ea27c3360c14241ec43a8e6904653f7b22d328"},
+    {file = "aiokafka-0.11.0-cp310-cp310-win_amd64.whl", hash = "sha256:1d519bf9875ac867fb19d55de3750833b1eb6379a08de29a68618e24e6a49fc0"},
+    {file = "aiokafka-0.11.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:0e957b42ae959365efbb45c9b5de38032c573608553c3670ad8695cc210abec9"},
+    {file = "aiokafka-0.11.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:224db2447f6c1024198d8342e7099198f90401e2fa29c0762afbc51eadf5c490"},
+    {file = "aiokafka-0.11.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6ef3e7c8a923e502caa4d24041f2be778fd7f9ee4587bf0bcb4f74cac05122fa"},
+    {file = "aiokafka-0.11.0-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:59f4b935589ebb244620afad8bf3320e3bc86879a8b1c692ad06bd324f6c6127"},
+    {file = "aiokafka-0.11.0-cp311-cp311-win32.whl", hash = "sha256:560839ae6bc13e71025d71e94df36980f5c6e36a64916439e598b6457267a37f"},
+    {file = "aiokafka-0.11.0-cp311-cp311-win_amd64.whl", hash = "sha256:1f8ae91f0373830e4664376157fe61b611ca7e573d8a559b151aef5bf53df46c"},
+    {file = "aiokafka-0.11.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:4e0cc080a7f4c659ee4e1baa1c32adedcccb105a52156d4909f357d76fac0dc1"},
+    {file = "aiokafka-0.11.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:55a07a39d82c595223a17015ea738d152544cee979d3d6d822707a082465621c"},
+    {file = "aiokafka-0.11.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3711fa64ee8640dcd4cb640f1030f9439d02e85acd57010d09053017092d8cc2"},
+    {file = "aiokafka-0.11.0-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:818a6f8e44b02113b9e795bee6029c8a4e525ab38f29d7adb0201f3fec74c808"},
+    {file = "aiokafka-0.11.0-cp312-cp312-win32.whl", hash = "sha256:8ba981956243767b37c929845c398fda2a2e35a4034d218badbe2b62e6f98f96"},
+    {file = "aiokafka-0.11.0-cp312-cp312-win_amd64.whl", hash = "sha256:9a478a14fd23fd1ffe9c7a21238d818b5f5e0626f7f06146b687f3699298391b"},
+    {file = "aiokafka-0.11.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:0973a245b8b9daf8ef6814253a80a700f1f54d2da7d88f6fe479f46e0fd83053"},
+    {file = "aiokafka-0.11.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:ee0c61a2dcabbe4474ff237d708f9bd663dd2317e03a9cb7239a212c9ee05b12"},
+    {file = "aiokafka-0.11.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:230170ce2e8a0eb852e2e8b78b08ce2e29b77dfe2c51bd56f5ab4be0f332a63b"},
+    {file = "aiokafka-0.11.0-cp38-cp38-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:eac78a009b713e28b5b4c4daae9d062acbf2b7980e5734467643a810134583b5"},
+    {file = "aiokafka-0.11.0-cp38-cp38-win32.whl", hash = "sha256:73584be8ba7906e3f33ca0f08f6af21a9ae31b86c6b635b93db3b1e6f452657b"},
+    {file = "aiokafka-0.11.0-cp38-cp38-win_amd64.whl", hash = "sha256:d724b6fc484e453b373052813e4e543fc028a22c3fbda10e13b6829740000b8a"},
+    {file = "aiokafka-0.11.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:419dd28c8ed6e926061bdc60929af08a6b52f1721e1179d9d21cc72ae28fd6f6"},
+    {file = "aiokafka-0.11.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f1c85f66eb3564c5e74d8e4c25df4ac1fd94f1a6f6e66f005aafa6f791bde215"},
+    {file = "aiokafka-0.11.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:eaafe134de57b184f3c030e1a11051590caff7953c8bf58048eefd8d828e39d7"},
+    {file = "aiokafka-0.11.0-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:807f699cf916369b1a512e4f2eaec714398c202d8803328ef8711967d99a56ce"},
+    {file = "aiokafka-0.11.0-cp39-cp39-win32.whl", hash = "sha256:d59fc7aec088c9ffc02d37e61591f053459bd11912cf04c70ac4f7e60405667d"},
+    {file = "aiokafka-0.11.0-cp39-cp39-win_amd64.whl", hash = "sha256:702aec15b63bad5e4476294bcb1cb177559149fce3e59335794f004c279cbd6a"},
+    {file = "aiokafka-0.11.0.tar.gz", hash = "sha256:f2def07fe1720c4fe37c0309e355afa9ff4a28e0aabfe847be0692461ac69352"},
 ]
 
 [package.dependencies]
 async-timeout = "*"
 packaging = "*"
+typing-extensions = ">=4.10.0"
 
 [package.extras]
-all = ["cramjam", "gssapi", "lz4 (>=3.1.3)"]
+all = ["cramjam (>=2.8.0)", "gssapi"]
 gssapi = ["gssapi"]
-lz4 = ["lz4 (>=3.1.3)"]
+lz4 = ["cramjam (>=2.8.0)"]
 snappy = ["cramjam"]
 zstd = ["cramjam"]
 
