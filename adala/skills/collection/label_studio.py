@@ -40,7 +40,7 @@ class LabelStudioSkill(TransformSkill):
         interface = LabelInterface(self.label_config)
         for tag in interface.controls:
             # NOTE: don't need to check object tag because at this point, unusable control tags should have been stripped out of the label config
-            if tag.tag == "Labels":
+            if tag.tag.lower() == "labels":
                 yield tag
 
     @model_validator(mode="after")
