@@ -209,7 +209,6 @@ async def submit_batch(batch: BatchData):
             f"Size of batch in bytes received for job_id:{batch.job_id} batch_size:{batch_size}"
         )
     except UnknownTopicOrPartitionError:
-        await producer.stop()
         raise HTTPException(
             status_code=500, detail=f"{topic=} for job {batch.job_id} not found"
         )
