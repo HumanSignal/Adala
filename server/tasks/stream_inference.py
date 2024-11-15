@@ -70,6 +70,8 @@ async def run_streaming(
     serializer="pickle",
     on_failure=parent_job_error_handler,
     task_time_limit=settings.task_time_limit_sec,
+    task_ignore_result=True,
+    task_store_errors_even_if_ignored=True,
 )
 def streaming_parent_task(
     self, agent: Agent, result_handler: ResultHandler, batch_size: int = 1
