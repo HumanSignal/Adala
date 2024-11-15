@@ -21,6 +21,8 @@ from server.utils import (
 
 logger = init_logger(__name__)
 
+settings = Settings()
+
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 app = Celery(
     "worker",
@@ -28,9 +30,8 @@ app = Celery(
     backend=REDIS_URL,
     accept_content=["json", "pickle"],
     broker_connection_retry_on_startup=True,
+    worker_max_memory_per_child=settings.celery_worker_max_memory_per_child_kb,
 )
-
-settings = Settings()
 
 
 def parent_job_error_handler(self, exc, task_id, args, kwargs, einfo):
