@@ -208,10 +208,11 @@ class LSEHandler(ResultHandler):
         # coerce back to dicts for sending
         result_batch = [record.dict() for record in result_batch]
         if result_batch:
-            logger.info(f"LSEHandler sending {len(result_batch)} predictions to LSE")
+            num_predictions = len(result_batch)
+            logger.info(f"LSEHandler sending {num_predictions} predictions to LSE")
             self.client.make_request(
                 "POST",
-                "/api/model-run/batch-predictions",
+                f"/api/model-run/batch-predictions?num_predictions={num_predictions}",
                 data=json.dumps(
                     {
                         "modelrun_id": self.modelrun_id,
@@ -219,7 +220,7 @@ class LSEHandler(ResultHandler):
                     }
                 ),
             )
-            logger.info(f"LSEHandler sent {len(result_batch)} predictions to LSE")
+            logger.info(f"LSEHandler sent {num_predictions} predictions to LSE")
         else:
             logger.error(
                 f"No valid results to send to LSE for modelrun_id {self.modelrun_id}"
