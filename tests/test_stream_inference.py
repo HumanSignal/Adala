@@ -165,4 +165,6 @@ async def test_run_streaming(
 
     # Verify that producer is called with the correct amount of send_and_wait calls and data
     assert mock_kafka_producer.send_and_wait.call_count == 1
-    mock_kafka_producer.send_and_wait.assert_any_call("output_topic", value=TEST_OUTPUT_DATA)
+    mock_kafka_producer.send_and_wait.assert_any_call(
+        "output_topic", value=TEST_OUTPUT_DATA
+    )

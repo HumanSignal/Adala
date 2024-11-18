@@ -1,6 +1,6 @@
 import logging
 import pandas as pd
-from typing import Type, Iterator
+from typing import Type, Iterator, Optional
 from functools import cached_property
 from adala.skills._base import TransformSkill
 from pydantic import BaseModel, Field, model_validator
@@ -30,6 +30,8 @@ class LabelStudioSkill(TransformSkill):
     )
     # ------------------------------
     label_config: str = "<View></View>"
+    allowed_control_tags: Optional[list[str]] = None
+    allowed_object_tags: Optional[list[str]] = None
 
     # TODO: implement postprocessing to verify Taxonomy
 
@@ -37,8 +39,8 @@ class LabelStudioSkill(TransformSkill):
         # check if the input config has NER tag (<Labels> + <Text>), and return its `from_name` and `to_name`
         interface = LabelInterface(self.label_config)
         for tag in interface.controls:
-            # TODO: don't need to check object tag because at this point, unusable control tags should have been stripped out of the label config, but confirm this - maybe move this logic to LSE
-            if tag.tag == "Labels":
+            # NOTE: don't need to check object tag because at this point, unusable control tags should have been stripped out of the label config
+            if tag.tag.lower() == "labels":
                 yield tag
 
     @model_validator(mode="after")
@@ -47,6 +49,27 @@ class LabelStudioSkill(TransformSkill):
         interface = LabelInterface(self.label_config)
         logger.debug(f"Read labeling config {self.label_config}")
 
+        if self.allowed_control_tags or self.allowed_object_tags:
+            if self.allowed_control_tags:
+                control_tags = {
+                    tag: interface._controls[tag] for tag in self.allowed_control_tags
+                }
+            else:
+                control_tags = interface._controls
+            if self.allowed_object_tags:
+                object_tags = {
+                    tag: interface._objects[tag] for tag in self.allowed_object_tags
+                }
+            else:
+                object_tags = interface._objects
+            interface = LabelInterface.create_instance(
+                tags={**control_tags, **object_tags}
+            )
+            logger.debug(
+                f"Filtered labeling config based on allowed tags {self.allowed_control_tags=} and {self.allowed_object_tags=} to {interface.config}"
+            )
+
+        # NOTE: filtered label config is used for the response model, but full label config is used for the prompt, so that the model has as much context as possible.
         self.field_schema = interface.to_json_schema()
         logger.debug(f"Converted labeling config to json schema: {self.field_schema}")
 
