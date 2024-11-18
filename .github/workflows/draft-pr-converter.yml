@@ -77,7 +77,7 @@ jobs:
       - name: Post to a Slack channel
         id: slack
         if: ${{ steps.mutation_step.outputs.exec == 'true' }}
-        uses: slackapi/slack-github-action@v1.27
+        uses: slackapi/slack-github-action@v2.0
         with:
           channel-id: 'C02LMULF4NA'
           payload: '{ "type": "mrkdwn", "text": "${{ env.SLACK_MESSAGE }}" }'
