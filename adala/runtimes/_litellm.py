@@ -472,7 +472,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                     logger.error(
                         f"Converting error to ConstrainedGenerationError: {str(e)}"
                     )
-                    logger.error(f"Traceback:\n{traceback.format_exc()}")
+                    logger.debug(f"Traceback:\n{traceback.format_exc()}")
                     e = ConstrainedGenerationError()
                 # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
                 dct = _log_llm_exception(e)
