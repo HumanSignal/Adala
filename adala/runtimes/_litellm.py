@@ -306,7 +306,9 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
             )
 
             # Catch case where the model does not return a properly formatted output
-            if type(e).__name__ == "ValidationError" and "Invalid JSON" in str(e):
+            # AttributeError is an instructor bug: https://github.com/instructor-ai/instructor/pull/1103
+            # > AttributeError: 'NoneType' object has no attribute '_raw_response'
+            if type(e).__name__ in {"ValidationError", "AttributeError"}:
                 e = ConstrainedGenerationError()
             # there are no other known errors to catch
             dct = _log_llm_exception(e)
@@ -464,7 +466,13 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                 )
 
                 # Catch case where the model does not return a properly formatted output
-                if type(e).__name__ == "ValidationError" and "Invalid JSON" in str(e):
+                # AttributeError is an instructor bug: https://github.com/instructor-ai/instructor/pull/1103
+                # > AttributeError: 'NoneType' object has no attribute '_raw_response'
+                if type(e).__name__ in {"ValidationError", "AttributeError"}:
+                    logger.error(
+                        f"Converting error to ConstrainedGenerationError: {str(e)}"
+                    )
+                    logger.debug(f"Traceback:\n{traceback.format_exc()}")
                     e = ConstrainedGenerationError()
                 # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
                 dct = _log_llm_exception(e)
