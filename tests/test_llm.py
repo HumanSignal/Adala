@@ -188,6 +188,7 @@ def test_split_message_into_chunks():
     assert result == [{"type": "text", "text": "Dave is here. Hi Dave!"}]
 
 
+@pytest.mark.vcr
 def test_vision_runtime():
     
     # test success
