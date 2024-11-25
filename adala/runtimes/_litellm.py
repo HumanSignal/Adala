@@ -143,6 +143,54 @@ class InstructorAsyncClientMixin(InstructorClientMixin):
         return instructor.from_litellm(litellm.acompletion, **kwargs)
 
 
+def handle_llm_exception(e: Exception, messages: List[Dict[str, str]], model: str, retries) -> tuple[Dict, Usage]:
+    """Handle exceptions from LLM calls and return standardized error dict and usage stats.
+    
+    Args:
+        e: The caught exception
+        messages: The messages that were sent to the LLM
+        model: The model name
+        retries: The retry policy object
+        
+    Returns:
+        Tuple of (error_dict, usage_stats)
+    """
+    
+    if isinstance(e, IncompleteOutputException):
+        usage = e.total_usage
+    elif isinstance(e, InstructorRetryException):
+        usage = e.total_usage
+        # get root cause error from retries
+        e = e.__cause__.last_attempt.exception()
+    else:
+        # Approximate usage for other errors
+        # usage = e.total_usage
+        # not available here, so have to approximate by hand, assuming the same error occurred each time
+        n_attempts = retries.stop.max_attempt_number
+        prompt_tokens = n_attempts * litellm.token_counter(
+            model=model, messages=messages[:-1]
+        )  # response is appended as the last message
+        # TODO a pydantic validation error may be appended as the last message, don't know how to get the raw response in this case
+        usage = Usage(
+            prompt_tokens=prompt_tokens,
+            completion_tokens=0,
+            total_tokens=prompt_tokens,
+        )
+        # Catch case where the model does not return a properly formatted out
+        # AttributeError is an instructor bug: https://github.com/instructor-ai/instructor/pull/1103
+        # > AttributeError: 'NoneType' object has no attribute '_raw_response'
+        if type(e).__name__ in {"ValidationError", "AttributeError"}:
+            logger.error(
+                f"Converting error to ConstrainedGenerationError: {str(e)}"
+            )
+            logger.debug(f"Traceback:\n{traceback.format_exc()}")
+            e = ConstrainedGenerationError()
+            
+        # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
+            
+    return _log_llm_exception(e), usage
+
+
 class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
     """
     Runtime that uses [LiteLLM API](https://litellm.vercel.app/docs) and chat
@@ -275,43 +323,8 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
             )
             usage = completion.usage
             dct = to_jsonable_python(response)
-        except IncompleteOutputException as e:
-            logger.error(f"Incomplete output error: {str(e)}")
-            logger.error(f"Traceback:\n{traceback.format_exc()}")
-            usage = e.total_usage
-            dct = _log_llm_exception(e)
-        except InstructorRetryException as e:
-            logger.error(f"Instructor retry error: {str(e)}")
-            logger.error(f"Traceback:\n{traceback.format_exc()}")
-            usage = e.total_usage
-            # get root cause error from retries
-            n_attempts = e.n_attempts
-            e = e.__cause__.last_attempt.exception()
-            dct = _log_llm_exception(e)
         except Exception as e:
-            logger.error(f"Other error: {str(e)}")
-            logger.error(f"Traceback:\n{traceback.format_exc()}")
-            # usage = e.total_usage
-            # not available here, so have to approximate by hand, assuming the same error occurred each time
-            n_attempts = retries.stop.max_attempt_number
-            prompt_tokens = n_attempts * litellm.token_counter(
-                model=self.model, messages=messages[:-1]
-            )  # response is appended as the last message
-            # TODO a pydantic validation error may be appended as the last message, don't know how to get the raw response in this case
-            completion_tokens = 0
-            usage = Usage(
-                prompt_tokens=prompt_tokens,
-                completion_tokens=completion_tokens,
-                total_tokens=(prompt_tokens + completion_tokens),
-            )
-
-            # Catch case where the model does not return a properly formatted output
-            # AttributeError is an instructor bug: https://github.com/instructor-ai/instructor/pull/1103
-            # > AttributeError: 'NoneType' object has no attribute '_raw_response'
-            if type(e).__name__ in {"ValidationError", "AttributeError"}:
-                e = ConstrainedGenerationError()
-            # there are no other known errors to catch
-            dct = _log_llm_exception(e)
+            dct, usage = handle_llm_exception(e, messages, self.model, retries)
 
         # Add usage data to the response (e.g. token counts, cost)
         dct.update(_get_usage_dict(usage, model=self.model))
@@ -437,45 +450,9 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         # convert list of LLMResponse objects to the dataframe records
         df_data = []
         for response in responses:
-            if isinstance(response, IncompleteOutputException):
-                e = response
-                usage = e.total_usage
-                dct = _log_llm_exception(e)
-            elif isinstance(response, InstructorRetryException):
-                e = response
-                usage = e.total_usage
-                # get root cause error from retries
-                n_attempts = e.n_attempts
-                e = e.__cause__.last_attempt.exception()
-                dct = _log_llm_exception(e)
-            elif isinstance(response, Exception):
-                e = response
-                # usage = e.total_usage
-                # not available here, so have to approximate by hand, assuming the same error occurred each time
-                n_attempts = retries.stop.max_attempt_number
+            if isinstance(response, Exception):
                 messages = []  # TODO how to get these?
-                prompt_tokens = n_attempts * litellm.token_counter(
-                    model=self.model, messages=messages[:-1]
-                )  # response is appended as the last message
-                # TODO a pydantic validation error may be appended as the last message, don't know how to get the raw response in this case
-                completion_tokens = 0
-                usage = Usage(
-                    prompt_tokens,
-                    completion_tokens,
-                    total_tokens=(prompt_tokens + completion_tokens),
-                )
-
-                # Catch case where the model does not return a properly formatted output
-                # AttributeError is an instructor bug: https://github.com/instructor-ai/instructor/pull/1103
-                # > AttributeError: 'NoneType' object has no attribute '_raw_response'
-                if type(e).__name__ in {"ValidationError", "AttributeError"}:
-                    logger.error(
-                        f"Converting error to ConstrainedGenerationError: {str(e)}"
-                    )
-                    logger.debug(f"Traceback:\n{traceback.format_exc()}")
-                    e = ConstrainedGenerationError()
-                # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
-                dct = _log_llm_exception(e)
+                dct, usage = handle_llm_exception(response, messages, self.model, retries)
             else:
                 resp, completion = response
                 usage = completion.usage
