@@ -250,4 +250,30 @@ def test_vision_runtime():
     assert (result[["_prompt_tokens", "_prompt_cost_usd", "_total_cost_usd"]] > 0).all().all()
     assert (result[["_completion_tokens", "_completion_cost_usd"]] == 0).all().all()
     
-    # TODO test with image input
+    # test with image input
+
+    runtime = AsyncLiteLLMVisionRuntime(model="gpt-4o-mini")
+
+    batch = pd.DataFrame.from_records([{
+        "text": "What's in this image?",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/687px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg"
+    }])
+
+    class VisionOutput(BaseModel):
+        description: str = Field(..., description="Description of the image")
+
+    result = asyncio.run(
+        runtime.batch_to_batch(
+            batch,
+            input_template="{text} {image}",
+            instructions_template="Describe what you see in the image.",
+            response_model=VisionOutput,
+            input_field_types={
+                "text": MessageChunkType.TEXT,
+                "image": MessageChunkType.IMAGE_URL
+            }
+        )
+    )
+
+    assert "mona lisa" in result["description"].iloc[0].lower()
+    assert (result[["_prompt_tokens", "_completion_tokens", "_prompt_cost_usd", "_completion_cost_usd", "_total_cost_usd"]] > 0).all().all()
