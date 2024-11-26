@@ -2,14 +2,17 @@ import logging
 import pandas as pd
 from typing import Type, Iterator, Optional
 from functools import cached_property
+from collections import defaultdict
 from adala.skills._base import TransformSkill
+from adala.runtimes import AsyncLiteLLMVisionRuntime
+from adala.runtimes._litellm import MessageChunkType
 from pydantic import BaseModel, Field, model_validator
 
 from adala.runtimes import Runtime, AsyncRuntime
 from adala.utils.internal_data import InternalDataFrame
 
 from label_studio_sdk.label_interface import LabelInterface
-from label_studio_sdk.label_interface.control_tags import ControlTag
+from label_studio_sdk.label_interface.control_tags import ControlTag, ObjectTag
 from label_studio_sdk._extensions.label_studio_tools.core.utils.json_schema import (
     json_schema_to_pydantic,
 )
@@ -41,6 +44,15 @@ class LabelStudioSkill(TransformSkill):
         for tag in interface.controls:
             # NOTE: don't need to check object tag because at this point, unusable control tags should have been stripped out of the label config
             if tag.tag.lower() == "labels":
+                yield tag
+                
+    def image_tags(self) -> Iterator[ObjectTag]:
+        # check if any image tags are used as input variables
+        object_tag_names = self.allowed_object_tags or list(interface._objects.keys())
+        interface = LabelInterface(self.label_config)
+        for tag_name in object_tag_names:
+            tag = interface.get_object(tag_name)
+            if tag.tag.lower() == "image":
                 yield tag
 
     @model_validator(mode="after")
@@ -100,13 +112,27 @@ class LabelStudioSkill(TransformSkill):
     ) -> InternalDataFrame:
 
         with json_schema_to_pydantic(self.field_schema) as ResponseModel:
-            output = await runtime.batch_to_batch(
-                input,
-                input_template=self.input_template,
-                output_template="",
-                instructions_template=self.instructions,
-                response_model=ResponseModel,
-            )
+            # special handling to flag image inputs if they exist
+            if isinstance(runtime, AsyncLiteLLMVisionRuntime):
+                input_field_types = defaultdict(lambda: MessageChunkType.TEXT)
+                for tag in self.image_tags():
+                    input_field_types[tag.name] = MessageChunkType.IMAGE_URL
+                output = await runtime.batch_to_batch(
+                    input,
+                    input_template=self.input_template,
+                    output_template="",
+                    instructions_template=self.instructions,
+                    response_model=ResponseModel,
+                    input_field_types=input_field_types
+                )
+            else:
+                output = await runtime.batch_to_batch(
+                    input,
+                    input_template=self.input_template,
+                    output_template="",
+                    instructions_template=self.instructions,
+                    response_model=ResponseModel,
+                )
             for ner_tag in self.ner_tags():
                 input_field_name = ner_tag.objects[0].value.lstrip("$")
                 output_field_name = ner_tag.name
