@@ -38,6 +38,7 @@ class LabelStudioSkill(TransformSkill):
 
     # TODO: implement postprocessing to verify Taxonomy
 
+    @cached_property
     def ner_tags(self) -> Iterator[ControlTag]:
         # check if the input config has NER tag (<Labels> + <Text>), and return its `from_name` and `to_name`
         interface = LabelInterface(self.label_config)
@@ -46,6 +47,7 @@ class LabelStudioSkill(TransformSkill):
             if tag.tag.lower() == "labels":
                 yield tag
 
+    @cached_property
     def image_tags(self) -> Iterator[ObjectTag]:
         # check if any image tags are used as input variables
         object_tag_names = self.allowed_object_tags or list(interface._objects.keys())
@@ -115,7 +117,7 @@ class LabelStudioSkill(TransformSkill):
             # special handling to flag image inputs if they exist
             if isinstance(runtime, AsyncLiteLLMVisionRuntime):
                 input_field_types = defaultdict(lambda: MessageChunkType.TEXT)
-                for tag in self.image_tags():
+                for tag in self.image_tags:
                     input_field_types[tag.name] = MessageChunkType.IMAGE_URL
                 output = await runtime.batch_to_batch(
                     input,
@@ -133,7 +135,7 @@ class LabelStudioSkill(TransformSkill):
                     instructions_template=self.instructions,
                     response_model=ResponseModel,
                 )
-            for ner_tag in self.ner_tags():
+            for ner_tag in self.ner_tags:
                 input_field_name = ner_tag.objects[0].value.lstrip("$")
                 output_field_name = ner_tag.name
                 quote_string_field_name = "text"
