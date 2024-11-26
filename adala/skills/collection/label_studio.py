@@ -39,52 +39,59 @@ class LabelStudioSkill(TransformSkill):
     # TODO: implement postprocessing to verify Taxonomy
 
     @cached_property
+    def label_interface(self) -> LabelInterface:
+        return LabelInterface(self.label_config)
+
+    @cached_property
     def ner_tags(self) -> Iterator[ControlTag]:
         # check if the input config has NER tag (<Labels> + <Text>), and return its `from_name` and `to_name`
-        interface = LabelInterface(self.label_config)
         control_tag_names = self.allowed_control_tags or list(
-            interface._controls.keys()
+            self.label_interface._controls.keys()
         )
         for tag_name in control_tag_names:
-            tag = interface.get_control(tag_name)
+            tag = self.label_interface.get_control(tag_name)
             if tag.tag.lower() in {"labels", "hypertextlabels"}:
                 yield tag
 
     @cached_property
     def image_tags(self) -> Iterator[ObjectTag]:
         # check if any image tags are used as input variables
-        interface = LabelInterface(self.label_config)
-        object_tag_names = self.allowed_object_tags or list(interface._objects.keys())
+        object_tag_names = self.allowed_object_tags or list(
+            self.label_interface._objects.keys()
+        )
         for tag_name in object_tag_names:
-            tag = interface.get_object(tag_name)
+            tag = self.label_interface.get_object(tag_name)
             if tag.tag.lower() == "image":
                 yield tag
 
     @model_validator(mode="after")
     def validate_response_model(self):
 
-        interface = LabelInterface(self.label_config)
         logger.debug(f"Read labeling config {self.label_config}")
 
         if self.allowed_control_tags or self.allowed_object_tags:
             if self.allowed_control_tags:
                 control_tags = {
-                    tag: interface._controls[tag] for tag in self.allowed_control_tags
+                    tag: self.label_interface._controls[tag]
+                    for tag in self.allowed_control_tags
                 }
             else:
-                control_tags = interface._controls
+                control_tags = self.label_interface._controls
             if self.allowed_object_tags:
                 object_tags = {
-                    tag: interface._objects[tag] for tag in self.allowed_object_tags
+                    tag: self.label_interface._objects[tag]
+                    for tag in self.allowed_object_tags
                 }
             else:
-                object_tags = interface._objects
+                object_tags = self.label_interface._objects
             interface = LabelInterface.create_instance(
                 tags={**control_tags, **object_tags}
             )
             logger.debug(
                 f"Filtered labeling config based on allowed tags {self.allowed_control_tags=} and {self.allowed_object_tags=} to {interface.config}"
             )
+        else:
+            interface = self.label_interface
 
         # NOTE: filtered label config is used for the response model, but full label config is used for the prompt, so that the model has as much context as possible.
         self.field_schema = interface.to_json_schema()
