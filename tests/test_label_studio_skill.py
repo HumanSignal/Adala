@@ -1,3 +1,4 @@
+import asyncio
 import pytest
 import os
 import pandas as pd
@@ -490,3 +491,51 @@ async def test_label_studio_skill_valid_predictions():
 
     assert len(failed_configs) == 0, f"Failed configs: {failed_configs}"
     assert len(errored_configs) == 0, f"Errored configs: {errored_configs}"
+
+
+@pytest.mark.vcr
+def test_label_studio_skill_image_input():
+    df = pd.DataFrame(
+        [
+            {
+                "title": "It's definitely not the Mona Lisa",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/687px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
+            }
+        ]
+    )
+
+    agent_payload = {
+        "runtimes": {
+            "default": {
+                "type": "AsyncLiteLLMChatRuntime",
+                "model": "gpt-4o-mini",
+            }
+        },
+        "skills": [
+            {
+                "type": "LabelStudioSkill",
+                "name": "SneakyMuseumLabel",
+                "input_template": """
+                    Given the title of a museum painting:\n{title}\n and the image of the painting:\n{image}\n,
+                    classify the painting as either "Mona Lisa" or "Not Mona Lisa".
+                    They may or may not agree with each other. If the title and image disagree, believe the image.
+                """,
+                "label_config": """
+                <View>
+                  <Header value="Painting Classification"/>
+                  <Text name="title" value="$title"/>
+                  <Image name="image" value="$image"/>
+                  <Choices name="classification" toName="image" required="true">
+                    <Choice value="Mona Lisa"/>
+                    <Choice value="Not Mona Lisa"/>
+                  </Choices>
+                </View>
+                """,
+            }
+        ],
+    }
+
+    agent = Agent(**agent_payload)
+    predictions = asyncio.run(agent.arun(df))
+
+    assert predictions.classification.tolist() == ["Mona Lisa"]
