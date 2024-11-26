@@ -47,10 +47,7 @@ class LabelStudioSkill(TransformSkill):
         )
         for tag_name in control_tag_names:
             tag = interface.get_control(tag_name)
-            if (
-                tag.tag.lower() in {"labels", "hypertextlabels"}
-                and interface.get_object(tag.to_name).tag.lower() != "image"
-            ):
+            if tag.tag.lower() in {"labels", "hypertextlabels"}:
                 yield tag
 
     @cached_property
