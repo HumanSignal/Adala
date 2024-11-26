@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Type, Union, Literal, TypedDict
+from typing import Any, Dict, List, Optional, Type, Union, Literal, TypedDict, Iterable
 from functools import cached_property
 from enum import Enum
 import litellm
@@ -21,6 +21,7 @@ from adala.utils.internal_data import InternalDataFrame
 from adala.utils.parse import (
     parse_template,
     partial_str_format,
+    TemplateChunks,
 )
 from pydantic import ConfigDict, field_validator, BaseModel
 from pydantic_core import to_jsonable_python
@@ -58,6 +59,7 @@ RETRY_POLICY = dict(
 )
 
 
+# TODO: consolidate these data models and unify our preprocessing for LLM input into one step RawInputModel -> PreparedInputModel
 class TextMessageChunk(TypedDict):
     type: Literal["text"]
     text: str
@@ -638,63 +640,72 @@ def split_message_into_chunks(
     """
     # Parse template to get field positions and surrounding text
     parsed = parse_template(input_template)
-    chunks: List[MessageChunk] = []
 
-    current_chunk: Optional[MessageChunk] = None
-
-    def add_to_current_chunk(chunk):
-        nonlocal current_chunk
+    def add_to_current_chunk(
+        current_chunk: Optional[MessageChunk], chunk: MessageChunk
+    ) -> MessageChunk:
         if current_chunk:
             current_chunk["text"] += chunk["text"]
+            return current_chunk
         else:
-            current_chunk = chunk
-
-    def push_current_chunk():
-        nonlocal current_chunk
-        if current_chunk:
-            chunks.append(current_chunk)
-            current_chunk = None
+            return chunk
 
     # Build chunks by iterating through parsed template parts
-    for part in parsed:
-        if part["type"] == "text":
-            add_to_current_chunk({"type": "text", "text": part["text"]})
-        elif part["type"] == "var":
-            field_value = part["text"]
-            try:
-                field_type = input_field_types[field_value]
-            except KeyError:
-                raise ValueError(f"Field {field_value} not found in input_field_types")
-            if field_type == MessageChunkType.TEXT:
-                # try to substitute in variable and add to current chunk
-                substituted_text = partial_str_format(
-                    f"{{{field_value}}}", **input_fields
+    def build_chunks(parsed: Iterable[TemplateChunks]):
+        current_chunk: Optional[MessageChunk] = None
+
+        for part in parsed:
+            if part["type"] == "text":
+                current_chunk = add_to_current_chunk(
+                    current_chunk, {"type": "text", "text": part["text"]}
                 )
-                if substituted_text != field_value:
-                    add_to_current_chunk({"type": "text", "text": substituted_text})
-                else:
-                    # be permissive for unfound variables
-                    add_to_current_chunk({"type": "text", "text": f"{{{field_value}}}"})
-            elif field_type == MessageChunkType.IMAGE_URL:
-                substituted_text = partial_str_format(
-                    f"{{{field_value}}}", **input_fields
-                )
-                if substituted_text != field_value:
-                    # push current chunk, push image chunk, and start new chunk
-                    push_current_chunk()
-                    chunks.append(
-                        {
+            elif part["type"] == "var":
+                field_value = part["text"]
+                try:
+                    field_type = input_field_types[field_value]
+                except KeyError:
+                    raise ValueError(
+                        f"Field {field_value} not found in input_field_types"
+                    )
+                if field_type == MessageChunkType.TEXT:
+                    # try to substitute in variable and add to current chunk
+                    substituted_text = partial_str_format(
+                        f"{{{field_value}}}", **input_fields
+                    )
+                    if substituted_text != field_value:
+                        current_chunk = add_to_current_chunk(
+                            current_chunk, {"type": "text", "text": substituted_text}
+                        )
+                    else:
+                        # be permissive for unfound variables
+                        current_chunk = add_to_current_chunk(
+                            current_chunk,
+                            {"type": "text", "text": f"{{{field_value}}}"},
+                        )
+                elif field_type == MessageChunkType.IMAGE_URL:
+                    substituted_text = partial_str_format(
+                        f"{{{field_value}}}", **input_fields
+                    )
+                    if substituted_text != field_value:
+                        # push current chunk, push image chunk, and start new chunk
+                        if current_chunk:
+                            yield current_chunk
+                        current_chunk = None
+                        yield {
                             "type": "image_url",
                             "image_url": {"url": input_fields[field_value]},
                         }
-                    )
-                else:
-                    # be permissive for unfound variables
-                    add_to_current_chunk({"type": "text", "text": f"{{{field_value}}}"})
+                    else:
+                        # be permissive for unfound variables
+                        current_chunk = add_to_current_chunk(
+                            current_chunk,
+                            {"type": "text", "text": f"{{{field_value}}}"},
+                        )
 
-    push_current_chunk()
+        if current_chunk:
+            yield current_chunk
 
-    return chunks
+    return list(build_chunks(parsed))
 
 
 class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
