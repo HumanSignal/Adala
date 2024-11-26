@@ -41,10 +41,10 @@ class LabelStudioSkill(TransformSkill):
     @cached_property
     def ner_tags(self) -> Iterator[ControlTag]:
         # check if the input config has NER tag (<Labels> + <Text>), and return its `from_name` and `to_name`
+        interface = LabelInterface(self.label_config)
         control_tag_names = self.allowed_control_tags or list(
             interface._controls.keys()
         )
-        interface = LabelInterface(self.label_config)
         for tag_name in control_tag_names:
             tag = interface.get_control(tag_name)
             if (
@@ -56,8 +56,8 @@ class LabelStudioSkill(TransformSkill):
     @cached_property
     def image_tags(self) -> Iterator[ObjectTag]:
         # check if any image tags are used as input variables
-        object_tag_names = self.allowed_object_tags or list(interface._objects.keys())
         interface = LabelInterface(self.label_config)
+        object_tag_names = self.allowed_object_tags or list(interface._objects.keys())
         for tag_name in object_tag_names:
             tag = interface.get_object(tag_name)
             if tag.tag.lower() == "image":
