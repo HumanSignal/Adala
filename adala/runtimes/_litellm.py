@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union, Literal, TypedDict
 from functools import cached_property
 from enum import Enum
 import litellm
@@ -58,9 +58,24 @@ RETRY_POLICY = dict(
 )
 
 
+class TextMessageChunk(TypedDict):
+    type: Literal["text"]
+    text: str
+
+
+class ImageMessageChunk(TypedDict):
+    type: Literal["image"]
+    image_url: Dict[str, str]
+
+
+MessageChunk = Union[TextMessageChunk, ImageMessageChunk]
+
+Message = Union[str, List[MessageChunk]]
+
+
 def get_messages(
     # user prompt can be a string or a list of multimodal message chunks
-    user_prompt: Union[str, List[Dict[str, str]]],
+    user_prompt: Message,
     system_prompt: Optional[str] = None,
     instruction_first: bool = True,
 ):
@@ -592,7 +607,7 @@ class MessageChunkType(Enum):
 
 def split_message_into_chunks(
     input_template: str, input_field_types: Dict[str, MessageChunkType], **input_fields
-) -> List[Dict[str, str]]:
+) -> List[MessageChunk]:
     """Split a template string with field types into a list of message chunks.
 
     Takes a template string with placeholders and splits it into chunks based on the field types,
@@ -623,9 +638,9 @@ def split_message_into_chunks(
     """
     # Parse template to get field positions and surrounding text
     parsed = parse_template(input_template)
-    chunks = []
+    chunks: List[MessageChunk] = []
 
-    current_chunk = None
+    current_chunk: Optional[MessageChunk] = None
 
     def add_to_current_chunk(chunk):
         nonlocal current_chunk
