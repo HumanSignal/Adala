@@ -45,7 +45,7 @@ class LabelStudioSkill(TransformSkill):
             # NOTE: don't need to check object tag because at this point, unusable control tags should have been stripped out of the label config
             if tag.tag.lower() == "labels":
                 yield tag
-                
+
     def image_tags(self) -> Iterator[ObjectTag]:
         # check if any image tags are used as input variables
         object_tag_names = self.allowed_object_tags or list(interface._objects.keys())
@@ -123,7 +123,7 @@ class LabelStudioSkill(TransformSkill):
                     output_template="",
                     instructions_template=self.instructions,
                     response_model=ResponseModel,
-                    input_field_types=input_field_types
+                    input_field_types=input_field_types,
                 )
             else:
                 output = await runtime.batch_to_batch(

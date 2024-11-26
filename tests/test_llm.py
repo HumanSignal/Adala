@@ -2,7 +2,11 @@ import pytest
 import asyncio
 import pandas as pd
 from pydantic import BaseModel, Field
-from adala.runtimes import LiteLLMChatRuntime, AsyncLiteLLMChatRuntime, AsyncLiteLLMVisionRuntime
+from adala.runtimes import (
+    LiteLLMChatRuntime,
+    AsyncLiteLLMChatRuntime,
+    AsyncLiteLLMVisionRuntime,
+)
 from adala.runtimes._litellm import split_message_into_chunks, MessageChunkType
 
 
@@ -143,12 +147,11 @@ def test_llm_async():
 
     # TODO test batch with successes and failures, figure out how to inject a particular error into LiteLLM
 
+
 def test_split_message_into_chunks():
     # Test basic text-only template
     result = split_message_into_chunks(
-        "Hello {name}!",
-        {"name": MessageChunkType.TEXT},
-        name="Alice"
+        "Hello {name}!", {"name": MessageChunkType.TEXT}, name="Alice"
     )
     assert result == [{"type": "text", "text": "Hello Alice!"}]
 
@@ -156,41 +159,36 @@ def test_split_message_into_chunks():
     result = split_message_into_chunks(
         "Look at this {image}",
         {"image": MessageChunkType.IMAGE_URL},
-        image="http://example.com/img.jpg"
+        image="http://example.com/img.jpg",
     )
     assert result == [
         {"type": "text", "text": "Look at this "},
-        {"type": "image_url", "image_url": {"url": "http://example.com/img.jpg"}}
+        {"type": "image_url", "image_url": {"url": "http://example.com/img.jpg"}},
     ]
 
     # Test mixed text and image template
     result = split_message_into_chunks(
         "User {name} shared {image} yesterday",
-        {
-            "name": MessageChunkType.TEXT,
-            "image": MessageChunkType.IMAGE_URL
-        },
+        {"name": MessageChunkType.TEXT, "image": MessageChunkType.IMAGE_URL},
         name="Bob",
-        image="http://example.com/photo.jpg"
+        image="http://example.com/photo.jpg",
     )
     assert result == [
         {"type": "text", "text": "User Bob shared "},
         {"type": "image_url", "image_url": {"url": "http://example.com/photo.jpg"}},
-        {"type": "text", "text": " yesterday"}
+        {"type": "text", "text": " yesterday"},
     ]
 
     # Test multiple occurrences of same field
     result = split_message_into_chunks(
-        "{name} is here. Hi {name}!",
-        {"name": MessageChunkType.TEXT},
-        name="Dave"
+        "{name} is here. Hi {name}!", {"name": MessageChunkType.TEXT}, name="Dave"
     )
     assert result == [{"type": "text", "text": "Dave is here. Hi Dave!"}]
 
 
 @pytest.mark.vcr
 def test_vision_runtime():
-    
+
     # test success
 
     runtime = AsyncLiteLLMVisionRuntime()
@@ -220,9 +218,24 @@ def test_vision_runtime():
         ]
     )
     pd.testing.assert_frame_equal(result[["name", "age"]], expected_result)
-    
+
     # assert all other columns (costs) are nonzero
-    assert (result[["_prompt_tokens", "_completion_tokens", "_prompt_cost_usd", "_completion_cost_usd", "_total_cost_usd"]] > 0).all().all()
+    assert (
+        (
+            result[
+                [
+                    "_prompt_tokens",
+                    "_completion_tokens",
+                    "_prompt_cost_usd",
+                    "_completion_cost_usd",
+                    "_total_cost_usd",
+                ]
+            ]
+            > 0
+        )
+        .all()
+        .all()
+    )
 
     # test failure
 
@@ -246,19 +259,29 @@ def test_vision_runtime():
             }
         ]
     )
-    pd.testing.assert_frame_equal(result[["_adala_error", "_adala_message", "_adala_details"]], expected_result)
+    pd.testing.assert_frame_equal(
+        result[["_adala_error", "_adala_message", "_adala_details"]], expected_result
+    )
     # assert only prompt costs are nonzero
-    assert (result[["_prompt_tokens", "_prompt_cost_usd", "_total_cost_usd"]] > 0).all().all()
+    assert (
+        (result[["_prompt_tokens", "_prompt_cost_usd", "_total_cost_usd"]] > 0)
+        .all()
+        .all()
+    )
     assert (result[["_completion_tokens", "_completion_cost_usd"]] == 0).all().all()
-    
+
     # test with image input
 
     runtime = AsyncLiteLLMVisionRuntime(model="gpt-4o-mini")
 
-    batch = pd.DataFrame.from_records([{
-        "text": "What's in this image?",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/687px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg"
-    }])
+    batch = pd.DataFrame.from_records(
+        [
+            {
+                "text": "What's in this image?",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/687px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
+            }
+        ]
+    )
 
     class VisionOutput(BaseModel):
         description: str = Field(..., description="Description of the image")
@@ -271,10 +294,25 @@ def test_vision_runtime():
             response_model=VisionOutput,
             input_field_types={
                 "text": MessageChunkType.TEXT,
-                "image": MessageChunkType.IMAGE_URL
-            }
+                "image": MessageChunkType.IMAGE_URL,
+            },
         )
     )
 
     assert "mona lisa" in result["description"].iloc[0].lower()
-    assert (result[["_prompt_tokens", "_completion_tokens", "_prompt_cost_usd", "_completion_cost_usd", "_total_cost_usd"]] > 0).all().all()
+    assert (
+        (
+            result[
+                [
+                    "_prompt_tokens",
+                    "_completion_tokens",
+                    "_prompt_cost_usd",
+                    "_completion_cost_usd",
+                    "_total_cost_usd",
+                ]
+            ]
+            > 0
+        )
+        .all()
+        .all()
+    )

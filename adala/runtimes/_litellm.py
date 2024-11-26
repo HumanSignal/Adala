@@ -146,19 +146,21 @@ class InstructorAsyncClientMixin(InstructorClientMixin):
         return instructor.from_litellm(litellm.acompletion, **kwargs)
 
 
-def handle_llm_exception(e: Exception, messages: List[Dict[str, str]], model: str, retries) -> tuple[Dict, Usage]:
+def handle_llm_exception(
+    e: Exception, messages: List[Dict[str, str]], model: str, retries
+) -> tuple[Dict, Usage]:
     """Handle exceptions from LLM calls and return standardized error dict and usage stats.
-    
+
     Args:
         e: The caught exception
         messages: The messages that were sent to the LLM
         model: The model name
         retries: The retry policy object
-        
+
     Returns:
         Tuple of (error_dict, usage_stats)
     """
-    
+
     if isinstance(e, IncompleteOutputException):
         usage = e.total_usage
     elif isinstance(e, InstructorRetryException):
@@ -183,14 +185,12 @@ def handle_llm_exception(e: Exception, messages: List[Dict[str, str]], model: st
         # AttributeError is an instructor bug: https://github.com/instructor-ai/instructor/pull/1103
         # > AttributeError: 'NoneType' object has no attribute '_raw_response'
         if type(e).__name__ in {"ValidationError", "AttributeError"}:
-            logger.error(
-                f"Converting error to ConstrainedGenerationError: {str(e)}"
-            )
+            logger.error(f"Converting error to ConstrainedGenerationError: {str(e)}")
             logger.debug(f"Traceback:\n{traceback.format_exc()}")
             e = ConstrainedGenerationError()
-            
+
         # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
-            
+
     return _log_llm_exception(e), usage
 
 
@@ -455,7 +455,9 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         for response in responses:
             if isinstance(response, Exception):
                 messages = []  # TODO how to get these?
-                dct, usage = handle_llm_exception(response, messages, self.model, retries)
+                dct, usage = handle_llm_exception(
+                    response, messages, self.model, retries
+                )
             else:
                 resp, completion = response
                 usage = completion.usage
@@ -586,9 +588,11 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
 class MessageChunkType(Enum):
     TEXT = "text"
     IMAGE_URL = "image_url"
-    
 
-def split_message_into_chunks(input_template: str, input_field_types: Dict[str, MessageChunkType], **input_fields) -> List[Dict[str, str]]:
+
+def split_message_into_chunks(
+    input_template: str, input_field_types: Dict[str, MessageChunkType], **input_fields
+) -> List[Dict[str, str]]:
     """Split a template string with field types into a list of message chunks.
 
     Takes a template string with placeholders and splits it into chunks based on the field types,
@@ -629,37 +633,46 @@ def split_message_into_chunks(input_template: str, input_field_types: Dict[str, 
             current_chunk["text"] += chunk["text"]
         else:
             current_chunk = chunk
-            
+
     def push_current_chunk():
         nonlocal current_chunk
         if current_chunk:
             chunks.append(current_chunk)
             current_chunk = None
-    
+
     # Build chunks by iterating through parsed template parts
     for part in parsed:
-        if part['type'] == 'text':
-            add_to_current_chunk({'type': 'text', 'text': part['text']})
-        elif part['type'] == 'var':
-            field_value = part['text']
+        if part["type"] == "text":
+            add_to_current_chunk({"type": "text", "text": part["text"]})
+        elif part["type"] == "var":
+            field_value = part["text"]
             try:
                 field_type = input_field_types[field_value]
             except KeyError:
                 raise ValueError(f"Field {field_value} not found in input_field_types")
             if field_type == MessageChunkType.TEXT:
                 # try to substitute in variable and add to current chunk
-                substituted_text = partial_str_format(f"{{{field_value}}}", **input_fields)
+                substituted_text = partial_str_format(
+                    f"{{{field_value}}}", **input_fields
+                )
                 if substituted_text != field_value:
                     add_to_current_chunk({"type": "text", "text": substituted_text})
                 else:
                     # be permissive for unfound variables
                     add_to_current_chunk({"type": "text", "text": f"{{{field_value}}}"})
             elif field_type == MessageChunkType.IMAGE_URL:
-                substituted_text = partial_str_format(f"{{{field_value}}}", **input_fields)
+                substituted_text = partial_str_format(
+                    f"{{{field_value}}}", **input_fields
+                )
                 if substituted_text != field_value:
                     # push current chunk, push image chunk, and start new chunk
                     push_current_chunk()
-                    chunks.append({"type": "image_url", "image_url": {"url": input_fields[field_value]}})
+                    chunks.append(
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": input_fields[field_value]},
+                        }
+                    )
                 else:
                     # be permissive for unfound variables
                     add_to_current_chunk({"type": "text", "text": f"{{{field_value}}}"})
@@ -674,13 +687,12 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
     Runtime that uses [LiteLLM API](https://litellm.vercel.app/docs) and vision
     models to perform the skill.
     """
-    
+
     def init_runtime(self) -> "Runtime":
         super().init_runtime()
         if not litellm.supports_vision(self.model):
             raise ValueError(f"Model {self.model} does not support vision")
         return self
-
 
     async def batch_to_batch(
         self,
@@ -702,16 +714,20 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
             raise ValueError(
                 "You must explicitly specify the `response_model` in runtime."
             )
-        
-        input_field_types = input_field_types or defaultdict(lambda: MessageChunkType.TEXT)
+
+        input_field_types = input_field_types or defaultdict(
+            lambda: MessageChunkType.TEXT
+        )
 
         extra_fields = extra_fields or {}
         user_prompts = batch.apply(
             # TODO: remove "extra_fields" to avoid name collisions
-            lambda row: split_message_into_chunks(input_template, input_field_types, **row, **extra_fields),
+            lambda row: split_message_into_chunks(
+                input_template, input_field_types, **row, **extra_fields
+            ),
             axis=1,
         ).tolist()
-        
+
         # rest of this function is the same as AsyncLiteLLMChatRuntime.batch_to_batch
 
         retries = AsyncRetrying(**RETRY_POLICY)
@@ -743,7 +759,9 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
         for response in responses:
             if isinstance(response, Exception):
                 messages = []  # TODO how to get these?
-                dct, usage = handle_llm_exception(response, messages, self.model, retries)
+                dct, usage = handle_llm_exception(
+                    response, messages, self.model, retries
+                )
             else:
                 resp, completion = response
                 usage = completion.usage
@@ -756,5 +774,5 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
 
         output_df = InternalDataFrame(df_data)
         return output_df.set_index(batch.index)
-    
+
     # TODO: cost estimate
