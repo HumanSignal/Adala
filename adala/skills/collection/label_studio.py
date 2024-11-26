@@ -41,10 +41,16 @@ class LabelStudioSkill(TransformSkill):
     @cached_property
     def ner_tags(self) -> Iterator[ControlTag]:
         # check if the input config has NER tag (<Labels> + <Text>), and return its `from_name` and `to_name`
+        control_tag_names = self.allowed_control_tags or list(
+            interface._controls.keys()
+        )
         interface = LabelInterface(self.label_config)
-        for tag in interface.controls:
-            # NOTE: don't need to check object tag because at this point, unusable control tags should have been stripped out of the label config
-            if tag.tag.lower() == "labels":
+        for tag_name in control_tag_names:
+            tag = interface.get_control(tag_name)
+            if (
+                tag.tag.lower() == "labels"
+                and interface.get_object(tag.to_name).tag.lower() != "image"
+            ):
                 yield tag
 
     @cached_property
