@@ -30,19 +30,23 @@ TEST_AGENT = {
     },
     "skills": [
         {
-            "type": "ClassificationSkill",
-            "name": "ClassificationResult",
-            "instructions": "",
+            "name": "label_studio_skill",
+            "type": "LabelStudioSkill",
             "input_template": "Classify sentiment of the input text: {input}",
-            "field_schema": {
-                "output": {
-                    "type": "string",
-                    "enum": ["positive", "negative", "neutral"],
-                }
-            },
+            "label_config": """
+            <View>
+                <Text name="text" value="$text" />
+                <Choices name="output" toName="text">
+                    <Choice value="positive" />
+                    <Choice value="negative" />
+                    <Choice value="neutral" />
+                </Choices>
+            </View>
+            """
         }
     ],
 }
+
 
 TEST_INPUT_DATA = [
     {"task_id": 100, "input": "I am happy"},
@@ -54,9 +58,9 @@ TEST_OUTPUT_DATA = [
         "output": "positive",
         "_completion_cost_usd": 3e-06,
         "_completion_tokens": 5,
-        "_prompt_cost_usd": 1.365e-05,
-        "_prompt_tokens": 91,
-        "_total_cost_usd": 1.6649999999999998e-05,
+        "_prompt_cost_usd": 1.35e-05,
+        "_prompt_tokens": 90,
+        "_total_cost_usd": 1.65e-05,
     }
 ]
 
@@ -164,7 +168,11 @@ async def test_run_streaming(
     )
 
     # Verify that producer is called with the correct amount of send_and_wait calls and data
-    assert mock_kafka_producer.send_and_wait.call_count == 1
-    mock_kafka_producer.send_and_wait.assert_any_call(
-        "output_topic", value=TEST_OUTPUT_DATA
-    )
+    assert mock_kafka_producer.send_and_wait.call_count == 1, f"Expected 1 call but got {mock_kafka_producer.send_and_wait.call_count}"
+    try:
+        mock_kafka_producer.send_and_wait.assert_any_call(
+            "output_topic", value=TEST_OUTPUT_DATA
+        )
+    except AssertionError as e:
+        actual_calls = mock_kafka_producer.send_and_wait.call_args_list
+        raise AssertionError(f"Expected call with ('output_topic', value={TEST_OUTPUT_DATA}) but got:\n{actual_calls}") from e

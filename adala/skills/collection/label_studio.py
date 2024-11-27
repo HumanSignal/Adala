@@ -2,11 +2,12 @@ import logging
 import pandas as pd
 from typing import Type, Iterator, Optional
 from functools import cached_property
+from copy import deepcopy
 from collections import defaultdict
 from adala.skills._base import TransformSkill
 from adala.runtimes import AsyncLiteLLMVisionRuntime
 from adala.runtimes._litellm import MessageChunkType
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, computed_field
 
 from adala.runtimes import Runtime, AsyncRuntime
 from adala.utils.internal_data import InternalDataFrame
@@ -35,7 +36,7 @@ class LabelStudioSkill(TransformSkill):
     label_config: str = "<View></View>"
     allowed_control_tags: Optional[list[str]] = None
     allowed_object_tags: Optional[list[str]] = None
-
+    
     # TODO: implement postprocessing to verify Taxonomy
 
     @cached_property
@@ -63,6 +64,14 @@ class LabelStudioSkill(TransformSkill):
             tag = self.label_interface.get_object(tag_name)
             if tag.tag.lower() == "image":
                 yield tag
+                
+    def __getstate__(self):
+        """Exclude cached properties when pickling - otherwise the 'Agent' can not be serialized in celery"""
+        state = deepcopy(super().__getstate__())
+        # Remove cached_property values
+        for key in ['label_interface', 'ner_tags', 'image_tags']:
+            state['__dict__'].pop(key, None)
+        return state
 
     @model_validator(mode="after")
     def validate_response_model(self):
