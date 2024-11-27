@@ -148,17 +148,20 @@ def test_agent_is_pickleable():
             "timeout_ms": 1000,
         },
         "skills": [
-            {
-                "type": "ClassificationSkill",
-                "name": "ClassificationResult",
-                "instructions": "",
-                "input_template": "Classify sentiment of the input text: {input}",
-                "field_schema": {
-                    "output": {
-                        "type": "string",
-                        "enum": ["positive", "negative", "neutral"],
-                    }
-                },
+        {
+            "name": "label_studio_skill",
+            "type": "LabelStudioSkill",
+            "input_template": "Classify sentiment of the input text: {input}",
+            "label_config": """
+            <View>
+                <Text name="text" value="$text" />
+                <Choices name="output" toName="text">
+                    <Choice value="positive" />
+                    <Choice value="negative" />
+                    <Choice value="neutral" />
+                </Choices>
+            </View>
+            """
             }
         ],
     }
@@ -168,5 +171,5 @@ def test_agent_is_pickleable():
     agent_roundtrip = pickle.loads(agent_pickle)
     assert (
         agent_json["skills"][0]["input_template"]
-        == agent_roundtrip.skills["ClassificationResult"].input_template
+        == agent_roundtrip.skills["label_studio_skill"].input_template
     )
