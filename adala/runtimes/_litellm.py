@@ -1,7 +1,18 @@
 import asyncio
 import logging
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Type, Union, Literal, TypedDict, Iterable, Generator
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Type,
+    Union,
+    Literal,
+    TypedDict,
+    Iterable,
+    Generator,
+)
 from functools import cached_property
 from enum import Enum
 import litellm
@@ -651,7 +662,9 @@ def split_message_into_chunks(
             return chunk
 
     # Build chunks by iterating through parsed template parts
-    def build_chunks(parsed: Iterable[TemplateChunks]) -> Generator[MessageChunk, None, None]:
+    def build_chunks(
+        parsed: Iterable[TemplateChunks],
+    ) -> Generator[MessageChunk, None, None]:
         current_chunk: Optional[MessageChunk] = None
 
         for part in parsed:
