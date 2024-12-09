@@ -90,7 +90,7 @@ jobs:
           matrix.os == 'ubuntu-latest' &&
           matrix.python-version == '3.11' &&
           github.event.pull_request.user.login != 'dependabot[bot]'
-        uses: codecov/codecov-action@v5.0.7
+        uses: codecov/codecov-action@v5.1.1
         with:
           files: tests/coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
