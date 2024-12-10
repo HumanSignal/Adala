@@ -148,11 +148,11 @@ def test_agent_is_pickleable():
             "timeout_ms": 1000,
         },
         "skills": [
-        {
-            "name": "label_studio_skill",
-            "type": "LabelStudioSkill",
-            "input_template": "Classify sentiment of the input text: {input}",
-            "label_config": """
+            {
+                "name": "label_studio_skill",
+                "type": "LabelStudioSkill",
+                "input_template": "Classify sentiment of the input text: {input}",
+                "label_config": """
             <View>
                 <Text name="text" value="$text" />
                 <Choices name="output" toName="text">
@@ -161,7 +161,7 @@ def test_agent_is_pickleable():
                     <Choice value="neutral" />
                 </Choices>
             </View>
-            """
+            """,
             }
         ],
     }

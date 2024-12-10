@@ -54,7 +54,10 @@ class LabelStudioSkill(TransformSkill):
             tag = self.label_interface.get_control(tag_name)
             if tag.tag.lower() in {"labels", "hypertextlabels"}:
                 if self.allowed_object_tags:
-                    if all(object_tag.tag in self.allowed_object_tags for object_tag in tag.objects):
+                    if all(
+                        object_tag.tag in self.allowed_object_tags
+                        for object_tag in tag.objects
+                    ):
                         tags.append(tag)
                 else:
                     tags.append(tag)

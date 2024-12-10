@@ -165,7 +165,7 @@ async def submit_streaming(request: SubmitStreamingRequest):
     """
 
     task = streaming_parent_task
-    
+
     result = task.apply_async(
         kwargs={"agent": request.agent, "result_handler": request.result_handler}
     )
