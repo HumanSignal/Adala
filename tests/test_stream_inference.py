@@ -42,7 +42,7 @@ TEST_AGENT = {
                     <Choice value="neutral" />
                 </Choices>
             </View>
-            """
+            """,
         }
     ],
 }
@@ -168,11 +168,15 @@ async def test_run_streaming(
     )
 
     # Verify that producer is called with the correct amount of send_and_wait calls and data
-    assert mock_kafka_producer.send_and_wait.call_count == 1, f"Expected 1 call but got {mock_kafka_producer.send_and_wait.call_count}"
+    assert (
+        mock_kafka_producer.send_and_wait.call_count == 1
+    ), f"Expected 1 call but got {mock_kafka_producer.send_and_wait.call_count}"
     try:
         mock_kafka_producer.send_and_wait.assert_any_call(
             "output_topic", value=TEST_OUTPUT_DATA
         )
     except AssertionError as e:
         actual_calls = mock_kafka_producer.send_and_wait.call_args_list
-        raise AssertionError(f"Expected call with ('output_topic', value={TEST_OUTPUT_DATA}) but got:\n{actual_calls}") from e
+        raise AssertionError(
+            f"Expected call with ('output_topic', value={TEST_OUTPUT_DATA}) but got:\n{actual_calls}"
+        ) from e

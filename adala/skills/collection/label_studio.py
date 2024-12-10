@@ -36,7 +36,7 @@ class LabelStudioSkill(TransformSkill):
     label_config: str = "<View></View>"
     allowed_control_tags: Optional[list[str]] = None
     allowed_object_tags: Optional[list[str]] = None
-    
+
     # TODO: implement postprocessing to verify Taxonomy
 
     @cached_property
@@ -53,7 +53,14 @@ class LabelStudioSkill(TransformSkill):
         for tag_name in control_tag_names:
             tag = self.label_interface.get_control(tag_name)
             if tag.tag.lower() in {"labels", "hypertextlabels"}:
-                tags.append(tag)
+                if self.allowed_object_tags:
+                    if all(
+                        object_tag.tag in self.allowed_object_tags
+                        for object_tag in tag.objects
+                    ):
+                        tags.append(tag)
+                else:
+                    tags.append(tag)
         return tags
 
     @cached_property
@@ -68,14 +75,13 @@ class LabelStudioSkill(TransformSkill):
             if tag.tag.lower() == "image":
                 tags.append(tag)
         return tags
-            
-                
+
     def __getstate__(self):
         """Exclude cached properties when pickling - otherwise the 'Agent' can not be serialized in celery"""
         state = deepcopy(super().__getstate__())
         # Remove cached_property values
-        for key in ['label_interface', 'ner_tags', 'image_tags']:
-            state['__dict__'].pop(key, None)
+        for key in ["label_interface", "ner_tags", "image_tags"]:
+            state["__dict__"].pop(key, None)
         return state
 
     @model_validator(mode="after")
