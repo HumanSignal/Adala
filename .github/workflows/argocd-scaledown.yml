@@ -10,6 +10,10 @@ on:
         required: false
         default: "adala"
         type: string
+      cloud:
+        required: false
+        default: "aws"
+        type: string
       cluster:
         required: false
         default: "dev.heartex.com"
@@ -29,6 +33,11 @@ on:
         required: false
         default: "adala"
         type: string
+      cloud:
+        description: "Cloud name"
+        required: false
+        default: "aws"
+        type: string
       cluster:
         description: "Cluster name"
         required: false
@@ -44,7 +53,6 @@ on:
       - converted_to_draft
     branches:
       - master
-      - '**'
 
 env:
   INFRA_REPO: "HumanSignal/infra"
@@ -103,14 +111,14 @@ jobs:
           username: "${{ steps.get-github-user.outputs.user_name }}"
           email: "${{ steps.get-github-user.outputs.user_email }}"
 
-      - name: Calculate version
-        id: version
+      - name: Details
+        id: details
         env:
           BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.ref_name }}
         run: |
           set -x
           pretty_branch_name="$(echo -n "${BRANCH_NAME#refs/heads/}" | sed 's#/#-#g' | sed 's#_#-#g'| sed 's#\.#-#g' | tr '[:upper:]' '[:lower:]' | cut -c1-25)"
-          echo "pretty_branch_name=$pretty_branch_name" >> $GITHUB_OUTPUT
+          echo "pretty_branch_name=${pretty_branch_name}" >> "${GITHUB_OUTPUT}"
 
       - name: Scaledown ArgoCD App
         uses: ./.github/actions-hub/actions/argocd-app-scaledown
@@ -118,6 +126,7 @@ jobs:
         with:
           release_name: "${{ inputs.release_name || steps.details.outputs.pretty_branch_name }}"
           template_name: "${{ inputs.template_name || 'adala' }}"
+          cloud: "${{ inputs.cloud || 'aws' }}"
           cluster: "${{ inputs.cluster || 'dev.heartex.com' }}"
           namespace: "${{ inputs.namespace || 'prompt' }}"
           github_token: "${{ secrets.GIT_PAT }}"
@@ -132,5 +141,5 @@ jobs:
         with:
           step: deactivate-env
           token: ${{ secrets.GIT_PAT }}
-          env: ${{ inputs.release_name || steps.details.outputs.pretty_branch_name }}
+          env: ${{ steps.argocd-app.outputs.app_name }}
           desc: "Environment was scaled down"

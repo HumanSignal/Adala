@@ -3,15 +3,16 @@ name: "ArgoCD: Deploy"
 on:
   workflow_call:
     inputs:
-      docker_image_version:
-        required: true
-        type: string
-      app_name:
+      release_name:
         required: true
         type: string
       template_name:
         required: false
         default: "adala"
+        type: string
+      cloud:
+        required: false
+        default: "aws"
         type: string
       cluster:
         required: false
@@ -21,20 +22,28 @@ on:
         required: false
         default: "prompt"
         type: string
-  workflow_dispatch:
-    inputs:
       docker_image_version:
-        description: "Docker image version"
         required: true
         type: string
-      app_name:
-        description: "ArgoCD App name"
+      override_values:
+        required: false
+        default: ""
+        type: string
+  workflow_dispatch:
+    inputs:
+      release_name:
+        description: "Release name"
         required: true
         type: string
       template_name:
-        description: "ArgoCD template name"
+        description: "Template name"
         required: false
         default: "adala"
+        type: string
+      cloud:
+        description: "Cloud name"
+        required: false
+        default: "aws"
         type: string
       cluster:
         description: "Cluster name"
@@ -46,6 +55,15 @@ on:
         required: false
         default: "prompt"
         type: string
+      docker_image_version:
+        description: "Docker image version"
+        required: true
+        type: string
+      override_values:
+        description: "Override values"
+        required: false
+        default: ""
+        type: string
 
 env:
   INFRA_REPO: "HumanSignal/infra"
@@ -54,20 +72,11 @@ jobs:
 
   deploy:
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    runs-on: "hs-dev-runner"
+    outputs:
+      host: ${{ steps.argocd-wait-app.outputs.url  }}
     steps:
       - uses: hmarr/debug-action@v3.0.0
-
-      - name: "GitHub deployment: Start"
-        id: github-deployment-start
-        continue-on-error: true
-        if: github.event.pull_request.head.ref
-        uses: bobheadxi/deployments@v1
-        with:
-          step: start
-          token: ${{ secrets.GIT_PAT }}
-          env: ${{ inputs.app_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Get GitHub user details
         id: get-github-user
@@ -119,17 +128,37 @@ jobs:
         uses: ./.github/actions-hub/actions/argocd-app-create
         id: argocd-app
         with:
-          docker_image_tag: "${{ inputs.docker_image_version }}"
-          release_name: "${{ inputs.app_name }}"
-          app_name: "${{ inputs.app_name }}-${{ inputs.template_name }}"
+          release_name: "${{ inputs.release_name }}"
           template_name: "${{ inputs.template_name }}"
+          cloud: "${{ inputs.cloud }}"
           cluster: "${{ inputs.cluster }}"
           namespace: "${{ inputs.namespace }}"
-          github_token: ${{ secrets.GIT_PAT }}
+          docker_image_tag: "${{ inputs.docker_image_version }}"
+          override_values: "${{ inputs.override_values }}"
+          github_token: "${{ secrets.GIT_PAT }}"
 
       - name: Git Push
         id: push
         uses: ./.github/actions-hub/actions/git-push
+
+      - name: "GitHub deployment: Start"
+        id: github-deployment-start
+        continue-on-error: true
+        if: github.event.pull_request.head.ref
+        uses: bobheadxi/deployments@v1
+        with:
+          step: start
+          token: ${{ secrets.GIT_PAT }}
+          env: ${{ steps.argocd-app.outputs.release_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Wait for ArgoCD App
+        uses: ./.github/actions-hub/actions/argocd-app-wait
+        id: argocd-wait-app
+        with:
+          app_name: "${{ steps.argocd-app.outputs.app_name }}"
+          argocd_url: "${{ env.ARGOCD_URL }}"
+          argocd_token: "${{ secrets.ARGOCD_DEV_TOKEN }}"
 
       - name: "GitHub deployment: Finish"
         id: github-deployment-finish
@@ -141,4 +170,4 @@ jobs:
           status: ${{ job.status }}
           deployment_id: ${{ steps.github-deployment-start.outputs.deployment_id }}
           env: ${{ steps.github-deployment-start.outputs.env }}
-          env_url: "https://${{ steps.argocd-app.outputs.url }}"
+          env_url: "${{ steps.argocd-wait-app.outputs.url }}"
