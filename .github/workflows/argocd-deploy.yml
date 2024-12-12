@@ -74,7 +74,7 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
-      image: "heartexlabs/actions-runner:latest"
+      image: "heartexlabs/actions-runner:master"
       credentials:
         username: ${{ vars.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
