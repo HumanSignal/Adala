@@ -64,6 +64,6 @@ jobs:
       contents: read
       deployments: write
     with:
-      docker_image_version: ${{ needs.build.outputs.image_version }}
-      app_name: ${{ needs.build.outputs.pretty_branch_name }}
+      release_name: "${{ needs.build.outputs.pretty_branch_name }}"
+      docker_image_version: "${{ needs.build.outputs.image_version }}"
     secrets: inherit
