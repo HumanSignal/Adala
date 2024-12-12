@@ -157,13 +157,13 @@ jobs:
           env: ${{ steps.argocd-app.outputs.release_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Wait for ArgoCD App
-        uses: ./.github/actions-hub/actions/argocd-app-wait
-        id: argocd-wait-app
-        with:
-          app_name: "${{ steps.argocd-app.outputs.app_name }}"
-          argocd_url: "${{ env.ARGOCD_URL }}"
-          argocd_token: "${{ secrets.ARGOCD_DEV_TOKEN }}"
+#      - name: Wait for ArgoCD App
+#        uses: ./.github/actions-hub/actions/argocd-app-wait
+#        id: argocd-wait-app
+#        with:
+#          app_name: "${{ steps.argocd-app.outputs.app_name }}"
+#          argocd_url: "${{ env.ARGOCD_URL }}"
+#          argocd_token: "${{ secrets.ARGOCD_DEV_TOKEN }}"
 
       - name: "GitHub deployment: Finish"
         id: github-deployment-finish
