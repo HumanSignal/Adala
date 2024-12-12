@@ -72,7 +72,12 @@ jobs:
 
   deploy:
     timeout-minutes: 15
-    runs-on: "hs-dev-runner"
+    runs-on: ubuntu-latest
+    container:
+      image: "heartexlabs/actions-runner:latest"
+      credentials:
+        username: ${{ vars.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
     outputs:
       host: ${{ steps.argocd-wait-app.outputs.url  }}
     steps:
