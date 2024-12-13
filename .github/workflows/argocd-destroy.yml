@@ -146,4 +146,4 @@ jobs:
         with:
           step: delete-env
           token: ${{ secrets.GIT_PAT }}
-          env: ${{ steps.argocd-app.outputs.app_name }}
+          env: ${{ steps.argocd-app.outputs.release_name }}
