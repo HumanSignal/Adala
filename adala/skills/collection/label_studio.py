@@ -1,3 +1,4 @@
+import re
 import logging
 import pandas as pd
 from typing import List, Optional, Type
@@ -21,6 +22,13 @@ from label_studio_sdk._extensions.label_studio_tools.core.utils.json_schema impo
 from .entity_extraction import extract_indices, validate_output_format_for_ner_tag
 
 logger = logging.getLogger(__name__)
+
+
+def extract_variable_name(input_string):
+    """Extract variable name in which would be specified as $<variable-name>"""
+    pattern = r'\$([a-zA-Z0-9_]+)'
+    matches = re.findall(pattern, input_string)
+    return matches
 
 
 class LabelStudioSkill(TransformSkill):
@@ -148,7 +156,12 @@ class LabelStudioSkill(TransformSkill):
             if isinstance(runtime, AsyncLiteLLMVisionRuntime):
                 input_field_types = defaultdict(lambda: MessageChunkType.TEXT)
                 for tag in self.image_tags:
-                    input_field_types[tag.name] = MessageChunkType.IMAGE_URL
+                    # these are the project variable names, NOT the label config tag names. TODO: pass this info from LSE to avoid recomputing it here.
+                    variables = extract_variable_name(tag.value)
+                    if len(variables) != 1:
+                        logger.warning(f"Image tag {tag.name} has multiple variables: {variables}. Cannot mark these variables as image inputs.")
+                        continue
+                    input_field_types[variables[0]] = MessageChunkType.IMAGE_URL
                 output = await runtime.batch_to_batch(
                     input,
                     input_template=self.input_template,
