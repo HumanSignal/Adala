@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 def extract_variable_name(input_string):
     """Extract variable name in which would be specified as $<variable-name>"""
-    pattern = r'\$([a-zA-Z0-9_]+)'
+    pattern = r"\$([a-zA-Z0-9_]+)"
     matches = re.findall(pattern, input_string)
     return matches
 
@@ -159,7 +159,9 @@ class LabelStudioSkill(TransformSkill):
                     # these are the project variable names, NOT the label config tag names. TODO: pass this info from LSE to avoid recomputing it here.
                     variables = extract_variable_name(tag.value)
                     if len(variables) != 1:
-                        logger.warning(f"Image tag {tag.name} has multiple variables: {variables}. Cannot mark these variables as image inputs.")
+                        logger.warning(
+                            f"Image tag {tag.name} has multiple variables: {variables}. Cannot mark these variables as image inputs."
+                        )
                         continue
                     input_field_types[variables[0]] = MessageChunkType.IMAGE_URL
                 output = await runtime.batch_to_batch(
