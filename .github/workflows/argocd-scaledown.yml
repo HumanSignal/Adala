@@ -146,5 +146,5 @@ jobs:
         with:
           step: deactivate-env
           token: ${{ secrets.GIT_PAT }}
-          env: ${{ steps.argocd-app.outputs.app_name }}
+          env: ${{ steps.argocd-app.outputs.release_name }}
           desc: "Environment was scaled down"

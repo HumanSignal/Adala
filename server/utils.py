@@ -1,3 +1,8 @@
+import sys
+# fix for https://github.com/dpkp/kafka-python/issues/2412
+if sys.version_info >= (3, 12, 0):
+    import six
+    sys.modules['kafka.vendor.six.moves'] = six.moves
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Union
 import logging
@@ -19,7 +24,7 @@ class Settings(BaseSettings):
 
     kafka_bootstrap_servers: Union[str, List[str]] = "localhost:9093"
     kafka_retention_ms: int = 180000  # 30 minutes
-    kafka_input_consumer_timeout_ms: int = 1500  # 1.5 seconds
+    kafka_input_consumer_timeout_ms: int = 2500  # 2.5 seconds
     kafka_output_consumer_timeout_ms: int = 1500  # 1.5 seconds
     task_time_limit_sec: int = 60 * 60 * 6  # 6 hours
     # https://docs.celeryq.dev/en/v5.4.0/userguide/configuration.html#worker-max-memory-per-child
