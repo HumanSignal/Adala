@@ -39,7 +39,7 @@ jobs:
               org: owner,
               username: actor,
             })
-              .then(response => core.setOutput("membership", response.data))
+              .then(response => core.setOutput("membership", true))
               .catch(reason => core.setOutput("membership", false));
 
   build:
