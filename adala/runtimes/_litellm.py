@@ -815,3 +815,22 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
         return output_df.set_index(batch.index)
 
     # TODO: cost estimate
+
+def get_model_info(provider: str, model_name: str, auth_info: Optional[dict]=None) -> dict:
+    if auth_info is None:
+        auth_info = {}
+    try:
+        # for azure models, need to get the canonical name for the model
+        if provider == "azure":
+            dummy_completion = litellm.completion(
+                model=f"azure/{model_name}",
+                messages=[{"role": "user", "content": ""}],
+                max_tokens=1,
+                **auth_info
+            )
+            model_name = dummy_completion.model
+        full_name = f"{provider}/{model_name}"
+        return litellm.get_model_info(full_name)
+    except Exception as err:
+        logger.error("Hit error when trying to get model metadata: %s", err)
+        return {}
