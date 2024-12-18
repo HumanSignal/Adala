@@ -198,9 +198,6 @@ async def submit_batch(batch: BatchData):
     try:
         for record in batch.data:
             await producer.send_and_wait(topic, value=record)
-            # FIXME Temporary workaround for messages getting dropped.
-            #       Remove once our kafka messaging is more reliable.
-            time.sleep(0.1)
 
         batch_size = len(json.dumps(batch.dict()).encode("utf-8"))
         logger.info(
