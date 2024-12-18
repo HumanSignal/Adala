@@ -524,8 +524,8 @@ def test_label_studio_skill_image_input():
                 <View>
                   <Header value="Painting Classification"/>
                   <Text name="title" value="$title"/>
-                  <Image name="image" value="$image"/>
-                  <Choices name="classification" toName="image" required="true">
+                  <Image name="image_tag" value="$image"/>
+                  <Choices name="classification" toName="image_tag" required="true">
                     <Choice value="Mona Lisa"/>
                     <Choice value="Not Mona Lisa"/>
                   </Choices>
