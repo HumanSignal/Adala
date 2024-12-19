@@ -424,6 +424,27 @@ async def improved_prompt(request: ImprovedPromptRequest):
     )
 
 
+class ModelMetadataRequestItem(BaseModel):
+    provider: str
+    model_name: str
+    auth_info: Optional[Dict[str, str]] = None
+
+class ModelMetadataRequest(BaseModel):
+    models: List[ModelMetadataRequestItem]
+
+class ModelMetadataResponse(BaseModel):
+    model_metadata: Dict[str, Dict]
+
+@app.post("/model-metadata", response_model=Response[ModelMetadataResponse])
+async def model_metadata(request: ModelMetadataRequest):
+    from adala.runtimes._litellm import get_model_info
+
+    resp = {'model_metadata': {item.model_name: get_model_info(**item.model_dump()) for item in request.models}}
+    return Response[ModelMetadataResponse](
+        success=True,
+        data=resp
+    )
+
 if __name__ == "__main__":
     # for debugging
     uvicorn.run("app:app", host="0.0.0.0", port=30001)
