@@ -122,7 +122,7 @@ jobs:
           BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.ref_name }}
         run: |
           set -x
-          pretty_branch_name="$(echo -n "${BRANCH_NAME#refs/heads/}" | sed 's#/#-#g' | sed 's#_#-#g'| sed 's#\.#-#g' | tr '[:upper:]' '[:lower:]' | cut -c1-25)"
+          pretty_branch_name="$(echo -n "${BRANCH_NAME#refs/heads/}" | sed -E 's#[/_\.-]+#-#g' | tr '[:upper:]' '[:lower:]' | cut -c1-25 | sed -E 's#-$##g')"
           echo "pretty_branch_name=${pretty_branch_name}" >> "${GITHUB_OUTPUT}"
 
       - name: Delete ArgoCD App

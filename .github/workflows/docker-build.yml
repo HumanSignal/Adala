@@ -63,8 +63,8 @@ jobs:
           BRANCH_NAME: ${{ inputs.branch_name }}
         run: |
           set -x
-          pretty_branch_name="$(echo -n "${BRANCH_NAME#refs/heads/}" | sed 's#/#-#g' | sed 's#_#-#g'| sed 's#\.#-#g' | tr '[:upper:]' '[:lower:]')"
-          echo "pretty_branch_name=$pretty_branch_name" >> $GITHUB_OUTPUT
+          pretty_branch_name="$(echo -n "${BRANCH_NAME#refs/heads/}" | sed -E 's#[/_\.-]+#-#g' | tr '[:upper:]' '[:lower:]' | cut -c1-25 | sed -E 's#-$##g')"
+          echo "pretty_branch_name=${pretty_branch_name}" >> "${GITHUB_OUTPUT}"
           current_time="$(date +'%Y%m%d.%H%M%S')"
           branch="-${pretty_branch_name}"
           short_sha="$(git rev-parse --short HEAD)"
