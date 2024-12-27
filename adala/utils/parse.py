@@ -110,7 +110,10 @@ class TemplateChunks(TypedDict):
     text: str
     start: int
     end: int
-    type: str
+    type: 
+    
+    
+match_fields_regex = re.compile(r"(?<!\{)\{([a-zA-Z0-9_]+)\}(?!})")
 
 
 def parse_template(string, include_texts=True) -> List[TemplateChunks]:
@@ -135,7 +138,7 @@ def parse_template(string, include_texts=True) -> List[TemplateChunks]:
     chunks: List[TemplateChunks] = []
     last_index = 0
 
-    for match in re.finditer(r"(?<!\{)\{(.*?)\}(?!})", string):
+    for match in match_fields_regex.finditer(string):
         # for match in re.finditer(r'\{(.*?)\}', string):
         # Text before field
         if last_index < match.start() and include_texts:
