@@ -84,21 +84,16 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Calculate Docker tags
-        id: calculate-docker-tags
-        uses: actions/github-script@v7
-        env:
-          TAGS: "${{ steps.version.outputs.image_version }},${{ steps.version.outputs.pretty_branch_name }}"
-          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          script: |
-            const raw_tags_input = process.env.TAGS;
-            const image_name = process.env.IMAGE_NAME;
-            
-            const tags = raw_tags_input.split(',').map(x => x.trim());
-            const docker_tags = tags.map(x => `${image_name}:${x}`).join(',');
-            console.log(docker_tags);
-            core.setOutput("docker-tags", docker_tags);
+          images: ${{ env.IMAGE_NAME }}
+          labels: |
+            org.opencontainers.image.revision=${{ inputs.sha }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.image_version }}
+            type=raw,value=${{ steps.version.outputs.pretty_branch_name }}
 
       - name: Push Docker image
         uses: docker/build-push-action@v6.10.0
@@ -107,7 +102,11 @@ jobs:
           context: .
           file: Dockerfile.app
           push: ${{ steps.actor-membership.outputs.active }}
-          tags: ${{ steps.calculate-docker-tags.outputs.docker-tags }}
+          platforms: linux/amd64,linux/arm64
+          sbom: true
+          provenance: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
