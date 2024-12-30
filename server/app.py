@@ -55,7 +55,7 @@ app.add_middleware(LogMiddleware)
 ResponseData = TypeVar("ResponseData")
 
 
-class Response(BaseModel, Generic[ResponseData]):
+class AdalaResponse(BaseModel, Generic[ResponseData]):
     success: bool = True
     data: ResponseData
     message: Optional[str] = None
@@ -152,7 +152,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-@app.post("/jobs/submit-streaming", response_model=Response[JobCreated])
+@app.post("/jobs/submit-streaming", response_model=AdalaResponse[JobCreated])
 async def submit_streaming(request: SubmitStreamingRequest):
     """
     Submit a request to execute task `request.task_name` in celery.
@@ -171,10 +171,10 @@ async def submit_streaming(request: SubmitStreamingRequest):
     )
     logger.info(f"Submitted {task.name} with ID {result.id}")
 
-    return Response[JobCreated](data=JobCreated(job_id=result.id))
+    return AdalaResponse[JobCreated](data=JobCreated(job_id=result.id))
 
 
-@app.post("/jobs/submit-batch", response_model=Response)
+@app.post("/jobs/submit-batch", response_model=AdalaResponse)
 async def submit_batch(batch: BatchData):
     """
     Submits a batch of data to an existing streaming job.
@@ -213,10 +213,10 @@ async def submit_batch(batch: BatchData):
     finally:
         await producer.stop()
 
-    return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
+    return AdalaResponse[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
 
-@app.post("/estimate-cost", response_model=Response[CostEstimate])
+@app.post("/estimate-cost", response_model=AdalaResponse[CostEstimate])
 async def estimate_cost(
     request: CostEstimateRequest,
 ):
@@ -258,17 +258,17 @@ async def estimate_cost(
         )
 
     except NotImplementedError as e:
-        return Response[CostEstimate](
+        return AdalaResponse[CostEstimate](
             data=CostEstimate(
                 is_error=True,
                 error_type=type(e).__name__,
                 error_message=str(e),
             )
         )
-    return Response[CostEstimate](data=total_cost_estimate)
+    return AdalaResponse[CostEstimate](data=total_cost_estimate)
 
 
-@app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])
+@app.get("/jobs/{job_id}", response_model=AdalaResponse[JobStatusResponse])
 def get_status(job_id):
     """
     Get the status of a job.
@@ -295,10 +295,10 @@ def get_status(job_id):
         status = Status.FAILED
     else:
         logger.info(f"Job {job_id} status: {status}")
-    return Response[JobStatusResponse](data=JobStatusResponse(status=status))
+    return AdalaResponse[JobStatusResponse](data=JobStatusResponse(status=status))
 
 
-@app.delete("/jobs/{job_id}", response_model=Response[JobStatusResponse])
+@app.delete("/jobs/{job_id}", response_model=AdalaResponse[JobStatusResponse])
 def cancel_job(job_id):
     """
     Cancel a job.
@@ -321,7 +321,7 @@ def cancel_job(job_id):
     delete_topic(input_topic_name)
     delete_topic(output_topic_name)
 
-    return Response[JobStatusResponse](data=JobStatusResponse(status=Status.CANCELED))
+    return AdalaResponse[JobStatusResponse](data=JobStatusResponse(status=Status.CANCELED))
 
 
 @app.get("/health")
@@ -399,7 +399,7 @@ class ImprovedPromptRequest(BaseModel):
         return self
 
 
-@app.post("/improved-prompt", response_model=Response[ImprovedPromptResponse])
+@app.post("/improved-prompt", response_model=AdalaResponse[ImprovedPromptResponse])
 async def improved_prompt(request: ImprovedPromptRequest):
     """
     Improve a given prompt using the specified model and variables.
@@ -418,7 +418,7 @@ async def improved_prompt(request: ImprovedPromptRequest):
         instructions=request.instructions,
     )
 
-    return Response[ImprovedPromptResponse](
+    return AdalaResponse[ImprovedPromptResponse](
         success=not isinstance(improved_prompt_response.output, ErrorResponseModel),
         data=improved_prompt_response,
     )
@@ -435,12 +435,12 @@ class ModelMetadataRequest(BaseModel):
 class ModelMetadataResponse(BaseModel):
     model_metadata: Dict[str, Dict]
 
-@app.post("/model-metadata", response_model=Response[ModelMetadataResponse])
+@app.post("/model-metadata", response_model=AdalaResponse[ModelMetadataResponse])
 async def model_metadata(request: ModelMetadataRequest):
     from adala.runtimes._litellm import get_model_info
 
     resp = {'model_metadata': {item.model_name: get_model_info(**item.model_dump()) for item in request.models}}
-    return Response[ModelMetadataResponse](
+    return AdalaResponse[ModelMetadataResponse](
         success=True,
         data=resp
     )

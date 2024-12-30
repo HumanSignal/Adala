@@ -10,13 +10,69 @@
   <img alt="Shows Adala logo in light mode and dark mode." src="/docs/src/img/logo.png" width="275" >
 </picture>
 
-Adala is an **A**utonomous **DA**ta (**L**abeling) **A**gent framework.
+Adala offers a robust framework for implementing agents and tools specialized in data processing workflows. The objective is to provide an abstraction layer over different data providers and LLMs and give a simple API to be used in Python notebooks and Agentic workflows.
 
-Adala offers a robust framework for implementing agents specialized in data processing, with an emphasis on
-diverse data labeling tasks. These agents are autonomous, meaning they can independently acquire one or more skills
-through iterative learning. This learning process is influenced by their operating environment, observations, and
-reflections. Users define the environment by providing a ground truth dataset. Every agent learns and applies its skills
-in what we refer to as a "runtime", synonymous with LLM.
+Here are some examples of what you can do with Adala:
+
+**Prompt Engineering**
+
+Refine a prompt to be more accurate and efficient:
+
+```python
+new_prompt = refine_prompt(
+  prompt='Label my {input}',
+  data_input=df[['input', 'output']],
+  output_fields_schema={'name': 'output', 'type': 'string'}
+)
+```
+
+**Synthetic Data Generation**
+
+Generate a synthetic dataset based on a prompt:
+
+```python
+synthetic_df = generate_synthetic_data(
+  prompt='Generate a new data using {context}',
+  data_input=df[['context']],
+  output_fields_schema={'name': 'output', 'type': 'string'}
+)
+```
+
+**LLM Evaluation**
+
+Evaluate the performance of an LLM:
+
+```python
+evaluation = evaluate_llm(
+  prompt='Rate the LLM responses:\n Question: {question}\n Answer: {answer}',
+  data_input=df[['question', 'answer']],
+  output_fields_schema={'name': 'rating', 'type': 'number'}
+)
+```
+
+**Autolabeling**
+
+Autolabel a dataset using a prompt:
+
+```python
+autolabeled_df = autolabel(
+  prompt='Label the text as positive or negative:\n{text}',
+  data_input=df[['text']],
+  output_fields_schema={'name': 'label', 'type': 'string', 'enum': ['positive', 'negative']}
+)
+```
+
+**Cost Estimation**
+
+Estimate the cost of a prompt inference:
+
+```python
+cost = estimate_cost(
+  prompt='Generate a new data using {context}',
+  data_input=df[['context']],
+  output_fields_schema={'name': 'output', 'type': 'string'}
+)
+```
 
 ![Training Agent Skill](./docs/src/img/training-agents-skill.png "Training Agent Skill")
 
