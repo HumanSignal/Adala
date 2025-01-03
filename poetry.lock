@@ -3557,7 +3557,7 @@ description = ""
 optional = false
 python-versions = ">=3.9,<4"
 files = [
-    {file = "83ec0f8a270e86ceabe8a8b846d404f1113ebd33.zip", hash = "sha256:76d38c321b8604276815edced9fbb0dfc52806b2b15d6be8027388e44cfb922f"},
+    {file = "5d8b6103612ac6ab6f5a221478f61b2a68c69bd6.zip", hash = "sha256:85c38724f05b6aa4f1856106fae2c3d00ba28198617299b7e622d21426473d00"},
 ]
 
 [package.dependencies]
@@ -3573,6 +3573,7 @@ numpy = ">=1.26.4,<2.0.0"
 pandas = ">=0.24.0"
 Pillow = ">=10.0.1"
 pydantic = ">=1.9.2"
+pydantic-core = ">=2.18.2,<3.0.0"
 requests = ">=2.22.0"
 requests-mock = "1.12.1"
 typing_extensions = ">=4.0.0"
@@ -3581,7 +3582,7 @@ xmljson = "0.2.1"
 
 [package.source]
 type = "url"
-url = "https://github.com/HumanSignal/label-studio-sdk/archive/83ec0f8a270e86ceabe8a8b846d404f1113ebd33.zip"
+url = "https://github.com/HumanSignal/label-studio-sdk/archive/5d8b6103612ac6ab6f5a221478f61b2a68c69bd6.zip"
 
 [[package]]
 name = "litellm"
@@ -6764,13 +6765,13 @@ files = [
 
 [[package]]
 name = "smart-open"
-version = "7.0.5"
+version = "7.1.0"
 description = "Utils for streaming large files (S3, HDFS, GCS, Azure Blob Storage, gzip, bz2...)"
 optional = false
 python-versions = "<4.0,>=3.7"
 files = [
-    {file = "smart_open-7.0.5-py3-none-any.whl", hash = "sha256:8523ed805c12dff3eaa50e9c903a6cb0ae78800626631c5fe7ea073439847b89"},
-    {file = "smart_open-7.0.5.tar.gz", hash = "sha256:d3672003b1dbc85e2013e4983b88eb9a5ccfd389b0d4e5015f39a9ee5620ec18"},
+    {file = "smart_open-7.1.0-py3-none-any.whl", hash = "sha256:4b8489bb6058196258bafe901730c7db0dcf4f083f316e97269c66f45502055b"},
+    {file = "smart_open-7.1.0.tar.gz", hash = "sha256:a4f09f84f0f6d3637c6543aca7b5487438877a21360e7368ccf1f704789752ba"},
 ]
 
 [package.dependencies]
@@ -8160,4 +8161,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "e826f6afc1c7bc9c1524efb0f2783ed8d1b0baeeabf614bc83583bc4bd59e1eb"
+content-hash = "7f22a248dfbe877df20c8cc22d9c6b841800e626866a58c004eb83ecfa1a4316"
