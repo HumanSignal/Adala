@@ -160,8 +160,8 @@ def resolve_litellm_model_and_provider(model_name: str, provider: str):
 
     This helper function contains logic which resolves this for supported providers
     """
-    if "/" in model_name:  # TODO handle models like vertex_ai/meta/llama ...
-        model_name = model_name.split("/")[1]
+    if "/" in model_name:
+        model_name = "/".join(model_name.split("/")[1:])
     provider = provider.lower()
     if provider == "vertexai":
         provider = "vertex_ai"
