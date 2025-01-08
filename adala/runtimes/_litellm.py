@@ -178,7 +178,7 @@ class InstructorClientMixin(BaseModel):
 
     @cached_property
     def client(self):
-        return self._from_litellm(mode=self.instructor_mode)
+        return self._from_litellm(mode=instructor.Mode(self.instructor_mode))
 
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
