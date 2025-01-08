@@ -111,6 +111,11 @@ class ValidateConnectionRequest(BaseModel):
     auth_token: Optional[str] = None
 
 
+class ValidateConnectionResponse(BaseModel):
+    model: str
+    success: bool
+
+
 class Status(Enum):
     PENDING = "Pending"
     INPROGRESS = "InProgress"
@@ -238,7 +243,7 @@ async def submit_batch(batch: BatchData):
     return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
 
-@app.post("/validate-connection", response_model=Response)
+@app.post("/validate-connection", response_model=Response[ValidateConnectionResponse])
 async def validate_connection(request: ValidateConnectionRequest):
     multi_model_provider_models = {
         "openai": "gpt-4o-mini",
@@ -259,7 +264,7 @@ async def validate_connection(request: ValidateConnectionRequest):
             if request.vertex_project:
                 model_extra["vertex_project"] = request.vertex_project
         try:
-            litellm.completion(
+            response = litellm.completion(
                 messages=messages,
                 model=model,
                 max_tokens=10,
@@ -291,7 +296,7 @@ async def validate_connection(request: ValidateConnectionRequest):
             )
         model_extra["api_key"] = request.api_key
         try:
-            litellm.completion(
+            response = litellm.completion(
                 messages=messages,
                 model=model,
                 max_tokens=10,
@@ -309,7 +314,9 @@ async def validate_connection(request: ValidateConnectionRequest):
                 detail=f"Failed to check availability of requested model '{model}': {e}",
             )
 
-    return Response(success=True, data=None)
+    return Response[ValidateConnectionResponse](
+        data=ValidateConnectionResponse(success=True, model=response.model)
+    )
 
 
 @app.post("/models-list", response_model=Response[ModelsListResponse])
