@@ -171,20 +171,16 @@ def resolve_litellm_model_and_provider(model_name: str, provider: str):
     return model_name, provider
 
 
-class InstructorClientMixin:
+class InstructorClientMixin(BaseModel):
+    
+    instructor_mode: str = "json_mode"
+
     def _from_litellm(self, **kwargs):
         return instructor.from_litellm(litellm.completion, **kwargs)
 
     @cached_property
     def client(self):
-        kwargs = {}
-        if self.is_custom_openai_endpoint or self.model.startswith("vertex"):
-            kwargs["mode"] = instructor.Mode.JSON
-        return self._from_litellm(**kwargs)
-
-    @property
-    def is_custom_openai_endpoint(self) -> bool:
-        return self.model.startswith("openai/") and self.model_extra.get("base_url")
+        return self._from_litellm(mode=self.instructor_mode)
 
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
