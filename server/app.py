@@ -103,6 +103,8 @@ class ValidateConnectionRequest(BaseModel):
     provider: str
     api_key: Optional[str] = None
     vertex_credentials: Optional[str] = None
+    vertex_location: Optional[str] = None
+    vertex_project: Optional[str] = None
     api_version: Optional[str] = None
     deployment_name: Optional[str] = None
     endpoint: Optional[str] = None
@@ -252,6 +254,10 @@ async def validate_connection(request: ValidateConnectionRequest):
             model_extra = {"api_key": request.api_key}
         elif provider == "vertexai":
             model_extra = {"vertex_credentials": request.vertex_credentials}
+            if request.vertex_location:
+                model_extra["vertex_location"] = request.vertex_location
+            if request.vertex_project:
+                model_extra["vertex_project"] = request.vertex_project
         try:
             litellm.completion(
                 messages=messages,
@@ -288,9 +294,8 @@ async def validate_connection(request: ValidateConnectionRequest):
             litellm.completion(
                 messages=messages,
                 model=model,
-                max_tokens=1000,
+                max_tokens=10,
                 temperature=0.0,
-                seed=47,
                 **model_extra,
             )
         except AuthenticationError:
