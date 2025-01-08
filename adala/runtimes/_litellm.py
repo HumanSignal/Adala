@@ -162,8 +162,8 @@ def resolve_litellm_model_and_provider(model_name: str, provider: str):
 
     This helper function contains logic which resolves this for supported providers
     """
-    if "/" in model_name:  # TODO handle models like vertex_ai/meta/llama ...
-        model_name = model_name.split("/")[1]
+    if "/" in model_name:
+        model_name = "/".join(model_name.split("/")[1:])
     provider = provider.lower()
     if provider == "vertexai":
         provider = "vertex_ai"
@@ -171,20 +171,16 @@ def resolve_litellm_model_and_provider(model_name: str, provider: str):
     return model_name, provider
 
 
-class InstructorClientMixin:
+class InstructorClientMixin(BaseModel):
+    
+    instructor_mode: str = "json_mode"
+
     def _from_litellm(self, **kwargs):
         return instructor.from_litellm(litellm.completion, **kwargs)
 
     @cached_property
     def client(self):
-        kwargs = {}
-        if self.is_custom_openai_endpoint or self.model.startswith("vertex"):
-            kwargs["mode"] = instructor.Mode.JSON
-        return self._from_litellm(**kwargs)
-
-    @property
-    def is_custom_openai_endpoint(self) -> bool:
-        return self.model.startswith("openai/") and self.model_extra.get("base_url")
+        return self._from_litellm(mode=instructor.Mode(self.instructor_mode))
 
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
@@ -259,7 +255,6 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
                  with the provider of your specified model.
         base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
         api_version (Optional[str]): API version, optional except for Azure.
-        timeout: Timeout in seconds.
     """
 
     model: str = "gpt-4o-mini"
@@ -279,7 +274,7 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
                 model=self.model,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
-                seed=self.seed,
+                # seed=self.seed,
                 # extra inference params passed to this runtime
                 **self.model_extra,
             )
@@ -400,7 +395,6 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                  with the provider of your specified model.
         base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
         api_version (Optional[str]): API version, optional except for Azure.
-        timeout: Timeout in seconds.
     """
 
     model: str = "gpt-4o-mini"
