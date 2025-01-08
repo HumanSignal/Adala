@@ -272,7 +272,7 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
                 model=self.model,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
-                seed=self.seed,
+                # seed=self.seed,
                 # extra inference params passed to this runtime
                 **self.model_extra,
             )
