@@ -50,8 +50,6 @@ from .base import AsyncRuntime, Runtime
 
 logger = logging.getLogger(__name__)
 
-# TODO remove
-litellm.drop_params = True
 
 # basically only retrying on timeout, incomplete output, or rate limit
 # https://docs.litellm.ai/docs/exception_mapping#custom-mapping-list
