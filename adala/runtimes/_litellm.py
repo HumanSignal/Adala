@@ -161,7 +161,7 @@ def normalize_litellm_model_and_provider(model_name: str, provider: str):
     This helper function contains logic which normalizes this for supported providers
     """
     if "/" in model_name:
-        model_name = "/".join(model_name.split("/")[1:])
+        model_name = model_name.split('/', 1)[1]
     provider = provider.lower()
     if provider == "vertexai":
         provider = "vertex_ai"
@@ -272,6 +272,7 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
                 model=self.model,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
+                # Can't yet assume seed is set correctly, non-null seed will cause Gemini models to error
                 # seed=self.seed,
                 # extra inference params passed to this runtime
                 **self.model_extra,
@@ -412,6 +413,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                 model=self.model,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
+                # Can't yet assume seed is set correctly, non-null seed will cause Gemini models to error
                 # seed=self.seed,
                 # extra inference params passed to this runtime
                 **self.model_extra,
