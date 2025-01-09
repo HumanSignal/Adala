@@ -153,12 +153,12 @@ def _get_usage_dict(usage: Usage, model: str) -> Dict:
     return data
 
 
-def resolve_litellm_model_and_provider(model_name: str, provider: str):
+def normalize_litellm_model_and_provider(model_name: str, provider: str):
     """
     When using litellm.get_model_info() some models are accessed with their provider prefix
     while others are not.
 
-    This helper function contains logic which resolves this for supported providers
+    This helper function contains logic which normalizes this for supported providers
     """
     if "/" in model_name:
         model_name = "/".join(model_name.split("/")[1:])
@@ -170,7 +170,7 @@ def resolve_litellm_model_and_provider(model_name: str, provider: str):
 
 
 class InstructorClientMixin(BaseModel):
-    
+
     instructor_mode: str = "json_mode"
 
     def _from_litellm(self, **kwargs):
@@ -566,7 +566,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
     def _get_completion_tokens(
         model: str, output_fields: Optional[List[str]], provider: str
     ) -> int:
-        model, provider = resolve_litellm_model_and_provider(model, provider)
+        model, provider = normalize_litellm_model_and_provider(model, provider)
         max_tokens = litellm.get_model_info(
             model=model, custom_llm_provider=provider
         ).get("max_tokens", None)
@@ -751,9 +751,12 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
 
     def init_runtime(self) -> "Runtime":
         super().init_runtime()
-        # model_name = self.model
-        # if not litellm.supports_vision(model_name):
-        #     raise ValueError(f"Model {self.model} does not support vision")
+        # Only running this supports_vision check for non-vertex models, since its based on a static JSON file in
+        # litellm which was not up to date. Will be soon in next release - should update this
+        if not self.model.startswith("vertex_ai"):
+            model_name = self.model
+            if not litellm.supports_vision(model_name):
+                raise ValueError(f"Model {self.model} does not support vision")
         return self
 
     async def batch_to_batch(
@@ -855,7 +858,9 @@ def get_model_info(
                 **auth_info,
             )
             model_name = dummy_completion.model
-        model_name, provider = resolve_litellm_model_and_provider(model_name, provider)
+        model_name, provider = normalize_litellm_model_and_provider(
+            model_name, provider
+        )
         return litellm.get_model_info(model=model_name, custom_llm_provider=provider)
     except Exception as err:
         logger.error("Hit error when trying to get model metadata: %s", err)

@@ -245,7 +245,7 @@ async def submit_batch(batch: BatchData):
 
 @app.post("/validate-connection", response_model=Response[ValidateConnectionResponse])
 async def validate_connection(request: ValidateConnectionRequest):
-    multi_model_provider_models = {
+    multi_model_provider_test_models = {
         "openai": "gpt-4o-mini",
         "vertexai": "vertex_ai/gemini-1.5-flash",
     }
@@ -253,8 +253,8 @@ async def validate_connection(request: ValidateConnectionRequest):
     messages = [{"role": "user", "content": "Hey, how's it going?"}]
 
     # For multi-model providers use a model that every account should have access to
-    if provider in multi_model_provider_models.keys():
-        model = multi_model_provider_models[provider]
+    if provider in multi_model_provider_test_models.keys():
+        model = multi_model_provider_test_models[provider]
         if provider == "openai":
             model_extra = {"api_key": request.api_key}
         elif provider == "vertexai":
