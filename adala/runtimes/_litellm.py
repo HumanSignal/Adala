@@ -272,6 +272,7 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
                 model=self.model,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
+                # Can't yet assume seed is set correctly, non-null seed will cause Gemini models to error
                 # seed=self.seed,
                 # extra inference params passed to this runtime
                 **self.model_extra,
@@ -412,6 +413,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                 model=self.model,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
+                # Can't yet assume seed is set correctly, non-null seed will cause Gemini models to error
                 # seed=self.seed,
                 # extra inference params passed to this runtime
                 **self.model_extra,
