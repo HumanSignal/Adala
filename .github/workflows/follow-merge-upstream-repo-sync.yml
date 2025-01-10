@@ -142,13 +142,14 @@ jobs:
             This PR was automaticaly generated via Follow Merge. 
             Please ensure that all linked upstream Pull Requests are merged before proceeding with this one.
 
-      - name: Add PR Reviewers
-        uses: ./.github/actions-hub/actions/github-add-pull-request-reviewers
+      - name: Add PR Assignees
+        if: steps.fm.outputs.assignees
+        uses: ./.github/actions-hub/actions/github-add-pull-request-assignees
         continue-on-error: true
         with:
           github_token: ${{ secrets.GIT_PAT }}
           pullrequest_number: "${{ steps.get-pr.outputs.number }}"
-          reviewers: "${{ steps.fm.outputs.actor }}"
+          assignees: "${{ steps.fm.outputs.assignees }}"
 
       - name: Link PR
         uses: ./.github/actions-hub/actions/github-link-upstream-pull-request
