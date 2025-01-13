@@ -43,7 +43,7 @@ litellm = "^1.47.2"
 pandarallel = "^1.6.5"
 instructor = "^1.4.3"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
 black = "^24.8.0"
