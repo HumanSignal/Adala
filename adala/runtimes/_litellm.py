@@ -171,14 +171,13 @@ def normalize_litellm_model_and_provider(model_name: str, provider: str):
 
 class InstructorClientMixin(BaseModel):
 
-    instructor_mode: str = "json_mode"
-
-    def _from_litellm(self, **kwargs):
-        return instructor.from_litellm(litellm.completion, **kwargs)
+    # Note: most models work better with json mode; this is set only for backwards compatibility
+    # instructor_mode: str = "json_mode"
+    instructor_mode: str = "tool_call"
 
     @cached_property
     def client(self):
-        return self._from_litellm(mode=instructor.Mode(self.instructor_mode))
+        return instructor.from_litellm(litellm.completion, mode=instructor.Mode(self.instructor_mode))
 
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
@@ -272,8 +271,7 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
                 model=self.model,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
-                # Can't yet assume seed is set correctly, non-null seed will cause Gemini models to error
-                # seed=self.seed,
+                seed=self.seed,
                 # extra inference params passed to this runtime
                 **self.model_extra,
             )
@@ -413,8 +411,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                 model=self.model,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
-                # Can't yet assume seed is set correctly, non-null seed will cause Gemini models to error
-                # seed=self.seed,
+                seed=self.seed,
                 # extra inference params passed to this runtime
                 **self.model_extra,
             )
