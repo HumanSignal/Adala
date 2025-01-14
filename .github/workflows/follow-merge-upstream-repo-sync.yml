@@ -121,7 +121,7 @@ jobs:
           commit_message="Update Poetry lock file"
           commit_message_workflow_link='Workflow run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
 
-          poetry lock --no-update
+          poetry lock
           
           git add poetry.lock
           git commit -m "${commit_message}" -m "${commit_message_workflow_link}"
