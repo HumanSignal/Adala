@@ -175,9 +175,13 @@ class InstructorClientMixin(BaseModel):
     # instructor_mode: str = "json_mode"
     instructor_mode: str = "tool_call"
 
+    # Note: doesn't seem like this separate function should be necessary, but errors when combined with @cached_property
+    def _from_litellm(self, **kwargs):
+        return instructor.from_litellm(litellm.completion, **kwargs)
+
     @cached_property
     def client(self):
-        return instructor.from_litellm(litellm.completion, mode=instructor.Mode(self.instructor_mode))
+        return self._from_litellm(mode=instructor.Mode(self.instructor_mode))
 
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
