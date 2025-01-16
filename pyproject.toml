@@ -1,15 +1,21 @@
-[tool.poetry]
+[project]
 name = "adala"
 version = "0.0.4dev"
 description = "Adala: Autonomous Data Labeling Agent"
 authors = [
-    "HumanSignal <hello@humansignal.com>"
+    { name = "HumanSignal", email = "support@humansignal.com" },
 ]
+readme = "README.md"
+license = "Apache-2.0"
 classifiers = [
-    "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
 ]
+requires-python = ">=3.9,<3.13"
+
+[project.urls]
+Repository = "https://github.com/HumanSignal/Adala"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
@@ -67,7 +73,6 @@ mockafka-py = "^0.1.57"
 
 [tool.poetry.scripts]
 adala = "adala.cli:main"
-
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
