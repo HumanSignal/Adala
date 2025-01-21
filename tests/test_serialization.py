@@ -101,6 +101,7 @@ def test_agent_is_serializable():
                 "verbose": False,
                 "batch_size": 100,
                 "concurrency": 1,
+                "instructor_mode": "tool_call",
                 "model": "gpt-4o-mini",
                 "max_tokens": 200,
                 "temperature": 0.0,
