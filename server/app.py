@@ -326,11 +326,8 @@ async def models_list(request: ModelsListRequest):
     # https://docs.litellm.ai/docs/set_keys#get_valid_models
     # https://github.com/BerriAI/litellm/blob/b9280528d368aced49cb4d287c57cd0b46168cb6/litellm/utils.py#L5705
     # Ultimately just uses litellm.models_by_provider - setting API key is not needed
-    lse_provider_to_litellm_provider = {"openai": "openai", "vertexai": "vertex_ai", "gemini": "gemini"}
     provider = request.provider.lower()
-    valid_models = litellm.models_by_provider[
-        lse_provider_to_litellm_provider[provider]
-    ]
+    valid_models = litellm.models_by_provider[provider]
 
     return Response[ModelsListResponse](
         data=ModelsListResponse(models_list=valid_models)

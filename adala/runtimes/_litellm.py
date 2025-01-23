@@ -153,22 +153,6 @@ def _get_usage_dict(usage: Usage, model: str) -> Dict:
     return data
 
 
-def normalize_litellm_model_and_provider(model_name: str, provider: str):
-    """
-    When using litellm.get_model_info() some models are accessed with their provider prefix
-    while others are not.
-
-    This helper function contains logic which normalizes this for supported providers
-    """
-    if "/" in model_name:
-        model_name = model_name.split('/', 1)[1]
-    provider = provider.lower()
-    if provider == "vertexai":
-        provider = "vertex_ai"
-
-    return model_name, provider
-
-
 class InstructorClientMixin(BaseModel):
 
     instructor_mode: str = "json_mode"
@@ -568,7 +552,6 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
     def _get_completion_tokens(
         model: str, output_fields: Optional[List[str]], provider: str
     ) -> int:
-        model, provider = normalize_litellm_model_and_provider(model, provider)
         max_tokens = litellm.get_model_info(
             model=model, custom_llm_provider=provider
         ).get("max_tokens", None)
