@@ -16,6 +16,8 @@ from aiokafka.errors import UnknownTopicOrPartitionError
 from fastapi import HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import litellm
+from litellm.exceptions import AuthenticationError
+from litellm.utils import check_valid_key, get_valid_models
 from pydantic import BaseModel, SerializeAsAny, field_validator, Field, model_validator
 from redis import Redis
 import time
@@ -36,7 +38,6 @@ from server.utils import (
 )
 
 logger = init_logger(__name__)
-
 
 settings = Settings()
 
@@ -83,10 +84,36 @@ class BatchSubmitted(BaseModel):
     job_id: str
 
 
+class ModelsListRequest(BaseModel):
+    provider: str
+
+
+class ModelsListResponse(BaseModel):
+    models_list: List[str]
+
+
 class CostEstimateRequest(BaseModel):
     agent: Agent
     prompt: str
     substitutions: List[Dict]
+    provider: str
+
+
+class ValidateConnectionRequest(BaseModel):
+    provider: str
+    api_key: Optional[str] = None
+    vertex_credentials: Optional[str] = None
+    vertex_location: Optional[str] = None
+    vertex_project: Optional[str] = None
+    api_version: Optional[str] = None
+    deployment_name: Optional[str] = None
+    endpoint: Optional[str] = None
+    auth_token: Optional[str] = None
+
+
+class ValidateConnectionResponse(BaseModel):
+    model: str
+    success: bool
 
 
 class Status(Enum):
@@ -216,7 +243,100 @@ async def submit_batch(batch: BatchData):
     return AdalaResponse[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
 
-@app.post("/estimate-cost", response_model=AdalaResponse[CostEstimate])
+@app.post("/validate-connection", response_model=Response[ValidateConnectionResponse])
+async def validate_connection(request: ValidateConnectionRequest):
+    multi_model_provider_test_models = {
+        "openai": "gpt-4o-mini",
+        "vertexai": "vertex_ai/gemini-1.5-flash",
+    }
+    provider = request.provider.lower()
+    messages = [{"role": "user", "content": "Hey, how's it going?"}]
+
+    # For multi-model providers use a model that every account should have access to
+    if provider in multi_model_provider_test_models.keys():
+        model = multi_model_provider_test_models[provider]
+        if provider == "openai":
+            model_extra = {"api_key": request.api_key}
+        elif provider == "vertexai":
+            model_extra = {"vertex_credentials": request.vertex_credentials}
+            if request.vertex_location:
+                model_extra["vertex_location"] = request.vertex_location
+            if request.vertex_project:
+                model_extra["vertex_project"] = request.vertex_project
+        try:
+            response = litellm.completion(
+                messages=messages,
+                model=model,
+                max_tokens=10,
+                temperature=0.0,
+                **model_extra,
+            )
+        except AuthenticationError:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Requested model '{model}' is not available with your api_key / credentials",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Error validating credentials for provider {provider}: {e}",
+            )
+
+    # For single-model connections use the provided model
+    else:
+        if provider.lower() == "azureopenai":
+            model = "azure/" + request.deployment_name
+            model_extra = {"base_url": request.endpoint}
+        elif provider.lower() == "custom":
+            model = "openai/" + request.deployment_name
+            model_extra = (
+                {"extra_headers": {"Authorization": request.auth_token}}
+                if request.auth_token
+                else {}
+            )
+        model_extra["api_key"] = request.api_key
+        try:
+            response = litellm.completion(
+                messages=messages,
+                model=model,
+                max_tokens=10,
+                temperature=0.0,
+                **model_extra,
+            )
+        except AuthenticationError:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Requested model '{model}' is not available with your api_key and settings.",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Failed to check availability of requested model '{model}': {e}",
+            )
+
+    return Response[ValidateConnectionResponse](
+        data=ValidateConnectionResponse(success=True, model=response.model)
+    )
+
+
+@app.post("/models-list", response_model=Response[ModelsListResponse])
+async def models_list(request: ModelsListRequest):
+    # get_valid_models uses api key set in env, however the list is not dynamically retrieved
+    # https://docs.litellm.ai/docs/set_keys#get_valid_models
+    # https://github.com/BerriAI/litellm/blob/b9280528d368aced49cb4d287c57cd0b46168cb6/litellm/utils.py#L5705
+    # Ultimately just uses litellm.models_by_provider - setting API key is not needed
+    lse_provider_to_litellm_provider = {"openai": "openai", "vertexai": "vertex_ai"}
+    provider = request.provider.lower()
+    valid_models = litellm.models_by_provider[
+        lse_provider_to_litellm_provider[provider]
+    ]
+
+    return Response[ModelsListResponse](
+        data=ModelsListResponse(models_list=valid_models)
+    )
+
+
+@app.post("/estimate-cost", response_model=Response[CostEstimate])
 async def estimate_cost(
     request: CostEstimateRequest,
 ):
@@ -238,6 +358,7 @@ async def estimate_cost(
     prompt = request.prompt
     substitutions = request.substitutions
     agent = request.agent
+    provider = request.provider
     runtime = agent.get_runtime()
 
     try:
@@ -247,7 +368,10 @@ async def estimate_cost(
                 list(skill.field_schema.keys()) if skill.field_schema else None
             )
             cost_estimate = runtime.get_cost_estimate(
-                prompt=prompt, substitutions=substitutions, output_fields=output_fields
+                prompt=prompt,
+                substitutions=substitutions,
+                output_fields=output_fields,
+                provider=provider,
             )
             cost_estimates.append(cost_estimate)
         total_cost_estimate = sum(
@@ -429,21 +553,26 @@ class ModelMetadataRequestItem(BaseModel):
     model_name: str
     auth_info: Optional[Dict[str, str]] = None
 
+
 class ModelMetadataRequest(BaseModel):
     models: List[ModelMetadataRequestItem]
+
 
 class ModelMetadataResponse(BaseModel):
     model_metadata: Dict[str, Dict]
 
-@app.post("/model-metadata", response_model=AdalaResponse[ModelMetadataResponse])
+
+@app.post("/model-metadata", response_model=Response[ModelMetadataResponse])
 async def model_metadata(request: ModelMetadataRequest):
     from adala.runtimes._litellm import get_model_info
 
-    resp = {'model_metadata': {item.model_name: get_model_info(**item.model_dump()) for item in request.models}}
-    return AdalaResponse[ModelMetadataResponse](
-        success=True,
-        data=resp
-    )
+    resp = {
+        "model_metadata": {
+            item.model_name: get_model_info(**item.model_dump())
+            for item in request.models
+        }
+    }
+    return Response[ModelMetadataResponse](success=True, data=resp)
 
 if __name__ == "__main__":
     # for debugging

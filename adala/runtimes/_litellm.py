@@ -153,20 +153,35 @@ def _get_usage_dict(usage: Usage, model: str) -> Dict:
     return data
 
 
-class InstructorClientMixin:
+def normalize_litellm_model_and_provider(model_name: str, provider: str):
+    """
+    When using litellm.get_model_info() some models are accessed with their provider prefix
+    while others are not.
+
+    This helper function contains logic which normalizes this for supported providers
+    """
+    if "/" in model_name:
+        model_name = model_name.split('/', 1)[1]
+    provider = provider.lower()
+    if provider == "vertexai":
+        provider = "vertex_ai"
+
+    return model_name, provider
+
+
+class InstructorClientMixin(BaseModel):
+
+    # Note: most models work better with json mode; this is set only for backwards compatibility
+    # instructor_mode: str = "json_mode"
+    instructor_mode: str = "tool_call"
+
+    # Note: doesn't seem like this separate function should be necessary, but errors when combined with @cached_property
     def _from_litellm(self, **kwargs):
         return instructor.from_litellm(litellm.completion, **kwargs)
 
     @cached_property
     def client(self):
-        kwargs = {}
-        if self.is_custom_openai_endpoint:
-            kwargs["mode"] = instructor.Mode.JSON
-        return self._from_litellm(**kwargs)
-
-    @property
-    def is_custom_openai_endpoint(self) -> bool:
-        return self.model.startswith("openai/") and self.model_extra.get("base_url")
+        return self._from_litellm(mode=instructor.Mode(self.instructor_mode))
 
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
@@ -241,7 +256,6 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
                  with the provider of your specified model.
         base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
         api_version (Optional[str]): API version, optional except for Azure.
-        timeout: Timeout in seconds.
     """
 
     model: str = "gpt-4o-mini"
@@ -382,7 +396,6 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                  with the provider of your specified model.
         base_url (Optional[str]): Base URL, optional. If provided, will be used to talk to an OpenAI-compatible API provider besides OpenAI.
         api_version (Optional[str]): API version, optional except for Azure.
-        timeout: Timeout in seconds.
     """
 
     model: str = "gpt-4o-mini"
@@ -553,9 +566,12 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         return user_tokens + system_tokens
 
     @staticmethod
-    def _get_completion_tokens(model: str, output_fields: Optional[List[str]]) -> int:
+    def _get_completion_tokens(
+        model: str, output_fields: Optional[List[str]], provider: str
+    ) -> int:
+        model, provider = normalize_litellm_model_and_provider(model, provider)
         max_tokens = litellm.get_model_info(
-            model=model, custom_llm_provider="openai"
+            model=model, custom_llm_provider=provider
         ).get("max_tokens", None)
         if not max_tokens:
             raise ValueError
@@ -565,10 +581,14 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
 
     @classmethod
     def _estimate_cost(
-        cls, user_prompt: str, model: str, output_fields: Optional[List[str]]
+        cls,
+        user_prompt: str,
+        model: str,
+        output_fields: Optional[List[str]],
+        provider: str,
     ):
         prompt_tokens = cls._get_prompt_tokens(user_prompt, model, output_fields)
-        completion_tokens = cls._get_completion_tokens(model, output_fields)
+        completion_tokens = cls._get_completion_tokens(model, output_fields, provider)
         prompt_cost, completion_cost = litellm.cost_per_token(
             model=model,
             prompt_tokens=prompt_tokens,
@@ -579,7 +599,11 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         return prompt_cost, completion_cost, total_cost
 
     def get_cost_estimate(
-        self, prompt: str, substitutions: List[Dict], output_fields: Optional[List[str]]
+        self,
+        prompt: str,
+        substitutions: List[Dict],
+        output_fields: Optional[List[str]],
+        provider: str,
     ) -> CostEstimate:
         try:
             user_prompts = [
@@ -594,6 +618,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                     user_prompt=user_prompt,
                     model=self.model,
                     output_fields=output_fields,
+                    provider=provider,
                 )
                 cumulative_prompt_cost += prompt_cost
                 cumulative_completion_cost += completion_cost
@@ -729,8 +754,12 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
 
     def init_runtime(self) -> "Runtime":
         super().init_runtime()
-        if not litellm.supports_vision(self.model):
-            raise ValueError(f"Model {self.model} does not support vision")
+        # Only running this supports_vision check for non-vertex models, since its based on a static JSON file in
+        # litellm which was not up to date. Will be soon in next release - should update this
+        if not self.model.startswith("vertex_ai"):
+            model_name = self.model
+            if not litellm.supports_vision(model_name):
+                raise ValueError(f"Model {self.model} does not support vision")
         return self
 
     async def batch_to_batch(
@@ -816,7 +845,10 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
 
     # TODO: cost estimate
 
-def get_model_info(provider: str, model_name: str, auth_info: Optional[dict]=None) -> dict:
+
+def get_model_info(
+    provider: str, model_name: str, auth_info: Optional[dict] = None
+) -> dict:
     if auth_info is None:
         auth_info = {}
     try:
@@ -826,11 +858,13 @@ def get_model_info(provider: str, model_name: str, auth_info: Optional[dict]=Non
                 model=f"azure/{model_name}",
                 messages=[{"role": "user", "content": ""}],
                 max_tokens=1,
-                **auth_info
+                **auth_info,
             )
             model_name = dummy_completion.model
-        full_name = f"{provider}/{model_name}"
-        return litellm.get_model_info(full_name)
+        model_name, provider = normalize_litellm_model_and_provider(
+            model_name, provider
+        )
+        return litellm.get_model_info(model=model_name, custom_llm_provider=provider)
     except Exception as err:
         logger.error("Hit error when trying to get model metadata: %s", err)
         return {}
