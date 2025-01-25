@@ -42,7 +42,7 @@ celery = {version = "^5.3.6", extras = ["redis"]}
 kombu = ">=5.4.0rc2" # Pin version to fix https://github.com/celery/celery/issues/8030. TODO: remove when this fix will be included in celery
 uvicorn = "*"
 pydantic-settings = "^2.2.1"
-label-studio-sdk = {url = "https://github.com/HumanSignal/label-studio-sdk/archive/6223e14c292c27a2f66d7af5e2c78e869b135493.zip"}
+label-studio-sdk = {url = "https://github.com/HumanSignal/label-studio-sdk/archive/673ae2212ffe4efaf6571f690268c452982a7957.zip"}
 kafka-python-ng = "^2.2.3"
 requests = "^2.32.0"
 litellm = "^1.47.2"
