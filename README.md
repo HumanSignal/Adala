@@ -96,6 +96,11 @@ Create a new project to evaluate {LLM_name} on question answering. Use the provi
 Track the progress of the ongoing annotation project: {project_name}. Generate a daily summary of completed tasks, pending work, and quality metrics. Notify team members of any delays or issues.  
 ```
 
+#### Visualize customer reports trends
+```
+Visualize the trends of customer reports over the last {time_period}. Generate a report with visualizations and insights. Highlight any significant changes or patterns.
+```
+
 Access [the full list of workflows](database-link) and submit your own! 📝
 
 ## 🗺 Roadmap
@@ -103,6 +108,7 @@ Access [the full list of workflows](database-link) and submit your own! 📝
 - [ ] More Workflows
 - [ ] More Actions
 - [ ] More Clients
+- [ ] More Data Providers and integrations
 
 ## 🤩 Contributing to Adala
 
@@ -111,7 +117,7 @@ Workflows are based on Agentic tools, or `@actions`. To define a new action, dec
 ```python
 from adala import action
 
-@action
+@action()
 def finetune_my_model(dataset_path: str, epochs: int = 10):
     ...
     return "Done!"
