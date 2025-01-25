@@ -243,7 +243,7 @@ async def submit_batch(batch: BatchData):
     return AdalaResponse[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
 
-@app.post("/validate-connection", response_model=Response[ValidateConnectionResponse])
+@app.post("/validate-connection", response_model=AdalaResponse[ValidateConnectionResponse])
 async def validate_connection(request: ValidateConnectionRequest):
     multi_model_provider_test_models = {
         "openai": "gpt-4o-mini",
@@ -314,12 +314,12 @@ async def validate_connection(request: ValidateConnectionRequest):
                 detail=f"Failed to check availability of requested model '{model}': {e}",
             )
 
-    return Response[ValidateConnectionResponse](
+    return AdalaResponse[ValidateConnectionResponse](
         data=ValidateConnectionResponse(success=True, model=response.model)
     )
 
 
-@app.post("/models-list", response_model=Response[ModelsListResponse])
+@app.post("/models-list", response_model=AdalaResponse[ModelsListResponse])
 async def models_list(request: ModelsListRequest):
     # get_valid_models uses api key set in env, however the list is not dynamically retrieved
     # https://docs.litellm.ai/docs/set_keys#get_valid_models
@@ -331,12 +331,12 @@ async def models_list(request: ModelsListRequest):
         lse_provider_to_litellm_provider[provider]
     ]
 
-    return Response[ModelsListResponse](
+    return AdalaResponse[ModelsListResponse](
         data=ModelsListResponse(models_list=valid_models)
     )
 
 
-@app.post("/estimate-cost", response_model=Response[CostEstimate])
+@app.post("/estimate-cost", response_model=AdalaResponse[CostEstimate])
 async def estimate_cost(
     request: CostEstimateRequest,
 ):
@@ -562,7 +562,7 @@ class ModelMetadataResponse(BaseModel):
     model_metadata: Dict[str, Dict]
 
 
-@app.post("/model-metadata", response_model=Response[ModelMetadataResponse])
+@app.post("/model-metadata", response_model=AdalaResponse[ModelMetadataResponse])
 async def model_metadata(request: ModelMetadataRequest):
     from adala.runtimes._litellm import get_model_info
 
@@ -572,7 +572,7 @@ async def model_metadata(request: ModelMetadataRequest):
             for item in request.models
         }
     }
-    return Response[ModelMetadataResponse](success=True, data=resp)
+    return AdalaResponse[ModelMetadataResponse](success=True, data=resp)
 
 if __name__ == "__main__":
     # for debugging
