@@ -54,7 +54,7 @@ adala client
 ```
 
 ## Usage
-Just copy-paste any [workflow](#workflows) into the chat interface and Adala will execute it.
+Use any [workflow from the list](#workflows) and paste it into the agentic chat (e.g. Claude) to execute it.
 
 
 # Workflows 🧰
