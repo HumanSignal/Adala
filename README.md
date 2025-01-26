@@ -12,16 +12,18 @@
 
 # Meet Adala 🛠️📊
 
-Adala gives you well-curated, actionable agentic workflows to take full control of your ML data processing. It’s designed to simplify complex tasks and help you focus on results instead of the details.
+Adala gives you well-curated, actionable agentic workflows to take full control of your ML data processing. It’s designed to simplify complex tasks and help you focus on results instead of the details. 
 
 ## What can Adala help you with?
 
-* 🏷️ Labeling and prepping data for training AI models
-* 📂 Organizing and managing data across your projects
-* 🔍 Exploring and analyzing datasets to uncover insights
-* 📊 Monitoring AI predictions for accuracy and fairness
-* 🛠️ Creating new datasets when you need them
-* 🤖 Testing and improving AI models (like LLMs)
+* ⚡ Fast Predictive Model Design and Development: Quickly prototype, build and refine predictive models tailored to your needs.
+* 📚 Generate Knowledge for RAG Systems: Create curated knowledge databases to enhance Retrieval-Augmented Generation systems and Chatbots.
+* 📂 Organizing and managing data: Keep projects and teams aligned with seamless workflows.
+* 🔍 Exploring and analyzing datasets: Gain insights and identify patterns in your data.
+* 📊 Monitoring AI predictions: Ensure accuracy and fairness across predictions.
+* 🛠️ Creating new datasets: Generate data as needed for evolving requirements.
+* 🤖 Testing and improving AI models: Optimize and enhance the performance of your LLMs.
+* 🏷️ Labeling and prepping data: Prepare datasets for effective model training.
 
 It seamlessly integrates data providers, data labeling, visualization tools, and ML pipelines, so you can focus on your data and results. 🎉
 
