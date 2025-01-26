@@ -12,7 +12,7 @@
 
 # Meet Adala 🛠️📊
 
-Adala gives you well-curated, actionable agentic workflows to take full control of your ML data processing. It’s designed to simplify complex tasks and help you focus on results instead of the details. 
+Adala is a Fast Predictive Model Design and Development Tool.
 
 ## What can Adala help you with?
 
