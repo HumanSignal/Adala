@@ -12,11 +12,11 @@
 
 # Meet Adala 🛠️📊
 
-Adala is a Fast Predictive Model Design and Development Tool.
+Adala is an agentic app that gives you full control over your AI stack through seamless integrations and actionable workflows. It simplifies complex tasks, eliminates operational bottlenecks, and lets you focus on results.
 
 ## What can Adala help you with?
 
-* ⚡ Fast Predictive Model Design and Development: Quickly prototype, build and refine predictive models tailored to your needs.
+* ⚡ Fast Predictive ML Model Design and Development: Quickly prototype, build and refine predictive models tailored to your needs.
 * 📚 Generate Knowledge for RAG Systems: Create curated knowledge databases to enhance Retrieval-Augmented Generation systems and Chatbots.
 * 📂 Organizing and managing data: Keep projects and teams aligned with seamless workflows.
 * 🔍 Exploring and analyzing datasets: Gain insights and identify patterns in your data.
