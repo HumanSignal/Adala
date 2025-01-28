@@ -33,8 +33,10 @@ class SimpleCodeValidationEnvironment(StaticEnvironment):
         stdin = io.StringIO(input_string)
 
         try:
-            with redirect_stdin(stdin), redirect_stdout(stdout), redirect_stderr(
-                stderr
+            with (
+                redirect_stdin(stdin),
+                redirect_stdout(stdout),
+                redirect_stderr(stderr),
             ):
                 exec(code, {"__builtins__": __builtins__})
             out["success"] = True
