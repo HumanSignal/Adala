@@ -12,15 +12,15 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
 ]
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.9,<3.9.7 || >3.9.7,<3.13"
 
 [project.urls]
 Repository = "https://github.com/HumanSignal/Adala"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
+python = ">=3.9,<3.9.7 || >3.9.7,<3.13"
 pandas = "*"
-openai = "^1.47.1"
+openai = "^1.60.2"
 guidance = "0.0.64"
 pydantic = "^2"
 rich = "^13"
@@ -45,7 +45,9 @@ pydantic-settings = "^2.2.1"
 label-studio-sdk = {url = "https://github.com/HumanSignal/label-studio-sdk/archive/29f7df5c6a705f865ade0c2484299d4e320562f8.zip"}
 kafka-python-ng = "^2.2.3"
 requests = "^2.32.0"
-litellm = "^1.47.2"
+# Using litellm from forked repo until vertex fix is released
+#litellm = "^1.47.2"
+litellm = {url = "https://github.com/HumanSignal/litellm/archive/ce03cd9c3624915fe629e01e35fead4a3061d181.zip"}
 pandarallel = "^1.6.5"
 instructor = "^1.4.3"
 
@@ -67,7 +69,7 @@ fakeredis = "^2.23.2"
 flower = "^2.0.1"
 pytest-asyncio = "^0.23.7"
 celery = {extras = ["pytest"], version = "^5.4.0"}
-openai-responses = "^0.10.1"
+openai-responses = "^0.11.6"
 pytest-recording = "^0.13.1"
 mockafka-py = "^0.1.57"
 
