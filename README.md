@@ -21,7 +21,7 @@ Adala is an agentic app that gives you full control over your AI stack through s
 * 📂 Organizing and managing data: Keep projects and teams aligned with seamless workflows.
 * 🔍 Exploring and analyzing datasets: Gain insights and identify patterns in your data.
 * 📊 Monitoring AI predictions: Ensure accuracy and fairness across predictions.
-* 🛠️ Creating new datasets: Generate data as needed for evolving requirements.
+* 🧪 Generating synthetic datasets: Create realistic synthetic data to address gaps and enrich training datasets for evolving requirements.
 * 🤖 Testing and improving AI models: Optimize and enhance the performance of your LLMs.
 * 🏷️ Labeling and prepping data: Prepare datasets for effective model training.
 
