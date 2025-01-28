@@ -153,7 +153,6 @@ def _get_usage_dict(usage: Usage, model: str) -> Dict:
     return data
 
 
-
 def normalize_litellm_model_and_provider(model_name: str, provider: str):
     """
     When using litellm.get_model_info() some models are accessed with their provider prefix
