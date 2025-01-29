@@ -3696,7 +3696,7 @@ optional = false
 python-versions = ">=3.9,<4"
 groups = ["main"]
 files = [
-    {file = "b3c9b27b1e2c0162f49bc3f6f6c18a543510bdcf.zip", hash = "sha256:808f204e88aa9e2401985fdbb65efa2f81de65137be5eabc1e801de89b737b1b"},
+    {file = "3b41cd9b1965c65b8ebaa37db6916a5006eecc23.zip", hash = "sha256:73678372465f2feaaa11927aa8a0204995eda5301339ef162862c30a97b8ff2e"},
 ]
 
 [package.dependencies]
@@ -3721,7 +3721,7 @@ xmljson = "0.2.1"
 
 [package.source]
 type = "url"
-url = "https://github.com/HumanSignal/label-studio-sdk/archive/b3c9b27b1e2c0162f49bc3f6f6c18a543510bdcf.zip"
+url = "https://github.com/HumanSignal/label-studio-sdk/archive/3b41cd9b1965c65b8ebaa37db6916a5006eecc23.zip"
 
 [[package]]
 name = "litellm"
@@ -8485,5 +8485,5 @@ type = ["pytest-mypy"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.9,<3.13"
-content-hash = "27f012a663bc4072a76d4cc5a60172f3d21118435a792b4ca2dd777b80a28159"
+python-versions = ">=3.9,<3.9.7 || >3.9.7,<3.13"
+content-hash = "9c78daf4572c1d75f53f514c9c354a0106df36ae5dc18bd5d4a1c38bd963ee90"
