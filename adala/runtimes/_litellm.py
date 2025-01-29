@@ -370,11 +370,17 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
             )
             usage = completion.usage
             dct = to_jsonable_python(response)
-            # Add usage data to the response (e.g. token counts, cost)
-            dct.update(_get_usage_dict(usage, model=completion.model))
+            # With successful completions we can get canonical model name
+            usage_model = completion.model
+
         except Exception as e:
             dct, usage = handle_llm_exception(e, messages, self.model, retries)
-            dct.update(usage)
+            # With exceptions we dont have access to completion.model
+            usage_model = self.model
+
+        # Add usage data to the response (e.g. token counts, cost)
+        dct.update(_get_usage_dict(usage, model=usage_model))
+
         return dct
 
 
@@ -500,14 +506,17 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                 dct, usage = handle_llm_exception(
                     response, messages, self.model, retries
                 )
-                dct.update(usage)
+                # With exceptions we dont have access to completion.model
+                usage_model = self.model
             else:
                 resp, completion = response
                 usage = completion.usage
                 dct = to_jsonable_python(resp)
+                # With successful completions we can get canonical model name
+                usage_model = completion.model
 
-                # Add usage data to the response (e.g. token counts, cost)
-                dct.update(_get_usage_dict(usage, model=completion.model))
+            # Add usage data to the response (e.g. token counts, cost)
+            dct.update(_get_usage_dict(usage, model=usage_model))
 
             df_data.append(dct)
 
