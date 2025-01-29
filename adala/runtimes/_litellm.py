@@ -145,7 +145,7 @@ def _get_usage_dict(usage: Usage, model: str) -> Dict:
         data["_prompt_cost_usd"] = prompt_cost
         data["_completion_cost_usd"] = completion_cost
         data["_total_cost_usd"] = prompt_cost + completion_cost
-    except NotFoundError:
+    except:
         logger.error(f"Failed to get cost for model {model}")
         data["_prompt_cost_usd"] = None
         data["_completion_cost_usd"] = None
@@ -161,7 +161,7 @@ def normalize_litellm_model_and_provider(model_name: str, provider: str):
     This helper function contains logic which normalizes this for supported providers
     """
     if "/" in model_name:
-        model_name = model_name.split('/', 1)[1]
+        model_name = model_name.split("/", 1)[1]
     provider = provider.lower()
     if provider == "vertexai":
         provider = "vertex_ai"
@@ -215,6 +215,8 @@ def handle_llm_exception(
         # usage = e.total_usage
         # not available here, so have to approximate by hand, assuming the same error occurred each time
         n_attempts = retries.stop.max_attempt_number
+        # Note that the default model used in token_counter is gpt-3.5-turbo as of now - if model passed in
+        # does not match a mapped model, falls back to default
         prompt_tokens = n_attempts * litellm.token_counter(
             model=model, messages=messages[:-1]
         )  # response is appended as the last message
@@ -368,11 +370,16 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
             )
             usage = completion.usage
             dct = to_jsonable_python(response)
+            # With successful completions we can get canonical model name
+            usage_model = completion.model
+
         except Exception as e:
             dct, usage = handle_llm_exception(e, messages, self.model, retries)
+            # With exceptions we dont have access to completion.model
+            usage_model = self.model
 
         # Add usage data to the response (e.g. token counts, cost)
-        dct.update(_get_usage_dict(usage, model=self.model))
+        dct.update(_get_usage_dict(usage, model=usage_model))
 
         return dct
 
@@ -499,13 +506,17 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                 dct, usage = handle_llm_exception(
                     response, messages, self.model, retries
                 )
+                # With exceptions we dont have access to completion.model
+                usage_model = self.model
             else:
                 resp, completion = response
                 usage = completion.usage
                 dct = to_jsonable_python(resp)
+                # With successful completions we can get canonical model name
+                usage_model = completion.model
 
             # Add usage data to the response (e.g. token counts, cost)
-            dct.update(_get_usage_dict(usage, model=self.model))
+            dct.update(_get_usage_dict(usage, model=usage_model))
 
             df_data.append(dct)
 
