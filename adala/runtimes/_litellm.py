@@ -215,6 +215,8 @@ def handle_llm_exception(
         # usage = e.total_usage
         # not available here, so have to approximate by hand, assuming the same error occurred each time
         n_attempts = retries.stop.max_attempt_number
+        # Note that the default model used in token_counter is gpt-3.5-turbo as of now - if model passed in
+        # does not match a mapped model, falls back to default
         prompt_tokens = n_attempts * litellm.token_counter(
             model=model, messages=messages[:-1]
         )  # response is appended as the last message
@@ -372,7 +374,7 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
             dct.update(_get_usage_dict(usage, model=completion.model))
         except Exception as e:
             dct, usage = handle_llm_exception(e, messages, self.model, retries)
-
+            dct.update(usage)
         return dct
 
 
@@ -498,6 +500,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                 dct, usage = handle_llm_exception(
                     response, messages, self.model, retries
                 )
+                dct.update(usage)
             else:
                 resp, completion = response
                 usage = completion.usage
