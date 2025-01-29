@@ -328,9 +328,10 @@ async def models_list(request: ModelsListRequest):
     # Ultimately just uses litellm.models_by_provider - setting API key is not needed
     lse_provider_to_litellm_provider = {"vertexai": "vertex_ai"}
     provider = request.provider.lower()
-    valid_models = litellm.models_by_provider[
-        lse_provider_to_litellm_provider.get(provider, provider)
-    ]
+    litellm_provider = lse_provider_to_litellm_provider.get(provider, provider)
+    valid_models = litellm.models_by_provider[litellm_provider]
+    # some providers include the prefix in this list and others don't
+    valid_models = [model.replace(f"{litellm_provider}/", "") for model in valid_models]
 
     return Response[ModelsListResponse](
         data=ModelsListResponse(models_list=valid_models)
