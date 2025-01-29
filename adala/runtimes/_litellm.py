@@ -145,7 +145,7 @@ def _get_usage_dict(usage: Usage, model: str) -> Dict:
         data["_prompt_cost_usd"] = prompt_cost
         data["_completion_cost_usd"] = completion_cost
         data["_total_cost_usd"] = prompt_cost + completion_cost
-    except NotFoundError:
+    except:
         logger.error(f"Failed to get cost for model {model}")
         data["_prompt_cost_usd"] = None
         data["_completion_cost_usd"] = None
@@ -368,11 +368,10 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
             )
             usage = completion.usage
             dct = to_jsonable_python(response)
+            # Add usage data to the response (e.g. token counts, cost)
+            dct.update(_get_usage_dict(usage, model=completion.model))
         except Exception as e:
             dct, usage = handle_llm_exception(e, messages, self.model, retries)
-
-        # Add usage data to the response (e.g. token counts, cost)
-        dct.update(_get_usage_dict(usage, model=self.model))
 
         return dct
 
@@ -504,8 +503,8 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                 usage = completion.usage
                 dct = to_jsonable_python(resp)
 
-            # Add usage data to the response (e.g. token counts, cost)
-            dct.update(_get_usage_dict(usage, model=self.model))
+                # Add usage data to the response (e.g. token counts, cost)
+                dct.update(_get_usage_dict(usage, model=completion.model))
 
             df_data.append(dct)
 
