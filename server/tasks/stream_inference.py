@@ -144,6 +144,7 @@ async def async_process_streaming_input(input_task_done: asyncio.Event, agent: A
         logger.error(
             f"Error in async_process_streaming_input: {e}. Traceback: {traceback.format_exc()}"
         )
+        input_task_done.set()
     # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_output
     finally:
         await agent.environment.finalize()
