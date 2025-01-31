@@ -261,8 +261,8 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
     """
 
     model: str = "gpt-4o-mini"
-    max_tokens: int = 1000
-    temperature: float = 0.0
+    max_tokens: Optional[int] = 1000
+    temperature: Optional[float] = 0.0
     seed: Optional[int] = 47
 
     model_config = ConfigDict(extra="allow")
@@ -406,8 +406,8 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
     """
 
     model: str = "gpt-4o-mini"
-    max_tokens: int = 1000
-    temperature: float = 0.0
+    max_tokens: Optional[int] = 1000
+    temperature: Optional[float] = 0.0
     seed: Optional[int] = 47
 
     model_config = ConfigDict(extra="allow")
