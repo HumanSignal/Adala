@@ -56,7 +56,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_deserializer=lambda v: json.loads(v.decode("utf-8")),
             auto_offset_reset="earliest",
-            max_partition_fetch_bytes=30000000,
+            max_partition_fetch_bytes=3000000,
             # enable_auto_commit=False, # Turned off as its not supported without group ID
             # group_id=output_topic_name, # No longer using group ID as of DIA-1584 - unclear details but causes problems
         )
@@ -65,7 +65,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         self.producer = AIOKafkaProducer(
             bootstrap_servers=self.kafka_bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-            max_request_size=30000000,
+            max_request_size=3000000,
             acks="all",  # waits for all replicas to respond that they have written the message
         )
         await self.producer.start()
