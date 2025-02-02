@@ -144,6 +144,7 @@ async def async_process_streaming_input(input_task_done: asyncio.Event, agent: A
         logger.error(
             f"Error in async_process_streaming_input: {e}. Traceback: {traceback.format_exc()}"
         )
+        input_task_done.set()
     # cleans up after any exceptions raised here as well as asyncio.CancelledError resulting from failure in async_process_streaming_output
     finally:
         await agent.environment.finalize()
@@ -168,6 +169,7 @@ async def async_process_streaming_output(
                 bootstrap_servers=settings.kafka_bootstrap_servers,
                 value_deserializer=lambda v: json.loads(v.decode("utf-8")),
                 auto_offset_reset="earliest",
+                max_partition_fetch_bytes=3000000,
                 # enable_auto_commit=False, # Turned off as its not supported without group ID
                 # group_id=output_topic_name, # No longer using group ID as of DIA-1584 - unclear details but causes problems
             )

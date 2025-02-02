@@ -111,8 +111,8 @@ class TemplateChunks(TypedDict):
     start: int
     end: int
     type: str
-    
-    
+
+
 match_fields_regex = re.compile(r"(?<!\{)\{([a-zA-Z0-9_]+)\}(?!})")
 
 
