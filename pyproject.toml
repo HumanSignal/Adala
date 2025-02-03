@@ -42,7 +42,7 @@ celery = {version = "^5.3.6", extras = ["redis"]}
 kombu = ">=5.4.0rc2" # Pin version to fix https://github.com/celery/celery/issues/8030. TODO: remove when this fix will be included in celery
 uvicorn = "*"
 pydantic-settings = "^2.2.1"
-label-studio-sdk = {url = "https://github.com/HumanSignal/label-studio-sdk/archive/06be84ba19d2ff3b71688ed6f46a1dcac85fe0ae.zip"}
+label-studio-sdk = {url = "https://github.com/HumanSignal/label-studio-sdk/archive/5352eb4b3147669b638e34e9efabc85ee62d7fdc.zip"}
 kafka-python-ng = "^2.2.3"
 requests = "^2.32.0"
 # Using litellm from forked repo until vertex fix is released: https://github.com/BerriAI/litellm/issues/7904
