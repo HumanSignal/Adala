@@ -23,6 +23,7 @@ services:
       - KAFKA_CFG_NODE_ID=1
       - KAFKA_KRAFT_CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+      - KAFKA_MESSAGE_MAX_BYTES=3000000
   redis:
     image: redis:alpine
     ports:
