@@ -250,6 +250,7 @@ async def validate_connection(request: ValidateConnectionRequest):
         "openai": "gpt-4o-mini",
         "vertexai": "vertex_ai/gemini-1.5-flash",
         "gemini": "gemini/gemini-1.5-flash",
+        "anthropic": "anthropic/claude-3-5-sonnet-20241022",
     }
     provider = request.provider.lower()
     messages = [{"role": "user", "content": "Hey, how's it going?"}]
