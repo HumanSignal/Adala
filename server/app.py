@@ -246,6 +246,7 @@ async def submit_batch(batch: BatchData):
 
 @app.post("/validate-connection", response_model=Response[ValidateConnectionResponse])
 async def validate_connection(request: ValidateConnectionRequest):
+    # TODO: move this logic to LSE, this is the last place Adala needs to be updated when adding a provider connection
     multi_model_provider_test_models = {
         "openai": "gpt-4o-mini",
         "vertexai": "vertex_ai/gemini-1.5-flash",
@@ -289,6 +290,9 @@ async def validate_connection(request: ValidateConnectionRequest):
     else:
         if provider.lower() == "azureopenai":
             model = "azure/" + request.deployment_name
+            model_extra = {"base_url": request.endpoint}
+        elif provider.lower() == "azureaifoundry":
+            model = "azure_ai/" + request.deployment_name
             model_extra = {"base_url": request.endpoint}
         elif provider.lower() == "custom":
             model = "openai/" + request.deployment_name
@@ -364,6 +368,8 @@ async def estimate_cost(
     agent = request.agent
     provider = request.provider
     runtime = agent.get_runtime()
+    with open("cost_estimate.log", "w") as f:
+        json.dump(request.model_dump(), f, indent=4)
 
     try:
         cost_estimates = []
