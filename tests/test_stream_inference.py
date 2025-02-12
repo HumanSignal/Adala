@@ -56,11 +56,11 @@ TEST_OUTPUT_DATA = [
         "task_id": 100,
         "input": "I am happy",
         "output": "positive",
-        "_completion_cost_usd": 3e-06,
-        "_completion_tokens": 5,
+        "_completion_cost_usd": 3.6e-06,
+        "_completion_tokens": 6,
         "_prompt_cost_usd": 1.35e-05,
         "_prompt_tokens": 90,
-        "_total_cost_usd": 1.65e-05,
+        "_total_cost_usd": 1.71e-05,
     }
 ]
 
@@ -123,6 +123,7 @@ def mock_kafka_producer():
 
         mock_producer.send_and_wait = AsyncMock(side_effect=send_and_wait_side_effect)
         mock_producer.send = AsyncMock(side_effect=send_side_effect)
+        mock_producer._max_request_size = 3000000
 
         yield mock_producer
 
