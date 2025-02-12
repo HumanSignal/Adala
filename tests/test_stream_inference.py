@@ -56,11 +56,11 @@ TEST_OUTPUT_DATA = [
         "task_id": 100,
         "input": "I am happy",
         "output": "positive",
-        "_completion_cost_usd": 3e-06,
-        "_completion_tokens": 5,
+        "_completion_cost_usd": 3.6e-06,
+        "_completion_tokens": 6,
         "_prompt_cost_usd": 1.35e-05,
         "_prompt_tokens": 90,
-        "_total_cost_usd": 1.65e-05,
+        "_total_cost_usd": 1.71e-05,
     }
 ]
 
@@ -123,6 +123,7 @@ def mock_kafka_producer():
 
         mock_producer.send_and_wait = AsyncMock(side_effect=send_and_wait_side_effect)
         mock_producer.send = AsyncMock(side_effect=send_side_effect)
+        mock_producer._max_request_size = 3000000
 
         yield mock_producer
 
@@ -130,10 +131,13 @@ def mock_kafka_producer():
 @pytest.fixture
 def agent(mock_kafka_consumer_input, mock_kafka_producer):
 
+    print("initializing test agent")
+
     with patch.object(AsyncKafkaEnvironment, "initialize", AsyncMock()) as mock_init:
         agent = Agent(**TEST_AGENT)
         agent.environment.consumer = mock_kafka_consumer_input
         agent.environment.producer = mock_kafka_producer
+        print("yielding test agent")
         yield agent
 
 
@@ -159,6 +163,7 @@ async def test_run_streaming(
         api_key="api_key", url="http://fakeapp.humansignal.com", modelrun_id=123
     )
 
+    print("calling run_streaming.......")
     # Call the run_streaming function
     await run_streaming(
         agent=agent,
@@ -166,6 +171,7 @@ async def test_run_streaming(
         batch_size=1,
         output_topic_name="output_topic",
     )
+    print("after run_streaming!!!!!!!")
 
     # Verify that producer is called with the correct amount of send_and_wait calls and data
     assert (
