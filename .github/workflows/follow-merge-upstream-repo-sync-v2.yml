@@ -1,0 +1,310 @@
+name: 'Follow Merge: Upstream repo sync v2'
+
+on:
+  workflow_call:
+    inputs:
+      branch_name:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'Branch name'
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.branch_name }}
+  cancel-in-progress: true
+
+env:
+  NODE: "18"
+  YARN: "1.22"
+
+jobs:
+  sync:
+    name: Sync PR
+    runs-on: ubuntu-latest
+    outputs:
+      label-studio-sdk: "${{ steps.upstream-prs.outputs.label-studio-sdk }}"
+    steps:
+      - uses: hmarr/debug-action@v3.0.0
+
+      - name: Add Workflow link to chat ops command comment
+        if: github.event.client_payload.github.payload.comment.id && github.event.client_payload.github.payload.repository.full_name
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
+          comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
+          body: |
+            > [Workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+      - name: Checkout Actions Hub
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          repository: HumanSignal/actions-hub
+          path: ./.github/actions-hub
+
+      - name: Find or Create branch
+        uses: ./.github/actions-hub/actions/github-find-or-create-branch
+        id: get-branch
+        with:
+          github_token: ${{ secrets.GIT_PAT }}
+          branch_name: "${{ inputs.branch_name }}"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          ref: ${{ steps.get-branch.outputs.branch_name }}
+          fetch-depth: 0
+
+      - name: Checkout Actions Hub
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          repository: HumanSignal/actions-hub
+          path: ./.github/actions-hub
+
+      - name: Get Upstream PRs
+        id: upstream-prs
+        uses: actions/github-script@v7
+        env:
+          BRANCH_NAME: ${{ inputs.branch_name }}
+        with:
+          github-token: ${{ secrets.GIT_PAT }}
+          script: |
+            const { repo, owner } = context.repo;
+            const branch_name = process.env.BRANCH_NAME;
+            const pyProjectPath = "pyproject.toml";
+            const repos = ["label-studio-sdk"];
+            const repos_infra = [];
+            const base_branch_name = 'develop';
+            
+            let shas = {};
+
+            // GET UPSTREAM PRS
+            let upstream_pulls = [];
+            for (const repo of repos.concat(repos_infra)) {
+              const {data: pulls} = await github.rest.pulls.list({
+                owner,
+                repo,
+                state: "all",
+                head: `${owner}:${branch_name}`,
+              });
+              const first_open_pull = pulls.find(e => e.state === 'open');
+              const pull = first_open_pull || pulls[0];
+              if (pull) {
+                core.info(`PRs found for ${repo} ${pull.html_url} ${pull.merged_at ? 'merged' : pull.state} ${pull.merged_at ? pull.merge_commit_sha : pull.head.sha}`)
+                upstream_pulls.push(pull);
+                if (pull.merged_at) {
+                  shas[repo] = pull.merge_commit_sha;
+                } else if (pull.state === 'open') {
+                  shas[repo] = pull.head.sha;
+                }
+              } else {
+                core.notice(`No open upstream PRs found for ${repo}`)
+              }
+            }
+            
+            // GET BASE VERSIONS
+            const {data: pyprojectBlob} = await github.rest.repos.getContent({
+              owner: owner,
+              repo: repo,
+              ref: base_branch_name,
+              path: pyProjectPath,
+            });
+            const base_pyproject = Buffer.from(pyprojectBlob.content, pyprojectBlob.encoding).toString("utf8");
+            for (const repo of repos) {
+              const match = base_pyproject.match(new RegExp(`${repo}\/archive.*(?<sha>[a-f0-9]{40})`));
+              if (match && match.groups.sha) {
+                core.info(`Base version for ${repo} ${pyprojectBlob.html_url} ${match.groups.sha}`);
+                shas[repo] = shas[repo] || match.groups.sha;
+              } else {
+                core.setFailed(`Could not parse ${repo} version from ${pyprojectBlob.html_url}`);
+              }
+            }
+            
+            for (const [key, value] of Object.entries(shas)) {
+              core.setOutput(key, value);
+            }
+            
+            core.info(`Base branch name ${base_branch_name}`);
+            core.setOutput('base_branch_name', base_branch_name);
+            
+            if (upstream_pulls.length > 0) {
+              core.info(`Title ${upstream_pulls[0].title}`);
+              core.setOutput('title', upstream_pulls[0].title);
+            }
+            
+            const upstream_prs_urls = upstream_pulls.map(e => e.html_url).join(',');
+            core.info(`Upstream PRs URLs ${upstream_prs_urls}`);
+            core.setOutput('upstream_prs_urls', upstream_prs_urls);
+            
+            let assignees = [];
+            for (const pull of upstream_pulls) {
+              if (pull.user) assignees.push(pull.user.login);
+              if (pull.assignee) assignees.push(pull.assignee.login);
+              assignees.concat(pull.assignees.map(e => e.name));
+            }
+            assignees = assignees.filter(x => x !== 'robot-ci-heartex');
+            core.info(`Assignees ${assignees.join(',')}`);
+            core.setOutput('assignees', assignees.join(','));
+            
+            if (assignees.length > 0) {
+              const author_username = assignees[0];
+              core.info(`Author username ${author_username}`);
+              core.setOutput('author_username', author_username);
+            }
+            
+            let status = "open"
+            if (upstream_pulls.every(p => p.merged_at)) {
+              status = 'merged';
+            } else if (upstream_pulls.every(p => p.closed_at)) {
+              status = 'closed';
+            }
+            core.info(`Status: ${status}`);
+            core.setOutput("status", status);
+
+      - name: Git Configure
+        uses: ./.github/actions-hub/actions/git-configure
+        with:
+          username: ${{ steps.upstream-prs.outputs.author_username }}
+
+      - name: Git Merge
+        id: merge
+        continue-on-error: true
+        uses: ./.github/actions-hub/actions/git-merge
+        with:
+          base_branch: ${{ steps.upstream-prs.outputs.base_branch_name }}
+          head_branch: ${{ steps.get-branch.outputs.branch_name }}
+          our_files: "pyproject.toml poetry.lock web/package.json web/yarn.lock"
+
+      - name: "Install poetry"
+        env:
+          POETRY_VERSION: ${{ vars.POETRY_VERSION }}
+        run: pipx install "poetry==${POETRY_VERSION}"
+
+      - name: "Set up Python"
+        id: setup_python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'poetry'
+
+      - name: Commit submodule
+        shell: bash
+        env:
+          SDK_SHA: "${{ steps.upstream-prs.outputs.label-studio-sdk }}"
+          COMMIT_MESSAGE: "Sync Follow Merge dependencies"
+          COMMIT_MESSAGE_WORKFLOW_LINK: "Workflow run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        run: |
+          set -xeuo pipefail
+                    
+          if [[ -n "${SDK_SHA}" ]]; then
+            poetry add "https://github.com/HumanSignal/label-studio-sdk/archive/${SDK_SHA}.zip" --lock
+          fi
+          
+          poetry lock
+          
+          git diff
+          git add -A
+          git status -s
+          git commit --allow-empty -m "${COMMIT_MESSAGE}" -m "${COMMIT_MESSAGE_WORKFLOW_LINK}"
+
+      - name: Git Push
+        uses: ./.github/actions-hub/actions/git-push
+
+      - name: Find or Create PR
+        uses: ./.github/actions-hub/actions/follow-merge-find-or-create-pull-request
+        id: get-pr
+        with:
+          github_token: ${{ secrets.GIT_PAT }}
+          branch_name: "${{ steps.get-branch.outputs.branch_name }}"
+          title: "${{ steps.upstream-prs.outputs.title }}"
+          upstream_prs_urls: "${{ steps.upstream-prs.outputs.upstream_prs_urls }}"
+
+      - name: Add PR Assignees
+        if: steps.upstream-prs.outputs.assignees
+        uses: ./.github/actions-hub/actions/github-add-pull-request-assignees
+        continue-on-error: true
+        with:
+          github_token: ${{ secrets.GIT_PAT }}
+          pullrequest_number: "${{ steps.get-pr.outputs.number }}"
+          assignees: "${{ steps.upstream-prs.outputs.assignees }}"
+
+      - name: Convert to ready for review
+        if: steps.upstream-prs.outputs.status == 'merged'
+        id: ready-for-review-pr
+        shell: bash
+        env:
+          GIT_PAT: ${{ secrets.GIT_PAT }}
+        run: |
+          echo "$GIT_PAT" | gh auth login --with-token
+          gh api graphql -F id='${{ steps.get-pr.outputs.node_id }}' -f query='
+            mutation($id: ID!) {
+              markPullRequestReadyForReview(input: { pullRequestId: $id }) {
+                pullRequest {
+                  id
+                }
+              }
+            }
+          '
+
+      - name: Enable AutoMerge
+        if: steps.upstream-prs.outputs.status == 'merged'
+        continue-on-error: true
+        shell: bash
+        env:
+          GIT_PAT: ${{ secrets.GIT_PAT }}
+        run: |
+          echo "$GIT_PAT" | gh auth login --with-token
+          gh api graphql -f pull='${{ steps.get-pr.outputs.node_id }}' -f query='
+            mutation($pull: ID!) {
+              enablePullRequestAutoMerge(input: {pullRequestId: $pull, mergeMethod: SQUASH}) {
+                pullRequest {
+                  id
+                  number
+                }
+              }
+            }'
+
+      - name: Close PR
+        if: steps.upstream-prs.outputs.status == 'closed'
+        continue-on-error: true
+        shell: bash
+        env:
+          GIT_PAT: ${{ secrets.GIT_PAT }}
+        run: |
+          echo "$GIT_PAT" | gh auth login --with-token
+          gh api graphql -f pull='${{ steps.get-pr.outputs.node_id }}' -f query='
+            mutation($pull: ID!) {
+              closePullRequest(input: {pullRequestId: $pull }) {
+                pullRequest {
+                  id
+                  state
+                }
+              }
+            }'
+
+  #      - name: Notify on failure
+  #        uses: ./.github/actions-hub/actions/github-create-comment
+  #        if: failure()
+  #        with:
+  #          github_token: ${{ secrets.GIT_PAT }}
+  #          repository: "${{ steps.fm.outputs.repo_name }}"
+  #          issue_number: "${{ steps.fm.outputs.pr_number }}"
+  #          body: |
+  #            Follow Merge downstream workflow has been failed.
+  #            > [Workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+      - name: Add reaction to chat ops command comment
+        if: always() && github.event.client_payload.github.payload.comment.id && github.event.client_payload.github.payload.repository.full_name
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
+          comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
+          reactions: ${{ job.status == 'success' && '+1' || '-1' }}
