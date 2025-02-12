@@ -77,11 +77,11 @@ jobs:
           github-token: ${{ secrets.GIT_PAT }}
           script: |
             const { repo, owner } = context.repo;
+            const base_branch_name = context.repo.default_branch;
             const branch_name = process.env.BRANCH_NAME;
             const pyProjectPath = "pyproject.toml";
             const repos = ["label-studio-sdk"];
             const repos_infra = [];
-            const base_branch_name = 'develop';
             
             let shas = {};
 
