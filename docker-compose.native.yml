@@ -24,9 +24,5 @@ services:
       - KAFKA_KRAFT_CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
       - KAFKA_MESSAGE_MAX_BYTES=3000000
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      - KAFKA_CFG_REPLICA_FETCH_MAX_BYTES=3000000
+      - KAFKA_CFG_REPLICA_FETCH_RESPONSE_MAX_BYTES=3000000
