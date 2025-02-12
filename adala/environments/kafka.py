@@ -111,8 +111,8 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
                 f"Message size of {num_bytes} is larger than max_request_size {producer._max_request_size} - splitting message into {num_chunks} chunks of size {chunk_size}"
             )
 
-            for i in range(0, len(data), chunk_size):
-                await producer.send_and_wait(topic, value=data[i : i + chunk_size])
+            for chunk_start in range(0, len(data), chunk_size):
+                await producer.send_and_wait(topic, value=data[chunk_start : chunk_start + chunk_size])
 
         # If the data is less than max_request_size, can send all at once
         else:
