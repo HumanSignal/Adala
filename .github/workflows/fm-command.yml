@@ -1,0 +1,34 @@
+name: "/fm command"
+
+on:
+  repository_dispatch:
+    types: [ fm-command ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.client_payload.github.payload.issue.number }}-${{ github.event.client_payload.slash_command.command }}-${{ github.event.client_payload.slash_command.args.unnamed.arg1 || github.event.client_payload.slash_command.args.all }}
+
+jobs:
+  sync:
+    name: "Update: Update Feature Flags"
+    if: github.event.client_payload.slash_command.args.unnamed.arg1 == 'sync'
+    uses: ./.github/workflows/follow-merge-upstream-repo-sync-v2.yml
+    with:
+      branch_name: ${{ github.event.client_payload.pull_request.head.ref }}
+    secrets: inherit
+
+  help:
+    if: ${{ github.event.client_payload.slash_command.args.unnamed.arg1 == 'help' || !contains(fromJson('["sync"]'), github.event.client_payload.slash_command.args.unnamed.arg1) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Update comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
+          comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
+          body: |
+            > Command | Description
+            > --- | ---
+            > /fm sync | Sync upstream prs and merge with pull request base
+          reaction-type: hooray
