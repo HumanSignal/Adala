@@ -368,8 +368,6 @@ async def estimate_cost(
     agent = request.agent
     provider = request.provider
     runtime = agent.get_runtime()
-    with open("cost_estimate.log", "w") as f:
-        json.dump(request.model_dump(), f, indent=4)
 
     try:
         cost_estimates = []
