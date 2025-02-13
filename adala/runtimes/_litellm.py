@@ -163,8 +163,13 @@ def normalize_litellm_model_and_provider(model_name: str, provider: str):
     if "/" in model_name:
         model_name = model_name.split("/", 1)[1]
     provider = provider.lower()
+    # TODO: move this logic to LSE, this is the last place Adala needs to be updated when adding a provider connection
     if provider == "vertexai":
         provider = "vertex_ai"
+    if provider == "azureopenai":
+        provider = "azure"
+    if provider == "azureaifoundry":
+        provider = "azure_ai"
 
     return model_name, provider
 
@@ -600,11 +605,32 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
     ):
         prompt_tokens = cls._get_prompt_tokens(user_prompt, model, output_fields)
         completion_tokens = cls._get_completion_tokens(model, output_fields, provider)
-        prompt_cost, completion_cost = litellm.cost_per_token(
-            model=model,
-            prompt_tokens=prompt_tokens,
-            completion_tokens=completion_tokens,
-        )
+        # amazingly, litellm.cost_per_token refers to a hardcoded dictionary litellm.model_cost which is case-sensitive with inconsistent casing.....
+        # Example: 'azure_ai/deepseek-r1' vs 'azure_ai/Llama-3.3-70B-Instruct'
+        # so we ctually have no way of determining the correct casing or reliably fixing it.
+        # we can at least try all-loweercase.
+        candidate_model_names = [model, model.lower()]
+        # ...and Azure AI Foundry openai models are not listed there, but under Azure OpenAI
+        if model.startswith("azure_ai/"):
+            candidate_model_names.append(model.replace("azure_ai/", "azure/"))
+            candidate_model_names.append(model.replace("azure_ai/", "azure/").lower())
+        for candidate_model_name in candidate_model_names:
+            try:
+                prompt_cost, completion_cost = litellm.cost_per_token(
+                    model=model,
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens,
+                )
+                break
+            except Exception as e:
+                # it also doesn't have a type to catch:
+                # Exception("This model isn't mapped yet. model=azure_ai/deepseek-R1, custom_llm_provider=azure_ai. Add it here - https://github.com/ BerriAI/litellm/blob/main/model_prices_and_context_window.json.")
+                if "model isn't mapped" in str(e):
+                    prompt_cost, completion_cost = None, None
+                raise e
+        if prompt_cost is None or completion_cost is None:
+            raise ValueError(f"Model {model} for provider {provider} not found.")
+
         total_cost = prompt_cost + completion_cost
 
         return prompt_cost, completion_cost, total_cost
