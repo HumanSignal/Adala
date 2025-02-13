@@ -624,7 +624,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
             candidate_model_names.append(model.replace("azure_ai/", "azure/").lower())
 
         completion_tokens = cls._get_completion_tokens(
-            candidate_model_names.copy(), output_fields, provider
+            candidate_model_names, output_fields, provider
         )
 
         for candidate_model_name in candidate_model_names:
