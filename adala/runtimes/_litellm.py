@@ -587,22 +587,21 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         output_fields: Optional[List[str]],
         provider: str,
     ) -> int:
+        max_tokens = None
         for model in candidate_model_names:
-            model, provider = normalize_litellm_model_and_provider(model, provider)
             try:
-                max_tokens = litellm.get_model_info(
-                    model=model, custom_llm_provider=provider
-                ).get("max_tokens", None)
+                max_tokens = litellm.get_model_info(model=model).get("max_tokens", None)
+                break
             except Exception as e:
                 if "model isn't mapped" in str(e):
                     continue
                 else:
                     raise e
-            if not max_tokens:
-                raise ValueError
-            # extremely rough heuristic, from testing on some anecdotal examples
-            n_outputs = len(output_fields) if output_fields else 1
-            return min(max_tokens, 4 * n_outputs)
+        if not max_tokens:
+            raise ValueError
+        # extremely rough heuristic, from testing on some anecdotal examples
+        n_outputs = len(output_fields) if output_fields else 1
+        return min(max_tokens, 4 * n_outputs)
 
     @classmethod
     def _estimate_cost(
@@ -622,11 +621,13 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         if model.startswith("azure_ai/"):
             candidate_model_names.append(model.replace("azure_ai/", "azure/"))
             candidate_model_names.append(model.replace("azure_ai/", "azure/").lower())
+        candidate_model_names = list(set(candidate_model_names))
 
         completion_tokens = cls._get_completion_tokens(
             candidate_model_names, output_fields, provider
         )
 
+        prompt_cost, completion_cost = None, None
         for candidate_model_name in candidate_model_names:
             try:
                 prompt_cost, completion_cost = litellm.cost_per_token(
@@ -634,14 +635,14 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
                 )
-                break
             except Exception as e:
                 # it also doesn't have a type to catch:
                 # Exception("This model isn't mapped yet. model=azure_ai/deepseek-R1, custom_llm_provider=azure_ai. Add it here - https://github.com/ BerriAI/litellm/blob/main/model_prices_and_context_window.json.")
                 if "model isn't mapped" in str(e):
-                    prompt_cost, completion_cost = None, None
-                else:
-                    raise e
+                    pass
+            if prompt_cost is not None and completion_cost is not None:
+                break
+
         if prompt_cost is None or completion_cost is None:
             raise ValueError(f"Model {model} for provider {provider} not found.")
 
