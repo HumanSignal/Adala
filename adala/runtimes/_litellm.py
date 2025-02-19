@@ -163,8 +163,13 @@ def normalize_litellm_model_and_provider(model_name: str, provider: str):
     if "/" in model_name:
         model_name = model_name.split("/", 1)[1]
     provider = provider.lower()
+    # TODO: move this logic to LSE, this is the last place Adala needs to be updated when adding a provider connection
     if provider == "vertexai":
         provider = "vertex_ai"
+    if provider == "azureopenai":
+        provider = "azure"
+    if provider == "azureaifoundry":
+        provider = "azure_ai"
 
     return model_name, provider
 
@@ -578,12 +583,20 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
 
     @staticmethod
     def _get_completion_tokens(
-        model: str, output_fields: Optional[List[str]], provider: str
+        candidate_model_names: List[str],
+        output_fields: Optional[List[str]],
+        provider: str,
     ) -> int:
-        model, provider = normalize_litellm_model_and_provider(model, provider)
-        max_tokens = litellm.get_model_info(
-            model=model, custom_llm_provider=provider
-        ).get("max_tokens", None)
+        max_tokens = None
+        for model in candidate_model_names:
+            try:
+                max_tokens = litellm.get_model_info(model=model).get("max_tokens", None)
+                break
+            except Exception as e:
+                if "model isn't mapped" in str(e):
+                    continue
+                else:
+                    raise e
         if not max_tokens:
             raise ValueError
         # extremely rough heuristic, from testing on some anecdotal examples
@@ -599,12 +612,40 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         provider: str,
     ):
         prompt_tokens = cls._get_prompt_tokens(user_prompt, model, output_fields)
-        completion_tokens = cls._get_completion_tokens(model, output_fields, provider)
-        prompt_cost, completion_cost = litellm.cost_per_token(
-            model=model,
-            prompt_tokens=prompt_tokens,
-            completion_tokens=completion_tokens,
+        # amazingly, litellm.cost_per_token refers to a hardcoded dictionary litellm.model_cost which is case-sensitive with inconsistent casing.....
+        # Example: 'azure_ai/deepseek-r1' vs 'azure_ai/Llama-3.3-70B-Instruct'
+        # so we have no way of determining the correct casing or reliably fixing it.
+        # we can at least try all-lowercase.
+        candidate_model_names = [model, model.lower()]
+        # ...and Azure AI Foundry openai models are not listed there, but under Azure OpenAI
+        if model.startswith("azure_ai/"):
+            candidate_model_names.append(model.replace("azure_ai/", "azure/"))
+            candidate_model_names.append(model.replace("azure_ai/", "azure/").lower())
+        candidate_model_names = list(set(candidate_model_names))
+
+        completion_tokens = cls._get_completion_tokens(
+            candidate_model_names, output_fields, provider
         )
+
+        prompt_cost, completion_cost = None, None
+        for candidate_model_name in candidate_model_names:
+            try:
+                prompt_cost, completion_cost = litellm.cost_per_token(
+                    model=candidate_model_name,
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens,
+                )
+            except Exception as e:
+                # it also doesn't have a type to catch:
+                # Exception("This model isn't mapped yet. model=azure_ai/deepseek-R1, custom_llm_provider=azure_ai. Add it here - https://github.com/ BerriAI/litellm/blob/main/model_prices_and_context_window.json.")
+                if "model isn't mapped" in str(e):
+                    pass
+            if prompt_cost is not None and completion_cost is not None:
+                break
+
+        if prompt_cost is None or completion_cost is None:
+            raise ValueError(f"Model {model} for provider {provider} not found.")
+
         total_cost = prompt_cost + completion_cost
 
         return prompt_cost, completion_cost, total_cost
@@ -624,10 +665,25 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
             cumulative_prompt_cost = 0
             cumulative_completion_cost = 0
             cumulative_total_cost = 0
+            # for azure, we need the canonical model name, not the deployment name
+            if self.model.startswith("azure/"):
+                messages = [{"role": "user", "content": "Hey, how's it going?"}]
+                response = litellm.completion(
+                    messages=messages,
+                    model=self.model,
+                    max_tokens=10,
+                    temperature=self.temperature,
+                    seed=self.seed,
+                    # extra inference params passed to this runtime
+                    **self.model_extra,
+                )
+                model = "azure/" + response.model
+            else:
+                model = self.model
             for user_prompt in user_prompts:
                 prompt_cost, completion_cost, total_cost = self._estimate_cost(
                     user_prompt=user_prompt,
-                    model=self.model,
+                    model=model,
                     output_fields=output_fields,
                     provider=provider,
                 )
