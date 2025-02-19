@@ -112,7 +112,9 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
             )
 
             for chunk_start in range(0, len(data), chunk_size):
-                await producer.send_and_wait(topic, value=data[chunk_start : chunk_start + chunk_size])
+                await producer.send_and_wait(
+                    topic, value=data[chunk_start : chunk_start + chunk_size]
+                )
 
         # If the data is less than max_request_size, can send all at once
         else:
