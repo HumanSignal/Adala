@@ -3725,23 +3725,23 @@ url = "https://github.com/HumanSignal/label-studio-sdk/archive/d953881b2b4567b93
 
 [[package]]
 name = "litellm"
-version = "1.59.9"
+version = "1.61.17"
 description = "Library to easily interface with LLM API providers"
 optional = false
 python-versions = ">=3.8.1,<4.0, !=3.9.7"
 groups = ["main"]
 files = [
-    {file = "ce03cd9c3624915fe629e01e35fead4a3061d181.zip", hash = "sha256:5ff93346085c5477671527a2231db42eb61d02881156f9194c5a705b12febfa1"},
+    {file = "2fce10fe5bacabe32590a170878a67110dcaa9ce.zip", hash = "sha256:43aa3a566442494fe764846ccc73d0d5cc0386088153352512f7aa679e2c3a5b"},
 ]
 
 [package.dependencies]
 aiohttp = "*"
 click = "*"
-httpx = ">=0.23.0,<0.28.0"
+httpx = ">=0.23.0"
 importlib-metadata = ">=6.8.0"
 jinja2 = ">=3.1.2,<4.0.0"
 jsonschema = ">=4.22.0,<5.0.0"
-openai = ">=1.55.3"
+openai = ">=1.61.0"
 pydantic = ">=2.0.0,<3.0.0"
 python-dotenv = ">=0.2.0"
 tiktoken = ">=0.7.0"
@@ -3753,7 +3753,7 @@ proxy = ["PyJWT (>=2.8.0,<3.0.0)", "apscheduler (>=3.10.4,<4.0.0)", "backoff", "
 
 [package.source]
 type = "url"
-url = "https://github.com/HumanSignal/litellm/archive/ce03cd9c3624915fe629e01e35fead4a3061d181.zip"
+url = "https://github.com/HumanSignal/litellm/archive/2fce10fe5bacabe32590a170878a67110dcaa9ce.zip"
 
 [[package]]
 name = "lxml"
@@ -4944,14 +4944,14 @@ sympy = "*"
 
 [[package]]
 name = "openai"
-version = "1.60.2"
+version = "1.64.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 groups = ["main", "dev"]
 files = [
-    {file = "openai-1.60.2-py3-none-any.whl", hash = "sha256:993bd11b96900b9098179c728026f016b4982ded7ee30dfcf4555eab1171fff9"},
-    {file = "openai-1.60.2.tar.gz", hash = "sha256:a8f843e10f2855713007f491d96afb2694b11b5e02cb97c7d01a0be60bc5bb51"},
+    {file = "openai-1.64.0-py3-none-any.whl", hash = "sha256:20f85cde9e95e9fbb416e3cb5a6d3119c0b28308afd6e3cc47bf100623dac623"},
+    {file = "openai-1.64.0.tar.gz", hash = "sha256:2861053538704d61340da56e2f176853d19f1dc5704bc306b7597155f850d57a"},
 ]
 
 [package.dependencies]
@@ -7802,7 +7802,6 @@ optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "vcrpy-6.0.1-py2.py3-none-any.whl", hash = "sha256:621c3fb2d6bd8aa9f87532c688e4575bcbbde0c0afeb5ebdb7e14cac409edfdd"},
     {file = "vcrpy-6.0.1.tar.gz", hash = "sha256:9e023fee7f892baa0bbda2f7da7c8ac51165c1c6e38ff8688683a12a4bde9278"},
 ]
 
@@ -8486,4 +8485,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.9.7 || >3.9.7,<3.13"
-content-hash = "d602bb786727cf78674306fdd3c8c9c873bba4d43dc25db7778ac34e170bfe0e"
+content-hash = "21784ac6321482733cc648787b5dbda041c1fa1d8aaa86738821510021b8e523"
