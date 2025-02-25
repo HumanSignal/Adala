@@ -36,7 +36,7 @@ TEST_AGENT = {
             "label_config": """
             <View>
                 <Text name="text" value="$text" />
-                <Choices name="output" toName="text">
+                <Choices name="output" toName="text" required="true">
                     <Choice value="positive" />
                     <Choice value="negative" />
                     <Choice value="neutral" />
