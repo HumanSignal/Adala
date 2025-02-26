@@ -412,20 +412,28 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
 
     model_config = ConfigDict(extra="allow")
 
+    @cached_property
+    def completion_model(self):
+        """
+        Check and cache the canonical model name in litellm, which can differ from the deployment name, as well as trying to make a valid completion
+        """
+        messages = [{"role": "user", "content": "Hey, how's it going?"}]
+        resp = litellm.completion(
+            messages=messages,
+            model=self.model,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            seed=self.seed,
+            # extra inference params passed to this runtime
+            **self.model_extra,
+        )
+        return resp.model
+
     def init_runtime(self) -> "Runtime":
         # check model availability
         # extension of litellm.check_valid_key for non-openai deployments
         try:
-            messages = [{"role": "user", "content": "Hey, how's it going?"}]
-            litellm.completion(
-                messages=messages,
-                model=self.model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                seed=self.seed,
-                # extra inference params passed to this runtime
-                **self.model_extra,
-            )
+            self.completion_model
         except AuthenticationError:
             raise ValueError(
                 f'Requested model "{self.model}" is not available with your api_key and settings.'
@@ -504,19 +512,15 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
             if isinstance(response, Exception):
                 messages = []  # TODO how to get these?
                 dct, usage = handle_llm_exception(
-                    response, messages, self.model, retries
+                    response, messages, self.completion_model, retries
                 )
-                # With exceptions we dont have access to completion.model
-                usage_model = self.model
             else:
                 resp, completion = response
                 usage = completion.usage
                 dct = to_jsonable_python(resp)
-                # With successful completions we can get canonical model name
-                usage_model = completion.model
 
             # Add usage data to the response (e.g. token counts, cost)
-            dct.update(_get_usage_dict(usage, model=usage_model))
+            dct.update(_get_usage_dict(usage, model=self.completion_model))
 
             df_data.append(dct)
 
