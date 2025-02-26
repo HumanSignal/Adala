@@ -43,7 +43,6 @@ from tenacity import (
     retry_if_not_exception_type,
     stop_after_attempt,
     wait_random_exponential,
-    RetryError,
 )
 from pydantic_core._pydantic_core import ValidationError
 
@@ -207,9 +206,8 @@ def handle_llm_exception(
 
     if isinstance(e, IncompleteOutputException):
         usage = e.total_usage
-    elif isinstance(e, RetryError):
-        # usage = e.total_usage
-        usage = {}
+    elif isinstance(e, InstructorRetryException):
+        usage = e.total_usage
         # get root cause error from retries
         e = e.__cause__.last_attempt.exception()
     else:
@@ -386,7 +384,7 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
         return dct
 
 
-class AsyncLiteLLMChatRuntime(AsyncRuntime):
+class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
     """
     Runtime that uses [OpenAI API](https://openai.com/) and chat completion
     models to perform the skill. It uses async calls to OpenAI API.
@@ -411,8 +409,6 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
     max_tokens: Optional[int] = 1000
     temperature: Optional[float] = 0.0
     seed: Optional[int] = 47
-    # TODO remove
-    instructor_mode: str = "tool_call"
 
     model_config = ConfigDict(extra="allow")
 
@@ -482,7 +478,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
 
         tasks = [
             asyncio.ensure_future(
-                retries.wraps(litellm.acompletion)(
+                self.client.chat.completions.create_with_completion(
                     messages=get_messages(
                         user_prompt,
                         instructions_template,
@@ -493,7 +489,7 @@ class AsyncLiteLLMChatRuntime(AsyncRuntime):
                     max_tokens=self.max_tokens,
                     temperature=self.temperature,
                     seed=self.seed,
-                    num_retries=0,
+                    max_retries=retries,
                     # extra inference params passed to this runtime
                     **self.model_extra,
                 )
