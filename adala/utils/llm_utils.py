@@ -11,7 +11,7 @@ from litellm.types.utils import Usage
 from tenacity import Retrying, AsyncRetrying
 from instructor.exceptions import InstructorRetryException, IncompleteOutputException
 from instructor.client import Instructor, AsyncInstructor
-from adala.utils.parse import MessagesBuilder
+from adala.utils.parse import MessagesBuilder, MessageChunkType
 
 logger = logging.getLogger(__name__)
 
@@ -272,7 +272,7 @@ def run_instructor_with_payload(
     
     messages_builder = MessagesBuilder(
         user_prompt_template=user_prompt_template,
-        instructions_template=instructions_template,
+        system_prompt=instructions_template,
         instructions_first=instructions_first,
         input_field_types=input_field_types,
         extra_fields=extra_fields,
@@ -337,7 +337,7 @@ async def arun_instructor_with_payload(
     
     messages_builder = MessagesBuilder(
         user_prompt_template=user_prompt_template,
-        instructions_template=instructions_template,
+        system_prompt=instructions_template,
         instructions_first=instructions_first,
         input_field_types=input_field_types,
         extra_fields=extra_fields,

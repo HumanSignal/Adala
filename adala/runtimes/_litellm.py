@@ -73,7 +73,6 @@ RETRY_POLICY = dict(
             ContentPolicyViolationError,
             AuthenticationError,
             BadRequestError,
-            APIConnectionError
         )
     ),
     # should stop earlier on ValidationError and later on other errors, but couldn't figure out how to do that cleanly
@@ -239,6 +238,8 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
             seed=self.seed,
             retries=retries,
             extra_fields=extra_fields,
+            instructions_first=instructions_first,
+            instructions_template=instructions_template,
             **self.model_extra,
         )
 
@@ -342,6 +343,8 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
             seed=self.seed,
             retries=retries,
             extra_fields=extra_fields,
+            instructions_first=instructions_first,
+            instructions_template=instructions_template,
             **self.model_extra,
         )
 
@@ -510,7 +513,6 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
             raise ValueError(
                 "You must explicitly specify the `response_model` in runtime."
             )
-
 
         extra_fields = extra_fields or {}
         records = batch.to_dict(orient="records")
