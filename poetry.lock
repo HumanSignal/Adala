@@ -2796,14 +2796,14 @@ files = [
 
 [[package]]
 name = "instructor"
-version = "1.4.3"
+version = "1.5.2"
 description = "structured outputs for llm"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "instructor-1.4.3-py3-none-any.whl", hash = "sha256:3bc088cf960ca144a5e2a8ce5edba449ca6b2bd69a8c279701fb03da4c5ab198"},
-    {file = "instructor-1.4.3.tar.gz", hash = "sha256:56b36d6426fc30d9590e8115726ab09c0635df925f193fb89c5fb2e25a807333"},
+    {file = "instructor-1.5.2-py3-none-any.whl", hash = "sha256:da25abbf1ab792fb094992f1d9ce593e26fe458cb1f9a8e7ebf9d68f3f2c757a"},
+    {file = "instructor-1.5.2.tar.gz", hash = "sha256:fdd5ccbca21b4c558a24e9ba12c84afd907e65153a39d035f47c25800011a977"},
 ]
 
 [package.dependencies]
@@ -2819,8 +2819,9 @@ typer = ">=0.9.0,<1.0.0"
 
 [package.extras]
 anthropic = ["anthropic (>=0.34.0,<0.35.0)", "xmltodict (>=0.13.0,<0.14.0)"]
+cerebras-cloud-sdk = ["cerebras_cloud_sdk (>=1.5.0,<2.0.0)"]
 cohere = ["cohere (>=5.1.8,<6.0.0)"]
-google-generativeai = ["google-generativeai (>=0.5.4,<0.6.0)"]
+google-generativeai = ["google-generativeai (>=0.8.2,<0.9.0)"]
 groq = ["groq (>=0.4.2,<0.5.0)"]
 litellm = ["litellm (>=1.35.31,<2.0.0)"]
 mistralai = ["mistralai (>=1.0.3,<2.0.0)"]
