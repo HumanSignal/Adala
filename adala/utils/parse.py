@@ -2,7 +2,17 @@ import re
 import string
 import logging
 from string import Formatter
-from typing import List, TypedDict, Dict, Optional, Union, Literal, Iterable, Generator, Any
+from typing import (
+    List,
+    TypedDict,
+    Dict,
+    Optional,
+    Union,
+    Literal,
+    Iterable,
+    Generator,
+    Any,
+)
 from enum import Enum
 from pydantic import BaseModel, Field
 from collections import defaultdict
@@ -307,10 +317,19 @@ class MessagesBuilder(BaseModel):
 
     def get_messages(self, payload: Dict[str, Any]):
         if self.split_into_chunks:
-            input_field_types = self.input_field_types or defaultdict(lambda: MessageChunkType.TEXT)
-            user_prompt = split_message_into_chunks(self.user_prompt_template, input_field_types, **payload, **self.extra_fields)
+            input_field_types = self.input_field_types or defaultdict(
+                lambda: MessageChunkType.TEXT
+            )
+            user_prompt = split_message_into_chunks(
+                self.user_prompt_template,
+                input_field_types,
+                **payload,
+                **self.extra_fields,
+            )
         else:
-            user_prompt = partial_str_format(self.user_prompt_template, **payload, **self.extra_fields)
+            user_prompt = partial_str_format(
+                self.user_prompt_template, **payload, **self.extra_fields
+            )
         messages = [{"role": "user", "content": user_prompt}]
         if self.system_prompt:
             if self.instruction_first:

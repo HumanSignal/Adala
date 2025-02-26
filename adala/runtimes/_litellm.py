@@ -226,7 +226,7 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
             )
 
         retries = Retrying(**RETRY_POLICY)
-        
+
         return run_instructor_with_payload(
             client=self.client,
             payload=record,
@@ -326,12 +326,12 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
             raise ValueError(
                 "You must explicitly specify the `response_model` in runtime."
             )
-        
+
         # convert batch to list of payloads
         payloads = batch.to_dict(orient="records")
         retries = AsyncRetrying(**RETRY_POLICY)
         extra_fields = extra_fields or {}
-        
+
         df_data = await arun_instructor_with_payloads(
             client=self.client,
             payloads=payloads,
@@ -517,7 +517,7 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
         extra_fields = extra_fields or {}
         records = batch.to_dict(orient="records")
         retries = AsyncRetrying(**RETRY_POLICY)
-        
+
         df_data = await arun_instructor_with_payloads(
             client=self.client,
             payloads=records,

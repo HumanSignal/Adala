@@ -126,11 +126,11 @@ def run_instructor_with_messages(
     temperature: Optional[float] = None,
     seed: Optional[int] = None,
     retries: Optional[Retrying] = None,
-    **kwargs
+    **kwargs,
 ) -> Dict[str, Any]:
     """
     Run a completion with an instructor client and handle errors appropriately.
-    
+
     Args:
         client: The instructor client to use
         messages: The messages to send to the model
@@ -141,7 +141,7 @@ def run_instructor_with_messages(
         seed: Integer seed to reduce nondeterminism
         retries: Retry policy to use
         **kwargs: Additional arguments to pass to the completion call
-        
+
     Returns:
         Dict containing the parsed response and usage information
     """
@@ -155,7 +155,7 @@ def run_instructor_with_messages(
             temperature=temperature,
             seed=seed,
             max_retries=retries,
-            **kwargs
+            **kwargs,
         )
         usage = completion.usage
         dct = to_jsonable_python(response)
@@ -182,11 +182,11 @@ async def arun_instructor_with_messages(
     temperature: Optional[float] = None,
     seed: Optional[int] = None,
     retries: Optional[AsyncRetrying] = None,
-    **kwargs
+    **kwargs,
 ) -> Dict[str, Any]:
     """
     Run a completion with an instructor client and handle errors appropriately.
-    
+
     Args:
         client: The instructor client to use
         messages: The messages to send to the model
@@ -197,7 +197,7 @@ async def arun_instructor_with_messages(
         seed: Integer seed to reduce nondeterminism
         retries: Retry policy to use
         **kwargs: Additional arguments to pass to the completion call
-        
+
     Returns:
         Dict containing the parsed response and usage information
     """
@@ -211,7 +211,7 @@ async def arun_instructor_with_messages(
             temperature=temperature,
             seed=seed,
             max_retries=retries,
-            **kwargs
+            **kwargs,
         )
         usage = completion.usage
         dct = to_jsonable_python(response)
@@ -244,11 +244,11 @@ def run_instructor_with_payload(
     input_field_types: Optional[Dict[str, MessageChunkType]] = None,
     split_into_chunks: bool = False,
     extra_fields: Optional[Dict[str, Any]] = None,
-    **kwargs
+    **kwargs,
 ) -> Dict[str, Any]:
     """
     Run a completion with an instructor client and handle errors appropriately.
-    
+
     Args:
         client: The instructor client to use
         payload: The data payload to send to the model
@@ -265,20 +265,20 @@ def run_instructor_with_payload(
         split_into_chunks: Whether to split the user prompt into chunks
         extra_fields: Additional fields to send to the model
         **kwargs: Additional arguments to pass to the completion call
-        
+
     Returns:
         Dict containing the parsed response and usage information
     """
-    
+
     messages_builder = MessagesBuilder(
         user_prompt_template=user_prompt_template,
         system_prompt=instructions_template,
         instructions_first=instructions_first,
         input_field_types=input_field_types,
         extra_fields=extra_fields,
-        split_into_chunks=split_into_chunks
+        split_into_chunks=split_into_chunks,
     )
-    
+
     messages = messages_builder.get_messages(payload)
     return run_instructor_with_messages(
         client,
@@ -289,9 +289,8 @@ def run_instructor_with_payload(
         temperature,
         seed,
         retries,
-        **kwargs
+        **kwargs,
     )
-    
 
 
 async def arun_instructor_with_payload(
@@ -309,11 +308,11 @@ async def arun_instructor_with_payload(
     input_field_types: Optional[Dict[str, MessageChunkType]] = None,
     extra_fields: Optional[Dict[str, Any]] = None,
     split_into_chunks: bool = False,
-    **kwargs
+    **kwargs,
 ) -> Dict[str, Any]:
     """
     Run a completion with an instructor client and handle errors appropriately.
-    
+
     Args:
         client: The instructor client to use
         payload: The data payload to send to the model
@@ -330,20 +329,20 @@ async def arun_instructor_with_payload(
         extra_fields: Additional fields to send to the model
         split_into_chunks: Whether to split the user prompt into chunks
         **kwargs: Additional arguments to pass to the completion call
-        
+
     Returns:
         Dict containing the parsed response and usage information
     """
-    
+
     messages_builder = MessagesBuilder(
         user_prompt_template=user_prompt_template,
         system_prompt=instructions_template,
         instructions_first=instructions_first,
         input_field_types=input_field_types,
         extra_fields=extra_fields,
-        split_into_chunks=split_into_chunks
+        split_into_chunks=split_into_chunks,
     )
-    
+
     messages = messages_builder.get_messages(payload)
     return await arun_instructor_with_messages(
         client,
@@ -354,9 +353,10 @@ async def arun_instructor_with_payload(
         temperature,
         seed,
         retries,
-        **kwargs
+        **kwargs,
     )
-    
+
+
 def run_instructor_with_payloads(
     client: Instructor,
     payloads: List[Dict[str, Any]],
@@ -372,12 +372,12 @@ def run_instructor_with_payloads(
     input_field_types: Optional[Dict[str, MessageChunkType]] = None,
     split_into_chunks: bool = False,
     extra_fields: Optional[Dict[str, Any]] = None,
-    **kwargs
+    **kwargs,
 ) -> List[Dict[str, Any]]:
     """
     Run completions with an instructor client for multiple payloads and handle errors appropriately.
     Synchronous version of arun_instructor_completions.
-    
+
     Args:
         client: The instructor client to use
         payloads: List of data payloads to send to the model
@@ -394,7 +394,7 @@ def run_instructor_with_payloads(
         split_into_chunks: Whether to split the user prompt into chunks
         extra_fields: Additional fields to send to the model
         **kwargs: Additional arguments to pass to the completion calls
-        
+
     Returns:
         List of dicts containing the parsed responses and usage information
     """
@@ -404,9 +404,9 @@ def run_instructor_with_payloads(
         instruction_first=instructions_first,
         input_field_types=input_field_types,
         extra_fields=extra_fields,
-        split_into_chunks=split_into_chunks
+        split_into_chunks=split_into_chunks,
     )
-    
+
     results = []
     for payload in payloads:
         messages = messages_builder.get_messages(payload)
@@ -419,13 +419,13 @@ def run_instructor_with_payloads(
             temperature,
             seed,
             retries,
-            **kwargs
+            **kwargs,
         )
         results.append(result)
-    
+
     return results
 
-    
+
 async def arun_instructor_with_payloads(
     client: AsyncInstructor,
     payloads: List[Dict[str, Any]],
@@ -441,11 +441,11 @@ async def arun_instructor_with_payloads(
     input_field_types: Optional[Dict[str, MessageChunkType]] = None,
     split_into_chunks: bool = False,
     extra_fields: Optional[Dict[str, Any]] = None,
-    **kwargs
+    **kwargs,
 ) -> List[Dict[str, Any]]:
     """
     Run completions with an instructor client for multiple payloads and handle errors appropriately.
-    
+
     Args:
         client: The instructor client to use
         payloads: List of data payloads to send to the model
@@ -462,20 +462,20 @@ async def arun_instructor_with_payloads(
         split_into_chunks: Whether to split the user prompt into chunks
         extra_fields: Additional fields to send to the model
         **kwargs: Additional arguments to pass to the completion calls
-        
+
     Returns:
         List of dicts containing the parsed responses and usage information
     """
-    
+
     messages_builder = MessagesBuilder(
         user_prompt_template=user_prompt_template,
         system_prompt=instructions_template,
         instruction_first=instructions_first,
         input_field_types=input_field_types,
         extra_fields=extra_fields,
-        split_into_chunks=split_into_chunks
+        split_into_chunks=split_into_chunks,
     )
-    
+
     tasks = [
         arun_instructor_with_messages(
             client,
@@ -486,9 +486,9 @@ async def arun_instructor_with_payloads(
             temperature,
             seed,
             retries,
-            **kwargs
+            **kwargs,
         )
         for payload in payloads
     ]
-    
+
     return await asyncio.gather(*tasks)
