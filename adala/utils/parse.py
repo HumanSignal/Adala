@@ -293,3 +293,26 @@ def split_message_into_chunks(
             yield current_chunk
 
     return list(build_chunks(parsed))
+
+
+class MessagesBuilder(BaseModel):
+    user_prompt_template: str
+    system_prompt: Optional[str] = None
+    instruction_first: bool = True
+    extra_fields: Dict[str, Any] = Field(default_factory=dict)
+    split_into_chunks: bool = False
+    input_field_types: Optional[Dict[str, MessageChunkType]] = Field(default=None)
+
+    def get_messages(self, payload: Dict[str, Any]):
+        if self.split_into_chunks:
+            input_field_types = self.input_field_types or defaultdict(lambda: MessageChunkType.TEXT)
+            user_prompt = split_message_into_chunks(self.user_prompt_template, input_field_types, **payload, **self.extra_fields)
+        else:
+            user_prompt = partial_str_format(self.user_prompt_template, **payload, **self.extra_fields)
+        messages = [{"role": "user", "content": user_prompt}]
+        if self.system_prompt:
+            if self.instruction_first:
+                messages.insert(0, {"role": "system", "content": self.system_prompt})
+            else:
+                messages[0]["content"] += self.system_prompt
+        return messages
