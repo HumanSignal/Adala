@@ -296,11 +296,10 @@ async def validate_connection(request: ValidateConnectionRequest):
             model_extra = {"base_url": request.endpoint}
         elif provider.lower() == "custom":
             model = "openai/" + request.deployment_name
-            model_extra = (
-                {"extra_headers": {"Authorization": request.auth_token}}
-                if request.auth_token
-                else {}
-            )
+            model_extra = {"base_url": request.endpoint}
+            if request.auth_token:
+                model_extra["extra_headers"] = {"Authorization": request.auth_token}
+
         model_extra["api_key"] = request.api_key
         try:
             response = litellm.completion(
