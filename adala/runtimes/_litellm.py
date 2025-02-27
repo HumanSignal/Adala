@@ -1,5 +1,7 @@
 import asyncio
 import logging
+import traceback
+from openai import OpenAI, AsyncOpenAI
 from collections import defaultdict
 from typing import (
     Any,
@@ -79,6 +81,8 @@ RETRY_POLICY = dict(
     stop=stop_after_attempt(3),
     wait=wait_random_exponential(multiplier=1, max=60),
 )
+retries = Retrying(**RETRY_POLICY)
+async_retries = AsyncRetrying(**RETRY_POLICY)
 
 
 def normalize_litellm_model_and_provider(model_name: str, provider: str):
@@ -107,18 +111,77 @@ class InstructorClientMixin(BaseModel):
     # Note: most models work better with json mode; this is set only for backwards compatibility
     # instructor_mode: str = "json_mode"
     instructor_mode: str = "tool_call"
+    provider: Optional[str] = None
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
 
     # Note: doesn't seem like this separate function should be necessary, but errors when combined with @cached_property
-    def _from_litellm(self, **kwargs):
+    @classmethod
+    def _from_litellm(cls, **kwargs):
         return instructor.from_litellm(litellm.completion, **kwargs)
+
+    @classmethod
+    def _from_openai(cls, api_key: str, base_url: str, **kwargs):
+        return instructor.from_openai(OpenAI(api_key=api_key, base_url=base_url))
+
+    @classmethod
+    def _get_client(cls, api_key: str, base_url: str, provider: str, **kwargs):
+        if provider == "Custom":
+            logger.info(f"Custom provider: using OpenAI client.")
+            return cls._from_openai(api_key, base_url)
+        return cls._from_litellm(mode=instructor.Mode(cls.instructor_mode))
 
     @cached_property
     def client(self):
-        return self._from_litellm(mode=instructor.Mode(self.instructor_mode))
+        return self._get_client(self.api_key, self.base_url, self.provider)
+
+    def init_runtime(self) -> "Runtime":
+        # check model availability
+        # extension of litellm.check_valid_key for non-openai deployments
+        try:
+            messages = [{"role": "user", "content": "Hey, how's it going?"}]
+            # in the after_init method, we should run sync validation of the client
+            client = InstructorClientMixin._get_client(
+                self.api_key, self.base_url, self.provider
+            )
+            run_instructor_with_messages(
+                client=client,
+                messages=messages,
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                seed=self.seed,
+                response_model=None,
+                retries=retries,
+                # extra inference params passed to this runtime
+                **self.model_extra,
+            )
+        except AuthenticationError:
+            logger.exception(
+                f'Requested model "{self.model}" is not available with your api_key and settings.\nTraceback:\n{traceback.format_exc()}'
+            )
+            raise ValueError(
+                f'Requested model "{self.model}" is not available with your api_key and settings.'
+            )
+        except Exception as e:
+            logger.exception(
+                f'Failed to check availability of requested model "{self.model}": {e}\nTraceback:\n{traceback.format_exc()}'
+            )
+            raise ValueError(
+                f'Failed to check availability of requested model "{self.model}": {e}'
+            )
+
+        return self
 
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
-    def _from_litellm(self, **kwargs):
+
+    @classmethod
+    def _from_openai(cls, api_key: str, base_url: str, **kwargs):
+        return instructor.from_openai(AsyncOpenAI(api_key=api_key, base_url=base_url))
+
+    @classmethod
+    def _from_litellm(cls, **kwargs):
         return instructor.from_litellm(litellm.acompletion, **kwargs)
 
 
@@ -149,31 +212,6 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
     seed: Optional[int] = 47
 
     model_config = ConfigDict(extra="allow")
-
-    def init_runtime(self) -> "Runtime":
-        # check model availability
-        # extension of litellm.check_valid_key for non-openai deployments
-        try:
-            messages = [{"role": "user", "content": "Hey, how's it going?"}]
-            litellm.completion(
-                messages=messages,
-                model=self.model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                seed=self.seed,
-                # extra inference params passed to this runtime
-                **self.model_extra,
-            )
-        except AuthenticationError:
-            raise ValueError(
-                f'Requested model "{self.model}" is not available with your api_key and settings.'
-            )
-        except Exception as e:
-            raise ValueError(
-                f'Failed to check availability of requested model "{self.model}": {e}'
-            )
-
-        return self
 
     def get_llm_response(self, messages: List[Dict[str, str]]) -> str:
         # TODO: sunset this method in favor of record_to_record
@@ -230,8 +268,6 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
                 "You must explicitly specify the `response_model` in runtime."
             )
 
-        retries = Retrying(**RETRY_POLICY)
-
         return run_instructor_with_payload(
             client=self.client,
             payload=record,
@@ -277,31 +313,6 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
 
     model_config = ConfigDict(extra="allow")
 
-    def init_runtime(self) -> "Runtime":
-        # check model availability
-        # extension of litellm.check_valid_key for non-openai deployments
-        try:
-            messages = [{"role": "user", "content": "Hey, how's it going?"}]
-            litellm.completion(
-                messages=messages,
-                model=self.model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                seed=self.seed,
-                # extra inference params passed to this runtime
-                **self.model_extra,
-            )
-        except AuthenticationError:
-            raise ValueError(
-                f'Requested model "{self.model}" is not available with your api_key and settings.'
-            )
-        except Exception as e:
-            raise ValueError(
-                f'Failed to check availability of requested model "{self.model}": {e}'
-            )
-
-        return self
-
     @field_validator("concurrency", mode="before")
     def check_concurrency(cls, value) -> int:
         value = value or -1
@@ -334,7 +345,6 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
 
         # convert batch to list of payloads
         payloads = batch.to_dict(orient="records")
-        retries = AsyncRetrying(**RETRY_POLICY)
         extra_fields = extra_fields or {}
 
         df_data = await arun_instructor_with_payloads(
@@ -346,7 +356,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
             max_tokens=self.max_tokens,
             temperature=self.temperature,
             seed=self.seed,
-            retries=retries,
+            retries=async_retries,
             extra_fields=extra_fields,
             instructions_first=instructions_first,
             instructions_template=instructions_template,
@@ -572,7 +582,6 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
 
         extra_fields = extra_fields or {}
         records = batch.to_dict(orient="records")
-        retries = AsyncRetrying(**RETRY_POLICY)
 
         df_data = await arun_instructor_with_payloads(
             client=self.client,
@@ -583,7 +592,7 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
             max_tokens=self.max_tokens,
             temperature=self.temperature,
             seed=self.seed,
-            retries=retries,
+            retries=async_retries,
             split_into_chunks=True,
             input_field_types=input_field_types,
             instructions_first=instructions_first,

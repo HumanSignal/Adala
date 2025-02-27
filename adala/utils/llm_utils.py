@@ -12,6 +12,7 @@ from tenacity import Retrying, AsyncRetrying
 from instructor.exceptions import InstructorRetryException, IncompleteOutputException
 from instructor.client import Instructor, AsyncInstructor
 from adala.utils.parse import MessagesBuilder, MessageChunkType
+from adala.utils.exceptions import ConstrainedGenerationError
 
 logger = logging.getLogger(__name__)
 
