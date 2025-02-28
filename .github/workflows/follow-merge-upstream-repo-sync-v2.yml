@@ -17,16 +17,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ inputs.branch_name }}
   cancel-in-progress: true
 
-env:
-  NODE: "18"
-  YARN: "1.22"
-
 jobs:
   sync:
     name: Sync PR
     runs-on: ubuntu-latest
     outputs:
-      label-studio-sdk: "${{ steps.upstream-prs.outputs.label-studio-sdk }}"
+      label-studio-sdk: "${{ fromJSON(steps.upstream-prs.outputs.shas).label-studio-sdk }}"
     steps:
       - uses: hmarr/debug-action@v3.0.0
 
@@ -69,109 +65,18 @@ jobs:
           path: ./.github/actions-hub
 
       - name: Get Upstream PRs
+        uses: ./.github/actions-hub/actions/follow-merge-upstream-prs
         id: upstream-prs
-        uses: actions/github-script@v7
-        env:
-          BRANCH_NAME: ${{ inputs.branch_name }}
         with:
-          github-token: ${{ secrets.GIT_PAT }}
-          script: |
-            const { repo, owner } = context.repo;
-            const base_branch_name = context.repo.default_branch;
-            const branch_name = process.env.BRANCH_NAME;
-            const pyProjectPath = "pyproject.toml";
-            const repos = ["label-studio-sdk"];
-            const repos_infra = [];
-            
-            let shas = {};
-
-            // GET UPSTREAM PRS
-            let upstream_pulls = [];
-            for (const repo of repos.concat(repos_infra)) {
-              const {data: pulls} = await github.rest.pulls.list({
-                owner,
-                repo,
-                state: "all",
-                head: `${owner}:${branch_name}`,
-              });
-              const first_open_pull = pulls.find(e => e.state === 'open');
-              const pull = first_open_pull || pulls[0];
-              if (pull) {
-                core.info(`PRs found for ${repo} ${pull.html_url} ${pull.merged_at ? 'merged' : pull.state} ${pull.merged_at ? pull.merge_commit_sha : pull.head.sha}`)
-                upstream_pulls.push(pull);
-                if (pull.merged_at) {
-                  shas[repo] = pull.merge_commit_sha;
-                } else if (pull.state === 'open') {
-                  shas[repo] = pull.head.sha;
-                }
-              } else {
-                core.notice(`No open upstream PRs found for ${repo}`)
-              }
-            }
-            
-            // GET BASE VERSIONS
-            const {data: pyprojectBlob} = await github.rest.repos.getContent({
-              owner: owner,
-              repo: repo,
-              ref: base_branch_name,
-              path: pyProjectPath,
-            });
-            const base_pyproject = Buffer.from(pyprojectBlob.content, pyprojectBlob.encoding).toString("utf8");
-            for (const repo of repos) {
-              const match = base_pyproject.match(new RegExp(`${repo}\/archive.*(?<sha>[a-f0-9]{40})`));
-              if (match && match.groups.sha) {
-                core.info(`Base version for ${repo} ${pyprojectBlob.html_url} ${match.groups.sha}`);
-                shas[repo] = shas[repo] || match.groups.sha;
-              } else {
-                core.setFailed(`Could not parse ${repo} version from ${pyprojectBlob.html_url}`);
-              }
-            }
-            
-            for (const [key, value] of Object.entries(shas)) {
-              core.setOutput(key, value);
-            }
-            
-            core.info(`Base branch name ${base_branch_name}`);
-            core.setOutput('base_branch_name', base_branch_name);
-            
-            if (upstream_pulls.length > 0) {
-              core.info(`Title ${upstream_pulls[0].title}`);
-              core.setOutput('title', upstream_pulls[0].title);
-            }
-            
-            const upstream_prs_urls = upstream_pulls.map(e => e.html_url).join(',');
-            core.info(`Upstream PRs URLs ${upstream_prs_urls}`);
-            core.setOutput('upstream_prs_urls', upstream_prs_urls);
-            
-            let assignees = [];
-            for (const pull of upstream_pulls) {
-              if (pull.user) assignees.push(pull.user.login);
-              if (pull.assignee) assignees.push(pull.assignee.login);
-              assignees.concat(pull.assignees.map(e => e.name));
-            }
-            assignees = assignees.filter(x => x !== 'robot-ci-heartex');
-            core.info(`Assignees ${assignees.join(',')}`);
-            core.setOutput('assignees', assignees.join(','));
-            
-            if (assignees.length > 0) {
-              const author_username = assignees[0];
-              core.info(`Author username ${author_username}`);
-              core.setOutput('author_username', author_username);
-            }
-            
-            let status = "open"
-            if (upstream_pulls.every(p => p.merged_at)) {
-              status = 'merged';
-            } else if (upstream_pulls.every(p => p.closed_at)) {
-              status = 'closed';
-            }
-            core.info(`Status: ${status}`);
-            core.setOutput("status", status);
+          branch_name: "${{ inputs.branch_name }}"
+          poetry_repositories: "label-studio-sdk"
+          infra_repositories: ""
+          github_token: "${{ secrets.GIT_PAT }}"
 
       - name: Git Configure
         uses: ./.github/actions-hub/actions/git-configure
         with:
-          username: ${{ steps.upstream-prs.outputs.author_username }}
+          username: ${{ github.event.client_payload.actor || steps.upstream-prs.outputs.author_username }}
 
       - name: Git Merge
         id: merge
@@ -197,12 +102,12 @@ jobs:
       - name: Commit submodule
         shell: bash
         env:
-          SDK_SHA: "${{ steps.upstream-prs.outputs.label-studio-sdk }}"
+          SDK_SHA: "${{ fromJSON(steps.upstream-prs.outputs.shas).label-studio-sdk }}"
           COMMIT_MESSAGE: "Sync Follow Merge dependencies"
           COMMIT_MESSAGE_WORKFLOW_LINK: "Workflow run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         run: |
           set -xeuo pipefail
-                    
+          
           if [[ -n "${SDK_SHA}" ]]; then
             poetry add "https://github.com/HumanSignal/label-studio-sdk/archive/${SDK_SHA}.zip" --lock
           fi
@@ -223,6 +128,7 @@ jobs:
         with:
           github_token: ${{ secrets.GIT_PAT }}
           branch_name: "${{ steps.get-branch.outputs.branch_name }}"
+          base_branch_name: "${{ steps.upstream-prs.outputs.base_branch_name }}"
           title: "${{ steps.upstream-prs.outputs.title }}"
           upstream_prs_urls: "${{ steps.upstream-prs.outputs.upstream_prs_urls }}"
 
@@ -234,6 +140,30 @@ jobs:
           github_token: ${{ secrets.GIT_PAT }}
           pullrequest_number: "${{ steps.get-pr.outputs.number }}"
           assignees: "${{ steps.upstream-prs.outputs.assignees }}"
+
+      - name: Add PR state Labels
+        if: steps.upstream-prs.outputs.status == 'stale'
+        uses: ./.github/actions-hub/actions/github-add-pull-request-labels
+        continue-on-error: true
+        with:
+          github_token: ${{ secrets.GIT_PAT }}
+          pullrequest_number: "${{ steps.get-pr.outputs.number }}"
+          labels: "FM Stale"
+
+      - name: Merge Stale PR (Dry run)
+        if: steps.upstream-prs.outputs.status == 'stale'
+        continue-on-error: true
+        shell: bash
+        env:
+          GIT_PAT: ${{ secrets.GIT_PAT }}
+          BRANCH_NAME: "origin/${{ steps.get-branch.outputs.branch_name }}"
+          BASE_BRANCH_NAME: "origin/${{ steps.upstream-prs.outputs.base_branch_name }}"
+        run: |
+          if git diff --quiet "${BASE_BRANCH_NAME}..${BRANCH_NAME}"; then
+            echo "No changes detected."
+          else
+            echo "Changes detected in PR."
+          fi
 
       - name: Convert to ready for review
         if: steps.upstream-prs.outputs.status == 'merged'

@@ -21,6 +21,7 @@ from litellm.exceptions import (
     ContentPolicyViolationError,
     BadRequestError,
     NotFoundError,
+    APIConnectionError,
 )
 from litellm.types.utils import Usage
 import instructor
@@ -33,7 +34,17 @@ from adala.utils.parse import (
     parse_template,
     partial_str_format,
     TemplateChunks,
+    MessageChunkType,
 )
+from adala.utils.llm_utils import (
+    run_instructor_with_payload,
+    run_instructor_with_payloads,
+    arun_instructor_with_payload,
+    arun_instructor_with_payloads,
+    run_instructor_with_messages,
+    arun_instructor_with_messages,
+)
+
 from pydantic import ConfigDict, field_validator, BaseModel
 from pydantic_core import to_jsonable_python
 from rich import print
@@ -70,89 +81,6 @@ RETRY_POLICY = dict(
 )
 
 
-# TODO: consolidate these data models and unify our preprocessing for LLM input into one step RawInputModel -> PreparedInputModel
-class TextMessageChunk(TypedDict):
-    type: Literal["text"]
-    text: str
-
-
-class ImageMessageChunk(TypedDict):
-    type: Literal["image"]
-    image_url: Dict[str, str]
-
-
-MessageChunk = Union[TextMessageChunk, ImageMessageChunk]
-
-Message = Union[str, List[MessageChunk]]
-
-
-def get_messages(
-    # user prompt can be a string or a list of multimodal message chunks
-    user_prompt: Message,
-    system_prompt: Optional[str] = None,
-    instruction_first: bool = True,
-):
-    messages = [{"role": "user", "content": user_prompt}]
-    if system_prompt:
-        if instruction_first:
-            messages.insert(0, {"role": "system", "content": system_prompt})
-        else:
-            messages[0]["content"] += system_prompt
-    return messages
-
-
-def _format_error_dict(e: Exception) -> dict:
-    error_message = type(e).__name__
-    error_details = str(e)
-    # TODO change this format?
-    error_dct = {
-        "_adala_error": True,
-        "_adala_message": error_message,
-        "_adala_details": error_details,
-    }
-    return error_dct
-
-
-def _log_llm_exception(e) -> dict:
-    dct = _format_error_dict(e)
-    base_error = f"Inference error {dct['_adala_message']}"
-    tb = "".join(
-        traceback.format_exception(e)
-    )  # format_exception return list of strings ending in new lines
-    logger.error(f"{base_error}\nTraceback:\n{tb}")
-    return dct
-
-
-def _get_usage_dict(usage: Usage, model: str) -> Dict:
-    data = dict()
-    data["_prompt_tokens"] = usage.prompt_tokens
-
-    # will not exist if there is no completion
-    # sometimes the response will have a CompletionUsage instead of a Usage, which doesn't have a .get() method
-    # data["_completion_tokens"] = usage.get("completion_tokens", 0)
-    try:
-        data["_completion_tokens"] = usage.completion_tokens
-    except AttributeError:
-        data["_completion_tokens"] = 0
-
-    # can't use litellm.completion_cost bc it only takes the most recent completion, and .usage is summed over retries
-    # TODO make sure this is calculated correctly after we turn on caching
-    # litellm will register the cost of an azure model on first successful completion. If there hasn't been a successful completion, the model will not be registered
-    try:
-        prompt_cost, completion_cost = litellm.cost_per_token(
-            model, data["_prompt_tokens"], data["_completion_tokens"]
-        )
-        data["_prompt_cost_usd"] = prompt_cost
-        data["_completion_cost_usd"] = completion_cost
-        data["_total_cost_usd"] = prompt_cost + completion_cost
-    except:
-        logger.error(f"Failed to get cost for model {model}")
-        data["_prompt_cost_usd"] = None
-        data["_completion_cost_usd"] = None
-        data["_total_cost_usd"] = None
-    return data
-
-
 def normalize_litellm_model_and_provider(model_name: str, provider: str):
     """
     When using litellm.get_model_info() some models are accessed with their provider prefix
@@ -163,8 +91,13 @@ def normalize_litellm_model_and_provider(model_name: str, provider: str):
     if "/" in model_name:
         model_name = model_name.split("/", 1)[1]
     provider = provider.lower()
+    # TODO: move this logic to LSE, this is the last place Adala needs to be updated when adding a provider connection
     if provider == "vertexai":
         provider = "vertex_ai"
+    if provider == "azureopenai":
+        provider = "azure"
+    if provider == "azureaifoundry":
+        provider = "azure_ai"
 
     return model_name, provider
 
@@ -187,56 +120,6 @@ class InstructorClientMixin(BaseModel):
 class InstructorAsyncClientMixin(InstructorClientMixin):
     def _from_litellm(self, **kwargs):
         return instructor.from_litellm(litellm.acompletion, **kwargs)
-
-
-def handle_llm_exception(
-    e: Exception, messages: List[Dict[str, str]], model: str, retries
-) -> tuple[Dict, Usage]:
-    """Handle exceptions from LLM calls and return standardized error dict and usage stats.
-
-    Args:
-        e: The caught exception
-        messages: The messages that were sent to the LLM
-        model: The model name
-        retries: The retry policy object
-
-    Returns:
-        Tuple of (error_dict, usage_stats)
-    """
-
-    if isinstance(e, IncompleteOutputException):
-        usage = e.total_usage
-    elif isinstance(e, InstructorRetryException):
-        usage = e.total_usage
-        # get root cause error from retries
-        e = e.__cause__.last_attempt.exception()
-    else:
-        # Approximate usage for other errors
-        # usage = e.total_usage
-        # not available here, so have to approximate by hand, assuming the same error occurred each time
-        n_attempts = retries.stop.max_attempt_number
-        # Note that the default model used in token_counter is gpt-3.5-turbo as of now - if model passed in
-        # does not match a mapped model, falls back to default
-        prompt_tokens = n_attempts * litellm.token_counter(
-            model=model, messages=messages[:-1]
-        )  # response is appended as the last message
-        # TODO a pydantic validation error may be appended as the last message, don't know how to get the raw response in this case
-        usage = Usage(
-            prompt_tokens=prompt_tokens,
-            completion_tokens=0,
-            total_tokens=prompt_tokens,
-        )
-        # Catch case where the model does not return a properly formatted out
-        # AttributeError is an instructor bug: https://github.com/instructor-ai/instructor/pull/1103
-        # > AttributeError: 'NoneType' object has no attribute '_raw_response'
-        if type(e).__name__ in {"ValidationError", "AttributeError"}:
-            logger.error(f"Converting error to ConstrainedGenerationError: {str(e)}")
-            logger.debug(f"Traceback:\n{traceback.format_exc()}")
-            e = ConstrainedGenerationError()
-
-        # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
-
-    return _log_llm_exception(e), usage
 
 
 class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
@@ -347,41 +230,23 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
                 "You must explicitly specify the `response_model` in runtime."
             )
 
-        messages = get_messages(
-            partial_str_format(input_template, **record, **extra_fields),
-            instructions_template,
-            instructions_first,
-        )
-
         retries = Retrying(**RETRY_POLICY)
 
-        try:
-            # returns a pydantic model named Output
-            response, completion = self.client.chat.completions.create_with_completion(
-                messages=messages,
-                response_model=response_model,
-                model=self.model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                seed=self.seed,
-                max_retries=retries,
-                # extra inference params passed to this runtime
-                **self.model_extra,
-            )
-            usage = completion.usage
-            dct = to_jsonable_python(response)
-            # With successful completions we can get canonical model name
-            usage_model = completion.model
-
-        except Exception as e:
-            dct, usage = handle_llm_exception(e, messages, self.model, retries)
-            # With exceptions we dont have access to completion.model
-            usage_model = self.model
-
-        # Add usage data to the response (e.g. token counts, cost)
-        dct.update(_get_usage_dict(usage, model=usage_model))
-
-        return dct
+        return run_instructor_with_payload(
+            client=self.client,
+            payload=record,
+            user_prompt_template=input_template,
+            response_model=response_model,
+            model=self.model,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            seed=self.seed,
+            retries=retries,
+            extra_fields=extra_fields,
+            instructions_first=instructions_first,
+            instructions_template=instructions_template,
+            **self.model_extra,
+        )
 
 
 class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
@@ -467,58 +332,26 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                 "You must explicitly specify the `response_model` in runtime."
             )
 
-        extra_fields = extra_fields or {}
-        user_prompts = batch.apply(
-            # TODO: remove "extra_fields" to avoid name collisions
-            lambda row: partial_str_format(input_template, **row, **extra_fields),
-            axis=1,
-        ).tolist()
-
+        # convert batch to list of payloads
+        payloads = batch.to_dict(orient="records")
         retries = AsyncRetrying(**RETRY_POLICY)
+        extra_fields = extra_fields or {}
 
-        tasks = [
-            asyncio.ensure_future(
-                self.client.chat.completions.create_with_completion(
-                    messages=get_messages(
-                        user_prompt,
-                        instructions_template,
-                        instructions_first,
-                    ),
-                    response_model=response_model,
-                    model=self.model,
-                    max_tokens=self.max_tokens,
-                    temperature=self.temperature,
-                    seed=self.seed,
-                    max_retries=retries,
-                    # extra inference params passed to this runtime
-                    **self.model_extra,
-                )
-            )
-            for user_prompt in user_prompts
-        ]
-        responses = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # convert list of LLMResponse objects to the dataframe records
-        df_data = []
-        for response in responses:
-            if isinstance(response, Exception):
-                messages = []  # TODO how to get these?
-                dct, usage = handle_llm_exception(
-                    response, messages, self.model, retries
-                )
-                # With exceptions we dont have access to completion.model
-                usage_model = self.model
-            else:
-                resp, completion = response
-                usage = completion.usage
-                dct = to_jsonable_python(resp)
-                # With successful completions we can get canonical model name
-                usage_model = completion.model
-
-            # Add usage data to the response (e.g. token counts, cost)
-            dct.update(_get_usage_dict(usage, model=usage_model))
-
-            df_data.append(dct)
+        df_data = await arun_instructor_with_payloads(
+            client=self.client,
+            payloads=payloads,
+            user_prompt_template=input_template,
+            response_model=response_model,
+            model=self.model,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            seed=self.seed,
+            retries=retries,
+            extra_fields=extra_fields,
+            instructions_first=instructions_first,
+            instructions_template=instructions_template,
+            **self.model_extra,
+        )
 
         output_df = InternalDataFrame(df_data)
         return output_df.set_index(batch.index)
@@ -578,12 +411,20 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
 
     @staticmethod
     def _get_completion_tokens(
-        model: str, output_fields: Optional[List[str]], provider: str
+        candidate_model_names: List[str],
+        output_fields: Optional[List[str]],
+        provider: str,
     ) -> int:
-        model, provider = normalize_litellm_model_and_provider(model, provider)
-        max_tokens = litellm.get_model_info(
-            model=model, custom_llm_provider=provider
-        ).get("max_tokens", None)
+        max_tokens = None
+        for model in candidate_model_names:
+            try:
+                max_tokens = litellm.get_model_info(model=model).get("max_tokens", None)
+                break
+            except Exception as e:
+                if "model isn't mapped" in str(e):
+                    continue
+                else:
+                    raise e
         if not max_tokens:
             raise ValueError
         # extremely rough heuristic, from testing on some anecdotal examples
@@ -599,12 +440,40 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         provider: str,
     ):
         prompt_tokens = cls._get_prompt_tokens(user_prompt, model, output_fields)
-        completion_tokens = cls._get_completion_tokens(model, output_fields, provider)
-        prompt_cost, completion_cost = litellm.cost_per_token(
-            model=model,
-            prompt_tokens=prompt_tokens,
-            completion_tokens=completion_tokens,
+        # amazingly, litellm.cost_per_token refers to a hardcoded dictionary litellm.model_cost which is case-sensitive with inconsistent casing.....
+        # Example: 'azure_ai/deepseek-r1' vs 'azure_ai/Llama-3.3-70B-Instruct'
+        # so we have no way of determining the correct casing or reliably fixing it.
+        # we can at least try all-lowercase.
+        candidate_model_names = [model, model.lower()]
+        # ...and Azure AI Foundry openai models are not listed there, but under Azure OpenAI
+        if model.startswith("azure_ai/"):
+            candidate_model_names.append(model.replace("azure_ai/", "azure/"))
+            candidate_model_names.append(model.replace("azure_ai/", "azure/").lower())
+        candidate_model_names = list(set(candidate_model_names))
+
+        completion_tokens = cls._get_completion_tokens(
+            candidate_model_names, output_fields, provider
         )
+
+        prompt_cost, completion_cost = None, None
+        for candidate_model_name in candidate_model_names:
+            try:
+                prompt_cost, completion_cost = litellm.cost_per_token(
+                    model=candidate_model_name,
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens,
+                )
+            except Exception as e:
+                # it also doesn't have a type to catch:
+                # Exception("This model isn't mapped yet. model=azure_ai/deepseek-R1, custom_llm_provider=azure_ai. Add it here - https://github.com/ BerriAI/litellm/blob/main/model_prices_and_context_window.json.")
+                if "model isn't mapped" in str(e):
+                    pass
+            if prompt_cost is not None and completion_cost is not None:
+                break
+
+        if prompt_cost is None or completion_cost is None:
+            raise ValueError(f"Model {model} for provider {provider} not found.")
+
         total_cost = prompt_cost + completion_cost
 
         return prompt_cost, completion_cost, total_cost
@@ -624,10 +493,25 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
             cumulative_prompt_cost = 0
             cumulative_completion_cost = 0
             cumulative_total_cost = 0
+            # for azure, we need the canonical model name, not the deployment name
+            if self.model.startswith("azure/"):
+                messages = [{"role": "user", "content": "Hey, how's it going?"}]
+                response = litellm.completion(
+                    messages=messages,
+                    model=self.model,
+                    max_tokens=10,
+                    temperature=self.temperature,
+                    seed=self.seed,
+                    # extra inference params passed to this runtime
+                    **self.model_extra,
+                )
+                model = "azure/" + response.model
+            else:
+                model = self.model
             for user_prompt in user_prompts:
                 prompt_cost, completion_cost, total_cost = self._estimate_cost(
                     user_prompt=user_prompt,
-                    model=self.model,
+                    model=model,
                     output_fields=output_fields,
                     provider=provider,
                 )
@@ -647,114 +531,6 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                 error_type=type(e).__name__,
                 error_message=str(e),
             )
-
-
-class MessageChunkType(Enum):
-    TEXT = "text"
-    IMAGE_URL = "image_url"
-
-
-def split_message_into_chunks(
-    input_template: str, input_field_types: Dict[str, MessageChunkType], **input_fields
-) -> List[MessageChunk]:
-    """Split a template string with field types into a list of message chunks.
-
-    Takes a template string with placeholders and splits it into chunks based on the field types,
-    preserving the text between placeholders.
-
-    Args:
-        input_template (str): Template string with placeholders, e.g. '{a} is a {b} is an {a}'
-        input_field_types (Dict[str, MessageChunkType]): Dict mapping field names to their types
-        **input_fields: Field values to substitute into template
-
-    Returns:
-        List[Dict[str, str]]: List of message chunks with appropriate type and content.
-            Text chunks have format: {'type': 'text', 'text': str}
-            Image chunks have format: {'type': 'image_url', 'image_url': {'url': str}}
-
-    Example:
-        >>> split_message_into_chunks(
-        ...     '{a} is a {b} is an {a}',
-        ...     {'a': MessageChunkType.TEXT, 'b': MessageChunkType.IMAGE_URL},
-        ...     a='the letter a',
-        ...     b='http://example.com/b.jpg'
-        ... )
-        [
-            {'type': 'text', 'text': 'the letter a is a '},
-            {'type': 'image_url', 'image_url': {'url': 'http://example.com/b.jpg'}},
-            {'type': 'text', 'text': ' is an the letter a'}
-        ]
-    """
-    # Parse template to get field positions and surrounding text
-    parsed = parse_template(input_template)
-
-    def add_to_current_chunk(
-        current_chunk: Optional[MessageChunk], chunk: MessageChunk
-    ) -> MessageChunk:
-        if current_chunk:
-            current_chunk["text"] += chunk["text"]
-            return current_chunk
-        else:
-            return chunk
-
-    # Build chunks by iterating through parsed template parts
-    def build_chunks(
-        parsed: Iterable[TemplateChunks],
-    ) -> Generator[MessageChunk, None, None]:
-        current_chunk: Optional[MessageChunk] = None
-
-        for part in parsed:
-            if part["type"] == "text":
-                current_chunk = add_to_current_chunk(
-                    current_chunk, {"type": "text", "text": part["text"]}
-                )
-            elif part["type"] == "var":
-                field_value = part["text"]
-                try:
-                    field_type = input_field_types[field_value]
-                except KeyError:
-                    raise ValueError(
-                        f"Field {field_value} not found in input_field_types"
-                    )
-                if field_type == MessageChunkType.TEXT:
-                    # try to substitute in variable and add to current chunk
-                    substituted_text = partial_str_format(
-                        f"{{{field_value}}}", **input_fields
-                    )
-                    if substituted_text != field_value:
-                        current_chunk = add_to_current_chunk(
-                            current_chunk, {"type": "text", "text": substituted_text}
-                        )
-                    else:
-                        # be permissive for unfound variables
-                        current_chunk = add_to_current_chunk(
-                            current_chunk,
-                            {"type": "text", "text": f"{{{field_value}}}"},
-                        )
-                elif field_type == MessageChunkType.IMAGE_URL:
-                    substituted_text = partial_str_format(
-                        f"{{{field_value}}}", **input_fields
-                    )
-                    if substituted_text != field_value:
-                        # push current chunk, push image chunk, and start new chunk
-                        if current_chunk:
-                            yield current_chunk
-                        current_chunk = None
-                        yield {
-                            "type": "image_url",
-                            "image_url": {"url": input_fields[field_value]},
-                        }
-                    else:
-                        # be permissive for unfound variables
-                        current_chunk = add_to_current_chunk(
-                            current_chunk,
-                            {"type": "text", "text": f"{{{field_value}}}"},
-                        )
-
-        if current_chunk:
-            yield current_chunk
-
-    return list(build_chunks(parsed))
 
 
 class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
@@ -794,62 +570,27 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
                 "You must explicitly specify the `response_model` in runtime."
             )
 
-        input_field_types = input_field_types or defaultdict(
-            lambda: MessageChunkType.TEXT
-        )
-
         extra_fields = extra_fields or {}
-        user_prompts = batch.apply(
-            # TODO: remove "extra_fields" to avoid name collisions
-            lambda row: split_message_into_chunks(
-                input_template, input_field_types, **row, **extra_fields
-            ),
-            axis=1,
-        ).tolist()
-
-        # rest of this function is the same as AsyncLiteLLMChatRuntime.batch_to_batch
-
+        records = batch.to_dict(orient="records")
         retries = AsyncRetrying(**RETRY_POLICY)
 
-        tasks = [
-            asyncio.ensure_future(
-                self.client.chat.completions.create_with_completion(
-                    messages=get_messages(
-                        user_prompt,
-                        instructions_template,
-                        instructions_first,
-                    ),
-                    response_model=response_model,
-                    model=self.model,
-                    max_tokens=self.max_tokens,
-                    temperature=self.temperature,
-                    seed=self.seed,
-                    max_retries=retries,
-                    # extra inference params passed to this runtime
-                    **self.model_extra,
-                )
-            )
-            for user_prompt in user_prompts
-        ]
-        responses = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # convert list of LLMResponse objects to the dataframe records
-        df_data = []
-        for response in responses:
-            if isinstance(response, Exception):
-                messages = []  # TODO how to get these?
-                dct, usage = handle_llm_exception(
-                    response, messages, self.model, retries
-                )
-            else:
-                resp, completion = response
-                usage = completion.usage
-                dct = to_jsonable_python(resp)
-
-            # Add usage data to the response (e.g. token counts, cost)
-            dct.update(_get_usage_dict(usage, model=self.model))
-
-            df_data.append(dct)
+        df_data = await arun_instructor_with_payloads(
+            client=self.client,
+            payloads=records,
+            user_prompt_template=input_template,
+            response_model=response_model,
+            model=self.model,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            seed=self.seed,
+            retries=retries,
+            split_into_chunks=True,
+            input_field_types=input_field_types,
+            instructions_first=instructions_first,
+            instructions_template=instructions_template,
+            extra_fields=extra_fields,
+            **self.model_extra,
+        )
 
         output_df = InternalDataFrame(df_data)
         return output_df.set_index(batch.index)

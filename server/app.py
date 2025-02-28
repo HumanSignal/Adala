@@ -246,6 +246,7 @@ async def submit_batch(batch: BatchData):
 
 @app.post("/validate-connection", response_model=Response[ValidateConnectionResponse])
 async def validate_connection(request: ValidateConnectionRequest):
+    # TODO: move this logic to LSE, this is the last place Adala needs to be updated when adding a provider connection
     multi_model_provider_test_models = {
         "openai": "gpt-4o-mini",
         "vertexai": "vertex_ai/gemini-1.5-flash",
@@ -290,13 +291,15 @@ async def validate_connection(request: ValidateConnectionRequest):
         if provider.lower() == "azureopenai":
             model = "azure/" + request.deployment_name
             model_extra = {"base_url": request.endpoint}
+        elif provider.lower() == "azureaifoundry":
+            model = "azure_ai/" + request.deployment_name
+            model_extra = {"base_url": request.endpoint}
         elif provider.lower() == "custom":
             model = "openai/" + request.deployment_name
-            model_extra = (
-                {"extra_headers": {"Authorization": request.auth_token}}
-                if request.auth_token
-                else {}
-            )
+            model_extra = {"base_url": request.endpoint}
+            if request.auth_token:
+                model_extra["extra_headers"] = {"Authorization": request.auth_token}
+
         model_extra["api_key"] = request.api_key
         try:
             response = litellm.completion(

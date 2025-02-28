@@ -7,7 +7,7 @@ from adala.runtimes import (
     AsyncLiteLLMChatRuntime,
     AsyncLiteLLMVisionRuntime,
 )
-from adala.runtimes._litellm import split_message_into_chunks, MessageChunkType
+from adala.utils.parse import split_message_into_chunks, MessageChunkType
 
 
 @pytest.mark.vcr
@@ -217,6 +217,7 @@ def test_vision_runtime():
             }
         ]
     )
+
     pd.testing.assert_frame_equal(result[["name", "age"]], expected_result)
 
     # assert all other columns (costs) are nonzero

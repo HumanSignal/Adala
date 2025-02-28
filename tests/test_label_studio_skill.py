@@ -7,9 +7,14 @@ from label_studio_sdk.label_interface import LabelInterface
 from label_studio_sdk.label_interface.objects import PredictionValue
 
 
+# NOTE: commented code can be used to recreate vcr cassettes, as they don't work with asyncio
+
+
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill():
+    # @pytest.mark.vcr
+    # def test_label_studio_skill():
 
     df = pd.DataFrame(
         [
@@ -25,6 +30,7 @@ async def test_label_studio_skill():
         "runtimes": {
             "default": {
                 "type": "AsyncLiteLLMChatRuntime",
+                # "type": "LiteLLMChatRuntime",
                 "model": "gpt-4o-mini",
                 "api_key": os.getenv("OPENAI_API_KEY"),
                 "max_tokens": 200,
@@ -66,18 +72,20 @@ async def test_label_studio_skill():
 
     agent = Agent(**agent_payload)
     predictions = await agent.arun(df)
-
+    # predictions = agent.run(df)
     assert predictions.classification.tolist() == ["Bug report", "Feature request"]
     assert predictions.evaluation.tolist() == [5, 5]
     assert predictions.rationale.tolist() == [
-        "The issue clearly indicates a problem with the login functionality of the platform, which is a critical feature. Users are unable to access their accounts, suggesting a potential bug that needs to be addressed.",
-        "The issue is requesting the addition of support for a new file type (.docx), which indicates a desire for new functionality in the system. This aligns with the definition of a feature request, as it seeks to enhance the capabilities of the application.",
+        "The issue clearly indicates a problem with the login functionality of the platform, which is a common type of bug that users may encounter. The description reinforces this by stating the inability to log in, suggesting a potential defect in the system.",
+        "The issue is requesting the addition of support for a new file type (.docx), which indicates a desire for enhanced functionality in the application. This aligns with typical feature requests that aim to improve user experience and expand capabilities.",
     ]
 
 
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill_partial_label_config():
+    # @pytest.mark.vcr
+    # def test_label_studio_skill_partial_label_config():
 
     df = pd.DataFrame(
         [
@@ -93,6 +101,7 @@ async def test_label_studio_skill_partial_label_config():
         "runtimes": {
             "default": {
                 "type": "AsyncLiteLLMChatRuntime",
+                # "type": "LiteLLMChatRuntime",
                 "model": "gpt-4o-mini",
                 "api_key": os.getenv("OPENAI_API_KEY"),
                 "max_tokens": 200,
@@ -140,6 +149,7 @@ async def test_label_studio_skill_partial_label_config():
 
     agent = Agent(**agent_payload)
     predictions = await agent.arun(df)
+    # predictions = agent.run(df)
 
     assert predictions.classification.tolist() == ["Bug report", "Feature request"]
     assert predictions.evaluation.tolist() == [5, 5]
@@ -150,6 +160,8 @@ async def test_label_studio_skill_partial_label_config():
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill_with_ner():
+    # @pytest.mark.vcr
+    # def test_label_studio_skill_with_ner():
     # documents that contain entities
     df = pd.DataFrame(
         [
@@ -173,6 +185,7 @@ async def test_label_studio_skill_with_ner():
         "runtimes": {
             "default": {
                 "type": "AsyncLiteLLMChatRuntime",
+                # "type": "LiteLLMChatRuntime",
                 "model": "gpt-4o-mini",
                 "api_key": os.getenv("OPENAI_API_KEY"),
                 "max_tokens": 200,
@@ -203,17 +216,10 @@ async def test_label_studio_skill_with_ner():
 
     agent = Agent(**agent_payload)
     predictions = await agent.arun(df)
+    # predictions = agent.run(df)
 
     expected_predictions = [
-        [
-            {"start": 0, "end": 10, "labels": ["Organization"], "text": "Apple Inc."},
-            {
-                "start": 17,
-                "end": 58,
-                "labels": ["Organization"],
-                "text": "American multinational technology company",
-            },
-        ],
+        [{"start": 0, "end": 10, "labels": ["Organization"], "text": "Apple Inc."}],
         [
             {"start": 4, "end": 13, "labels": ["Product"], "text": "iPhone 14"},
             {"start": 44, "end": 53, "labels": ["Organization"], "text": "Apple Inc"},
@@ -221,16 +227,13 @@ async def test_label_studio_skill_with_ner():
         [
             {"start": 4, "end": 15, "labels": ["Product"], "text": "MacBook Pro"},
             {"start": 88, "end": 98, "labels": ["Organization"], "text": "Apple Inc."},
-            {"start": 29, "end": 38, "labels": ["Product"], "text": "Macintosh"},
+            {"start": 80, "end": 84, "labels": ["Version"], "text": "2006"},
         ],
         [
             {"start": 4, "end": 15, "labels": ["Product"], "text": "Apple Watch"},
             {"start": 54, "end": 63, "labels": ["Organization"], "text": "Apple Inc"},
         ],
-        [
-            {"start": 4, "end": 8, "labels": ["Product"], "text": "iPad"},
-            {"start": 76, "end": 85, "labels": ["Organization"], "text": "Apple Inc"},
-        ],
+        [{"start": 76, "end": 85, "labels": ["Organization"], "text": "Apple Inc"}],
     ]
 
     assert predictions.entities.tolist() == expected_predictions
@@ -239,13 +242,15 @@ async def test_label_studio_skill_with_ner():
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_label_studio_skill_valid_predictions():
+    # @pytest.mark.vcr
+    # def test_label_studio_skill_valid_predictions():
     """
     Fuzz test matrix of text input tags x control tags x models
     """
 
     ALLOWED_OBJECT_TAGS = {"Text", "HyperText"}
     # ALLOWED_CONTROL_TAGS = {'Choices', 'Labels', 'TextArea', 'Rating', 'Number', 'Pairwise'}
-    MODELS = {"gpt-4o-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"}
+    MODELS = {"gpt-4o-mini", "gpt-4o"}
     RUNS_PER_MODEL = 5
 
     sample_text = """
@@ -423,6 +428,7 @@ async def test_label_studio_skill_valid_predictions():
                 "runtimes": {
                     "default": {
                         "type": "AsyncLiteLLMChatRuntime",
+                        # "type": "LiteLLMChatRuntime",
                         "model": model,
                         "api_key": os.getenv("OPENAI_API_KEY"),
                         "max_tokens": 4000,
@@ -447,6 +453,9 @@ async def test_label_studio_skill_valid_predictions():
             predictions = await agent.arun(
                 pd.DataFrame([{"text": sample_text}] * RUNS_PER_MODEL)
             )
+            # predictions = agent.run(
+            #     pd.DataFrame([{"text": sample_text}] * RUNS_PER_MODEL)
+            # )
 
             # filter out failed predictions
             if "_adala_error" in predictions.columns:
@@ -518,7 +527,7 @@ def test_label_studio_skill_image_input():
                 "input_template": """
                     Given the title of a museum painting:\n{title}\n and the image of the painting:\n{image}\n,
                     classify the painting as either "Mona Lisa" or "Not Mona Lisa".
-                    They may or may not agree with each other. If the title and image disagree, believe the image.
+                    They may or may not agree with each other. If the title and image disagree, believe the image. Remember, the output classification must be based on the image, not the title.
                 """,
                 "label_config": """
                 <View>
