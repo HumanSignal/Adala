@@ -115,10 +115,6 @@ class InstructorClientMixin(BaseModel):
     api_key: Optional[str] = None
     base_url: Optional[str] = None
 
-    # keep this class serializable
-    # model_config = ConfigDict(exclude={"client"})
-
-    # Note: doesn't seem like this separate function should be necessary, but errors when combined with @cached_property
     @property
     def _litellm_client(self):
         return litellm.completion
@@ -141,7 +137,8 @@ class InstructorClientMixin(BaseModel):
             **self.model_extra,
         )
 
-    # def _get_client(self, api_key: str, base_url: str, provider: str, **kwargs):
+    # Yes, this is recomputed every time - there's no clean way to cache it unless we drop pickle serialization, in which case adding it to ConfigDict(ignore) would work.
+    # There's no appreciable startup cost in the instructor client init function anyway.
     @property
     def client(self):
         if self.provider == "Custom":
