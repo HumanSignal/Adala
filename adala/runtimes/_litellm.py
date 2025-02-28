@@ -158,7 +158,7 @@ class InstructorClientMixin(BaseModel):
         # check model availability
         # extension of litellm.check_valid_key for non-openai deployments
         try:
-            self._check_client
+            self._check_client()
         except AuthenticationError:
             logger.exception(
                 f'Requested model "{self.model}" is not available with your api_key and settings.\nTraceback:\n{traceback.format_exc()}'
