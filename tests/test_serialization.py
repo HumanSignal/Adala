@@ -107,6 +107,9 @@ def test_agent_is_serializable():
                 "temperature": 0.0,
                 "seed": 47,
                 "timeout": 10,
+                "provider": None,
+                "api_key": None,
+                "base_url": None,
             }
         },
         "default_runtime": "default",
