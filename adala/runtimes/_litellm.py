@@ -115,47 +115,53 @@ class InstructorClientMixin(BaseModel):
     api_key: Optional[str] = None
     base_url: Optional[str] = None
 
+    # keep this class serializable
+    # model_config = ConfigDict(exclude={"client"})
+
     # Note: doesn't seem like this separate function should be necessary, but errors when combined with @cached_property
-    @classmethod
-    def _from_litellm(cls, **kwargs):
-        return instructor.from_litellm(litellm.completion, **kwargs)
+    @property
+    def _litellm_client(self):
+        return litellm.completion
 
-    @classmethod
-    def _from_openai(cls, api_key: str, base_url: str, **kwargs):
-        return instructor.from_openai(OpenAI(api_key=api_key, base_url=base_url))
+    @property
+    def _openai_client(self):
+        return OpenAI
 
-    @classmethod
-    def _get_client(cls, api_key: str, base_url: str, provider: str, **kwargs):
-        if provider == "Custom":
-            logger.info(f"Custom provider: using OpenAI client.")
-            return cls._from_openai(api_key, base_url)
-        return cls._from_litellm(mode=instructor.Mode(cls.instructor_mode))
+    def _check_client(self):
+        run_instructor_with_messages(
+            client=self.client,
+            messages=[{"role": "user", "content": "Hey, how's it going?"}],
+            model=self.model,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            seed=self.seed,
+            response_model=None,
+            retries=retries,
+            # extra inference params passed to this runtime
+            **self.model_extra,
+        )
 
-    @cached_property
+    # def _get_client(self, api_key: str, base_url: str, provider: str, **kwargs):
+    @property
     def client(self):
-        return self._get_client(self.api_key, self.base_url, self.provider)
+        if self.provider == "Custom":
+            logger.info(f"Custom provider: using OpenAI client.")
+            return instructor.from_openai(
+                self._openai_client(api_key=self.api_key, base_url=self.base_url),
+                mode=instructor.Mode(self.instructor_mode),
+            )
+        return instructor.from_litellm(
+            self._litellm_client,
+            api_key=self.api_key,
+            base_url=self.base_url,
+            mode=instructor.Mode(self.instructor_mode),
+        )
 
     def init_runtime(self) -> "Runtime":
         # check model availability
         # extension of litellm.check_valid_key for non-openai deployments
         try:
-            messages = [{"role": "user", "content": "Hey, how's it going?"}]
-            # in the after_init method, we should run sync validation of the client
-            client = InstructorClientMixin._get_client(
-                self.api_key, self.base_url, self.provider
-            )
-            run_instructor_with_messages(
-                client=client,
-                messages=messages,
-                model=self.model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                seed=self.seed,
-                response_model=None,
-                retries=retries,
-                # extra inference params passed to this runtime
-                **self.model_extra,
-            )
+            self._check_client
         except AuthenticationError:
             logger.exception(
                 f'Requested model "{self.model}" is not available with your api_key and settings.\nTraceback:\n{traceback.format_exc()}'
@@ -176,13 +182,29 @@ class InstructorClientMixin(BaseModel):
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
 
-    @classmethod
-    def _from_openai(cls, api_key: str, base_url: str, **kwargs):
-        return instructor.from_openai(AsyncOpenAI(api_key=api_key, base_url=base_url))
+    @property
+    def _litellm_client(self):
+        return litellm.acompletion
 
-    @classmethod
-    def _from_litellm(cls, **kwargs):
-        return instructor.from_litellm(litellm.acompletion, **kwargs)
+    @property
+    def _openai_client(self):
+        return AsyncOpenAI
+
+    def _check_client(self):
+        """Make this synchronous"""
+        client = InstructorClientMixin(**self.model_dump()).client
+        run_instructor_with_messages(
+            client=client,
+            messages=[{"role": "user", "content": "Hey, how's it going?"}],
+            model=self.model,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            seed=self.seed,
+            response_model=None,
+            retries=retries,
+            # extra inference params passed to this runtime
+            **self.model_extra,
+        )
 
 
 class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
