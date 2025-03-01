@@ -4,15 +4,17 @@ import traceback
 import litellm
 from litellm import token_counter
 from collections import defaultdict
-from typing import Any, Dict, List, Type, Optional
+from typing import Any, Dict, List, Type, Optional, Tuple
 from pydantic import BaseModel, Field
 from pydantic_core import to_jsonable_python
 from litellm.types.utils import Usage
+from litellm.utils import trim_messages
 from tenacity import Retrying, AsyncRetrying
 from instructor.exceptions import InstructorRetryException, IncompleteOutputException
 from instructor.client import Instructor, AsyncInstructor
 from adala.utils.parse import MessagesBuilder, MessageChunkType
 from adala.utils.exceptions import ConstrainedGenerationError
+from adala.utils.types import debug_time_it
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +41,8 @@ def _get_usage_dict(usage: Usage, model: str) -> Dict:
         data["_prompt_cost_usd"] = prompt_cost
         data["_completion_cost_usd"] = completion_cost
         data["_total_cost_usd"] = prompt_cost + completion_cost
-    except:
-        logger.exception(f"Failed to get cost for model {model}")
+    except Exception as e:
+        logger.exception(f"Failed to get cost for model {model}", exc_info=e)
         data["_prompt_cost_usd"] = None
         data["_completion_cost_usd"] = None
         data["_total_cost_usd"] = None
@@ -70,7 +72,11 @@ def _log_llm_exception(e) -> dict:
 
 
 def handle_llm_exception(
-    e: Exception, messages: List[Dict[str, str]], model: str, retries
+    e: Exception,
+    messages: List[Dict[str, str]],
+    model: str,
+    retries,
+    prompt_token_count: Optional[int] = None,
 ) -> tuple[Dict, Usage]:
     """Handle exceptions from LLM calls and return standardized error dict and usage stats.
 
@@ -95,11 +101,9 @@ def handle_llm_exception(
         # usage = e.total_usage
         # not available here, so have to approximate by hand, assuming the same error occurred each time
         n_attempts = retries.stop.max_attempt_number
-        # Note that the default model used in token_counter is gpt-3.5-turbo as of now - if model passed in
-        # does not match a mapped model, falls back to default
-        prompt_tokens = n_attempts * litellm.token_counter(
-            model=model, messages=messages[:-1]
-        )  # response is appended as the last message
+        if prompt_token_count is None:
+            prompt_token_count = token_counter(model=model, messages=messages[:-1])
+        prompt_tokens = n_attempts * prompt_token_count
         # TODO a pydantic validation error may be appended as the last message, don't know how to get the raw response in this case
         usage = Usage(
             prompt_tokens=prompt_tokens,
@@ -118,6 +122,30 @@ def handle_llm_exception(
     return _log_llm_exception(e), usage
 
 
+def _ensure_messages_fit_in_context_window(
+    messages: List[Dict[str, str]], model: str
+) -> Tuple[List[Dict[str, str]], int]:
+    """
+    Ensure that the messages fit in the context window of the model.
+    """
+    token_count = token_counter(model=model, messages=messages)
+    logger.debug(f"Prompt tokens count: {token_count}")
+
+    if model in litellm.model_cost:
+        # If we are able to identify the model context window, ensure the messages fit in it
+        max_tokens = litellm.model_cost[model].get(
+            "max_input_tokens", litellm.model_cost[model]["max_tokens"]
+        )
+        if token_count > max_tokens:
+            logger.info(
+                f"Prompt tokens count {token_count} exceeds max tokens {max_tokens} for model {model}. Trimming messages."
+            )
+            return trim_messages(messages, model=model), token_count
+    # in other cases, just return the original messages
+    return messages, token_count
+
+
+@debug_time_it
 def run_instructor_with_messages(
     client: Instructor,
     messages: List[Dict[str, Any]],
@@ -127,6 +155,7 @@ def run_instructor_with_messages(
     temperature: Optional[float] = None,
     seed: Optional[int] = None,
     retries: Optional[Retrying] = None,
+    ensure_messages_fit_in_context_window: bool = False,
     **kwargs,
 ) -> Dict[str, Any]:
     """
@@ -141,13 +170,19 @@ def run_instructor_with_messages(
         temperature: Temperature for sampling
         seed: Integer seed to reduce nondeterminism
         retries: Retry policy to use
+        ensure_messages_fit_in_context_window: Whether to ensure the messages fit in the context window (setting it to True will slow down the function)
         **kwargs: Additional arguments to pass to the completion call
 
     Returns:
         Dict containing the parsed response and usage information
     """
     try:
-        # returns a pydantic model and completion info
+        prompt_token_count = None
+        if ensure_messages_fit_in_context_window:
+            messages, prompt_token_count = _ensure_messages_fit_in_context_window(
+                messages, model
+            )
+
         response, completion = client.chat.completions.create_with_completion(
             messages=messages,
             response_model=response_model,
@@ -164,7 +199,9 @@ def run_instructor_with_messages(
         usage_model = completion.model
 
     except Exception as e:
-        dct, usage = handle_llm_exception(e, messages, model, retries)
+        dct, usage = handle_llm_exception(
+            e, messages, model, retries, prompt_token_count=prompt_token_count
+        )
         # With exceptions we don't have access to completion.model
         usage_model = model
 
@@ -174,6 +211,7 @@ def run_instructor_with_messages(
     return dct
 
 
+@debug_time_it
 async def arun_instructor_with_messages(
     client: AsyncInstructor,
     messages: List[Dict[str, Any]],
@@ -183,6 +221,7 @@ async def arun_instructor_with_messages(
     temperature: Optional[float] = None,
     seed: Optional[int] = None,
     retries: Optional[AsyncRetrying] = None,
+    ensure_messages_fit_in_context_window: bool = False,
     **kwargs,
 ) -> Dict[str, Any]:
     """
@@ -197,13 +236,19 @@ async def arun_instructor_with_messages(
         temperature: Temperature for sampling
         seed: Integer seed to reduce nondeterminism
         retries: Retry policy to use
+        ensure_messages_fit_in_context_window: Whether to ensure the messages fit in the context window (setting it to True will slow down the function)
         **kwargs: Additional arguments to pass to the completion call
 
     Returns:
         Dict containing the parsed response and usage information
     """
     try:
-        # returns a pydantic model and completion info
+        prompt_token_count = None
+        if ensure_messages_fit_in_context_window:
+            messages, prompt_token_count = _ensure_messages_fit_in_context_window(
+                messages, model
+            )
+
         response, completion = await client.chat.completions.create_with_completion(
             messages=messages,
             response_model=response_model,
@@ -220,7 +265,9 @@ async def arun_instructor_with_messages(
         usage_model = completion.model
 
     except Exception as e:
-        dct, usage = handle_llm_exception(e, messages, model, retries)
+        dct, usage = handle_llm_exception(
+            e, messages, model, retries, prompt_token_count=prompt_token_count
+        )
         # With exceptions we don't have access to completion.model
         usage_model = model
 
@@ -245,6 +292,7 @@ def run_instructor_with_payload(
     input_field_types: Optional[Dict[str, MessageChunkType]] = None,
     split_into_chunks: bool = False,
     extra_fields: Optional[Dict[str, Any]] = None,
+    ensure_messages_fit_in_context_window: bool = False,
     **kwargs,
 ) -> Dict[str, Any]:
     """
@@ -265,6 +313,7 @@ def run_instructor_with_payload(
         input_field_types: The types of the input fields
         split_into_chunks: Whether to split the user prompt into chunks
         extra_fields: Additional fields to send to the model
+        ensure_messages_fit_in_context_window: Whether to ensure the messages fit in the context window (setting it to True will slow down the function)
         **kwargs: Additional arguments to pass to the completion call
 
     Returns:
@@ -290,6 +339,7 @@ def run_instructor_with_payload(
         temperature,
         seed,
         retries,
+        ensure_messages_fit_in_context_window=ensure_messages_fit_in_context_window,
         **kwargs,
     )
 
@@ -309,6 +359,7 @@ async def arun_instructor_with_payload(
     input_field_types: Optional[Dict[str, MessageChunkType]] = None,
     extra_fields: Optional[Dict[str, Any]] = None,
     split_into_chunks: bool = False,
+    ensure_messages_fit_in_context_window: bool = False,
     **kwargs,
 ) -> Dict[str, Any]:
     """
@@ -329,6 +380,7 @@ async def arun_instructor_with_payload(
         input_field_types: The types of the input fields
         extra_fields: Additional fields to send to the model
         split_into_chunks: Whether to split the user prompt into chunks
+        ensure_messages_fit_in_context_window: Whether to ensure the messages fit in the context window (setting it to True will slow down the function)
         **kwargs: Additional arguments to pass to the completion call
 
     Returns:
@@ -354,6 +406,7 @@ async def arun_instructor_with_payload(
         temperature,
         seed,
         retries,
+        ensure_messages_fit_in_context_window=ensure_messages_fit_in_context_window,
         **kwargs,
     )
 
@@ -373,6 +426,7 @@ def run_instructor_with_payloads(
     input_field_types: Optional[Dict[str, MessageChunkType]] = None,
     split_into_chunks: bool = False,
     extra_fields: Optional[Dict[str, Any]] = None,
+    ensure_messages_fit_in_context_window: bool = False,
     **kwargs,
 ) -> List[Dict[str, Any]]:
     """
@@ -394,6 +448,7 @@ def run_instructor_with_payloads(
         input_field_types: The types of the input fields
         split_into_chunks: Whether to split the user prompt into chunks
         extra_fields: Additional fields to send to the model
+        ensure_messages_fit_in_context_window: Whether to ensure the messages fit in the context window (setting it to True will slow down the function)
         **kwargs: Additional arguments to pass to the completion calls
 
     Returns:
@@ -420,6 +475,7 @@ def run_instructor_with_payloads(
             temperature,
             seed,
             retries,
+            ensure_messages_fit_in_context_window=ensure_messages_fit_in_context_window,
             **kwargs,
         )
         results.append(result)
@@ -442,6 +498,7 @@ async def arun_instructor_with_payloads(
     input_field_types: Optional[Dict[str, MessageChunkType]] = None,
     split_into_chunks: bool = False,
     extra_fields: Optional[Dict[str, Any]] = None,
+    ensure_messages_fit_in_context_window: bool = False,
     **kwargs,
 ) -> List[Dict[str, Any]]:
     """
@@ -462,6 +519,7 @@ async def arun_instructor_with_payloads(
         input_field_types: The types of the input fields
         split_into_chunks: Whether to split the user prompt into chunks
         extra_fields: Additional fields to send to the model
+        ensure_messages_fit_in_context_window: Whether to ensure the messages fit in the context window (setting it to True will slow down the function)
         **kwargs: Additional arguments to pass to the completion calls
 
     Returns:
@@ -487,6 +545,7 @@ async def arun_instructor_with_payloads(
             temperature,
             seed,
             retries,
+            ensure_messages_fit_in_context_window=ensure_messages_fit_in_context_window,
             **kwargs,
         )
         for payload in payloads
