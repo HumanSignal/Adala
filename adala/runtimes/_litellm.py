@@ -68,19 +68,22 @@ logger = logging.getLogger(__name__)
 # https://docs.litellm.ai/docs/exception_mapping#custom-mapping-list
 # NOTE: token usage is only correctly calculated if we only use instructor retries, not litellm retries
 # https://github.com/jxnl/instructor/pull/763
-RETRY_POLICY = dict(
-    retry=retry_if_not_exception_type(
-        (
-            ValidationError,
-            ContentPolicyViolationError,
-            AuthenticationError,
-            BadRequestError,
-        )
-    ),
-    # should stop earlier on ValidationError and later on other errors, but couldn't figure out how to do that cleanly
-    stop=stop_after_attempt(3),
-    wait=wait_random_exponential(multiplier=1, max=60),
-)
+# RETRY_POLICY = dict(
+#     retry=retry_if_not_exception_type(
+#         (
+#             ValidationError,
+#             ContentPolicyViolationError,
+#             AuthenticationError,
+#             BadRequestError,
+#         )
+#     ),
+#     # should stop earlier on ValidationError and later on other errors, but couldn't figure out how to do that cleanly
+#     stop=stop_after_attempt(3),
+#     wait=wait_random_exponential(multiplier=1, max=60),
+# )
+
+# For now, disabling all instructor retries as of DIA-1910 to speed up inference runs greatly
+RETRY_POLICY = dict(stop=stop_after_attempt(1))
 retries = Retrying(**RETRY_POLICY)
 async_retries = AsyncRetrying(**RETRY_POLICY)
 
