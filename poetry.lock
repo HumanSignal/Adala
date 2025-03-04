@@ -3725,23 +3725,23 @@ url = "https://github.com/HumanSignal/label-studio-sdk/archive/0fecdd0030b8cefe4
 
 [[package]]
 name = "litellm"
-version = "1.59.9"
+version = "1.62.2"
 description = "Library to easily interface with LLM API providers"
 optional = false
 python-versions = ">=3.8.1,<4.0, !=3.9.7"
 groups = ["main"]
 files = [
-    {file = "ce03cd9c3624915fe629e01e35fead4a3061d181.zip", hash = "sha256:5ff93346085c5477671527a2231db42eb61d02881156f9194c5a705b12febfa1"},
+    {file = "c0506d5844ef20d0db14144fbcbf99c05637bde3.zip", hash = "sha256:6cee06b9e4bb6f63502bdbfff21b1356560e3205978b2a3b385e7f128540e17b"},
 ]
 
 [package.dependencies]
 aiohttp = "*"
 click = "*"
-httpx = ">=0.23.0,<0.28.0"
+httpx = ">=0.23.0"
 importlib-metadata = ">=6.8.0"
 jinja2 = ">=3.1.2,<4.0.0"
 jsonschema = ">=4.22.0,<5.0.0"
-openai = ">=1.55.3"
+openai = ">=1.61.0"
 pydantic = ">=2.0.0,<3.0.0"
 python-dotenv = ">=0.2.0"
 tiktoken = ">=0.7.0"
@@ -3753,7 +3753,7 @@ proxy = ["PyJWT (>=2.8.0,<3.0.0)", "apscheduler (>=3.10.4,<4.0.0)", "backoff", "
 
 [package.source]
 type = "url"
-url = "https://github.com/HumanSignal/litellm/archive/ce03cd9c3624915fe629e01e35fead4a3061d181.zip"
+url = "https://github.com/HumanSignal/litellm/archive/c0506d5844ef20d0db14144fbcbf99c05637bde3.zip"
 
 [[package]]
 name = "lxml"
@@ -4944,14 +4944,14 @@ sympy = "*"
 
 [[package]]
 name = "openai"
-version = "1.60.2"
+version = "1.65.3"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 groups = ["main", "dev"]
 files = [
-    {file = "openai-1.60.2-py3-none-any.whl", hash = "sha256:993bd11b96900b9098179c728026f016b4982ded7ee30dfcf4555eab1171fff9"},
-    {file = "openai-1.60.2.tar.gz", hash = "sha256:a8f843e10f2855713007f491d96afb2694b11b5e02cb97c7d01a0be60bc5bb51"},
+    {file = "openai-1.65.3-py3-none-any.whl", hash = "sha256:a155fa5d60eccda516384d3d60d923e083909cc126f383fe4a350f79185c232a"},
+    {file = "openai-1.65.3.tar.gz", hash = "sha256:9b7cd8f79140d03d77f4ed8aeec6009be5dcd79bbc02f03b0e8cd83356004f71"},
 ]
 
 [package.dependencies]
@@ -8486,4 +8486,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.9.7 || >3.9.7,<3.13"
-content-hash = "9b8574cd0020e3b5a692421d8dc8da7ec2b38db58e8c8e2768832fef4eebcf77"
+content-hash = "64a1e3d43dbcdeca131b8473fdda9a357f141a8ef9cb718f5295659fb25de340"
