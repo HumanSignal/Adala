@@ -1,7 +1,7 @@
 import re
 import logging
 import pandas as pd
-from typing import List, Optional, Type
+from typing import List, Optional, Type, Dict, Tuple
 from functools import cached_property
 from copy import deepcopy
 from collections import defaultdict
@@ -208,8 +208,13 @@ class LabelStudioSkillImageOCR(TransformSkill):
         tasks = [process_single_image(image) for image in images]
         results = await asyncio.gather(*tasks)
         
+        return results
+    
+    def _convert_ocr_results_to_label_studio_format(self, results: list) -> Tuple[List, List]:
+        
         # normalize EasyOCR results to RectangleLabels bounding boxes format of Label Studio
-        normalized_results = []
+        all_bbox_annotations = []
+        all_text_annotations = []
         for result in results:
             if not result:
                 continue
@@ -222,7 +227,8 @@ class LabelStudioSkillImageOCR(TransformSkill):
             original_height = result.get('image_height', 1000)
             
             # Convert to Label Studio format
-            label_studio_results = []
+            bbox_annotations = []
+            text_annotations = []
             
             for i, (bbox, text, score) in enumerate(zip(bboxes, texts, scores)):
                 # EasyOCR bboxes format is [[x1,y1],[x2,y2],[x3,y3],[x4,y4]]
@@ -251,24 +257,41 @@ class LabelStudioSkillImageOCR(TransformSkill):
                 # generate unique id for the annotation
                 id_gen = str(uuid.uuid4())[:8]
                 # Create Label Studio format annotation
-                annotation = {
+                bbox_annotation = {
                     "x": x_percent,
                     "y": y_percent,
                     "width": width_percent,
                     "height": height_percent,
-                    "rectanglelabels": ['Transcription'],  # TODO: customize
-                    "score": score, 
-                    "text": text
+                    "rotation": 0,
+                    "id": id_gen,
+                    # "rectanglelabels": ['Transcription'],  # TODO: customize
+                    # "score": score, 
+                    # "text": text
                 }
+                text_annotation = {
+                    'text': [text],
+                    'id': id_gen
+                }
+                # annotation = {
+                #     "x": x_percent,
+                #     "y": y_percent,
+                #     "width": width_percent,
+                #     "height": height_percent,
+                #     "rectanglelabels": ['Transcription'],  # TODO: customize
+                #     "score": score, 
+                #     "text": text
+                # }
                 
-                label_studio_results.append(annotation)
+                bbox_annotations.append(bbox_annotation)
+                text_annotations.append(text_annotation)
             
             # Replace the OCR result with the Label Studio formatted result
-            normalized_results.append(label_studio_results)
+            all_bbox_annotations.append(bbox_annotations)
+            all_text_annotations.append(text_annotations)
             
-        return normalized_results
+        return all_bbox_annotations, all_text_annotations
     
-    def _calculate_similarity(self, text: str, reference_texts: List[str]) -> float:
+    def _calculate_similarity(self, text: str, reference_texts: List[str]) -> Tuple[float, str]:
         """
         Calculate similarity between a text and a list of reference texts
 
@@ -277,29 +300,29 @@ class LabelStudioSkillImageOCR(TransformSkill):
             reference_texts: List of reference texts
 
         Returns:
-            Similarity score between 0 and 1
+            Similarity score between 0 and 1 and the best matching text
         """
         # Convert to lowercase for case-insensitive comparison
         text = text.lower()
-        reference_texts = [ref_text.lower() for ref_text in reference_texts]
         
         # Use SequenceMatcher to calculate similarity
         from difflib import SequenceMatcher
         
         best_score = 0
+        best_match = None
         if reference_texts:
             for ref_text in reference_texts:
                 # Calculate similarity ratio using SequenceMatcher
-                similarity = SequenceMatcher(None, text, ref_text).ratio()
+                similarity = SequenceMatcher(None, text, ref_text.lower()).ratio()
                 print(f"Similarity between {text} and {ref_text}: {similarity}")
                 
                 # Update best score if this one is higher
                 if similarity > best_score:
                     best_score = similarity
-        
-        return best_score
+                    best_match = ref_text
+        return best_score, best_match
     
-    def _filter_ocr_results(self, ocr_results: list, reference_texts: List[str]) -> list:
+    def _filter_ocr_results(self, ocr_results: Dict, reference_texts: List[str]) -> list:
         """
         Filter OCR results based on similarity to output texts
         
@@ -310,12 +333,18 @@ class LabelStudioSkillImageOCR(TransformSkill):
         Returns:
             List of filtered OCR results
         """
-        filtered_results = []
-        for result in ocr_results:
+        filtered_results = {
+            'bboxes': [],
+            'texts': [],
+            'scores': []
+        }
+        for bbox, text, score in zip(ocr_results['bboxes'], ocr_results['texts'], ocr_results['scores']):
             # Simple similarity function - can be replaced with more sophisticated methods
-            similarity = self._calculate_similarity(result['text'], reference_texts)
+            similarity, best_match = self._calculate_similarity(text, reference_texts)
             if similarity >= 0.9:
-                filtered_results.append(result)
+                filtered_results['bboxes'].append(bbox)
+                filtered_results['texts'].append(best_match)
+                filtered_results['scores'].append(score)
             
         return filtered_results
         
@@ -329,6 +358,7 @@ class LabelStudioSkillImageOCR(TransformSkill):
         with json_schema_to_pydantic(self.field_schema) as ResponseModel:
             # special handling to flag image inputs if they exist
             input_field_types = defaultdict(lambda: MessageChunkType.TEXT)
+            image_value_key = None
             for tag in self.image_tags:
                 # these are the project variable names, NOT the label config tag names. TODO: pass this info from LSE to avoid recomputing it here.
                 variables = extract_variable_name(tag.value)
@@ -337,7 +367,8 @@ class LabelStudioSkillImageOCR(TransformSkill):
                         f"Image tag {tag.name} has multiple variables: {variables}. Cannot mark these variables as image inputs."
                     )
                     continue
-                input_field_types[variables[0]] = (
+                image_value_key = variables[0]
+                input_field_types[image_value_key] = (
                     MessageChunkType.IMAGE_URLS
                     if tag.attr.get("valueList")
                     else MessageChunkType.IMAGE_URL
@@ -354,17 +385,25 @@ class LabelStudioSkillImageOCR(TransformSkill):
                 response_model=ResponseModel,
                 input_field_types=input_field_types,
             )
-            output['label'] = await self.process_images_with_ocr(input['image'].tolist())
-            
-            # Convert OCR results to a format that can be used for similarity matching
-            # Process each row individually
-            # Process each row to filter OCR results based on similarity to reference texts
-            filtered_labels = []
+            print(f'Output: {output}')
+            print(f'Process images with OCR: {input[image_value_key].tolist()}')
+            ocr_results = await self.process_images_with_ocr(input[image_value_key].tolist())
+            filtered_ocr_results = []
             for i, row in output.iterrows():
-                # Filter OCR results based on similarity to reference texts
-                filtered_ocr = self._filter_ocr_results(row['label'], row['output'])
-                filtered_labels.append(filtered_ocr)
-            output['label'] = filtered_labels
+                extracted_result = row['output']
+                filtered_ocr_result = {
+                    'image_width': ocr_results[i]['image_width'],
+                    'image_height': ocr_results[i]['image_height'],
+                    'ocr_data': self._filter_ocr_results(ocr_results[i]['ocr_data'], extracted_result)
+                }
+                filtered_ocr_results.append(filtered_ocr_result)
+            print(f'Filtered OCR results: {filtered_ocr_results}')
+            # convert filtered OCR results to Label Studio format
+            bbox_annotations, text_annotations = self._convert_ocr_results_to_label_studio_format(filtered_ocr_results)
+            print(f'Bbox annotations: {bbox_annotations}')
+            print(f'Text annotations: {text_annotations}')
+            output['bbox'] = bbox_annotations
+            output['transcription'] = text_annotations
             return output
 
 
