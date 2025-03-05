@@ -3696,7 +3696,7 @@ optional = false
 python-versions = ">=3.9,<4"
 groups = ["main"]
 files = [
-    {file = "0fecdd0030b8cefe471b574deed3ca19b64ff323.zip", hash = "sha256:73038bce8d8a2923d866456abc96ae2676ce759847ab53c1ea364815a989da7f"},
+    {file = "4b2f1d9b3befa4a546907321912055a43a408d17.zip", hash = "sha256:4fb8066f51597a7b0b3687527140f3bf8a7259d4e93a9c3de0920f0ef9c4e0ff"},
 ]
 
 [package.dependencies]
@@ -3713,6 +3713,7 @@ pandas = ">=0.24.0"
 Pillow = ">=10.0.1"
 pydantic = ">=1.9.2"
 pydantic-core = ">=2.18.2,<3.0.0"
+pyjwt = ">=2.10.1,<3.0.0"
 requests = ">=2.22.0"
 requests-mock = "1.12.1"
 typing_extensions = ">=4.0.0"
@@ -3721,7 +3722,7 @@ xmljson = "0.2.1"
 
 [package.source]
 type = "url"
-url = "https://github.com/HumanSignal/label-studio-sdk/archive/0fecdd0030b8cefe471b574deed3ca19b64ff323.zip"
+url = "https://github.com/HumanSignal/label-studio-sdk/archive/4b2f1d9b3befa4a546907321912055a43a408d17.zip"
 
 [[package]]
 name = "litellm"
@@ -5970,14 +5971,14 @@ files = [
 
 [[package]]
 name = "pyjwt"
-version = "2.9.0"
+version = "2.10.1"
 description = "JSON Web Token implementation in Python"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "PyJWT-2.9.0-py3-none-any.whl", hash = "sha256:3b02fb0f44517787776cf48f2ae25d8e14f300e6d7545a4315cee571a415e850"},
-    {file = "pyjwt-2.9.0.tar.gz", hash = "sha256:7e1e5b56cc735432a7369cbfa0efe50fa113ebecdc04ae6922deba8b84582d0c"},
+    {file = "PyJWT-2.10.1-py3-none-any.whl", hash = "sha256:dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb"},
+    {file = "pyjwt-2.10.1.tar.gz", hash = "sha256:3cc5772eb20009233caf06e9d8a0577824723b44e6648ee0a2aedb6cf9381953"},
 ]
 
 [package.dependencies]
