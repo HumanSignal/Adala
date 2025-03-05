@@ -39,7 +39,7 @@ def validate_output_format_for_ner_tag(
                     entity["text"] = corrected_text
                 elif entity["text"] != corrected_text:
                     # this seems to happen rarely if at all in testing, but could lead to invalid predictions
-                    logger.warning(f"text and indices disagree for a predicted entity")
+                    logger.error(f"text and indices disagree for a predicted entity")
     return df
 
 
