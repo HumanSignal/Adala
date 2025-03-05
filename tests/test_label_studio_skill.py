@@ -7,14 +7,18 @@ from label_studio_sdk.label_interface import LabelInterface
 from label_studio_sdk.label_interface.objects import PredictionValue
 
 
-# NOTE: commented code can be used to recreate vcr cassettes, as they don't work with asyncio
-
+# NOTE: commented code can be used to recreate vcr cassettes, as they don't work with asyncio (yeah, frustrating - consider use other stub framework)
+# INSTRUCTIONS to recreate cassettes:
+# 1. Uncomment the lines in test you want to recreate
+# 2. Run the test with `pytest -vvv --record-mode=rewrite -k <test_name>`
+# 3. If you see mismatched asserts, verify the results and replace the test suite with the new results
+# 4. Don't forget to uncomment back the lines you commented out before recording the cassette
 
 @pytest.mark.asyncio
 @pytest.mark.vcr
-async def test_label_studio_skill():
-    # @pytest.mark.vcr
-    # def test_label_studio_skill():
+async def test_label_studio_skill_basic():
+# @pytest.mark.vcr
+# def test_label_studio_skill_basic():
 
     df = pd.DataFrame(
         [
@@ -76,16 +80,19 @@ async def test_label_studio_skill():
     assert predictions.classification.tolist() == ["Bug report", "Feature request"]
     assert predictions.evaluation.tolist() == [5, 5]
     assert predictions.rationale.tolist() == [
-        "The issue clearly indicates a problem with the login functionality of the platform, which is a common type of bug that users may encounter. The description reinforces this by stating the inability to log in, suggesting a potential defect in the system.",
-        "The issue is requesting the addition of support for a new file type (.docx), which indicates a desire for enhanced functionality in the application. This aligns with typical feature requests that aim to improve user experience and expand capabilities.",
+        [
+            "The issue clearly indicates a problem with the login functionality, which is a common bug that users may encounter.",
+            "The description provides additional context that reinforces the classification as a bug report.",
+        ],
+        ["The issue is requesting the addition of support for a new file type, which aligns with enhancing the functionality of the application.", "Supporting .docx files would likely improve user experience and broaden the use cases for the application."],
     ]
 
 
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill_partial_label_config():
-    # @pytest.mark.vcr
-    # def test_label_studio_skill_partial_label_config():
+# @pytest.mark.vcr
+# def test_label_studio_skill_partial_label_config():
 
     df = pd.DataFrame(
         [
