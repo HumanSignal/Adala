@@ -160,6 +160,33 @@ class InstructorClientMixin(BaseModel):
             )
 
         return self
+    
+    def get_canonical_model_provider_string(self, model: str) -> str:
+        """provider_name/model_name"""
+        # this is really a litellm function, not an instructor function. Putting it here to avoid duplicating it between sync/async runtimes.
+        try:
+            return match_model_provider_string(model)
+        except NoModelsFoundError:
+            logger.info(
+                f"Model {model} not found in litellm model map for provider {self.provider}. This is likely a single-model deployment."
+            )
+        except Exception as e:
+            logger.exception(
+                f"(1/2) Failed to get canonical model provider string for {model}"
+            )
+        try:
+            resp = self._check_client()
+            return match_model_provider_string(resp.model)
+        except NoModelsFoundError:
+            logger.warning(
+                f"Model {model} not found in litellm model map for provider {self.provider}. This is likely a custom model."
+            )
+            return model
+        except Exception as e:
+            logger.exception(
+                f"(2/2) Failed to get canonical model provider string for {model}"
+            )
+            return model
 
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
@@ -220,29 +247,7 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
     @property
     def canonical_model_provider_string(self):
         """provider_name/model_name"""
-        try:
-            return match_model_provider_string(self.model)
-        except NoModelsFoundError:
-            logger.info(
-                f"Model {self.model} not found in litellm model map for provider {self.provider}. This is likely a single-model deployment."
-            )
-        except Exception as e:
-            logger.exception(
-                f"(1/2) Failed to get canonical model provider string for {self.model}"
-            )
-        try:
-            resp = self._check_client()
-            return match_model_provider_string(resp.model)
-        except NoModelsFoundError:
-            logger.warning(
-                f"Model {self.model} not found in litellm model map for provider {self.provider}. This is likely a custom model."
-            )
-            return self.model
-        except Exception as e:
-            logger.exception(
-                f"(2/2) Failed to get canonical model provider string for {self.model}"
-            )
-            return self.model
+        return self.get_canonical_model_provider_string(self.model)
 
     def get_llm_response(self, messages: List[Dict[str, str]]) -> str:
         # TODO: sunset this method in favor of record_to_record
@@ -357,29 +362,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
     @property
     def canonical_model_provider_string(self):
         """provider_name/model_name"""
-        try:
-            return match_model_provider_string(self.model)
-        except NoModelsFoundError:
-            logger.info(
-                f"Model {self.model} not found in litellm model map for provider {self.provider}. This is likely a single-model deployment."
-            )
-        except Exception as e:
-            logger.exception(
-                f"(1/2) Failed to get canonical model provider string for {self.model}"
-            )
-        try:
-            resp = self._check_client()
-            return match_model_provider_string(resp.model)
-        except NoModelsFoundError:
-            logger.warning(
-                f"Model {self.model} not found in litellm model map for provider {self.provider}. This is likely a custom model."
-            )
-            return self.model
-        except Exception as e:
-            logger.exception(
-                f"(2/2) Failed to get canonical model provider string for {self.model}"
-            )
-            return self.model
+        return self.get_canonical_model_provider_string(self.model)
 
     async def batch_to_batch(
         self,
