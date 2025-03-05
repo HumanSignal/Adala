@@ -32,13 +32,14 @@ def validate_output_format_for_ner_tag(
             continue
         text = row[input_field_name]
         entities = row[output_field_name]
-        for entity in entities:
-            corrected_text = text[entity["start"] : entity["end"]]
-            if entity.get("text") is None:
-                entity["text"] = corrected_text
-            elif entity["text"] != corrected_text:
-                # this seems to happen rarely if at all in testing, but could lead to invalid predictions
-                logger.warning(f"text and indices disagree for a predicted entity")
+        if entities is not None:
+            for entity in entities:
+                corrected_text = text[entity["start"] : entity["end"]]
+                if entity.get("text") is None:
+                    entity["text"] = corrected_text
+                elif entity["text"] != corrected_text:
+                    # this seems to happen rarely if at all in testing, but could lead to invalid predictions
+                    logger.warning(f"text and indices disagree for a predicted entity")
     return df
 
 
