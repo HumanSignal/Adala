@@ -202,6 +202,7 @@ class InstructorAsyncClientMixin(InstructorClientMixin):
     def _check_client(self):
         """Make this synchronous"""
         client = InstructorClientMixin(**self.model_dump()).client
+        # don't use response model and error handling from run_instructor_with_messages here
         response = client.chat.completions.create(
             messages=[{"role": "user", "content": "Hey, how's it going?"}],
             model=self.model,
