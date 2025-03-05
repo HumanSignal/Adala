@@ -2,10 +2,8 @@ import asyncio
 import logging
 import traceback
 import litellm
-from litellm import token_counter
-from collections import defaultdict
 from typing import Any, Dict, List, Type, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from pydantic_core import to_jsonable_python
 from litellm.types.utils import Usage
 from tenacity import Retrying, AsyncRetrying
