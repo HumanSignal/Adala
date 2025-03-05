@@ -600,6 +600,7 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
             )
 
         extra_fields = extra_fields or {}
+        input_field_types = input_field_types or {}
         records = batch.to_dict(orient="records")
         # in multi-image cases, the number of tokens can be too large for the context window
         # so we need to split the payloads into chunks

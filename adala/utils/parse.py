@@ -162,6 +162,7 @@ def parse_template(
     chunks: List[TemplateChunks] = []
     last_index = 0
     payload = payload or {}
+    input_field_types = input_field_types or {}
 
     for match in match_fields_regex.finditer(string):
         # for match in re.finditer(r'\{(.*?)\}', string):
