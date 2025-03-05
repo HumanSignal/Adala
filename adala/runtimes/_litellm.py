@@ -108,18 +108,19 @@ class InstructorClientMixin(BaseModel):
         return OpenAI
 
     def _check_client(self):
-        return run_instructor_with_messages(
-            client=self.client,
+        # don't use response model and error handling from run_instructor_with_messages here
+        response = self.client.chat.completions.create(
             messages=[{"role": "user", "content": "Hey, how's it going?"}],
             model=self.model,
             max_tokens=self.max_tokens,
             temperature=self.temperature,
             seed=self.seed,
             response_model=None,
-            retries=retries,
+            max_retries=retries,
             # extra inference params passed to this runtime
             **self.model_extra,
         )
+        return response
 
     # Yes, this is recomputed every time - there's no clean way to cache it unless we drop pickle serialization, in which case adding it to ConfigDict(ignore) would work.
     # There's no appreciable startup cost in the instructor client init function anyway.
@@ -174,18 +175,18 @@ class InstructorAsyncClientMixin(InstructorClientMixin):
     def _check_client(self):
         """Make this synchronous"""
         client = InstructorClientMixin(**self.model_dump()).client
-        return run_instructor_with_messages(
-            client=client,
+        response = client.chat.completions.create(
             messages=[{"role": "user", "content": "Hey, how's it going?"}],
             model=self.model,
             max_tokens=self.max_tokens,
             temperature=self.temperature,
             seed=self.seed,
             response_model=None,
-            retries=retries,
+            max_retries=retries,
             # extra inference params passed to this runtime
             **self.model_extra,
         )
+        return response
 
 
 class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
