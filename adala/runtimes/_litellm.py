@@ -160,7 +160,7 @@ class InstructorClientMixin(BaseModel):
             )
 
         return self
-    
+
     def get_canonical_model_provider_string(self, model: str) -> str:
         """provider_name/model_name"""
         # this is really a litellm function, not an instructor function. Putting it here to avoid duplicating it between sync/async runtimes.
