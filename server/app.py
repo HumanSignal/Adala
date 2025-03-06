@@ -571,7 +571,7 @@ class ModelMetadataResponse(BaseModel):
 
 @app.post("/model-metadata", response_model=Response[ModelMetadataResponse])
 async def model_metadata(request: ModelMetadataRequest):
-    from adala.runtimes._litellm import get_model_info
+    from adala.utils.model_info_utils import get_model_info
 
     resp = {
         "model_metadata": {
