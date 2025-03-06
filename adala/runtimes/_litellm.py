@@ -64,6 +64,10 @@ from .base import AsyncRuntime, Runtime
 logger = logging.getLogger(__name__)
 
 
+# safeguard for custom models where we don't know what params are supported
+litellm.drop_params = True
+
+
 # basically only retrying on timeout, incomplete output, or rate limit
 # https://docs.litellm.ai/docs/exception_mapping#custom-mapping-list
 # NOTE: token usage is only correctly calculated if we only use instructor retries, not litellm retries
