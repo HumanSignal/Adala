@@ -45,6 +45,20 @@ def test_partial_string_format():
     result = partial_str_format("{missing1} and {missing2}")
     assert result == "{missing1} and {missing2}"
 
+    # Test with unmatched brackets
+    result = partial_str_format("{ {text}", text="test")
+    assert result == "{ test"
+
+    # Test adversarial example
+    result = partial_str_format(
+        '{"key": "value", "text": "{text}", "unused1": "{unused}", "nested": {"subkey": "{more_unexpected}"}, "break": "\\" \' \\n \\t \\b \\f \\r \\\\ \\/ {unmatched", "unicode": "\uD83D\uDE00", "null": null, "number": 123, "array": [1, 2, "{array_item}"], "weird": "\u0000\u001F"}',
+        text="test",
+    )
+    assert (
+        result
+        == '{"key": "value", "text": "test", "unused1": "{unused}", "nested": {"subkey": "{more_unexpected}"}, "break": "\\" \' \\n \\t \\b \\f \\r \\\\ \\/ {unmatched", "unicode": "\uD83D\uDE00", "null": null, "number": 123, "array": [1, 2, "{array_item}"], "weird": "\u0000\u001F"}'
+    )
+
     # Test larger prompt
     prompt = """
 Given the following product review:
