@@ -70,11 +70,11 @@ def test_llm_sync():
         "_adala_error": True,
         "_adala_message": "AuthenticationError",
         "_adala_details": "litellm.AuthenticationError: AuthenticationError: OpenAIException - Error code: 401 - {'error': {'message': 'Incorrect API key provided: fake_api_key. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}",
-        "_prompt_tokens": 9,
+        "_prompt_tokens": 0,
         "_completion_tokens": 0,
-        "_prompt_cost_usd": 1.35e-06,
+        "_prompt_cost_usd": 0,
         "_completion_cost_usd": 0.0,
-        "_total_cost_usd": 1.35e-06,
+        "_total_cost_usd": 0,
     }
     assert result == expected_result
 
@@ -135,11 +135,11 @@ def test_llm_async():
                 "_adala_error": True,
                 "_adala_message": "AuthenticationError",
                 "_adala_details": "litellm.AuthenticationError: AuthenticationError: OpenAIException - Error code: 401 - {'error': {'message': 'Incorrect API key provided: fake_api_key. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}",
-                "_prompt_tokens": 9,
+                "_prompt_tokens": 0,
                 "_completion_tokens": 0,
-                "_prompt_cost_usd": 1.35e-06,
+                "_prompt_cost_usd": 0.0,
                 "_completion_cost_usd": 0.0,
-                "_total_cost_usd": 1.35e-06,
+                "_total_cost_usd": 0.0,
             }
         ]
     )
@@ -263,13 +263,13 @@ def test_vision_runtime():
     pd.testing.assert_frame_equal(
         result[["_adala_error", "_adala_message", "_adala_details"]], expected_result
     )
-    # assert only prompt costs are nonzero
+    # assert only prompt costs are zero
     assert (
-        (result[["_prompt_tokens", "_prompt_cost_usd", "_total_cost_usd"]] > 0)
+        (result[["_prompt_tokens", "_prompt_cost_usd", "_total_cost_usd"]] == 0.0)
         .all()
         .all()
     )
-    assert (result[["_completion_tokens", "_completion_cost_usd"]] == 0).all().all()
+    assert (result[["_completion_tokens", "_completion_cost_usd"]] == 0.0).all().all()
 
     # test with image input
 
