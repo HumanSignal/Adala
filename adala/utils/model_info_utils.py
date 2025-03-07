@@ -55,14 +55,14 @@ def match_model_provider_string(model: str) -> str:
     lowercase_to_canonical_case = {
         k.lower(): k for k in litellm.models_by_provider[provider]
     }
-    candidate_model_names = []
+    candidate_model_names = set()
     for name in [model_name, normalize_canonical_model_name(model_name)]:
-        candidate_model_names.append("/".join([provider, name.lower()]))
+        candidate_model_names.add("/".join([provider, name.lower()]))
     # ...and Azure AI Foundry openai models are not listed there, but under Azure OpenAI
     if provider == "azure_ai":
-        for model in candidate_model_names:
-            candidate_model_names.append(model.replace("azure_ai/", "azure/"))
-    matched_models = set(candidate_model_names) & set(lowercase_to_canonical_case)
+        for model in candidate_model_names.copy():
+            candidate_model_names.add(model.replace("azure_ai/", "azure/"))
+    matched_models = candidate_model_names & set(lowercase_to_canonical_case)
     if len(matched_models) == 0:
         raise NoModelsFoundError(model)
     if len(matched_models) > 1:
