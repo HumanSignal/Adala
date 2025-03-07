@@ -14,11 +14,12 @@ from label_studio_sdk.label_interface.objects import PredictionValue
 # 3. If you see mismatched asserts, verify the results and replace the test suite with the new results
 # 4. Don't forget to uncomment back the lines you commented out before recording the cassette
 
+
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill_basic():
-# @pytest.mark.vcr
-# def test_label_studio_skill_basic():
+    # @pytest.mark.vcr
+    # def test_label_studio_skill_basic():
 
     df = pd.DataFrame(
         [
@@ -84,15 +85,18 @@ async def test_label_studio_skill_basic():
             "The issue clearly indicates a problem with the login functionality, which is a common bug that users may encounter.",
             "The description provides additional context that reinforces the classification as a bug report.",
         ],
-        ["The issue is requesting the addition of support for a new file type, which aligns with enhancing the functionality of the application.", "Supporting .docx files would likely improve user experience and broaden the use cases for the application."],
+        [
+            "The issue is requesting the addition of support for a new file type, which aligns with enhancing the functionality of the application.",
+            "Supporting .docx files would likely improve user experience and broaden the use cases for the application.",
+        ],
     ]
 
 
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill_partial_label_config():
-# @pytest.mark.vcr
-# def test_label_studio_skill_partial_label_config():
+    # @pytest.mark.vcr
+    # def test_label_studio_skill_partial_label_config():
 
     df = pd.DataFrame(
         [
