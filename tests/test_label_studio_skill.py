@@ -81,14 +81,8 @@ async def test_label_studio_skill_basic():
     assert predictions.classification.tolist() == ["Bug report", "Feature request"]
     assert predictions.evaluation.tolist() == [5, 5]
     assert predictions.rationale.tolist() == [
-        [
-            "The issue clearly indicates a problem with the login functionality, which is a common bug that users may encounter.",
-            "The description provides additional context that reinforces the classification as a bug report.",
-        ],
-        [
-            "The issue is requesting the addition of support for a new file type, which aligns with enhancing the functionality of the application.",
-            "Supporting .docx files would likely improve user experience and broaden the use cases for the application.",
-        ],
+        "The issue describes a problem with logging into the platform, which is a technical issue that typically indicates a bug or malfunction in the login functionality.",
+        "The issue is requesting the addition of support for a new file type (.docx), which indicates a desire for new functionality in the application. This aligns with the definition of a feature request.",
     ]
 
 
