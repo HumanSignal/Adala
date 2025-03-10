@@ -9,6 +9,7 @@ import aiohttp
 import base64
 import asyncio
 import io
+from thefuzz import fuzz
 from PIL import Image
 from urllib.parse import urlparse
 import uuid
@@ -210,6 +211,34 @@ class LabelStudioSkillImageOCR(TransformSkill):
         
         return results
     
+    def _get_normalized_bbox(self, bbox: List[List[int]], original_width: int, original_height: int) -> List[float]:
+        # Calculate top-left corner (minimum x and y)
+        # bbox format is [[x1,y1],[x2,y2],[x3,y3],[x4,y4]]
+        x_values = [point[0] for point in bbox]
+        y_values = [point[1] for point in bbox]
+        
+        min_x = min(x_values)
+        min_y = min(y_values)
+        
+        # Calculate width and height
+        max_x = max(x_values)
+        max_y = max(y_values)
+        width = max_x - min_x
+        height = max_y - min_y
+        
+        # Convert to percentages
+        x_percent = (min_x / original_width) * 100
+        y_percent = (min_y / original_height) * 100
+        width_percent = (width / original_width) * 100
+        height_percent = (height / original_height) * 100
+        
+        return {
+            'x': x_percent,
+            'y': y_percent,
+            'width': width_percent,
+            'height': height_percent
+        }
+    
     def _convert_ocr_results_to_label_studio_format(self, results: list) -> Tuple[List, List]:
         
         # normalize EasyOCR results to RectangleLabels bounding boxes format of Label Studio
@@ -235,52 +264,18 @@ class LabelStudioSkillImageOCR(TransformSkill):
                 # We need to convert to Label Studio format with x,y as top-left corner
                 # and width, height as percentages
                 
-                # Calculate top-left corner (minimum x and y)
-                x_values = [point[0] for point in bbox]
-                y_values = [point[1] for point in bbox]
-                
-                min_x = min(x_values)
-                min_y = min(y_values)
-                
-                # Calculate width and height
-                max_x = max(x_values)
-                max_y = max(y_values)
-                width = max_x - min_x
-                height = max_y - min_y
-                
-                # Convert to percentages
-                x_percent = (min_x / original_width) * 100
-                y_percent = (min_y / original_height) * 100
-                width_percent = (width / original_width) * 100
-                height_percent = (height / original_height) * 100
+                bbox_annotation = self._get_normalized_bbox(bbox, original_width, original_height)
                 
                 # generate unique id for the annotation
                 id_gen = str(uuid.uuid4())[:8]
                 # Create Label Studio format annotation
-                bbox_annotation = {
-                    "x": x_percent,
-                    "y": y_percent,
-                    "width": width_percent,
-                    "height": height_percent,
-                    "rotation": 0,
-                    "id": id_gen,
-                    # "rectanglelabels": ['Transcription'],  # TODO: customize
-                    # "score": score, 
-                    # "text": text
-                }
+                bbox_annotation['id'] = id_gen
+                bbox_annotation['rotation'] = 0
+                
                 text_annotation = {
                     'text': [text],
                     'id': id_gen
                 }
-                # annotation = {
-                #     "x": x_percent,
-                #     "y": y_percent,
-                #     "width": width_percent,
-                #     "height": height_percent,
-                #     "rectanglelabels": ['Transcription'],  # TODO: customize
-                #     "score": score, 
-                #     "text": text
-                # }
                 
                 bbox_annotations.append(bbox_annotation)
                 text_annotations.append(text_annotation)
@@ -291,9 +286,65 @@ class LabelStudioSkillImageOCR(TransformSkill):
             
         return all_bbox_annotations, all_text_annotations
     
-    def _calculate_similarity(self, text: str, reference_texts: List[str]) -> Tuple[float, str]:
+    def _convert_ocr_results_to_label_studio_format_v2(self, results: list) -> Tuple[List, List]:
         """
-        Calculate similarity between a text and a list of reference texts
+        Same as _convert_ocr_results_to_label_studio_format, but uses a different approach to filter the OCR results:
+        results['ocr_data'] contains a dictionary of reference texts as keys and lists of OCR results as values.
+        For each reference text, we create a group of `bbox_annotations` and `text_annotations`. 
+        In text_annotations, we place "parentID" as the id of the bbox_annotation that it belongs to (pick the first text_annotation id as parentID)
+        """
+        all_bbox_annotations = []
+        all_text_annotations = []
+        
+        for result in results:
+            bbox_annotations = []
+            text_annotations = []
+            
+            original_width = result['image_width']
+            original_height = result['image_height']
+            
+            # Process each reference text and its associated OCR results
+            for reference_text, ocr_matches in result['ocr_data'].items():
+                # Create a group for this reference text
+                group_id = None
+                
+                # Process each OCR match for this reference text
+                for bbox, text, score in zip(ocr_matches['bboxes'], ocr_matches['texts'], ocr_matches['scores']):
+                    
+                    bbox_annotation = self._get_normalized_bbox(bbox, original_width, original_height)
+                    
+                    # Generate unique id for the annotation
+                    id_gen = str(uuid.uuid4())[:8]
+                    if group_id is None:
+                        group_id = id_gen
+                    
+                    # Create bbox annotation
+                    bbox_annotation['rotation'] = 0
+                    bbox_annotation['id'] = id_gen
+                    bbox_annotation['score'] = score
+                    # Create text annotation
+                    text_annotation = {
+                        'text': [text],
+                        'id': id_gen,
+                    }
+                    if group_id != id_gen:
+                        text_annotation['parent_id'] = group_id
+                        bbox_annotation['parent_id'] = group_id
+                    
+                    bbox_annotations.append(bbox_annotation)
+                    text_annotations.append(text_annotation)
+                
+            # Add annotations for this result to the overall lists
+            all_bbox_annotations.append(bbox_annotations)
+            all_text_annotations.append(text_annotations)
+            
+        return all_bbox_annotations, all_text_annotations
+                
+        
+    @classmethod
+    def _calculate_similarity(cls, text: str, reference_texts: List[str]) -> Tuple[float, str]:
+        """
+        Calculate similarity between a text and substrings within reference texts.
 
         Args:
             text: The text to compare
@@ -304,22 +355,21 @@ class LabelStudioSkillImageOCR(TransformSkill):
         """
         # Convert to lowercase for case-insensitive comparison
         text = text.lower()
-        
-        # Use SequenceMatcher to calculate similarity
-        from difflib import SequenceMatcher
+        text_len = len(text)
         
         best_score = 0
         best_match = None
+        
         if reference_texts:
             for ref_text in reference_texts:
-                # Calculate similarity ratio using SequenceMatcher
-                similarity = SequenceMatcher(None, text, ref_text.lower()).ratio()
-                print(f"Similarity between {text} and {ref_text}: {similarity}")
-                
-                # Update best score if this one is higher
-                if similarity > best_score:
-                    best_score = similarity
+                ref_text_lower = ref_text.lower()
+                best_window_score = fuzz.partial_ratio(text, ref_text_lower)
+                if best_window_score > best_score:
+                    best_score = best_window_score
                     best_match = ref_text
+        best_score = float(best_score) / 100
+        print(f"Best substring similarity between '{text}' and '{best_match}': {best_score}")
+                    
         return best_score, best_match
     
     def _filter_ocr_results(self, ocr_results: Dict, reference_texts: List[str]) -> list:
@@ -347,6 +397,99 @@ class LabelStudioSkillImageOCR(TransformSkill):
                 filtered_results['scores'].append(score)
             
         return filtered_results
+    
+    def _filter_ocr_results_v2(self, ocr_results: Dict, reference_texts: List[str]) -> Dict[str, List]:
+        
+        output = {}
+        for ref_text in reference_texts:
+            ref_text_lower = ref_text.lower()
+            output[ref_text] = {
+                'bboxes': [],
+                'texts': [],
+                'scores': []
+            }
+            for text, score, bbox in zip(ocr_results['texts'], ocr_results['scores'], ocr_results['bboxes']):
+                text_lower = text.lower()
+                # check if text is a fuzzy substring of ref_text
+                similarity = fuzz.partial_ratio(text_lower, ref_text_lower)
+                if similarity >= 95:
+                    output[ref_text]['bboxes'].append(bbox)
+                    output[ref_text]['texts'].append(text)
+                    output[ref_text]['scores'].append(score)
+            
+        # Filter to keep only horizontally aligned bounding boxes
+        for ref_text in output:
+            if not output[ref_text]['bboxes']:
+                continue
+                
+            # Group bounding boxes by their vertical position (y-coordinate)
+            # Using the middle y-coordinate of each box for grouping
+            y_groups = {}
+            for i, bbox in enumerate(output[ref_text]['bboxes']):
+                # Calculate middle y-coordinate of the bounding box
+                # bbox format is [[x1,y1],[x2,y2],[x3,y3],[x4,y4]]
+                # Calculate middle y-coordinate of the bounding box
+                # bbox format is [[x1,y1],[x2,y2],[x3,y3],[x4,y4]]
+                y_values = [point[1] for point in bbox]
+                mid_y = sum(y_values) / len(y_values)
+                
+                # Group with tolerance of 10 pixels
+                group_key = int(mid_y / 10) * 10
+                if group_key not in y_groups:
+                    y_groups[group_key] = []
+                y_groups[group_key].append(i)
+            
+            # Find the group with the maximum number of bounding boxes
+            max_group_key = max(y_groups.keys(), key=lambda k: len(y_groups[k]), default=None)
+            
+            if max_group_key is not None:
+                # Keep only the bounding boxes in the largest horizontal group
+                indices_to_keep = y_groups[max_group_key]
+                
+                # Create new filtered lists
+                filtered_bboxes = [output[ref_text]['bboxes'][i] for i in indices_to_keep]
+                filtered_texts = [output[ref_text]['texts'][i] for i in indices_to_keep]
+                filtered_scores = [output[ref_text]['scores'][i] for i in indices_to_keep]
+                
+                # Sort bounding boxes by x-coordinate to maintain reading order
+                sorted_indices = sorted(range(len(filtered_bboxes)), 
+                                       key=lambda i: min(point[0] for point in filtered_bboxes[i]))
+                
+                filtered_bboxes = [filtered_bboxes[i] for i in sorted_indices]
+                filtered_texts = [filtered_texts[i] for i in sorted_indices]
+                filtered_scores = [filtered_scores[i] for i in sorted_indices]
+                
+                # Create a combined bounding box that encompasses all individual boxes
+                if filtered_bboxes:
+                    # Find min and max coordinates across all bounding boxes
+                    all_x = [point[0] for bbox in filtered_bboxes for point in bbox]
+                    all_y = [point[1] for bbox in filtered_bboxes for point in bbox]
+                    
+                    min_x, max_x = min(all_x), max(all_x)
+                    min_y, max_y = min(all_y), max(all_y)
+                    
+                    # Create a new bounding box with the min/max coordinates
+                    combined_bbox = [
+                        [min_x, min_y],  # top-left
+                        [max_x, min_y],  # top-right
+                        [max_x, max_y],  # bottom-right
+                        [min_x, max_y]   # bottom-left
+                    ]
+                    
+                    # Calculate average score
+                    avg_score = sum(filtered_scores) / len(filtered_scores) if filtered_scores else 0
+                    
+                    # Add the combined bounding box to the results
+                    filtered_bboxes.insert(0, combined_bbox)
+                    filtered_texts.insert(0, ref_text)  # Use the reference text for the combined box
+                    filtered_scores.insert(0, avg_score)
+                
+                # Update the output with filtered results
+                output[ref_text]['bboxes'] = filtered_bboxes
+                output[ref_text]['texts'] = filtered_texts
+                output[ref_text]['scores'] = filtered_scores
+        
+        return output
         
 
     async def aapply(
@@ -394,30 +537,15 @@ class LabelStudioSkillImageOCR(TransformSkill):
                 filtered_ocr_result = {
                     'image_width': ocr_results[i]['image_width'],
                     'image_height': ocr_results[i]['image_height'],
-                    'ocr_data': self._filter_ocr_results(ocr_results[i]['ocr_data'], extracted_result)
+                    'ocr_data': self._filter_ocr_results_v2(ocr_results[i]['ocr_data'], extracted_result)
                 }
                 filtered_ocr_results.append(filtered_ocr_result)
             print(f'Filtered OCR results: {filtered_ocr_results}')
             # convert filtered OCR results to Label Studio format
-            bbox_annotations, text_annotations = self._convert_ocr_results_to_label_studio_format(filtered_ocr_results)
+            # bbox_annotations, text_annotations = self._convert_ocr_results_to_label_studio_format(filtered_ocr_results)
+            bbox_annotations, text_annotations = self._convert_ocr_results_to_label_studio_format_v2(filtered_ocr_results)
             print(f'Bbox annotations: {bbox_annotations}')
             print(f'Text annotations: {text_annotations}')
             output['bbox'] = bbox_annotations
             output['transcription'] = text_annotations
             return output
-
-
-if __name__ == "__main__":
-    images = [
-      "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0000.png",
-    #   "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0001.png",
-    #   "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0002.png",
-    #   "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0003.png",
-    #   "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0004.png",
-    #   "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0005.png",
-    #   "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0006.png",
-    #   "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0007.png",
-    #   "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0008.png"
-    ]
-    results = asyncio.run(LabelStudioSkillImageOCR.process_images_with_ocr(images))
-    print(results)
