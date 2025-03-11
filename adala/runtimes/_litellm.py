@@ -543,6 +543,8 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
         records = batch.to_dict(orient="records")
         # in multi-image cases, the number of tokens can be too large for the context window
         # so we need to split the payloads into chunks
+        # we use this heuristic for MIG projects as they more likely to have multi-image inputs
+        # for other data types, we skip checking the context window as it will be slower
         ensure_messages_fit_in_context_window = any(
             input_field_types.get(field) == MessageChunkType.IMAGE_URLS
             for field in input_field_types
