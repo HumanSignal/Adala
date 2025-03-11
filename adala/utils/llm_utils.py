@@ -140,6 +140,11 @@ def _ensure_messages_fit_in_context_window(
             logger.info(
                 f"Prompt tokens count {token_count} exceeds max tokens {max_tokens} for model {model}. Trimming messages."
             )
+            # TODO: in case it exceeds max tokens, content of the last message is truncated.
+            # to improve this, we implement:
+            # - UI-level warning for the user, use prediction_meta field for warnings as well as errors in future
+            # - sequential aggregation instead of trimming
+            # - potential v2 solution to downsample images instead of cutting them off (using quality=low instead of quality=auto in completion)
             return trim_messages(messages, model=model), token_count
     # in other cases, just return the original messages
     return messages, token_count

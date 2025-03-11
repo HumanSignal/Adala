@@ -216,7 +216,7 @@ def split_message_into_chunks(
     Args:
         input_template: Template string with placeholders like '{field_name}'
         input_field_types: Mapping of field names to their chunk types
-        payload: Dictionary with values to substitute into the template
+        payload: Dictionary with values to substitute into the template instead of placeholders
 
     Returns:
         List of message chunks with appropriate type and content:
@@ -249,23 +249,27 @@ def split_message_into_chunks(
     current_text = ""
 
     def _add_current_text_as_chunk():
+        # this function is used to flush `current_text` buffer into a text chunk, and start over
         nonlocal current_text
         if current_text:
             result.append({"type": "text", "text": current_text})
             current_text = ""
 
     for part in parsed:
+        # iterate over parsed chunks - they already contains field types and placeholder values
         if part["type"] == "text":
+            # each text chunk without placeholders is added to the current buffer and we continue
             current_text += part["text"]
         elif part["type"] == "var":
             field_type = part["field_type"]
             field_value = part["data"]
             if field_value is None:
+                # if field value is not provided, it is assumed to be a text field
                 current_text += part["text"]
             else:
                 match field_type:
                     case MessageChunkType.TEXT:
-                        # Add text fields to current buffer
+                        # For text fields, we don't break chunks and add text fields to current buffer
                         current_text += (
                             str(field_value)
                             if field_value is not None
@@ -275,7 +279,7 @@ def split_message_into_chunks(
                     case MessageChunkType.IMAGE_URL:
                         # Add remaining text as text chunk
                         _add_current_text_as_chunk()
-                        # Add image URL as image chunk
+                        # Add image URL as new image chunk
                         result.append(
                             {"type": "image_url", "image_url": {"url": field_value}}
                         )
@@ -286,7 +290,7 @@ def split_message_into_chunks(
                         ), "Image URLs must be a list"
                         # Add remaining text as text chunk
                         _add_current_text_as_chunk()
-                        # Add image URLs as image chunks
+                        # Add image URLs as new image chunks
                         for url in field_value:
                             result.append(
                                 {"type": "image_url", "image_url": {"url": url}}
@@ -298,6 +302,8 @@ def split_message_into_chunks(
 
     # Add any remaining text
     _add_current_text_as_chunk()
+
+    logger.debug(f"Result: {result}")
 
     return result
 
