@@ -18,7 +18,7 @@ from adala.runtimes import AsyncLiteLLMVisionRuntime
 from adala.runtimes._litellm import MessageChunkType
 from pydantic import BaseModel, Field, model_validator, computed_field
 from difflib import SequenceMatcher
-
+import numpy as np
 
 from adala.runtimes import Runtime, AsyncRuntime
 from adala.utils.internal_data import InternalDataFrame
@@ -28,6 +28,7 @@ from label_studio_sdk.label_interface.control_tags import ControlTag, ObjectTag
 from label_studio_sdk._extensions.label_studio_tools.core.utils.json_schema import (
     json_schema_to_pydantic,
 )
+from .match_bbox_by_text import find_text_in_image
 
 
 logger = logging.getLogger(__name__)
@@ -490,6 +491,12 @@ class LabelStudioSkillImageOCR(TransformSkill):
                 output[ref_text]['scores'] = filtered_scores
         
         return output
+    
+    
+    def _get_labels(self) -> List[str]:
+        # TODO: validate labels are coming from <Labels> tag, use control tag name
+        # format: {'StartDate': LabelTag(attr={'value': 'StartDate', 'background': 'red'}, tag='Label', value='StartDate', parent_name='columns'), 'EndDate': LabelTag(attr={'value': 'EndDate', 'background': 'green'}, tag='Label', value='EndDate', parent_name='columns'), 'Amount': LabelTag(attr={'value': 'Amount'}, tag='Label', value='Amount', parent_name='columns')}
+        return list(self.label_interface.labels)[0]
         
 
     async def aapply(
@@ -497,55 +504,176 @@ class LabelStudioSkillImageOCR(TransformSkill):
         input: InternalDataFrame,
         runtime: AsyncRuntime,
     ) -> InternalDataFrame:
-
-        with json_schema_to_pydantic(self.field_schema) as ResponseModel:
-            # special handling to flag image inputs if they exist
-            input_field_types = defaultdict(lambda: MessageChunkType.TEXT)
-            image_value_key = None
-            for tag in self.image_tags:
-                # these are the project variable names, NOT the label config tag names. TODO: pass this info from LSE to avoid recomputing it here.
-                variables = extract_variable_name(tag.value)
-                if len(variables) != 1:
-                    logger.warning(
-                        f"Image tag {tag.name} has multiple variables: {variables}. Cannot mark these variables as image inputs."
-                    )
-                    continue
-                image_value_key = variables[0]
-                input_field_types[image_value_key] = (
-                    MessageChunkType.IMAGE_URLS
-                    if tag.attr.get("valueList")
-                    else MessageChunkType.IMAGE_URL
+        
+        labels = self._get_labels()
+        # validate labels
+        from adala.utils.pydantic_generator import field_schema_to_pydantic_class
+        LineItem = field_schema_to_pydantic_class(
+            class_name="LineItem",
+            description="A single line extracted from the document",
+            field_schema={label: {"type": "string"} for label in labels}
+        )
+        
+        class ResponseModel(BaseModel):
+            lines: List[LineItem]
+        
+        input_field_types = defaultdict(lambda: MessageChunkType.TEXT)
+        image_value_key = None
+        for tag in self.image_tags:
+            # these are the project variable names, NOT the label config tag names. TODO: pass this info from LSE to avoid recomputing it here.
+            variables = extract_variable_name(tag.value)
+            if len(variables) != 1:
+                logger.warning(
+                    f"Image tag {tag.name} has multiple variables: {variables}. Cannot mark these variables as image inputs."
                 )
+                continue
+            image_value_key = variables[0]
+            input_field_types[image_value_key] = (
+                MessageChunkType.IMAGE_URLS
+                if tag.attr.get("valueList")
+                else MessageChunkType.IMAGE_URL
+            )
 
-            logger.debug(
-                f"Using VisionRuntime with input field types: {input_field_types}"
-            )
-            output = await runtime.batch_to_batch(
-                input,
-                input_template=self.input_template,
-                output_template="",
-                instructions_template=self.instructions,
-                response_model=ResponseModel,
-                input_field_types=input_field_types,
-            )
-            print(f'Output: {output}')
-            print(f'Process images with OCR: {input[image_value_key].tolist()}')
-            ocr_results = await self.process_images_with_ocr(input[image_value_key].tolist())
-            filtered_ocr_results = []
-            for i, row in output.iterrows():
-                extracted_result = row['output']
-                filtered_ocr_result = {
-                    'image_width': ocr_results[i]['image_width'],
-                    'image_height': ocr_results[i]['image_height'],
-                    'ocr_data': self._filter_ocr_results_v2(ocr_results[i]['ocr_data'], extracted_result)
+        logger.debug(
+            f"Using VisionRuntime with input field types: {input_field_types}"
+        )
+        output = await runtime.batch_to_batch(
+            input,
+            input_template=self.input_template,
+            output_template="",
+            instructions_template=self.instructions,
+            response_model=ResponseModel,
+            input_field_types=input_field_types,
+        )
+        print(f'Output: {output}')
+        
+        images = input[image_value_key].tolist()
+        all_bbox_annotations = []
+        all_text_annotations = []
+        all_label_annotations = []
+        for i, row in output.iterrows():
+            extracted_results = row['lines']
+            
+            ocr_results = find_text_in_image(images[i], extracted_results)
+            bbox_annotations = []
+            text_annotations = []
+            label_annotations = []
+            for ocr_result in ocr_results:
+                # Add bbox annotation
+                
+                bbox_id = ocr_result['element']['id']
+                parent_id = ocr_result['element'].get('parent_id')
+                
+                bbox_annotation = ocr_result['element']
+                bbox_annotation['score'] = ocr_result['matching_score'] * ocr_result['element']['score']
+                
+                bbox_annotations.append(ocr_result['element'])
+                
+                # Add text annotation
+                text_annotation = {
+                    'text': [ocr_result['reference_text']],
+                    'id': bbox_id
                 }
-                filtered_ocr_results.append(filtered_ocr_result)
-            print(f'Filtered OCR results: {filtered_ocr_results}')
-            # convert filtered OCR results to Label Studio format
-            # bbox_annotations, text_annotations = self._convert_ocr_results_to_label_studio_format(filtered_ocr_results)
-            bbox_annotations, text_annotations = self._convert_ocr_results_to_label_studio_format_v2(filtered_ocr_results)
-            print(f'Bbox annotations: {bbox_annotations}')
-            print(f'Text annotations: {text_annotations}')
-            output['bbox'] = bbox_annotations
-            output['transcription'] = text_annotations
-            return output
+                if parent_id:
+                    text_annotation['parent_id'] = parent_id
+                text_annotations.append(text_annotation)
+                
+                label = ocr_result.pop('reference_label', None)
+
+                if label:
+                    label_annotation = {
+                        'labels': [label],
+                        'id': bbox_id
+                    }
+                    if parent_id:
+                        label_annotation['parent_id'] = parent_id
+                    label_annotations.append(label_annotation)
+                    
+            all_bbox_annotations.append(bbox_annotations)
+            all_text_annotations.append(text_annotations)   
+            all_label_annotations.append(label_annotations)
+        output['bbox'] = all_bbox_annotations
+        output['transcription'] = all_text_annotations
+        output['columns'] = all_label_annotations
+        return output
+            
+
+        # with json_schema_to_pydantic(self.field_schema) as ResponseModel:
+        #     # special handling to flag image inputs if they exist
+        #     input_field_types = defaultdict(lambda: MessageChunkType.TEXT)
+        #     image_value_key = None
+        #     for tag in self.image_tags:
+        #         # these are the project variable names, NOT the label config tag names. TODO: pass this info from LSE to avoid recomputing it here.
+        #         variables = extract_variable_name(tag.value)
+        #         if len(variables) != 1:
+        #             logger.warning(
+        #                 f"Image tag {tag.name} has multiple variables: {variables}. Cannot mark these variables as image inputs."
+        #             )
+        #             continue
+        #         image_value_key = variables[0]
+        #         input_field_types[image_value_key] = (
+        #             MessageChunkType.IMAGE_URLS
+        #             if tag.attr.get("valueList")
+        #             else MessageChunkType.IMAGE_URL
+        #         )
+
+        #     logger.debug(
+        #         f"Using VisionRuntime with input field types: {input_field_types}"
+        #     )
+        #     output = await runtime.batch_to_batch(
+        #         input,
+        #         input_template=self.input_template,
+        #         output_template="",
+        #         instructions_template=self.instructions,
+        #         response_model=ResponseModel,
+        #         input_field_types=input_field_types,
+        #     )
+        #     print(f'Output: {output}')
+            # print(f'Process images with OCR: {input[image_value_key].tolist()}')
+            # # ocr_results = await self.process_images_with_ocr(input[image_value_key].tolist())
+            # # filtered_ocr_results = []
+            # images = input[image_value_key].tolist()
+            # all_bbox_annotations = []
+            # all_text_annotations = []
+            # for i, row in output.iterrows():
+            #     extracted_result = row['output']
+                
+            #     ocr_results = find_text_in_image(images[i], extracted_result)
+            #     bbox_annotations = []
+            #     text_annotations = []
+            #     for ocr_result in ocr_results:
+            #         # Convert OCR results to Label Studio format
+            #         parent_id = ocr_result['bbox']['id']
+
+            #         for word in ocr_result['words']:
+            #             bbox_annotation = word['bbox']
+            #             bbox_annotation['rotation'] = 0
+            #             bbox_annotation['parent_id'] = parent_id
+            #             bbox_annotation['score'] = word['score']
+                                                
+            #             text_annotation = {
+            #                 'text': [word['text']],
+            #                 'id': bbox_annotation['id'],
+            #                 'parent_id': parent_id
+            #             }
+                        
+            #             bbox_annotations.append(bbox_annotation)
+            #             text_annotations.append(text_annotation)
+                        
+            #         bbox_annotation = ocr_result['bbox']
+            #         bbox_annotation['rotation'] = 0
+            #         bbox_annotation['score'] = float(np.sqrt(ocr_result['detection_score'] * ocr_result['matching_score']))
+                    
+            #         text_annotation = {
+            #             'text': [ocr_result['reference_text']],
+            #             'id': parent_id
+            #         }
+                    
+            #         bbox_annotations.append(bbox_annotation)
+            #         text_annotations.append(text_annotation)
+                        
+            #     all_bbox_annotations.append(bbox_annotations)
+            #     all_text_annotations.append(text_annotations)   
+            # output['bbox'] = all_bbox_annotations
+            # output['transcription'] = all_text_annotations
+            # return output
