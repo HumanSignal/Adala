@@ -539,7 +539,16 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
             )
 
         extra_fields = extra_fields or {}
+        input_field_types = input_field_types or {}
         records = batch.to_dict(orient="records")
+        # in multi-image cases, the number of tokens can be too large for the context window
+        # so we need to split the payloads into chunks
+        # we use this heuristic for MIG projects as they more likely to have multi-image inputs
+        # for other data types, we skip checking the context window as it will be slower
+        ensure_messages_fit_in_context_window = any(
+            input_field_types.get(field) == MessageChunkType.IMAGE_URLS
+            for field in input_field_types
+        )
 
         df_data = await arun_instructor_with_payloads(
             client=self.client,
@@ -556,6 +565,7 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
             instructions_first=instructions_first,
             instructions_template=instructions_template,
             extra_fields=extra_fields,
+            ensure_messages_fit_in_context_window=ensure_messages_fit_in_context_window,
             **self.model_extra,
         )
 
