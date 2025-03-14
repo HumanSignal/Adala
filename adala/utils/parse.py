@@ -1,20 +1,24 @@
+import logging
 import re
 import string
-import logging
-from typing import (
-    List,
-    TypedDict,
-    Dict,
-    Optional,
-    Union,
-    Literal,
-    Iterable,
-    Generator,
-    Any,
-)
-from enum import Enum
-from pydantic import BaseModel, Field
 from collections import defaultdict
+from enum import Enum
+from typing import (
+    Annotated,
+    Any,
+    DefaultDict,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    TypedDict,
+    Union,
+)
+
+from pydantic import BaseModel, Field, validator
 
 logger = logging.getLogger(__name__)
 
@@ -288,8 +292,12 @@ class MessagesBuilder(BaseModel):
     instruction_first: bool = True
     extra_fields: Dict[str, Any] = Field(default_factory=dict)
     split_into_chunks: bool = False
-    input_field_types: DefaultDict[str, Annotated[MessageChunkType, Field(default_factory=lambda: MessageChunkType.TEXT)]] = Field(default_factory=lambda: defaultdict(lambda: MessageChunkType.TEXT))
-
+    input_field_types: DefaultDict[
+        str,
+        Annotated[
+            MessageChunkType, Field(default_factory=lambda: MessageChunkType.TEXT)
+        ],
+    ] = Field(default_factory=lambda: defaultdict(lambda: MessageChunkType.TEXT))
 
     def get_messages(self, payload: Dict[str, Any]):
         if self.split_into_chunks:
