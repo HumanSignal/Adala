@@ -555,7 +555,7 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
             payloads=records,
             user_prompt_template=input_template,
             response_model=response_model,
-            model=self.canonical_model_provider_string,
+            model=self.model,
             max_tokens=self.max_tokens,
             temperature=self.temperature,
             seed=self.seed,

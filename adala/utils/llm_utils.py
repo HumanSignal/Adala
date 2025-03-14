@@ -156,6 +156,7 @@ def run_instructor_with_messages(
     messages: List[Dict[str, Any]],
     response_model: Type[BaseModel],
     model: str,
+    canonical_model_provider_string: Optional[str] = None,
     max_tokens: Optional[int] = None,
     temperature: Optional[float] = None,
     seed: Optional[int] = None,
@@ -171,6 +172,7 @@ def run_instructor_with_messages(
         messages: The messages to send to the model
         response_model: The Pydantic model to validate the response against
         model: The model name to use
+        canonical_model_provider_string: The canonical model provider string to use
         max_tokens: Maximum tokens to generate
         temperature: Temperature for sampling
         seed: Integer seed to reduce nondeterminism
@@ -185,7 +187,7 @@ def run_instructor_with_messages(
         prompt_token_count = None
         if ensure_messages_fit_in_context_window:
             messages, prompt_token_count = _ensure_messages_fit_in_context_window(
-                messages, model
+                messages, canonical_model_provider_string or model
             )
 
         response, completion = client.chat.completions.create_with_completion(
@@ -222,6 +224,7 @@ async def arun_instructor_with_messages(
     messages: List[Dict[str, Any]],
     response_model: Type[BaseModel],
     model: str,
+    canonical_model_provider_string: Optional[str] = None,
     max_tokens: Optional[int] = None,
     temperature: Optional[float] = None,
     seed: Optional[int] = None,
@@ -237,6 +240,7 @@ async def arun_instructor_with_messages(
         messages: The messages to send to the model
         response_model: The Pydantic model to validate the response against
         model: The model name to use
+        canonical_model_provider_string: The canonical model provider string to use
         max_tokens: Maximum tokens to generate
         temperature: Temperature for sampling
         seed: Integer seed to reduce nondeterminism
@@ -251,7 +255,7 @@ async def arun_instructor_with_messages(
         prompt_token_count = None
         if ensure_messages_fit_in_context_window:
             messages, prompt_token_count = _ensure_messages_fit_in_context_window(
-                messages, model
+                messages, canonical_model_provider_string or model
             )
 
         response, completion = await client.chat.completions.create_with_completion(
@@ -288,6 +292,7 @@ def run_instructor_with_payload(
     user_prompt_template: str,
     response_model: Type[BaseModel],
     model: str,
+    canonical_model_provider_string: Optional[str] = None,
     max_tokens: Optional[int] = None,
     temperature: Optional[float] = None,
     seed: Optional[int] = None,
@@ -309,6 +314,7 @@ def run_instructor_with_payload(
         user_prompt_template: The template to use for the user prompt
         response_model: The Pydantic model to validate the response against
         model: The model name to use
+        canonical_model_provider_string: The canonical model provider string to use
         max_tokens: Maximum tokens to generate
         temperature: Temperature for sampling
         seed: Integer seed to reduce nondeterminism
@@ -340,6 +346,7 @@ def run_instructor_with_payload(
         messages,
         response_model,
         model,
+        canonical_model_provider_string,
         max_tokens,
         temperature,
         seed,
@@ -355,6 +362,7 @@ async def arun_instructor_with_payload(
     user_prompt_template: str,
     response_model: Type[BaseModel],
     model: str,
+    canonical_model_provider_string: Optional[str] = None,
     max_tokens: Optional[int] = None,
     temperature: Optional[float] = None,
     seed: Optional[int] = None,
@@ -407,6 +415,7 @@ async def arun_instructor_with_payload(
         messages,
         response_model,
         model,
+        canonical_model_provider_string,
         max_tokens,
         temperature,
         seed,
@@ -422,10 +431,11 @@ def run_instructor_with_payloads(
     user_prompt_template: str,
     response_model: Type[BaseModel],
     model: str,
-    max_tokens: int,
-    temperature: float,
-    seed: Optional[int],
-    retries: Retrying,
+    canonical_model_provider_string: Optional[str] = None,
+    max_tokens: Optional[int] = None,
+    temperature: Optional[float] = None,
+    seed: Optional[int] = None,
+    retries: Optional[Retrying] = None,
     instructions_template: Optional[str] = None,
     instructions_first: bool = True,
     input_field_types: Optional[Dict[str, MessageChunkType]] = None,
@@ -444,6 +454,7 @@ def run_instructor_with_payloads(
         user_prompt_template: The template to use for the user prompt
         response_model: The Pydantic model to validate the responses against
         model: The model name to use
+        canonical_model_provider_string: The canonical model provider string to use
         max_tokens: Maximum tokens to generate
         temperature: Temperature for sampling
         seed: Integer seed to reduce nondeterminism
@@ -476,6 +487,7 @@ def run_instructor_with_payloads(
             messages,
             response_model,
             model,
+            canonical_model_provider_string,
             max_tokens,
             temperature,
             seed,
@@ -494,6 +506,7 @@ async def arun_instructor_with_payloads(
     user_prompt_template: str,
     response_model: Type[BaseModel],
     model: str,
+    canonical_model_provider_string: Optional[str] = None,
     max_tokens: Optional[int] = None,
     temperature: Optional[float] = None,
     seed: Optional[int] = None,
@@ -515,6 +528,7 @@ async def arun_instructor_with_payloads(
         user_prompt_template: The template to use for the user prompt
         response_model: The Pydantic model to validate the responses against
         model: The model name to use
+        canonical_model_provider_string: The canonical model provider string to use
         max_tokens: Maximum tokens to generate
         temperature: Temperature for sampling
         seed: Integer seed to reduce nondeterminism
@@ -546,6 +560,7 @@ async def arun_instructor_with_payloads(
             messages_builder.get_messages(payload),
             response_model,
             model,
+            canonical_model_provider_string,
             max_tokens,
             temperature,
             seed,
