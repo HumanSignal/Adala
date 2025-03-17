@@ -318,12 +318,20 @@ class MessagesBuilder(BaseModel):
     instruction_first: bool = True
     extra_fields: Dict[str, Any] = Field(default_factory=dict)
     split_into_chunks: bool = False
-    input_field_types: DefaultDict[
-        str,
-        Annotated[
-            MessageChunkType, Field(default_factory=lambda: MessageChunkType.TEXT)
-        ],
+    input_field_types: Optional[
+        DefaultDict[
+            str,
+            Annotated[
+                MessageChunkType, Field(default_factory=lambda: MessageChunkType.TEXT)
+            ],
+        ]
     ] = Field(default_factory=lambda: defaultdict(lambda: MessageChunkType.TEXT))
+
+    @validator("input_field_types", pre=True)
+    def set_default_input_field_types(cls, value):
+        if value is None:
+            return defaultdict(lambda: MessageChunkType.TEXT)
+        return value
 
     def get_messages(self, payload: Dict[str, Any]):
         if self.split_into_chunks:
