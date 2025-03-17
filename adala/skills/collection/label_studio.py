@@ -163,7 +163,15 @@ class LabelStudioSkill(TransformSkill):
                             f"Image tag {tag.name} has multiple variables: {variables}. Cannot mark these variables as image inputs."
                         )
                         continue
-                    input_field_types[variables[0]] = MessageChunkType.IMAGE_URL
+                    input_field_types[variables[0]] = (
+                        MessageChunkType.IMAGE_URLS
+                        if tag.attr.get("valueList")
+                        else MessageChunkType.IMAGE_URL
+                    )
+
+                logger.debug(
+                    f"Using VisionRuntime with input field types: {input_field_types}"
+                )
                 output = await runtime.batch_to_batch(
                     input,
                     input_template=self.input_template,
