@@ -32,7 +32,8 @@ RUN --mount=type=cache,target="/var/cache/apt",sharing=locked \
     set -eux; \
     apt-get update; \
     apt-get upgrade -y; \
-    apt-get install --no-install-recommends -y procps; \
+    apt-get install --no-install-recommends -y \ 
+        procps tesseract-ocr tesseract-ocr-chi-sim tesseract-ocr-chi-tra tesseract-ocr-deu; \
     apt-get autoremove -y
 
 RUN --mount=type=cache,target=${PIP_CACHE_DIR},sharing=locked \
