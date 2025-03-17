@@ -104,7 +104,18 @@ class TemplateChunks(TypedDict):
 match_fields_regex = re.compile(r"(?<!\{)\{([a-zA-Z0-9_]+)\}(?!})")
 
 
-def parse_template(string, include_texts=True) -> List[TemplateChunks]:
+class MessageChunkType(Enum):
+    TEXT = "text"
+    IMAGE_URL = "image_url"
+    IMAGE_URLS = "image_urls"
+
+
+def parse_template(
+    string,
+    include_texts=True,
+    payload: Optional[Dict[str, Any]] = None,
+    input_field_types: Optional[Dict[str, MessageChunkType]] = None,
+) -> List[TemplateChunks]:
     """
     Parses a template string to extract output fields and the text between them.
 
@@ -125,34 +136,57 @@ def parse_template(string, include_texts=True) -> List[TemplateChunks]:
 
     chunks: List[TemplateChunks] = []
     last_index = 0
+    payload = payload or {}
+    input_field_types = input_field_types or {}
 
     for match in match_fields_regex.finditer(string):
         # for match in re.finditer(r'\{(.*?)\}', string):
         # Text before field
-        if last_index < match.start() and include_texts:
-            text = string[last_index : match.start()]
+        start = match.start()
+        if last_index < start and include_texts:
+            text = string[last_index:start]
             chunks.append(
                 {
                     "text": text,
                     "start": last_index,
-                    "end": match.start(),
+                    "end": start,
                     "type": "text",
+                    "data": None,
+                    "field_type": None,
                 }
             )
 
         # Field itself
-        field = match.group(1)
-        start = match.start()
         end = match.end()
-        chunks.append({"text": field, "start": start, "end": end, "type": "var"})
+        field = string[start:end].strip("{}")
+        # Extract the field name by removing the brackets
+        data = payload.get(field)
+        field_type = input_field_types.get(field, MessageChunkType.TEXT)
+        chunks.append(
+            {
+                "text": field,
+                "start": start,
+                "end": end,
+                "type": "var",
+                "data": data,
+                "field_type": field_type,
+            }
+        )
 
-        last_index = match.end()
+        last_index = end
 
     # Text after the last field
     if last_index < len(string) and include_texts:
         text = string[last_index:]
         chunks.append(
-            {"text": text, "start": last_index, "end": len(string), "type": "text"}
+            {
+                "text": text,
+                "start": last_index,
+                "end": len(string),
+                "type": "text",
+                "data": None,
+                "field_type": None,
+            }
         )
 
     return chunks
@@ -174,112 +208,104 @@ MessageChunk = Union[TextMessageChunk, ImageMessageChunk]
 Message = Union[str, List[MessageChunk]]
 
 
-class MessageChunkType(Enum):
-    TEXT = "text"
-    IMAGE_URL = "image_url"
-
-
 def split_message_into_chunks(
-    input_template: str, input_field_types: Dict[str, MessageChunkType], **input_fields
+    input_template: str, input_field_types: Dict[str, MessageChunkType], **payload
 ) -> List[MessageChunk]:
-    """Split a template string with field types into a list of message chunks.
-
-    Takes a template string with placeholders and splits it into chunks based on the field types,
-    preserving the text between placeholders.
+    """Split a template string into message chunks based on field types.
 
     Args:
-        input_template (str): Template string with placeholders, e.g. '{a} is a {b} is an {a}'
-        input_field_types (Dict[str, MessageChunkType]): Dict mapping field names to their types
-        **input_fields: Field values to substitute into template
+        input_template: Template string with placeholders like '{field_name}'
+        input_field_types: Mapping of field names to their chunk types
+        payload: Dictionary with values to substitute into the template instead of placeholders
 
     Returns:
-        List[Dict[str, str]]: List of message chunks with appropriate type and content.
-            Text chunks have format: {'type': 'text', 'text': str}
-            Image chunks have format: {'type': 'image_url', 'image_url': {'url': str}}
+        List of message chunks with appropriate type and content:
+        - Text chunks: {'type': 'text', 'text': str}
+        - Image chunks: {'type': 'image_url', 'image_url': {'url': str}}
 
     Example:
         >>> split_message_into_chunks(
-        ...     '{a} is a {b} is an {a}',
-        ...     {'a': MessageChunkType.TEXT, 'b': MessageChunkType.IMAGE_URL},
-        ...     a='the letter a',
-        ...     b='http://example.com/b.jpg'
+        ...     'Look at {image} and describe {text}',
+        ...     {'image': MessageChunkType.IMAGE_URL, 'text': MessageChunkType.TEXT},
+        ...     {'image': 'http://example.com/img.jpg', 'text': 'this content'}
         ... )
         [
-            {'type': 'text', 'text': 'the letter a is a '},
-            {'type': 'image_url', 'image_url': {'url': 'http://example.com/b.jpg'}},
-            {'type': 'text', 'text': ' is an the letter a'}
+            {'type': 'text', 'text': 'Look at '},
+            {'type': 'image_url', 'image_url': {'url': 'http://example.com/img.jpg'}},
+            {'type': 'text', 'text': ' and describe this content'}
         ]
     """
-    # Parse template to get field positions and surrounding text
-    parsed = parse_template(input_template)
+    # Parse template to get chunks with field positions and types
+    parsed = parse_template(
+        input_template,
+        include_texts=True,
+        payload=payload,
+        input_field_types=input_field_types,
+    )
 
-    def add_to_current_chunk(
-        current_chunk: Optional[MessageChunk], chunk: MessageChunk
-    ) -> MessageChunk:
-        if current_chunk:
-            current_chunk["text"] += chunk["text"]
-            return current_chunk
-        else:
-            return chunk
+    logger.debug(f"Parsed template: {parsed}")
 
-    # Build chunks by iterating through parsed template parts
-    def build_chunks(
-        parsed: Iterable[TemplateChunks],
-    ) -> Generator[MessageChunk, None, None]:
-        current_chunk: Optional[MessageChunk] = None
+    result = []
+    current_text = ""
 
-        for part in parsed:
-            if part["type"] == "text":
-                current_chunk = add_to_current_chunk(
-                    current_chunk, {"type": "text", "text": part["text"]}
-                )
-            elif part["type"] == "var":
-                field_value = part["text"]
-                try:
-                    field_type = input_field_types[field_value]
-                except KeyError:
-                    raise ValueError(
-                        f"Field {field_value} not found in input_field_types. Found fields: {input_field_types}"
-                    )
-                if field_type == MessageChunkType.TEXT:
-                    # try to substitute in variable and add to current chunk
-                    substituted_text = partial_str_format(
-                        f"{{{field_value}}}", **input_fields
-                    )
-                    if substituted_text != field_value:
-                        current_chunk = add_to_current_chunk(
-                            current_chunk, {"type": "text", "text": substituted_text}
-                        )
-                    else:
-                        # be permissive for unfound variables
-                        current_chunk = add_to_current_chunk(
-                            current_chunk,
-                            {"type": "text", "text": f"{{{field_value}}}"},
-                        )
-                elif field_type == MessageChunkType.IMAGE_URL:
-                    substituted_text = partial_str_format(
-                        f"{{{field_value}}}", **input_fields
-                    )
-                    if substituted_text != field_value:
-                        # push current chunk, push image chunk, and start new chunk
-                        if current_chunk:
-                            yield current_chunk
-                        current_chunk = None
-                        yield {
-                            "type": "image_url",
-                            "image_url": {"url": input_fields[field_value]},
-                        }
-                    else:
-                        # be permissive for unfound variables
-                        current_chunk = add_to_current_chunk(
-                            current_chunk,
-                            {"type": "text", "text": f"{{{field_value}}}"},
+    def _add_current_text_as_chunk():
+        # this function is used to flush `current_text` buffer into a text chunk, and start over
+        nonlocal current_text
+        if current_text:
+            result.append({"type": "text", "text": current_text})
+            current_text = ""
+
+    for part in parsed:
+        # iterate over parsed chunks - they already contains field types and placeholder values
+        if part["type"] == "text":
+            # each text chunk without placeholders is added to the current buffer and we continue
+            current_text += part["text"]
+        elif part["type"] == "var":
+            field_type = part["field_type"]
+            field_value = part["data"]
+            if field_value is None:
+                # if field value is not provided, it is assumed to be a text field
+                current_text += part["text"]
+            else:
+                match field_type:
+                    case MessageChunkType.TEXT:
+                        # For text fields, we don't break chunks and add text fields to current buffer
+                        current_text += (
+                            str(field_value)
+                            if field_value is not None
+                            else part["text"]
                         )
 
-        if current_chunk:
-            yield current_chunk
+                    case MessageChunkType.IMAGE_URL:
+                        # Add remaining text as text chunk
+                        _add_current_text_as_chunk()
+                        # Add image URL as new image chunk
+                        result.append(
+                            {"type": "image_url", "image_url": {"url": field_value}}
+                        )
 
-    return list(build_chunks(parsed))
+                    case MessageChunkType.IMAGE_URLS:
+                        assert isinstance(
+                            field_value, List
+                        ), "Image URLs must be a list"
+                        # Add remaining text as text chunk
+                        _add_current_text_as_chunk()
+                        # Add image URLs as new image chunks
+                        for url in field_value:
+                            result.append(
+                                {"type": "image_url", "image_url": {"url": url}}
+                            )
+
+                    case _:
+                        # Handle unknown field types as text
+                        current_text += part["text"]
+
+    # Add any remaining text
+    _add_current_text_as_chunk()
+
+    logger.debug(f"Result: {result}")
+
+    return result
 
 
 class MessagesBuilder(BaseModel):
@@ -296,8 +322,8 @@ class MessagesBuilder(BaseModel):
                 lambda: MessageChunkType.TEXT
             )
             user_prompt = split_message_into_chunks(
-                self.user_prompt_template,
-                input_field_types,
+                input_template=self.user_prompt_template,
+                input_field_types=input_field_types,
                 **payload,
                 **self.extra_fields,
             )
