@@ -16,7 +16,7 @@ interactions:
       host:
       - api.openai.com
       user-agent:
-      - OpenAI/Python 1.47.1
+      - OpenAI/Python 1.63.2
       x-stainless-arch:
       - arm64
       x-stainless-async:
@@ -26,9 +26,13 @@ interactions:
       x-stainless-os:
       - MacOS
       x-stainless-package-version:
-      - 1.47.1
+      - 1.63.2
       x-stainless-raw-response:
       - 'true'
+      x-stainless-read-timeout:
+      - '10.0'
+      x-stainless-retry-count:
+      - '0'
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
@@ -38,18 +42,20 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAAwAAAP//jFJNbxMxEL3vrxh84ZJFmw+aNJeKSiDChQtSoQitHHuya2p7LHs2Jaoi
-        8Tf4e/wS5E2aTUWRuFjyezNP783MQwEgjBZLEKqVrFyw5fXErS5w6t7dbj++ifLT9ub19INbzb+8
-        vf58K0a5g9bfUfFj1ytFLlhkQ/5Aq4iSMauO57OqqsaXi4uecKTR5rYmcDmj0hlvykk1mZXVvBwv
-        jt0tGYVJLOFrAQDw0L/Zp9f4QyyhGj0iDlOSDYrlqQhARLIZETIlk1h6FqOBVOQZfW999dKBJuMb
-        uEdrR8Ct9Hewo+4FvKd7kGvqOH+v4KaV/PvnrwTkMxDBGa+BScvd1bl4xE2XZA7oO2uP+P7k1lIT
-        Iq3TkT/hG+NNauuIMpHPzhJTED27LwC+9VPpngQVIZILXDPdoc+C49lBTgy7OCMvjyQTSzvg0+no
-        GbVaI0tj09lUhZKqRT10DiuQnTZ0RhRnmf8285z2Ibfxzf/ID4RSGBh1HSJqo54GHsoi5kv9V9lp
-        xr1hkTBujcKaDca8B40b2dnD/Yi0S4yu3hjfYAzRHI5oE+qqmk0W6/liIkWxL/4AAAD//wMANNbG
-        e1IDAAA=
+        H4sIAAAAAAAAA4xSwYrbMBC9+yumuvQSF9tJk91cSpeydFuWQil0oRSjSBNbqawR0rhtWPLvRXY2
+        zrK70IsO7808vTcz9xmAMFqsQahWsuq8za8ubr+9f3vVXX++u/7wpZCfaKdWd77Hr9/LWzFLHbTZ
+        oeKHrjeKOm+RDbmRVgElY1ItV4tyPq+Wl8uB6EijTW2N53xBeWecyauiWuTFKi8vjt0tGYVRrOFH
+        BgBwP7zJp9P4V6yhmD0gHcYoGxTrUxGACGQTImSMJrJ0LGYTqcgxusH6zesOdn1kkOADNUF2M9j0
+        DAlvMSBIpyGg1Htgghathz31r+Aj/QElHdzA+ENCgUnL/bvznwJu+yhTWtdbe8QPJ+uWGh9oE4/8
+        Cd8aZ2JbB5SRXLIZmbwY2EMG8HMYUf8otfCBOs810y90SbBcjHJiWsxEVtWRZGJpJ3y+nD2jVmtk
+        aWw8G7FQUrWop85pH7LXhs6I7CzzUzPPaY+5jWv+R34ilELPqGsfUBv1OPBUFjCd7UtlpxkPhkXE
+        8NsorNlgSHvQuJW9HY9JxH1k7OqtcQ0GH8x4UVtfF8vVfCUv58VSZIfsHwAAAP//AwDZWlUEXwMA
+        AA==
     headers:
+      CF-Cache-Status:
+      - DYNAMIC
       CF-RAY:
-      - 91497cde1d455bf0-LIS
+      - 91c864e2d94b193e-BCN
       Connection:
       - keep-alive
       Content-Encoding:
@@ -57,14 +63,14 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 19 Feb 2025 21:53:08 GMT
+      - Fri, 07 Mar 2025 07:31:36 GMT
       Server:
       - cloudflare
       Set-Cookie:
-      - __cf_bm=pdrPVnZs80kceMbFjP5hySilGriDjxO5ZV7rteMaOe8-1740001988-1.0.1.1-iD6jNgvCTil6rsU_6spFovSB0M4jV_wsXefMELr2VqhsCsypVsQDVSGcFc95vOcWOlCN2HD4zM0_wjHw2g.4_A;
-        path=/; expires=Wed, 19-Feb-25 22:23:08 GMT; domain=.api.openai.com; HttpOnly;
+      - __cf_bm=EWCL4yI.h.cjKyJAyYMqZDf5LIA16oiyMePtNXl6jGE-1741332696-1.0.1.1-3pg9E5nnOalXpiCSoMG7zuJBWXrHw2U9Zow_4hgJ2_gcioPQjgv8l88cmL0FBccjrtnJzVlVlt7dWDnpYjOVwp5uHL8MaSet8Q9Lr._QHJw;
+        path=/; expires=Fri, 07-Mar-25 08:01:36 GMT; domain=.api.openai.com; HttpOnly;
         Secure; SameSite=None
-      - _cfuvid=3936tT4iEjeNttD2XMU.Chdl_3WhiDD8G6V4bXj_vu0-1740001988047-0.0.1.1-604800000;
+      - _cfuvid=jGocxY0HpR2UOYQT1cR6yzZDBib5nqhIAPe0oxgS7rU-1741332696642-0.0.1.1-604800000;
         path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Transfer-Encoding:
       - chunked
@@ -74,12 +80,10 @@ interactions:
       - X-Request-ID
       alt-svc:
       - h3=":443"; ma=86400
-      cf-cache-status:
-      - DYNAMIC
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '1584'
+      - '474'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -97,7 +101,7 @@ interactions:
       x-ratelimit-reset-tokens:
       - 0s
       x-request-id:
-      - req_a16fad289e23163891d6d35400521a48
+      - req_d143222aad7c6110a628bcceaf54448d
     status:
       code: 200
       message: OK
@@ -113,15 +117,16 @@ interactions:
       "description": "Correctly extracted `MyModel` with all the required parameters
       with correct types", "parameters": {"properties": {"title": {"anyOf": [{"type":
       "string"}, {"type": "null"}], "default": null, "title": "Title"}, "description":
-      {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "description":
-      "List of texts (one or more) for description", "title": "Description"}, "classification":
-      {"description": "Choices for title", "enum": ["Bug report", "Feature request",
-      "Question", "Other"], "title": "Classification", "type": "string"}, "rationale":
-      {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "description":
-      "List of texts (one or more) for title", "title": "Rationale"}, "evaluation":
-      {"description": "Rating for title (0 to 5)", "maximum": 5, "minimum": 0, "title":
-      "Evaluation", "type": "integer"}}, "required": ["classification", "evaluation"],
-      "type": "object"}}}]}'
+      {"anyOf": [{"type": "string"}, {"items": {"type": "string"}, "type": "array"},
+      {"type": "null"}], "default": null, "description": "Text or list of texts for
+      description", "title": "Description"}, "classification": {"description": "Choices
+      for title", "enum": ["Bug report", "Feature request", "Question", "Other"],
+      "title": "Classification", "type": "string"}, "rationale": {"anyOf": [{"type":
+      "string"}, {"items": {"type": "string"}, "type": "array"}, {"type": "null"}],
+      "default": null, "description": "Text or list of texts for title", "title":
+      "Rationale"}, "evaluation": {"description": "Rating for title (0 to 5)", "maximum":
+      5, "minimum": 0, "title": "Evaluation", "type": "integer"}}, "required": ["classification",
+      "evaluation"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -130,16 +135,16 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '1562'
+      - '1646'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=pdrPVnZs80kceMbFjP5hySilGriDjxO5ZV7rteMaOe8-1740001988-1.0.1.1-iD6jNgvCTil6rsU_6spFovSB0M4jV_wsXefMELr2VqhsCsypVsQDVSGcFc95vOcWOlCN2HD4zM0_wjHw2g.4_A;
-        _cfuvid=3936tT4iEjeNttD2XMU.Chdl_3WhiDD8G6V4bXj_vu0-1740001988047-0.0.1.1-604800000
+      - __cf_bm=EWCL4yI.h.cjKyJAyYMqZDf5LIA16oiyMePtNXl6jGE-1741332696-1.0.1.1-3pg9E5nnOalXpiCSoMG7zuJBWXrHw2U9Zow_4hgJ2_gcioPQjgv8l88cmL0FBccjrtnJzVlVlt7dWDnpYjOVwp5uHL8MaSet8Q9Lr._QHJw;
+        _cfuvid=jGocxY0HpR2UOYQT1cR6yzZDBib5nqhIAPe0oxgS7rU-1741332696642-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
-      - OpenAI/Python 1.47.1
+      - OpenAI/Python 1.63.2
       x-stainless-arch:
       - arm64
       x-stainless-async:
@@ -149,9 +154,13 @@ interactions:
       x-stainless-os:
       - MacOS
       x-stainless-package-version:
-      - 1.47.1
+      - 1.63.2
       x-stainless-raw-response:
       - 'true'
+      x-stainless-read-timeout:
+      - '10.0'
+      x-stainless-retry-count:
+      - '0'
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
@@ -161,22 +170,21 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAAwAAAP//jFRRT9swEH7vrzj5ZS8tCgXW0LexiYEmxLQhpGmdIte5JMcc27MvsA7x
-        3yc7bdMCk5aHKLrv7r7PX+78OAIQVIo5CNVIVq3Tk7Npe5nTu/dXnw8/nK4+fbtu/9j85vyou7g9
-        vxDjWGGXd6h4U3WgbOs0MlnTw8qjZIxdD2fHWZYdnuZ5Alpboo5ltePJsZ20ZGgyzabHk2w2OczX
-        1Y0lhUHM4fsIAOAxvaNOU+JvMYdsvIm0GIKsUcy3SQDCWx0jQoZAgaVhMR5AZQ2jidJNp/UOwNbq
-        QkmtB+L+edz5HsySWhe/pvIjuVw9nGR3b6e3s6+/v9T56bXf4etbr1wSVHVGbU3awbfx+TMyAGFk
-        m2qvVlfJu/HzBOnrrkXDUbZ4XAgm1rgQ84W4BCXNGwZtazILMV6IEoPy5CLXywxgC9wgOC25sr5N
-        FUpHFytSclt01tXg0VnPKcMnRK45bxoECqFDUBql1ysgU8ZqDCDBebvU2MIDcZO4euLN+aUmXoGt
-        9mSM4aEh1QDFBsq2rTUQDY15y64GbiRDF9AHaOUK0CjbGUZ/AFHLzonBI5nKeoUBuKEAyxUElkym
-        ToRk5JKSArZRGJAZQ+jqGkPKkeBsHB2SGkqsUDFE0xqEsAqM7UGyA++l7jZmnTyJvd/1NHrt+8fO
-        FHqsuiD1ejzX8aftvGtbRw/Ds/EVFRkKTeFRhjRGIrB1PXfkSQyi21sV4bxtHRdsf6KJDacnJ30/
-        MazzgM42IFuWeogfHa23cb9fUSJLSru0XV8lVYPlUDqssexKsjvAaOfUL9W81rs/OZn6f9oPgFLo
-        GMvCeSxJ7Z94SPMYb7t/pW1dToJFQH9PCgsm9PFPlFjJTvd3kOgnpajI1Oidp3QRicoVWXY8zZez
-        fCrF6Gn0FwAA//8DAAwXP1CWBQAA
+        H4sIAAAAAAAAA4xUTW/bMAy951cQuuySFPlokja3dMOwdQiGDUUPXQZDkWmbnSxpEt3OCPLfB9lJ
+        nKYdMB8Mg4/vPZKmtO0BCErFAoQqJKvS6cHN1epuWd883C/p05/78mF19959lR+qL99+sxf9yLCb
+        R1R8YF0oWzqNTNa0sPIoGaPqaH45mkzGs+tZA5Q2RR1puePBpR2UZGgwHo4vB8P5YHS1ZxeWFAax
+        gB89AIBt8451mhT/iAUM+4dIiSHIHMXimAQgvNUxImQIFFgaFv0OVNYwmli6qbQ+AdhanSipdWfc
+        PtuT725YUutk6sNjsfx4jcvn2zoMb582D+H7yPgTv1a6dk1BWWXUcUgn+DG+ODMDEEaWDXdVr5rZ
+        9c8TpM+rEg3HssV2LZhY41os1uIzKGneMWibk1mL/lqkGJQnF71eZwBb4ALBacmZ9WXDUDpOMSMl
+        j6SbKgePznpuMnyDyL3nXYFAIVQIrdcGA0hw3m40lvBMXESznEwOZM4M+/BckCqAIoVRFYaU1Hs5
+        LiQD1y6GdA1k0lhTo76pcrAeSqkPg4TYTYH7vg5RqYnri6ZofJK6OrQ03YkXQ9313vr+ebIrHrMq
+        SL1fon18d9xKbfPYcThbMpGRoVAkHmVofrYIbF3rHX0aB1G9WGjhvC0dJ2x/oYmC4+m01RPdoevQ
+        6XwPsmWpu/hkNO6/oZekyJKajT8eMiVVgWlH7Q6brFKyJ0DvpOvX1byl3XZOJv8f+Q5QCh1jmjiP
+        KamXHXdpHuOd9K+045SbgkVA/0QKEyb08U+kmMlKtzeFCHVgLJOMTI7eeWquC5G5ZDibT+byejKc
+        id6u9xcAAP//AwCtSsqOPAUAAA==
     headers:
       CF-RAY:
-      - 91497ce9cb475bf0-LIS
+      - 91c864eb48a6193e-BCN
       Connection:
       - keep-alive
       Content-Encoding:
@@ -184,7 +192,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 19 Feb 2025 21:53:09 GMT
+      - Fri, 07 Mar 2025 07:31:40 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -200,7 +208,7 @@ interactions:
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '1443'
+      - '3642'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -218,7 +226,7 @@ interactions:
       x-ratelimit-reset-tokens:
       - 0s
       x-request-id:
-      - req_f226516bc99fc5fdc2297bb5bc5149d9
+      - req_e86560922a7bca1dc5b51c4edbee590d
     status:
       code: 200
       message: OK
@@ -234,15 +242,16 @@ interactions:
       "function": {"name": "MyModel", "description": "Correctly extracted `MyModel`
       with all the required parameters with correct types", "parameters": {"properties":
       {"title": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null,
-      "title": "Title"}, "description": {"anyOf": [{"type": "string"}, {"type": "null"}],
-      "default": null, "description": "List of texts (one or more) for description",
-      "title": "Description"}, "classification": {"description": "Choices for title",
-      "enum": ["Bug report", "Feature request", "Question", "Other"], "title": "Classification",
-      "type": "string"}, "rationale": {"anyOf": [{"type": "string"}, {"type": "null"}],
-      "default": null, "description": "List of texts (one or more) for title", "title":
-      "Rationale"}, "evaluation": {"description": "Rating for title (0 to 5)", "maximum":
-      5, "minimum": 0, "title": "Evaluation", "type": "integer"}}, "required": ["classification",
-      "evaluation"], "type": "object"}}}]}'
+      "title": "Title"}, "description": {"anyOf": [{"type": "string"}, {"items": {"type":
+      "string"}, "type": "array"}, {"type": "null"}], "default": null, "description":
+      "Text or list of texts for description", "title": "Description"}, "classification":
+      {"description": "Choices for title", "enum": ["Bug report", "Feature request",
+      "Question", "Other"], "title": "Classification", "type": "string"}, "rationale":
+      {"anyOf": [{"type": "string"}, {"items": {"type": "string"}, "type": "array"},
+      {"type": "null"}], "default": null, "description": "Text or list of texts for
+      title", "title": "Rationale"}, "evaluation": {"description": "Rating for title
+      (0 to 5)", "maximum": 5, "minimum": 0, "title": "Evaluation", "type": "integer"}},
+      "required": ["classification", "evaluation"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -251,16 +260,16 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '1598'
+      - '1682'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=pdrPVnZs80kceMbFjP5hySilGriDjxO5ZV7rteMaOe8-1740001988-1.0.1.1-iD6jNgvCTil6rsU_6spFovSB0M4jV_wsXefMELr2VqhsCsypVsQDVSGcFc95vOcWOlCN2HD4zM0_wjHw2g.4_A;
-        _cfuvid=3936tT4iEjeNttD2XMU.Chdl_3WhiDD8G6V4bXj_vu0-1740001988047-0.0.1.1-604800000
+      - __cf_bm=EWCL4yI.h.cjKyJAyYMqZDf5LIA16oiyMePtNXl6jGE-1741332696-1.0.1.1-3pg9E5nnOalXpiCSoMG7zuJBWXrHw2U9Zow_4hgJ2_gcioPQjgv8l88cmL0FBccjrtnJzVlVlt7dWDnpYjOVwp5uHL8MaSet8Q9Lr._QHJw;
+        _cfuvid=jGocxY0HpR2UOYQT1cR6yzZDBib5nqhIAPe0oxgS7rU-1741332696642-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
-      - OpenAI/Python 1.47.1
+      - OpenAI/Python 1.63.2
       x-stainless-arch:
       - arm64
       x-stainless-async:
@@ -270,9 +279,13 @@ interactions:
       x-stainless-os:
       - MacOS
       x-stainless-package-version:
-      - 1.47.1
+      - 1.63.2
       x-stainless-raw-response:
       - 'true'
+      x-stainless-read-timeout:
+      - '10.0'
+      x-stainless-retry-count:
+      - '0'
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
@@ -282,22 +295,24 @@ interactions:
   response:
     body:
       string: !!binary |
-        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
+        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
+        ZFyIBQAA
     headers:
+      CF-Cache-Status:
+      - DYNAMIC
       CF-RAY:
-      - 91497cf3e8b85bf0-LIS
+      - 91c86503fadb193e-BCN
       Connection:
       - keep-alive
       Content-Encoding:
@@ -305,7 +320,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 19 Feb 2025 21:53:15 GMT
+      - Fri, 07 Mar 2025 07:31:43 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -316,12 +331,10 @@ interactions:
       - X-Request-ID
       alt-svc:
       - h3=":443"; ma=86400
-      cf-cache-status:
-      - DYNAMIC
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '5402'
+      - '2389'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
@@ -339,7 +352,7 @@ interactions:
       x-ratelimit-reset-tokens:
       - 0s
       x-request-id:
-      - req_60a31a7131c4ac9f05ed02e403eb5302
+      - req_31397671a786d58cb8d6d080c8d49b15
     status:
       code: 200
       message: OK
