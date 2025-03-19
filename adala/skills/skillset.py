@@ -201,7 +201,10 @@ class LinearSkillSet(SkillSet):
             # use input dataset for the first node in the pipeline
             print_text(f"Applying skill: {skill_name}")
             skill_output = skill.apply(skill_input, runtime)
-            print_dataframe(skill_output)
+
+            # Commented out to not log customer data. Can be used when debugging if needed
+            # print_dataframe(skill_output)
+
             if isinstance(skill, TransformSkill):
                 # Columns to drop from skill_input because they are also in skill_output
                 cols_to_drop = set(skill_output.columns) & set(skill_input.columns)
@@ -247,7 +250,10 @@ class LinearSkillSet(SkillSet):
             # use input dataset for the first node in the pipeline
             print_text(f"Applying skill: {skill_name}")
             skill_output = await skill.aapply(skill_input, runtime)
-            print_dataframe(skill_output)
+
+            # Commented out to not log customer data. Can be used when debugging if needed
+            # print_dataframe(skill_output)
+
             if isinstance(skill, TransformSkill):
                 # Columns to drop from skill_input because they are also in skill_output
                 cols_to_drop = set(skill_output.columns) & set(skill_input.columns)
