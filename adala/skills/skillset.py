@@ -203,7 +203,7 @@ class LinearSkillSet(SkillSet):
             skill_output = skill.apply(skill_input, runtime)
 
             # Commented out to not log customer data. Can be used when debugging if needed
-            #print_dataframe(skill_output)
+            # print_dataframe(skill_output)
 
             if isinstance(skill, TransformSkill):
                 # Columns to drop from skill_input because they are also in skill_output
@@ -252,7 +252,7 @@ class LinearSkillSet(SkillSet):
             skill_output = await skill.aapply(skill_input, runtime)
 
             # Commented out to not log customer data. Can be used when debugging if needed
-            #print_dataframe(skill_output)
+            # print_dataframe(skill_output)
 
             if isinstance(skill, TransformSkill):
                 # Columns to drop from skill_input because they are also in skill_output
