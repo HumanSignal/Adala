@@ -1,1 +1,2 @@
-from .base import Agent, create_agent_from_file, create_agent_from_dict
+"""Legacy module, use adala.core instead."""
+from adala.legacy.agents import *
