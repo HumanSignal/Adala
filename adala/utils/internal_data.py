@@ -1,16 +1,40 @@
 import pandas as pd
-from typing import List, Dict, Any, Union, Iterable
+from typing import List, Dict, Any, Union, Iterable, Optional, Type
 
-Record = Dict[str, str]
+Record = Dict[str, Any]
 
-# Internal data tables representation. Replace this with Dask or Polars in the future.
-InternalDataFrame = pd.DataFrame
+# Use pandas DataFrame for internal data representation
+class DataTable(pd.DataFrame):
+    """
+    A simple wrapper around pandas DataFrame to provide common batch processing methods.
+    This provides a direct interface for tabular data handling with LLMs.
+    """
+    
+    @classmethod
+    def from_records(cls, data: List[Dict]) -> 'DataTable':
+        """Create a DataTable from a list of dictionaries."""
+        return cls(data)
+    
+    @classmethod
+    def from_dataframe(cls, df: pd.DataFrame) -> 'DataTable':
+        """Create a DataTable from a pandas DataFrame."""
+        return cls(df)
+    
+    def to_records(self) -> List[Dict]:
+        """Convert to a list of dictionaries."""
+        return self.to_dict(orient="records")
+    
+    @classmethod
+    def concat(cls, dfs: Iterable['DataTable'], **kwargs) -> 'DataTable':
+        """Concatenate multiple DataTables."""
+        return cls(pd.concat(dfs, **kwargs))
+
+# For backward compatibility
+InternalDataFrame = DataTable
 InternalSeries = pd.Series
 
-
 def InternalDataFrame_encoder(df: InternalDataFrame) -> List:
-    return df.to_dict(orient="records")
-
+    return df.to_records()
 
 def InternalDataFrameConcat(
     dfs: Iterable[InternalDataFrame], **kwargs
@@ -24,4 +48,4 @@ def InternalDataFrameConcat(
     Returns:
         InternalDataFrame: The concatenated dataframe.
     """
-    return pd.concat(dfs, **kwargs)
+    return DataTable.concat(dfs, **kwargs)

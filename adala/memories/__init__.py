@@ -1,3 +1,2 @@
-from .file_memory import FileMemory
-from .vectordb import VectorDBMemory
-from .base import Memory
+"""Legacy module, use adala.core instead."""
+from adala.legacy.memories import *
