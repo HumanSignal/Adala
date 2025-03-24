@@ -103,7 +103,10 @@ def handle_llm_exception(
         n_attempts = retries.stop.max_attempt_number
         if prompt_token_count is None:
             prompt_token_count = token_counter(model=model, messages=messages[:-1])
-        prompt_tokens = n_attempts * prompt_token_count
+        if type(e).__name__ in {"APIError", "AuthenticationError", "APIConnectionError"}:
+            prompt_tokens = 0
+        else:
+            prompt_tokens = n_attempts * prompt_token_count
         # TODO a pydantic validation error may be appended as the last message, don't know how to get the raw response in this case
         usage = Usage(
             prompt_tokens=prompt_tokens,
