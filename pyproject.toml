@@ -19,7 +19,7 @@ Repository = "https://github.com/HumanSignal/Adala"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.9.7 || >3.9.7,<3.13"
-pandas = "*"
+pandas = "2.2.3"
 openai = "^1.60.2"
 guidance = "0.0.64"
 pydantic = "^2"
@@ -52,7 +52,7 @@ pandarallel = "^1.6.5"
 instructor = "^1.4.3"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.3"
+pytest = "7.4.4"
 pytest-cov = "^4.1.0"
 black = "^24.8.0"
 pytest-black = "^0.3.12"
@@ -67,11 +67,11 @@ jupyter-client = "8.4.0"
 matplotlib = "^3.7.4"
 fakeredis = "^2.23.2"
 flower = "^2.0.1"
-pytest-asyncio = "^0.23.7"
+pytest-asyncio = "0.23.8"
 celery = {extras = ["pytest"], version = "^5.4.0"}
 openai-responses = "^0.11.6"
-pytest-recording = "^0.13.1"
 mockafka-py = "^0.1.57"
+pytest-recording = "0.13.2"
 
 [tool.poetry.scripts]
 adala = "adala.cli:main"

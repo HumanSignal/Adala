@@ -315,6 +315,9 @@ async def validate_connection(request: ValidateConnectionRequest):
                 detail=f"Requested model '{model}' is not available with your api_key and settings.",
             )
         except Exception as e:
+            logger.exception(
+                f'Failed to check availability of requested model "{model}": {e}\nTraceback:\n{traceback.format_exc()}'
+            )
             raise HTTPException(
                 status_code=400,
                 detail=f"Failed to check availability of requested model '{model}': {e}",

@@ -7,19 +7,12 @@ from label_studio_sdk.label_interface import LabelInterface
 from label_studio_sdk.label_interface.objects import PredictionValue
 
 
-# NOTE: commented code can be used to recreate vcr cassettes, as they don't work with asyncio (yeah, frustrating - consider use other stub framework)
-# INSTRUCTIONS to recreate cassettes:
-# 1. Uncomment the lines in test you want to recreate
-# 2. Run the test with `pytest -vvv --record-mode=rewrite -k <test_name>`
-# 3. If you see mismatched asserts, verify the results and replace the test suite with the new results
-# 4. Don't forget to uncomment back the lines you commented out before recording the cassette
+# NOTE: to recreate vcr cassettes, run the test with `pytest -vvv --record-mode=rewrite -k <test_name>` and change the assert values
 
 
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill_basic():
-    # @pytest.mark.vcr
-    # def test_label_studio_skill_basic():
 
     df = pd.DataFrame(
         [
@@ -35,7 +28,6 @@ async def test_label_studio_skill_basic():
         "runtimes": {
             "default": {
                 "type": "AsyncLiteLLMChatRuntime",
-                # "type": "LiteLLMChatRuntime",
                 "model": "gpt-4o-mini",
                 "api_key": os.getenv("OPENAI_API_KEY"),
                 "max_tokens": 200,
@@ -77,11 +69,10 @@ async def test_label_studio_skill_basic():
 
     agent = Agent(**agent_payload)
     predictions = await agent.arun(df)
-    # predictions = agent.run(df)
     assert predictions.classification.tolist() == ["Bug report", "Feature request"]
     assert predictions.evaluation.tolist() == [5, 5]
     assert predictions.rationale.tolist() == [
-        "The issue describes a problem with logging into the platform, which is a technical issue that typically indicates a bug or malfunction in the login functionality.",
+        "The issue clearly indicates a problem with the login functionality, which is a bug that needs to be addressed.",
         "The issue is requesting the addition of support for a new file type (.docx), which indicates a desire for new functionality in the application. This aligns with the definition of a feature request.",
     ]
 
@@ -89,8 +80,6 @@ async def test_label_studio_skill_basic():
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill_partial_label_config():
-    # @pytest.mark.vcr
-    # def test_label_studio_skill_partial_label_config():
 
     df = pd.DataFrame(
         [
@@ -106,7 +95,6 @@ async def test_label_studio_skill_partial_label_config():
         "runtimes": {
             "default": {
                 "type": "AsyncLiteLLMChatRuntime",
-                # "type": "LiteLLMChatRuntime",
                 "model": "gpt-4o-mini",
                 "api_key": os.getenv("OPENAI_API_KEY"),
                 "max_tokens": 200,
@@ -154,7 +142,6 @@ async def test_label_studio_skill_partial_label_config():
 
     agent = Agent(**agent_payload)
     predictions = await agent.arun(df)
-    # predictions = agent.run(df)
 
     assert predictions.classification.tolist() == ["Bug report", "Feature request"]
     assert predictions.evaluation.tolist() == [5, 5]
@@ -165,9 +152,6 @@ async def test_label_studio_skill_partial_label_config():
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill_with_ner():
-    # @pytest.mark.vcr
-    # def test_label_studio_skill_with_ner():
-    # documents that contain entities
     df = pd.DataFrame(
         [
             {
@@ -221,7 +205,6 @@ async def test_label_studio_skill_with_ner():
 
     agent = Agent(**agent_payload)
     predictions = await agent.arun(df)
-    # predictions = agent.run(df)
 
     expected_predictions = [
         [{"start": 0, "end": 10, "labels": ["Organization"], "text": "Apple Inc."}],
@@ -247,8 +230,6 @@ async def test_label_studio_skill_with_ner():
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_label_studio_skill_valid_predictions():
-    # @pytest.mark.vcr
-    # def test_label_studio_skill_valid_predictions():
     """
     Fuzz test matrix of text input tags x control tags x models
     """
