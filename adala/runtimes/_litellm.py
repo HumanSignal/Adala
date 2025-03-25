@@ -518,7 +518,8 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
         super().init_runtime()
         # Only running this supports_vision check for non-vertex models, since its based on a static JSON file in
         # litellm which was not up to date. Will be soon in next release - should update this
-        if not self.model.startswith("vertex_ai"):
+        # Added azure to the exception list bc https://github.com/BerriAI/litellm/issues/6524
+        if not self.model.startswith(("vertex_ai", "azure")):
             model_name = self.model
             if not litellm.supports_vision(model_name):
                 raise ValueError(f"Model {self.model} does not support vision")
