@@ -103,7 +103,11 @@ def handle_llm_exception(
         n_attempts = retries.stop.max_attempt_number
         if prompt_token_count is None:
             prompt_token_count = token_counter(model=model, messages=messages[:-1])
-        if type(e).__name__ in {"APIError", "AuthenticationError", "APIConnectionError"}:
+        if type(e).__name__ in {
+            "APIError",
+            "AuthenticationError",
+            "APIConnectionError",
+        }:
             prompt_tokens = 0
         else:
             prompt_tokens = n_attempts * prompt_token_count

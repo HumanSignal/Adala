@@ -24,7 +24,7 @@ from litellm.exceptions import (
     BadRequestError,
     NotFoundError,
     APIConnectionError,
-    APIError
+    APIError,
 )
 from litellm.types.utils import Usage
 import instructor
