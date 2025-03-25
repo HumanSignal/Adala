@@ -109,6 +109,7 @@ class ValidateConnectionRequest(BaseModel):
     deployment_name: Optional[str] = None
     endpoint: Optional[str] = None
     auth_token: Optional[str] = None
+    model: Optional[str] = None
 
 
 class ValidateConnectionResponse(BaseModel):
@@ -174,8 +175,18 @@ def get_index():
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     logger.error(f"Request validation error: {exc}")
+    
+    formatted_errors = []
+    for error in exc.errors():
+        error_type = error.get("type", "unknown_error")
+        error_loc = " -> ".join(str(loc) for loc in error.get("loc", []))
+        error_msg = error.get("msg", "No error message")
+        formatted_errors.append(f"{error_loc}: {error_msg} ({error_type})")
+    
+    formatted_errors_str = "\n".join(formatted_errors)
     return JSONResponse(
-        content=str(exc), status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
+        content=f"Validation {'errors' if len(formatted_errors) > 1 else 'error'}: {formatted_errors_str}",
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
     )
 
 
@@ -246,19 +257,11 @@ async def submit_batch(batch: BatchData):
 
 @app.post("/validate-connection", response_model=Response[ValidateConnectionResponse])
 async def validate_connection(request: ValidateConnectionRequest):
-    # TODO: move this logic to LSE, this is the last place Adala needs to be updated when adding a provider connection
-    multi_model_provider_test_models = {
-        "openai": "gpt-4o-mini",
-        "vertexai": "vertex_ai/gemini-1.5-flash",
-        "gemini": "gemini/gemini-1.5-flash",
-        "anthropic": "anthropic/claude-3-5-sonnet-20241022",
-    }
     provider = request.provider.lower()
     messages = [{"role": "user", "content": "Hey, how's it going?"}]
 
     # For multi-model providers use a model that every account should have access to
-    if provider in multi_model_provider_test_models.keys():
-        model = multi_model_provider_test_models[provider]
+    if request.model:
         if provider == "vertexai":
             model_extra = {"vertex_credentials": request.vertex_credentials}
             if request.vertex_location:
@@ -270,7 +273,7 @@ async def validate_connection(request: ValidateConnectionRequest):
         try:
             response = litellm.completion(
                 messages=messages,
-                model=model,
+                model=request.model,
                 max_tokens=10,
                 temperature=0.0,
                 **model_extra,
@@ -278,7 +281,7 @@ async def validate_connection(request: ValidateConnectionRequest):
         except AuthenticationError:
             raise HTTPException(
                 status_code=400,
-                detail=f"Requested model '{model}' is not available with your api_key / credentials",
+                detail=f"Requested model '{request.model}' is not available with your api_key / credentials",
             )
         except Exception as e:
             raise HTTPException(
