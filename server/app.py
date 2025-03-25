@@ -175,14 +175,14 @@ def get_index():
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     logger.error(f"Request validation error: {exc}")
-    
+
     formatted_errors = []
     for error in exc.errors():
         error_type = error.get("type", "unknown_error")
         error_loc = " -> ".join(str(loc) for loc in error.get("loc", []))
         error_msg = error.get("msg", "No error message")
         formatted_errors.append(f"{error_loc}: {error_msg} ({error_type})")
-    
+
     formatted_errors_str = "\n".join(formatted_errors)
     return JSONResponse(
         content=f"Validation {'errors' if len(formatted_errors) > 1 else 'error'}: {formatted_errors_str}",

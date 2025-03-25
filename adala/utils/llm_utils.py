@@ -70,7 +70,7 @@ def get_canonical_model_provider_string(
                 api_key=api_key,
                 base_url=base_url,
             )
-            
+
         # Ensure the model contains a provider prefix
         if "/" in model:
             model = model.split("/", 1)[0] + "/" + resp.model
