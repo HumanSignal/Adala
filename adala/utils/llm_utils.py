@@ -70,7 +70,11 @@ def get_canonical_model_provider_string(
                 api_key=api_key,
                 base_url=base_url,
             )
-        return match_model_provider_string(resp.model)
+            
+        # Ensure the model contains a provider prefix
+        if "/" in model:
+            model = model.split("/", 1)[0] + "/" + resp.model
+        return match_model_provider_string(model)
     except NoModelsFoundError:
         logger.warning(
             f"Model {model} not found in litellm model map for provider {provider}. This is likely a custom model."

@@ -476,7 +476,7 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
         # Only running this supports_vision check for non-vertex models, since its based on a static JSON file in
         # litellm which was not up to date. Will be soon in next release - should update this
         if not self.model.startswith("vertex_ai"):
-            model_name = self.model
+            model_name = self.canonical_model_provider_string
             if not litellm.supports_vision(model_name):
                 raise ValueError(f"Model {self.model} does not support vision")
         return self
