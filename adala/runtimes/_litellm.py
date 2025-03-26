@@ -24,6 +24,7 @@ from litellm.exceptions import (
     BadRequestError,
     NotFoundError,
     APIConnectionError,
+    APIError
 )
 from litellm.types.utils import Usage
 import instructor
@@ -59,8 +60,10 @@ from rich import print
 from tenacity import (
     AsyncRetrying,
     Retrying,
+    retry_if_exception_type,
     retry_if_not_exception_type,
     stop_after_attempt,
+    wait_fixed,
     wait_random_exponential,
 )
 from pydantic_core._pydantic_core import ValidationError
@@ -92,8 +95,12 @@ litellm.drop_params = True
 #     wait=wait_random_exponential(multiplier=1, max=60),
 # )
 
-# For now, disabling all instructor retries as of DIA-1910 to speed up inference runs greatly
-RETRY_POLICY = dict(stop=stop_after_attempt(1))
+# DIA-1910 disabled all retries - DIA-2083 introduces retries on APIError caused by connection error
+RETRY_POLICY = dict(
+    retry=retry_if_exception_type(APIError),
+    stop=stop_after_attempt(3),
+    wait=wait_fixed(1),
+)
 retries = Retrying(**RETRY_POLICY)
 async_retries = AsyncRetrying(**RETRY_POLICY)
 
