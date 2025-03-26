@@ -17,74 +17,9 @@ from adala.utils.parse import MessagesBuilder, MessageChunkType
 from adala.utils.exceptions import ConstrainedGenerationError
 from adala.utils.types import debug_time_it
 from adala.utils.model_info_utils import match_model_provider_string, NoModelsFoundError
+from litellm.exceptions import BadRequestError
 
 logger = logging.getLogger(__name__)
-
-
-@lru_cache(maxsize=128)
-def get_canonical_model_provider_string(
-    model: str,
-    provider: Optional[str] = None,
-    base_url: Optional[str] = None,
-    api_key: Optional[str] = None,
-) -> str:
-    """
-    Get the canonical model provider string in the format 'provider/model_name'.
-    This function is cached for efficiency using LRU cache.
-
-    Args:
-        model: The model name to get the canonical string for
-        provider: Optional provider name to use for hints
-        base_url: Optional base URL to use for hints
-        api_key: Optional API key to use for hints
-
-    Returns:
-        String in the format 'provider/model_name'
-    """
-    try:
-        return match_model_provider_string(model)
-    except NoModelsFoundError:
-        logger.info(
-            f"Model {model} not found in litellm model map for provider {provider}. This is likely a single-model deployment."
-        )
-    except Exception as e:
-        logger.exception(
-            f"(1/2) Failed to get canonical model provider string for {model}"
-        )
-
-    # If direct matching fails, try to check with a simple completion request
-    try:
-        # We'd need to implement proper client checking here based on context
-        if provider == "Custom":
-            from openai import OpenAI
-
-            client = OpenAI(api_key=api_key, base_url=base_url)
-            resp = client.chat.completions.create(
-                model=model, messages=[{"role": "user", "content": ""}], max_tokens=1
-            )
-        else:
-            resp = litellm.completion(
-                model=model,
-                messages=[{"role": "user", "content": ""}],
-                max_tokens=1,
-                api_key=api_key,
-                base_url=base_url,
-            )
-
-        # Ensure the model contains a provider prefix
-        if "/" in model:
-            model = model.split("/", 1)[0] + "/" + resp.model
-        return match_model_provider_string(model)
-    except NoModelsFoundError:
-        logger.warning(
-            f"Model {model} not found in litellm model map for provider {provider}. This is likely a custom model."
-        )
-        return model
-    except Exception as e:
-        logger.exception(
-            f"(2/2) Failed to get canonical model provider string for {model}"
-        )
-        return model
 
 
 def _get_usage_dict(usage: Usage, model: str) -> Dict:

@@ -2,6 +2,9 @@ import re
 import litellm
 import logging
 from typing import Optional, List
+import traceback
+from litellm.exceptions import BadRequestError
+from functools import lru_cache
 
 logger = logging.getLogger(__name__)
 
@@ -141,3 +144,137 @@ def _estimate_cost(
     total_cost = prompt_cost + completion_cost
 
     return prompt_cost, completion_cost, total_cost
+
+
+@lru_cache(maxsize=128)
+def get_canonical_model_provider_string(
+    model: str,
+    provider: Optional[str] = None,
+    base_url: Optional[str] = None,
+    api_key: Optional[str] = None,
+) -> str:
+    """
+    Get the canonical model provider string in the format 'provider/model_name'.
+    This function is cached for efficiency using LRU cache.
+
+    Args:
+        model: The model name to get the canonical string for
+        provider: Optional provider name to use for hints
+        base_url: Optional base URL to use for hints
+        api_key: Optional API key to use for hints
+
+    Returns:
+        String in the format 'provider/model_name'
+    """
+    try:
+        return match_model_provider_string(model)
+    except (NoModelsFoundError, BadRequestError) as e:
+        logger.info(
+            f"Model {model} not found in litellm model map for provider {provider}. This is likely a single-model deployment."
+        )
+        logger.debug(f"Exception: {str(e)}\nTraceback: {traceback.format_exc()}")
+    except Exception as e:
+        logger.exception(
+            f"(1/2) Failed to get canonical model provider string for {model}."
+        )
+
+    # If direct matching fails, try to check with a simple completion request
+    try:
+        # We'd need to implement proper client checking here based on context
+        if provider == "Custom":
+            from openai import OpenAI
+
+            client = OpenAI(api_key=api_key, base_url=base_url)
+            resp = client.chat.completions.create(
+                model=model, messages=[{"role": "user", "content": ""}], max_tokens=1
+            )
+        else:
+            resp = litellm.completion(
+                model=model,
+                messages=[{"role": "user", "content": ""}],
+                max_tokens=1,
+                api_key=api_key,
+                base_url=base_url,
+            )
+        # Ensure the model contains a provider prefix
+        if "/" in model and model != resp.model:
+            model = model.split("/", 1)[0] + "/" + resp.model
+        return match_model_provider_string(model)
+    except (NoModelsFoundError, BadRequestError) as e:
+        logger.warning(
+            f"Model {model} not found in litellm model map for provider {provider}. This is likely a custom model."
+        )
+        logger.debug(f"Exception: {str(e)}\nTraceback: {traceback.format_exc()}")
+        return model
+    except Exception as e:
+        logger.exception(
+            f"(2/2) Failed to get canonical model provider string for {model}"
+        )
+        return model
+
+
+@lru_cache(maxsize=128)
+async def get_canonical_model_provider_string_async(
+    model: str,
+    provider: Optional[str] = None,
+    base_url: Optional[str] = None,
+    api_key: Optional[str] = None,
+) -> str:
+    """
+    Async version of get_canonical_model_provider_string.
+    Get the canonical model provider string in the format 'provider/model_name'.
+
+    Args:
+        model: The model name to get the canonical string for
+        provider: Optional provider name to use for hints
+        base_url: Optional base URL to use for hints
+        api_key: Optional API key to use for hints
+
+    Returns:
+        String in the format 'provider/model_name'
+    """
+    try:
+        return match_model_provider_string(model)
+    except (NoModelsFoundError, BadRequestError) as e:
+        logger.info(
+            f"Model {model} not found in litellm model map for provider {provider}. This is likely a single-model deployment."
+        )
+        logger.debug(f"Exception: {str(e)}\nTraceback: {traceback.format_exc()}")
+    except Exception as e:
+        logger.exception(
+            f"(1/2) Failed to get canonical model provider string for {model}."
+        )
+
+    # If direct matching fails, try to check with a simple completion request
+    try:
+        # We'd need to implement proper client checking here based on context
+        if provider == "Custom":
+            from openai import AsyncOpenAI
+
+            client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+            resp = await client.chat.completions.create(
+                model=model, messages=[{"role": "user", "content": ""}], max_tokens=1
+            )
+        else:
+            resp = await litellm.acompletion(
+                model=model,
+                messages=[{"role": "user", "content": ""}],
+                max_tokens=1,
+                api_key=api_key,
+                base_url=base_url,
+            )
+        # Ensure the model contains a provider prefix
+        if "/" in model and model != resp.model:
+            model = model.split("/", 1)[0] + "/" + resp.model
+        return match_model_provider_string(model)
+    except (NoModelsFoundError, BadRequestError) as e:
+        logger.warning(
+            f"Model {model} not found in litellm model map for provider {provider}. This is likely a custom model."
+        )
+        logger.debug(f"Exception: {str(e)}\nTraceback: {traceback.format_exc()}")
+        return model
+    except Exception as e:
+        logger.exception(
+            f"(2/2) Failed to get canonical model provider string for {model}"
+        )
+        return model

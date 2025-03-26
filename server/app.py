@@ -380,7 +380,7 @@ async def estimate_cost(
             output_fields = (
                 list(skill.field_schema.keys()) if skill.field_schema else None
             )
-            cost_estimate = runtime.get_cost_estimate(
+            cost_estimate = await runtime.get_cost_estimate_async(
                 prompt=prompt,
                 substitutions=substitutions,
                 output_fields=output_fields,

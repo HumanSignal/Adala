@@ -1,0 +1,312 @@
+interactions:
+- request:
+    body: '{"messages": [{"role": "user", "content": "\n                    Given
+      the github issue title:\nI can''t login\n and the description:\nI can''t login
+      to the platform\n, \n                    classify the issue. Provide a rationale
+      for your classification. \n                    Evaluate the final classification
+      on a Likert scale from 1 to 5, \n                    where 1 is \"Completely
+      irrelevant\" and 5 is \"Completely relevant\"."}], "model": "deepseek-ai/DeepSeek-V3-0324-fast",
+      "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
+      "function", "function": {"name": "MyModel"}}, "tools": [{"type": "function",
+      "function": {"name": "MyModel", "description": "Correctly extracted `MyModel`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"title": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null,
+      "title": "Title"}, "description": {"anyOf": [{"type": "string"}, {"items": {"type":
+      "string"}, "type": "array"}, {"type": "null"}], "default": null, "description":
+      "Text or list of texts for description", "title": "Description"}, "classification":
+      {"description": "Choices for title", "enum": ["Bug report", "Feature request",
+      "Question", "Other"], "title": "Classification", "type": "string"}, "rationale":
+      {"anyOf": [{"type": "string"}, {"items": {"type": "string"}, "type": "array"},
+      {"type": "null"}], "default": null, "description": "Text or list of texts for
+      title", "title": "Rationale"}, "evaluation": {"description": "Rating for title
+      (0 to 5)", "maximum": 5, "minimum": 0, "title": "Evaluation", "type": "integer"}},
+      "required": ["classification", "evaluation"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1669'
+      content-type:
+      - application/json
+      host:
+      - router.huggingface.co
+      user-agent:
+      - AsyncOpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://router.huggingface.co/nebius/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-df4cb5405c464bf38ab95473007503fd","choices":[{"finish_reason":"stop","index":0,"logprobs":null,"message":{"content":"","refusal":null,"role":"assistant","audio":null,"function_call":null,"tool_calls":[{"id":"chatcmpl-tool-3c27b364ccd24f2cbf1d8dd717bf550b","function":{"arguments":"{
+        \"classification\": \"Bug report\", \"rationale\": \"The issue describes a
+        problem with logging in to the platform, which is a core functionality issue.
+        This fits the definition of a bug report, as it indicates a failure in the
+        system''s expected behavior (users should be able to log in).\", \"evaluation\":
+        4 }","name":"MyModel"},"type":"function"}],"reasoning_content":null},"stop_reason":null}],"created":1743001628,"model":"deepseek-ai/DeepSeek-V3-0324-fast","object":"chat.completion","service_tier":null,"system_fingerprint":null,"usage":{"completion_tokens":70,"prompt_tokens":80,"total_tokens":150,"completion_tokens_details":null,"prompt_tokens_details":null},"prompt_logprobs":null}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Xet-Access-Token,X-Xet-Token-Expiration,X-Xet-Refresh-Route,X-Xet-Cas-Url,X-Xet-Hash
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '991'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 26 Mar 2025 15:07:12 GMT
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 4c13f73e83aaf9d7bee2c3b379c641d6.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - ZDJhAgolknC3hO2QSJYW0-btqlEbR3eeTdRObn7Ft8A3yj5OcuYF0w==
+      X-Amz-Cf-Pop:
+      - LIS50-P1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-67e4181c-3291c9c419a4bc8512a41c24
+      X-Robots-Tag:
+      - none
+      cross-origin-opener-policy:
+      - same-origin
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '600'
+      x-ratelimit-limit-tokens:
+      - '200000'
+      x-ratelimit-remaining-requests:
+      - '600'
+      x-ratelimit-remaining-tokens:
+      - '200000'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "user", "content": "\n                    Given
+      the github issue title:\nSupport new file types\n and the description:\nIt would
+      be great if we could upload files of type .docx\n, \n                    classify
+      the issue. Provide a rationale for your classification. \n                    Evaluate
+      the final classification on a Likert scale from 1 to 5, \n                    where
+      1 is \"Completely irrelevant\" and 5 is \"Completely relevant\"."}], "model":
+      "deepseek-ai/DeepSeek-V3-0324-fast", "max_tokens": 1000, "seed": 47, "temperature":
+      0.0, "tool_choice": {"type": "function", "function": {"name": "MyModel"}}, "tools":
+      [{"type": "function", "function": {"name": "MyModel", "description": "Correctly
+      extracted `MyModel` with all the required parameters with correct types", "parameters":
+      {"properties": {"title": {"anyOf": [{"type": "string"}, {"type": "null"}], "default":
+      null, "title": "Title"}, "description": {"anyOf": [{"type": "string"}, {"items":
+      {"type": "string"}, "type": "array"}, {"type": "null"}], "default": null, "description":
+      "Text or list of texts for description", "title": "Description"}, "classification":
+      {"description": "Choices for title", "enum": ["Bug report", "Feature request",
+      "Question", "Other"], "title": "Classification", "type": "string"}, "rationale":
+      {"anyOf": [{"type": "string"}, {"items": {"type": "string"}, "type": "array"},
+      {"type": "null"}], "default": null, "description": "Text or list of texts for
+      title", "title": "Rationale"}, "evaluation": {"description": "Rating for title
+      (0 to 5)", "maximum": 5, "minimum": 0, "title": "Evaluation", "type": "integer"}},
+      "required": ["classification", "evaluation"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1705'
+      content-type:
+      - application/json
+      host:
+      - router.huggingface.co
+      user-agent:
+      - AsyncOpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://router.huggingface.co/nebius/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-5b3c42f5f94f4dd3a5598ad9ce5da59c","choices":[{"finish_reason":"stop","index":0,"logprobs":null,"message":{"content":"","refusal":null,"role":"assistant","audio":null,"function_call":null,"tool_calls":[{"id":"chatcmpl-tool-e99d9b73b82c4d21a06da84d80d18d9e","function":{"arguments":"{
+        \"classification\": \"Feature request\", \"rationale\": \"The issue is requesting
+        support for a new file type (.docx) to be uploaded, which is a new functionality
+        or enhancement to the existing system. This fits the definition of a feature
+        request, as it is not reporting a bug or asking for documentation, but rather
+        suggesting an improvement or addition to the product''s capabilities.\", \"evaluation\":
+        5 }","name":"MyModel"},"type":"function"}],"reasoning_content":null},"stop_reason":null}],"created":1743001628,"model":"deepseek-ai/DeepSeek-V3-0324-fast","object":"chat.completion","service_tier":null,"system_fingerprint":null,"usage":{"completion_tokens":85,"prompt_tokens":87,"total_tokens":172,"completion_tokens_details":null,"prompt_tokens_details":null},"prompt_logprobs":null}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Xet-Access-Token,X-Xet-Token-Expiration,X-Xet-Refresh-Route,X-Xet-Cas-Url,X-Xet-Hash
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1089'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 26 Mar 2025 15:07:14 GMT
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 27a35654821ee52d8aa69c940ad5de7e.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - 1SmkWR5Qg8WI70kvl7dhNjy-WfHxjIC5jQKRbMpObTMpxJ7_2db2WQ==
+      X-Amz-Cf-Pop:
+      - LIS50-P1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-67e4181c-145868e2110381ce07e36164
+      X-Robots-Tag:
+      - none
+      cross-origin-opener-policy:
+      - same-origin
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '600'
+      x-ratelimit-limit-tokens:
+      - '200000'
+      x-ratelimit-remaining-requests:
+      - '600'
+      x-ratelimit-remaining-tokens:
+      - '200000'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "user", "content": ""}], "model": "deepseek-ai/DeepSeek-V3-0324-fast",
+      "max_tokens": 1}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '110'
+      content-type:
+      - application/json
+      host:
+      - router.huggingface.co
+      user-agent:
+      - AsyncOpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://router.huggingface.co/nebius/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-d79a8210cbec44418a96a36972370d0d\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"logprobs\":null,\"message\":{\"content\":\"\u4F60\u597D\",\"refusal\":null,\"role\":\"assistant\",\"audio\":null,\"function_call\":null,\"tool_calls\":[],\"reasoning_content\":null},\"stop_reason\":null}],\"created\":1743001637,\"model\":\"deepseek-ai/DeepSeek-V3-0324-fast\",\"object\":\"chat.completion\",\"service_tier\":null,\"system_fingerprint\":null,\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":3,\"total_tokens\":4,\"completion_tokens_details\":null,\"prompt_tokens_details\":null},\"prompt_logprobs\":null}"
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Xet-Access-Token,X-Xet-Token-Expiration,X-Xet-Refresh-Route,X-Xet-Cas-Url,X-Xet-Hash
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '564'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 26 Mar 2025 15:07:17 GMT
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 68c9162ccc29f8f3ca30be36950cea58.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - _fnohY-6f8NnqzP4d-r6eap52B1Eptxil71DI9SKAfOoLyOWjY54ow==
+      X-Amz-Cf-Pop:
+      - LIS50-P1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-67e41825-192cc54a524485926b5be658
+      X-Robots-Tag:
+      - none
+      cross-origin-opener-policy:
+      - same-origin
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '600'
+      x-ratelimit-limit-tokens:
+      - '200000'
+      x-ratelimit-remaining-requests:
+      - '600'
+      x-ratelimit-remaining-tokens:
+      - '200000'
+    status:
+      code: 200
+      message: OK
+version: 1
