@@ -1,0 +1,212 @@
+interactions:
+- request:
+    body: '{"messages": [{"role": "user", "content": ""}], "model": "gpt4o", "max_tokens":
+      1}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '82'
+      content-type:
+      - application/json
+      host:
+      - humansignal-openai-test.openai.azure.com
+      user-agent:
+      - AzureOpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://humansignal-openai-test.openai.azure.com/openai/deployments/gpt4o/chat/completions?api-version=2024-08-01-preview
+  response:
+    body:
+      string: '{"choices":[{"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"filtered":false,"detected":false},"protected_material_text":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"length","index":0,"logprobs":null,"message":{"content":"Hello","refusal":null,"role":"assistant"}}],"created":1743029672,"id":"chatcmpl-BFTvkE6QUUnfU058kGGuvi0APFbJw","model":"gpt-4o-2024-05-13","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{}}],"system_fingerprint":"fp_65792305e4","usage":{"completion_tokens":1,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":0,"rejected_prediction_tokens":0},"prompt_tokens":7,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":8}}
+
+        '
+    headers:
+      Content-Length:
+      - '959'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 26 Mar 2025 22:54:32 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      apim-request-id:
+      - ae64a267-2a3c-4093-8b94-00695f48cc22
+      azureml-model-session:
+      - v20250319-1-164616836
+      cmp-upstream-response-duration:
+      - '140'
+      ms-azureml-model-time:
+      - '192'
+      x-accel-buffering:
+      - 'no'
+      x-aml-cluster:
+      - hyena-eastus2-02
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '194'
+      x-ms-client-request-id:
+      - ae64a267-2a3c-4093-8b94-00695f48cc22
+      x-ms-rai-invoked:
+      - 'true'
+      x-ms-region:
+      - East US
+      x-ratelimit-limit-requests:
+      - '900'
+      x-ratelimit-limit-tokens:
+      - '900000'
+      x-ratelimit-remaining-requests:
+      - '899'
+      x-ratelimit-remaining-tokens:
+      - '899998'
+      x-request-id:
+      - b8b22626-4364-4b06-b1ee-7591828fdcff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "\n                As a genius
+      expert, your task is to understand the content and provide\n                the
+      parsed objects in json that match the following json_schema:\n\n\n                {\n  \"properties\":
+      {\n    \"output\": {\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"items\":
+      {\n            \"type\": \"string\"\n          },\n          \"type\": \"array\"\n        },\n        {\n          \"type\":
+      \"null\"\n        }\n      ],\n      \"default\": null,\n      \"description\":
+      \"Text or list of texts for pdf\",\n      \"title\": \"Output\"\n    }\n  },\n  \"title\":
+      \"MyModel\",\n  \"type\": \"object\"\n}\n\n                Make sure to return
+      an instance of the JSON, not the schema itself\n"}, {"role": "user", "content":
+      [{"type": "text", "text": "\n                    Extract the publication reference
+      with author name(s) and year from the last page 9: "}, {"type": "image_url",
+      "image_url": {"url": "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0000.png"}},
+      {"type": "image_url", "image_url": {"url": "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0001.png"}},
+      {"type": "image_url", "image_url": {"url": "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0002.png"}},
+      {"type": "image_url", "image_url": {"url": "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0003.png"}},
+      {"type": "image_url", "image_url": {"url": "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0004.png"}},
+      {"type": "image_url", "image_url": {"url": "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0005.png"}},
+      {"type": "image_url", "image_url": {"url": "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0006.png"}},
+      {"type": "image_url", "image_url": {"url": "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0007.png"}},
+      {"type": "image_url", "image_url": {"url": "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0008.png"}},
+      {"type": "text", "text": ". DON''T ANALYZE ANY OTHER PAGES.\n                "}]}],
+      "model": "gpt4o", "max_tokens": 4096, "response_format": {"type": "json_object"},
+      "seed": 47, "temperature": 0.0}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '2166'
+      content-type:
+      - application/json
+      host:
+      - humansignal-openai-test.openai.azure.com
+      user-agent:
+      - AsyncAzureOpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://humansignal-openai-test.openai.azure.com/openai/deployments/gpt4o/chat/completions?api-version=2024-08-01-preview
+  response:
+    body:
+      string: '{"choices":[{"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"filtered":false,"detected":false},"protected_material_text":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"stop","index":0,"logprobs":null,"message":{"content":"{\n  \"output\":
+        [\n    \"Amsterdam et al., J Am Coll Cardiol 2014, 64: e139-228\",\n    \"Fihn
+        et al., J Am Coll Cardiol 2012, 126: e354-471\",\n    \"Task Force et al.,
+        Eur Heart J 2013, 34: 2949-3003\",\n    \"Patel et al., J Thorac Cardiovasc
+        Surg 2012, 143: 780-803\",\n    \"Smith et al., Circulation 2011, 124: 2458-73\",\n    \"Goff
+        et al., J Am Coll Cardiol 2014, 63: 2935-59\",\n    \"Whelton et al., J Am
+        Coll Cardiol 2017\",\n    \"Arnett et al., J Am Coll Cardiol 2019, 74: 1376-414\",\n    \"MacMahon
+        et al., Radiology 2017, 284: 228-43\",\n    \"Piepoli et al., Eur Heart J
+        2016, 37: 2315-81\",\n    \"Bhatnagar et al., Circulation 2014, 130: 1418-36\",\n    \"Arnett
+        et al., J Am Coll Cardiol 2019, 74: 1376-414\",\n    \"Crowley and Health
+        Public Policy Committee of the American College of, Ann Intern Med 2015, 162:
+        583-4\",\n    \"Fihn et al., Circulation 2012, 126: e354-471\",\n    \"National
+        Institute for Health and Clinical Excellence (NICE), Chest pain of recent
+        onset. Clinical Guideline 95. 2010\"\n  ]\n}","refusal":null,"role":"assistant"}}],"created":1743029679,"id":"chatcmpl-BFTvrVgJmqjQpyFePqfvOVDXSLzIg","model":"gpt-4o-2024-05-13","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_result":{"jailbreak":{"filtered":false,"detected":false},"custom_blocklists":{"filtered":false,"details":[]}}},{"prompt_index":7,"content_filter_result":{"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"},"hate":{"filtered":false,"severity":"safe"},"self_harm":{"filtered":false,"severity":"safe"},"custom_blocklists":{"filtered":false,"details":[]}}},{"prompt_index":2,"content_filter_result":{"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"},"hate":{"filtered":false,"severity":"safe"},"self_harm":{"filtered":false,"severity":"safe"},"custom_blocklists":{"filtered":false,"details":[]}}},{"prompt_index":1,"content_filter_result":{"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"},"hate":{"filtered":false,"severity":"safe"},"self_harm":{"filtered":false,"severity":"safe"},"custom_blocklists":{"filtered":false,"details":[]}}},{"prompt_index":8,"content_filter_result":{"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"},"hate":{"filtered":false,"severity":"safe"},"self_harm":{"filtered":false,"severity":"safe"},"custom_blocklists":{"filtered":false,"details":[]}}},{"prompt_index":6,"content_filter_result":{"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"},"hate":{"filtered":false,"severity":"safe"},"self_harm":{"filtered":false,"severity":"safe"},"custom_blocklists":{"filtered":false,"details":[]}}},{"prompt_index":5,"content_filter_result":{"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"},"hate":{"filtered":false,"severity":"safe"},"self_harm":{"filtered":false,"severity":"safe"},"custom_blocklists":{"filtered":false,"details":[]}}},{"prompt_index":9,"content_filter_result":{"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"},"hate":{"filtered":false,"severity":"safe"},"self_harm":{"filtered":false,"severity":"safe"},"custom_blocklists":{"filtered":false,"details":[]}}},{"prompt_index":4,"content_filter_result":{"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"},"hate":{"filtered":false,"severity":"safe"},"self_harm":{"filtered":false,"severity":"safe"},"custom_blocklists":{"filtered":false,"details":[]}}},{"prompt_index":3,"content_filter_result":{"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"},"hate":{"filtered":false,"severity":"safe"},"self_harm":{"filtered":false,"severity":"safe"},"custom_blocklists":{"filtered":false,"details":[]}}}],"system_fingerprint":"fp_b705f0c291","usage":{"completion_tokens":370,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":0,"rejected_prediction_tokens":0},"prompt_tokens":7087,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":7457}}'
+    headers:
+      Content-Length:
+      - '4646'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 26 Mar 2025 22:54:43 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      api-supported-versions:
+      - '1'
+      apim-request-id:
+      - 3ac5a987-71ce-4d43-b775-95ce3de1ee00
+      azureml-model-session:
+      - v20250319-1-164616836
+      request-id:
+      - 3ac5a987-71ce-4d43-b775-95ce3de1ee00
+      x-accel-buffering:
+      - 'no'
+      x-aml-cluster:
+      - hyena-eastus2-02
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '11211'
+      x-ms-client-request-id:
+      - 3ac5a987-71ce-4d43-b775-95ce3de1ee00
+      x-ms-rai-invoked:
+      - 'true'
+      x-ms-region:
+      - East US
+      x-ratelimit-limit-requests:
+      - '900'
+      x-ratelimit-limit-tokens:
+      - '900000'
+      x-ratelimit-remaining-requests:
+      - '898'
+      x-ratelimit-remaining-tokens:
+      - '886689'
+      x-request-id:
+      - e3269a5a-9433-4b05-a8fa-d55ef9fdffe5
+    status:
+      code: 200
+      message: OK
+version: 1

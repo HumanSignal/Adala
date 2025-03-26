@@ -12,7 +12,7 @@ from server.app import _get_redis_conn
 @pytest.fixture(scope="module")
 def vcr_config():
     return {
-        "filter_headers": ["authorization"],
+        "filter_headers": ["authorization", "api-key"],
         "match_on": ("method", "scheme", "host", "port", "path", "query", "body"),
     }
 
