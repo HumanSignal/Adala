@@ -1,0 +1,91 @@
+interactions:
+- request:
+    body: '{"messages": [{"role": "user", "content": ""}], "model": "gpt4o", "max_tokens":
+      1}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '82'
+      content-type:
+      - application/json
+      host:
+      - humansignal-openai-test.openai.azure.com
+      user-agent:
+      - AsyncAzureOpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://humansignal-openai-test.openai.azure.com/openai/deployments/gpt4o/chat/completions?api-version=2024-08-01-preview
+  response:
+    body:
+      string: '{"choices":[{"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"filtered":false,"detected":false},"protected_material_text":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"length","index":0,"logprobs":null,"message":{"content":"Hello","refusal":null,"role":"assistant"}}],"created":1743082892,"id":"chatcmpl-BFhm8rDflZdoPzhTJQh68K5MlLy5p","model":"gpt-4o-2024-05-13","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{}}],"system_fingerprint":"fp_65792305e4","usage":{"completion_tokens":1,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":0,"rejected_prediction_tokens":0},"prompt_tokens":7,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":8}}
+
+        '
+    headers:
+      Content-Length:
+      - '959'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 27 Mar 2025 13:41:32 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      apim-request-id:
+      - 6ad0ca11-2dad-4da4-a6be-f7d3210aa80f
+      azureml-model-session:
+      - v20250319-1-164616836
+      cmp-upstream-response-duration:
+      - '473'
+      ms-azureml-model-time:
+      - '515'
+      x-accel-buffering:
+      - 'no'
+      x-aml-cluster:
+      - hyena-eastus2-01
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '518'
+      x-ms-client-request-id:
+      - 6ad0ca11-2dad-4da4-a6be-f7d3210aa80f
+      x-ms-rai-invoked:
+      - 'true'
+      x-ms-region:
+      - East US
+      x-ratelimit-limit-requests:
+      - '900'
+      x-ratelimit-limit-tokens:
+      - '900000'
+      x-ratelimit-remaining-requests:
+      - '899'
+      x-ratelimit-remaining-tokens:
+      - '899998'
+      x-request-id:
+      - 71ea21e6-1ad3-4b0d-acfd-bb7f207edbec
+    status:
+      code: 200
+      message: OK
+version: 1

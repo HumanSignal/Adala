@@ -10,7 +10,7 @@ from adala.runtimes.base import CostEstimate
 
 @pytest.mark.asyncio
 @pytest.mark.vcr
-async def test_custom_endpoint_with_cost_estimate():
+async def test_custom_endpoint_simple():
 
     df = pd.DataFrame(
         [
@@ -77,28 +77,26 @@ async def test_custom_endpoint_with_cost_estimate():
     # Check that we have evaluations and they're all within the valid range
     assert all(1 <= eval_score <= 5 for eval_score in predictions.evaluation.tolist())
 
-    # Test get_cost_estimate function
-    runtime = agent.get_runtime()
-
-    # Define test prompt and substitutions for cost estimation
-    test_prompt = "Classify the following github issue: Title: {title}, Description: {description}"
-    substitutions = [
-        {"title": "Login broken", "description": "Can't log in to the application"},
-        {"title": "Add PDF support", "description": "Need to support PDF file uploads"},
-    ]
-
-    # Get cost estimate with output fields
-    output_fields = ["classification", "rationale", "evaluation"]
-    cost_estimate = await runtime.get_cost_estimate_async(
-        prompt=test_prompt,
-        substitutions=substitutions,
-        output_fields=output_fields,
-        provider="Custom",
-    )
-
-    # Verify the cost estimate structure
-    assert cost_estimate.is_error
-    assert (
-        cost_estimate.error_message
-        == "Model deepseek-ai/DeepSeek-V3-0324-fast for provider Custom not found."
-    )
+    # Assert specific values in the predictions
+    expected_classifications = ["Bug report", "Feature request"]
+    assert predictions.classification.tolist() == expected_classifications
+    
+    # Assert rationales match expected content
+    assert "unable to log in" in predictions.rationale[0]
+    assert "new file type (.docx)" in predictions.rationale[1]
+    
+    # Assert all evaluations are 5
+    assert all(score == 5 for score in predictions.evaluation.tolist())
+    
+    # Assert precise token counts
+    assert predictions._prompt_tokens.tolist() == [80, 87]
+    assert predictions._completion_tokens.tolist() == [76, 78]
+    
+    # Assert costs are None
+    assert all(cost is None for cost in predictions._prompt_cost_usd.tolist())
+    assert all(cost is None for cost in predictions._completion_cost_usd.tolist())
+    assert all(cost is None for cost in predictions._total_cost_usd.tolist())
+    
+    # Assert title and description are None (as they were input fields)
+    assert all(title is None for title in predictions.title.tolist())
+    assert all(description is None for description in predictions.description.tolist())

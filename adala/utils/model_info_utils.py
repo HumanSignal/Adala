@@ -52,12 +52,14 @@ def match_model_provider_string(model: str) -> str:
     """Given a string of the form 'provider/model', return the 'provider/model' as listed in litellm's model map"""
     # NOTE: if needed, can pass api_base and api_key into this function for additional hints
     model_name, provider, _, _ = litellm.get_llm_provider(model)
-
+    
     # amazingly, litellm.cost_per_token refers to a hardcoded dictionary litellm.model_cost which is case-sensitive with inconsistent casing.....
     # Example: 'azure_ai/deepseek-r1' vs 'azure_ai/Llama-3.3-70B-Instruct'
     lowercase_to_canonical_case = {
         k.lower(): k for k in litellm.models_by_provider[provider]
     }
+    if model_name.lower() in lowercase_to_canonical_case:
+        return lowercase_to_canonical_case[model_name.lower()]
     candidate_model_names = set()
     for name in [model_name, normalize_canonical_model_name(model_name)]:
         candidate_model_names.add("/".join([provider, name.lower()]))
