@@ -154,6 +154,17 @@ class InstructorAsyncClientMixin(InstructorClientMixin):
 
 
 class GetCostEstimateMixin:
+
+    def get_canonical_model_provider_string(self):
+        return get_canonical_model_provider_string(
+            self.model, self.provider, self.base_url, self.api_key
+        )
+
+    async def get_canonical_model_provider_string_async(self):
+        return await get_canonical_model_provider_string_async(
+            self.model, self.provider, self.base_url, self.api_key
+        )
+
     def get_cost_estimate(
         self,
         prompt: str,
@@ -201,9 +212,7 @@ class GetCostEstimateMixin:
                 cumulative_prompt_cost = 0
                 cumulative_completion_cost = 0
                 cumulative_total_cost = 0
-                model = await get_canonical_model_provider_string_async(
-                    self.model, self.provider, self.base_url, self.api_key
-                )
+                model = await self.get_canonical_model_provider_string_async()
                 for user_prompt in user_prompts:
                     prompt_cost, completion_cost, total_cost = _estimate_cost(
                         user_prompt=user_prompt,
@@ -238,9 +247,7 @@ class GetCostEstimateMixin:
                 cumulative_prompt_cost = 0
                 cumulative_completion_cost = 0
                 cumulative_total_cost = 0
-                model = get_canonical_model_provider_string(
-                    self.model, self.provider, self.base_url, self.api_key
-                )
+                model = self.get_canonical_model_provider_string()
                 for user_prompt in user_prompts:
                     prompt_cost, completion_cost, total_cost = _estimate_cost(
                         user_prompt=user_prompt,
@@ -449,6 +456,7 @@ class AsyncLiteLLMChatRuntime(
             extra_fields=extra_fields,
             instructions_first=instructions_first,
             instructions_template=instructions_template,
+            canonical_model_provider_string=self.get_canonical_model_provider_string(),
             **self.model_extra,
         )
 
@@ -512,9 +520,7 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
         # Only running this supports_vision check for non-vertex models, since its based on a static JSON file in
         # litellm which was not up to date. Will be soon in next release - should update this
         if not self.model.startswith("vertex_ai"):
-            model_name = get_canonical_model_provider_string(
-                self.model, self.provider, self.base_url, self.api_key
-            )
+            model_name = self.get_canonical_model_provider_string()
             if not litellm.supports_vision(model_name):
                 raise ValueError(f"Model {self.model} does not support vision")
         return self
@@ -568,6 +574,7 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
             instructions_template=instructions_template,
             extra_fields=extra_fields,
             ensure_messages_fit_in_context_window=ensure_messages_fit_in_context_window,
+            canonical_model_provider_string=self.get_canonical_model_provider_string(),
             **self.model_extra,
         )
 

@@ -95,7 +95,7 @@ def test_MIG():
     outputs = predictions.output.tolist()
     assert isinstance(outputs[0], list)
     assert any("Fihn et al., Circulation 2012" in item for item in outputs[0])
-    
+
     assert predictions._prompt_tokens[0] == 7087
     assert predictions._completion_tokens[0] == 370
     assert predictions._prompt_cost_usd[0] == 0.035435

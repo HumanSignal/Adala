@@ -317,3 +317,75 @@ def test_vision_runtime():
         .all()
         .all()
     )
+
+
+@pytest.mark.asyncio
+async def test_arun_instructor_with_messages_exception_handling():
+    """Test exception handling in arun_instructor_with_messages when ConstrainedGenerationError is raised."""
+    from adala.utils.llm_utils import arun_instructor_with_messages
+    from adala.utils.exceptions import ConstrainedGenerationError
+    from instructor.exceptions import InstructorRetryException
+    from litellm.types.utils import Usage
+    from pydantic import BaseModel, Field
+    from tenacity import AsyncRetrying, stop_after_attempt
+    from unittest.mock import AsyncMock, patch, MagicMock
+
+    # Define a sample response model
+    class TestModel(BaseModel):
+        result: str = Field(..., description="A test result")
+
+    # Create test messages
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Hello, how are you?"},
+    ]
+
+    # Create a mock AsyncInstructor
+    mock_client = AsyncMock()
+
+    # Configure the mock to raise ConstrainedGenerationError
+    # In instructor, max_retries is an integer, not a Retrying object
+    # So we need to simulate the retry behavior here
+    side_effects = [ConstrainedGenerationError()] * 3  # Will be raised 3 times
+    mock_client.chat.completions.create_with_completion = AsyncMock(
+        side_effect=side_effects
+    )
+
+    # Configure retry policy (3 attempts)
+    # Note: In actual code, this is converted to an integer
+    retries = AsyncRetrying(stop=stop_after_attempt(3))
+
+    # Execute the function with the mocked client - need to patch at the module level
+    with patch(
+        "adala.utils.llm_utils.token_counter", return_value=39
+    ) as mock_token_counter:
+        result = await arun_instructor_with_messages(
+            client=mock_client,
+            messages=messages,
+            response_model=TestModel,
+            model="gpt-4",
+            temperature=0,
+            max_tokens=100,
+            retries=retries,
+        )
+
+        # Verify the mock was called
+        assert mock_token_counter.call_count > 0
+
+    # Verify the error response
+    assert result["_adala_error"] is True
+    assert result["_adala_message"] == "ConstrainedGenerationError"
+    assert (
+        "could not generate a properly-formatted response" in result["_adala_details"]
+    )
+
+    # Verify the usage statistics - using actual values from the log output
+    assert result["_prompt_tokens"] == 117  # Actual token count from execution
+    assert result["_completion_tokens"] == 0
+    assert result["_total_cost_usd"] == 0.00351
+    assert result["_prompt_cost_usd"] == 0.00351
+    assert result["_completion_cost_usd"] == 0.0
+
+    # Verify the mock was called the expected number of times
+    # The actual retries happen inside instructor, not in our code
+    assert mock_client.chat.completions.create_with_completion.call_count == 1

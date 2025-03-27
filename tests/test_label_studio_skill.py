@@ -71,21 +71,27 @@ async def test_label_studio_skill_basic():
     predictions = await agent.arun(df)
     # Check individual fields
     assert predictions.title.tolist() == ["I can't login", "Support new file types"]
-    assert predictions.description.tolist() == ["I can't login to the platform", "It would be great if we could upload files of type .docx"]
+    assert predictions.description.tolist() == [
+        "I can't login to the platform",
+        "It would be great if we could upload files of type .docx",
+    ]
     assert predictions.classification.tolist() == ["Bug report", "Feature request"]
     assert predictions.evaluation.tolist() == [5, 5]
-    
+
     # Check rationale content without exact matching (can deviate between runs)
     assert "login" in predictions.rationale[0].lower()
     assert "bug" in predictions.rationale[0].lower()
     assert "file type" in predictions.rationale[1].lower()
     assert "feature" in predictions.rationale[1].lower()
-    
+
     # Check token counts and costs
     assert predictions._prompt_tokens.tolist() == [255, 264]
     assert predictions._completion_tokens.tolist() == [50, 76]
     assert predictions._prompt_cost_usd.tolist() == [3.825e-05, 3.96e-05]
-    assert predictions._completion_cost_usd.tolist() == [2.9999999999999997e-05, 4.56e-05]
+    assert predictions._completion_cost_usd.tolist() == [
+        2.9999999999999997e-05,
+        4.56e-05,
+    ]
     assert predictions._total_cost_usd.tolist() == [6.825e-05, 8.52e-05]
 
 
@@ -547,15 +553,18 @@ def test_label_studio_skill_image_input():
 
     # Assert the classification is correct
     assert predictions.classification.tolist() == ["Mona Lisa"]
-    
+
     # Assert the input fields are preserved
     assert predictions.title[0] == "It's definitely not the Mona Lisa"
-    assert predictions.image[0] == "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/687px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg"
-    
+    assert (
+        predictions.image[0]
+        == "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/687px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg"
+    )
+
     # Assert token counts
     assert predictions._prompt_tokens[0] == 228
     assert predictions._completion_tokens[0] == 8
-    
+
     # Assert costs
     assert predictions._prompt_cost_usd[0] == 3.42e-05
     assert predictions._completion_cost_usd[0] == 4.8e-06

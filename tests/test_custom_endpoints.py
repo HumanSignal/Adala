@@ -80,23 +80,23 @@ async def test_custom_endpoint_simple():
     # Assert specific values in the predictions
     expected_classifications = ["Bug report", "Feature request"]
     assert predictions.classification.tolist() == expected_classifications
-    
+
     # Assert rationales match expected content
     assert "unable to log in" in predictions.rationale[0]
     assert "new file type (.docx)" in predictions.rationale[1]
-    
+
     # Assert all evaluations are 5
     assert all(score == 5 for score in predictions.evaluation.tolist())
-    
+
     # Assert precise token counts
     assert predictions._prompt_tokens.tolist() == [80, 87]
     assert predictions._completion_tokens.tolist() == [76, 78]
-    
+
     # Assert costs are None
     assert all(cost is None for cost in predictions._prompt_cost_usd.tolist())
     assert all(cost is None for cost in predictions._completion_cost_usd.tolist())
     assert all(cost is None for cost in predictions._total_cost_usd.tolist())
-    
+
     # Assert title and description are None (as they were input fields)
     assert all(title is None for title in predictions.title.tolist())
     assert all(description is None for description in predictions.description.tolist())

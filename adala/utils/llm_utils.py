@@ -15,7 +15,6 @@ from instructor.client import Instructor, AsyncInstructor
 from adala.utils.parse import MessagesBuilder, MessageChunkType
 from adala.utils.exceptions import ConstrainedGenerationError
 from adala.utils.types import debug_time_it
-from adala.utils.model_info_utils import match_model_provider_string, NoModelsFoundError
 from litellm.exceptions import BadRequestError
 
 logger = logging.getLogger(__name__)
@@ -219,7 +218,7 @@ def run_instructor_with_messages(
             e, messages, model, retries, prompt_token_count=prompt_token_count
         )
         # With exceptions we don't have access to completion.model
-        usage_model = model
+        usage_model = canonical_model_provider_string or model
 
     # Add usage data to the response (e.g. token counts, cost)
     dct.update(_get_usage_dict(usage, model=usage_model))
@@ -287,7 +286,7 @@ async def arun_instructor_with_messages(
             e, messages, model, retries, prompt_token_count=prompt_token_count
         )
         # With exceptions we don't have access to completion.model
-        usage_model = model
+        usage_model = canonical_model_provider_string or model
 
     # Add usage data to the response (e.g. token counts, cost)
     dct.update(_get_usage_dict(usage, model=usage_model))

@@ -523,7 +523,7 @@ async def test_estimate_cost_endpoint_success(async_client):
         }
         """,
         "substitutions": [{"text": "test"}],
-        'provider': 'OpenAI'
+        "provider": "OpenAI",
     }
 
     resp = await async_client.post("/estimate-cost", json=req)
@@ -578,7 +578,7 @@ async def test_estimate_cost_endpoint_invalid_model(async_client):
         },
         "prompt": "test {text}",
         "substitutions": [{"text": "test"}],
-        'provider': 'Custom'
+        "provider": "Custom",
     }
 
     resp = await async_client.post("/estimate-cost", json=req)
