@@ -3,6 +3,7 @@ from typing import Any, Dict, Generic, List, Optional, TypeVar
 import os
 import json
 import pandas as pd
+import traceback
 
 import fastapi
 from fastapi import Request, status
@@ -395,6 +396,7 @@ async def estimate_cost(
         )
 
     except NotImplementedError as e:
+        logger.debug(f"Error estimating cost: {e} {traceback.format_exc()}")
         return Response[CostEstimate](
             data=CostEstimate(
                 is_error=True,

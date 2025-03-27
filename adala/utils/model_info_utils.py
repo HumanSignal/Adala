@@ -5,6 +5,7 @@ from typing import Optional, List
 import traceback
 from litellm.exceptions import BadRequestError
 from functools import lru_cache
+from async_lru import alru_cache
 
 logger = logging.getLogger(__name__)
 
@@ -215,7 +216,7 @@ def get_canonical_model_provider_string(
         return model
 
 
-@lru_cache(maxsize=128)
+@alru_cache(maxsize=128)
 async def get_canonical_model_provider_string_async(
     model: str,
     provider: Optional[str] = None,

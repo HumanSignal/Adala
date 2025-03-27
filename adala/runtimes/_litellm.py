@@ -222,6 +222,7 @@ class GetCostEstimateMixin:
 
             except Exception as e:
                 logger.error("Failed to estimate cost: %s", e)
+                logger.debug(traceback.format_exc())
                 return CostEstimate(
                     is_error=True,
                     error_type=type(e).__name__,
@@ -258,6 +259,7 @@ class GetCostEstimateMixin:
 
             except Exception as e:
                 logger.error("Failed to estimate cost: %s", e)
+                logger.debug(traceback.format_exc())
                 return CostEstimate(
                     is_error=True,
                     error_type=type(e).__name__,

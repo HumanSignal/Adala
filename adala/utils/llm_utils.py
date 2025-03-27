@@ -5,7 +5,6 @@ import litellm
 from litellm import token_counter
 from collections import defaultdict
 from typing import Any, Dict, List, Type, Optional, Tuple
-from functools import lru_cache
 from pydantic import BaseModel, Field
 from pydantic_core import to_jsonable_python
 from litellm.types.utils import Usage
