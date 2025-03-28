@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 import pandas as pd
 from copy import deepcopy
 from unittest.mock import patch
+import numpy as np
 
 # TODO manage which keys correspond to which models/deployments, probably using a litellm Router
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -475,3 +476,116 @@ def test_streaming_azure(client):
             assert (
                 actual_output == expected_output
             ), "adala did not return expected output"
+
+
+@pytest.mark.vcr
+@pytest.mark.asyncio
+async def test_estimate_cost_endpoint_success(async_client):
+    """Test the estimate-cost endpoint with a valid payload."""
+    req = {
+        "agent": {
+            "skills": [
+                {
+                    "type": "ClassificationSkill",
+                    "name": "text_classifier",
+                    "instructions": "Always return the answer 'Feature Lack'.",
+                    "input_template": "{text}",
+                    "output_template": "{output}",
+                    "labels": [
+                        "Feature Lack",
+                        "Price",
+                        "Integration Issues",
+                        "Usability Concerns",
+                        "Competitor Advantage",
+                    ],
+                }
+            ],
+            "runtimes": {
+                "default": {
+                    "type": "AsyncLiteLLMChatRuntime",
+                    "model": "gpt-4o-mini",
+                    "api_key": "123",
+                    "provider": "openai",
+                }
+            },
+        },
+        "prompt": """
+        test {text}
+
+        Use the following JSON format:
+        {
+            "data": [
+                {
+                    "output": "<output>",
+                    "reasoning": "<reasoning>",
+                }
+            ]
+        }
+        """,
+        "substitutions": [{"text": "test"}],
+        "provider": "OpenAI",
+    }
+
+    resp = await async_client.post("/estimate-cost", json=req)
+    assert resp.status_code == 200
+
+    resp_data = resp.json()["data"]
+    assert "prompt_cost_usd" in resp_data
+    assert "completion_cost_usd" in resp_data
+    assert "total_cost_usd" in resp_data
+    assert "is_error" in resp_data
+
+    assert resp_data["is_error"] is False
+    assert isinstance(resp_data["prompt_cost_usd"], float)
+    assert isinstance(resp_data["completion_cost_usd"], float)
+    assert isinstance(resp_data["total_cost_usd"], float)
+    assert np.isclose(
+        resp_data["total_cost_usd"],
+        resp_data["prompt_cost_usd"] + resp_data["completion_cost_usd"],
+    )
+
+
+@pytest.mark.vcr
+@pytest.mark.asyncio
+async def test_estimate_cost_endpoint_invalid_model(async_client):
+    """Test the estimate-cost endpoint with an invalid model."""
+    req = {
+        "agent": {
+            "skills": [
+                {
+                    "type": "ClassificationSkill",
+                    "name": "text_classifier",
+                    "instructions": "Always return the answer 'Feature Lack'.",
+                    "input_template": "{text}",
+                    "output_template": "{output}",
+                    "labels": [
+                        "Feature Lack",
+                        "Price",
+                        "Integration Issues",
+                        "Usability Concerns",
+                        "Competitor Advantage",
+                    ],
+                }
+            ],
+            "runtimes": {
+                "default": {
+                    "type": "AsyncLiteLLMChatRuntime",
+                    "model": "nonexistent-model",
+                    "api_key": "fake_api_key",
+                    "provider": "custom",
+                }
+            },
+        },
+        "prompt": "test {text}",
+        "substitutions": [{"text": "test"}],
+        "provider": "Custom",
+    }
+
+    resp = await async_client.post("/estimate-cost", json=req)
+    assert resp.status_code == 200
+
+    resp_data = resp.json()["data"]
+    assert "is_error" in resp_data
+    assert resp_data["is_error"] is True
+    assert resp_data["error_type"] is not None
+    assert "not found" in resp_data["error_message"]

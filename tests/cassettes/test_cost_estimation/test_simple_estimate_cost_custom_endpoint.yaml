@@ -1,0 +1,89 @@
+interactions:
+- request:
+    body: '{"messages": [{"role": "user", "content": ""}], "model": "deepseek-ai/DeepSeek-V3-0324-fast",
+      "max_tokens": 1}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '110'
+      content-type:
+      - application/json
+      host:
+      - router.huggingface.co
+      user-agent:
+      - AsyncOpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://router.huggingface.co/nebius/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-d9f8e325b31e40a0a3c12fa7f6d141f1\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"logprobs\":null,\"message\":{\"content\":\"\u4F60\u597D\",\"refusal\":null,\"role\":\"assistant\",\"audio\":null,\"function_call\":null,\"tool_calls\":[],\"reasoning_content\":null},\"stop_reason\":null}],\"created\":1743084090,\"model\":\"deepseek-ai/DeepSeek-V3-0324-fast\",\"object\":\"chat.completion\",\"service_tier\":null,\"system_fingerprint\":null,\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":3,\"total_tokens\":4,\"completion_tokens_details\":null,\"prompt_tokens_details\":null},\"prompt_logprobs\":null}"
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Xet-Access-Token,X-Xet-Token-Expiration,X-Xet-Refresh-Route,X-Xet-Cas-Url,X-Xet-Hash
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '564'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 27 Mar 2025 14:01:31 GMT
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Vary:
+      - Origin
+      Via:
+      - 1.1 95edb2a6efdb5ee4d3c7f7aa298bb2f2.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - hSXbVy8kijlNJC_D3iRlbE5v50zXGGPzExJ2Aqs1eh4G6vyiz5xU_Q==
+      X-Amz-Cf-Pop:
+      - EWR53-P1
+      X-Cache:
+      - Miss from cloudfront
+      X-Powered-By:
+      - huggingface-moon
+      X-Request-Id:
+      - Root=1-67e55a3a-7933f4332d7d991e0d2f95dd
+      X-Robots-Tag:
+      - none
+      cross-origin-opener-policy:
+      - same-origin
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ratelimit-limit-requests:
+      - '600'
+      x-ratelimit-limit-tokens:
+      - '200000'
+      x-ratelimit-remaining-requests:
+      - '600'
+      x-ratelimit-remaining-tokens:
+      - '200000'
+    status:
+      code: 200
+      message: OK
+version: 1

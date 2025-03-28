@@ -14,6 +14,7 @@ from typing import (
     TypedDict,
     Iterable,
     Generator,
+    Awaitable,
 )
 from functools import cached_property
 from enum import Enum
@@ -24,7 +25,7 @@ from litellm.exceptions import (
     BadRequestError,
     NotFoundError,
     APIConnectionError,
-    APIError
+    APIError,
 )
 from litellm.types.utils import Usage
 import instructor
@@ -51,6 +52,8 @@ from adala.utils.model_info_utils import (
     match_model_provider_string,
     NoModelsFoundError,
     _estimate_cost,
+    get_canonical_model_provider_string,
+    get_canonical_model_provider_string_async,
 )
 
 from pydantic import ConfigDict, field_validator, BaseModel
@@ -121,21 +124,6 @@ class InstructorClientMixin(BaseModel):
     def _openai_client(self):
         return OpenAI
 
-    def _check_client(self):
-        # don't use response model and error handling from run_instructor_with_messages here
-        response = self.client.chat.completions.create(
-            messages=[{"role": "user", "content": "Hey, how's it going?"}],
-            model=self.model,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature,
-            seed=self.seed,
-            response_model=None,
-            max_retries=retries,
-            # extra inference params passed to this runtime
-            **self.model_extra,
-        )
-        return response
-
     # Yes, this is recomputed every time - there's no clean way to cache it unless we drop pickle serialization, in which case adding it to ConfigDict(ignore) would work.
     # There's no appreciable startup cost in the instructor client init function anyway.
     @property
@@ -153,55 +141,6 @@ class InstructorClientMixin(BaseModel):
             mode=instructor.Mode(self.instructor_mode),
         )
 
-    def init_runtime(self) -> "Runtime":
-        # check model availability
-        # extension of litellm.check_valid_key for non-openai deployments
-        try:
-            self._check_client()
-        except AuthenticationError:
-            logger.exception(
-                f'Requested model "{self.model}" is not available with your api_key and settings.\nTraceback:\n{traceback.format_exc()}'
-            )
-            raise ValueError(
-                f'Requested model "{self.model}" is not available with your api_key and settings.'
-            )
-        except Exception as e:
-            logger.exception(
-                f'Failed to check availability of requested model "{self.model}": {e}\nTraceback:\n{traceback.format_exc()}'
-            )
-            raise ValueError(
-                f'Failed to check availability of requested model "{self.model}": {e}'
-            )
-
-        return self
-
-    def get_canonical_model_provider_string(self, model: str) -> str:
-        """provider_name/model_name"""
-        # this is really a litellm function, not an instructor function. Putting it here to avoid duplicating it between sync/async runtimes.
-        try:
-            return match_model_provider_string(model)
-        except NoModelsFoundError:
-            logger.info(
-                f"Model {model} not found in litellm model map for provider {self.provider}. This is likely a single-model deployment."
-            )
-        except Exception as e:
-            logger.exception(
-                f"(1/2) Failed to get canonical model provider string for {model}"
-            )
-        try:
-            resp = self._check_client()
-            return match_model_provider_string(resp.model)
-        except NoModelsFoundError:
-            logger.warning(
-                f"Model {model} not found in litellm model map for provider {self.provider}. This is likely a custom model."
-            )
-            return model
-        except Exception as e:
-            logger.exception(
-                f"(2/2) Failed to get canonical model provider string for {model}"
-            )
-            return model
-
 
 class InstructorAsyncClientMixin(InstructorClientMixin):
 
@@ -213,25 +152,134 @@ class InstructorAsyncClientMixin(InstructorClientMixin):
     def _openai_client(self):
         return AsyncOpenAI
 
-    def _check_client(self):
-        """Make this synchronous"""
-        client = InstructorClientMixin(**self.model_dump()).client
-        # don't use response model and error handling from run_instructor_with_messages here
-        response = client.chat.completions.create(
-            messages=[{"role": "user", "content": "Hey, how's it going?"}],
-            model=self.model,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature,
-            seed=self.seed,
-            response_model=None,
-            max_retries=retries,
-            # extra inference params passed to this runtime
-            **self.model_extra,
+
+class GetCostEstimateMixin:
+
+    def get_canonical_model_provider_string(self):
+        return get_canonical_model_provider_string(
+            self.model, self.provider, self.base_url, self.api_key
         )
-        return response
+
+    async def get_canonical_model_provider_string_async(self):
+        return await get_canonical_model_provider_string_async(
+            self.model, self.provider, self.base_url, self.api_key
+        )
+
+    def get_cost_estimate(
+        self,
+        prompt: str,
+        substitutions: List[Dict],
+        output_fields: Optional[List[str]],
+        provider: str,
+    ) -> CostEstimate:
+        return self._get_cost_estimate_impl(
+            prompt=prompt,
+            substitutions=substitutions,
+            output_fields=output_fields,
+            provider=provider,
+            use_async=False,
+        )
+
+    async def get_cost_estimate_async(
+        self,
+        prompt: str,
+        substitutions: List[Dict],
+        output_fields: Optional[List[str]],
+        provider: str,
+    ) -> CostEstimate:
+        return await self._get_cost_estimate_impl(
+            prompt=prompt,
+            substitutions=substitutions,
+            output_fields=output_fields,
+            provider=provider,
+            use_async=True,
+        )
+
+    def _get_cost_estimate_impl(
+        self,
+        prompt: str,
+        substitutions: List[Dict],
+        output_fields: Optional[List[str]],
+        provider: str,
+        use_async: bool,
+    ) -> Union[CostEstimate, Awaitable[CostEstimate]]:
+        async def async_impl():
+            try:
+                user_prompts = [
+                    partial_str_format(prompt, **substitution)
+                    for substitution in substitutions
+                ]
+                cumulative_prompt_cost = 0
+                cumulative_completion_cost = 0
+                cumulative_total_cost = 0
+                model = await self.get_canonical_model_provider_string_async()
+                for user_prompt in user_prompts:
+                    prompt_cost, completion_cost, total_cost = _estimate_cost(
+                        user_prompt=user_prompt,
+                        model=model,
+                        output_fields=output_fields,
+                        provider=provider,
+                    )
+                    cumulative_prompt_cost += prompt_cost
+                    cumulative_completion_cost += completion_cost
+                    cumulative_total_cost += total_cost
+                return CostEstimate(
+                    prompt_cost_usd=cumulative_prompt_cost,
+                    completion_cost_usd=cumulative_completion_cost,
+                    total_cost_usd=cumulative_total_cost,
+                )
+
+            except Exception as e:
+                logger.error("Failed to estimate cost: %s", e)
+                logger.debug(traceback.format_exc())
+                return CostEstimate(
+                    is_error=True,
+                    error_type=type(e).__name__,
+                    error_message=str(e),
+                )
+
+        def sync_impl():
+            try:
+                user_prompts = [
+                    partial_str_format(prompt, **substitution)
+                    for substitution in substitutions
+                ]
+                cumulative_prompt_cost = 0
+                cumulative_completion_cost = 0
+                cumulative_total_cost = 0
+                model = self.get_canonical_model_provider_string()
+                for user_prompt in user_prompts:
+                    prompt_cost, completion_cost, total_cost = _estimate_cost(
+                        user_prompt=user_prompt,
+                        model=model,
+                        output_fields=output_fields,
+                        provider=provider,
+                    )
+                    cumulative_prompt_cost += prompt_cost
+                    cumulative_completion_cost += completion_cost
+                    cumulative_total_cost += total_cost
+                return CostEstimate(
+                    prompt_cost_usd=cumulative_prompt_cost,
+                    completion_cost_usd=cumulative_completion_cost,
+                    total_cost_usd=cumulative_total_cost,
+                )
+
+            except Exception as e:
+                logger.error("Failed to estimate cost: %s", e)
+                logger.debug(traceback.format_exc())
+                return CostEstimate(
+                    is_error=True,
+                    error_type=type(e).__name__,
+                    error_message=str(e),
+                )
+
+        if use_async:
+            return async_impl()
+        else:
+            return sync_impl()
 
 
-class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
+class LiteLLMChatRuntime(InstructorClientMixin, GetCostEstimateMixin, Runtime):
     """
     Runtime that uses [LiteLLM API](https://litellm.vercel.app/docs) and chat
     completion models to perform the skill.
@@ -258,11 +306,6 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
     seed: Optional[int] = 47
 
     model_config = ConfigDict(extra="allow")
-
-    @property
-    def canonical_model_provider_string(self):
-        """provider_name/model_name"""
-        return self.get_canonical_model_provider_string(self.model)
 
     def get_llm_response(self, messages: List[Dict[str, str]]) -> str:
         # TODO: sunset this method in favor of record_to_record
@@ -336,7 +379,9 @@ class LiteLLMChatRuntime(InstructorClientMixin, Runtime):
         )
 
 
-class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
+class AsyncLiteLLMChatRuntime(
+    InstructorAsyncClientMixin, GetCostEstimateMixin, AsyncRuntime
+):
     """
     Runtime that uses [OpenAI API](https://openai.com/) and chat completion
     models to perform the skill. It uses async calls to OpenAI API.
@@ -373,11 +418,6 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
                 "Set `AsyncOpenAIChatRuntime(concurrency=10, ...)` or any other positive integer. "
             )
         return value
-
-    @property
-    def canonical_model_provider_string(self):
-        """provider_name/model_name"""
-        return self.get_canonical_model_provider_string(self.model)
 
     async def batch_to_batch(
         self,
@@ -416,6 +456,7 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
             extra_fields=extra_fields,
             instructions_first=instructions_first,
             instructions_template=instructions_template,
+            canonical_model_provider_string=self.get_canonical_model_provider_string(),
             **self.model_extra,
         )
 
@@ -467,46 +508,6 @@ class AsyncLiteLLMChatRuntime(InstructorAsyncClientMixin, AsyncRuntime):
         # Extract the single row from the output DataFrame and convert it to a dictionary
         return output_df.iloc[0].to_dict()
 
-    def get_cost_estimate(
-        self,
-        prompt: str,
-        substitutions: List[Dict],
-        output_fields: Optional[List[str]],
-        provider: str,
-    ) -> CostEstimate:
-        try:
-            user_prompts = [
-                partial_str_format(prompt, **substitution)
-                for substitution in substitutions
-            ]
-            cumulative_prompt_cost = 0
-            cumulative_completion_cost = 0
-            cumulative_total_cost = 0
-            model = self.canonical_model_provider_string
-            for user_prompt in user_prompts:
-                prompt_cost, completion_cost, total_cost = _estimate_cost(
-                    user_prompt=user_prompt,
-                    model=model,
-                    output_fields=output_fields,
-                    provider=provider,
-                )
-                cumulative_prompt_cost += prompt_cost
-                cumulative_completion_cost += completion_cost
-                cumulative_total_cost += total_cost
-            return CostEstimate(
-                prompt_cost_usd=cumulative_prompt_cost,
-                completion_cost_usd=cumulative_completion_cost,
-                total_cost_usd=cumulative_total_cost,
-            )
-
-        except Exception as e:
-            logger.error("Failed to estimate cost: %s", e)
-            return CostEstimate(
-                is_error=True,
-                error_type=type(e).__name__,
-                error_message=str(e),
-            )
-
 
 class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
     """
@@ -519,7 +520,7 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
         # Only running this supports_vision check for non-vertex models, since its based on a static JSON file in
         # litellm which was not up to date. Will be soon in next release - should update this
         if not self.model.startswith("vertex_ai"):
-            model_name = self.model
+            model_name = self.get_canonical_model_provider_string()
             if not litellm.supports_vision(model_name):
                 raise ValueError(f"Model {self.model} does not support vision")
         return self
@@ -573,6 +574,7 @@ class AsyncLiteLLMVisionRuntime(AsyncLiteLLMChatRuntime):
             instructions_template=instructions_template,
             extra_fields=extra_fields,
             ensure_messages_fit_in_context_window=ensure_messages_fit_in_context_window,
+            canonical_model_provider_string=self.get_canonical_model_provider_string(),
             **self.model_extra,
         )
 

@@ -7,19 +7,12 @@ from label_studio_sdk.label_interface import LabelInterface
 from label_studio_sdk.label_interface.objects import PredictionValue
 
 
-# NOTE: commented code can be used to recreate vcr cassettes, as they don't work with asyncio (yeah, frustrating - consider use other stub framework)
-# INSTRUCTIONS to recreate cassettes:
-# 1. Uncomment the lines in test you want to recreate
-# 2. Run the test with `pytest -vvv --record-mode=rewrite -k <test_name>`
-# 3. If you see mismatched asserts, verify the results and replace the test suite with the new results
-# 4. Don't forget to uncomment back the lines you commented out before recording the cassette
+# NOTE: to recreate vcr cassettes, run the test with `pytest -vvv --record-mode=rewrite -k <test_name>` and change the assert values
 
 
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill_basic():
-    # @pytest.mark.vcr
-    # def test_label_studio_skill_basic():
 
     df = pd.DataFrame(
         [
@@ -35,7 +28,6 @@ async def test_label_studio_skill_basic():
         "runtimes": {
             "default": {
                 "type": "AsyncLiteLLMChatRuntime",
-                # "type": "LiteLLMChatRuntime",
                 "model": "gpt-4o-mini",
                 "api_key": os.getenv("OPENAI_API_KEY"),
                 "max_tokens": 200,
@@ -77,20 +69,35 @@ async def test_label_studio_skill_basic():
 
     agent = Agent(**agent_payload)
     predictions = await agent.arun(df)
-    # predictions = agent.run(df)
+    # Check individual fields
+    assert predictions.title.tolist() == ["I can't login", "Support new file types"]
+    assert predictions.description.tolist() == [
+        "I can't login to the platform",
+        "It would be great if we could upload files of type .docx",
+    ]
     assert predictions.classification.tolist() == ["Bug report", "Feature request"]
     assert predictions.evaluation.tolist() == [5, 5]
-    assert predictions.rationale.tolist() == [
-        "The issue describes a problem with logging into the platform, which is a technical issue that typically indicates a bug or malfunction in the login functionality.",
-        "The issue is requesting the addition of support for a new file type (.docx), which indicates a desire for new functionality in the application. This aligns with the definition of a feature request.",
+
+    # Check rationale content without exact matching (can deviate between runs)
+    assert "login" in predictions.rationale[0].lower()
+    assert "bug" in predictions.rationale[0].lower()
+    assert "file type" in predictions.rationale[1].lower()
+    assert "feature" in predictions.rationale[1].lower()
+
+    # Check token counts and costs
+    assert predictions._prompt_tokens.tolist() == [255, 264]
+    assert predictions._completion_tokens.tolist() == [50, 76]
+    assert predictions._prompt_cost_usd.tolist() == [3.825e-05, 3.96e-05]
+    assert predictions._completion_cost_usd.tolist() == [
+        2.9999999999999997e-05,
+        4.56e-05,
     ]
+    assert predictions._total_cost_usd.tolist() == [6.825e-05, 8.52e-05]
 
 
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill_partial_label_config():
-    # @pytest.mark.vcr
-    # def test_label_studio_skill_partial_label_config():
 
     df = pd.DataFrame(
         [
@@ -106,7 +113,6 @@ async def test_label_studio_skill_partial_label_config():
         "runtimes": {
             "default": {
                 "type": "AsyncLiteLLMChatRuntime",
-                # "type": "LiteLLMChatRuntime",
                 "model": "gpt-4o-mini",
                 "api_key": os.getenv("OPENAI_API_KEY"),
                 "max_tokens": 200,
@@ -154,7 +160,6 @@ async def test_label_studio_skill_partial_label_config():
 
     agent = Agent(**agent_payload)
     predictions = await agent.arun(df)
-    # predictions = agent.run(df)
 
     assert predictions.classification.tolist() == ["Bug report", "Feature request"]
     assert predictions.evaluation.tolist() == [5, 5]
@@ -165,9 +170,6 @@ async def test_label_studio_skill_partial_label_config():
 @pytest.mark.asyncio
 @pytest.mark.vcr
 async def test_label_studio_skill_with_ner():
-    # @pytest.mark.vcr
-    # def test_label_studio_skill_with_ner():
-    # documents that contain entities
     df = pd.DataFrame(
         [
             {
@@ -221,7 +223,6 @@ async def test_label_studio_skill_with_ner():
 
     agent = Agent(**agent_payload)
     predictions = await agent.arun(df)
-    # predictions = agent.run(df)
 
     expected_predictions = [
         [{"start": 0, "end": 10, "labels": ["Organization"], "text": "Apple Inc."}],
@@ -247,8 +248,6 @@ async def test_label_studio_skill_with_ner():
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_label_studio_skill_valid_predictions():
-    # @pytest.mark.vcr
-    # def test_label_studio_skill_valid_predictions():
     """
     Fuzz test matrix of text input tags x control tags x models
     """
@@ -552,4 +551,21 @@ def test_label_studio_skill_image_input():
     agent = Agent(**agent_payload)
     predictions = asyncio.run(agent.arun(df))
 
+    # Assert the classification is correct
     assert predictions.classification.tolist() == ["Mona Lisa"]
+
+    # Assert the input fields are preserved
+    assert predictions.title[0] == "It's definitely not the Mona Lisa"
+    assert (
+        predictions.image[0]
+        == "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/687px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg"
+    )
+
+    # Assert token counts
+    assert predictions._prompt_tokens[0] == 228
+    assert predictions._completion_tokens[0] == 8
+
+    # Assert costs
+    assert predictions._prompt_cost_usd[0] == 3.42e-05
+    assert predictions._completion_cost_usd[0] == 4.8e-06
+    assert predictions._total_cost_usd[0] == 3.9e-05

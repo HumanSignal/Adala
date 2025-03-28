@@ -310,3 +310,8 @@ class AsyncRuntime(Runtime):
             response_model=response_model,
         )
         return output
+
+    async def get_cost_estimate_async(
+        self, prompt: str, substitutions: List[Dict], output_fields: Optional[List[str]]
+    ) -> CostEstimate:
+        raise NotImplementedError("This runtime does not support cost estimates")

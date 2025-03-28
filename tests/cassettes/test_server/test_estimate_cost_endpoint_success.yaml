@@ -1,0 +1,41 @@
+interactions:
+- request:
+    body: '{"agent": {"skills": [{"type": "ClassificationSkill", "name": "text_classifier",
+      "instructions": "Always return the answer ''Feature Lack''.", "input_template":
+      "{text}", "output_template": "{output}", "labels": ["Feature Lack", "Price",
+      "Integration Issues", "Usability Concerns", "Competitor Advantage"]}], "runtimes":
+      {"default": {"type": "AsyncLiteLLMChatRuntime", "model": "gpt-4o-mini", "api_key":
+      "123",
+      "provider": "openai"}}}, "prompt": "\n        test {text}\n\n        Use the
+      following JSON format:\n        {\n            \"data\": [\n                {\n                    \"output\":
+      \"<output>\",\n                    \"reasoning\": \"<reasoning>\",\n                }\n            ]\n        }\n        ",
+      "substitutions": [{"text": "test"}], "provider": "OpenAI"}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '940'
+      content-type:
+      - application/json
+      host:
+      - localhost:30001
+      user-agent:
+      - python-httpx/0.27.2
+    method: POST
+    uri: http://localhost:30001/estimate-cost
+  response:
+    body:
+      string: '{"success":true,"data":{"prompt_cost_usd":1.59e-05,"completion_cost_usd":2.4e-06,"total_cost_usd":1.83e-05,"is_error":false,"error_type":null,"error_message":null},"message":null,"errors":null}'
+    headers:
+      content-length:
+      - '193'
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1
