@@ -188,7 +188,7 @@ async def test_message_trimming_mocked():
     assert "image_url" in results["_message_counts"]
     assert "text" in results["_message_counts"]
 
-    # Verify that the number of images was trimmed (less than 200)
+    # Verify that the number of images was trimmed from 2000 to 1391 (each image is around 100 tokens so this is the max that fits in the context window of 128000 tokens)
     assert results["_message_counts"]["image_url"] == 1391
 
     # Verify that the number of text messages was also trimmed
