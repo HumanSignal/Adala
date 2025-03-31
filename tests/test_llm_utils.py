@@ -3,7 +3,7 @@ import pytest
 from pydantic import BaseModel, Field
 from instructor import Instructor
 from tenacity import Retrying, stop_after_attempt, wait_fixed
-from adala.utils.llm_utils import run_instructor_with_messages
+from adala.utils.llm_utils import run_instructor_with_messages, count_message_types
 from adala.utils.parse import MessageChunkType
 from typing import Optional, List
 
@@ -72,5 +72,54 @@ def test_run_instructor_with_messages_gemini_image():
         "_prompt_cost_usd": 0,
         "_completion_cost_usd": 0,
         "_total_cost_usd": 0,
-        "message_counts": {"text": 2, "image_url": 1},
+        "_message_counts": {"text": 2, "image_url": 1},
     }
+
+
+def test_count_message_types():
+    """Test the count_message_types class method."""
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Hello, world!"},
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Look at this image: "},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "http://example.com/image.jpg"},
+                },
+            ],
+        },
+    ]
+
+    counts = count_message_types(messages)
+
+    assert counts["text"] == 3  # 2 text strings + 1 text chunk
+    assert counts["image_url"] == 1
+
+
+def test_message_type_counting_with_various_inputs():
+    """Test count_message_types with various message formats."""
+    messages = [
+        {"role": "system", "content": "System message"},
+        {"role": "user", "content": "Text message"},
+        {
+            "role": "assistant",
+            "content": [
+                {"type": "text", "text": "Chunked text"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "http://example.com/image.jpg"},
+                },
+            ],
+        },
+        {"type": "text", "text": "Direct text chunk"},
+        {"unknown_format": "This should be counted as text"},
+    ]
+
+    counts = count_message_types(messages)
+
+    # 2 text messages + 1 chunked text + 1 direct text chunk + 1 unknown format
+    assert counts["text"] == 5
+    assert counts["image_url"] == 1

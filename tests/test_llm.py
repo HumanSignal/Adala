@@ -75,7 +75,7 @@ def test_llm_sync():
         "_prompt_cost_usd": 0.0,
         "_completion_cost_usd": 0.0,
         "_total_cost_usd": 0.0,
-        "message_counts": {"text": 1},
+        "_message_counts": {"text": 1},
     }
     assert result == expected_result
 
@@ -112,7 +112,7 @@ def test_llm_async():
                 "_prompt_cost_usd": 1.29e-05,
                 "_completion_cost_usd": 6e-06,
                 "_total_cost_usd": 1.89e-05,
-                "message_counts": {"text": 1},
+                "_message_counts": {"text": 1},
             }
         ]
     )
@@ -142,7 +142,7 @@ def test_llm_async():
                 "_prompt_cost_usd": 0.0,
                 "_completion_cost_usd": 0.0,
                 "_total_cost_usd": 0.0,
-                "message_counts": {"text": 1},
+                "_message_counts": {"text": 1},
             }
         ]
     )

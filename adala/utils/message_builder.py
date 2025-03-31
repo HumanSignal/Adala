@@ -1,7 +1,6 @@
 """This module provides a utility class for building and formatting messages for LLM interactions.
 The main interface includes:
-- MessagesBuilder.get_messages() - builds a list of messages from a payload and template
-- MessagesBuilder.count_message_types() - counts message types in a message list
+- MessagesBuilder.get_messages() -> MessagesBuilderGetMessagesResponse
 
 Other methods are used internally and not intended for external use.
 """
@@ -9,11 +8,12 @@ Other methods are used internally and not intended for external use.
 import logging
 from typing import Dict, Any, Optional, List, DefaultDict, Annotated, Union
 from collections import defaultdict
+from abc import ABC, abstractmethod
 
 from pydantic import BaseModel, Field, field_validator
-import litellm
-from litellm.utils import token_counter
+from pydantic.dataclasses import dataclass
 
+from adala.utils.token_counter import TokenCounter, get_token_counter
 from adala.utils.parse import (
     MessageChunkType,
     MessageChunk,
@@ -22,6 +22,19 @@ from adala.utils.parse import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class MessagesBuilderGetMessagesResponse:
+    """
+    Response model for MessagesBuilder.get_messages method.
+
+    Contains the formatted messages ready to be sent to an LLM API.
+    """
+
+    messages: List[Dict[str, Any]] = Field(
+        description="List of message dictionaries formatted for LLM API consumption"
+    )
 
 
 class MessagesBuilder(BaseModel):
@@ -53,6 +66,9 @@ class MessagesBuilder(BaseModel):
             If True, the messages will be trimmed to fit within the model's context window (e.g. 128k tokens for GPT-4o).
             Warning: this will slow down the function.
         model (Optional[str]): The LLM model identifier, used for context window calculations.
+            If not provided, the model will not be trimmed.
+        token_counter (TokenCounter): The token counter to use for context window calculations.
+            If not provided, the default token counter will be used.
 
     Example:
         ```python
@@ -63,15 +79,23 @@ class MessagesBuilder(BaseModel):
             input_field_types={"image": MessageChunkType.IMAGE_URL}
         )
 
-        messages = builder.get_messages({"image": "http://example.com/image.jpg"})
+        r = builder.get_messages({"image": "http://example.com/image.jpg"})
+        print(r.messages)
+        ```
+        Output:
+        ```
+        [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": [{"type": "image_url", "image_url": {"url": "http://example.com/image.jpg"}}]}
+        ]
         ```
     """
 
-    user_prompt_template: str
-    system_prompt: Optional[str] = None
-    instruction_first: bool = True
+    user_prompt_template: str = Field(default="")
+    system_prompt: Optional[str] = Field(default=None)
+    instruction_first: bool = Field(default=True)
     extra_fields: Dict[str, Any] = Field(default_factory=dict)
-    split_into_chunks: bool = False
+    split_into_chunks: bool = Field(default=False)
     input_field_types: Optional[
         DefaultDict[
             str,
@@ -80,8 +104,14 @@ class MessagesBuilder(BaseModel):
             ],
         ]
     ] = Field(default_factory=lambda: defaultdict(lambda: MessageChunkType.TEXT))
-    trim_to_fit_context: bool = False
-    model: Optional[str] = None
+    trim_to_fit_context: bool = Field(default=False)
+    model: Optional[str] = Field(default=None)
+
+    # compositional dependencies
+    token_counter: TokenCounter = Field(default_factory=get_token_counter)
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @field_validator("input_field_types", mode="before")
     @classmethod
@@ -194,7 +224,9 @@ class MessagesBuilder(BaseModel):
 
         return result
 
-    def get_messages(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def get_messages(
+        self, payload: Dict[str, Any]
+    ) -> MessagesBuilderGetMessagesResponse:
         """
         Generate formatted messages based on template and payload.
 
@@ -231,7 +263,7 @@ class MessagesBuilder(BaseModel):
         if self.trim_to_fit_context and self.model:
             messages = self.trim_messages_to_fit_context(messages, self.model)
 
-        return {"messages": messages}
+        return MessagesBuilderGetMessagesResponse(messages=messages)
 
     def _format_user_prompt(
         self, payload: Dict[str, Any]
@@ -285,47 +317,8 @@ class MessagesBuilder(BaseModel):
 
         return messages
 
-    @classmethod
-    def count_message_types(cls, messages: List[Dict[str, Any]]) -> Dict[str, int]:
-        """
-        Count the number of each message type in a list of messages.
-
-        Args:
-            messages: List of message dictionaries
-
-        Returns:
-            Dictionary mapping message types to counts
-        """
-        message_counts: DefaultDict[str, int] = defaultdict(int)
-
-        for message in messages:
-            cls._count_message_content(message, message_counts)
-
-        return dict(message_counts)
-
-    @classmethod
-    def _count_message_content(
-        cls, message: Dict[str, Any], counts: DefaultDict[str, int]
-    ) -> None:
-        """Helper method to count different content types in a message."""
-        if "role" in message and "content" in message:
-            content = message["content"]
-            if isinstance(content, str):
-                counts["text"] += 1
-            elif isinstance(content, list):
-                for content_part in content:
-                    if isinstance(content_part, dict) and "type" in content_part:
-                        counts[content_part["type"]] += 1
-                    else:
-                        counts["text"] += 1
-        elif "type" in message:
-            counts[message["type"]] += 1
-        else:
-            counts["text"] += 1
-
-    @classmethod
     def trim_messages_to_fit_context(
-        cls, messages: List[Dict[str, Any]], model: str
+        self, messages: List[Dict[str, Any]], model: str
     ) -> List[Dict[str, Any]]:
         """
         Trims messages to fit within the model's context window.
@@ -337,18 +330,9 @@ class MessagesBuilder(BaseModel):
         Returns:
             List of trimmed messages that fit within the context window.
         """
-        if not model or model not in litellm.model_cost:
-            logger.warning(
-                "Trimming was requested but model '%s' not found in litellm.model_cost. Returning original messages.",
-                model,
-            )
-            return messages
-
         try:
             # Get token limit for the model
-            max_tokens = litellm.model_cost[model].get(
-                "max_input_tokens", litellm.model_cost[model].get("max_tokens")
-            )
+            max_tokens = self.token_counter.max_tokens(model)
             if max_tokens is None:
                 logger.error(
                     "Could not determine max_tokens for model '%s'. Cannot trim.",
@@ -370,7 +354,9 @@ class MessagesBuilder(BaseModel):
         system_message = None
         if messages and messages[0]["role"] == "system":
             system_message = messages[0]
-            system_tokens = token_counter(model=model, messages=[system_message])
+            system_tokens = self.token_counter.count_tokens(
+                model=model, messages=[system_message]
+            )
             total_tokens += system_tokens
             messages_to_process = messages[1:]
         else:
@@ -383,7 +369,9 @@ class MessagesBuilder(BaseModel):
 
             if isinstance(content, str):
                 # Simple string content
-                message_tokens = token_counter(model=model, messages=[message])
+                message_tokens = self.token_counter.count_tokens(
+                    model=model, messages=[message]
+                )
                 if total_tokens + message_tokens <= max_tokens:
                     result_messages.append(message)
                     total_tokens += message_tokens
@@ -397,7 +385,9 @@ class MessagesBuilder(BaseModel):
 
                 for chunk in content:
                     temp_message = {"role": role, "content": [chunk]}
-                    chunk_tokens = token_counter(model=model, messages=[temp_message])
+                    chunk_tokens = self.token_counter.count_tokens(
+                        model=model, messages=[temp_message]
+                    )
 
                     if total_tokens + chunk_tokens <= max_tokens:
                         new_content.append(chunk)

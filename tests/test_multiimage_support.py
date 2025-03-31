@@ -179,20 +179,20 @@ async def test_message_trimming_mocked():
     results = results[0]
     # Log the result message counts for debugging
     print(f"Original message count: {len(image_urls)}")
-    print(f"Message counts in result: {results['message_counts']}")
+    print(f"Message counts in result: {results['_message_counts']}")
 
     # Verify the message_counts in the result
-    assert "message_counts" in results
+    assert "_message_counts" in results
 
     # The message counts should include image_url and text
-    assert "image_url" in results["message_counts"]
-    assert "text" in results["message_counts"]
+    assert "image_url" in results["_message_counts"]
+    assert "text" in results["_message_counts"]
 
     # Verify that the number of images was trimmed (less than 200)
-    assert results["message_counts"]["image_url"] == 1391
+    assert results["_message_counts"]["image_url"] == 1391
 
     # Verify that the number of text messages was also trimmed
-    assert results["message_counts"]["text"] == 1  # last message is also trimmed
+    assert results["_message_counts"]["text"] == 1  # last message is also trimmed
 
     # Verify that the metrics are included
     assert results["_prompt_tokens"] == 128000

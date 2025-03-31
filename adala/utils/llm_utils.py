@@ -4,7 +4,7 @@ import traceback
 import litellm
 from litellm import token_counter
 from collections import defaultdict
-from typing import Any, Dict, List, Type, Optional, Tuple
+from typing import Any, Dict, List, Type, Optional, Tuple, DefaultDict
 from pydantic import BaseModel, Field
 from pydantic_core import to_jsonable_python
 from litellm.types.utils import Usage
@@ -21,7 +21,45 @@ from litellm.exceptions import BadRequestError
 logger = logging.getLogger(__name__)
 
 
-def _get_usage_dict(usage: Usage, model: str) -> Dict:
+def _count_message_content(
+    message: Dict[str, Any], counts: DefaultDict[str, int]
+) -> None:
+    """Helper method to count different content types in a message."""
+    if "role" in message and "content" in message:
+        content = message["content"]
+        if isinstance(content, str):
+            counts["text"] += 1
+        elif isinstance(content, list):
+            for content_part in content:
+                if isinstance(content_part, dict) and "type" in content_part:
+                    counts[content_part["type"]] += 1
+                else:
+                    counts["text"] += 1
+    elif "type" in message:
+        counts[message["type"]] += 1
+    else:
+        counts["text"] += 1
+
+
+def count_message_types(messages: List[Dict[str, Any]]) -> Dict[str, int]:
+    """
+    Count the number of each message type in a list of messages.
+
+    Args:
+        messages: List of message dictionaries
+
+    Returns:
+        Dictionary mapping message types to counts
+    """
+    message_counts: DefaultDict[str, int] = defaultdict(int)
+
+    for message in messages:
+        _count_message_content(message, message_counts)
+
+    return dict(message_counts)
+
+
+def _get_usage_dict(usage: Usage, model: str, messages: List[Dict[str, Any]]) -> Dict:
     data = dict()
     data["_prompt_tokens"] = usage.prompt_tokens
 
@@ -48,6 +86,7 @@ def _get_usage_dict(usage: Usage, model: str) -> Dict:
         data["_prompt_cost_usd"] = None
         data["_completion_cost_usd"] = None
         data["_total_cost_usd"] = None
+    data["_message_counts"] = count_message_types(messages)
     return data
 
 
@@ -165,9 +204,6 @@ def run_instructor_with_messages(
         Dict containing the parsed response and usage information
     """
     try:
-        messages_counts: Dict[str, int] = {}
-        # Count message types before sending to the LLM
-        message_counts = MessagesBuilder.count_message_types(messages)
 
         response, completion = client.chat.completions.create_with_completion(
             messages=messages,
@@ -189,12 +225,10 @@ def run_instructor_with_messages(
         # With exceptions we don't have access to completion.model
         usage_model = canonical_model_provider_string or model
         # Add empty message counts in case of exception
-        message_counts = MessagesBuilder.count_message_types(messages)
 
     # Add usage data to the response (e.g. token counts, cost)
-    usage_data = _get_usage_dict(usage, model=usage_model)
+    usage_data = _get_usage_dict(usage, model=usage_model, messages=messages)
     # Add message counts to usage data
-    usage_data["message_counts"] = message_counts
     dct.update(usage_data)
 
     return dct
@@ -232,10 +266,6 @@ async def arun_instructor_with_messages(
         Dict containing the parsed response and usage information
     """
     try:
-        message_counts: Dict[str, int] = {}
-
-        # Count message types before sending to the LLM
-        message_counts = MessagesBuilder.count_message_types(messages)
 
         response, completion = await client.chat.completions.create_with_completion(
             messages=messages,
@@ -256,14 +286,9 @@ async def arun_instructor_with_messages(
         dct, usage = handle_llm_exception(e, messages, model, retries)
         # With exceptions we don't have access to completion.model
         usage_model = canonical_model_provider_string or model
-        # Add empty message counts in case of exception
-        if not message_counts:
-            message_counts = MessagesBuilder.count_message_types(messages)
 
     # Add usage data to the response (e.g. token counts, cost)
-    usage_data = _get_usage_dict(usage, model=usage_model)
-    # Add message counts to usage data
-    usage_data["message_counts"] = message_counts
+    usage_data = _get_usage_dict(usage, model=usage_model, messages=messages)
     dct.update(usage_data)
 
     return dct
@@ -323,7 +348,7 @@ def run_instructor_with_payload(
         split_into_chunks=split_into_chunks,
     )
 
-    messages = messages_builder.get_messages(payload)["messages"]
+    messages = messages_builder.get_messages(payload).messages
     return run_instructor_with_messages(
         client,
         messages,
@@ -392,7 +417,7 @@ async def arun_instructor_with_payload(
         split_into_chunks=split_into_chunks,
     )
 
-    messages = messages_builder.get_messages(payload)["messages"]
+    messages = messages_builder.get_messages(payload).messages
     return await arun_instructor_with_messages(
         client,
         messages,
@@ -464,7 +489,7 @@ def run_instructor_with_payloads(
 
     results = []
     for payload in payloads:
-        messages = messages_builder.get_messages(payload)["messages"]
+        messages = messages_builder.get_messages(payload).messages
         result = run_instructor_with_messages(
             client,
             messages,
@@ -541,7 +566,7 @@ async def arun_instructor_with_payloads(
 
     tasks = []
     for payload in payloads:
-        messages = messages_builder.get_messages(payload)["messages"]
+        messages = messages_builder.get_messages(payload).messages
         tasks.append(
             arun_instructor_with_messages(
                 client,

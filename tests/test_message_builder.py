@@ -14,7 +14,7 @@ def test_basic_message_builder():
         system_prompt="You are a helpful assistant.",
     )
 
-    messages = builder.get_messages({"name": "Alice"})["messages"]
+    messages = builder.get_messages({"name": "Alice"}).messages
 
     assert len(messages) == 2
     assert messages[0]["role"] == "system"
@@ -27,7 +27,7 @@ def test_message_builder_without_system_prompt():
     """Test MessagesBuilder without a system prompt."""
     builder = MessagesBuilder(user_prompt_template="Hello, my name is {name}.")
 
-    messages = builder.get_messages({"name": "Bob"})["messages"]
+    messages = builder.get_messages({"name": "Bob"}).messages
 
     assert len(messages) == 1
     assert messages[0]["role"] == "user"
@@ -42,7 +42,7 @@ def test_message_builder_instruction_last():
         instruction_first=False,
     )
 
-    messages = builder.get_messages({"name": "Charlie"})["messages"]
+    messages = builder.get_messages({"name": "Charlie"}).messages
 
     assert len(messages) == 1
     assert messages[0]["role"] == "user"
@@ -58,7 +58,7 @@ def test_message_builder_with_extra_fields():
         extra_fields={"age": 30},
     )
 
-    messages = builder.get_messages({"name": "David"})["messages"]
+    messages = builder.get_messages({"name": "David"}).messages
 
     assert len(messages) == 2
     assert messages[1]["role"] == "user"
@@ -72,7 +72,7 @@ def test_message_builder_with_incomplete_template():
         system_prompt="You are a helpful assistant.",
     )
 
-    messages = builder.get_messages({"name": "Eva"})["messages"]
+    messages = builder.get_messages({"name": "Eva"}).messages
 
     assert len(messages) == 2
     assert messages[1]["role"] == "user"
@@ -88,9 +88,7 @@ def test_message_builder_split_into_chunks():
         input_field_types={"image": MessageChunkType.IMAGE_URL},
     )
 
-    messages = builder.get_messages({"image": "http://example.com/image.jpg"})[
-        "messages"
-    ]
+    messages = builder.get_messages({"image": "http://example.com/image.jpg"}).messages
 
     assert len(messages) == 2
     assert messages[1]["role"] == "user"
@@ -121,7 +119,7 @@ def test_message_builder_with_multiple_images():
             "image1": "http://example.com/image1.jpg",
             "image2": "http://example.com/image2.jpg",
         }
-    )["messages"]
+    ).messages
 
     assert len(messages) == 2
     assert messages[1]["role"] == "user"
@@ -147,7 +145,7 @@ def test_message_builder_with_empty_prompt():
         user_prompt_template="", system_prompt="You are a helpful assistant."
     )
 
-    messages = builder.get_messages({})["messages"]
+    messages = builder.get_messages({}).messages
 
     assert len(messages) == 2
     assert messages[1]["role"] == "user"
@@ -164,9 +162,7 @@ def test_message_builder_append_system_to_chunks():
         input_field_types={"image": MessageChunkType.IMAGE_URL},
     )
 
-    messages = builder.get_messages({"image": "http://example.com/image.jpg"})[
-        "messages"
-    ]
+    messages = builder.get_messages({"image": "http://example.com/image.jpg"}).messages
 
     assert len(messages) == 1
     assert messages[0]["role"] == "user"
@@ -182,29 +178,6 @@ def test_message_builder_append_system_to_chunks():
     )
     assert messages[0]["content"][2]["type"] == "text"
     assert messages[0]["content"][2]["text"] == "Describe the image in detail."
-
-
-def test_count_message_types():
-    """Test the count_message_types class method."""
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Hello, world!"},
-        {
-            "role": "user",
-            "content": [
-                {"type": "text", "text": "Look at this image: "},
-                {
-                    "type": "image_url",
-                    "image_url": {"url": "http://example.com/image.jpg"},
-                },
-            ],
-        },
-    ]
-
-    counts = MessagesBuilder.count_message_types(messages)
-
-    assert counts["text"] == 3  # 2 text strings + 1 text chunk
-    assert counts["image_url"] == 1
 
 
 @pytest.mark.parametrize(
@@ -244,10 +217,9 @@ def test_trim_messages_to_fit_context(
             ],
         },
     ]
+    m = MessagesBuilder()
 
-    trimmed = MessagesBuilder.trim_messages_to_fit_context(
-        messages=messages, model="gpt-4o"
-    )
+    trimmed = m.trim_messages_to_fit_context(messages=messages, model="gpt-4o")
 
     assert len(trimmed) == expected_message_count
 
@@ -366,7 +338,7 @@ def test_all_features_combined():
                 "image1": "http://example.com/image1.jpg",
                 "image2": "http://example.com/image2.jpg",
             }
-        )["messages"]
+        ).messages
 
     # Verify the result
     assert len(messages) == 2
@@ -453,38 +425,12 @@ def test_get_messages_with_all_default_fields():
     builder = MessagesBuilder(user_prompt_template="Hello, world!")
 
     # Get messages with no payload
-    messages = builder.get_messages({})["messages"]
+    messages = builder.get_messages({}).messages
 
     # Verify result
     assert len(messages) == 1
     assert messages[0]["role"] == "user"
     assert messages[0]["content"] == "Hello, world!"
-
-
-def test_message_type_counting_with_various_inputs():
-    """Test count_message_types with various message formats."""
-    messages = [
-        {"role": "system", "content": "System message"},
-        {"role": "user", "content": "Text message"},
-        {
-            "role": "assistant",
-            "content": [
-                {"type": "text", "text": "Chunked text"},
-                {
-                    "type": "image_url",
-                    "image_url": {"url": "http://example.com/image.jpg"},
-                },
-            ],
-        },
-        {"type": "text", "text": "Direct text chunk"},
-        {"unknown_format": "This should be counted as text"},
-    ]
-
-    counts = MessagesBuilder.count_message_types(messages)
-
-    # 2 text messages + 1 chunked text + 1 direct text chunk + 1 unknown format
-    assert counts["text"] == 5
-    assert counts["image_url"] == 1
 
 
 def test_split_message_into_chunks():
@@ -541,7 +487,7 @@ def test_message_builder_with_multiple_image_urls():
         "http://example.com/image3.jpg",
     ]
 
-    messages = builder.get_messages({"images": image_urls})["messages"]
+    messages = builder.get_messages({"images": image_urls}).messages
 
     # Verify the correct structure was created
     assert len(messages) == 2
@@ -584,7 +530,7 @@ def test_message_builder_with_mixed_field_types():
             "images": image_urls,
             "single_image": "http://example.com/main.jpg",
         }
-    )["messages"]
+    ).messages
 
     assert len(messages) == 2
     assert messages[1]["role"] == "user"
@@ -630,7 +576,7 @@ def test_empty_image_urls_list():
     )
 
     # Test with empty list
-    messages = builder.get_messages({"images": []})["messages"]
+    messages = builder.get_messages({"images": []}).messages
 
     assert len(messages) == 1
     assert messages[0]["role"] == "user"
