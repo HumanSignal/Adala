@@ -200,7 +200,7 @@ class MessagesBuilder(BaseModel):
 
         Args:
             payload: Variables to substitute in the template
-            
+
         Example:
             >>> builder = MessagesBuilder(
             ...     user_prompt_template="Analyze this image: {image}",

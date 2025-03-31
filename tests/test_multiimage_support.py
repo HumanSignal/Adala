@@ -195,8 +195,8 @@ async def test_message_trimming_mocked():
     assert results["message_counts"]["text"] == 1  # last message is also trimmed
 
     # Verify that the metrics are included
-    assert results['_prompt_tokens'] == 128000
-    assert results['_completion_tokens'] == 370
-    assert results['_prompt_cost_usd'] == 0.32
-    assert results['_completion_cost_usd'] == 0.0037
-    assert results['_total_cost_usd'] == 0.3237
+    assert results["_prompt_tokens"] == 128000
+    assert results["_completion_tokens"] == 370
+    assert results["_prompt_cost_usd"] == 0.32
+    assert results["_completion_cost_usd"] == 0.0037
+    assert results["_total_cost_usd"] == 0.3237

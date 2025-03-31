@@ -206,19 +206,19 @@ def test_count_message_types():
 @pytest.mark.parametrize(
     "max_input_tokens, expected_message_count, expected_chunk_count",
     [
-        (1, 1, 0),    # Only system message fits
-        (30, 2, 0),   # System message and first user message fit
-        (50, 3, 2),   # All messages fit, but only 2 chunks in the last message
+        (1, 1, 0),  # Only system message fits
+        (30, 2, 0),  # System message and first user message fit
+        (50, 3, 2),  # All messages fit, but only 2 chunks in the last message
     ],
 )
 @patch("litellm.model_cost")
 @patch("litellm.utils.token_counter")
 def test_trim_messages_to_fit_context(
-    mock_token_counter, 
-    mock_model_cost, 
-    max_input_tokens, 
-    expected_message_count, 
-    expected_chunk_count
+    mock_token_counter,
+    mock_model_cost,
+    max_input_tokens,
+    expected_message_count,
+    expected_chunk_count,
 ):
     """Test trimming messages to fit context window."""
     # Setup model token limits
@@ -246,16 +246,19 @@ def test_trim_messages_to_fit_context(
     )
 
     assert len(trimmed) == expected_message_count
-    
+
     if expected_message_count > 0:
         assert trimmed[0] == messages[0]  # System message is preserved
-        
+
     if expected_message_count > 1:
         assert trimmed[1] == messages[1]  # First user message is preserved
-        
+
     if expected_message_count > 2 and expected_chunk_count > 0:
         assert len(trimmed[2]["content"]) == expected_chunk_count
-        assert trimmed[2]["content"][:expected_chunk_count] == messages[2]["content"][:expected_chunk_count]
+        assert (
+            trimmed[2]["content"][:expected_chunk_count]
+            == messages[2]["content"][:expected_chunk_count]
+        )
 
 
 @patch("litellm.model_cost")

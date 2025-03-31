@@ -545,7 +545,7 @@ async def arun_instructor_with_payloads(
         trim_to_fit_context=ensure_messages_fit_in_context_window,
         model=canonical_model_provider_string or model,
     )
-    
+
     tasks = []
     for payload in payloads:
         messages = messages_builder.get_messages(payload)

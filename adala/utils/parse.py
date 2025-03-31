@@ -118,8 +118,8 @@ class MessageChunkType(Enum):
     TEXT = "text"
     IMAGE_URL = "image_url"
     IMAGE_URLS = "image_urls"
-    
-    
+
+
 class TextMessageChunk(TypedDict):
     type: Literal["text"]
     text: str
@@ -215,5 +215,3 @@ def parse_template(
         )
 
     return chunks
-
-
