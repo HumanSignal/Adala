@@ -165,14 +165,9 @@ def run_instructor_with_messages(
         Dict containing the parsed response and usage information
     """
     try:
-        prompt_token_count = None
-        if ensure_messages_fit_in_context_window:
-            messages, prompt_token_count = _ensure_messages_fit_in_context_window(
-                messages, canonical_model_provider_string or model
-            )
-
+        messages_counts: Dict[str, int] = {}
         # Count message types before sending to the LLM
-        message_counts: Dict[str, int] = MessagesBuilder.count_message_types(messages)
+        message_counts = MessagesBuilder.count_message_types(messages)
 
         response, completion = client.chat.completions.create_with_completion(
             messages=messages,
@@ -190,13 +185,11 @@ def run_instructor_with_messages(
         usage_model = completion.model
 
     except Exception as e:
-        dct, usage = handle_llm_exception(
-            e, messages, model, retries, prompt_token_count=prompt_token_count
-        )
+        dct, usage = handle_llm_exception(e, messages, model, retries)
         # With exceptions we don't have access to completion.model
         usage_model = canonical_model_provider_string or model
         # Add empty message counts in case of exception
-        message_counts: Dict[str, int] = MessagesBuilder.count_message_types(messages)
+        message_counts = MessagesBuilder.count_message_types(messages)
 
     # Add usage data to the response (e.g. token counts, cost)
     usage_data = _get_usage_dict(usage, model=usage_model)
@@ -330,7 +323,7 @@ def run_instructor_with_payload(
         split_into_chunks=split_into_chunks,
     )
 
-    messages = messages_builder.get_messages(payload)
+    messages = messages_builder.get_messages(payload)["messages"]
     return run_instructor_with_messages(
         client,
         messages,
@@ -399,7 +392,7 @@ async def arun_instructor_with_payload(
         split_into_chunks=split_into_chunks,
     )
 
-    messages = messages_builder.get_messages(payload)
+    messages = messages_builder.get_messages(payload)["messages"]
     return await arun_instructor_with_messages(
         client,
         messages,
@@ -471,7 +464,7 @@ def run_instructor_with_payloads(
 
     results = []
     for payload in payloads:
-        messages = messages_builder.get_messages(payload)
+        messages = messages_builder.get_messages(payload)["messages"]
         result = run_instructor_with_messages(
             client,
             messages,
@@ -548,7 +541,7 @@ async def arun_instructor_with_payloads(
 
     tasks = []
     for payload in payloads:
-        messages = messages_builder.get_messages(payload)
+        messages = messages_builder.get_messages(payload)["messages"]
         tasks.append(
             arun_instructor_with_messages(
                 client,

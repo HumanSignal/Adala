@@ -194,7 +194,7 @@ class MessagesBuilder(BaseModel):
 
         return result
 
-    def get_messages(self, payload: Dict[str, Any]):
+    def get_messages(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """
         Generate formatted messages based on template and payload.
 
@@ -231,7 +231,7 @@ class MessagesBuilder(BaseModel):
         if self.trim_to_fit_context and self.model:
             messages = self.trim_messages_to_fit_context(messages, self.model)
 
-        return messages
+        return {"messages": messages}
 
     def _format_user_prompt(
         self, payload: Dict[str, Any]
