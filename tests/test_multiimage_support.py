@@ -3,6 +3,16 @@ import pytest
 from adala.agents import Agent
 import asyncio
 import os
+from unittest.mock import patch, MagicMock, AsyncMock
+from pydantic import BaseModel
+from typing import Dict, Any, List
+import json
+from adala.utils.llm_utils import (
+    arun_instructor_with_messages,
+    arun_instructor_with_payloads,
+)
+from litellm.types.utils import Usage
+from adala.utils.parse import MessageChunkType
 
 
 @pytest.mark.vcr
@@ -101,3 +111,92 @@ def test_MIG():
     assert predictions._prompt_cost_usd[0] == 0.035435
     assert predictions._completion_cost_usd[0] == 0.00555
     assert predictions._total_cost_usd[0] == 0.040985
+
+
+class SimpleResponse(BaseModel):
+    result: str
+    output: List[str] = []
+
+
+@pytest.mark.asyncio
+async def test_message_trimming_mocked():
+    """Test that messages exceeding context window are properly trimmed and message counts tracked.
+
+    This test uses a real image URL duplicated many times to test the context window trimming.
+    Only the create_with_completion method is mocked, all other util functions perform actual computations.
+    """
+    # Use a real image URL and duplicate it many times (200+) to exceed context window
+    real_image_url = "https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0000.png"
+
+    # Create a payload with a large list of images
+    image_urls = [real_image_url] * 2000
+    payload = {"images": image_urls}
+
+    # Create a user prompt template that references the images
+    user_prompt_template = "Analyze these images: {images}. Provide the list of authors and the year of publication."
+
+    # Create mock objects
+    mock_client = AsyncMock()
+
+    # Create a realistic completion response similar to the example in test_MIG.yaml
+    mock_response = SimpleResponse(
+        result="Success",
+        output=[
+            "Fihn et al., Circulation 2012, 126: e354-471",
+            "Amsterdam et al., J Am Coll Cardiol 2014, 64: e139-228",
+            "Task Force et al., Eur Heart J 2013, 34: 2949-3003",
+        ],
+    )
+
+    # Create realistic completion object with usage stats
+    mock_completion = MagicMock()
+    mock_completion.model = "gpt-4o"
+    mock_completion.usage = Usage(
+        prompt_tokens=128000,
+        completion_tokens=370,
+        total_tokens=128370,
+    )
+
+    # Mock only the create_with_completion method
+    mock_client.chat.completions.create_with_completion = AsyncMock(
+        return_value=(mock_response, mock_completion)
+    )
+
+    # Run the function with our minimally mocked dependencies
+    # Using the higher-level function that handles payloads
+    results = await arun_instructor_with_payloads(
+        client=mock_client,
+        payloads=[payload],
+        user_prompt_template=user_prompt_template,
+        response_model=SimpleResponse,
+        model="gpt-4o",
+        input_field_types={"images": MessageChunkType.IMAGE_URLS},
+        extra_fields={},
+        ensure_messages_fit_in_context_window=True,
+        split_into_chunks=True,
+    )
+
+    results = results[0]
+    # Log the result message counts for debugging
+    print(f"Original message count: {len(image_urls)}")
+    print(f"Message counts in result: {results['message_counts']}")
+
+    # Verify the message_counts in the result
+    assert "message_counts" in results
+
+    # The message counts should include image_url and text
+    assert "image_url" in results["message_counts"]
+    assert "text" in results["message_counts"]
+
+    # Verify that the number of images was trimmed (less than 200)
+    assert results["message_counts"]["image_url"] == 1391
+
+    # Verify that the number of text messages was also trimmed
+    assert results["message_counts"]["text"] == 1  # last message is also trimmed
+
+    # Verify that the metrics are included
+    assert results['_prompt_tokens'] == 128000
+    assert results['_completion_tokens'] == 370
+    assert results['_prompt_cost_usd'] == 0.32
+    assert results['_completion_cost_usd'] == 0.0037
+    assert results['_total_cost_usd'] == 0.3237

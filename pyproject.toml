@@ -74,6 +74,7 @@ celery = {extras = ["pytest"], version = "^5.4.0"}
 openai-responses = "^0.11.6"
 mockafka-py = "^0.1.57"
 pytest-recording = "0.13.2"
+mypy = "^1.15.0"
 
 [tool.poetry.scripts]
 adala = "adala.cli:main"

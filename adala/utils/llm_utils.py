@@ -12,7 +12,8 @@ from litellm.utils import trim_messages
 from tenacity import Retrying, AsyncRetrying
 from instructor.exceptions import InstructorRetryException, IncompleteOutputException
 from instructor.client import Instructor, AsyncInstructor
-from adala.utils.parse import MessagesBuilder, MessageChunkType
+from adala.utils.parse import MessageChunkType
+from adala.utils.message_builder import MessagesBuilder
 from adala.utils.exceptions import ConstrainedGenerationError
 from adala.utils.types import debug_time_it
 from litellm.exceptions import BadRequestError
@@ -130,34 +131,6 @@ def handle_llm_exception(
     return _log_llm_exception(e), usage
 
 
-def _ensure_messages_fit_in_context_window(
-    messages: List[Dict[str, str]], model: str
-) -> Tuple[List[Dict[str, str]], int]:
-    """
-    Ensure that the messages fit in the context window of the model.
-    """
-    token_count = token_counter(model=model, messages=messages)
-    logger.debug(f"Prompt tokens count: {token_count}")
-
-    if model in litellm.model_cost:
-        # If we are able to identify the model context window, ensure the messages fit in it
-        max_tokens = litellm.model_cost[model].get(
-            "max_input_tokens", litellm.model_cost[model]["max_tokens"]
-        )
-        if token_count > max_tokens:
-            logger.info(
-                f"Prompt tokens count {token_count} exceeds max tokens {max_tokens} for model {model}. Trimming messages."
-            )
-            # TODO: in case it exceeds max tokens, content of the last message is truncated.
-            # to improve this, we implement:
-            # - UI-level warning for the user, use prediction_meta field for warnings as well as errors in future
-            # - sequential aggregation instead of trimming
-            # - potential v2 solution to downsample images instead of cutting them off (using quality=low instead of quality=auto in completion)
-            return trim_messages(messages, model=model), token_count
-    # in other cases, just return the original messages
-    return messages, token_count
-
-
 @debug_time_it
 def run_instructor_with_messages(
     client: Instructor,
@@ -198,6 +171,9 @@ def run_instructor_with_messages(
                 messages, canonical_model_provider_string or model
             )
 
+        # Count message types before sending to the LLM
+        message_counts: Dict[str, int] = MessagesBuilder.count_message_types(messages)
+
         response, completion = client.chat.completions.create_with_completion(
             messages=messages,
             response_model=response_model,
@@ -219,9 +195,14 @@ def run_instructor_with_messages(
         )
         # With exceptions we don't have access to completion.model
         usage_model = canonical_model_provider_string or model
+        # Add empty message counts in case of exception
+        message_counts: Dict[str, int] = MessagesBuilder.count_message_types(messages)
 
     # Add usage data to the response (e.g. token counts, cost)
-    dct.update(_get_usage_dict(usage, model=usage_model))
+    usage_data = _get_usage_dict(usage, model=usage_model)
+    # Add message counts to usage data
+    usage_data["message_counts"] = message_counts
+    dct.update(usage_data)
 
     return dct
 
@@ -237,7 +218,6 @@ async def arun_instructor_with_messages(
     temperature: Optional[float] = None,
     seed: Optional[int] = None,
     retries: Optional[AsyncRetrying] = None,
-    ensure_messages_fit_in_context_window: bool = False,
     **kwargs,
 ) -> Dict[str, Any]:
     """
@@ -253,18 +233,16 @@ async def arun_instructor_with_messages(
         temperature: Temperature for sampling
         seed: Integer seed to reduce nondeterminism
         retries: Retry policy to use
-        ensure_messages_fit_in_context_window: Whether to ensure the messages fit in the context window (setting it to True will slow down the function)
         **kwargs: Additional arguments to pass to the completion call
 
     Returns:
         Dict containing the parsed response and usage information
     """
     try:
-        prompt_token_count = None
-        if ensure_messages_fit_in_context_window:
-            messages, prompt_token_count = _ensure_messages_fit_in_context_window(
-                messages, canonical_model_provider_string or model
-            )
+        message_counts: Dict[str, int] = {}
+
+        # Count message types before sending to the LLM
+        message_counts = MessagesBuilder.count_message_types(messages)
 
         response, completion = await client.chat.completions.create_with_completion(
             messages=messages,
@@ -282,14 +260,18 @@ async def arun_instructor_with_messages(
         usage_model = completion.model
 
     except Exception as e:
-        dct, usage = handle_llm_exception(
-            e, messages, model, retries, prompt_token_count=prompt_token_count
-        )
+        dct, usage = handle_llm_exception(e, messages, model, retries)
         # With exceptions we don't have access to completion.model
         usage_model = canonical_model_provider_string or model
+        # Add empty message counts in case of exception
+        if not message_counts:
+            message_counts = MessagesBuilder.count_message_types(messages)
 
     # Add usage data to the response (e.g. token counts, cost)
-    dct.update(_get_usage_dict(usage, model=usage_model))
+    usage_data = _get_usage_dict(usage, model=usage_model)
+    # Add message counts to usage data
+    usage_data["message_counts"] = message_counts
+    dct.update(usage_data)
 
     return dct
 
@@ -560,23 +542,26 @@ async def arun_instructor_with_payloads(
         input_field_types=input_field_types,
         extra_fields=extra_fields,
         split_into_chunks=split_into_chunks,
+        trim_to_fit_context=ensure_messages_fit_in_context_window,
+        model=canonical_model_provider_string or model,
     )
-
-    tasks = [
-        arun_instructor_with_messages(
-            client,
-            messages_builder.get_messages(payload),
-            response_model,
-            model,
-            canonical_model_provider_string,
-            max_tokens,
-            temperature,
-            seed,
-            retries,
-            ensure_messages_fit_in_context_window=ensure_messages_fit_in_context_window,
-            **kwargs,
+    
+    tasks = []
+    for payload in payloads:
+        messages = messages_builder.get_messages(payload)
+        tasks.append(
+            arun_instructor_with_messages(
+                client,
+                messages,
+                response_model,
+                model,
+                canonical_model_provider_string,
+                max_tokens,
+                temperature,
+                seed,
+                retries,
+                **kwargs,
+            )
         )
-        for payload in payloads
-    ]
 
     return await asyncio.gather(*tasks)
