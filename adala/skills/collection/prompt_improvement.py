@@ -121,6 +121,9 @@ class PromptImprovementSkill(AnalysisSkill):
         self.output_template = output_json_template
 
         logger.debug(
-            f"Instructions: {self.instructions}\nInput template: {self.input_template}\nInput prefix: {self.input_prefix}"
+            "Instructions: %s\nInput template: %s\nInput prefix: %s",
+            self.instructions,
+            self.input_template,
+            self.input_prefix,
         )
         return self

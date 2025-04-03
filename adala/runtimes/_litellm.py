@@ -230,8 +230,9 @@ class GetCostEstimateMixin:
                 )
 
             except Exception as e:
-                logger.error("Failed to estimate cost: %s", e)
-                logger.debug(traceback.format_exc())
+                logger.exception("Failed to estimate cost")
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("%s", traceback.format_exc())
                 return CostEstimate(
                     is_error=True,
                     error_type=type(e).__name__,
@@ -265,8 +266,9 @@ class GetCostEstimateMixin:
                 )
 
             except Exception as e:
-                logger.error("Failed to estimate cost: %s", e)
-                logger.debug(traceback.format_exc())
+                logger.exception("Failed to estimate cost")
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("%s", traceback.format_exc())
                 return CostEstimate(
                     is_error=True,
                     error_type=type(e).__name__,

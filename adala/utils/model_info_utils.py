@@ -173,9 +173,12 @@ def get_canonical_model_provider_string(
         return match_model_provider_string(model)
     except (NoModelsFoundError, BadRequestError) as e:
         logger.info(
-            f"Model {model} not found in litellm model map for provider {provider}. This is likely a single-model deployment."
+            "Model %s not found in litellm model map for provider %s. This is likely a single-model deployment.",
+            model,
+            provider,
         )
-        logger.debug(f"Exception: {str(e)}\nTraceback: {traceback.format_exc()}")
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Exception: %s\nTraceback: %s", str(e), traceback.format_exc())
     except Exception as e:
         logger.exception(
             f"(1/2) Failed to get canonical model provider string for {model}."
@@ -207,7 +210,8 @@ def get_canonical_model_provider_string(
         logger.warning(
             f"Model {model} not found in litellm model map for provider {provider}. This is likely a custom model."
         )
-        logger.debug(f"Exception: {str(e)}\nTraceback: {traceback.format_exc()}")
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Exception: %s\nTraceback: %s", str(e), traceback.format_exc())
         return model
     except Exception as e:
         logger.exception(
@@ -242,7 +246,8 @@ async def get_canonical_model_provider_string_async(
         logger.info(
             f"Model {model} not found in litellm model map for provider {provider}. This is likely a single-model deployment."
         )
-        logger.debug(f"Exception: {str(e)}\nTraceback: {traceback.format_exc()}")
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Exception: %s\nTraceback: %s", str(e), traceback.format_exc())
     except Exception as e:
         logger.exception(
             f"(1/2) Failed to get canonical model provider string for {model}."
@@ -274,7 +279,8 @@ async def get_canonical_model_provider_string_async(
         logger.warning(
             f"Model {model} not found in litellm model map for provider {provider}. This is likely a custom model."
         )
-        logger.debug(f"Exception: {str(e)}\nTraceback: {traceback.format_exc()}")
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Exception: %s\nTraceback: %s", str(e), traceback.format_exc())
         return model
     except Exception as e:
         logger.exception(

@@ -16,6 +16,7 @@ from typing import (
     Optional,
     TypedDict,
     Union,
+    cast,
 )
 
 from pydantic import BaseModel, Field, validator
@@ -193,6 +194,7 @@ def parse_template(
             }
         )
 
+    logger.debug("Parsed template: %s", chunks)
     return chunks
 
 
@@ -247,7 +249,7 @@ def split_message_into_chunks(
         input_field_types=input_field_types,
     )
 
-    logger.debug(f"Parsed template: {parsed}")
+    logger.debug("Parsed template: %s", parsed)
 
     result = []
     current_text = ""
@@ -307,7 +309,7 @@ def split_message_into_chunks(
     # Add any remaining text
     _add_current_text_as_chunk()
 
-    logger.debug(f"Result: {result}")
+    logger.debug("Result: %s", result)
 
     return result
 

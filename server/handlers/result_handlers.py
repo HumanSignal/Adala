@@ -3,6 +3,7 @@ import json
 from abc import abstractmethod
 from pydantic import BaseModel, Field, computed_field, ConfigDict, model_validator
 import csv
+import logging
 
 from adala.utils.registry import BaseModelInRegistry
 from server.utils import init_logger
@@ -56,7 +57,7 @@ class DummyHandler(ResultHandler):
     """
 
     def __call__(self, batch):
-        logger.debug(f"\n\nHandler received batch: {batch}\n\n")
+        logger.debug("Handler received batch: %s", batch)
 
 
 class LSEBatchItem(BaseModel):
@@ -141,7 +142,7 @@ class LSEBatchItem(BaseModel):
             k: v for k, v in result.items() if k not in prepared_result
         }
 
-        logger.debug(f"Prepared result: {prepared_result}")
+        logger.debug("Prepared result: %s", prepared_result)
 
         return cls(**prepared_result)
 
@@ -194,8 +195,7 @@ class LSEHandler(ResultHandler):
         return transformed_errors
 
     def __call__(self, result_batch: list[Dict]):
-        logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
-        logger.info("LSEHandler received batch")
+        logger.debug("Handler received batch: %s", result_batch)
 
         # coerce dicts to LSEBatchItems for validation
         norm_result_batch = [
@@ -209,7 +209,7 @@ class LSEHandler(ResultHandler):
         result_batch = [record.dict() for record in result_batch]
         if result_batch:
             num_predictions = len(result_batch)
-            logger.info(f"LSEHandler sending {num_predictions} predictions to LSE")
+            logger.info("LSEHandler sending %d predictions to LSE", num_predictions)
             self.client.make_request(
                 "POST",
                 f"/api/model-run/batch-predictions?num_predictions={num_predictions}",
@@ -220,10 +220,10 @@ class LSEHandler(ResultHandler):
                     }
                 ),
             )
-            logger.info(f"LSEHandler sent {num_predictions} predictions to LSE")
+            logger.info("LSEHandler sent %d predictions to LSE", num_predictions)
         else:
             logger.error(
-                f"No valid results to send to LSE for modelrun_id {self.modelrun_id}"
+                "No valid results to send to LSE for modelrun_id %s", self.modelrun_id
             )
 
         # Send failed predictions back to LSE
@@ -242,9 +242,13 @@ class LSEHandler(ResultHandler):
                     }
                 ),
             )
-            logger.info(f"LSEHandler sent {len(error_batch)} failed predictions to LSE")
+            logger.info(
+                "LSEHandler sent %d failed predictions to LSE", len(error_batch)
+            )
         else:
-            logger.debug(f"No errors to send to LSE for modelrun_id {self.modelrun_id}")
+            logger.debug(
+                "No errors to send to LSE for modelrun_id %s", self.modelrun_id
+            )
 
 
 class CSVHandler(ResultHandler):
@@ -267,7 +271,7 @@ class CSVHandler(ResultHandler):
         return self
 
     def __call__(self, result_batch: List[Dict]):
-        logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
+        logger.debug("Handler received batch: %s", result_batch)
 
         # coerce dicts to LSEBatchItems for validation
         norm_result_batch = [

@@ -21,6 +21,7 @@ from adala.utils.logs import print_dataframe, print_text
 from adala.utils.registry import BaseModelInRegistry
 from adala.runtimes.base import Runtime, AsyncRuntime
 from tqdm import tqdm
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -530,11 +531,10 @@ Instruct the model to give the final answer at the end of the prompt, using the 
                 _adala_message=str(e),
                 _adala_details=traceback.format_exc(),
             )
-
         # get tokens and token cost
-        resp = ImprovedPromptResponse(output=output, **response_dct)
-        logger.debug(f"resp: {resp}")
-
+        resp_string = json.dumps(output)
+        resp = json.loads(resp_string)
+        logger.debug("resp: %s", resp)
         return resp
 
 

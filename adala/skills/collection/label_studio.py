@@ -95,7 +95,7 @@ class LabelStudioSkill(TransformSkill):
     @model_validator(mode="after")
     def validate_response_model(self):
 
-        logger.debug(f"Read labeling config {self.label_config}")
+        logger.debug("Read labeling config %s", self.label_config)
 
         if self.allowed_control_tags or self.allowed_object_tags:
             if self.allowed_control_tags:
@@ -123,7 +123,10 @@ class LabelStudioSkill(TransformSkill):
 
         # NOTE: filtered label config is used for the response model, but full label config is used for the prompt, so that the model has as much context as possible.
         self.field_schema = interface.to_json_schema()
-        logger.debug(f"Converted labeling config to json schema: {self.field_schema}")
+        logger.debug(
+            "Converted labeling config to json schema: %s",
+            self.field_schema,
+        )
 
         return self
 
@@ -170,7 +173,7 @@ class LabelStudioSkill(TransformSkill):
                     )
 
                 logger.debug(
-                    f"Using VisionRuntime with input field types: {input_field_types}"
+                    "Using VisionRuntime with input field types: %s", input_field_types
                 )
                 output = await runtime.batch_to_batch(
                     input,

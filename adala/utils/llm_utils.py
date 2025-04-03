@@ -90,7 +90,8 @@ def handle_llm_exception(
     Returns:
         Tuple of (error_dict, usage_stats)
     """
-    logger.debug(f"LLM Exception: {e}\nTraceback:\n{traceback.format_exc()}")
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug("LLM Exception: %s\nTraceback:\n%s", e, traceback.format_exc())
     if isinstance(e, IncompleteOutputException):
         usage = e.total_usage
     elif isinstance(e, InstructorRetryException):
@@ -137,7 +138,7 @@ def _ensure_messages_fit_in_context_window(
     Ensure that the messages fit in the context window of the model.
     """
     token_count = token_counter(model=model, messages=messages)
-    logger.debug(f"Prompt tokens count: {token_count}")
+    logger.debug("Prompt tokens count: %s", token_count)
 
     if model in litellm.model_cost:
         # If we are able to identify the model context window, ensure the messages fit in it

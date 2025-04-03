@@ -99,7 +99,7 @@ class Agent(BaseModel, ABC):
         Validates and possibly transforms the environment attribute:
         if the environment is an InternalDataFrame, it is transformed into a StaticEnvironment.
         """
-        logger.debug(f"Validating environment attribute: {v}")
+        logger.debug("Validating environment attribute: %s", v)
         if isinstance(v, InternalDataFrame):
             v = StaticEnvironment(df=v)
         elif isinstance(v, dict) and "type" in v:

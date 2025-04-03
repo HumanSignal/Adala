@@ -4,6 +4,7 @@ import os
 import json
 import pandas as pd
 import traceback
+import logging
 
 import fastapi
 from fastapi import Request, status
@@ -396,7 +397,9 @@ async def estimate_cost(
         )
 
     except NotImplementedError as e:
-        logger.debug(f"Error estimating cost: {e} {traceback.format_exc()}")
+        logger.exception("Error estimating cost: %s", e)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Error estimating cost: %s %s", e, traceback.format_exc())
         return Response[CostEstimate](
             data=CostEstimate(
                 is_error=True,
