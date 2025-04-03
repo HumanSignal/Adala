@@ -92,7 +92,10 @@ def handle_llm_exception(
     """
     logger.debug(f"LLM Exception: {e}\nTraceback:\n{traceback.format_exc()}")
     if isinstance(e, IncompleteOutputException):
-        usage = e.total_usage
+        if hasattr(e, "last_completion") and hasattr(e.last_completion, "usage"):   
+            usage = e.last_completion.usage
+        else:
+            usage = None
     elif isinstance(e, InstructorRetryException):
         usage = e.total_usage
         # get root cause error from retries
@@ -126,6 +129,14 @@ def handle_llm_exception(
             e = ConstrainedGenerationError()
 
         # the only other instructor error that would be thrown is IncompleteOutputException due to max_tokens reached
+
+    if usage is None:
+        logger.error("Can't retrieve usage from LLM exception: setting usage to 0")
+        usage = Usage(
+            prompt_tokens=0,
+            completion_tokens=0,
+            total_tokens=0,
+        )
 
     return _log_llm_exception(e), usage
 
