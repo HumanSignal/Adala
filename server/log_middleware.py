@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from logging import Formatter
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -20,11 +21,13 @@ class JsonFormatter(Formatter):
         return json.dumps(json_record)
 
 
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
+
 logger = logging.root
 handler = logging.StreamHandler()
 handler.setFormatter(JsonFormatter())
 logger.handlers = [handler]
-logger.setLevel(logging.DEBUG)
+logger.setLevel(getattr(logging, LOG_LEVEL, logging.INFO))
 logging.getLogger("uvicorn.access").disabled = True
 
 
