@@ -229,12 +229,13 @@ class LSEHandler(ResultHandler):
         # Send failed predictions back to LSE
         if error_batch:
             error_batch = self.prepare_errors_payload(error_batch)
+            num_failed_predictions = len(error_batch)
             logger.info(
-                f"LSEHandler sending {len(error_batch)} failed predictions to LSE"
+                f"LSEHandler sending {num_failed_predictions} failed predictions to LSE"
             )
             self.client.make_request(
                 "POST",
-                "/api/model-run/batch-failed-predictions",
+                f"/api/model-run/batch-failed-predictions?num_failed_predictions={num_failed_predictions}",
                 data=json.dumps(
                     {
                         "modelrun_id": self.modelrun_id,
@@ -242,7 +243,9 @@ class LSEHandler(ResultHandler):
                     }
                 ),
             )
-            logger.info(f"LSEHandler sent {len(error_batch)} failed predictions to LSE")
+            logger.info(
+                f"LSEHandler sent {num_failed_predictions} failed predictions to LSE"
+            )
         else:
             logger.debug(f"No errors to send to LSE for modelrun_id {self.modelrun_id}")
 
