@@ -243,7 +243,9 @@ class LSEHandler(ResultHandler):
                     }
                 ),
             )
-            logger.info(f"LSEHandler sent {num_failed_predictions} failed predictions to LSE")
+            logger.info(
+                f"LSEHandler sent {num_failed_predictions} failed predictions to LSE"
+            )
         else:
             logger.debug(f"No errors to send to LSE for modelrun_id {self.modelrun_id}")
 
