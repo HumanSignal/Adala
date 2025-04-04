@@ -92,7 +92,7 @@ def handle_llm_exception(
     """
     logger.debug(f"LLM Exception: {e}\nTraceback:\n{traceback.format_exc()}")
     if isinstance(e, IncompleteOutputException):
-        if hasattr(e, "last_completion") and hasattr(e.last_completion, "usage"):   
+        if hasattr(e, "last_completion") and hasattr(e.last_completion, "usage"):
             usage = e.last_completion.usage
         else:
             usage = None
