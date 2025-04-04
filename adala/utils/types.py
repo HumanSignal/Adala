@@ -54,7 +54,7 @@ def debug_time_it(func: Callable[..., T]) -> Callable[..., T]:
         end_time = time.time()
         execution_time = end_time - start_time
         logger.debug(
-            f"Function '{func.__name__}' executed in {execution_time:.4f} seconds"
+            "Function '%s' executed in %.4f seconds", func.__name__, execution_time
         )
         return result
 
@@ -65,7 +65,9 @@ def debug_time_it(func: Callable[..., T]) -> Callable[..., T]:
         end_time = time.time()
         execution_time = end_time - start_time
         logger.debug(
-            f"Async function '{func.__name__}' executed in {execution_time:.4f} seconds"
+            "Async function '%s' executed in %.4f seconds",
+            func.__name__,
+            execution_time,
         )
         return result
 

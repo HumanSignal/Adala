@@ -87,6 +87,9 @@ class LSEBatchItem(BaseModel):
     prompt_cost_usd: Optional[float] = Field(alias="_prompt_cost_usd")
     completion_cost_usd: Optional[float] = Field(alias="_completion_cost_usd")
     total_cost_usd: Optional[float] = Field(alias="_total_cost_usd")
+    message_counts: Optional[Dict[str, int]] = Field(
+        alias="_message_counts", default_factory=dict
+    )
 
     @model_validator(mode="after")
     def check_error_consistency(self):
@@ -125,6 +128,7 @@ class LSEBatchItem(BaseModel):
                 "_prompt_cost_usd",
                 "_completion_cost_usd",
                 "_total_cost_usd",
+                "_message_counts",
             )
         }
 
@@ -141,7 +145,7 @@ class LSEBatchItem(BaseModel):
             k: v for k, v in result.items() if k not in prepared_result
         }
 
-        logger.debug(f"Prepared result: {prepared_result}")
+        logger.debug("Prepared result: %s", prepared_result)
 
         return cls(**prepared_result)
 

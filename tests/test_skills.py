@@ -166,7 +166,7 @@ def test_classification_skill_multilabel():
         environment=StaticEnvironment(
             df=df, ground_truth_columns={"predicted_tags": "tags"}
         ),
-        teacher_runtimes={"default": OpenAIChatRuntime(model="gpt-4-turbo")},
+        teacher_runtimes={"default": OpenAIChatRuntime(model="gpt-4o-mini")},
     )
 
     out_df2 = agent2.run()
@@ -181,6 +181,19 @@ def test_classification_skill_multilabel():
     # assert they make correct predictions
 
     assert (out_df2["tags"] == df["tags"]).all()
+    # Extract and verify tags from the output dataframes
+    expected_tags = [
+        ["Account Access", "Login Issues"],
+        ["App Functionality", "Bug Report"],
+        ["Billing", "Account Management"],
+        ["User Settings", "Notifications"],
+        ["Performance", "Website Issues"],
+    ]
+
+    # Verify that both dataframes contain the expected tags
+    for i, expected_tag_set in enumerate(expected_tags):
+        assert set(out_df1["tags"][i]) == set(expected_tag_set)
+        assert set(out_df2["tags"][i]) == set(expected_tag_set)
 
 
 @pytest.mark.vcr

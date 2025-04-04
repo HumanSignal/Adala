@@ -7,7 +7,7 @@ from adala.runtimes import (
     AsyncLiteLLMChatRuntime,
     AsyncLiteLLMVisionRuntime,
 )
-from adala.utils.parse import split_message_into_chunks, MessageChunkType
+from adala.utils.parse import MessageChunkType
 
 
 @pytest.mark.vcr
@@ -72,9 +72,10 @@ def test_llm_sync():
         "_adala_details": "litellm.AuthenticationError: AuthenticationError: OpenAIException - Error code: 401 - {'error': {'message': 'Incorrect API key provided: fake_api_key. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}",
         "_prompt_tokens": 0,
         "_completion_tokens": 0,
-        "_prompt_cost_usd": 0,
+        "_prompt_cost_usd": 0.0,
         "_completion_cost_usd": 0.0,
-        "_total_cost_usd": 0,
+        "_total_cost_usd": 0.0,
+        "_message_counts": {"text": 1},
     }
     assert result == expected_result
 
@@ -102,7 +103,7 @@ def test_llm_async():
 
     # note age coerced to string
     # Check basic structure and types
-    assert result.shape == (1, 7)
+    assert result.shape == (1, 8)
     assert "name" in result.columns
     assert "age" in result.columns
     assert result["name"].iloc[0] == "Carla"
@@ -114,6 +115,7 @@ def test_llm_async():
     assert result["_prompt_cost_usd"].iloc[0] > 0
     assert result["_completion_cost_usd"].iloc[0] > 0
     assert result["_total_cost_usd"].iloc[0] > 0
+    assert result["_message_counts"].iloc[0] == {"text": 1}
 
     # test failure
 
@@ -139,50 +141,13 @@ def test_llm_async():
                 "_prompt_cost_usd": 0.0,
                 "_completion_cost_usd": 0.0,
                 "_total_cost_usd": 0.0,
+                "_message_counts": {"text": 1},
             }
         ]
     )
     pd.testing.assert_frame_equal(result, expected_result)
 
     # TODO test batch with successes and failures, figure out how to inject a particular error into LiteLLM
-
-
-def test_split_message_into_chunks():
-    # Test basic text-only template
-    result = split_message_into_chunks(
-        "Hello {name}!", {"name": MessageChunkType.TEXT}, name="Alice"
-    )
-    assert result == [{"type": "text", "text": "Hello Alice!"}]
-
-    # Test template with image URL
-    result = split_message_into_chunks(
-        "Look at this {image}",
-        {"image": MessageChunkType.IMAGE_URL},
-        image="http://example.com/img.jpg",
-    )
-    assert result == [
-        {"type": "text", "text": "Look at this "},
-        {"type": "image_url", "image_url": {"url": "http://example.com/img.jpg"}},
-    ]
-
-    # Test mixed text and image template
-    result = split_message_into_chunks(
-        "User {name} shared {image} yesterday",
-        {"name": MessageChunkType.TEXT, "image": MessageChunkType.IMAGE_URL},
-        name="Bob",
-        image="http://example.com/photo.jpg",
-    )
-    assert result == [
-        {"type": "text", "text": "User Bob shared "},
-        {"type": "image_url", "image_url": {"url": "http://example.com/photo.jpg"}},
-        {"type": "text", "text": " yesterday"},
-    ]
-
-    # Test multiple occurrences of same field
-    result = split_message_into_chunks(
-        "{name} is here. Hi {name}!", {"name": MessageChunkType.TEXT}, name="Dave"
-    )
-    assert result == [{"type": "text", "text": "Dave is here. Hi Dave!"}]
 
 
 @pytest.mark.vcr

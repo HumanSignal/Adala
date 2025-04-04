@@ -1,0 +1,271 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Adala - Autonomous Data Labeling Agent Framework
+
+This guide provides rules and best practices for contributing to the Adala framework, a Python-based autonomous agent system for data labeling and processing.
+
+## General Guidelines
+
+- Use Python 3.8+ features and syntax
+- Follow PEP 8 style guidelines with descriptive variable names
+- Use type hints for all function parameters and return types
+- Write comprehensive docstrings in Google format with examples
+- Maintain backward compatibility where possible
+- Keep dependencies minimal and explicitly versioned
+
+## Architecture Patterns
+
+### Agent-Based Architecture
+
+- Follow the agent-skill-environment-runtime architecture pattern
+- New components should inherit from the appropriate base class:
+  - Agents from `@adala/agents/base.py:Agent`
+  - Skills from `@adala/skills/_base.py:Skill` or its subclasses
+  - Environments from `@adala/environments/base.py:Environment`
+  - Runtimes from `@adala/runtimes/base.py:Runtime`
+
+### Registry Pattern
+
+- Use the registry pattern for new component types:
+  ```python
+  class MyNewComponent(BaseModelInRegistry):
+      # Implementation
+  ```
+- Ensure all registered classes have a unique `type` attribute
+- Register components through class inheritance, not explicit registration
+- The registry mechanism stores classes by their name in a global `_registry` dictionary
+- Use `create_from_registry(type, **kwargs)` class method to instantiate objects from registry
+
+### Pydantic Models
+
+- Use Pydantic for data validation and serialization
+- Implement `model_validator` for complex validations
+- Use `field_validator` for single field validations
+- Define model configuration with `ConfigDict` when needed
+- For attributes that shouldn't be serialized, use `field_serializer` to customize serialization behavior
+
+## Component Guidelines
+
+### Agent Development
+
+- Base agents on `@adala/agents/base.py:Agent`
+- Implement `learn()` and `run()` methods for all agent types
+- Support both synchronous and asynchronous operations where appropriate
+- Use dependency injection for environments, skills, runtimes
+- Reference existing agents for structure:
+  ```python
+  agent = Agent(
+      skills=skills,
+      environment=environment,
+      runtimes={"default": runtime},
+      teacher_runtimes={"default": teacher_runtime},
+  )
+  ```
+
+### Skill Development
+
+- Choose the appropriate base skill type:
+  - `TransformSkill` for data transformation
+  - `AnalysisSkill` for data analysis
+  - `SynthesisSkill` for data generation
+  - `SampleTransformSkill` for sample-based transformation
+- Define input and output templates with clear variable placeholders
+- Use field_schema to define the structure of output data
+- Implement `apply()` and `improve()` methods
+- For async operations, implement `aapply()` method
+- Test skills with multiple runtimes
+
+### Environment Development
+
+- Choose between `Environment` and `AsyncEnvironment`
+- Implement `get_data_batch()` and `get_feedback()` methods
+- For async environments, implement `set_predictions()`
+- Ensure proper integration with `EnvironmentFeedback` class
+- Handle data validation and transformation properly
+
+### Runtime Development
+
+- Base on `Runtime` or `AsyncRuntime`
+- Implement `record_to_record()` and `batch_to_batch()`
+- Support both plain text and structured generation
+- Handle token counting and cost estimation
+- Implement error handling with detailed error information
+- Follow the pattern in `@adala/runtimes/_litellm.py` for new integrations
+
+## Code Quality and Testing
+
+### Testing Standards
+
+- Write pytest-compatible tests for all components
+- Use `vcr` for recording external API calls:
+  ```python
+  @pytest.mark.vcr
+  def test_my_function():
+      # Test implementation
+  ```
+- Separate unit tests from integration tests with markers:
+  ```python
+  @pytest.mark.use_openai  # Tests requiring OpenAI access
+  @pytest.mark.use_azure   # Tests requiring Azure access
+  @pytest.mark.use_server  # Tests requiring running server
+  ```
+- Test both success and error cases
+- Use fixtures for common test setups
+- Add assertions for expected outcomes and error conditions
+- Follow existing test patterns in the `@tests/` directory
+- Use the `conftest.py` file for shared fixtures and test configurations
+
+### Error Handling
+
+- Use custom exception classes defined in `@adala/utils/exceptions.py`
+- Catch specific exceptions, not general exceptions
+- Include detailed error messages
+- Log errors with appropriate log levels
+- Return structured error responses for API endpoints
+- Use `ErrorResponseModel` for consistent error formatting
+
+### Logging
+
+- Use the logging module, not print statements
+- Set appropriate log levels based on message importance
+- Include context in log messages
+- Use structured logging for server components
+- Configure log levels through environment variables (`LOG_LEVEL`)
+- Use JSON formatting for logs in server components (`@server/log_middleware.py`)
+
+## Data Processing
+
+### Pandas Integration
+
+- Use `InternalDataFrame` as a wrapper around pandas DataFrame
+- Support both dataframe and dictionary operations
+- Ensure compatibility with pandas operations
+- Handle both synchronous and asynchronous processing
+
+### Serialization/Deserialization
+
+- Implement proper serialization/deserialization methods
+- Support both JSON and pickle formats
+- Handle model regeneration after deserialization
+- Use field_serializer for custom serialization behavior:
+  ```python
+  @field_serializer("field_name")
+  def serialize_field(self, value):
+      # Custom serialization
+  ```
+
+## Server Implementation
+
+- Follow FastAPI best practices
+- Use Pydantic models for request/response validation
+- Implement proper dependency injection
+- Handle authentication and authorization
+- Use structured error responses
+- Implement health checks and monitoring
+- Use background tasks for long-running operations
+- Initialize database connections at startup
+- Add proper middleware for logging and CORS handling
+- Implement consistent response formats using `Response` generic model
+- Use Celery for task queue management and job processing
+- Use Kafka for streaming data processing
+- Implement proper cleanup of resources on shutdown
+
+## Async Programming
+
+- Use `async`/`await` for I/O-bound operations
+- Implement both sync and async versions of key functions
+- Use proper exception handling in async context
+- Avoid blocking the event loop
+- Use `asyncio.gather` for parallel execution
+- Handle task cancellation properly
+- Use appropriate concurrency settings when dealing with external APIs
+- Use the `debug_time_it` decorator from `@adala/utils/types.py` to measure execution time of async functions
+
+## Documentation
+
+- Write clear docstrings with parameters, return types, and examples
+- Update README.md and other documentation when adding features
+- Include usage examples in notebooks
+- Document public APIs thoroughly
+- Keep documentation in sync with code changes
+- Use MkDocs for generating user-facing documentation
+- Document code with docstrings following the Google format
+
+## LLM Integration
+
+- Use the appropriate runtime for the LLM provider
+- Handle token limits and context windows
+- Implement proper error handling for LLM API failures
+- Support streaming responses when possible
+- Track and log token usage and costs
+- Use structured output parsing with Instructor
+- Handle rate limiting and retries
+- Implement cost estimation for different providers
+- Support multiple model providers (OpenAI, Azure, VertexAI, etc.)
+
+## Performance Considerations
+
+- Implement batching for bulk operations
+- Use appropriate concurrency levels
+- Monitor memory usage
+- Implement caching for expensive operations
+- Use efficient data structures
+- Profile code for performance bottlenecks
+- Use the `debug_time_it` decorator to identify performance issues
+- Configure appropriate timeouts for external API calls
+
+## Kafka Integration
+
+- Use proper topic naming conventions (`adala-input-{job_id}` and `adala-output-{job_id}`)
+- Implement proper cleanup of Kafka topics
+- Handle Kafka connection retries and timeouts
+- Configure appropriate message sizes and retention policies
+- Use proper serialization/deserialization for Kafka messages
+- Handle Kafka consumer and producer lifecycle properly
+- Implement error handling for Kafka operations
+- Configure batch size and timeout settings for optimal performance
+
+## Result Handling
+
+- Implement result handlers that inherit from `@server/handlers/result_handlers.py:ResultHandler`
+- Use the factory pattern to create result handlers based on type
+- Handle both success and error cases in result handlers
+- Implement proper cleanup of resources in result handlers
+- Support different output formats (CSV, JSON, etc.)
+- Support external integrations (Label Studio, etc.)
+- Handle batching of results for efficient processing
+
+## Container and Deployment
+
+- Follow Docker best practices
+- Use multi-stage builds for smaller images
+- Configure appropriate resource limits
+- Implement health checks for containers
+- Use environment variables for configuration
+- Implement proper logging for containerized applications
+- Support different deployment environments (development, production)
+- Configure appropriate timeout and retry policies
+
+## Community Contribution
+
+- Refer to `@CONTRIBUTION.md` for detailed contribution guidelines
+- Follow existing coding standards when submitting contributions
+- Use pull requests for all code changes
+- Ensure comprehensive test coverage for new features
+- Provide detailed documentation for new components
+- Make the project more versatile and impactful for global users
+- Engage with the community for feedback before major changes
+
+## Community Support
+
+- Join the @Discord channel for project discussions
+- Use Discord for:
+  - Questions about implementation
+  - Clarification on project features
+  - Community engagement and feedback
+  - Discussions about project-related topics
+- Follow community guidelines when engaging with other members
+- Share learnings and use cases to help expand the project's impact
