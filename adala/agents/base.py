@@ -260,7 +260,7 @@ class Agent(BaseModel, ABC):
                 "When using asynchronous run with `agent.arun()`, the runtime must be an AsyncRuntime."
             )
         else:
-            print(f"Using runtime {type(runtime)}")
+            logger.info("Using runtime %s", type(runtime))
 
         if input is None:
             if self.environment is None:
@@ -276,7 +276,7 @@ class Agent(BaseModel, ABC):
                         batch_size=runtime.batch_size
                     )
                     if data_batch.empty:
-                        print_text("No more data in the environment. Exiting.")
+                        logger.info("No more data in the environment. Exiting.")
                         break
                 except Exception as e:
                     # TODO: environment should raise a specific exception + log error

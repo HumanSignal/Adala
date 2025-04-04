@@ -1,209 +1,9 @@
 interactions:
 - request:
-    body: '{"messages": [{"role": "user", "content": "Hey, how''s it going?"}], "model":
-      "gpt-4o-mini", "max_tokens": 1000, "seed": 47, "temperature": 0.0}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '143'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
-        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - arm64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.11.9
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAwAAAP//VJFNTsMwEIX3OcXgDZsGNSG0oRu2/KyQkBBCqHKTSWKwPZY9AQqqxDW4
-        HidBTtMWNpb8Pr+nN+PPBECoWixAVJ3kyjidnr/651nx8Hrf3BI6y9kZP1zPPtQU724uxSQ6aPWM
-        Fe9cJxUZp5EV2S2uPErGmJrN89OzeZkX5QAM1aijrXWcFpQaZVWaT/Minc7TrBzdHakKg1jAYwIA
-        8Dmcsaet8V0sYDrZKQZDkC2Kxf4RgPCkoyJkCCqwtCwmB1iRZbRD9atjAzUp28Ibaj0B7qR9gTX1
-        R3BJbyBX1HO8XsB9J/nn6zsA2Sh4MMrWwFTL9cXfcI9NH2Qc0PZaj/pm31ZT6zytwsj3eqOsCt3S
-        owxkY7PA5MRANwnA07CV/t+gwnkyjpdML2hjYFZs48ThL/7AcoRMLPVBP82TsZ8I68Bolo2yLXrn
-        1XZFjVsWZXY+W1WzuRTJJvkFAAD//wMAqZfXrzACAAA=
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8b2b32b228c94892-LIS
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 13 Aug 2024 19:44:08 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - heartex
-      openai-processing-ms:
-      - '215'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '30000'
-      x-ratelimit-limit-tokens:
-      - '150000000'
-      x-ratelimit-remaining-requests:
-      - '29999'
-      x-ratelimit-remaining-tokens:
-      - '149998994'
-      x-ratelimit-reset-requests:
-      - 2ms
-      x-ratelimit-reset-tokens:
-      - 0s
-      x-request-id:
-      - req_25fc987e7ea35d326d15f8fbde2ff0d5
-    status:
-      code: 200
-      message: OK
-- request:
     body: '{"messages": [{"role": "user", "content": "Extract entities from the input
       text.\n\nInput:\n\"\"\"\nApple Inc. is an American multinational technology
       company that specializes in consumer electronics, computer software, and online
-      services.\n\"\"\""}], "model": "gpt-4o-mini", "max_tokens": 1000, "seed": 47,
-      "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
-      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
-      "Correctly extracted `Output` with all the required parameters with correct
-      types", "parameters": {"$defs": {"Model": {"properties": {"quote_string": {"description":
-      "The text of the entity extracted from the input document.", "title": "Quote
-      String", "type": "string"}, "label": {"description": "The label assigned to
-      the entity.", "enum": ["Organization", "Person", "Product", "Version"], "title":
-      "Label", "type": "string"}}, "required": ["quote_string", "label"], "title":
-      "Model", "type": "object"}}, "properties": {"entities": {"description": "Extracted
-      entities:", "items": {"$ref": "#/$defs/Model"}, "title": "Entities", "type":
-      "array"}}, "required": ["entities"], "type": "object"}}}]}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '1170'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
-        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - arm64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.11.9
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA2xSTWvjMBS8+1eId45L4qb58C0LLXTZ3VAWFtq6GFl5dtSVJVV6LuuE/Pcix03c
-        sDoIMaN5M4y0jxgDuYGUgdhyErVV8fLdvc4K88vel6vf73++PVY/npKVoO1t+SBhFBSmeEVBn6or
-        YWqrkKTRR1o45IRh6mSeXN/MF8l00RG12aAKsspSPDVxLbWMk3EyjcfzeLLo1VsjBXpI2XPEGGP7
-        bg859Qb/QcrGo0+kRu95hZCeLjEGzqiAAPdeeuKaYHQmhdGEOkTXjVIDgoxRueBKnY2Paz84n8vi
-        SuVPy5+r3Wa9a+1WFVw8vrnvrbx7aAd+x9Gt7QKVjRankgb8CU8vzBgDzetOu27INnShZAy4q5oa
-        NYXUsM8ANUmS6DNIn/cZvDWGMPfkpK4ySDNYWauQ3WtxlcEoA8ULVB2xdhXXcsdDkAwOLwf4YnWI
-        /nd+GRTosGw8V32zPX44PZUylXWm8BfNQym19NvcIfddA+DJ2KN38OkcoPnyymCdqS3lZP6iDgMn
-        N9fHeXD+iUO2J8kQVwN8toj6hOBbT1jnpdQVOutk90OgtPl0MVnOCjGbc4gO0QcAAAD//wMA6z4r
-        7S8DAAA=
-    headers:
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 8b2b32b5efbe4892-LIS
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 13 Aug 2024 19:44:09 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
-      openai-organization:
-      - heartex
-      openai-processing-ms:
-      - '359'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '30000'
-      x-ratelimit-limit-tokens:
-      - '150000000'
-      x-ratelimit-remaining-requests:
-      - '29999'
-      x-ratelimit-remaining-tokens:
-      - '149998950'
-      x-ratelimit-reset-requests:
-      - 2ms
-      x-ratelimit-reset-tokens:
-      - 0s
-      x-request-id:
-      - req_0c76004cfaad383ee1dc19802433daa6
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "user", "content": "Extract entities from the input
-      text.\n\nInput:\n\"\"\"\nThe iPhone 14 is the latest smartphone from Apple Inc.\n\"\"\""}],
-      "model": "gpt-4o-mini", "max_tokens": 1000, "seed": 47, "temperature": 0.0,
+      services.\n\"\"\""}], "model": "gpt-4o-mini", "seed": 47, "temperature": 0.0,
       "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
       [{"type": "function", "function": {"name": "Output", "description": "Correctly
       extracted `Output` with all the required parameters with correct types", "parameters":
@@ -223,16 +23,13 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '1084'
+      - '1150'
       content-type:
       - application/json
-      cookie:
-      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
-        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
-      - OpenAI/Python 1.34.0
+      - OpenAI/Python 1.65.3
       x-stainless-arch:
       - arm64
       x-stainless-async:
@@ -242,7 +39,13 @@ interactions:
       x-stainless-os:
       - MacOS
       x-stainless-package-version:
-      - 1.34.0
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
@@ -252,20 +55,19 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSwYrbMBC9+yvEnOMl9jpx4ttSCl1KSS5daNeLUeSxo1SWFGkcmgb/e7GTTbxh
-        dRDiPb15j5k5BYyBLCFjILacRGNVuDy4XRodNqvZTszb2ap83n/7VUZR+hKvWpj0CrPZoaB31YMw
-        jVVI0ugzLRxywr5qlMaPs3QRJ8uBaEyJqpfVlsLEhI3UMoyncRJO0zBaXNRbIwV6yNhrwBhjp+Hu
-        c+oS/0LGppN3pEHveY2QXT8xBs6oHgHuvfTENcHkRgqjCXUfXbdKjQgyRhWCK3UzPp/T6H1rFleq
-        OH75+jKrfn+PZ/u4evzR6p94kE6uR37n0kc7BKpaLa5NGvFXPLszYww0bwbtqiXb0p2SMeCubhvU
-        1KeGUw6oSZJEn0P2esph3xrCwpOTus4hy0Gut0Yji5IcJjkovkE14GtnylZQDt3kM9mTtQrZsxYP
-        d7qVq7mW/3ifP4furYMPCbvgs/fbqO8Oq9ZzdRnIBe+uE1amts5s/N3AoJJa+m3hkPuhceDJ2LN3
-        7zM4QPthOcA601gqyPxB3ReMkuRcD24LfGPj9EKSIa5GqjQKLgnBHz1hU1RS1+isk8NiQWWLZBEt
-        5xsxTzkEXfAfAAD//wMASZf6NmYDAAA=
+        H4sIAAAAAAAAAwAAAP//jFNda9swFH3PrxD3OSn5aj78tsE6urU0sEIZdTCKfO1okyVVuu6WhPz3
+        YjmNnTSD+cGIe3TOPTq62nUYA5lCxECsOYnCqt7nW5zd9bMv9vv1I81+5GbxtNh8ndz8cTIvoVsx
+        zOoXCnpnXQlTWIUkja5h4ZATVqqD6Xg0nY1m02kACpOiqmi5pd7Y9AqpZW/YH457/WlvMDuw10YK
+        9BCx5w5jjO3Cv/KpU/wLEet33ysFes9zhOi4iTFwRlUV4N5LT1wTdBtQGE2oK+u6VKoFkDEqEVyp
+        pnH97VrrJiyuVHK3yO9fpmtMN694M7//+bj95p6G23GrXy29scFQVmpxDKmFH+vRWTPGQPMicB9K
+        siWdMRkD7vKyQE2Va9jFgJokSfQxRM+7GF5KQ5h4clLnMUQxfLJWIbvV4iqGbgyKr1AF4MHlXMst
+        r4zEsF/u4aTVvnNpvWwF6DArPVcfk+VaGwq6IdrlAdkfb1GZ3Dqz8mdUyKSWfp045D6EA56MrW1V
+        FkJzKE8GAKwzhaWEzG8M7QbXo1oPmiFtoZMDSIa4atfn3Qt6SYrEZZiQ41AKLtaYNtRmOHmZStMC
+        Oq1Tf3RzSbs+udT5/8g3gBBoCdPEOkylOD1xs81h9Yb/te2YcjAMHt2rFJiQRFfdRIoZL1U9j+A3
+        nrBIMqlzdNbJ8Lwgs8lskvaH8/54MIDOvvMGAAD//wMAXHm4h2wEAAA=
     headers:
-      CF-Cache-Status:
-      - DYNAMIC
       CF-RAY:
-      - 8b2b32ba0df34892-LIS
+      - 92b22833894ae3cd-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -273,23 +75,33 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 13 Aug 2024 19:44:10 GMT
+      - Fri, 04 Apr 2025 16:24:38 GMT
       Server:
       - cloudflare
+      Set-Cookie:
+      - __cf_bm=B9Z3k00587Cie3dzvScTxCg9bIZjwCzW9Gvyti4zPhU-1743783878-1.0.1.1-8SAyIBddJ0nEdD8dbVNTh7QmDtD2QpZt13cpJdC9Ha3xzsMXr4anEAUVCJTO8_qHzX0t1XcWd9dvvjJ3vd9L673DsDqC5q_YcxCrG41ZBDc;
+        path=/; expires=Fri, 04-Apr-25 16:54:38 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=1tEhXBwn6WT72KBbsDShp5p8aq5IOqWjF975IxqPuRc-1743783878274-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Transfer-Encoding:
       - chunked
       X-Content-Type-Options:
       - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
       alt-svc:
       - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '792'
+      - '437'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
+      - max-age=31536000; includeSubDomains; preload
       x-ratelimit-limit-requests:
       - '30000'
       x-ratelimit-limit-tokens:
@@ -297,21 +109,20 @@ interactions:
       x-ratelimit-remaining-requests:
       - '29999'
       x-ratelimit-remaining-tokens:
-      - '149998972'
+      - '149999948'
       x-ratelimit-reset-requests:
       - 2ms
       x-ratelimit-reset-tokens:
       - 0s
       x-request-id:
-      - req_0f1ff239e8eeea8e9e09e45138b2aaae
+      - req_718bf8b139990313649fadf2863027ee
     status:
       code: 200
       message: OK
 - request:
     body: '{"messages": [{"role": "user", "content": "Extract entities from the input
-      text.\n\nInput:\n\"\"\"\nThe MacBook Pro is a line of Macintosh portable computers
-      introduced in January 2006 by Apple Inc.\n\"\"\""}], "model": "gpt-4o-mini",
-      "max_tokens": 1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type":
+      text.\n\nInput:\n\"\"\"\nThe iPhone 14 is the latest smartphone from Apple Inc.\n\"\"\""}],
+      "model": "gpt-4o-mini", "seed": 47, "temperature": 0.0, "tool_choice": {"type":
       "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
       "function": {"name": "Output", "description": "Correctly extracted `Output`
       with all the required parameters with correct types", "parameters": {"$defs":
@@ -330,16 +141,16 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '1128'
+      - '1064'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
-        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
+      - __cf_bm=B9Z3k00587Cie3dzvScTxCg9bIZjwCzW9Gvyti4zPhU-1743783878-1.0.1.1-8SAyIBddJ0nEdD8dbVNTh7QmDtD2QpZt13cpJdC9Ha3xzsMXr4anEAUVCJTO8_qHzX0t1XcWd9dvvjJ3vd9L673DsDqC5q_YcxCrG41ZBDc;
+        _cfuvid=1tEhXBwn6WT72KBbsDShp5p8aq5IOqWjF975IxqPuRc-1743783878274-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
-      - OpenAI/Python 1.34.0
+      - OpenAI/Python 1.65.3
       x-stainless-arch:
       - arm64
       x-stainless-async:
@@ -349,7 +160,13 @@ interactions:
       x-stainless-os:
       - MacOS
       x-stainless-package-version:
-      - 1.34.0
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
@@ -359,20 +176,19 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA5ST0U/bMBDG3/NXWPfcoDRNaZo3QOrEVgTSNLSJoMh1ndTg+Dz7ApSq//uUpGtL
-        NR6Wh8i6L7/vO50vm4AxUEvIGIgVJ1FbHU5f3FN6sU7SUTUfTX9NzJUtZ/jt2t0vXn/AoCVw8SQF
-        /aXOBNZWS1Joelk4yUm2rsNJPBpP0ngcdUKNS6lbrLIUJhjWyqgwjuIkjCbhMN3RK1RCesjYQ8AY
-        Y5vu3fZplvINMtZ5dZVaes8rCdn+I8bAoW4rwL1XnrghGBxEgYakaVs3jdZHAiHqQnCtD8H9szk6
-        H4bFtS6uki8TiT9vXmg2/v6mL1/nqbXzGR7l9dZr2zVUNkbsh3Sk7+vZSRhjYHjdsbcN2YZOSMaA
-        u6qppaG2a9jkIA0pUtLnkD1scvjdIMnCk1OmyiHL4YaLS8Rnducwh0EOmi+k7pQ7h8tGUA7bwSeg
-        MoR+9X/YV24a7tYsjqLzE/JeOq/QfEZeWKsluzbi7IS7dRU36p1TDz9u4cNQtsG/zo9HV+1k2Xiu
-        dzuwq2/3S6Wxsg4X/mRHoFRG+VXhJPfdXYEntH12m9MlQPNhH8E6rC0VhM/StIbDcdz7weGfOahJ
-        uhMJietDPY6iYNch+LUnWRelMpV01qlul6G0RZIOp+cLcT7hEGyDPwAAAP//AwCvOJ7e2QMAAA==
+        H4sIAAAAAAAAA4xTy27bMBC8+yuIPduBZQuRoluDom0OdXxrgcgQaGolsaVIhlw1TQ3/eyEqsRTH
+        BaqDQOxwZmcfPMwYA1lCxkA0nERr1eL2DtOvYpNWmy9l+jG5ecK77+Lbeiuj580G5j3D7H+goFfW
+        lTCtVUjS6AEWDjlhrxol8TpJ12mSBqA1JaqeVltaxGbRSi0Xq+UqXiyTRZS+sBsjBXrI2MOMMcYO
+        4d/71CX+howt56+RFr3nNUJ2usQYOKP6CHDvpSeuCeYjKIwm1L113Sk1AcgYVQiu1Jh4+A6T89gs
+        rlRhtrfxU/L4ad+sP9fN9e3m3iUlxu0k3yD9bIOhqtPi1KQJfopnZ8kYA83bwL3vyHZ0xmQMuKu7
+        FjX1ruGQA2qSJNHnkD0ccnjsDGHhyUld55DlILeN0ciiOId5DorvUYX41pmyE5TDcX6J9sFahexO
+        i6sz3r2ruZZ/eO8/h+PuCG8cHmeXzrtJ3x1Wnefq/UC41oaCbpjI7gU5noavTG2d2fszKlRSS98U
+        DrkPPQVPxg62egshOXRv9gasM62lgsxPDOmiOB70YNztEV2lLyAZ4mrCSlbzC3pFicRlWKzTLgsu
+        GixH6rjTvCulmQCzSdXv3VzSHiqXuv4f+REQAi1hWViHpRRvKx6vOeyf/r+unbocDINH90sKLEii
+        6ydRYsU7Nawx+GdP2BaV1DU662R4lVDZIr0ul6ubZRxFMDvO/gIAAP//AwDzzQhVowQAAA==
     headers:
-      CF-Cache-Status:
-      - DYNAMIC
       CF-RAY:
-      - 8b2b32c16a214892-LIS
+      - 92b228378f2ce3cd-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -380,130 +196,27 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 13 Aug 2024 19:44:11 GMT
+      - Fri, 04 Apr 2025 16:24:39 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
       - chunked
       X-Content-Type-Options:
       - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
       alt-svc:
       - h3=":443"; ma=86400
-      openai-organization:
-      - heartex
-      openai-processing-ms:
-      - '631'
-      openai-version:
-      - '2020-10-01'
-      strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
-      x-ratelimit-limit-requests:
-      - '30000'
-      x-ratelimit-limit-tokens:
-      - '150000000'
-      x-ratelimit-remaining-requests:
-      - '29999'
-      x-ratelimit-remaining-tokens:
-      - '149998961'
-      x-ratelimit-reset-requests:
-      - 2ms
-      x-ratelimit-reset-tokens:
-      - 0s
-      x-request-id:
-      - req_ada73a3087242422517919731c583855
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"messages": [{"role": "user", "content": "Extract entities from the input
-      text.\n\nInput:\n\"\"\"\nThe Apple Watch is a line of smartwatches produced
-      by Apple Inc.\n\"\"\""}], "model": "gpt-4o-mini", "max_tokens": 1000, "seed":
-      47, "temperature": 0.0, "tool_choice": {"type": "function", "function": {"name":
-      "Output"}}, "tools": [{"type": "function", "function": {"name": "Output", "description":
-      "Correctly extracted `Output` with all the required parameters with correct
-      types", "parameters": {"$defs": {"Model": {"properties": {"quote_string": {"description":
-      "The text of the entity extracted from the input document.", "title": "Quote
-      String", "type": "string"}, "label": {"description": "The label assigned to
-      the entity.", "enum": ["Organization", "Person", "Product", "Version"], "title":
-      "Label", "type": "string"}}, "required": ["quote_string", "label"], "title":
-      "Model", "type": "object"}}, "properties": {"entities": {"description": "Extracted
-      entities:", "items": {"$ref": "#/$defs/Model"}, "title": "Entities", "type":
-      "array"}}, "required": ["entities"], "type": "object"}}}]}'
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate
-      connection:
-      - keep-alive
-      content-length:
-      - '1094'
-      content-type:
-      - application/json
-      cookie:
-      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
-        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
-      host:
-      - api.openai.com
-      user-agent:
-      - OpenAI/Python 1.34.0
-      x-stainless-arch:
-      - arm64
-      x-stainless-async:
-      - 'false'
-      x-stainless-lang:
-      - python
-      x-stainless-os:
-      - MacOS
-      x-stainless-package-version:
-      - 1.34.0
-      x-stainless-runtime:
-      - CPython
-      x-stainless-runtime-version:
-      - 3.11.9
-    method: POST
-    uri: https://api.openai.com/v1/chat/completions
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA3RSTW/bMAy9+1cIPNuF7ebTt/UwYAW2ZLusRV0YikI7amRJleh2aeD/XthJEzdY
-        dRAIPj2+J5L7gDGQa8gYiA0nUVsVzV/c03zxexPfbu8tv3mJG/s6/zV/TTH5KSHsGGb1hII+WFfC
-        1FYhSaMPsHDICbuqyTS9Hk9n6TjpgdqsUXW0ylI0MlEttYzSOB1F8TRKZkf2xkiBHjL2EDDG2L6/
-        O596jf8gY3H4kanRe14hZKdHjIEzqssA91564pogPIPCaELdWdeNUgOAjFGF4EqdhQ9nP4jPzeJK
-        FVu3+7O4vn9ex3a5vZstd3e3b+n3xWSgdyi9s72hstHi1KQBfspnF2KMgeZ1z100ZBu6YDIG3FVN
-        jZo617DPATVJkuhzyB72OTw3hrDw5KSucshy+GatQvaXk9jkEOag+ApVjyydWTeCcmjDr4k/tLi6
-        4C1cxbV8490PcmgfW/jksQ3+Fz8OOu+wbDxXx5Ec8+1pxspU1pmVvxgZlFJLvykcct+3DjwZe9Du
-        dHoFaD6tB1hnaksFmS3qrmAymhzqwXmFz2g6PoJkiKsBa5oER4fgd56wLkqpK3TWyX61oLTFaJbM
-        JysxmXII2uAdAAD//wMAqAHMmWgDAAA=
-    headers:
-      CF-Cache-Status:
+      cf-cache-status:
       - DYNAMIC
-      CF-RAY:
-      - 8b2b32c8ae8e4892-LIS
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Date:
-      - Tue, 13 Aug 2024 19:44:12 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      alt-svc:
-      - h3=":443"; ma=86400
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '483'
+      - '675'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
+      - max-age=31536000; includeSubDomains; preload
       x-ratelimit-limit-requests:
       - '30000'
       x-ratelimit-limit-tokens:
@@ -511,21 +224,21 @@ interactions:
       x-ratelimit-remaining-requests:
       - '29999'
       x-ratelimit-remaining-tokens:
-      - '149998969'
+      - '149999970'
       x-ratelimit-reset-requests:
       - 2ms
       x-ratelimit-reset-tokens:
       - 0s
       x-request-id:
-      - req_9c8f3f0308c1ceb15f23fe8ef5e9205c
+      - req_1f03a8643875044e1853c878e08fe6df
     status:
       code: 200
       message: OK
 - request:
     body: '{"messages": [{"role": "user", "content": "Extract entities from the input
-      text.\n\nInput:\n\"\"\"\nThe iPad is a line of tablet computers designed, developed,
-      and marketed by Apple Inc.\n\"\"\""}], "model": "gpt-4o-mini", "max_tokens":
-      1000, "seed": 47, "temperature": 0.0, "tool_choice": {"type": "function", "function":
+      text.\n\nInput:\n\"\"\"\nThe MacBook Pro is a line of Macintosh portable computers
+      introduced in January 2006 by Apple Inc.\n\"\"\""}], "model": "gpt-4o-mini",
+      "seed": 47, "temperature": 0.0, "tool_choice": {"type": "function", "function":
       {"name": "Output"}}, "tools": [{"type": "function", "function": {"name": "Output",
       "description": "Correctly extracted `Output` with all the required parameters
       with correct types", "parameters": {"$defs": {"Model": {"properties": {"quote_string":
@@ -544,16 +257,16 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '1116'
+      - '1108'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=hB18UljW7UZU691nOlL0AKbEXZ.z2MxaC2s6BKzw89I-1723578070-1.0.1.1-MsLp.JVQFNNxZNJTUoOw_wRg7MOoziK7wiidR5KuaCFJInPXjcPfVq8gqTJ.NL2ut.JWhvl8PZR5j0cQnlAlZg;
-        _cfuvid=61Rc3TIrUawOwIu8uMB9YcQU3WqJXMYoSpzKaDUbIWc-1723578070221-0.0.1.1-604800000
+      - __cf_bm=B9Z3k00587Cie3dzvScTxCg9bIZjwCzW9Gvyti4zPhU-1743783878-1.0.1.1-8SAyIBddJ0nEdD8dbVNTh7QmDtD2QpZt13cpJdC9Ha3xzsMXr4anEAUVCJTO8_qHzX0t1XcWd9dvvjJ3vd9L673DsDqC5q_YcxCrG41ZBDc;
+        _cfuvid=1tEhXBwn6WT72KBbsDShp5p8aq5IOqWjF975IxqPuRc-1743783878274-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
-      - OpenAI/Python 1.34.0
+      - OpenAI/Python 1.65.3
       x-stainless-arch:
       - arm64
       x-stainless-async:
@@ -563,7 +276,13 @@ interactions:
       x-stainless-os:
       - MacOS
       x-stainless-package-version:
-      - 1.34.0
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
@@ -573,20 +292,20 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA2xSTU/jMBC951dYc25Qmza05MZqVyu0aMty4EJQ5DqT1OAv7MnyUeW/o6ShDRU+
-        WNZ7fvOeZmYXMQayhIyB2HIS2qn44r9/vPxzPX/5516Iyusq/F1d3epNVeunGiadwm4eUdCn6kxY
-        7RSStGZPC4+csKs6WybzdLlK0qQntC1RdbLaUbywsZZGxsk0WcTTZTxbDeqtlQIDZOw+YoyxXX93
-        OU2Jr5Cx6eQT0RgCrxGywyfGwFvVIcBDkIG4IZgcSWENoemim0apEUHWqkJwpY7G+7MbvY/N4koV
-        v245JekduTn+WP+8e/5d6eo9fTUjv33pN9cHqhojDk0a8Qc8OzFjDAzXvXbdkGvoRMkYcF83Gg11
-        qWGXAxqSJDHkkN3vcnhuLGERyEtT55DlIG94mcMkB8U3qHroxtuyEZRDO/lOcemcQnZlxNmJbu1r
-        buQ776Ln0D608CVcG333fhi13GPVBK6GWQx4exiusrXzdhNOZgWVNDJsC4889D2DQNbtvTuf3gGa
-        L3sBzlvtqCD7hKYrOEuHJYLj7h7ZJB1IssTVSLVMoyEhhLdAqItKmhq987LfKahcsVjNLs434nzJ
-        IWqjDwAAAP//AwBAWrCOYQMAAA==
+        H4sIAAAAAAAAAwAAAP//lFTvT9swEP3ev8K6zy1KQ6FtvkHZgEkbaD81ERQZ55J6OLZnXxBd1f99
+        igNNWkDa8iGy7vm9ez7feT1gDGQOCQOx5CQqq0anlzj7pBbH704XYnX0czH/7KcP7x/NhS/O5jBs
+        GObuFwp6Zh0IU1mFJI1uYeGQEzaq4+nkcDo7nE3nAahMjqqhlZZGEzOqpJajOIono2g6Gs+e2Esj
+        BXpI2M2AMcbW4d/41Dk+QsKi4XOkQu95iZBsNzEGzqgmAtx76YlrgmEHCqMJdWNd10r1ADJGZYIr
+        1SVuv3Vv3RWLK5WdFE7FX348fj0T8XleXPDq/ORbIfv5WumVDYaKWottkXr4Np7sJWMMNK8C96om
+        W+8rMwbclXWFmhrXsE4BNUmS6FNIbtYp/K4NYebJSV2mkKTwkYtTY+7ZtTMpDFNQ/A5VQK6dyWtB
+        KWyGbxClJuOX/0f7wHXN3YrFUXS8x/yOzkuj32KeWKuQXWpxsMe7ciXX8g+nlny7gZ2ibAavrW97
+        V+2wqD1XL3uAa20o6IYmuH1CNtt+U6a0ztz5PSoUUku/zBxyH64RPBnb2moshORQ77QqWGcqSxmZ
+        ewzpxkdxqwfdOHXoZP4EkiGuungcjYev6GU5Epehl7fjI7hYYt5RuzHidS5NDxj0Tv3SzWva7cml
+        Lv9FvgOEQEuYZ9ZhLsXuibttDpvX5q1t2yoHw+DRPUiBGUl0zU3kWPBatZMDfuUJq6yQukRnnQwP
+        ARQ2mx3nUTyPJuMxDDaDvwAAAP//AwA8/KkyFgUAAA==
     headers:
-      CF-Cache-Status:
-      - DYNAMIC
       CF-RAY:
-      - 8b2b32cddf464892-LIS
+      - 92b2283cea3be3cd-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -594,23 +313,27 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 13 Aug 2024 19:44:13 GMT
+      - Fri, 04 Apr 2025 16:24:40 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
       - chunked
       X-Content-Type-Options:
       - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
       alt-svc:
       - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '450'
+      - '890'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
+      - max-age=31536000; includeSubDomains; preload
       x-ratelimit-limit-requests:
       - '30000'
       x-ratelimit-limit-tokens:
@@ -618,13 +341,245 @@ interactions:
       x-ratelimit-remaining-requests:
       - '29999'
       x-ratelimit-remaining-tokens:
-      - '149998964'
+      - '149999960'
       x-ratelimit-reset-requests:
       - 2ms
       x-ratelimit-reset-tokens:
       - 0s
       x-request-id:
-      - req_0af80e803411b30c0301bc73d610a2ad
+      - req_f7aa0397e1cbe513e6da30b7b5093bdd
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "user", "content": "Extract entities from the input
+      text.\n\nInput:\n\"\"\"\nThe Apple Watch is a line of smartwatches produced
+      by Apple Inc.\n\"\"\""}], "model": "gpt-4o-mini", "seed": 47, "temperature":
+      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"$defs": {"Model": {"properties": {"quote_string": {"description": "The text
+      of the entity extracted from the input document.", "title": "Quote String",
+      "type": "string"}, "label": {"description": "The label assigned to the entity.",
+      "enum": ["Organization", "Person", "Product", "Version"], "title": "Label",
+      "type": "string"}}, "required": ["quote_string", "label"], "title": "Model",
+      "type": "object"}}, "properties": {"entities": {"description": "Extracted entities:",
+      "items": {"$ref": "#/$defs/Model"}, "title": "Entities", "type": "array"}},
+      "required": ["entities"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1074'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=B9Z3k00587Cie3dzvScTxCg9bIZjwCzW9Gvyti4zPhU-1743783878-1.0.1.1-8SAyIBddJ0nEdD8dbVNTh7QmDtD2QpZt13cpJdC9Ha3xzsMXr4anEAUVCJTO8_qHzX0t1XcWd9dvvjJ3vd9L673DsDqC5q_YcxCrG41ZBDc;
+        _cfuvid=1tEhXBwn6WT72KBbsDShp5p8aq5IOqWjF975IxqPuRc-1743783878274-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//jFPLbtswELzrK4g9W4Efgu3o1jSH5lIXOTQtIkOgqZVMhyJZchU0Mfzv
+        hajEkh0HqA4CscOZnX1wHzEGsoCUgdhyErVV8c0dLlduIhQZ+3NX6md/TwuViHKubh5g1DLMZoeC
+        3llXwtRWIUmjO1g45ISt6mSRzBbL2XI5DkBtClQtrbIUJyaupZbxdDxN4vEinizf2FsjBXpI2WPE
+        GGP78G996gL/QsqCVojU6D2vENLjJcbAGdVGgHsvPXFNMOpBYTShbq3rRqkBQMaoXHCl+sTdtx+c
+        +2ZxpfLq6+31/VNTvgrz29zO1Lfvxo53v4b5OukXGwyVjRbHJg3wYzw9S8YYaF4H7qoh25wrMwbc
+        VU2NmlrXsM8ANUmS6DNIH/cZ/GkMYe7JSV1lkGbwxVqF7IGT2GYwykDxDaqA/HCmaARlcBh9TrzT
+        4uqMt3IV1/KVtxVkcFgf4MTjIbp0Xg8677BsPFcfR8K1NhR0w0zWb8jhOH5lKuvMxp9RoZRa+m3u
+        kPvQVfBkbGertRCSQ3OyOWCdqS3lZJ4wpJsk804P+u3u0ek7SIa4GrAW09EFvbxA4jKs1nGbBRdb
+        LHpqv9W8KaQZANGg6o9uLml3lUtd/Y98DwiBlrDIrcNCitOK+2sO28f/2bVjl4Nh8OiepcCcJLp2
+        EgWWvFHdIoN/8YR1XkpdobNOhncJpc2X82I8vR4nkwlEh+gfAAAA//8DAFd0LFClBAAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 92b228440a5fe3cd-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 04 Apr 2025 16:24:41 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '789'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '30000'
+      x-ratelimit-limit-tokens:
+      - '150000000'
+      x-ratelimit-remaining-requests:
+      - '29999'
+      x-ratelimit-remaining-tokens:
+      - '149999968'
+      x-ratelimit-reset-requests:
+      - 2ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_b7d630b259a81c695c1581da5281b28d
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "user", "content": "Extract entities from the input
+      text.\n\nInput:\n\"\"\"\nThe iPad is a line of tablet computers designed, developed,
+      and marketed by Apple Inc.\n\"\"\""}], "model": "gpt-4o-mini", "seed": 47, "temperature":
+      0.0, "tool_choice": {"type": "function", "function": {"name": "Output"}}, "tools":
+      [{"type": "function", "function": {"name": "Output", "description": "Correctly
+      extracted `Output` with all the required parameters with correct types", "parameters":
+      {"$defs": {"Model": {"properties": {"quote_string": {"description": "The text
+      of the entity extracted from the input document.", "title": "Quote String",
+      "type": "string"}, "label": {"description": "The label assigned to the entity.",
+      "enum": ["Organization", "Person", "Product", "Version"], "title": "Label",
+      "type": "string"}}, "required": ["quote_string", "label"], "title": "Model",
+      "type": "object"}}, "properties": {"entities": {"description": "Extracted entities:",
+      "items": {"$ref": "#/$defs/Model"}, "title": "Entities", "type": "array"}},
+      "required": ["entities"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1096'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=B9Z3k00587Cie3dzvScTxCg9bIZjwCzW9Gvyti4zPhU-1743783878-1.0.1.1-8SAyIBddJ0nEdD8dbVNTh7QmDtD2QpZt13cpJdC9Ha3xzsMXr4anEAUVCJTO8_qHzX0t1XcWd9dvvjJ3vd9L673DsDqC5q_YcxCrG41ZBDc;
+        _cfuvid=1tEhXBwn6WT72KBbsDShp5p8aq5IOqWjF975IxqPuRc-1743783878274-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAwAAAP//jFNNb9swDL3nVwg8x0WSerXnW7sVRU4piu4DqANDkWlHmyxpEj2sC/Lf
+        CysfdtIMmA+GwKdHPpJPmxFjIEvIGIg1J9FYFd3NMX2cP5tUL56e7f3tk6+++vtvPLnT/juMO4ZZ
+        /UBBB9aVMI1VSNLoHSwccsIu6zSJr5P0Ok2nAWhMiaqj1Zai2ESN1DKaTWZxNEmiabpnr40U6CFj
+        LyPGGNuEf6dTl/gHMjYZHyINes9rhOx4iTFwRnUR4N5LT1wTjHtQGE2oO+m6VWoAkDGqEFypvvDu
+        2wzO/bC4UkWLSbX49DmWnD88fKlWC+NsEs+aQb1d6lcbBFWtFschDfBjPDsrxhho3gTuoiXb0hmT
+        MeCubhvU1KmGTQ6oSZJEn0P2ssnhV2sIC09O6jqHLAf5yMscxjkovkIVQo/OlK2gHLbjS4xbaxWy
+        uRZXZ7yFq7mWf3knPYftcgsn4rajS+flYOQOq9Zz9X4XXGtDIW9YxnKPbI97V6a2zqz8GRUqqaVf
+        Fw65D+MET8buZHUSQnFoTywD1pnGUkHmJ4Zy0w97f0Fv6x6d3exBMsTVgJUcgJN8RYnEZfDU0caC
+        izWWPbW3M29LaQbAaND1ezWXcu86l7r+n/Q9IARawrKwDkspTjvurznsXv2/rh2nHASDR/dbCixI
+        ous2UWLFW7VzMPhXT9gUldQ1OutkeJBQ2SK9KSezj5N4OoXRdvQGAAD//wMAJjLeOJ4EAAA=
+    headers:
+      CF-RAY:
+      - 92b2284a7f86e3cd-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 04 Apr 2025 16:24:42 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '559'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '30000'
+      x-ratelimit-limit-tokens:
+      - '150000000'
+      x-ratelimit-remaining-requests:
+      - '29999'
+      x-ratelimit-remaining-tokens:
+      - '149999962'
+      x-ratelimit-reset-requests:
+      - 2ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_b9743d5eb08419401994928efb584f64
     status:
       code: 200
       message: OK

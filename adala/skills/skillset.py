@@ -1,3 +1,4 @@
+import logging
 from pydantic import BaseModel, model_validator, field_validator
 from abc import ABC, abstractmethod
 from typing import List, Union, Dict, Any, Optional, Mapping, Type
@@ -17,6 +18,8 @@ from ._base import (
     AnalysisSkill,
     SynthesisSkill,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class SkillSet(BaseModel, ABC):
@@ -199,7 +202,7 @@ class LinearSkillSet(SkillSet):
         for i, skill_name in enumerate(skill_sequence):
             skill = self.skills[skill_name]
             # use input dataset for the first node in the pipeline
-            print_text(f"Applying skill: {skill_name}")
+            logger.info("Applying skill: %s", skill_name)
             skill_output = skill.apply(skill_input, runtime)
 
             # Commented out to not log customer data. Can be used when debugging if needed
@@ -248,7 +251,7 @@ class LinearSkillSet(SkillSet):
         for i, skill_name in enumerate(skill_sequence):
             skill = self.skills[skill_name]
             # use input dataset for the first node in the pipeline
-            print_text(f"Applying skill: {skill_name}")
+            logger.info("Applying skill: %s", skill_name)
             skill_output = await skill.aapply(skill_input, runtime)
 
             # Commented out to not log customer data. Can be used when debugging if needed
@@ -322,7 +325,7 @@ class ParallelSkillSet(SkillSet):
         for i, skill_name in enumerate(skill_sequence):
             skill = self.skills[skill_name]
             # use input dataset for the first node in the pipeline
-            print_text(f"Applying skill: {skill_name}")
+            logger.info("Applying skill: %s", skill_name)
             skill_output = skill.apply(input, runtime)
             skill_outputs.append(skill_output)
         if not skill_outputs:

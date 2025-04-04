@@ -61,7 +61,7 @@ Adala is a versatile framework designed for individuals and professionals in the
 - 📈 **Data scientists:** Apply agents to preprocess and postprocess your data. Interact with Adala natively through Python notebooks when working with large Dataframes.
 - 🏫 **Educators and students:** Use Adala as a teaching tool or as a base for advanced projects and research.
 
-While the roles highlighted above are central, it's pivotal to note that Adala is intricately designed to streamline and elevate the AI development journey, 
+While the roles highlighted above are central, it's pivotal to note that Adala is intricately designed to streamline and elevate the AI development journey,
 catering to all enthusiasts, irrespective of their specific niche in the field. 🥰
 
 ## 🔌Installation
@@ -73,11 +73,13 @@ pip install adala
 ```
 
 Adala frequently releases updates. In order to ensure that you are using the most up-to-date version, it is recommended that you install it from GitHub:
+
 ```sh
 pip install git+https://github.com/HumanSignal/Adala.git
 ```
 
 Developer installation:
+
 ```sh
 git clone https://github.com/HumanSignal/Adala.git
 cd Adala/
@@ -105,7 +107,7 @@ export OPENAI_API_KEY='your-openai-api-key'
 
 In this example we will use Adala as a standalone library directly inside Python notebook.
 
-Click [here](./examples/quickstart.ipynb) to see an extended quickstart example. 
+Click [here](./examples/quickstart.ipynb) to see an extended quickstart example.
 
 ```python
 import pandas as pd
@@ -141,7 +143,7 @@ agent = Agent(
     skills=ClassificationSkill(
         name='sentiment',
         instructions="Label text as positive, negative or neutral.",
-        labels={'sentiment': ["Positive", "Negative", "Neutral"]},
+        labels=["Positive", "Negative", "Neutral"],
         input_template="Text: {text}",
         output_template="Sentiment: {sentiment}"
     ),
@@ -149,15 +151,97 @@ agent = Agent(
     # define all the different runtimes your skills may use
     runtimes = {
         # You can specify your OPENAI API KEY here via `OpenAIRuntime(..., api_key='your-api-key')`
-        'openai': OpenAIChatRuntime(model='gpt-3.5-turbo'),
+        'openai': OpenAIChatRuntime(model='gpt-4o'),
+    },
+    teacher_runtimes = {
+        # You can specify your OPENAI API KEY here via `OpenAIRuntime(..., api_key='your-api-key')`
+        'default': OpenAIChatRuntime(model='gpt-4o'),
     },
     default_runtime='openai',
-    
-    # NOTE! If you have access to GPT-4, you can uncomment the lines bellow for better results
-#     default_teacher_runtime='openai-gpt4',
-#     teacher_runtimes = {
-#       'openai-gpt4': OpenAIRuntime(model='gpt-4')
-#     }
+)
+
+print(agent)
+print(agent.skills)
+
+agent.learn(learning_iterations=3, accuracy_threshold=0.95)
+
+print('\n=> Run tests ...')
+predictions = agent.run(test_df)
+print('\n => Test results:')
+print(predictions)
+```
+
+However, if you prefer to use Adala with Claude, Gemini, or other OpenAI compatible LLMs, you can do so by using OpenRouter.ai. Below is an example of how to use the OpenRouter API:
+
+Start by setting the `OPENROUTER_API_KEY` environment variable, which you can get from [OpenRouter](https://openrouter.ai/api-keys).
+
+```
+export OPENROUTER_API_KEY='your-openrouter-api-key'
+```
+
+Then, let's see how to modify the previous example to use OpenRouter with Claude 3.5 Haiku.
+
+```python
+import os
+import pandas as pd
+
+from adala.agents import Agent
+from adala.environments import StaticEnvironment
+from adala.skills import ClassificationSkill
+from adala.runtimes import OpenAIChatRuntime
+from rich import print
+
+# Train dataset
+train_df = pd.DataFrame([
+    ["It was the negative first impressions, and then it started working.", "Positive"],
+    ["Not loud enough and doesn't turn on like it should.", "Negative"],
+    ["I don't know what to say.", "Neutral"],
+    ["Manager was rude, but the most important that mic shows very flat frequency response.", "Positive"],
+    ["The phone doesn't seem to accept anything except CBR mp3s.", "Negative"],
+    ["I tried it before, I bought this device for my son.", "Neutral"],
+], columns=["text", "sentiment"])
+
+# Test dataset
+test_df = pd.DataFrame([
+    "All three broke within two months of use.",
+    "The device worked for a long time, can't say anything bad.",
+    "Just a random line of text."
+], columns=["text"])
+
+agent = Agent(
+    # connect to a dataset
+    environment=StaticEnvironment(df=train_df),
+
+    # define a skill
+    skills=ClassificationSkill(
+        name='sentiment',
+        instructions="Label text as positive, negative or neutral.",
+        labels=["Positive", "Negative", "Neutral"],
+        input_template="Text: {text}",
+        output_template="Sentiment: {sentiment}"
+    ),
+
+    # define all the different runtimes your skills may use
+    runtimes = {
+        # You can specify your OpenRouter API Key here or set it ahead of time in your environment variable, OPENROUTER_API_KEY
+        'openrouter': OpenAIChatRuntime(
+            base_url="https://openrouter.ai/api/v1",
+            model="anthropic/claude-3.5-haiku",
+            api_key=os.getenv("OPENROUTER_API_KEY"),
+            provider="Custom"
+            ),
+    },
+
+    default_runtime='openrouter',
+
+    teacher_runtimes = {
+        "default" : OpenAIChatRuntime(
+            base_url="https://openrouter.ai/api/v1",
+            model="anthropic/claude-3.5-haiku",
+            api_key=os.getenv("OPENROUTER_API_KEY"),
+            provider="Custom"
+        ),
+    }
 )
 
 print(agent)
@@ -172,6 +256,7 @@ print(predictions)
 ```
 
 ### 👉 Examples
+
 | Skill                                                                              | Description                                                                       | Colab                                                                                                                                                                                                                                        |
 |------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [ClassificationSkill](./examples/classification_skill.ipynb)                 | Classify text into a set of predefined labels.                                    | <a target="_blank" href="https://colab.research.google.com/github/HumanSignal/Adala/blob/master/examples/classification_skill.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>          |

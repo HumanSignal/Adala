@@ -301,7 +301,7 @@ class LiteLLMChatRuntime(InstructorClientMixin, GetCostEstimateMixin, Runtime):
     """
 
     model: str = "gpt-4o-mini"
-    max_tokens: Optional[int] = 1000
+    max_tokens: Optional[int] = None
     temperature: Optional[float] = 0.0
     seed: Optional[int] = 47
 
@@ -403,7 +403,7 @@ class AsyncLiteLLMChatRuntime(
     """
 
     model: str = "gpt-4o-mini"
-    max_tokens: Optional[int] = 1000
+    max_tokens: Optional[int] = None
     temperature: Optional[float] = 0.0
     seed: Optional[int] = 47
 
