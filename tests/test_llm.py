@@ -65,11 +65,15 @@ def test_llm_sync():
         instructions_template="",
         response_model=Output,
     )
+    # guard against changing error message
+    details_str = "litellm.AuthenticationError: AuthenticationError: OpenAIException"
+    if result["_adala_details"].startswith(details_str):
+        result["_adala_details"] = details_str
 
     expected_result = {
         "_adala_error": True,
         "_adala_message": "AuthenticationError",
-        "_adala_details": "litellm.AuthenticationError: AuthenticationError: OpenAIException - Error code: 401 - {'error': {'message': 'Incorrect API key provided: fake_api_key. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}",
+        "_adala_details": details_str,
         "_prompt_tokens": 0,
         "_completion_tokens": 0,
         "_prompt_cost_usd": 0.0,
@@ -214,13 +218,17 @@ def test_vision_runtime():
             response_model=Output,
         )
     )
+    # guard against changing error message
+    details_str = "litellm.AuthenticationError: AuthenticationError: OpenAIException"
+    if result["_adala_details"].str.startswith(details_str).all():
+        result["_adala_details"] = details_str
 
     expected_result = pd.DataFrame.from_records(
         [
             {
                 "_adala_error": True,
                 "_adala_message": "AuthenticationError",
-                "_adala_details": "litellm.AuthenticationError: AuthenticationError: OpenAIException - Error code: 401 - {'error': {'message': 'Incorrect API key provided: fake_api_key. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}",
+                "_adala_details": details_str,
             }
         ]
     )
