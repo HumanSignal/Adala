@@ -14,6 +14,7 @@ from typing import (
     Literal,
     Mapping,
     Optional,
+    Tuple,
     TypedDict,
     Union,
 )
@@ -21,6 +22,9 @@ from typing import (
 from pydantic import BaseModel, Field, validator
 
 logger = logging.getLogger(__name__)
+
+from litellm.utils import token_counter
+import litellm
 
 
 class PartialStringFormatter(string.Formatter):
@@ -103,6 +107,8 @@ class TemplateChunks(TypedDict):
     start: int
     end: int
     type: str
+    data: Optional[Any]
+    field_type: Optional[Any]
 
 
 match_fields_regex = re.compile(r"(?<!\{)\{([a-zA-Z0-9_]+)\}(?!})")
@@ -112,6 +118,21 @@ class MessageChunkType(Enum):
     TEXT = "text"
     IMAGE_URL = "image_url"
     IMAGE_URLS = "image_urls"
+
+
+class TextMessageChunk(TypedDict):
+    type: Literal["text"]
+    text: str
+
+
+class ImageMessageChunk(TypedDict):
+    type: Literal["image"]
+    image_url: Dict[str, str]
+
+
+MessageChunk = Union[TextMessageChunk, ImageMessageChunk]
+
+Message = Union[str, List[MessageChunk]]
 
 
 def parse_template(
@@ -194,161 +215,3 @@ def parse_template(
         )
 
     return chunks
-
-
-# TODO: consolidate these data models and unify our preprocessing for LLM input into one step RawInputModel -> PreparedInputModel
-class TextMessageChunk(TypedDict):
-    type: Literal["text"]
-    text: str
-
-
-class ImageMessageChunk(TypedDict):
-    type: Literal["image"]
-    image_url: Dict[str, str]
-
-
-MessageChunk = Union[TextMessageChunk, ImageMessageChunk]
-
-Message = Union[str, List[MessageChunk]]
-
-
-def split_message_into_chunks(
-    input_template: str, input_field_types: Dict[str, MessageChunkType], **payload
-) -> List[MessageChunk]:
-    """Split a template string into message chunks based on field types.
-
-    Args:
-        input_template: Template string with placeholders like '{field_name}'
-        input_field_types: Mapping of field names to their chunk types
-        payload: Dictionary with values to substitute into the template instead of placeholders
-
-    Returns:
-        List of message chunks with appropriate type and content:
-        - Text chunks: {'type': 'text', 'text': str}
-        - Image chunks: {'type': 'image_url', 'image_url': {'url': str}}
-
-    Example:
-        >>> split_message_into_chunks(
-        ...     'Look at {image} and describe {text}',
-        ...     {'image': MessageChunkType.IMAGE_URL, 'text': MessageChunkType.TEXT},
-        ...     {'image': 'http://example.com/img.jpg', 'text': 'this content'}
-        ... )
-        [
-            {'type': 'text', 'text': 'Look at '},
-            {'type': 'image_url', 'image_url': {'url': 'http://example.com/img.jpg'}},
-            {'type': 'text', 'text': ' and describe this content'}
-        ]
-    """
-    # Parse template to get chunks with field positions and types
-    parsed = parse_template(
-        input_template,
-        include_texts=True,
-        payload=payload,
-        input_field_types=input_field_types,
-    )
-
-    logger.debug(f"Parsed template: {parsed}")
-
-    result = []
-    current_text = ""
-
-    def _add_current_text_as_chunk():
-        # this function is used to flush `current_text` buffer into a text chunk, and start over
-        nonlocal current_text
-        if current_text:
-            result.append({"type": "text", "text": current_text})
-            current_text = ""
-
-    for part in parsed:
-        # iterate over parsed chunks - they already contains field types and placeholder values
-        if part["type"] == "text":
-            # each text chunk without placeholders is added to the current buffer and we continue
-            current_text += part["text"]
-        elif part["type"] == "var":
-            field_type = part["field_type"]
-            field_value = part["data"]
-            if field_value is None:
-                # if field value is not provided, it is assumed to be a text field
-                current_text += part["text"]
-            else:
-                match field_type:
-                    case MessageChunkType.TEXT:
-                        # For text fields, we don't break chunks and add text fields to current buffer
-                        current_text += (
-                            str(field_value)
-                            if field_value is not None
-                            else part["text"]
-                        )
-
-                    case MessageChunkType.IMAGE_URL:
-                        # Add remaining text as text chunk
-                        _add_current_text_as_chunk()
-                        # Add image URL as new image chunk
-                        result.append(
-                            {"type": "image_url", "image_url": {"url": field_value}}
-                        )
-
-                    case MessageChunkType.IMAGE_URLS:
-                        assert isinstance(
-                            field_value, List
-                        ), "Image URLs must be a list"
-                        # Add remaining text as text chunk
-                        _add_current_text_as_chunk()
-                        # Add image URLs as new image chunks
-                        for url in field_value:
-                            result.append(
-                                {"type": "image_url", "image_url": {"url": url}}
-                            )
-
-                    case _:
-                        # Handle unknown field types as text
-                        current_text += part["text"]
-
-    # Add any remaining text
-    _add_current_text_as_chunk()
-
-    logger.debug(f"Result: {result}")
-
-    return result
-
-
-class MessagesBuilder(BaseModel):
-    user_prompt_template: str
-    system_prompt: Optional[str] = None
-    instruction_first: bool = True
-    extra_fields: Dict[str, Any] = Field(default_factory=dict)
-    split_into_chunks: bool = False
-    input_field_types: Optional[
-        DefaultDict[
-            str,
-            Annotated[
-                MessageChunkType, Field(default_factory=lambda: MessageChunkType.TEXT)
-            ],
-        ]
-    ] = Field(default_factory=lambda: defaultdict(lambda: MessageChunkType.TEXT))
-
-    @validator("input_field_types", pre=True)
-    def set_default_input_field_types(cls, value):
-        if value is None:
-            return defaultdict(lambda: MessageChunkType.TEXT)
-        return value
-
-    def get_messages(self, payload: Dict[str, Any]):
-        if self.split_into_chunks:
-            user_prompt = split_message_into_chunks(
-                input_template=self.user_prompt_template,
-                input_field_types=self.input_field_types,
-                **payload,
-                **self.extra_fields,
-            )
-        else:
-            user_prompt = partial_str_format(
-                self.user_prompt_template, **payload, **self.extra_fields
-            )
-        messages = [{"role": "user", "content": user_prompt}]
-        if self.system_prompt:
-            if self.instruction_first:
-                messages.insert(0, {"role": "system", "content": self.system_prompt})
-            else:
-                messages[0]["content"] += self.system_prompt
-        return messages

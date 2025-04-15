@@ -1,7 +1,16 @@
 interactions:
 - request:
-    body: '{"messages": [{"role": "user", "content": "Hey, how''s it going?"}], "model":
-      "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47, "temperature": 0.0}'
+    body: '{"messages": [{"role": "system", "content": "Classify input text."}, {"role":
+      "user", "content": "Support Ticket: My account is locked and I can''t log in."}],
+      "model": "gpt-3.5-turbo", "seed": 47, "temperature": 0.0, "tool_choice": {"type":
+      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_tags": {"description": "The classification label", "items": {"enum":
+      ["Account Access", "Login Issues", "App Functionality", "Bug Report", "Billing",
+      "Account Management", "User Settings", "Notifications", "Performance", "Website
+      Issues"], "type": "string"}, "minItems": 1, "title": "Predicted Tags", "type":
+      "array", "uniqueItems": true}}, "required": ["predicted_tags"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -10,47 +19,53 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '145'
+      - '882'
       content-type:
       - application/json
       host:
       - api.openai.com
       user-agent:
-      - OpenAI/Python 1.45.1
+      - OpenAI/Python 1.65.3
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
       - python
       x-stainless-os:
-      - Linux
+      - MacOS
       x-stainless-package-version:
-      - 1.45.1
+      - 1.65.3
       x-stainless-raw-response:
       - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.11.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA3RRwW5aMRC88xVbX3IBBASUhEuV9lCQmkukqIeqQsZvn+3Ub9e19zVBEf9e2VBe
-        eujFhxnPaGb2bQSgfKPWoIzTYroYJvf32DzYz19a9/TLPaKs7uST2STt9ddvt2pcFLx/RiN/VVPD
-        XQwonulEm4RasLjObxY389nidjmrRMcNhiKzUSbX09VE+rTnyWy+WJ2Vjr3BrNbwfQQA8FbfkpEa
-        fFVrqD4V6TBnbVGtL58AVOJQEKVz9lk0iRoPpGESpBp7gyHwB9hedfDcZwENpUMvmCAmtkl3Y8gM
-        W2iYrgSc/o3QIgZPNo9h30uVOkwIwuAwRDhwDy9eHGg6iPNkK0KIzRQ2/AJGE2zhFKxSwo0+fHwf
-        MGHbZ10Goj6EM368NA5sY+J9PvMXvPXks9sl1JmptMvCUVX2OAL4UZft/xlLxcRdlJ3wT6RiOF+e
-        7NRwy4G8Xp1JYdFhwJd3/xPtGhTtQ353HXXK58kOBrNLyNpS5UMW7HatJ4spJl+PVbc4jv4AAAD/
-        /wMAXSwNpqsCAAA=
+        H4sIAAAAAAAAAwAAAP//jFPbbtswDH3PVwh8Topc5y5v3QVDsGHFhg4NVgeGIjOOOlkSJGptF+Tf
+        B9mJ7aQZMD8YAo8OeXhI7XqMgcxhzkBsOYnSqsG7xeZTOf6xXNwlH4dPy7BE8vnog/2c3GIB/cgw
+        60cUdGRdCVNahSSNrmHhkBPGrKNkOkmur8fTaQWUJkcVaYWlweRqNqDg1mYwHI1nB+bWSIEe5uyh
+        xxhju+ofNeocn2HOhv1jpETveYEwby4xBs6oGAHuvfTENUG/BYXRhDrK1kGpDkDGqExwpdrC9bfr
+        nFujuFLZc/E98U9icr/+ORvj47e7P1+T+/dv1516deoXWwnaBC0agzp4E5+fFWMMNC8r7m0gG+iM
+        yRhwV4QSNUXVsEvBOsylIMwz4oVPYf6Qwo0QJmhiN0Kg9yn0U/hiCqnZwvuAPoXVHk7y7nuXzquO
+        Ww43wXP12kautSEeu6l8XB2QfTMyZQrrzNqfUWEjtfTbzCH3lRPgydhaVpRQFYdwMm2wzpSWMjK/
+        sCo3mr6p80G7jR10dADJEFed+CzpX8iX5UhcVuvQbKDgYhutPVLbTeQhl6YD9Dpdv1ZzKXfdudTF
+        /6RvASHQxnEfBn/ScXvNYXys/7rWuFwJBo/utxSYkUQXJ5HjhgdVLx/4F09YZhupC3TWyeYt9fa9
+        vwAAAP//AwDbgveOSgQAAA==
     headers:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 8c7b5450cb706189-ORD
+      - 92b292cbd88894e9-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -58,14 +73,14 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Mon, 23 Sep 2024 14:47:21 GMT
+      - Fri, 04 Apr 2025 17:37:24 GMT
       Server:
       - cloudflare
       Set-Cookie:
-      - __cf_bm=p9dxPQnARWEyNWpRZ2PKStxmt9NtmdtWcDWUVnEiUus-1727102841-1.0.1.1-Bzi1_LFY46ss9v7GK8Gxm45eOq0WXJYvndAcND.Dbi14Qd0wFjioKcU4nWZCAl9igmw9HbChpbjmBthD63J1Sw;
-        path=/; expires=Mon, 23-Sep-24 15:17:21 GMT; domain=.api.openai.com; HttpOnly;
+      - __cf_bm=UjpT6pj4nlhb6LQRz3ATb8xCElCwIHv5SmcQlnlFh80-1743788244-1.0.1.1-W37_0MuRWttLbRLExhK6dH4RNJeH3EhxuZ3Ys9II.2AkBPBklP8iv5gDNEwnj9EP.j75VLbnJNugu3h1m4gm0vI1GQ2MbqkCHMU7QfQ5YdM;
+        path=/; expires=Fri, 04-Apr-25 18:07:24 GMT; domain=.api.openai.com; HttpOnly;
         Secure; SameSite=None
-      - _cfuvid=DayyEV7zI8VvbNFwHMtH6No_2lNdicbUlGtiDfG0ods-1727102841404-0.0.1.1-604800000;
+      - _cfuvid=TNkwJvtV5O7yFWTZtaytyhryK8dgvimDzDzrm0NZ5NE-1743788244694-0.0.1.1-604800000;
         path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Transfer-Encoding:
       - chunked
@@ -73,14 +88,16 @@ interactions:
       - nosniff
       access-control-expose-headers:
       - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '676'
+      - '344'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
+      - max-age=31536000; includeSubDomains; preload
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
@@ -88,19 +105,28 @@ interactions:
       x-ratelimit-remaining-requests:
       - '9999'
       x-ratelimit-remaining-tokens:
-      - '49998993'
+      - '49999978'
       x-ratelimit-reset-requests:
       - 6ms
       x-ratelimit-reset-tokens:
-      - 1ms
+      - 0s
       x-request-id:
-      - req_d83a2ce22b42344818bb9116997c0ce7
+      - req_ebf223808c31d04e0253bf16396a38d3
     status:
       code: 200
       message: OK
 - request:
-    body: '{"messages": [{"role": "user", "content": "Hey, how''s it going?"}], "model":
-      "gpt-4-turbo", "max_tokens": 1000, "seed": 47, "temperature": 0.0}'
+    body: '{"messages": [{"role": "system", "content": "Classify input text."}, {"role":
+      "user", "content": "Support Ticket: The app keeps crashing when I try to upload
+      a photo."}], "model": "gpt-3.5-turbo", "seed": 47, "temperature": 0.0, "tool_choice":
+      {"type": "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_tags": {"description": "The classification label", "items": {"enum":
+      ["Account Access", "Login Issues", "App Functionality", "Bug Report", "Billing",
+      "Account Management", "User Settings", "Notifications", "Performance", "Website
+      Issues"], "type": "string"}, "minItems": 1, "title": "Predicted Tags", "type":
+      "array", "uniqueItems": true}}, "required": ["predicted_tags"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -109,49 +135,53 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '143'
+      - '894'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=p9dxPQnARWEyNWpRZ2PKStxmt9NtmdtWcDWUVnEiUus-1727102841-1.0.1.1-Bzi1_LFY46ss9v7GK8Gxm45eOq0WXJYvndAcND.Dbi14Qd0wFjioKcU4nWZCAl9igmw9HbChpbjmBthD63J1Sw;
-        _cfuvid=DayyEV7zI8VvbNFwHMtH6No_2lNdicbUlGtiDfG0ods-1727102841404-0.0.1.1-604800000
+      - __cf_bm=UjpT6pj4nlhb6LQRz3ATb8xCElCwIHv5SmcQlnlFh80-1743788244-1.0.1.1-W37_0MuRWttLbRLExhK6dH4RNJeH3EhxuZ3Ys9II.2AkBPBklP8iv5gDNEwnj9EP.j75VLbnJNugu3h1m4gm0vI1GQ2MbqkCHMU7QfQ5YdM;
+        _cfuvid=TNkwJvtV5O7yFWTZtaytyhryK8dgvimDzDzrm0NZ5NE-1743788244694-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
-      - OpenAI/Python 1.45.1
+      - OpenAI/Python 1.65.3
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
       - python
       x-stainless-os:
-      - Linux
+      - MacOS
       x-stainless-package-version:
-      - 1.45.1
+      - 1.65.3
       x-stainless-raw-response:
       - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.11.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA3SQT0vDQBDF7/kU4168NJLEaLUX8Q+oCJ4UEZGwTSbJ2t2dZXcCVul3l01rWw9e
-        Anm/fY837zsBEKoRMxB1L7k2TqeXl9g8Lk4evm76xdPn6/2tqj+urhv33LIzYhIdNP/Amn9dRzUZ
-        p5EV2TWuPUrGmJpPi2meFWdlPgJDDepo6xynZcqDn1NaZEWZZmWanW/cPakag5jBWwIA8D1+Y0/b
-        4KeYQTb5VQyGIDsUs+0jAOFJR0XIEFRgaVlMdrAmy2jH6neoNR3A/aGBHj0CE/SoHSxpOIKXXvJh
-        ALLx14NRtgGmRi4v9tM8tkOQ8SI7aL3RV9t6mjrnaR42fKu3yqrQVx5lIBurBCYnRrpKAN7HGYY/
-        lwnnyTiumBZoY2BeruPEbvw9eLqBTCz1Tj/O/jNVDbJUOuxNKdb9lO12Adm25HilCMvAaKpW2Q69
-        82q9bOuqvC2K41yW5yciWSU/AAAA//8DAJMAai5nAgAA
+        H4sIAAAAAAAAAwAAAP//jFNda9swFH33rxD3OSlNY5PMj2XQtX0Y3Rgba4JR5GtHrSyp0nWzEPLf
+        h+zEdtIM5gcj7tE599wP7SLGQOaQMhBrTqKyanx7X9xVxsZTWuHjl7cVJiWSftg+beTnNxgFhlm9
+        oKAj60qYyiokaXQLC4ecMKhOZvF0Np/fxHEDVCZHFWilpfH0KhlT7VZmfD25SQ7MtZECPaTsOWKM
+        sV3zDx51jn8gZdejY6RC73mJkHaXGANnVIgA91564ppg1IPCaEIdbOtaqQFAxqhMcKX6xO23G5z7
+        RnGlst+P8eTh+6eNW7/8KO9+PdnkXUx/5ptBvlZ6axtDRa1F16AB3sXTs2SMgeZVw/1ak63pjMkY
+        cFfWFWoKrmG3AOswl4Iwz4iXfgHp8wJu65J9Q2scLWC5hxOJfXTpvBw0xmFRe64+doxrbYgH403L
+        lgdk301HmdI6s/JnVCikln6dOeS+KRo8GdvaChaa5FCfDBasM5WljMwrNukm8azVg37xenR+wMgQ
+        VwNSkowuyGU5EpfN4LtdE1ysQxOP1H7neJ1LMwCiQdEfzVzSbguXuvwf+R4QAm0Y7GHEJwX31xyG
+        Z/mva12TG8Pg0b1LgRlJdGEQORa8Vu2agd96wiorpC7RWSe7VxPto78AAAD//wMA7ZSukzQEAAA=
     headers:
-      CF-Cache-Status:
-      - DYNAMIC
       CF-RAY:
-      - 8c7b5457eb566189-ORD
+      - 92b292d1a92b94e9-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -159,7 +189,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Mon, 23 Sep 2024 14:47:22 GMT
+      - Fri, 04 Apr 2025 17:37:25 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -168,34 +198,47 @@ interactions:
       - nosniff
       access-control-expose-headers:
       - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '560'
+      - '485'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
+      - max-age=31536000; includeSubDomains; preload
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
-      - '2000000'
+      - '50000000'
       x-ratelimit-remaining-requests:
       - '9999'
       x-ratelimit-remaining-tokens:
-      - '1998994'
+      - '49999974'
       x-ratelimit-reset-requests:
       - 6ms
       x-ratelimit-reset-tokens:
-      - 30ms
+      - 0s
       x-request-id:
-      - req_45586556d6711f6840c065d9f54333fb
+      - req_e8b964696c6c83261b67daeb0b381124
     status:
       code: 200
       message: OK
 - request:
-    body: '{"messages": [{"role": "user", "content": "Hey, how''s it going?"}], "model":
-      "gpt-3.5-turbo", "max_tokens": 1000, "seed": 47, "temperature": 0.0}'
+    body: '{"messages": [{"role": "system", "content": "Classify input text."}, {"role":
+      "user", "content": "Support Ticket: I need to update my billing information."}],
+      "model": "gpt-3.5-turbo", "seed": 47, "temperature": 0.0, "tool_choice": {"type":
+      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_tags": {"description": "The classification label", "items": {"enum":
+      ["Account Access", "Login Issues", "App Functionality", "Bug Report", "Billing",
+      "Account Management", "User Settings", "Notifications", "Performance", "Website
+      Issues"], "type": "string"}, "minItems": 1, "title": "Predicted Tags", "type":
+      "array", "uniqueItems": true}}, "required": ["predicted_tags"], "type": "object"}}}]}'
     headers:
       accept:
       - application/json
@@ -204,50 +247,53 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '145'
+      - '882'
       content-type:
       - application/json
       cookie:
-      - __cf_bm=p9dxPQnARWEyNWpRZ2PKStxmt9NtmdtWcDWUVnEiUus-1727102841-1.0.1.1-Bzi1_LFY46ss9v7GK8Gxm45eOq0WXJYvndAcND.Dbi14Qd0wFjioKcU4nWZCAl9igmw9HbChpbjmBthD63J1Sw;
-        _cfuvid=DayyEV7zI8VvbNFwHMtH6No_2lNdicbUlGtiDfG0ods-1727102841404-0.0.1.1-604800000
+      - __cf_bm=UjpT6pj4nlhb6LQRz3ATb8xCElCwIHv5SmcQlnlFh80-1743788244-1.0.1.1-W37_0MuRWttLbRLExhK6dH4RNJeH3EhxuZ3Ys9II.2AkBPBklP8iv5gDNEwnj9EP.j75VLbnJNugu3h1m4gm0vI1GQ2MbqkCHMU7QfQ5YdM;
+        _cfuvid=TNkwJvtV5O7yFWTZtaytyhryK8dgvimDzDzrm0NZ5NE-1743788244694-0.0.1.1-604800000
       host:
       - api.openai.com
       user-agent:
-      - OpenAI/Python 1.45.1
+      - OpenAI/Python 1.65.3
       x-stainless-arch:
-      - x64
+      - arm64
       x-stainless-async:
       - 'false'
       x-stainless-lang:
       - python
       x-stainless-os:
-      - Linux
+      - MacOS
       x-stainless-package-version:
-      - 1.45.1
+      - 1.65.3
       x-stainless-raw-response:
       - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
       x-stainless-runtime:
       - CPython
       x-stainless-runtime-version:
-      - 3.11.5
+      - 3.11.9
     method: POST
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA3RRwW4aMRS88xUvvuSyIFhANFwilByCqjbqLWlVIbN+eJ3Yfpb9timK+PfIhrDJ
-        IRcfZjyjmXmvAwBhlFiCaFrJjQt2uFqhurc/bsPj9OE+rNTPG13//r5weh5+3YgqK2j7hA2/q0YN
-        uWCRDfkj3USUjNl1sqgXk3H9bVYXwpFCm2U68HA6mg+5i1sajif1/KRsyTSYxBL+DAAAXsubM3qF
-        /8USxtU74jAlqVEsz58ARCSbESFTMomlZ1H1ZEOe0ZfYd2gtXcD60sFTlxgk5A4dY4QQSUfpKkgE
-        a1DkLxla+Q9hh2iN16mCbcdF2mJEYIIWbYA9dfBiuAXp99warwviEdUI7ugFGulhDcdghWJScn/9
-        MWDEXZdkHsh31p7ww7mxJR0ibdOJP+M7401qNxFlIp/bJaYgCnsYAPwty3afxhIhkgu8YXpGnw0n
-        s6Od6G/Zk9P5iWRiaXt8dvWVaKOQpbHpw3XEMZ/xujcYn0OWliLtE6Pb7IzXGEM05Vhli8PgDQAA
-        //8DAL488q2rAgAA
+        H4sIAAAAAAAAA4xTTY/aMBC951dYc4bVspCCcuTQD7Vq1VLRSguKjDMJBsd27clqV4j/XjkJSWC3
+        UnOIrHl+M2/ejE8RYyAzSBiIPSdRWjVefso/6HfZrwX/ssTPQqzWP6xbVfHPkngOo8AwuwMKurDu
+        hCmtQpJGN7BwyAlD1sl8Np0vFg+zuAZKk6EKtMLSeHoXj6lyOzO+nzzELXNvpEAPCXuMGGPsVP+D
+        Rp3hMyTsfnSJlOg9LxCS7hJj4IwKEeDeS09cE4x6UBhNqINsXSk1AMgYlQquVF+4+U6Dc28UVyp9
+        /3v/cfI0+7NbP8fLr6vvx8PhuFzjZFCvSf1ia0F5pUVn0ADv4slNMcZA87LmfqvIVnTDZAy4K6oS
+        NQXVcNqAdZhJQZilxAu/geRxA0uplNTFBrZnuOKfo7fO24ErDvPKc/XaLq61IR5U135tW+TcjUaZ
+        wjqz8zdUyKWWfp865L7uGDwZ28gKEuriUF1NFawzpaWUzBHrcpPZtMkH/db16LzFyBBXA1Lc7s11
+        ujRD4rKeerdogot9cPBC7ReOV5k0AyAaNP1azFu5m8alLv4nfQ8IgTZMtZ3vVcP9NYfhTf7rWmdy
+        LRg8uicpMCWJLgwiw5xXqtkx8C+esExzqQt01snuyUTn6C8AAAD//wMAEg4EjDEEAAA=
     headers:
-      CF-Cache-Status:
-      - DYNAMIC
       CF-RAY:
-      - 8c7b545dd9c36189-ORD
+      - 92b292d5ff5194e9-LIS
       Connection:
       - keep-alive
       Content-Encoding:
@@ -255,7 +301,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Mon, 23 Sep 2024 14:47:23 GMT
+      - Fri, 04 Apr 2025 17:37:26 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -264,14 +310,18 @@ interactions:
       - nosniff
       access-control-expose-headers:
       - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
       openai-organization:
       - heartex
       openai-processing-ms:
-      - '563'
+      - '281'
       openai-version:
       - '2020-10-01'
       strict-transport-security:
-      - max-age=15552000; includeSubDomains; preload
+      - max-age=31536000; includeSubDomains; preload
       x-ratelimit-limit-requests:
       - '10000'
       x-ratelimit-limit-tokens:
@@ -279,13 +329,800 @@ interactions:
       x-ratelimit-remaining-requests:
       - '9999'
       x-ratelimit-remaining-tokens:
-      - '49998993'
+      - '49999978'
       x-ratelimit-reset-requests:
       - 6ms
       x-ratelimit-reset-tokens:
-      - 1ms
+      - 0s
       x-request-id:
-      - req_79187cd5ab17414b67c50721bd8183e2
+      - req_59fef61c1ed48ab14571bc8ffbf8f05b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text."}, {"role":
+      "user", "content": "Support Ticket: How do I change my notification settings?"}],
+      "model": "gpt-3.5-turbo", "seed": 47, "temperature": 0.0, "tool_choice": {"type":
+      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_tags": {"description": "The classification label", "items": {"enum":
+      ["Account Access", "Login Issues", "App Functionality", "Bug Report", "Billing",
+      "Account Management", "User Settings", "Notifications", "Performance", "Website
+      Issues"], "type": "string"}, "minItems": 1, "title": "Predicted Tags", "type":
+      "array", "uniqueItems": true}}, "required": ["predicted_tags"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '883'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=UjpT6pj4nlhb6LQRz3ATb8xCElCwIHv5SmcQlnlFh80-1743788244-1.0.1.1-W37_0MuRWttLbRLExhK6dH4RNJeH3EhxuZ3Ys9II.2AkBPBklP8iv5gDNEwnj9EP.j75VLbnJNugu3h1m4gm0vI1GQ2MbqkCHMU7QfQ5YdM;
+        _cfuvid=TNkwJvtV5O7yFWTZtaytyhryK8dgvimDzDzrm0NZ5NE-1743788244694-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA4xTXW/aQBB896847TNEECBBfmylpvQhqZQmqhqQdZzX5pr7yt26IkH89+pssA1J
+        pfrBsnZuZudm17uEMZA5pAzEhpPQTg0/LYobu9Yvt3dyoXCrN+Jl/fb4QOKzngsYRIZd/0ZBR9aF
+        sNopJGlNAwuPnDCqjq+nk+v5/HJ6VQPa5qgirXQ0nFzMhlT5tR2OxpezA3NjpcAAKXtKGGNsV7+j
+        R5PjFlI2GhwrGkPgJULaHmIMvFWxAjwEGYgbgkEHCmsITbRtKqV6AFmrMsGV6ho3z6733QXFlcru
+        lZ+Nivzmp/715evz41v1bXG1xe8/ev0a6VdXGyoqI9qAenhbT8+aMQaG65p7V5Gr6IzJGHBfVhoN
+        RdewW4LzmEtBmGfEy7CE9GkJDwE9u0ciaWJpsIRbS7KQgseuYQmrPZzo7pOPvle9tDwWVeDqfYzc
+        GEuNbsxxdUD27ciULZ2363BGhUIaGTaZRx7qJCCQdY2taKFuDtXJtMF5qx1lZJ+xbjeeTho96Lax
+        hx72BsgSV7367Mg60ctyJC7rdWg3UHCxidEeqd0m8iqXtgckvVu/d/ORdnNzacr/ke8AIdDFcR8G
+        f3Lj7pjH+LP+61ibcm0YAvo/UmBGEn2cRI4Fr1SzfBBeA6HOCmlK9M7L9l9K9slfAAAA//8DABzR
+        ShdKBAAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 92b292da5db394e9-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 04 Apr 2025 17:37:26 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '275'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49999977'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_576087b40a6794809cfa806abfce90e1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text."}, {"role":
+      "user", "content": "Support Ticket: I''m experiencing slow performance on the
+      website."}], "model": "gpt-3.5-turbo", "seed": 47, "temperature": 0.0, "tool_choice":
+      {"type": "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_tags": {"description": "The classification label", "items": {"enum":
+      ["Account Access", "Login Issues", "App Functionality", "Bug Report", "Billing",
+      "Account Management", "User Settings", "Notifications", "Performance", "Website
+      Issues"], "type": "string"}, "minItems": 1, "title": "Predicted Tags", "type":
+      "array", "uniqueItems": true}}, "required": ["predicted_tags"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '891'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=UjpT6pj4nlhb6LQRz3ATb8xCElCwIHv5SmcQlnlFh80-1743788244-1.0.1.1-W37_0MuRWttLbRLExhK6dH4RNJeH3EhxuZ3Ys9II.2AkBPBklP8iv5gDNEwnj9EP.j75VLbnJNugu3h1m4gm0vI1GQ2MbqkCHMU7QfQ5YdM;
+        _cfuvid=TNkwJvtV5O7yFWTZtaytyhryK8dgvimDzDzrm0NZ5NE-1743788244694-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA4xTTW/iMBC98yusOUMFFJYqt5bdop7arrT0UFBknElw69iWPa6WRfz3lRNIAu1K
+        m0NkzfN78+bD+x5jIDNIGIgtJ1FaNbh7yBemnD89P99/5y/ZPNwu5vn41/3H7oEK6EeG2byhoBPr
+        SpjSKiRpdA0Lh5wwqo5mk+vZzc148q0CSpOhirTC0uD6ajqg4DZmMByNp0fm1kiBHhL22mOMsX31
+        jx51hr8hYcP+KVKi97xASJpLjIEzKkaAey89cU3Qb0FhNKGOtnVQqgOQMSoVXKk2cf3tO+e2UVyp
+        dJk9hoUa3r247XJhFsvpO43+vP342clXS+9sZSgPWjQN6uBNPLlIxhhoXlbcx0A20AWTMeCuCCVq
+        iq5hvwLrMJOCMEuJF34FyesKntDlxpVcC1zB+gBnGofeV+d1pzMO8+C5+twyrrUhHp1XPVsfkUMz
+        HmUK68zGX1Ahl1r6beqQ+6pq8GRsbStaqJJDOJssWGdKSymZd6zSjSaTWg/azWvR2REjQ1x1SNNR
+        /wu5NEPispp8s2yCi23s4onaLh0PmTQdoNcp+rOZr7TrwqUu/ke+BYRAGyd7nPFZwe01h/Fd/uta
+        0+TKMHh0H1JgShJdHESGOQ+q3jPwO09YprnUBTrrZPNseofeXwAAAP//AwAP3JQlNQQAAA==
+    headers:
+      CF-RAY:
+      - 92b292ddfbb194e9-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 04 Apr 2025 17:37:27 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '308'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49999974'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_977d373f3e067aa0bb07b0d3c51d3631
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text."}, {"role":
+      "user", "content": "Support Ticket: My account is locked and I can''t log in."}],
+      "model": "gpt-3.5-turbo", "seed": 47, "temperature": 0.0, "tool_choice": {"type":
+      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_tags": {"description": "The classification label", "items": {"enum":
+      ["Account Access", "Login Issues", "App Functionality", "Bug Report", "Billing",
+      "Account Management", "User Settings", "Notifications", "Performance", "Website
+      Issues"], "type": "string"}, "minItems": 1, "title": "Predicted Tags", "type":
+      "array", "uniqueItems": true}}, "required": ["predicted_tags"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '882'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=UjpT6pj4nlhb6LQRz3ATb8xCElCwIHv5SmcQlnlFh80-1743788244-1.0.1.1-W37_0MuRWttLbRLExhK6dH4RNJeH3EhxuZ3Ys9II.2AkBPBklP8iv5gDNEwnj9EP.j75VLbnJNugu3h1m4gm0vI1GQ2MbqkCHMU7QfQ5YdM;
+        _cfuvid=TNkwJvtV5O7yFWTZtaytyhryK8dgvimDzDzrm0NZ5NE-1743788244694-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA4xTXW/iMBB851dY+wxVoVAKb62QqqK7A53uSyooMs4muOfYlr0+USH++8kJJIFy
+        0uUhsnY8u7Oz632HMZApTBmILSdRWNV7esme7WiZ7frhy3LyazLZzZ0fL3Hyox8CdCPDbN5Q0Il1
+        I0xhFZI0uoKFQ04Ys/bHw7vxw8NgOC6BwqSoIi231Lu7GfUouI3p3fYHoyNza6RAD1P22mGMsX35
+        jxp1ijuYstvuKVKg9zxHmNaXGANnVIwA91564pqg24DCaEIdZeugVAsgY1QiuFJN4erbt86NUVyp
+        5OeCL75u5tti5gffv32ez+63z+Jt9tSqV6V+t6WgLGhRG9TC6/j0ohhjoHlRcheBbKALJmPAXR4K
+        1BRVw34F1mEqBWGaEM/9CqavK3gUwgRN7FEI9H4F3RV8MrnU7MX7gH4F6wOc5T10rp3XLbccZsFz
+        9dFGrrUhHrspfVwfkUM9MmVy68zGX1Ahk1r6beKQ+9IJ8GRsJStKKItDOJs2WGcKSwmZ31iW6w/v
+        q3zQbGML7R9BMsRVKz4ad6/kS1IkLst1qDdQcLGN1p6ozSbykErTAjqtrj+quZa76lzq/H/SN4AQ
+        aOO4j4M/67i55jA+1n9dq10uBYNH90cKTEiii5NIMeNBVcsH/t0TFkkmdY7OOlm/pc6h8xcAAP//
+        AwApWutCSgQAAA==
+    headers:
+      CF-RAY:
+      - 92b292e1288f94e9-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 04 Apr 2025 17:37:27 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '308'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49999978'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_305495cfec864617590836e533ee66b2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text."}, {"role":
+      "user", "content": "Support Ticket: The app keeps crashing when I try to upload
+      a photo."}], "model": "gpt-3.5-turbo", "seed": 47, "temperature": 0.0, "tool_choice":
+      {"type": "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_tags": {"description": "The classification label", "items": {"enum":
+      ["Account Access", "Login Issues", "App Functionality", "Bug Report", "Billing",
+      "Account Management", "User Settings", "Notifications", "Performance", "Website
+      Issues"], "type": "string"}, "minItems": 1, "title": "Predicted Tags", "type":
+      "array", "uniqueItems": true}}, "required": ["predicted_tags"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '894'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=UjpT6pj4nlhb6LQRz3ATb8xCElCwIHv5SmcQlnlFh80-1743788244-1.0.1.1-W37_0MuRWttLbRLExhK6dH4RNJeH3EhxuZ3Ys9II.2AkBPBklP8iv5gDNEwnj9EP.j75VLbnJNugu3h1m4gm0vI1GQ2MbqkCHMU7QfQ5YdM;
+        _cfuvid=TNkwJvtV5O7yFWTZtaytyhryK8dgvimDzDzrm0NZ5NE-1743788244694-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA4xTyW7bMBC96yuIOdtBvFWCjkFWIEiALpfGhkBTI5kJRTLkqGhq+N8LSrYkOy5Q
+        HQRiHt+bNwu3EWMgc0gZiA0nUVk1vnoo7t4f1f1rXMr8LZnF1fdSl3L6x70/eBgFhlm/oqAD60KY
+        yiokaXQLC4ecMKhO4vksTpLpPGmAyuSoAq20NJ5dLMZUu7UZX06miz1zY6RADyl7iRhjbNv8g0ed
+        429I2eXoEKnQe14ipN0lxsAZFSLAvZeeuCYY9aAwmlAH27pWagCQMSoTXKk+cfttB+e+UVyp7Hb9
+        80c8vf32eH2faPHl6QbvzJNX60G+VvrDNoaKWouuQQO8i6cnyRgDzauG+1yTremEyRhwV9YVagqu
+        YbsE6zCXgjDPiJd+CenLEq7qkn1FaxwtYbWDI4lddO68GjTGYVF7rj53jGttiAfjTctWe2TXTUeZ
+        0jqz9idUKKSWfpM55L4pGjwZ29oKFprkUB8NFqwzlaWMzBs26SbzuNWDfvF6NNljZIirAWmxGJ2R
+        y3IkLpvBd7smuNiEJh6o/c7xOpdmAESDoj+bOafdFi51+T/yPSAE2jDY/YiPCu6vOQzP8l/XuiY3
+        hsGj+yUFZiTRhUHkWPBatWsG/sMTVlkhdYnOOtm9mmgX/QUAAP//AwCBkxVINAQAAA==
+    headers:
+      CF-RAY:
+      - 92b292e4eef994e9-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 04 Apr 2025 17:37:28 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '323'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49999974'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_5fe393ab98fed65ee8d49567be05267f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text."}, {"role":
+      "user", "content": "Support Ticket: I need to update my billing information."}],
+      "model": "gpt-3.5-turbo", "seed": 47, "temperature": 0.0, "tool_choice": {"type":
+      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_tags": {"description": "The classification label", "items": {"enum":
+      ["Account Access", "Login Issues", "App Functionality", "Bug Report", "Billing",
+      "Account Management", "User Settings", "Notifications", "Performance", "Website
+      Issues"], "type": "string"}, "minItems": 1, "title": "Predicted Tags", "type":
+      "array", "uniqueItems": true}}, "required": ["predicted_tags"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '882'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=UjpT6pj4nlhb6LQRz3ATb8xCElCwIHv5SmcQlnlFh80-1743788244-1.0.1.1-W37_0MuRWttLbRLExhK6dH4RNJeH3EhxuZ3Ys9II.2AkBPBklP8iv5gDNEwnj9EP.j75VLbnJNugu3h1m4gm0vI1GQ2MbqkCHMU7QfQ5YdM;
+        _cfuvid=TNkwJvtV5O7yFWTZtaytyhryK8dgvimDzDzrm0NZ5NE-1743788244694-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA4xTUW/aMBB+z6+w7hmqUmDQvA2tqmi1TUh9qQqKjHNJvDq2sS9TO8R/n5xAEmgn
+        LQ+RdZ+/u+++O+8jxkCmEDMQBSdRWjVcLLP73e3dIqu+7lbftqOReVpNds+v3x+f+D0MAsNsf6Gg
+        E+tKmNIqJGl0AwuHnDBkHc0m49l8fjOZ10BpUlSBllsajq+mQ6rc1gyvRzfTI7MwUqCHmL1EjDG2
+        r/9Bo07xDWJ2PThFSvSe5whxe4kxcEaFCHDvpSeuCQYdKIwm1EG2rpTqAWSMSgRXqivcfPveuTOK
+        K5XgqnArV+rHL29/xENaPNwtfzwvtenVa1K/21pQVmnRGtTD23h8UYwx0LysuT8rshVdMBkD7vKq
+        RE1BNezXYB2mUhCmCfHcryF+WcNCKiV1vobNAc74h+iz86bnisOs8lx9tItrbYgH1bVfmyNyaEej
+        TG6d2foLKmRSS18kDrmvOwZPxjaygoS6OFRnUwXrTGkpIfOKdbnRZNzkg27rOnR2xMgQVz3S9Lg3
+        5+mSFInLeurtogkuiuDgidotHK9SaXpA1Gv6o5jPcjeNS53/T/oOEAJtmOpxvmcNd9cchjf5r2ut
+        ybVg8Oh+S4EJSXRhEClmvFLNjoF/94Rlkkmdo7NOtk8mOkR/AQAA//8DADyyMxIxBAAA
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 92b292e83cf494e9-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 04 Apr 2025 17:37:28 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '238'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49999978'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_1ce60fb4b8118c65b41aa4238c101fe3
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text."}, {"role":
+      "user", "content": "Support Ticket: How do I change my notification settings?"}],
+      "model": "gpt-3.5-turbo", "seed": 47, "temperature": 0.0, "tool_choice": {"type":
+      "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_tags": {"description": "The classification label", "items": {"enum":
+      ["Account Access", "Login Issues", "App Functionality", "Bug Report", "Billing",
+      "Account Management", "User Settings", "Notifications", "Performance", "Website
+      Issues"], "type": "string"}, "minItems": 1, "title": "Predicted Tags", "type":
+      "array", "uniqueItems": true}}, "required": ["predicted_tags"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '883'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=UjpT6pj4nlhb6LQRz3ATb8xCElCwIHv5SmcQlnlFh80-1743788244-1.0.1.1-W37_0MuRWttLbRLExhK6dH4RNJeH3EhxuZ3Ys9II.2AkBPBklP8iv5gDNEwnj9EP.j75VLbnJNugu3h1m4gm0vI1GQ2MbqkCHMU7QfQ5YdM;
+        _cfuvid=TNkwJvtV5O7yFWTZtaytyhryK8dgvimDzDzrm0NZ5NE-1743788244694-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA4xTXYvbMBB8968Q+5wcly/i82MpOQJtj+sHFC7BKPLa1p0sqdK61xDy34vsxHZy
+        V6gfjNnRzI5m14eIMZAZJAxEyUlUVo0/rPP7X+u4jFdmlT/qtV7effqafa5fY76yMAoMs3tGQWfW
+        jTCVVUjS6BYWDjlhUJ0s57NlHE/ncQNUJkMVaIWl8exmMaba7cz4djJdnJilkQI9JOwpYoyxQ/MO
+        HnWGfyBht6NzpULveYGQdIcYA2dUqAD3XnrimmDUg8JoQh1s61qpAUDGqFRwpfrG7XMYfPdBcaXS
+        +HtpXym7s9n0cWHLh5ef2uDH/WTQr5Xe28ZQXmvRBTTAu3py1Ywx0LxquA812ZqumIwBd0Vdoabg
+        Gg4bsA4zKQizlHjhN5A8beCHR8e+IZHUoTTawBdDMpeCh65+A9sjXOgeo/e+t4O0HOa15+ptjFxr
+        Q61uyHF7Qo7dyJQprDM7f0WFXGrpy9Qh900S4MnY1law0DSH+mLaYJ2pLKVkXrBpN5nPWj3ot3GA
+        nvYGyBBXg/rizLrQSzMkLpt16DZQcFGGaM/UfhN5nUkzAKLBrd+6eU+7vbnUxf/I94AQaMO4T4O/
+        uHF/zGH4Wf91rEu5MQwe3W8pMCWJLkwiw5zXql0+8HtPWKW51AU662T3L0XH6C8AAAD//wMAxFpW
+        mkoEAAA=
+    headers:
+      CF-RAY:
+      - 92b292eae93994e9-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 04 Apr 2025 17:37:29 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '293'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49999977'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_2ecb3b667c8a47379a54fed2a586c3b0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "system", "content": "Classify input text."}, {"role":
+      "user", "content": "Support Ticket: I''m experiencing slow performance on the
+      website."}], "model": "gpt-3.5-turbo", "seed": 47, "temperature": 0.0, "tool_choice":
+      {"type": "function", "function": {"name": "Output"}}, "tools": [{"type": "function",
+      "function": {"name": "Output", "description": "Correctly extracted `Output`
+      with all the required parameters with correct types", "parameters": {"properties":
+      {"predicted_tags": {"description": "The classification label", "items": {"enum":
+      ["Account Access", "Login Issues", "App Functionality", "Bug Report", "Billing",
+      "Account Management", "User Settings", "Notifications", "Performance", "Website
+      Issues"], "type": "string"}, "minItems": 1, "title": "Predicted Tags", "type":
+      "array", "uniqueItems": true}}, "required": ["predicted_tags"], "type": "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '891'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=UjpT6pj4nlhb6LQRz3ATb8xCElCwIHv5SmcQlnlFh80-1743788244-1.0.1.1-W37_0MuRWttLbRLExhK6dH4RNJeH3EhxuZ3Ys9II.2AkBPBklP8iv5gDNEwnj9EP.j75VLbnJNugu3h1m4gm0vI1GQ2MbqkCHMU7QfQ5YdM;
+        _cfuvid=TNkwJvtV5O7yFWTZtaytyhryK8dgvimDzDzrm0NZ5NE-1743788244694-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '600.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.9
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA4xTXW/aMBR9z6+w7jNUDQVB80arbp1aaUg8TGtBkXFugjfHtuybaQzx3ycnkATK
+        pOUhsu7xOffcD+8jxkBmkDAQW06itGr48CX/7OyovB8tv1UxzXf3KJ9eXmb0wOd/YBAYZvMDBZ1Y
+        N8KUViFJoxtYOOSEQTWeju+ms9lofF8DpclQBVphaXh3MxlS5TZmeBuPJkfm1kiBHhL2HjHG2L7+
+        B486w9+QsNvBKVKi97xASNpLjIEzKkSAey89cU0w6EBhNKEOtnWlVA8gY1QquFJd4ubb985do7hS
+        6fPr9lEtCrWZP9L3OFssn+3b8tPrUy9fI72ztaG80qJtUA9v48lFMsZA87Lmfq3IVnTBZAy4K6oS
+        NQXXsF+BdZhJQZilxAu/guR9BQt0uXEl1wJXsD7AmcYhunZe9zrjMK88Vx9bxrU2xIPzumfrI3Jo
+        x6NMYZ3Z+Asq5FJLv00dcl9XDZ6MbWwFC3VyqM4mC9aZ0lJK5ifW6eLxuNGDbvM6dHrEyBBXPdIk
+        HlyRSzMkLuvJt8smuNiGLp6o3dLxKpOmB0S9oj+auabdFC518T/yHSAE2jDZ44zPCu6uOQzv8l/X
+        2ibXhsGj+yUFpiTRhUFkmPNKNXsGfucJyzSXukBnnWyfTXSI/gIAAP//AwBSn0VNNQQAAA==
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 92b292ee1edd94e9-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 04 Apr 2025 17:37:29 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - heartex
+      openai-processing-ms:
+      - '447'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '10000'
+      x-ratelimit-limit-tokens:
+      - '50000000'
+      x-ratelimit-remaining-requests:
+      - '9999'
+      x-ratelimit-remaining-tokens:
+      - '49999974'
+      x-ratelimit-reset-requests:
+      - 6ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_b164f281280e13b2c6fa0d6ed8fbea46
     status:
       code: 200
       message: OK

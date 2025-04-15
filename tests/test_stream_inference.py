@@ -61,6 +61,7 @@ TEST_OUTPUT_DATA = [
         "_prompt_cost_usd": 1.35e-05,
         "_prompt_tokens": 90,
         "_total_cost_usd": 1.71e-05,
+        "_message_counts": {"text": 1},
     }
 ]
 

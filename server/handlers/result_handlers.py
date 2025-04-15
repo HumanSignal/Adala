@@ -87,6 +87,9 @@ class LSEBatchItem(BaseModel):
     prompt_cost_usd: Optional[float] = Field(alias="_prompt_cost_usd")
     completion_cost_usd: Optional[float] = Field(alias="_completion_cost_usd")
     total_cost_usd: Optional[float] = Field(alias="_total_cost_usd")
+    message_counts: Optional[Dict[str, int]] = Field(
+        alias="_message_counts", default_factory=dict
+    )
 
     @model_validator(mode="after")
     def check_error_consistency(self):
@@ -125,6 +128,7 @@ class LSEBatchItem(BaseModel):
                 "_prompt_cost_usd",
                 "_completion_cost_usd",
                 "_total_cost_usd",
+                "_message_counts",
             )
         }
 
@@ -141,7 +145,7 @@ class LSEBatchItem(BaseModel):
             k: v for k, v in result.items() if k not in prepared_result
         }
 
-        logger.debug(f"Prepared result: {prepared_result}")
+        logger.debug("Prepared result: %s", prepared_result)
 
         return cls(**prepared_result)
 
@@ -229,12 +233,13 @@ class LSEHandler(ResultHandler):
         # Send failed predictions back to LSE
         if error_batch:
             error_batch = self.prepare_errors_payload(error_batch)
+            num_failed_predictions = len(error_batch)
             logger.info(
-                f"LSEHandler sending {len(error_batch)} failed predictions to LSE"
+                f"LSEHandler sending {num_failed_predictions} failed predictions to LSE"
             )
             self.client.make_request(
                 "POST",
-                "/api/model-run/batch-failed-predictions",
+                f"/api/model-run/batch-failed-predictions?num_failed_predictions={num_failed_predictions}",
                 data=json.dumps(
                     {
                         "modelrun_id": self.modelrun_id,
@@ -242,7 +247,9 @@ class LSEHandler(ResultHandler):
                     }
                 ),
             )
-            logger.info(f"LSEHandler sent {len(error_batch)} failed predictions to LSE")
+            logger.info(
+                f"LSEHandler sent {num_failed_predictions} failed predictions to LSE"
+            )
         else:
             logger.debug(f"No errors to send to LSE for modelrun_id {self.modelrun_id}")
 
