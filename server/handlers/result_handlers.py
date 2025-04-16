@@ -90,6 +90,7 @@ class LSEBatchItem(BaseModel):
     message_counts: Optional[Dict[str, int]] = Field(
         alias="_message_counts", default_factory=dict
     )
+    inference_time: Optional[float] = Field(alias="_inference_time")
 
     @model_validator(mode="after")
     def check_error_consistency(self):
@@ -129,6 +130,7 @@ class LSEBatchItem(BaseModel):
                 "_completion_cost_usd",
                 "_total_cost_usd",
                 "_message_counts",
+                "_inference_time",
             )
         }
 

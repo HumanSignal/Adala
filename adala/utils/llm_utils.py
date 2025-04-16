@@ -2,6 +2,7 @@ import asyncio
 import logging
 import traceback
 import litellm
+import time
 from litellm import token_counter
 from collections import defaultdict
 from typing import Any, Dict, List, Type, Optional, Tuple, DefaultDict
@@ -59,7 +60,7 @@ def count_message_types(messages: List[Dict[str, Any]]) -> Dict[str, int]:
     return dict(message_counts)
 
 
-def _get_usage_dict(usage: Usage, model: str, messages: List[Dict[str, Any]]) -> Dict:
+def _get_usage_dict(usage: Usage, model: str, messages: List[Dict[str, Any]], inference_time: float) -> Dict:
     data = dict()
     data["_prompt_tokens"] = usage.prompt_tokens
 
@@ -87,6 +88,7 @@ def _get_usage_dict(usage: Usage, model: str, messages: List[Dict[str, Any]]) ->
         data["_completion_cost_usd"] = None
         data["_total_cost_usd"] = None
     data["_message_counts"] = count_message_types(messages)
+    data["_inference_time"] = inference_time
     return data
 
 
@@ -214,8 +216,8 @@ def run_instructor_with_messages(
     Returns:
         Dict containing the parsed response and usage information
     """
+    start_time = time.time()
     try:
-
         response, completion = client.chat.completions.create_with_completion(
             messages=messages,
             response_model=response_model,
@@ -237,8 +239,9 @@ def run_instructor_with_messages(
         usage_model = canonical_model_provider_string or model
         # Add empty message counts in case of exception
 
+    inference_time = time.time() - start_time
     # Add usage data to the response (e.g. token counts, cost)
-    usage_data = _get_usage_dict(usage, model=usage_model, messages=messages)
+    usage_data = _get_usage_dict(usage, model=usage_model, messages=messages, inference_time=inference_time)
     # Add message counts to usage data
     dct.update(usage_data)
 
@@ -276,6 +279,7 @@ async def arun_instructor_with_messages(
     Returns:
         Dict containing the parsed response and usage information
     """
+    start_time = time.time()
     try:
 
         response, completion = await client.chat.completions.create_with_completion(
@@ -297,9 +301,10 @@ async def arun_instructor_with_messages(
         dct, usage = handle_llm_exception(e, messages, model, retries)
         # With exceptions we don't have access to completion.model
         usage_model = canonical_model_provider_string or model
-
+    
+    inference_time = time.time() - start_time
     # Add usage data to the response (e.g. token counts, cost)
-    usage_data = _get_usage_dict(usage, model=usage_model, messages=messages)
+    usage_data = _get_usage_dict(usage, model=usage_model, messages=messages, inference_time=inference_time)
     dct.update(usage_data)
 
     return dct
