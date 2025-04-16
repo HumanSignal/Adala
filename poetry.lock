@@ -131,7 +131,7 @@ version = "0.11.0"
 description = "Kafka integration with asyncio"
 optional = false
 python-versions = ">=3.8"
-groups = ["main", "dev"]
+groups = ["main"]
 files = [
     {file = "aiokafka-0.11.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:926f93fb6a39891fd4364494432b479c0602f9cac708778d4a262a2c2e20d3b4"},
     {file = "aiokafka-0.11.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:38e1917e706c1158d5e1f612d1fc1b40f706dc46c534e73ab4de8ae2868a31be"},
@@ -441,6 +441,7 @@ files = [
     {file = "async-timeout-4.0.3.tar.gz", hash = "sha256:4640d96be84d82d02ed59ea2b7105a0f7b33abe8703703cd0ab0bf87c427522f"},
     {file = "async_timeout-4.0.3-py3-none-any.whl", hash = "sha256:7405140ff1230c310e51dc27b3145b9092d659ce68ff733fb0cefe3ee42be028"},
 ]
+markers = {dev = "python_full_version < \"3.11.3\""}
 
 [[package]]
 name = "attrs"
@@ -1162,58 +1163,6 @@ traitlets = ">=4"
 
 [package.extras]
 test = ["pytest"]
-
-[[package]]
-name = "confluent-kafka"
-version = "2.5.3"
-description = "Confluent's Python client for Apache Kafka"
-optional = false
-python-versions = "*"
-groups = ["dev"]
-files = [
-    {file = "confluent-kafka-2.5.3.tar.gz", hash = "sha256:eca625b0a8742d864a954bbe6493d453c07bacedf9e10d71a54dd1047f775778"},
-    {file = "confluent_kafka-2.5.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:8a1a2a8756b2c1cd2654ea83d1e819a6e2c0a4337eacec50bfd2ab1f0c24a29c"},
-    {file = "confluent_kafka-2.5.3-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:c284eefed1b27133d90afc0fa2fd735864db8501190f3c2e0c8d8b1a20b07759"},
-    {file = "confluent_kafka-2.5.3-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:46c6063726fcdae835902961bb6c0e4c148499b87fdd513e6b2a6b406922ae3e"},
-    {file = "confluent_kafka-2.5.3-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:505078b402dde98dc06dc66b6356acd19984742ef6b82dd52fb860f2a14b5a57"},
-    {file = "confluent_kafka-2.5.3-cp310-cp310-win_amd64.whl", hash = "sha256:db30418bb36723a02ba51e058312056d0403c5f245beb379bff66e4b0c14337b"},
-    {file = "confluent_kafka-2.5.3-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:4dd5fa74231fc21c3a26eeda1999a27f84768a6291a8b04c3cd61ac1deea4ace"},
-    {file = "confluent_kafka-2.5.3-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:ac8b5fe45ee9c11ce7a516dc7c41441ebb17d9ff63c8646a59b8e52bd791b154"},
-    {file = "confluent_kafka-2.5.3-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:7125c3f86a76136b25aa21c94303b33709e2dd15f777395ea81fbd6872d9147b"},
-    {file = "confluent_kafka-2.5.3-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:8ec7a407bcb2eb122ff159d602cedc41d858f4c66a436c778f5d2f9f15fbec4e"},
-    {file = "confluent_kafka-2.5.3-cp311-cp311-win_amd64.whl", hash = "sha256:4cfb18d69e6912fe90cbbcc9c7d805988122c51ab3041e1424ace64bc31b736f"},
-    {file = "confluent_kafka-2.5.3-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:8d86de3e2c7bb59fb16faea468e833712912106f32a3a3ec345088c366042734"},
-    {file = "confluent_kafka-2.5.3-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:e9ffb298b3ea3477afdaa5da6033d35dc0be01b10537d9b63994411e79b41477"},
-    {file = "confluent_kafka-2.5.3-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:61a92637bea8fca454ec711f46e7753647deb7da56132995103acb5eb5041a29"},
-    {file = "confluent_kafka-2.5.3-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:3daad72791ae06dec257c9105278e89ae0924e86ef107a1acb443106f002f361"},
-    {file = "confluent_kafka-2.5.3-cp312-cp312-win_amd64.whl", hash = "sha256:f626494cd6ad18fa2ed83f80d687bc0194cff6f61b3d4f2aa183efa23ede2e02"},
-    {file = "confluent_kafka-2.5.3-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:f034f13c08ba238154d818294ceabb2257e8df8fb6489f891ec7600c7c541553"},
-    {file = "confluent_kafka-2.5.3-cp36-cp36m-manylinux_2_28_aarch64.whl", hash = "sha256:806c43fd1524034a9b6c958b4f9395ff5f56ef697218a336eac1da5006184f66"},
-    {file = "confluent_kafka-2.5.3-cp36-cp36m-manylinux_2_28_x86_64.whl", hash = "sha256:0cdb150c12d5ac6e33572cbf16243284c65a178e3719baa610a48d672e9d92bf"},
-    {file = "confluent_kafka-2.5.3-cp36-cp36m-win_amd64.whl", hash = "sha256:a2ed265bf3420811efd802fd8ebf5ec0f20a82e9baeff5299a67f6a84dde1b06"},
-    {file = "confluent_kafka-2.5.3-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:27d048429b138667c51541adc04bb398afa61a37a7be89f16ff9a318019d02c6"},
-    {file = "confluent_kafka-2.5.3-cp37-cp37m-manylinux_2_28_aarch64.whl", hash = "sha256:eb80c22a7ca17839f229f299bafca1450c9fe4d5ca222e60e52428df91d42b56"},
-    {file = "confluent_kafka-2.5.3-cp37-cp37m-manylinux_2_28_x86_64.whl", hash = "sha256:5122b8e9f94b6160d47e8f0020857376caa21f715b95c4b13c68683b47260c8f"},
-    {file = "confluent_kafka-2.5.3-cp37-cp37m-win_amd64.whl", hash = "sha256:3b69c3120e0cac9ca463ca603ddc9d4e811409ef4ec69d2b6bb8bd94d6fce95e"},
-    {file = "confluent_kafka-2.5.3-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:a6f152e704b01c6a726233d081921454b7de106a5e4036994d1d5f4b34e7e46f"},
-    {file = "confluent_kafka-2.5.3-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:2b8eef8c2f963ca6f5fcc79a0d6edef4e25fba83dfc0ef3f0401e1644f60ff11"},
-    {file = "confluent_kafka-2.5.3-cp38-cp38-manylinux_2_28_aarch64.whl", hash = "sha256:0751302b0fd8090cbca92d7d34d237768923107b30de2611f3db93c2118cf2a8"},
-    {file = "confluent_kafka-2.5.3-cp38-cp38-manylinux_2_28_x86_64.whl", hash = "sha256:0e0cb3b18a59d1c6fcae60297ee25b5c65d5c39c8ad8033a8fa1392498a71c9e"},
-    {file = "confluent_kafka-2.5.3-cp38-cp38-win_amd64.whl", hash = "sha256:0b14928cddba963ea7d1c66aa268b6d37976bc91b4cf2100b5b7336d848ced22"},
-    {file = "confluent_kafka-2.5.3-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:dae80e9e1e4417462fe61f64da0ab111395719e35c9f7f3eac7c671ff5e868fe"},
-    {file = "confluent_kafka-2.5.3-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:75e1da68b199ef2472e47785d9a5c2dc75d307ed78827ad929bb733728b18567"},
-    {file = "confluent_kafka-2.5.3-cp39-cp39-manylinux_2_28_aarch64.whl", hash = "sha256:fa2318eaa9b2d5f3ebc2022b71e4ebf6242c13963b4faccf46eea49fea0ad91f"},
-    {file = "confluent_kafka-2.5.3-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:490836e9fc3b4489721327e3df987c8667916a97d178e2296913c8d5de6623a9"},
-    {file = "confluent_kafka-2.5.3-cp39-cp39-win_amd64.whl", hash = "sha256:cfabe291cda68fdc3136f2f367dd4e5a6c3750113785f0c1936ba9cae09f4e9d"},
-]
-
-[package.extras]
-avro = ["avro (>=1.11.1,<2)", "fastavro (>=0.23.0,<1.0)", "fastavro (>=1.0)", "requests"]
-dev = ["avro (>=1.11.1,<2)", "fastavro (>=0.23.0,<1.0)", "fastavro (>=1.0)", "flake8", "pytest", "pytest (==4.6.4)", "pytest-timeout", "requests"]
-doc = ["avro (>=1.11.1,<2)", "fastavro (>=0.23.0,<1.0)", "fastavro (>=1.0)", "requests", "sphinx", "sphinx-rtd-theme"]
-json = ["jsonschema", "pyrsistent", "pyrsistent (==0.16.1)", "requests"]
-protobuf = ["protobuf", "requests"]
-schema-registry = ["requests"]
 
 [[package]]
 name = "contourpy"
@@ -3496,25 +3445,6 @@ test-integration = ["ipykernel", "jupyter-server (!=2.11)", "nbconvert", "pytest
 test-ui = ["calysto-bash"]
 
 [[package]]
-name = "kafka-python-ng"
-version = "2.2.3"
-description = "Pure Python client for Apache Kafka"
-optional = false
-python-versions = ">=3.8"
-groups = ["main"]
-files = [
-    {file = "kafka_python_ng-2.2.3-py2.py3-none-any.whl", hash = "sha256:adc6e82147c441ca4ae1f22e291fc08efab0d10971cbd4aa1481d2ffa38e9480"},
-    {file = "kafka_python_ng-2.2.3.tar.gz", hash = "sha256:f79f28e10ade9b5a9860b2ec15b7cc8dc510d5702f5a399430478cff5f93a05a"},
-]
-
-[package.extras]
-boto = ["botocore"]
-crc32c = ["crc32c"]
-lz4 = ["lz4"]
-snappy = ["python-snappy"]
-zstd = ["zstandard"]
-
-[[package]]
 name = "kiwisolver"
 version = "1.4.7"
 description = "A fast implementation of the Cassowary constraint solver"
@@ -4462,25 +4392,6 @@ lint = ["black (==24.8.0)", "clang-format (==18.1.8)", "isort (==5.13.2)", "pyli
 plot = ["matplotlib (==3.9.2)", "pandas (==2.2.2)"]
 test = ["pytest (==8.3.3)", "pytest-sugar (==1.0.0)"]
 type = ["mypy (==1.11.2)"]
-
-[[package]]
-name = "mockafka-py"
-version = "0.1.61"
-description = "A mock library for confluent kafka"
-optional = false
-python-versions = "<4.0,>=3.8"
-groups = ["dev"]
-files = [
-    {file = "mockafka_py-0.1.61-py3-none-any.whl", hash = "sha256:a61bf1a8526fa9a6cd9a2240e182fb58111bfd6f0b40ff49b50a2a4cfa2b5b15"},
-    {file = "mockafka_py-0.1.61.tar.gz", hash = "sha256:cd3c8320f2e7552cbf1641a6da0bb1124f5388789e2408b2e99d978cfcc61fda"},
-]
-
-[package.dependencies]
-aiokafka = ">=0.10,<0.12"
-confluent-kafka = ">=1.9.2"
-pytest-asyncio = ">=0.23.5,<0.24.0"
-pytest-cov = ">=4.1,<6.0"
-typing-extensions = ">=4.12.2,<5.0.0"
 
 [[package]]
 name = "monotonic"
@@ -8587,4 +8498,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.9.7 || >3.9.7,<3.13"
-content-hash = "3a561a2da0c1e47192defd7f3e9b6d2e4799988b78dafb2329af477e43b42526"
+content-hash = "96accf8a89eb70c6a9ccf7d1a3b4589bb38f167791fdac36e94f536e39585905"
