@@ -116,10 +116,10 @@ def streaming_parent_task(
     ensure_topic(output_topic_name)
 
     # Override default agent kafka settings
-    agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
+    agent.environment.kafka_bootstrap_servers = settings.kafka.bootstrap_servers
     agent.environment.kafka_input_topic = input_topic_name
     agent.environment.kafka_output_topic = output_topic_name
-    agent.environment.timeout_ms = settings.kafka_input_consumer_timeout_ms
+    agent.environment.timeout_ms = settings.kafka.input_consumer_timeout_ms
 
     # Run the input and output streaming tasks
     asyncio.run(run_streaming(agent, result_handler, batch_size, output_topic_name))
@@ -158,7 +158,7 @@ async def async_process_streaming_output(
 ):
     logger.info(f"Polling for results {output_topic_name=}")
 
-    timeout_ms = settings.kafka_output_consumer_timeout_ms
+    timeout_ms = settings.kafka.output_consumer_timeout_ms
 
     # Retry to workaround race condition of topic creation
     retries = 5
@@ -166,7 +166,7 @@ async def async_process_streaming_output(
         try:
             consumer = AIOKafkaConsumer(
                 output_topic_name,
-                bootstrap_servers=settings.kafka_bootstrap_servers,
+                bootstrap_servers=settings.kafka.bootstrap_servers,
                 value_deserializer=lambda v: json.loads(v.decode("utf-8")),
                 auto_offset_reset="earliest",
                 max_partition_fetch_bytes=3000000,

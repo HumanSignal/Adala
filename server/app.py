@@ -228,7 +228,7 @@ async def submit_batch(batch: BatchData):
 
     topic = get_input_topic_name(batch.job_id)
     producer = AIOKafkaProducer(
-        bootstrap_servers=settings.kafka_bootstrap_servers,
+        bootstrap_servers=settings.kafka.bootstrap_servers,
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
         max_request_size=3000000,
         acks="all",  # waits for all replicas to respond that they have written the message

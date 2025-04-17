@@ -57,8 +57,15 @@ class RedisSettings(BaseSettings):
 
         return urlunparse(parts)
         
-        
 
+class KafkaSettings(BaseSettings):
+    """
+    Kafka settings including authentication and SSL options.
+    """
+    bootstrap_servers: Union[str, List[str]] = "localhost:9093"
+    retention_ms: int = 18000000  # 300 minutes
+    input_consumer_timeout_ms: int = 2500  # 2.5 seconds
+    output_consumer_timeout_ms: int = 1500  # 1.5 seconds
 
 
 class Settings(BaseSettings):
@@ -67,10 +74,7 @@ class Settings(BaseSettings):
     https://docs.pydantic.dev/latest/concepts/pydantic_settings/#field-value-priority
     """
 
-    kafka_bootstrap_servers: Union[str, List[str]] = "localhost:9093"
-    kafka_retention_ms: int = 18000000  # 300 minutes
-    kafka_input_consumer_timeout_ms: int = 2500  # 2.5 seconds
-    kafka_output_consumer_timeout_ms: int = 1500  # 1.5 seconds
+    kafka: KafkaSettings = KafkaSettings()
     task_time_limit_sec: int = 60 * 60 * 6  # 6 hours
     # https://docs.celeryq.dev/en/v5.4.0/userguide/configuration.html#worker-max-memory-per-child
     celery_worker_max_memory_per_child_kb: int = 1024000  # 1GB
@@ -97,8 +101,8 @@ def get_output_topic_name(job_id: str):
 
 def ensure_topic(topic_name: str):
     settings = Settings()
-    bootstrap_servers = settings.kafka_bootstrap_servers
-    retention_ms = settings.kafka_retention_ms
+    bootstrap_servers = settings.kafka.bootstrap_servers
+    retention_ms = settings.kafka.retention_ms
 
     async def _ensure_topic():
         admin_client = AIOKafkaAdminClient(
@@ -128,7 +132,7 @@ def ensure_topic(topic_name: str):
 
 def delete_topic(topic_name: str):
     settings = Settings()
-    bootstrap_servers = settings.kafka_bootstrap_servers
+    bootstrap_servers = settings.kafka.bootstrap_servers
 
     async def _delete_topic():
         admin_client = AIOKafkaAdminClient(
