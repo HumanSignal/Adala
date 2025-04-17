@@ -25,11 +25,10 @@ logger = init_logger(__name__)
 
 settings = Settings()
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 app = Celery(
     "worker",
-    broker=REDIS_URL,
-    backend=REDIS_URL,
+    broker=settings.redis.to_url(),
+    backend=settings.redis.to_url(),
     accept_content=["json", "pickle"],
     broker_connection_retry_on_startup=True,
     worker_max_memory_per_child=settings.celery_worker_max_memory_per_child_kb,
