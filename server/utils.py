@@ -1,10 +1,3 @@
-import sys
-
-# fix for https://github.com/dpkp/kafka-python/issues/2412
-if sys.version_info >= (3, 12, 0):
-    import six
-
-    sys.modules["kafka.vendor.six.moves"] = six.moves
 from urllib.parse import quote, urlparse, urlunparse, parse_qsl, urlencode
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Union, Optional
