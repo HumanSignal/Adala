@@ -10,8 +10,9 @@ from typing import List, Union
 import logging
 import os
 from pathlib import Path
-from kafka.admin import KafkaAdminClient, NewTopic
-from kafka.errors import TopicAlreadyExistsError, UnknownTopicOrPartitionError
+from aiokafka.admin import AIOKafkaAdminClient, NewTopic
+from aiokafka.errors import TopicAlreadyExistsError, UnknownTopicOrPartitionError
+import asyncio
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 
@@ -55,40 +56,54 @@ def ensure_topic(topic_name: str):
     bootstrap_servers = settings.kafka_bootstrap_servers
     retention_ms = settings.kafka_retention_ms
 
-    admin_client = KafkaAdminClient(
-        bootstrap_servers=bootstrap_servers,
-        client_id="topic_creator",
-        api_version=(2, 5, 0),
-    )
+    async def _ensure_topic():
+        admin_client = AIOKafkaAdminClient(
+            bootstrap_servers=bootstrap_servers,
+            client_id="topic_creator",
+        )
 
-    topic = NewTopic(
-        name=topic_name,
-        num_partitions=1,
-        replication_factor=1,
-        topic_configs={"retention.ms": str(retention_ms)},
-    )
+        try:
+            await admin_client.start()
+            topic = NewTopic(
+                name=topic_name,
+                num_partitions=1,
+                replication_factor=1,
+                topic_configs={"retention.ms": str(retention_ms)},
+            )
 
-    try:
-        admin_client.create_topics(new_topics=[topic])
-    except TopicAlreadyExistsError:
-        # we shouldn't hit this case when KAFKA_CFG_AUTO_CREATE_TOPICS=false unless there is a legitimate name collision, so should raise here after testing
-        pass
+            try:
+                await admin_client.create_topics([topic])
+            except TopicAlreadyExistsError:
+                # we shouldn't hit this case when KAFKA_CFG_AUTO_CREATE_TOPICS=false unless there is a legitimate name collision, so should raise here after testing
+                pass
+        finally:
+            await admin_client.close()
+
+    asyncio.run(_ensure_topic())
 
 
 def delete_topic(topic_name: str):
     settings = Settings()
     bootstrap_servers = settings.kafka_bootstrap_servers
 
-    admin_client = KafkaAdminClient(
-        bootstrap_servers=bootstrap_servers,
-        client_id="topic_deleter",
-        api_version=(2, 5, 0),
-    )
+    async def _delete_topic():
+        admin_client = AIOKafkaAdminClient(
+            bootstrap_servers=bootstrap_servers,
+            client_id="topic_deleter",
+        )
 
-    try:
-        admin_client.delete_topics(topics=[topic_name])
-    except UnknownTopicOrPartitionError:
-        logger.error(f"Topic {topic_name} does not exist and cannot be deleted.")
+        try:
+            await admin_client.start()
+            try:
+                await admin_client.delete_topics([topic_name])
+            except UnknownTopicOrPartitionError:
+                logger.error(
+                    f"Topic {topic_name} does not exist and cannot be deleted."
+                )
+        finally:
+            await admin_client.close()
+
+    asyncio.run(_delete_topic())
 
 
 def init_logger(name, level=LOG_LEVEL):
