@@ -17,6 +17,7 @@ class RedisSettings(BaseSettings):
     """
     Redis settings including authentication and SSL options.
     """
+
     url: str = "redis://localhost:6379/0"
     socket_connect_timeout: int = 1
     username: Optional[str] = None
@@ -40,21 +41,30 @@ class RedisSettings(BaseSettings):
 
         # Convert query string to dict
         query_dict = dict(parse_qsl(parts.query))
-        
+
         # Update with new kwargs
-        kwargs_to_update_query = self.model_dump(include=['ssl', 'ssl_cert_reqs', 'ssl_ca_certs', 'ssl_certfile', 'ssl_keyfile'])
+        kwargs_to_update_query = self.model_dump(
+            include=[
+                "ssl",
+                "ssl_cert_reqs",
+                "ssl_ca_certs",
+                "ssl_certfile",
+                "ssl_keyfile",
+            ]
+        )
         query_dict.update(kwargs_to_update_query)
-        
+
         # Convert back to query string
         parts._replace(query=urlencode(query_dict, doseq=False))
 
         return urlunparse(parts)
-        
+
 
 class KafkaSettings(BaseSettings):
     """
     Kafka settings including authentication and SSL options.
     """
+
     bootstrap_servers: Union[str, List[str]] = "localhost:9093"
     retention_ms: int = 18000000  # 300 minutes
     input_consumer_timeout_ms: int = 2500  # 2.5 seconds
@@ -76,7 +86,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         # have to use an absolute path here so celery workers can find it
         env_file=(Path(__file__).parent / ".env"),
-        env_nested_delimiter='_'  # allows REDIS_SSL_ENABLED=true in env
+        env_nested_delimiter="_",  # allows REDIS_SSL_ENABLED=true in env
     )
 
 
