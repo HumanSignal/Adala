@@ -5,8 +5,9 @@ if sys.version_info >= (3, 12, 0):
     import six
 
     sys.modules["kafka.vendor.six.moves"] = six.moves
+from urllib.parse import quote, urlparse, urlunparse, parse_qsl, urlencode
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List, Union
+from typing import List, Union, Optional
 import logging
 import os
 from pathlib import Path
@@ -17,6 +18,47 @@ import asyncio
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 
 logger = logging.getLogger(__name__)
+
+
+class RedisSettings(BaseSettings):
+    """
+    Redis settings including authentication and SSL options.
+    """
+    url: str = "redis://localhost:6379/0"
+    socket_connect_timeout: int = 1
+    username: Optional[str] = None
+    password: Optional[str] = None
+    ssl: bool = False
+    ssl_cert_reqs: str = "required"
+    ssl_ca_certs: Optional[str] = None
+    ssl_certfile: Optional[str] = None
+    ssl_keyfile: Optional[str] = None
+
+    def to_url(self) -> str:
+        """
+        Convert the RedisSettings object to a URL string.
+        Params passed in separately take precedence over those in the URL.
+        """
+        parts = urlparse(self.url)
+        if self.username:
+            parts.username = quote(self.username)
+        if self.password:
+            parts.password = quote(self.password)
+
+        # Convert query string to dict
+        query_dict = dict(parse_qsl(parts.query))
+        
+        # Update with new kwargs
+        kwargs_to_update_query = self.model_dump(include=['ssl', 'ssl_cert_reqs', 'ssl_ca_certs', 'ssl_certfile', 'ssl_keyfile'])
+        query_dict.update(kwargs_to_update_query)
+        
+        # Convert back to query string
+        parts._replace(query=urlencode(query_dict, doseq=False))
+
+        return urlunparse(parts)
+        
+        
+
 
 
 class Settings(BaseSettings):
@@ -32,10 +74,12 @@ class Settings(BaseSettings):
     task_time_limit_sec: int = 60 * 60 * 6  # 6 hours
     # https://docs.celeryq.dev/en/v5.4.0/userguide/configuration.html#worker-max-memory-per-child
     celery_worker_max_memory_per_child_kb: int = 1024000  # 1GB
+    redis: RedisSettings = RedisSettings()
 
     model_config = SettingsConfigDict(
         # have to use an absolute path here so celery workers can find it
         env_file=(Path(__file__).parent / ".env"),
+        env_nested_delimiter='_'  # allows REDIS_SSL_ENABLED=true in env
     )
 
 

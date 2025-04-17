@@ -477,8 +477,9 @@ async def _get_redis_conn():
     """
     needs to be in a separate function to allow dependency injection for testing
     """
-    redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-    redis_conn = Redis.from_url(redis_url, socket_connect_timeout=1)
+    settings = Settings()
+    url = settings.redis.to_url()
+    redis_conn = Redis.from_url(url)
     return redis_conn
 
 
