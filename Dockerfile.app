@@ -69,9 +69,29 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR} \
 FROM python-base AS production
 
 # Copy artifacts from other stages
-COPY --from=venv-builder /usr/src/app /usr/src/app
+COPY --from=venv-builder --chown=1001:0 /usr/src/app /usr/src/app
+
+RUN chown -R 1001:0 /usr/src/app
 
 ENV LITELLM_LOG=WARNING
 
 # Set the working directory in the container to where the app will be run from
 WORKDIR /usr/src/app/server
+
+# Install netcat for connection checking
+RUN --mount=type=cache,target="/var/cache/apt",sharing=locked \
+    --mount=type=cache,target="/var/lib/apt/lists",sharing=locked \
+    set -eux; \
+    apt-get update; \
+    apt-get install --no-install-recommends -y netcat-openbsd; \
+    apt-get autoremove -y
+
+# Copy and setup entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Switch to non-root user
+USER 1001
+
+# Set the entrypoint
+ENTRYPOINT ["docker-entrypoint.sh"]
