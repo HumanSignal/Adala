@@ -1521,7 +1521,7 @@ version = "5.1.1"
 description = "Decorators for Humans"
 optional = false
 python-versions = ">=3.5"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "decorator-5.1.1-py3-none-any.whl", hash = "sha256:b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186"},
     {file = "decorator-5.1.1.tar.gz", hash = "sha256:637996211036b6385ef91435e4fae22989472f9d571faba8927ba8253acbc330"},
@@ -2255,6 +2255,44 @@ files = [
 [package.dependencies]
 google-auth = ">=1.12.0"
 google-auth-oauthlib = ">=0.4.1"
+
+[[package]]
+name = "gssapi"
+version = "1.9.0"
+description = "Python GSSAPI Wrapper"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "gssapi-1.9.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:261e00ac426d840055ddb2199f4989db7e3ce70fa18b1538f53e392b4823e8f1"},
+    {file = "gssapi-1.9.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:14a1ae12fdf1e4c8889206195ba1843de09fe82587fa113112887cd5894587c6"},
+    {file = "gssapi-1.9.0-cp310-cp310-win32.whl", hash = "sha256:2a9c745255e3a810c3e8072e267b7b302de0705f8e9a0f2c5abc92fe12b9475e"},
+    {file = "gssapi-1.9.0-cp310-cp310-win_amd64.whl", hash = "sha256:dfc1b4c0bfe9f539537601c9f187edc320daf488f694e50d02d0c1eb37416962"},
+    {file = "gssapi-1.9.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:67d9be5e34403e47fb5749d5a1ad4e5a85b568e6a9add1695edb4a5b879f7560"},
+    {file = "gssapi-1.9.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:11e9b92cef11da547fc8c210fa720528fd854038504103c1b15ae2a89dce5fcd"},
+    {file = "gssapi-1.9.0-cp311-cp311-win32.whl", hash = "sha256:6c5f8a549abd187687440ec0b72e5b679d043d620442b3637d31aa2766b27cbe"},
+    {file = "gssapi-1.9.0-cp311-cp311-win_amd64.whl", hash = "sha256:59e1a1a9a6c5dc430dc6edfcf497f5ca00cf417015f781c9fac2e85652cd738f"},
+    {file = "gssapi-1.9.0-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:b66a98827fbd2864bf8993677a039d7ba4a127ca0d2d9ed73e0ef4f1baa7fd7f"},
+    {file = "gssapi-1.9.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:2bddd1cc0c9859c5e0fd96d4d88eb67bd498fdbba45b14cdccfe10bfd329479f"},
+    {file = "gssapi-1.9.0-cp312-cp312-win32.whl", hash = "sha256:10134db0cf01bd7d162acb445762dbcc58b5c772a613e17c46cf8ad956c4dfec"},
+    {file = "gssapi-1.9.0-cp312-cp312-win_amd64.whl", hash = "sha256:e28c7d45da68b7e36ed3fb3326744bfe39649f16e8eecd7b003b082206039c76"},
+    {file = "gssapi-1.9.0-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:cea344246935b5337e6f8a69bb6cc45619ab3a8d74a29fcb0a39fd1e5843c89c"},
+    {file = "gssapi-1.9.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:1a5786bd9fcf435bd0c87dc95ae99ad68cefcc2bcc80c71fef4cb0ccdfb40f1e"},
+    {file = "gssapi-1.9.0-cp313-cp313-win32.whl", hash = "sha256:c99959a9dd62358e370482f1691e936cb09adf9a69e3e10d4f6a097240e9fd28"},
+    {file = "gssapi-1.9.0-cp313-cp313-win_amd64.whl", hash = "sha256:a2e43f50450e81fe855888c53df70cdd385ada979db79463b38031710a12acd9"},
+    {file = "gssapi-1.9.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:c0e378d62b2fc352ca0046030cda5911d808a965200f612fdd1d74501b83e98f"},
+    {file = "gssapi-1.9.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:b74031c70864d04864b7406c818f41be0c1637906fb9654b06823bcc79f151dc"},
+    {file = "gssapi-1.9.0-cp38-cp38-win32.whl", hash = "sha256:f2f3a46784d8127cc7ef10d3367dedcbe82899ea296710378ccc9b7cefe96f4c"},
+    {file = "gssapi-1.9.0-cp38-cp38-win_amd64.whl", hash = "sha256:a81f30cde21031e7b1f8194a3eea7285e39e551265e7744edafd06eadc1c95bc"},
+    {file = "gssapi-1.9.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:cbc93fdadd5aab9bae594538b2128044b8c5cdd1424fe015a465d8a8a587411a"},
+    {file = "gssapi-1.9.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:5b2a3c0a9beb895942d4b8e31f515e52c17026e55aeaa81ee0df9bbfdac76098"},
+    {file = "gssapi-1.9.0-cp39-cp39-win32.whl", hash = "sha256:060b58b455d29ab8aca74770e667dca746264bee660ac5b6a7a17476edc2c0b8"},
+    {file = "gssapi-1.9.0-cp39-cp39-win_amd64.whl", hash = "sha256:11c9fe066edb0fa0785697eb0cecf2719c7ad1d9f2bf27be57b647a617bcfaa5"},
+    {file = "gssapi-1.9.0.tar.gz", hash = "sha256:f468fac8f3f5fca8f4d1ca19e3cd4d2e10bd91074e7285464b22715d13548afe"},
+]
+
+[package.dependencies]
+decorator = "*"
 
 [[package]]
 name = "guidance"
@@ -8516,4 +8554,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.9.7 || >3.9.7,<3.13"
-content-hash = "70263af231fdfbaa0f258cc18404a7782c8f49febe5eddd7920fcea932b48bb9"
+content-hash = "4b2c8001ed40d33c3be15bee0484d8b414e0095d05cfe92e7577df1c65df0570"
