@@ -1,12 +1,14 @@
 from urllib.parse import quote, urlparse, urlunparse, parse_qsl, urlencode
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Literal, Dict, Any
 import logging
 import os
 from pathlib import Path
 from aiokafka.admin import AIOKafkaAdminClient, NewTopic
 from aiokafka.errors import TopicAlreadyExistsError, UnknownTopicOrPartitionError
+from aiokafka.helpers import create_ssl_context
 import asyncio
+import ssl
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 
@@ -65,10 +67,65 @@ class KafkaSettings(BaseSettings):
     Kafka settings including authentication and SSL options.
     """
 
-    bootstrap_servers: Union[str, List[str]] = "localhost:9093"
+    # for topics
     retention_ms: int = 18000000  # 300 minutes
+    
+    # for consumers
     input_consumer_timeout_ms: int = 2500  # 2.5 seconds
     output_consumer_timeout_ms: int = 1500  # 1.5 seconds
+
+    # for producers and consumers
+    bootstrap_servers: Union[str, List[str]] = "localhost:9093"
+    security_protocol: Literal["PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"] = "PLAINTEXT"
+    
+    # SSL parameters
+    ssl_cert_reqs: str = "required"
+    ssl_ca_certs: Optional[str] = None
+    ssl_certfile: Optional[str] = None
+    ssl_keyfile: Optional[str] = None
+    
+    # SASL parameters
+    # NOTE: may want to add other SASL mechanisms SCRAM-SHA-256, SCRAM-SHA-512, OAUTHBEARER
+    sasl_mechanism: Optional[Literal["PLAIN", "GSSAPI"]] = None
+    sasl_plain_username: Optional[str] = None
+    sasl_plain_password: Optional[str] = None
+    sasl_kerberos_service_name: Optional[str] = "kafka",
+    sasl_kerberos_domain_name: Optional[str] = None
+
+    def to_kafka_kwargs(self) -> Dict[str, Any]:
+        """
+        Convert the KafkaSettings object to kwargs for AIOKafkaProducer/Consumer/AdminClient.
+        These are common kwargs for all Kafka objects; usage-specific kwargs are passed in separately.
+        """
+        kwargs = self.model_dump(include=["bootstrap_servers", "security_protocol"])
+
+        # Add SSL parameters if using SSL
+        if self.security_protocol in ["SSL", "SASL_SSL"]:
+            ssl_context = create_ssl_context(
+                cafile=self.ssl_ca_certs,
+                certfile=self.ssl_certfile,
+                keyfile=self.ssl_keyfile,
+            )
+            if self.ssl_cert_reqs:
+                ssl_context.verify_mode = getattr(ssl, f"CERT_{self.ssl_cert_reqs.upper()}")
+            kwargs["ssl_context"] = ssl_context
+
+        # Add SASL parameters if using SASL
+        if self.security_protocol in ["SASL_PLAINTEXT", "SASL_SSL"]:
+            if self.sasl_mechanism == "PLAIN":
+                kwargs.update({
+                    "sasl_mechanism": "PLAIN",
+                    "sasl_plain_username": self.sasl_plain_username,
+                    "sasl_plain_password": self.sasl_plain_password,
+                })
+            elif self.sasl_mechanism == "GSSAPI":
+                kwargs.update({
+                    "sasl_mechanism": "GSSAPI",
+                    "sasl_kerberos_service_name": self.sasl_kerberos_service_name,
+                    "sasl_kerberos_domain_name": self.sasl_kerberos_domain_name,
+                })
+
+        return kwargs
 
 
 class Settings(BaseSettings):
@@ -105,12 +162,12 @@ def get_output_topic_name(job_id: str):
 
 def ensure_topic(topic_name: str):
     settings = Settings()
-    bootstrap_servers = settings.kafka.bootstrap_servers
+    kafka_kwargs = settings.kafka.to_kafka_kwargs()
     retention_ms = settings.kafka.retention_ms
 
     async def _ensure_topic():
         admin_client = AIOKafkaAdminClient(
-            bootstrap_servers=bootstrap_servers,
+            **kafka_kwargs,
             client_id="topic_creator",
         )
 
@@ -136,11 +193,11 @@ def ensure_topic(topic_name: str):
 
 def delete_topic(topic_name: str):
     settings = Settings()
-    bootstrap_servers = settings.kafka.bootstrap_servers
+    kafka_kwargs = settings.kafka.to_kafka_kwargs()
 
     async def _delete_topic():
         admin_client = AIOKafkaAdminClient(
-            bootstrap_servers=bootstrap_servers,
+            **kafka_kwargs,
             client_id="topic_deleter",
         )
 
