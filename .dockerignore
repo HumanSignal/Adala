@@ -1,2 +1,17 @@
+# Ignore everything
+*
+
+# Except these specific files and directories
+!poetry.lock
+!poetry.toml
+!server/
+!adala/
+!pyproject.toml
+!docker-entrypoint.sh
+!README.md
+
+# Still ignore these patterns within the allowed directories
 **/__pycache__
 **/.venv
+**/.pytest_cache
+**/kafka-data
