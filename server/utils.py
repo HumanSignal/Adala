@@ -80,10 +80,10 @@ class KafkaSettings(BaseSettings):
     )
 
     # SSL parameters
-    ssl_cert_reqs: str = "required"
-    ssl_ca_certs: Optional[str] = None
+    ssl_cafile: Optional[str] = None
     ssl_certfile: Optional[str] = None
     ssl_keyfile: Optional[str] = None
+    ssl_cert_password: Optional[str] = None
 
     # SASL parameters
     # NOTE: may want to add other SASL mechanisms SCRAM-SHA-256, SCRAM-SHA-512, OAUTHBEARER
@@ -101,14 +101,11 @@ class KafkaSettings(BaseSettings):
         # Add SSL parameters if using SSL
         if self.security_protocol in ["SSL", "SASL_SSL"]:
             ssl_context = create_ssl_context(
-                cafile=self.ssl_ca_certs,
+                cafile=self.ssl_cafile,
                 certfile=self.ssl_certfile,
                 keyfile=self.ssl_keyfile,
+                password=self.ssl_cert_password,
             )
-            if self.ssl_cert_reqs:
-                ssl_context.verify_mode = getattr(
-                    ssl, f"CERT_{self.ssl_cert_reqs.upper()}"
-                )
             kwargs["ssl_context"] = ssl_context
 
         # Add SASL parameters if using SASL
