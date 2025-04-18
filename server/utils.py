@@ -86,7 +86,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         # have to use an absolute path here so celery workers can find it
         env_file=(Path(__file__).parent / ".env"),
-        env_nested_delimiter="_",  # allows REDIS_SSL_ENABLED=true in env
+        env_nested_delimiter="_",  # allows env vars like REDIS_URL -> redis.url
+        env_nested_max_split=1,  # allows env vars like REDIS_SSL_CERT_REQS -> redis.ssl_cert_reqs
     )
 
 
