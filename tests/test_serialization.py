@@ -7,7 +7,6 @@ def test_agent_is_serializable():
     agent_data = {
         "environment": {
             "type": "AsyncKafkaEnvironment",
-            "kafka_bootstrap_servers": "",
             "kafka_input_topic": "",
             "kafka_output_topic": "",
             "timeout_ms": 1,
@@ -51,7 +50,6 @@ def test_agent_is_serializable():
     assert serialized_agent == {
         "environment": {
             "type": "AsyncKafkaEnvironment",
-            "kafka_bootstrap_servers": "",
             "kafka_input_topic": "",
             "kafka_output_topic": "",
             "timeout_ms": 1,
@@ -146,7 +144,6 @@ def test_agent_is_pickleable():
         },
         "environment": {
             "type": "AsyncKafkaEnvironment",
-            "kafka_bootstrap_servers": "localhost:9092",
             "kafka_input_topic": "input_topic",
             "kafka_output_topic": "output_topic",
             "timeout_ms": 1000,
