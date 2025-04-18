@@ -46,12 +46,11 @@ class RedisSettings(BaseSettings):
 
         # Update with new kwargs
         kwargs_to_update_query = self.model_dump(
-            include=[
-                "ssl",
-                "ssl_cert_reqs",
-                "ssl_ca_certs",
-                "ssl_certfile",
-                "ssl_keyfile",
+            exclude_none=True,
+            exclude=[
+                "url",
+                "username",
+                "password",
             ]
         )
         query_dict.update(kwargs_to_update_query)
