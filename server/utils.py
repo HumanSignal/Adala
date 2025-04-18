@@ -87,11 +87,9 @@ class KafkaSettings(BaseSettings):
 
     # SASL parameters
     # NOTE: may want to add other SASL mechanisms SCRAM-SHA-256, SCRAM-SHA-512, OAUTHBEARER
-    sasl_mechanism: Optional[Literal["PLAIN", "GSSAPI"]] = None
+    sasl_mechanism: Optional[Literal["PLAIN"]] = None
     sasl_plain_username: Optional[str] = None
     sasl_plain_password: Optional[str] = None
-    sasl_kerberos_service_name: Optional[str] = "kafka"
-    sasl_kerberos_domain_name: Optional[str] = None
 
     def to_kafka_kwargs(self) -> Dict[str, Any]:
         """
@@ -121,14 +119,6 @@ class KafkaSettings(BaseSettings):
                         "sasl_mechanism": "PLAIN",
                         "sasl_plain_username": self.sasl_plain_username,
                         "sasl_plain_password": self.sasl_plain_password,
-                    }
-                )
-            elif self.sasl_mechanism == "GSSAPI":
-                kwargs.update(
-                    {
-                        "sasl_mechanism": "GSSAPI",
-                        "sasl_kerberos_service_name": self.sasl_kerberos_service_name,
-                        "sasl_kerberos_domain_name": self.sasl_kerberos_domain_name,
                     }
                 )
 
