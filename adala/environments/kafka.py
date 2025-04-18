@@ -42,7 +42,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
 
     async def initialize(self):
         assert (
-            self.kafka_kwargs is not None and 'bootstrap_servers' in self.kafka_kwargs
+            self.kafka_kwargs is not None and "bootstrap_servers" in self.kafka_kwargs
         ), "missing initialization for kafka_kwargs"
         assert (
             self.kafka_input_topic is not None

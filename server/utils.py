@@ -69,21 +69,23 @@ class KafkaSettings(BaseSettings):
 
     # for topics
     retention_ms: int = 18000000  # 300 minutes
-    
+
     # for consumers
     input_consumer_timeout_ms: int = 2500  # 2.5 seconds
     output_consumer_timeout_ms: int = 1500  # 1.5 seconds
 
     # for producers and consumers
     bootstrap_servers: Union[str, List[str]] = "localhost:9093"
-    security_protocol: Literal["PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"] = "PLAINTEXT"
-    
+    security_protocol: Literal["PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"] = (
+        "PLAINTEXT"
+    )
+
     # SSL parameters
     ssl_cert_reqs: str = "required"
     ssl_ca_certs: Optional[str] = None
     ssl_certfile: Optional[str] = None
     ssl_keyfile: Optional[str] = None
-    
+
     # SASL parameters
     # NOTE: may want to add other SASL mechanisms SCRAM-SHA-256, SCRAM-SHA-512, OAUTHBEARER
     sasl_mechanism: Optional[Literal["PLAIN", "GSSAPI"]] = None
@@ -107,23 +109,29 @@ class KafkaSettings(BaseSettings):
                 keyfile=self.ssl_keyfile,
             )
             if self.ssl_cert_reqs:
-                ssl_context.verify_mode = getattr(ssl, f"CERT_{self.ssl_cert_reqs.upper()}")
+                ssl_context.verify_mode = getattr(
+                    ssl, f"CERT_{self.ssl_cert_reqs.upper()}"
+                )
             kwargs["ssl_context"] = ssl_context
 
         # Add SASL parameters if using SASL
         if self.security_protocol in ["SASL_PLAINTEXT", "SASL_SSL"]:
             if self.sasl_mechanism == "PLAIN":
-                kwargs.update({
-                    "sasl_mechanism": "PLAIN",
-                    "sasl_plain_username": self.sasl_plain_username,
-                    "sasl_plain_password": self.sasl_plain_password,
-                })
+                kwargs.update(
+                    {
+                        "sasl_mechanism": "PLAIN",
+                        "sasl_plain_username": self.sasl_plain_username,
+                        "sasl_plain_password": self.sasl_plain_password,
+                    }
+                )
             elif self.sasl_mechanism == "GSSAPI":
-                kwargs.update({
-                    "sasl_mechanism": "GSSAPI",
-                    "sasl_kerberos_service_name": self.sasl_kerberos_service_name,
-                    "sasl_kerberos_domain_name": self.sasl_kerberos_domain_name,
-                })
+                kwargs.update(
+                    {
+                        "sasl_mechanism": "GSSAPI",
+                        "sasl_kerberos_service_name": self.sasl_kerberos_service_name,
+                        "sasl_kerberos_domain_name": self.sasl_kerberos_domain_name,
+                    }
+                )
 
         return kwargs
 
