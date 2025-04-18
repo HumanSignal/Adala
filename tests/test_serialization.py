@@ -50,6 +50,7 @@ def test_agent_is_serializable():
     assert serialized_agent == {
         "environment": {
             "type": "AsyncKafkaEnvironment",
+            "kafka_kwargs": None,
             "kafka_input_topic": "",
             "kafka_output_topic": "",
             "timeout_ms": 1,
