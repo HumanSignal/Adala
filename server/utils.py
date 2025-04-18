@@ -51,7 +51,7 @@ class RedisSettings(BaseSettings):
                 "url",
                 "username",
                 "password",
-            ]
+            ],
         )
         query_dict.update(kwargs_to_update_query)
 
