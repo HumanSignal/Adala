@@ -40,8 +40,6 @@ from server.utils import (
 
 logger = init_logger(__name__)
 
-settings = Settings()
-
 app = fastapi.FastAPI()
 
 # TODO: add a correct middleware policy to handle CORS
@@ -227,8 +225,10 @@ async def submit_batch(batch: BatchData):
     """
 
     topic = get_input_topic_name(batch.job_id)
+    settings = Settings()
+    kafka_kwargs = settings.kafka.to_kafka_kwargs()
     producer = AIOKafkaProducer(
-        bootstrap_servers=settings.kafka.bootstrap_servers,
+        **kafka_kwargs,
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
         max_request_size=3000000,
         acks="all",  # waits for all replicas to respond that they have written the message

@@ -89,7 +89,7 @@ class KafkaSettings(BaseSettings):
     sasl_mechanism: Optional[Literal["PLAIN", "GSSAPI"]] = None
     sasl_plain_username: Optional[str] = None
     sasl_plain_password: Optional[str] = None
-    sasl_kerberos_service_name: Optional[str] = "kafka",
+    sasl_kerberos_service_name: Optional[str] = "kafka"
     sasl_kerberos_domain_name: Optional[str] = None
 
     def to_kafka_kwargs(self) -> Dict[str, Any]:

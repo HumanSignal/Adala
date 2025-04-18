@@ -18,7 +18,7 @@ SUBMIT_PAYLOAD = {
     "agent": {
         "environment": {
             "type": "AsyncKafkaEnvironment",
-            "kafka_bootstrap_servers": "",
+            "kafka_kwargs": {"kafka_bootstrap_servers": ""},
             "kafka_input_topic": "",
             "kafka_output_topic": "",
             "timeout_ms": 1,

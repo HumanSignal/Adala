@@ -6,7 +6,7 @@ import asyncio
 import aiohttp
 import math
 from csv import DictReader, DictWriter
-from typing import Dict, Union, List, Optional, Iterable
+from typing import Dict, Union, List, Optional, Iterable, Any
 from io import StringIO
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from adala.utils.internal_data import InternalDataFrame
@@ -24,14 +24,14 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
     - agent can return its predictions to the output topic
 
     Attributes:
-        kafka_bootstrap_servers (Union[str, List[str]]): The Kafka bootstrap servers.
+        kafka_kwargs (Dict[str, Any]): The Kafka kwargs, including at least bootstrap_servers.
         kafka_input_topic (str): The Kafka input topic.
         kafka_output_topic (str): The Kafka output topic.
         timeout_ms (int): The timeout for the Kafka consumer.
     """
 
     # these are mandatory, but should be set by server
-    kafka_bootstrap_servers: Optional[Union[str, List[str]]] = None
+    kafka_kwargs: Optional[Dict[str, Any]] = None
     kafka_input_topic: Optional[str] = None
     kafka_output_topic: Optional[str] = None
     timeout_ms: Optional[int] = None
@@ -42,8 +42,8 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
 
     async def initialize(self):
         assert (
-            self.kafka_bootstrap_servers is not None
-        ), "missing initialization for kafka_bootstrap_servers"
+            self.kafka_kwargs is not None and 'bootstrap_servers' in self.kafka_kwargs
+        ), "missing initialization for kafka_kwargs"
         assert (
             self.kafka_input_topic is not None
         ), "missing initialization for kafka_input_topic"
@@ -54,7 +54,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
 
         self.consumer = AIOKafkaConsumer(
             self.kafka_input_topic,
-            bootstrap_servers=self.kafka_bootstrap_servers,
+            **self.kafka_kwargs,
             value_deserializer=lambda v: json.loads(v.decode("utf-8")),
             auto_offset_reset="earliest",
             max_partition_fetch_bytes=3000000,
@@ -64,7 +64,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         await self.consumer.start()
 
         self.producer = AIOKafkaProducer(
-            bootstrap_servers=self.kafka_bootstrap_servers,
+            **self.kafka_kwargs,
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
             max_request_size=3000000,
             acks="all",  # waits for all replicas to respond that they have written the message
