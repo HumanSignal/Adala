@@ -115,7 +115,7 @@ def streaming_parent_task(
     ensure_topic(output_topic_name)
 
     # Override default agent kafka settings
-    agent.environment.kafka_bootstrap_servers = settings.kafka.bootstrap_servers
+    agent.environment.kafka_kwargs = settings.kafka.to_kafka_kwargs()
     agent.environment.kafka_input_topic = input_topic_name
     agent.environment.kafka_output_topic = output_topic_name
     agent.environment.timeout_ms = settings.kafka.input_consumer_timeout_ms
