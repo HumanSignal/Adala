@@ -48,10 +48,11 @@ kafka-python-ng = "^2.2.3"
 requests = "^2.32.0"
 # Using litellm from forked repo until vertex fix is released: https://github.com/BerriAI/litellm/issues/7904
 #litellm = "^1.47.2"
-litellm = {url = "https://github.com/HumanSignal/litellm/archive/788ed6a20984714c6b855c339326f99506322833.zip"}
+litellm = {url = "https://github.com/HumanSignal/litellm/archive/9deadf35b9b2ff351388abc3a2ea144ed93ca013.zip"}
 pandarallel = "^1.6.5"
 instructor = "^1.4.3"
 async-lru = "^2.0.5"
+jinja2 = ">=3.1.6,<4.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
@@ -71,7 +72,6 @@ fakeredis = "^2.23.2"
 flower = "^2.0.1"
 pytest-asyncio = "0.23.8"
 celery = {extras = ["pytest"], version = "^5.4.0"}
-openai-responses = "^0.11.6"
 mockafka-py = "^0.1.57"
 pytest-recording = "0.13.2"
 mypy = "^1.15.0"
