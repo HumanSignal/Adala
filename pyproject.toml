@@ -43,7 +43,7 @@ celery = {version = "^5.3.6", extras = ["redis"]}
 kombu = ">=5.4.0rc2" # Pin version to fix https://github.com/celery/celery/issues/8030. TODO: remove when this fix will be included in celery
 uvicorn = "*"
 pydantic-settings = "^2.2.1"
-label-studio-sdk = {url = "https://github.com/HumanSignal/label-studio-sdk/archive/388257eeea2ed95ae769724bb8b6ad9c41511b96.zip"}
+label-studio-sdk = {url = "https://github.com/HumanSignal/label-studio-sdk/archive/e0d7c78951452d0dbfae44fbeb25a264bf0c2a8f.zip"}
 requests = "^2.32.0"
 # Using litellm from forked repo until vertex fix is released: https://github.com/BerriAI/litellm/issues/7904
 #litellm = "^1.47.2"
