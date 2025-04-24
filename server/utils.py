@@ -28,6 +28,10 @@ class RedisSettings(BaseSettings):
     ssl_certfile: Optional[str] = None
     ssl_keyfile: Optional[str] = None
 
+    model_config = SettingsConfigDict(
+        extra="allow",
+    )
+
     @property
     def ssl(self) -> bool:
         return self.ssl_ca_certs is not None
@@ -115,6 +119,10 @@ class KafkaSettings(BaseSettings):
     sasl_mechanism: Optional[Literal["PLAIN"]] = None
     sasl_plain_username: Optional[str] = None
     sasl_plain_password: Optional[str] = None
+
+    model_config = SettingsConfigDict(
+        extra="allow",
+    )
 
     def to_kafka_kwargs(self) -> Dict[str, Any]:
         """
