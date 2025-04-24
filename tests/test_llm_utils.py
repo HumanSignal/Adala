@@ -64,16 +64,18 @@ def test_run_instructor_with_messages_gemini_image():
         retries=retries,
     )
 
-    assert response == {
-        "content": "A medical document titled Angina/Chest Pain, containing information about different types of angina and chest pain, including unstable angina, new/worsening angina, stable angina, post-infarction ischemia, and chest pain of unknown etiology. It also includes notes on InterQual criteria, an overview of angina pectoris, acute coronary syndrome, telehealth, and application to specialty referral.",
-        "objects": ["medical document", "angina", "chest pain"],
-        "_prompt_tokens": 3395,
-        "_completion_tokens": 86,
-        "_prompt_cost_usd": 0,
-        "_completion_cost_usd": 0,
-        "_total_cost_usd": 0,
-        "_message_counts": {"text": 2, "image_url": 1},
-    }
+    assert (
+        response["content"]
+        == "A medical document titled Angina/Chest Pain, containing information about different types of angina and chest pain, including unstable angina, new/worsening angina, stable angina, post-infarction ischemia, and chest pain of unknown etiology. It also includes notes on InterQual criteria, an overview of angina pectoris, acute coronary syndrome, telehealth, and application to specialty referral."
+    )
+    assert response["objects"] == ["medical document", "angina", "chest pain"]
+    assert response["_prompt_tokens"] == 3395
+    assert response["_completion_tokens"] == 86
+    assert response["_prompt_cost_usd"] == 0
+    assert response["_completion_cost_usd"] == 0
+    assert response["_total_cost_usd"] == 0
+    assert response["_message_counts"] == {"text": 2, "image_url": 1}
+    assert response["_inference_time"] > 0
 
 
 def test_count_message_types():
