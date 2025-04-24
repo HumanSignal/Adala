@@ -36,10 +36,13 @@ class RedisSettings(BaseSettings):
         Params passed in separately take precedence over those in the URL.
         """
         parts = urlparse(self.url)
-        if self.username:
-            parts.username = quote(self.username)
-        if self.password:
-            parts.password = quote(self.password)
+        if self.username or self.password:
+            username = self.username or parts.username or ""
+            password = self.password or parts.password or ""
+            domain = parts.netloc.split("@")[-1]
+            parts = parts._replace(
+                netloc=f"{quote(username)}:{quote(password)}@{domain}"
+            )
 
         # Convert query string to dict
         query_dict = dict(parse_qsl(parts.query))
@@ -56,7 +59,7 @@ class RedisSettings(BaseSettings):
         query_dict.update(kwargs_to_update_query)
 
         # Convert back to query string
-        parts._replace(query=urlencode(query_dict, doseq=False))
+        parts = parts._replace(query=urlencode(query_dict, doseq=False))
 
         return urlunparse(parts)
 
