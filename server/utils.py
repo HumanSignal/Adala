@@ -24,11 +24,20 @@ class RedisSettings(BaseSettings):
     socket_connect_timeout: int = 1
     username: Optional[str] = None
     password: Optional[str] = None
-    ssl: bool = False
     ssl_cert_reqs: str = "required"
     ssl_ca_certs: Optional[str] = None
     ssl_certfile: Optional[str] = None
     ssl_keyfile: Optional[str] = None
+
+    @property
+    def ssl(self) -> bool:
+        return self.ssl_ca_certs is not None
+
+    def to_kwargs(self) -> Dict[str, Any]:
+        """
+        Kwargs that cannot be encoded in the url
+        """
+        return self.model_dump(exclude_none=True, include=["socket_connect_timeout"])
 
     def to_url(self) -> str:
         """
@@ -47,16 +56,18 @@ class RedisSettings(BaseSettings):
         # Convert query string to dict
         query_dict = dict(parse_qsl(parts.query))
 
-        # Update with new kwargs
-        kwargs_to_update_query = self.model_dump(
-            exclude_none=True,
-            exclude=[
-                "url",
-                "username",
-                "password",
-            ],
-        )
-        query_dict.update(kwargs_to_update_query)
+        # Update with kwargs that can be encoded in the url
+        if self.ssl:
+            kwargs_to_update_query = self.model_dump(
+                exclude_none=True,
+                include=[
+                    "ssl_cert_reqs",
+                    "ssl_ca_certs",
+                    "ssl_certfile",
+                    "ssl_keyfile",
+                ],
+            )
+            query_dict.update(kwargs_to_update_query)
 
         # Convert back to query string
         parts = parts._replace(query=urlencode(query_dict, doseq=False))

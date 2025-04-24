@@ -479,7 +479,8 @@ async def _get_redis_conn():
     """
     settings = Settings()
     url = settings.redis.to_url()
-    redis_conn = Redis.from_url(url)
+    kwargs = settings.redis.to_kwargs()
+    redis_conn = Redis.from_url(url, **kwargs)
     return redis_conn
 
 

@@ -32,6 +32,7 @@ app = Celery(
     accept_content=["json", "pickle"],
     broker_connection_retry_on_startup=True,
     worker_max_memory_per_child=settings.celery_worker_max_memory_per_child_kb,
+    **{f"redis_{k}": v for k, v in settings.redis.to_kwargs().items()},
 )
 
 
