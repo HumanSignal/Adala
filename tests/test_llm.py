@@ -70,18 +70,17 @@ def test_llm_sync():
     if result["_adala_details"].startswith(details_str):
         result["_adala_details"] = details_str
 
-    expected_result = {
-        "_adala_error": True,
-        "_adala_message": "AuthenticationError",
-        "_adala_details": details_str,
-        "_prompt_tokens": 0,
-        "_completion_tokens": 0,
-        "_prompt_cost_usd": 0.0,
-        "_completion_cost_usd": 0.0,
-        "_total_cost_usd": 0.0,
-        "_message_counts": {"text": 1},
-    }
-    assert result == expected_result
+    # Assert each field individually
+    assert result["_adala_error"] == True
+    assert result["_adala_message"] == "AuthenticationError"
+    assert result["_adala_details"] == details_str
+    assert result["_prompt_tokens"] == 0
+    assert result["_completion_tokens"] == 0
+    assert result["_prompt_cost_usd"] == 0.0
+    assert result["_completion_cost_usd"] == 0.0
+    assert result["_total_cost_usd"] == 0.0
+    assert result["_message_counts"] == {"text": 1}
+    assert result["_inference_time"] > 0
 
 
 @pytest.mark.vcr
@@ -107,7 +106,6 @@ def test_llm_async():
 
     # note age coerced to string
     # Check basic structure and types
-    assert result.shape == (1, 8)
     assert "name" in result.columns
     assert "age" in result.columns
     assert result["name"].iloc[0] == "Carla"
@@ -120,7 +118,7 @@ def test_llm_async():
     assert result["_completion_cost_usd"].iloc[0] > 0
     assert result["_total_cost_usd"].iloc[0] > 0
     assert result["_message_counts"].iloc[0] == {"text": 1}
-
+    assert result["_inference_time"].iloc[0] > 0
     # test failure
 
     runtime.api_key = "fake_api_key"
@@ -134,23 +132,20 @@ def test_llm_async():
         )
     )
 
-    expected_result = pd.DataFrame.from_records(
-        [
-            {
-                "_adala_error": True,
-                "_adala_message": "APIError",
-                "_adala_details": "litellm.APIError: APIError: OpenAIException - Connection error.",
-                "_prompt_tokens": 0,
-                "_completion_tokens": 0,
-                "_prompt_cost_usd": 0.0,
-                "_completion_cost_usd": 0.0,
-                "_total_cost_usd": 0.0,
-                "_message_counts": {"text": 1},
-            }
-        ]
+    # Test each field individually
+    assert result["_adala_error"].iloc[0] == True
+    assert result["_adala_message"].iloc[0] == "APIError"
+    assert (
+        result["_adala_details"].iloc[0]
+        == "litellm.APIError: APIError: OpenAIException - Connection error."
     )
-    pd.testing.assert_frame_equal(result, expected_result)
-
+    assert result["_prompt_tokens"].iloc[0] == 0
+    assert result["_completion_tokens"].iloc[0] == 0
+    assert result["_prompt_cost_usd"].iloc[0] == 0.0
+    assert result["_completion_cost_usd"].iloc[0] == 0.0
+    assert result["_total_cost_usd"].iloc[0] == 0.0
+    assert result["_message_counts"].iloc[0] == {"text": 1}
+    assert result["_inference_time"].iloc[0] > 0
     # TODO test batch with successes and failures, figure out how to inject a particular error into LiteLLM
 
 
