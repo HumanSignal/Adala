@@ -21,7 +21,6 @@ class RedisSettings(BaseSettings):
     """
 
     url: str = "redis://localhost:6379/0"
-    socket_connect_timeout: int = 1
     username: Optional[str] = None
     password: Optional[str] = None
     ssl_cert_reqs: str = "required"
@@ -36,8 +35,20 @@ class RedisSettings(BaseSettings):
     def to_kwargs(self) -> Dict[str, Any]:
         """
         Kwargs that cannot be encoded in the url
+        Right now none are set by default, but free to pass in at runtime
         """
-        return self.model_dump(exclude_none=True, include=["socket_connect_timeout"])
+        return self.model_dump(
+            exclude_none=True,
+            exclude=[
+                "url",
+                "username",
+                "password",
+                "ssl_cert_reqs",
+                "ssl_ca_certs",
+                "ssl_certfile",
+                "ssl_keyfile",
+            ],
+        )
 
     def to_url(self) -> str:
         """

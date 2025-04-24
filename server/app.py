@@ -480,7 +480,8 @@ async def _get_redis_conn():
     settings = Settings()
     url = settings.redis.to_url()
     kwargs = settings.redis.to_kwargs()
-    redis_conn = Redis.from_url(url, **kwargs)
+    # set short socket_connect_timeout for ping
+    redis_conn = Redis.from_url(url, **kwargs, socket_connect_timeout=1)
     return redis_conn
 
 
