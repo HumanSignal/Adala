@@ -21,6 +21,7 @@ env:
   DOCKER_CLI_EXPERIMENTAL: enabled
   IMAGE_NAME: "${{ vars.DOCKERHUB_ORG }}/adala"
   DOCKER_IMAGE_TAG_CHECK_NAME: "Docker image tag"
+  POETRY_VERSION: 2.1.2
 
 jobs:
   docker_build_and_push:
@@ -110,7 +111,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            POETRY_VERSION=${{ vars.POETRY_VERSION }}
+            POETRY_VERSION=${{ env.POETRY_VERSION }}
 
       - name: Create Docker image tag Check
         uses: actions/github-script@v7

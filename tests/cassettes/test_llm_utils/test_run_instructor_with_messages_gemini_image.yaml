@@ -11,7 +11,7 @@ interactions:
       host:
       - htx-pub.s3.amazonaws.com
       user-agent:
-      - litellm/1.62.2
+      - litellm/1.65.6
     method: GET
     uri: https://htx-pub.s3.amazonaws.com/demo/ocr/pdf/output_0000.png
   response:
@@ -4657,7 +4657,7 @@ interactions:
       Content-Type:
       - image/png
       Date:
-      - Mon, 31 Mar 2025 20:39:47 GMT
+      - Fri, 11 Apr 2025 22:05:22 GMT
       ETag:
       - '"da4e340b8aa9fa21921d02feb5aa9a12"'
       Last-Modified:
@@ -4665,9 +4665,9 @@ interactions:
       Server:
       - AmazonS3
       x-amz-id-2:
-      - LZxnvYK4f/+cGqtKeGrJUR6GpvR1+0BfqyjVqmy/Ux8a8/KE7A/1RHPBeYYFFt4UGEF5Zmfz9+HCrqCpJusDOfX+ZidGbp6p
+      - 5PNAhO4JXirXYwwtpGzkNsttaV+pM2oCxKSDIkPu95HO579yUMw/91LHYM3WLWhBrgS8YdkcDu0=
       x-amz-request-id:
-      - 6MDKYVWMKQXGKHBF
+      - E0NFV4ZWDDRPH6CD
       x-amz-server-side-encryption:
       - AES256
       x-amz-version-id:
@@ -4682,11 +4682,12 @@ interactions:
       are a helpful assistant that analyzes images."}]}, "tools": [{"function_declarations":
       [{"name": "ImageDescription", "description": "Model for image description response.",
       "parameters": {"properties": {"content": {"description": "The main content of
-      the image", "type": "string"}, "objects": {"description": "List of objects visible
-      in the image", "items": {"type": "string"}, "type": "array"}}, "required": ["content",
-      "objects"], "type": "object"}}]}], "toolConfig": {"functionCallingConfig": {"mode":
-      "ANY", "allowed_function_names": ["ImageDescription"]}}, "generationConfig":
-      {"temperature": 0.1, "max_output_tokens": 500}}'
+      the image", "title": "Content", "type": "string"}, "objects": {"description":
+      "List of objects visible in the image", "items": {"type": "string"}, "title":
+      "Objects", "type": "array"}}, "required": ["content", "objects"], "type": "object"}}]}],
+      "toolConfig": {"functionCallingConfig": {"mode": "ANY", "allowed_function_names":
+      ["ImageDescription"]}}, "generationConfig": {"temperature": 0.1, "max_output_tokens":
+      500}}'
     headers:
       accept:
       - '*/*'
@@ -4695,29 +4696,25 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '352804'
+      - '352844'
       content-type:
       - application/json
       host:
       - generativelanguage.googleapis.com
       user-agent:
-      - litellm/1.62.2
+      - litellm/1.65.6
     method: POST
-    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAC/41T227aQBB991eM/AyEWxLSt4hEFVKjpi2KKlV5GOyx2Wa9Y+2uQ1GUf+94gWCb
-        pCpIeJkze87xXF4igDhBk6oUPbn4E/ySCMBL+K0xNp6MF+AQkmCJ1h9zd5+XxllSssokXrGZo9at
-        y3vcYEESjxcF5nRDLrGqrPPjXjcTbe7eYWh5i6+hoFQlqCHlpCokCl55TSlcm1wZPJuvyXm4R2V6
-        UN+TgzI5KJOxLbBWBlxx5SFVWUY2EGxLcsAZYKCQRwpJoCkDjTKJrtKapTLO40rTPrMHhjZnG7aO
-        gsgh2kkq2fm+GEAbKgXKCXuhBGkr1RYq82R4Y4AkU3O+HcDCA2rHexdi1LCv7RpYSFXst0pqIUWV
-        444R+Jnss6JN441KSjxb5QRPKk9SGMsG7Rbc1qSWC+qBJ01rQu3XO1tYllrqHAx7BicUStAtWJKy
-        WdSDkw5Kp3j1W6S6I/MGd3v3DkU9CMH0+9ixWvEJ/NiJvEYf/TueH48qsWUdRrXglPSB/vWQEGcy
-        SW79ndDJ9Eraj+XX+zeTMT7nXzgvLa/qt+8PB6OhfMeX49nV5Hx4MR1fRgfloBlXThbijjzKQuLb
-        3MfCUJR+yU9k5lyFoZ9Mrs53Oo0NbmXMLva4Z4+6fXk6G/VOqN2NCCvdbFRj7aUAqJXfhr29u/58
-        2+iFSLSsnU+7hfqAaHn7c/khz3R0YIkaXem+7v+7/qfY7KItFu3N7xr/QNapXYdz2VKj+uPBsJ9p
-        dOs+/Snj6DX6C6ASygRNBQAA
+        H4sIAAAAAAAC/41SXU/CMBR9369o+gyEsi0y34gQYyLR6GJMDA+XrYxq1y5rZzSE/+5lY7APMe6h
+        a+89Pef23LtzCKERqFjEYLmh1+QNI4TsyvWQ08pyZTFRhzCYQW7P2OrbNfYI2RQqskKrG5CydfmY
+        V5ByjNO7FBI+5ybKRXbA00EXCXlifmFo1UZnJOWxiECSWEdFilECa13gqhKhAH8xibbcWJKB6Isg
+        mV6/86j3qlPa8i9Le4lVJ7J3Lp3O+9VZnOZali6kOuaypt/XALoRSpjtEweDxiDsOXx4PNVO4TO5
+        10mW6/Wh6uF4xK6mfsD8IJi6bMI8lzm1cqlJC4NeL7kF7DWcLKXIkGY21B9c3eii9NN1A7/SaQxH
+        C8HcY95qC7J92RtPBz1qM0dhIZsGNyYKDQAp7Hc5EsvZ7aLRIpRoleZ7XaMuEIWL1/Aij8dqFqfR
+        le5z/1/1n2LMbYs5x+Krxr/w3IiqwwlPsefDyWg83EgwW+rsnR/v0+yapAMAAA==
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -4726,11 +4723,11 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Mon, 31 Mar 2025 20:39:49 GMT
+      - Fri, 11 Apr 2025 22:05:25 GMT
       Server:
       - scaffolding on HTTPServer2
       Server-Timing:
-      - gfet4t7; dur=2219
+      - gfet4t7; dur=2246
       Transfer-Encoding:
       - chunked
       Vary:

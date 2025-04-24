@@ -17,6 +17,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ inputs.branch_name }}
   cancel-in-progress: true
 
+env:
+  POETRY_VERSION: 2.1.2
+
 jobs:
   sync:
     name: Sync PR
@@ -88,9 +91,7 @@ jobs:
           our_files: "pyproject.toml poetry.lock web/package.json web/yarn.lock"
 
       - name: "Install poetry"
-        env:
-          POETRY_VERSION: ${{ vars.POETRY_VERSION }}
-        run: pipx install "poetry==${POETRY_VERSION}"
+        run: pipx install "poetry==${{ env.POETRY_VERSION }}"
 
       - name: "Set up Python"
         id: setup_python

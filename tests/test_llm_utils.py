@@ -57,23 +57,20 @@ def test_run_instructor_with_messages_gemini_image():
         client=client,
         messages=messages,
         response_model=ImageDescription,
-        model="gemini/gemini-2.0-flash-exp",
-        canonical_model_provider_string="gemini/gemini-2.0-flash-exp",
+        model="gemini/gemini-2.0-flash",
+        canonical_model_provider_string="gemini/gemini-2.0-flash",
         temperature=0.1,
         max_tokens=500,
         retries=retries,
     )
 
-    assert (
-        response["content"]
-        == "A medical document titled Angina/Chest Pain, containing information about different types of angina and chest pain, including unstable angina, new/worsening angina, stable angina, post-infarction ischemia, and chest pain of unknown etiology. It also includes notes on InterQual criteria, an overview of angina pectoris, acute coronary syndrome, telehealth, and application to specialty referral."
-    )
-    assert response["objects"] == ["medical document", "angina", "chest pain"]
+    assert response["content"] == "A medical document about angina and chest pain"
+    assert response["objects"] == ["text"]
     assert response["_prompt_tokens"] == 3395
-    assert response["_completion_tokens"] == 86
-    assert response["_prompt_cost_usd"] == 0
-    assert response["_completion_cost_usd"] == 0
-    assert response["_total_cost_usd"] == 0
+    assert response["_completion_tokens"] == 13
+    assert response["_prompt_cost_usd"] == 0.00033949999999999996
+    assert response["_completion_cost_usd"] == 5.199999999999999e-06
+    assert response["_total_cost_usd"] == 0.0003447
     assert response["_message_counts"] == {"text": 2, "image_url": 1}
     assert response["_inference_time"] > 0
 
