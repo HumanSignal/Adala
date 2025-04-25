@@ -12,13 +12,13 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
 ]
-requires-python = ">=3.9,<3.9.7 || >3.9.7,<3.13"
+requires-python = ">=3.10,<3.13"
 
 [project.urls]
 Repository = "https://github.com/HumanSignal/Adala"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.9.7 || >3.9.7,<3.13"
+python = ">=3.10,<3.13"
 pandas = "2.2.3"
 openai = "^1.60.2"
 guidance = "0.0.64"
