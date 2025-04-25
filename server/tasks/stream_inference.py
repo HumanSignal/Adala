@@ -170,7 +170,7 @@ async def async_process_streaming_output(
         try:
             consumer = AIOKafkaConsumer(
                 output_topic_name,
-                bootstrap_servers=settings.kafka.bootstrap_servers,
+                **settings.kafka.to_kafka_kwargs(),
                 value_deserializer=lambda v: json.loads(v.decode("utf-8")),
                 auto_offset_reset="earliest",
                 max_partition_fetch_bytes=3000000,
