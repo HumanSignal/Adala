@@ -115,14 +115,13 @@ def streaming_parent_task(
     output_topic_name = get_output_topic_name(parent_job_id)
     ensure_topic(output_topic_name)
 
+    # Run the input and output streaming tasks
+    asyncio.run(run_streaming(agent, result_handler, batch_size, output_topic_name))
+
     # Override default agent kafka settings
-    agent.environment.kafka_kwargs = settings.kafka.to_kafka_kwargs()
     agent.environment.kafka_input_topic = input_topic_name
     agent.environment.kafka_output_topic = output_topic_name
     agent.environment.timeout_ms = settings.kafka.input_consumer_timeout_ms
-
-    # Run the input and output streaming tasks
-    asyncio.run(run_streaming(agent, result_handler, batch_size, output_topic_name))
 
     # clean up kafka topics
     delete_topic(input_topic_name)
@@ -133,6 +132,11 @@ def streaming_parent_task(
 
 async def async_process_streaming_input(input_task_done: asyncio.Event, agent: Agent):
     try:
+
+        # Override more kafka settings
+        # these kwargs contain the SSL context, so must be done in the same context as initialize() to avoid de/serialization issues
+        agent.environment.kafka_kwargs = settings.kafka.to_kafka_kwargs()
+
         # start up kaka producer and consumer
         await agent.environment.initialize()
         # Run the agent
