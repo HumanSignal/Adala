@@ -115,13 +115,13 @@ def streaming_parent_task(
     output_topic_name = get_output_topic_name(parent_job_id)
     ensure_topic(output_topic_name)
 
-    # Run the input and output streaming tasks
-    asyncio.run(run_streaming(agent, result_handler, batch_size, output_topic_name))
-
     # Override default agent kafka settings
     agent.environment.kafka_input_topic = input_topic_name
     agent.environment.kafka_output_topic = output_topic_name
     agent.environment.timeout_ms = settings.kafka.input_consumer_timeout_ms
+
+    # Run the input and output streaming tasks
+    asyncio.run(run_streaming(agent, result_handler, batch_size, output_topic_name))
 
     # clean up kafka topics
     delete_topic(input_topic_name)
