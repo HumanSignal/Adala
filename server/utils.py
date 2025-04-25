@@ -8,7 +8,6 @@ from aiokafka.admin import AIOKafkaAdminClient, NewTopic
 from aiokafka.errors import TopicAlreadyExistsError, UnknownTopicOrPartitionError
 from aiokafka.helpers import create_ssl_context
 import asyncio
-import ssl
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 
