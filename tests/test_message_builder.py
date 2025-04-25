@@ -324,9 +324,10 @@ def test_all_features_combined():
         model="gpt-4",
     )
 
-    with patch("litellm.model_cost") as mock_model_cost, patch(
-        "litellm.utils.token_counter"
-    ) as mock_token_counter:
+    with (
+        patch("litellm.model_cost") as mock_model_cost,
+        patch("litellm.utils.token_counter") as mock_token_counter,
+    ):
         # Setup model token limits
         mock_model_cost.__getitem__.return_value = {"max_input_tokens": 4000}
         # Make token counting return small values to avoid trimming
