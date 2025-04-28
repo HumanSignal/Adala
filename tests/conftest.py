@@ -44,7 +44,9 @@ async def async_client():
     from server.app import app
 
     async with httpx.AsyncClient(
-        timeout=10, app=app, base_url="http://localhost:30001"
+        timeout=10,
+        transport=httpx.ASGITransport(app=app),
+        base_url="http://localhost:30001",
     ) as client:
         yield client
 

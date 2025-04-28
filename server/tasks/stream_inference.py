@@ -25,14 +25,14 @@ logger = init_logger(__name__)
 
 settings = Settings()
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 app = Celery(
     "worker",
-    broker=REDIS_URL,
-    backend=REDIS_URL,
+    broker=settings.redis.to_url(),
+    backend=settings.redis.to_url(),
     accept_content=["json", "pickle"],
     broker_connection_retry_on_startup=True,
     worker_max_memory_per_child=settings.celery_worker_max_memory_per_child_kb,
+    **{f"redis_{k}": v for k, v in settings.redis.to_kwargs().items()},
 )
 
 
@@ -116,10 +116,9 @@ def streaming_parent_task(
     ensure_topic(output_topic_name)
 
     # Override default agent kafka settings
-    agent.environment.kafka_bootstrap_servers = settings.kafka_bootstrap_servers
     agent.environment.kafka_input_topic = input_topic_name
     agent.environment.kafka_output_topic = output_topic_name
-    agent.environment.timeout_ms = settings.kafka_input_consumer_timeout_ms
+    agent.environment.timeout_ms = settings.kafka.input_consumer_timeout_ms
 
     # Run the input and output streaming tasks
     asyncio.run(run_streaming(agent, result_handler, batch_size, output_topic_name))
@@ -133,6 +132,11 @@ def streaming_parent_task(
 
 async def async_process_streaming_input(input_task_done: asyncio.Event, agent: Agent):
     try:
+
+        # Override more kafka settings
+        # these kwargs contain the SSL context, so must be done in the same context as initialize() to avoid de/serialization issues
+        agent.environment.kafka_kwargs = settings.kafka.to_kafka_kwargs()
+
         # start up kaka producer and consumer
         await agent.environment.initialize()
         # Run the agent
@@ -158,7 +162,7 @@ async def async_process_streaming_output(
 ):
     logger.info(f"Polling for results {output_topic_name=}")
 
-    timeout_ms = settings.kafka_output_consumer_timeout_ms
+    timeout_ms = settings.kafka.output_consumer_timeout_ms
 
     # Retry to workaround race condition of topic creation
     retries = 5
@@ -166,7 +170,7 @@ async def async_process_streaming_output(
         try:
             consumer = AIOKafkaConsumer(
                 output_topic_name,
-                bootstrap_servers=settings.kafka_bootstrap_servers,
+                **settings.kafka.to_kafka_kwargs(),
                 value_deserializer=lambda v: json.loads(v.decode("utf-8")),
                 auto_offset_reset="earliest",
                 max_partition_fetch_bytes=3000000,

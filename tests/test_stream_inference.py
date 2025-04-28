@@ -23,7 +23,7 @@ TEST_AGENT = {
     },
     "environment": {
         "type": "AsyncKafkaEnvironment",
-        "kafka_bootstrap_servers": "localhost:9092",
+        "kafka_kwargs": {"kafka_bootstrap_servers": "localhost:9092"},
         "kafka_input_topic": "input_topic",
         "kafka_output_topic": "output_topic",
         "timeout_ms": 1000,

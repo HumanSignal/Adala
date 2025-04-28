@@ -1,22 +1,157 @@
-import sys
-
-# fix for https://github.com/dpkp/kafka-python/issues/2412
-if sys.version_info >= (3, 12, 0):
-    import six
-
-    sys.modules["kafka.vendor.six.moves"] = six.moves
+from urllib.parse import quote, urlparse, urlunparse, parse_qsl, urlencode
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List, Union
+from typing import List, Union, Optional, Literal, Dict, Any
 import logging
 import os
 from pathlib import Path
 from aiokafka.admin import AIOKafkaAdminClient, NewTopic
 from aiokafka.errors import TopicAlreadyExistsError, UnknownTopicOrPartitionError
+from aiokafka.helpers import create_ssl_context
 import asyncio
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 
 logger = logging.getLogger(__name__)
+
+
+class RedisSettings(BaseSettings):
+    """
+    Redis settings including authentication and SSL options.
+    """
+
+    url: str = "redis://localhost:6379/0"
+    username: Optional[str] = None
+    password: Optional[str] = None
+    ssl_cert_reqs: str = "required"
+    ssl_ca_certs: Optional[str] = None
+    ssl_certfile: Optional[str] = None
+    ssl_keyfile: Optional[str] = None
+
+    model_config = SettingsConfigDict(
+        extra="allow",
+    )
+
+    @property
+    def ssl(self) -> bool:
+        return self.ssl_ca_certs is not None
+
+    def to_kwargs(self) -> Dict[str, Any]:
+        """
+        Kwargs that cannot be encoded in the url
+        Right now none are set by default, but free to pass in at runtime
+        """
+        return self.model_dump(
+            exclude_none=True,
+            exclude=[
+                "url",
+                "username",
+                "password",
+                "ssl_cert_reqs",
+                "ssl_ca_certs",
+                "ssl_certfile",
+                "ssl_keyfile",
+            ],
+        )
+
+    def to_url(self) -> str:
+        """
+        Convert the RedisSettings object to a URL string.
+        Params passed in separately take precedence over those in the URL.
+        """
+        parts = urlparse(self.url)
+        if self.username or self.password:
+            username = self.username or parts.username or ""
+            password = self.password or parts.password or ""
+            domain = parts.netloc.split("@")[-1]
+            parts = parts._replace(
+                netloc=f"{quote(username)}:{quote(password)}@{domain}"
+            )
+
+        # Convert query string to dict
+        query_dict = dict(parse_qsl(parts.query))
+
+        # Update with kwargs that can be encoded in the url
+        if self.ssl:
+            kwargs_to_update_query = self.model_dump(
+                exclude_none=True,
+                include=[
+                    "ssl_cert_reqs",
+                    "ssl_ca_certs",
+                    "ssl_certfile",
+                    "ssl_keyfile",
+                ],
+            )
+            query_dict.update(kwargs_to_update_query)
+
+        # Convert back to query string
+        parts = parts._replace(query=urlencode(query_dict, doseq=False))
+
+        return urlunparse(parts)
+
+
+class KafkaSettings(BaseSettings):
+    """
+    Kafka settings including authentication and SSL options.
+    """
+
+    # for topics
+    retention_ms: int = 18000000  # 300 minutes
+
+    # for consumers
+    input_consumer_timeout_ms: int = 2500  # 2.5 seconds
+    output_consumer_timeout_ms: int = 1500  # 1.5 seconds
+
+    # for producers and consumers
+    bootstrap_servers: Union[str, List[str]] = "localhost:9093"
+    security_protocol: Literal["PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"] = (
+        "PLAINTEXT"
+    )
+
+    # SSL parameters
+    ssl_cafile: Optional[str] = None
+    ssl_certfile: Optional[str] = None
+    ssl_keyfile: Optional[str] = None
+    ssl_cert_password: Optional[str] = None
+
+    # SASL parameters
+    # NOTE: may want to add other SASL mechanisms SCRAM-SHA-256, SCRAM-SHA-512, OAUTHBEARER
+    sasl_mechanism: Optional[Literal["PLAIN"]] = None
+    sasl_plain_username: Optional[str] = None
+    sasl_plain_password: Optional[str] = None
+
+    model_config = SettingsConfigDict(
+        extra="allow",
+    )
+
+    def to_kafka_kwargs(self) -> Dict[str, Any]:
+        """
+        Convert the KafkaSettings object to kwargs for AIOKafkaProducer/Consumer/AdminClient.
+        These are common kwargs for all Kafka objects; usage-specific kwargs are passed in separately.
+        """
+        kwargs = self.model_dump(include=["bootstrap_servers", "security_protocol"])
+
+        # Add SSL parameters if using SSL
+        if self.security_protocol in ["SSL", "SASL_SSL"]:
+            ssl_context = create_ssl_context(
+                cafile=self.ssl_cafile,
+                certfile=self.ssl_certfile,
+                keyfile=self.ssl_keyfile,
+                password=self.ssl_cert_password,
+            )
+            kwargs["ssl_context"] = ssl_context
+
+        # Add SASL parameters if using SASL
+        if self.security_protocol in ["SASL_PLAINTEXT", "SASL_SSL"]:
+            if self.sasl_mechanism == "PLAIN":
+                kwargs.update(
+                    {
+                        "sasl_mechanism": "PLAIN",
+                        "sasl_plain_username": self.sasl_plain_username,
+                        "sasl_plain_password": self.sasl_plain_password,
+                    }
+                )
+
+        return kwargs
 
 
 class Settings(BaseSettings):
@@ -25,17 +160,17 @@ class Settings(BaseSettings):
     https://docs.pydantic.dev/latest/concepts/pydantic_settings/#field-value-priority
     """
 
-    kafka_bootstrap_servers: Union[str, List[str]] = "localhost:9093"
-    kafka_retention_ms: int = 18000000  # 300 minutes
-    kafka_input_consumer_timeout_ms: int = 2500  # 2.5 seconds
-    kafka_output_consumer_timeout_ms: int = 1500  # 1.5 seconds
+    kafka: KafkaSettings = KafkaSettings()
     task_time_limit_sec: int = 60 * 60 * 6  # 6 hours
     # https://docs.celeryq.dev/en/v5.4.0/userguide/configuration.html#worker-max-memory-per-child
     celery_worker_max_memory_per_child_kb: int = 1024000  # 1GB
+    redis: RedisSettings = RedisSettings()
 
     model_config = SettingsConfigDict(
         # have to use an absolute path here so celery workers can find it
         env_file=(Path(__file__).parent / ".env"),
+        env_nested_delimiter="_",  # allows env vars like REDIS_URL -> redis.url
+        env_nested_max_split=1,  # allows env vars like REDIS_SSL_CERT_REQS -> redis.ssl_cert_reqs
     )
 
 
@@ -53,12 +188,12 @@ def get_output_topic_name(job_id: str):
 
 def ensure_topic(topic_name: str):
     settings = Settings()
-    bootstrap_servers = settings.kafka_bootstrap_servers
-    retention_ms = settings.kafka_retention_ms
+    kafka_kwargs = settings.kafka.to_kafka_kwargs()
+    retention_ms = settings.kafka.retention_ms
 
     async def _ensure_topic():
         admin_client = AIOKafkaAdminClient(
-            bootstrap_servers=bootstrap_servers,
+            **kafka_kwargs,
             client_id="topic_creator",
         )
 
@@ -84,11 +219,11 @@ def ensure_topic(topic_name: str):
 
 def delete_topic(topic_name: str):
     settings = Settings()
-    bootstrap_servers = settings.kafka_bootstrap_servers
+    kafka_kwargs = settings.kafka.to_kafka_kwargs()
 
     async def _delete_topic():
         admin_client = AIOKafkaAdminClient(
-            bootstrap_servers=bootstrap_servers,
+            **kafka_kwargs,
             client_id="topic_deleter",
         )
 
