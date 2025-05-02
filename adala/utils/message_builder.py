@@ -6,8 +6,11 @@ Other methods are used internally and not intended for external use.
 """
 
 import logging
+import base64
+import requests
 from typing import Dict, Any, Optional, List, DefaultDict, Annotated, Union
 from collections import defaultdict
+from functools import cached_property
 
 from pydantic import BaseModel, Field, field_validator
 from pydantic.dataclasses import dataclass
@@ -145,9 +148,13 @@ class MessagesBuilder(BaseModel):
             return defaultdict(lambda: MessageChunkType.TEXT)
         return value
 
-    @classmethod
+    @cached_property
+    def is_openai_model(self) -> bool:
+        """Check if the model is an OpenAI model."""
+        return self.model and self.model.startswith("openai/")
+
     def split_message_into_chunks(
-        cls,
+        self,
         input_template: str,
         input_field_types: Dict[str, MessageChunkType],
         **payload,
@@ -228,16 +235,34 @@ class MessagesBuilder(BaseModel):
                         case MessageChunkType.PDF_URL:
                             # Add remaining text as text chunk
                             _add_current_text_as_chunk()
-                            # Add PDF URL as new file chunk
-                            result.append(
-                                {
-                                    "type": "file",
-                                    "file": {
-                                        "file_id": field_value,
-                                        "format": "application/pdf",
-                                    },
-                                }
-                            )
+                            if self.is_openai_model:
+                                # OpenAI models support PDF input
+                                # we need to download the PDF and encode it as base64
+                                response = requests.get(field_value)
+                                pdf_data = response.content
+                                base64_pdf_data = base64.b64encode(pdf_data).decode("utf-8")
+                                result.append(
+                                    {
+                                        "type": "file",
+                                        "file": {
+                                            "filename": field_value.split("/")[-1]
+                                            if "/" in field_value
+                                            else "document.pdf",
+                                            "file_data": f"data:application/pdf;base64,{base64_pdf_data}",
+                                        },
+                                    }
+                                )
+                            else:
+                                # Add PDF URL as new file chunk
+                                result.append(
+                                    {
+                                        "type": "file",
+                                        "file": {
+                                            "file_id": field_value,
+                                            "format": "application/pdf",
+                                        },
+                                    }
+                                )
 
                         case MessageChunkType.IMAGE_URLS:
                             assert isinstance(

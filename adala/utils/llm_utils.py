@@ -70,6 +70,9 @@ def check_model_pdf_support(model: str) -> bool:
     Returns:
         Boolean indicating if the model supports PDF input
     """
+    # check if it is an OpenAI model
+    if model.startswith("openai/") and any(k in model for k in ("gpt-4o", "gpt-4.1")):
+        return True
     try:
         return supports_pdf_input(model)
     except Exception as e:
@@ -522,8 +525,10 @@ def run_instructor_with_payloads(
         system_prompt=instructions_template,
         instruction_first=instructions_first,
         input_field_types=input_field_types,
-        extra_fields=extra_fields,
+        extra_fields=extra_fields or {},
         split_into_chunks=split_into_chunks,
+        trim_to_fit_context=ensure_messages_fit_in_context_window,
+        model=canonical_model_provider_string or model,
     )
 
     results = []
@@ -597,7 +602,7 @@ async def arun_instructor_with_payloads(
         system_prompt=instructions_template,
         instruction_first=instructions_first,
         input_field_types=input_field_types,
-        extra_fields=extra_fields,
+        extra_fields=extra_fields or {},
         split_into_chunks=split_into_chunks,
         trim_to_fit_context=ensure_messages_fit_in_context_window,
         model=canonical_model_provider_string or model,
