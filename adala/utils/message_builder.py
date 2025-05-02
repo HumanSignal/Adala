@@ -61,6 +61,7 @@ class MessagesBuilder(BaseModel):
             - MessageChunkType.TEXT: Text content
             - MessageChunkType.IMAGE_URL: Image URL
             - MessageChunkType.IMAGE_URLS: List of image URLs
+            - MessageChunkType.PDF_URL: PDF document URL
         trim_to_fit_context (bool): Whether to trim messages to fit within model context limits.
             If True, the messages will be trimmed to fit within the model's context window (e.g. 128k tokens for GPT-4o).
             Warning: this will slow down the function.
@@ -86,6 +87,30 @@ class MessagesBuilder(BaseModel):
         [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": [{"type": "image_url", "image_url": {"url": "http://example.com/image.jpg"}}]}
+        ]
+        ```
+
+        Example with PDF:
+        ```python
+        builder = MessagesBuilder(
+            user_prompt_template="Analyze this document: {document}",
+            split_into_chunks=True,
+            input_field_types={"document": MessageChunkType.PDF_URL}
+        )
+
+        r = builder.get_messages({"document": "http://example.com/document.pdf"})
+        print(r.messages)
+        ```
+        Output:
+        ```
+        [
+            {"role": "user", "content": [
+                {"type": "text", "text": "Analyze this document: "},
+                {"type": "file", "file": {
+                    "file_id": "http://example.com/document.pdf",
+                    "format": "application/pdf"
+                }}]
+            }
         ]
         ```
     """
@@ -198,6 +223,20 @@ class MessagesBuilder(BaseModel):
                             # Add image URL as new image chunk
                             result.append(
                                 {"type": "image_url", "image_url": {"url": field_value}}
+                            )
+
+                        case MessageChunkType.PDF_URL:
+                            # Add remaining text as text chunk
+                            _add_current_text_as_chunk()
+                            # Add PDF URL as new file chunk
+                            result.append(
+                                {
+                                    "type": "file",
+                                    "file": {
+                                        "file_id": field_value,
+                                        "format": "application/pdf",
+                                    },
+                                }
                             )
 
                         case MessageChunkType.IMAGE_URLS:

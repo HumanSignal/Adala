@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Type, Optional, Tuple, DefaultDict
 from pydantic import BaseModel, Field
 from pydantic_core import to_jsonable_python
 from litellm.types.utils import Usage
-from litellm.utils import trim_messages
+from litellm.utils import trim_messages, supports_pdf_input
 from tenacity import Retrying, AsyncRetrying
 from instructor.exceptions import InstructorRetryException, IncompleteOutputException
 from instructor.client import Instructor, AsyncInstructor
@@ -58,6 +58,23 @@ def count_message_types(messages: List[Dict[str, Any]]) -> Dict[str, int]:
         _count_message_content(message, message_counts)
 
     return dict(message_counts)
+
+
+def check_model_pdf_support(model: str) -> bool:
+    """
+    Check if a model supports PDF input.
+
+    Args:
+        model: The model name to check
+
+    Returns:
+        Boolean indicating if the model supports PDF input
+    """
+    try:
+        return supports_pdf_input(model)
+    except Exception as e:
+        logger.warning(f"Error checking PDF support for model {model}: {e}")
+        return False
 
 
 def _get_usage_dict(
