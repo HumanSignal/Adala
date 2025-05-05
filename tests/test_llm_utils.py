@@ -81,7 +81,8 @@ def test_run_instructor_with_messages_gemini_image():
 
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_arun_instructor_with_payloads_pdf():
+@pytest.mark.parametrize("model", ["openai/gpt-4o-mini", "anthropic/claude-3-7-sonnet-latest"])
+async def test_arun_instructor_with_payloads_pdf(model):
     """Test arun_instructor_with_payloads function with a single payload containing a PDF document."""
     # Set up test dependencies
     from adala.runtimes._litellm import InstructorAsyncClientMixin, AsyncRetrying
@@ -98,9 +99,9 @@ async def test_arun_instructor_with_payloads_pdf():
         )
 
     client = InstructorAsyncClientMixin(
-        model="openai/gpt-4o-mini",
-        provider="openai",
-        api_key=os.getenv("OPENAI_API_KEY"),
+        model=model,
+        provider="openai" if 'openai' in model else "anthropic",
+        api_key=os.getenv("OPENAI_API_KEY") if 'openai' in model else os.getenv("ANTHROPIC_API_KEY")
     ).client
 
     # Configure retry policy (3 attempts with 1 second delay)
@@ -131,8 +132,8 @@ async def test_arun_instructor_with_payloads_pdf():
         payloads=[{"document_url": sample_pdf_url}],  # Single item in the list
         user_prompt_template=user_prompt_template,
         response_model=DocumentAnalysis,
-        model="openai/gpt-4o-mini",
-        canonical_model_provider_string="openai/gpt-4o-mini",
+        model=model,
+        canonical_model_provider_string=model,
         temperature=0.1,
         max_tokens=500,
         retries=retries,
