@@ -71,18 +71,27 @@ class LabelStudioSkill(TransformSkill):
                     tags.append(tag)
         return tags
 
-    @cached_property
-    def image_tags(self) -> List[ObjectTag]:
-        # check if any image tags are used as input variables
+    def _get_object_tags_by_type(self, tag_type: str) -> List[ObjectTag]:
+        # Get object tags of a specific type
         object_tag_names = self.allowed_object_tags or list(
             self.label_interface._objects.keys()
         )
         tags = []
         for tag_name in object_tag_names:
             tag = self.label_interface.get_object(tag_name)
-            if tag.tag.lower() == "image":
+            if tag.tag.lower() == tag_type.lower():
                 tags.append(tag)
         return tags
+
+    @cached_property
+    def image_tags(self) -> List[ObjectTag]:
+        """List of image tags used as input variables"""
+        return self._get_object_tags_by_type("image")
+
+    @cached_property
+    def pdf_tags(self) -> List[ObjectTag]:
+        """List of PDF tags used as input variables"""
+        return self._get_object_tags_by_type("pdf")
 
     def __getstate__(self):
         """Exclude cached properties when pickling - otherwise the 'Agent' can not be serialized in celery"""
@@ -154,24 +163,45 @@ class LabelStudioSkill(TransformSkill):
         with json_schema_to_pydantic(self.field_schema) as ResponseModel:
             # special handling to flag image inputs if they exist
             if isinstance(runtime, AsyncLiteLLMVisionRuntime):
+                # by default, all input fields are text
                 input_field_types = defaultdict(lambda: MessageChunkType.TEXT)
+
+                # Process image tags if they exist
                 for tag in self.image_tags:
-                    # these are the project variable names, NOT the label config tag names. TODO: pass this info from LSE to avoid recomputing it here.
                     variables = extract_variable_name(tag.value)
                     if len(variables) != 1:
                         logger.warning(
-                            f"Image tag {tag.name} has multiple variables: {variables}. Cannot mark these variables as image inputs."
+                            "Image tag %s has multiple variables: %s. Cannot mark these variables as image inputs.",
+                            tag.name,
+                            variables,
                         )
                         continue
+
+                    # Check if this is a list of images or a single image
+                    is_image_list = tag.attr.get("valueList") if tag.attr else False
                     input_field_types[variables[0]] = (
                         MessageChunkType.IMAGE_URLS
-                        if tag.attr.get("valueList")
+                        if is_image_list
                         else MessageChunkType.IMAGE_URL
                     )
 
+                # Process PDF tags if they exist
+                for tag in self.pdf_tags:
+                    variables = extract_variable_name(tag.value)
+                    if len(variables) != 1:
+                        logger.warning(
+                            "PDF tag %s has multiple variables: %s. Cannot mark these variables as PDF inputs.",
+                            tag.name,
+                            variables,
+                        )
+                        continue
+
+                    input_field_types[variables[0]] = MessageChunkType.PDF_URL
+
                 logger.debug(
-                    f"Using VisionRuntime with input field types: {input_field_types}"
+                    "Using VisionRuntime with input field types: %s", input_field_types
                 )
+
                 output = await runtime.batch_to_batch(
                     input,
                     input_template=self.input_template,

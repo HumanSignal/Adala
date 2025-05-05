@@ -236,20 +236,22 @@ class MessagesBuilder(BaseModel):
                         case MessageChunkType.PDF_URL:
                             # Add remaining text as text chunk
                             _add_current_text_as_chunk()
-                            
+
                             # read the PDF file in base64
                             local_path = get_local_path(field_value)
                             with open(local_path, "rb") as pdf_file:
                                 pdf_data = pdf_file.read()
                             base64_pdf_data = base64.b64encode(pdf_data).decode("utf-8")
                             file_data = f"data:application/pdf;base64,{base64_pdf_data}"
-                            result.append({
-                                "type": "file",
-                                "file": {
-                                    "filename": field_value.split("/")[-1],
-                                    "file_data": file_data
-                                },
-                            })
+                            result.append(
+                                {
+                                    "type": "file",
+                                    "file": {
+                                        "filename": field_value.split("/")[-1],
+                                        "file_data": file_data,
+                                    },
+                                }
+                            )
 
                         case MessageChunkType.IMAGE_URLS:
                             assert isinstance(

@@ -81,27 +81,36 @@ def test_run_instructor_with_messages_gemini_image():
 
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.parametrize("model", ["openai/gpt-4o-mini", "anthropic/claude-3-7-sonnet-latest"])
+@pytest.mark.parametrize(
+    "model", ["openai/gpt-4o-mini", "anthropic/claude-3-7-sonnet-latest"]
+)
 async def test_arun_instructor_with_payloads_pdf(model):
     """Test arun_instructor_with_payloads function with a single payload containing a PDF document."""
     # Set up test dependencies
     from adala.runtimes._litellm import InstructorAsyncClientMixin, AsyncRetrying
     from adala.utils.llm_utils import arun_instructor_with_payloads
     from adala.utils.parse import MessageChunkType
-    
+
     class DocumentAnalysis(BaseModel):
         """Model for PDF document analysis response."""
 
         summary: str = Field(..., description="A summary of the document content")
-        topics: List[str] = Field(..., description="Main topics covered in the document")
+        topics: List[str] = Field(
+            ..., description="Main topics covered in the document"
+        )
         document_type: str = Field(
-            ..., description="The type of document (e.g., academic paper, report, manual)"
+            ...,
+            description="The type of document (e.g., academic paper, report, manual)",
         )
 
     client = InstructorAsyncClientMixin(
         model=model,
-        provider="openai" if 'openai' in model else "anthropic",
-        api_key=os.getenv("OPENAI_API_KEY") if 'openai' in model else os.getenv("ANTHROPIC_API_KEY")
+        provider="openai" if "openai" in model else "anthropic",
+        api_key=(
+            os.getenv("OPENAI_API_KEY")
+            if "openai" in model
+            else os.getenv("ANTHROPIC_API_KEY")
+        ),
     ).client
 
     # Configure retry policy (3 attempts with 1 second delay)
@@ -111,7 +120,9 @@ async def test_arun_instructor_with_payloads_pdf(model):
     )
 
     # Create sample PDF URL - this is a placeholder that will be replaced manually
-    sample_pdf_url = "https://hs-sandbox-pub.s3.us-east-1.amazonaws.com/demo/4.uniform.pdf"
+    sample_pdf_url = (
+        "https://hs-sandbox-pub.s3.us-east-1.amazonaws.com/demo/4.uniform.pdf"
+    )
 
     # Check if model supports PDF input
     assert check_model_pdf_support(
@@ -119,8 +130,10 @@ async def test_arun_instructor_with_payloads_pdf(model):
     ), "Model should support PDF input"
 
     # Define user prompt template that includes the PDF
-    user_prompt_template = "Please analyze this document and provide a summary: {document_url}"
-    
+    user_prompt_template = (
+        "Please analyze this document and provide a summary: {document_url}"
+    )
+
     # Define input field types to specify the document_url is a PDF
     input_field_types = {
         "document_url": MessageChunkType.PDF_URL,
@@ -139,9 +152,9 @@ async def test_arun_instructor_with_payloads_pdf(model):
         retries=retries,
         instructions_template="You are a helpful assistant that analyzes documents.",
         input_field_types=input_field_types,
-        split_into_chunks=True
+        split_into_chunks=True,
     )
-    
+
     # Verify we got exactly one result
     assert len(results) == 1
     response = results[0]
@@ -150,18 +163,18 @@ async def test_arun_instructor_with_payloads_pdf(model):
     assert isinstance(response["summary"], str)
     assert len(response["summary"]) > 0
     assert "angina" in response["summary"].lower()
-    
+
     # Verify topics are present and in expected format
     assert "topics" in response
     assert isinstance(response["topics"], list)
     assert len(response["topics"]) > 0
     assert any("angina" in topic.lower() for topic in response["topics"])
     assert all(isinstance(topic, str) for topic in response["topics"])
-    
+
     # Verify document type
     assert "document_type" in response
     assert isinstance(response["document_type"], str)
-    
+
     # Verify token usage and cost information is present with correct types
     assert "_prompt_tokens" in response
     assert isinstance(response["_prompt_tokens"], int)
@@ -173,12 +186,12 @@ async def test_arun_instructor_with_payloads_pdf(model):
     assert isinstance(response["_completion_cost_usd"], float)
     assert "_total_cost_usd" in response
     assert isinstance(response["_total_cost_usd"], float)
-    
+
     # Verify message counts with exact values
     assert "_message_counts" in response
     assert response["_message_counts"]["text"] == 2
     assert response["_message_counts"]["file"] == 1
-    
+
     # Verify inference time is tracked
     assert "_inference_time" in response
     assert isinstance(response["_inference_time"], float)
