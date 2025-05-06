@@ -51,47 +51,38 @@ class LabelStudioSkill(TransformSkill):
     def label_interface(self) -> LabelInterface:
         return LabelInterface(self.label_config)
 
-    @cached_property
-    def ner_tags(self) -> List[ControlTag]:
-        # check if the input config has NER tag (<Labels> + <Text>), and return its `from_name` and `to_name`
-        control_tag_names = self.allowed_control_tags or list(
-            self.label_interface._controls.keys()
-        )
-        tags = []
-        for tag_name in control_tag_names:
-            tag = self.label_interface.get_control(tag_name)
-            if tag.tag.lower() in {"labels", "hypertextlabels"}:
-                if self.allowed_object_tags:
+    def get_ner_tags(self) -> List[ControlTag]:
+        ner_tags = self.label_interface.ner_tags
+        if self.allowed_control_tags:
+            # filter by control tags
+            ner_tags = [
+                tag for tag in ner_tags if tag.name in self.allowed_control_tags
+            ]
+            if self.allowed_object_tags:
+                # filter by object tags
+                ner_tags = [
+                    tag
+                    for tag in ner_tags
                     if all(
                         object_tag.tag in self.allowed_object_tags
                         for object_tag in tag.objects
-                    ):
-                        tags.append(tag)
-                else:
-                    tags.append(tag)
-        return tags
+                    )
+                ]
+        return ner_tags
 
-    def _get_object_tags_by_type(self, tag_type: str) -> List[ObjectTag]:
-        # Get object tags of a specific type
-        object_tag_names = self.allowed_object_tags or list(
-            self.label_interface._objects.keys()
-        )
-        tags = []
-        for tag_name in object_tag_names:
-            tag = self.label_interface.get_object(tag_name)
-            if tag.tag.lower() == tag_type.lower():
-                tags.append(tag)
-        return tags
+    def get_image_tags(self) -> List[ObjectTag]:
+        image_tags = self.label_interface.image_tags
+        if self.allowed_object_tags:
+            image_tags = [
+                tag for tag in image_tags if tag.name in self.allowed_object_tags
+            ]
+        return image_tags
 
-    @cached_property
-    def image_tags(self) -> List[ObjectTag]:
-        """List of image tags used as input variables"""
-        return self._get_object_tags_by_type("image")
-
-    @cached_property
-    def pdf_tags(self) -> List[ObjectTag]:
-        """List of PDF tags used as input variables"""
-        return self._get_object_tags_by_type("pdf")
+    def get_pdf_tags(self) -> List[ObjectTag]:
+        pdf_tags = self.label_interface.pdf_tags
+        if self.allowed_object_tags:
+            pdf_tags = [tag for tag in pdf_tags if tag.name in self.allowed_object_tags]
+        return pdf_tags
 
     def __getstate__(self):
         """Exclude cached properties when pickling - otherwise the 'Agent' can not be serialized in celery"""
@@ -167,7 +158,7 @@ class LabelStudioSkill(TransformSkill):
                 input_field_types = defaultdict(lambda: MessageChunkType.TEXT)
 
                 # Process image tags if they exist
-                for tag in self.image_tags:
+                for tag in self.get_image_tags():
                     variables = extract_variable_name(tag.value)
                     if len(variables) != 1:
                         logger.warning(
@@ -178,15 +169,14 @@ class LabelStudioSkill(TransformSkill):
                         continue
 
                     # Check if this is a list of images or a single image
-                    is_image_list = tag.attr.get("valueList") if tag.attr else False
                     input_field_types[variables[0]] = (
                         MessageChunkType.IMAGE_URLS
-                        if is_image_list
+                        if tag.is_image_list
                         else MessageChunkType.IMAGE_URL
                     )
 
                 # Process PDF tags if they exist
-                for tag in self.pdf_tags:
+                for tag in self.get_pdf_tags():
                     variables = extract_variable_name(tag.value)
                     if len(variables) != 1:
                         logger.warning(
@@ -218,7 +208,7 @@ class LabelStudioSkill(TransformSkill):
                     instructions_template=self.instructions,
                     response_model=ResponseModel,
                 )
-            for ner_tag in self.ner_tags:
+            for ner_tag in self.get_ner_tags():
                 input_field_name = ner_tag.objects[0].value.lstrip("$")
                 output_field_name = ner_tag.name
                 quote_string_field_name = "text"
