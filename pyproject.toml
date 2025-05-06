@@ -13,45 +13,51 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 requires-python = ">=3.10,<3.13"
+dependencies = [
+    "pandas (==2.2.3)",
+    "openai (>=1.60.2,<2.0.0)",
+    "guidance (==0.0.64)",
+    "pydantic (>=2,<3)",
+    "rich (>=13,<14)",
+    "aiosqlite (>=0.19.0,<0.20.0)",
+    "chromadb (>=0.5.7,<0.6.0)",
+    "durationpy (>=0.9,<0.10)",
+    "tenacity (>=8.2.3,<9.0.0)",
+    "gspread (>=5.12.3,<6.0.0)",
+    "datasets (>=2.16.1,<3.0.0)",
+    "aiohttp (>=3.9.3,<4.0.0)",
+    "boto3 (>=1.34.38,<2.0.0)",
+    "aiokafka (>=0.11.0,<0.12.0)",
+    # these are for the server
+    # they would be installed as `extras` if poetry supported version strings for extras, but it doesn't
+    # https://github.com/python-poetry/poetry/issues/834
+    # they also can't be installed as a `group`, because those are for dev dependencies only and could not be included if this package was pip-installed
+    "redis-om",
+    "fastapi (>=0.115.6,<0.116.0)",
+    "celery[redis] (>=5.3.6,<6.0.0)",
+    "kombu (>=5.4.0rc2)",
+    "uvicorn",
+    "pydantic-settings (>=2.9.0,<3.0.0)",
+    "label-studio-sdk @ https://github.com/HumanSignal/label-studio-sdk/archive/1ef88e2f8afe50a738fc1b03385cb1f3d6b2dd9f.zip",
+    "requests (>=2.32.0,<3.0.0)",
+    # Using litellm from forked repo until vertex fix is released: https://github.com/BerriAI/litellm/issues/7904
+    #litellm = "^1.47.2"
+    "litellm @ https://github.com/HumanSignal/litellm/archive/9deadf35b9b2ff351388abc3a2ea144ed93ca013.zip",
+    "pandarallel (>=1.6.5,<2.0.0)",
+    "instructor (==1.4.3)",
+    "async-lru (>=2.0.5,<3.0.0)",
+    "jinja2 (>=3.1.6,<4.0)"
+]
 
 [project.urls]
 Repository = "https://github.com/HumanSignal/Adala"
 
+[project.scripts]
+adala = "adala.cli:main"
+[tool.poetry]
+requires-poetry = '>=2.0.0,<3.0.0'
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
-pandas = "2.2.3"
-openai = "^1.60.2"
-guidance = "0.0.64"
-pydantic = "^2"
-rich = "^13"
-aiosqlite = "^0.19.0"
-chromadb = "^0.5.7"
-durationpy = "^0.9"
-tenacity = "^8.2.3"
-gspread = "^5.12.3"
-datasets = "^2.16.1"
-aiohttp = "^3.9.3"
-boto3 = "^1.34.38"
-aiokafka = "^0.11.0"
-# these are for the server
-# they would be installed as `extras` if poetry supported version strings for extras, but it doesn't
-# https://github.com/python-poetry/poetry/issues/834
-# they also can't be installed as a `group`, because those are for dev dependencies only and could not be included if this package was pip-installed
-redis-om = "*"
-fastapi = "^0.115.6"
-celery = {version = "^5.3.6", extras = ["redis"]}
-kombu = ">=5.4.0rc2" # Pin version to fix https://github.com/celery/celery/issues/8030. TODO: remove when this fix will be included in celery
-uvicorn = "*"
-pydantic-settings = "^2.9.0"
-label-studio-sdk = {url = "https://github.com/HumanSignal/label-studio-sdk/archive/1ef88e2f8afe50a738fc1b03385cb1f3d6b2dd9f.zip"}
-requests = "^2.32.0"
-# Using litellm from forked repo until vertex fix is released: https://github.com/BerriAI/litellm/issues/7904
-#litellm = "^1.47.2"
-litellm = {url = "https://github.com/HumanSignal/litellm/archive/9deadf35b9b2ff351388abc3a2ea144ed93ca013.zip"}
-pandarallel = "^1.6.5"
-instructor = "1.4.3"
-async-lru = "^2.0.5"
-jinja2 = ">=3.1.6,<4.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
@@ -75,9 +81,6 @@ pytest-recording = "0.13.2"
 mypy = "^1.15.0"
 pytest-benchmark = "^5.1.0"
 pytest-profiling = "^1.8.1"
-
-[tool.poetry.scripts]
-adala = "adala.cli:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

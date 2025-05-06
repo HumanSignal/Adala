@@ -1,4 +1,5 @@
 from urllib.parse import quote, urlparse, urlunparse, parse_qsl, urlencode
+from pydantic import BaseModel, ConfigDict
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Union, Optional, Literal, Dict, Any
 import logging
@@ -14,7 +15,7 @@ LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 logger = logging.getLogger(__name__)
 
 
-class RedisSettings(BaseSettings):
+class RedisSettings(BaseModel):
     """
     Redis settings including authentication and SSL options.
     """
@@ -27,7 +28,7 @@ class RedisSettings(BaseSettings):
     ssl_certfile: Optional[str] = None
     ssl_keyfile: Optional[str] = None
 
-    model_config = SettingsConfigDict(
+    model_config = ConfigDict(
         extra="allow",
     )
 
@@ -89,7 +90,7 @@ class RedisSettings(BaseSettings):
         return urlunparse(parts)
 
 
-class KafkaSettings(BaseSettings):
+class KafkaSettings(BaseModel):
     """
     Kafka settings including authentication and SSL options.
     """
@@ -119,7 +120,7 @@ class KafkaSettings(BaseSettings):
     sasl_plain_username: Optional[str] = None
     sasl_plain_password: Optional[str] = None
 
-    model_config = SettingsConfigDict(
+    model_config = ConfigDict(
         extra="allow",
     )
 
