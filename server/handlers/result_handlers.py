@@ -10,7 +10,7 @@ from server.utils import init_logger
 logger = init_logger(__name__)
 
 try:
-    from label_studio_sdk import Client as LSEClient
+    from label_studio_sdk import LabelStudio as LSEClient
 except ImportError:
     logger.warning(
         "Label Studio SDK not found. LSEHandler will not be available. Run `poetry install --with label-studio` to fix"
@@ -167,22 +167,15 @@ class LSEHandler(ResultHandler):
     def client(self) -> LSEClient:
         _client = LSEClient(
             api_key=self.api_key,
-            url=self.url,
+            base_url=self.url,
         )
-        # Need this to make POST requests using the SDK client
-        # TODO headers can only be set in this function, since client is a computed field. Need to rethink approach if we make non-POST requests, should probably just make a PR in label_studio_sdk to allow setting this in make_request()
-        _client.headers.update(
-            {
-                "accept": "application/json",
-                "Content-Type": "application/json",
-            }
-        )
+
         return _client
 
     @model_validator(mode="after")
     def ready(self):
-        conn = self.client.check_connection()
-        assert conn["status"] == "UP", "Label Studio is not available"
+        # Use versions endpoint to verify connection to LS instance
+        assert self.client.versions.get()
 
         return self
 
@@ -216,15 +209,9 @@ class LSEHandler(ResultHandler):
         if result_batch:
             num_predictions = len(result_batch)
             logger.info(f"LSEHandler sending {num_predictions} predictions to LSE")
-            self.client.make_request(
-                "POST",
-                f"/api/model-run/batch-predictions?num_predictions={num_predictions}",
-                data=json.dumps(
-                    {
-                        "modelrun_id": self.modelrun_id,
-                        "results": result_batch,
-                    }
-                ),
+            self.client.prompts.batch_predictions(
+                modelrun_id=self.modelrun_id,
+                results=result_batch,
             )
             logger.info(f"LSEHandler sent {num_predictions} predictions to LSE")
         else:
@@ -239,15 +226,9 @@ class LSEHandler(ResultHandler):
             logger.info(
                 f"LSEHandler sending {num_failed_predictions} failed predictions to LSE"
             )
-            self.client.make_request(
-                "POST",
-                f"/api/model-run/batch-failed-predictions?num_failed_predictions={num_failed_predictions}",
-                data=json.dumps(
-                    {
-                        "modelrun_id": self.modelrun_id,
-                        "failed_predictions": error_batch,
-                    }
-                ),
+            self.client.prompts.batch_failed_predictions(
+                modelrun_id=self.modelrun_id,
+                failed_predictions=error_batch,
             )
             logger.info(
                 f"LSEHandler sent {num_failed_predictions} failed predictions to LSE"
