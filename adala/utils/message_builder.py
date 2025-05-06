@@ -149,11 +149,6 @@ class MessagesBuilder(BaseModel):
             return defaultdict(lambda: MessageChunkType.TEXT)
         return value
 
-    @cached_property
-    def is_openai_model(self) -> bool:
-        """Check if the model is an OpenAI model."""
-        return self.model and self.model.startswith("openai/")
-
     def split_message_into_chunks(
         self,
         input_template: str,
