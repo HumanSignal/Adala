@@ -109,7 +109,7 @@ async def test_arun_instructor_with_payloads_pdf(model):
         api_key=(
             os.getenv("OPENAI_API_KEY")
             if "openai" in model
-            else os.getenv("ANTHROPIC_API_KEY")
+            else os.getenv("ANTHROPIC_API_KEY", "fake_api_key")
         ),
     ).client
 
