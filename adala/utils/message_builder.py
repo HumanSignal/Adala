@@ -14,7 +14,10 @@ from functools import cached_property
 
 from pydantic import BaseModel, Field, field_validator
 from pydantic.dataclasses import dataclass
-from label_studio_sdk._extensions.label_studio_tools.core.utils.io import get_local_path
+from label_studio_sdk._extensions.label_studio_tools.core.utils.io import (
+    get_local_path,
+    get_base64_content,
+)
 
 from adala.utils.token_counter import TokenCounter, get_token_counter
 from adala.utils.parse import (
@@ -231,22 +234,24 @@ class MessagesBuilder(BaseModel):
                         case MessageChunkType.PDF_URL:
                             # Add remaining text as text chunk
                             _add_current_text_as_chunk()
-
-                            # read the PDF file in base64
-                            local_path = get_local_path(field_value)
-                            with open(local_path, "rb") as pdf_file:
-                                pdf_data = pdf_file.read()
-                            base64_pdf_data = base64.b64encode(pdf_data).decode("utf-8")
-                            file_data = f"data:application/pdf;base64,{base64_pdf_data}"
-                            result.append(
-                                {
-                                    "type": "file",
-                                    "file": {
-                                        "filename": field_value.split("/")[-1],
-                                        "file_data": file_data,
-                                    },
-                                }
-                            )
+                            try:
+                                base64_pdf_data = get_base64_content(field_value)
+                                file_data = (
+                                    f"data:application/pdf;base64,{base64_pdf_data}"
+                                )
+                                result.append(
+                                    {
+                                        "type": "file",
+                                        "file": {
+                                            "filename": field_value.split("/")[-1],
+                                            "file_data": file_data,
+                                        },
+                                    }
+                                )
+                            except Exception as e:
+                                logger.error(
+                                    "Error getting base64 content for PDF: %s", e
+                                )
 
                         case MessageChunkType.IMAGE_URLS:
                             assert isinstance(
