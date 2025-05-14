@@ -236,7 +236,9 @@ class MessagesBuilder(BaseModel):
                             _add_current_text_as_chunk()
                             try:
                                 base64_pdf_data = get_base64_content(field_value)
-                                file_data = f"data:application/pdf;base64,{base64_pdf_data}"
+                                file_data = (
+                                    f"data:application/pdf;base64,{base64_pdf_data}"
+                                )
                                 result.append(
                                     {
                                         "type": "file",
@@ -244,8 +246,8 @@ class MessagesBuilder(BaseModel):
                                             "filename": field_value.split("/")[-1],
                                             "file_data": file_data,
                                         },
-                                        }
-                                    )
+                                    }
+                                )
                             except Exception as e:
                                 logger.error(
                                     "Error getting base64 content for PDF: %s", e
