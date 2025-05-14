@@ -436,13 +436,14 @@ def test_get_messages_with_all_default_fields():
 
 def test_split_message_into_chunks():
     # Test basic text-only template
-    result = MessagesBuilder.split_message_into_chunks(
+    m = MessagesBuilder()
+    result = m.split_message_into_chunks(
         "Hello {name}!", {"name": MessageChunkType.TEXT}, name="Alice"
     )
     assert result == [{"type": "text", "text": "Hello Alice!"}]
 
     # Test template with image URL
-    result = MessagesBuilder.split_message_into_chunks(
+    result = m.split_message_into_chunks(
         "Look at this {image}",
         {"image": MessageChunkType.IMAGE_URL},
         image="http://example.com/img.jpg",
@@ -453,7 +454,7 @@ def test_split_message_into_chunks():
     ]
 
     # Test mixed text and image template
-    result = MessagesBuilder.split_message_into_chunks(
+    result = m.split_message_into_chunks(
         "User {name} shared {image} yesterday",
         {"name": MessageChunkType.TEXT, "image": MessageChunkType.IMAGE_URL},
         name="Bob",
@@ -466,7 +467,7 @@ def test_split_message_into_chunks():
     ]
 
     # Test multiple occurrences of same field
-    result = MessagesBuilder.split_message_into_chunks(
+    result = m.split_message_into_chunks(
         "{name} is here. Hi {name}!", {"name": MessageChunkType.TEXT}, name="Dave"
     )
     assert result == [{"type": "text", "text": "Dave is here. Hi Dave!"}]
@@ -593,8 +594,8 @@ def test_split_message_into_chunks_with_image_urls():
     """Test the split_message_into_chunks static method with IMAGE_URLS type."""
     # Test with image URLs list
     image_urls = ["http://example.com/img1.jpg", "http://example.com/img2.jpg"]
-
-    result = MessagesBuilder.split_message_into_chunks(
+    m = MessagesBuilder()
+    result = m.split_message_into_chunks(
         "Check these images: {images}",
         {"images": MessageChunkType.IMAGE_URLS},
         images=image_urls,

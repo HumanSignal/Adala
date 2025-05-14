@@ -51,38 +51,38 @@ class LabelStudioSkill(TransformSkill):
     def label_interface(self) -> LabelInterface:
         return LabelInterface(self.label_config)
 
-    @cached_property
-    def ner_tags(self) -> List[ControlTag]:
-        # check if the input config has NER tag (<Labels> + <Text>), and return its `from_name` and `to_name`
-        control_tag_names = self.allowed_control_tags or list(
-            self.label_interface._controls.keys()
-        )
-        tags = []
-        for tag_name in control_tag_names:
-            tag = self.label_interface.get_control(tag_name)
-            if tag.tag.lower() in {"labels", "hypertextlabels"}:
-                if self.allowed_object_tags:
+    def get_ner_tags(self) -> List[ControlTag]:
+        ner_tags = self.label_interface.ner_tags
+        if self.allowed_control_tags:
+            # filter by control tags
+            ner_tags = [
+                tag for tag in ner_tags if tag.name in self.allowed_control_tags
+            ]
+            if self.allowed_object_tags:
+                # filter by object tags
+                ner_tags = [
+                    tag
+                    for tag in ner_tags
                     if all(
                         object_tag.tag in self.allowed_object_tags
                         for object_tag in tag.objects
-                    ):
-                        tags.append(tag)
-                else:
-                    tags.append(tag)
-        return tags
+                    )
+                ]
+        return ner_tags
 
-    @cached_property
-    def image_tags(self) -> List[ObjectTag]:
-        # check if any image tags are used as input variables
-        object_tag_names = self.allowed_object_tags or list(
-            self.label_interface._objects.keys()
-        )
-        tags = []
-        for tag_name in object_tag_names:
-            tag = self.label_interface.get_object(tag_name)
-            if tag.tag.lower() == "image":
-                tags.append(tag)
-        return tags
+    def get_image_tags(self) -> List[ObjectTag]:
+        image_tags = self.label_interface.image_tags
+        if self.allowed_object_tags:
+            image_tags = [
+                tag for tag in image_tags if tag.name in self.allowed_object_tags
+            ]
+        return image_tags
+
+    def get_pdf_tags(self) -> List[ObjectTag]:
+        pdf_tags = self.label_interface.pdf_tags
+        if self.allowed_object_tags:
+            pdf_tags = [tag for tag in pdf_tags if tag.name in self.allowed_object_tags]
+        return pdf_tags
 
     def __getstate__(self):
         """Exclude cached properties when pickling - otherwise the 'Agent' can not be serialized in celery"""
@@ -154,24 +154,44 @@ class LabelStudioSkill(TransformSkill):
         with json_schema_to_pydantic(self.field_schema) as ResponseModel:
             # special handling to flag image inputs if they exist
             if isinstance(runtime, AsyncLiteLLMVisionRuntime):
+                # by default, all input fields are text
                 input_field_types = defaultdict(lambda: MessageChunkType.TEXT)
-                for tag in self.image_tags:
-                    # these are the project variable names, NOT the label config tag names. TODO: pass this info from LSE to avoid recomputing it here.
+
+                # Process image tags if they exist
+                for tag in self.get_image_tags():
                     variables = extract_variable_name(tag.value)
                     if len(variables) != 1:
                         logger.warning(
-                            f"Image tag {tag.name} has multiple variables: {variables}. Cannot mark these variables as image inputs."
+                            "Image tag %s has multiple variables: %s. Cannot mark these variables as image inputs.",
+                            tag.name,
+                            variables,
                         )
                         continue
+
+                    # Check if this is a list of images or a single image
                     input_field_types[variables[0]] = (
                         MessageChunkType.IMAGE_URLS
-                        if tag.attr.get("valueList")
+                        if tag.is_image_list
                         else MessageChunkType.IMAGE_URL
                     )
 
+                # Process PDF tags if they exist
+                for tag in self.get_pdf_tags():
+                    variables = extract_variable_name(tag.value)
+                    if len(variables) != 1:
+                        logger.warning(
+                            "PDF tag %s has multiple variables: %s. Cannot mark these variables as PDF inputs.",
+                            tag.name,
+                            variables,
+                        )
+                        continue
+
+                    input_field_types[variables[0]] = MessageChunkType.PDF_URL
+
                 logger.debug(
-                    f"Using VisionRuntime with input field types: {input_field_types}"
+                    "Using VisionRuntime with input field types: %s", input_field_types
                 )
+
                 output = await runtime.batch_to_batch(
                     input,
                     input_template=self.input_template,
@@ -188,7 +208,7 @@ class LabelStudioSkill(TransformSkill):
                     instructions_template=self.instructions,
                     response_model=ResponseModel,
                 )
-            for ner_tag in self.ner_tags:
+            for ner_tag in self.get_ner_tags():
                 input_field_name = ner_tag.objects[0].value.lstrip("$")
                 output_field_name = ner_tag.name
                 quote_string_field_name = "text"

@@ -118,6 +118,7 @@ class MessageChunkType(Enum):
     TEXT = "text"
     IMAGE_URL = "image_url"
     IMAGE_URLS = "image_urls"
+    PDF_URL = "pdf_url"
 
 
 class TextMessageChunk(TypedDict):

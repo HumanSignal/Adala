@@ -6,11 +6,15 @@ Other methods are used internally and not intended for external use.
 """
 
 import logging
+import base64
+import requests
 from typing import Dict, Any, Optional, List, DefaultDict, Annotated, Union
 from collections import defaultdict
+from functools import cached_property
 
 from pydantic import BaseModel, Field, field_validator
 from pydantic.dataclasses import dataclass
+from label_studio_sdk._extensions.label_studio_tools.core.utils.io import get_local_path
 
 from adala.utils.token_counter import TokenCounter, get_token_counter
 from adala.utils.parse import (
@@ -61,6 +65,7 @@ class MessagesBuilder(BaseModel):
             - MessageChunkType.TEXT: Text content
             - MessageChunkType.IMAGE_URL: Image URL
             - MessageChunkType.IMAGE_URLS: List of image URLs
+            - MessageChunkType.PDF_URL: PDF document URL
         trim_to_fit_context (bool): Whether to trim messages to fit within model context limits.
             If True, the messages will be trimmed to fit within the model's context window (e.g. 128k tokens for GPT-4o).
             Warning: this will slow down the function.
@@ -86,6 +91,30 @@ class MessagesBuilder(BaseModel):
         [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": [{"type": "image_url", "image_url": {"url": "http://example.com/image.jpg"}}]}
+        ]
+        ```
+
+        Example with PDF:
+        ```python
+        builder = MessagesBuilder(
+            user_prompt_template="Analyze this document: {document}",
+            split_into_chunks=True,
+            input_field_types={"document": MessageChunkType.PDF_URL}
+        )
+
+        r = builder.get_messages({"document": "http://example.com/document.pdf"})
+        print(r.messages)
+        ```
+        Output:
+        ```
+        [
+            {"role": "user", "content": [
+                {"type": "text", "text": "Analyze this document: "},
+                {"type": "file", "file": {
+                    "file_id": "http://example.com/document.pdf",
+                    "format": "application/pdf"
+                }}]
+            }
         ]
         ```
     """
@@ -120,9 +149,8 @@ class MessagesBuilder(BaseModel):
             return defaultdict(lambda: MessageChunkType.TEXT)
         return value
 
-    @classmethod
     def split_message_into_chunks(
-        cls,
+        self,
         input_template: str,
         input_field_types: Dict[str, MessageChunkType],
         **payload,
@@ -198,6 +226,26 @@ class MessagesBuilder(BaseModel):
                             # Add image URL as new image chunk
                             result.append(
                                 {"type": "image_url", "image_url": {"url": field_value}}
+                            )
+
+                        case MessageChunkType.PDF_URL:
+                            # Add remaining text as text chunk
+                            _add_current_text_as_chunk()
+
+                            # read the PDF file in base64
+                            local_path = get_local_path(field_value)
+                            with open(local_path, "rb") as pdf_file:
+                                pdf_data = pdf_file.read()
+                            base64_pdf_data = base64.b64encode(pdf_data).decode("utf-8")
+                            file_data = f"data:application/pdf;base64,{base64_pdf_data}"
+                            result.append(
+                                {
+                                    "type": "file",
+                                    "file": {
+                                        "filename": field_value.split("/")[-1],
+                                        "file_data": file_data,
+                                    },
+                                }
                             )
 
                         case MessageChunkType.IMAGE_URLS:
