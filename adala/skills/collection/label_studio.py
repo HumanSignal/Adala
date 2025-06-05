@@ -64,10 +64,11 @@ class LabelStudioSkill(TransformSkill):
                     tag
                     for tag in ner_tags
                     if all(
-                        object_tag.tag in self.allowed_object_tags
+                        object_tag.name in self.allowed_object_tags
                         for object_tag in tag.objects
                     )
                 ]
+
         return ner_tags
 
     def get_image_tags(self) -> List[ObjectTag]:
@@ -208,15 +209,24 @@ class LabelStudioSkill(TransformSkill):
                     instructions_template=self.instructions,
                     response_model=ResponseModel,
                 )
+            df = pd.concat([input, output], axis=1)
             for ner_tag in self.get_ner_tags():
                 input_field_name = ner_tag.objects[0].value.lstrip("$")
                 output_field_name = ner_tag.name
                 quote_string_field_name = "text"
-                df = pd.concat([input, output], axis=1)
+
                 output = validate_output_format_for_ner_tag(
                     df, input_field_name, output_field_name
+                )
+                logger.debug(
+                    "Processing NER tag %s with input field %s and output field %s, output: %s",
+                    ner_tag.name,
+                    input_field_name,
+                    output_field_name,
+                    output,
                 )
                 output = extract_indices(
                     output, input_field_name, output_field_name, quote_string_field_name
                 )
+                logger.debug("After extract_indices, output: %s", output)
             return output
