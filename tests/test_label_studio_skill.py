@@ -5,6 +5,9 @@ import pandas as pd
 from adala.agents import Agent
 from label_studio_sdk.label_interface import LabelInterface
 from label_studio_sdk.label_interface.objects import PredictionValue
+from unittest.mock import AsyncMock, patch
+from adala.skills.collection.label_studio import LabelStudioSkill
+from adala.utils.internal_data import InternalDataFrame
 
 
 # NOTE: to recreate vcr cassettes, run the test with `pytest -vvv --record-mode=rewrite -k <test_name>` and change the assert values
@@ -569,3 +572,172 @@ def test_label_studio_skill_image_input():
     assert predictions._prompt_cost_usd[0] == 3.42e-05
     assert predictions._completion_cost_usd[0] == 4.8e-06
     assert predictions._total_cost_usd[0] == 3.9e-05
+
+
+@pytest.mark.asyncio
+async def test_label_studio_skill_aapply_with_ner_processing():
+    """Test aapply function with mocked output before NER processing loop"""
+    from label_studio_sdk.label_interface.interface import LabelInterface
+
+    # Input data
+    clinical_note = """Complaints of frequent urination and burning. Urinalysis confirms UTI. Prescribed nitrofurantoin 100 mg BID for 7 days."""
+    input_df = pd.DataFrame({"clinical_note": [clinical_note]})
+    # Mocked intermediate output (before NER processing)
+    mocked_intermediate_output = pd.DataFrame(
+        [
+            {
+                "medication": [
+                    {
+                        "start": 66,
+                        "end": 76,
+                        "labels": ["medication"],
+                        "text": "nitrofurantoin",
+                    }
+                ],
+                "dosage": [
+                    {"start": 77, "end": 80, "labels": ["dosage"], "text": "100"}
+                ],
+                "dosage_unit": [
+                    {"start": 81, "end": 83, "labels": ["dosage_unit"], "text": "mg"}
+                ],
+                "frequency": [
+                    {"start": 84, "end": 87, "labels": ["frequency"], "text": "BID"}
+                ],
+                "strength": [
+                    {"start": 77, "end": 80, "labels": ["strength"], "text": "100"}
+                ],
+                "medications_info": "Prescribed for 7 days",
+            }
+        ]
+    )
+
+    # Label config
+    label_config = """
+<View name="root">
+  <Style>
+    .label-group-title {
+      font-weight: bold;
+      margin: 4px 0;
+    }
+  </Style>
+
+  <!-- Independent labels, each with its own class -->
+  <View name="medications" style="padding: 0 1em; margin: 0.25em 0; background: #F1F1F1; position: sticky; top: 0; border-radius: 3px; z-index: 100">
+    <Text name="medical_labels_title" value="Medical Labels" style="font-weight: bold;" />
+
+    <Labels name="medication" toName="text" showInline="true">
+      <Label value="medication" background="#00dbaf"/>
+    </Labels>
+
+    <Labels name="dosage" toName="text" showInline="true">
+      <Label value="dosage" background="#3357ff"/>
+    </Labels>
+
+    <Labels name="dosage_unit" toName="text" showInline="true">
+      <Label value="dosage_unit" background="#ffb400"/>
+    </Labels>
+
+    <Labels name="strength" toName="text" showInline="true">
+      <Label value="strength" background="#ff6347"/>
+    </Labels>
+
+    <Labels name="frequency" toName="text" showInline="true">
+      <Label value="frequency" background="#20b2aa"/>
+    </Labels>
+  </View>
+
+  <Text name="text" value="$clinical_note"/>
+
+  <TextArea name="medications_info" toName="text" placeholder="Enter extracted medication info here..."
+            rows="5" maxSubmissions="1"/>
+</View>
+    """
+
+    # Input template
+    input_template = """
+Annotate the following data:
+
+# clinical_note
+{clinical_note}
+"""
+    li = LabelInterface(label_config)
+    assert li.ner_tags
+
+    # Create the skill
+    skill = LabelStudioSkill(
+        label_config=label_config,
+        input_template=input_template,
+        allowed_control_tags=[
+            "medication",
+            "dosage",
+            "dosage_unit",
+            "frequency",
+            "strength",
+        ],
+        allowed_object_tags=["text"],
+    )
+
+    # Create mock runtime
+    mock_runtime = AsyncMock()
+
+    # Mock the batch_to_batch method to return our intermediate output
+    mock_runtime.batch_to_batch.return_value = mocked_intermediate_output
+
+    # Convert input to InternalDataFrame
+    input_internal_df = InternalDataFrame(input_df)
+
+    # Call aapply with mocked runtime
+    result = await skill.aapply(input_internal_df, mock_runtime)
+
+    # Verify that batch_to_batch was called with correct parameters
+    mock_runtime.batch_to_batch.assert_called_once()
+
+    # Print all columns and full data without truncation
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.max_rows", None)
+    pd.set_option("display.width", None)
+    pd.set_option("display.max_colwidth", None)
+    print("\nFull DataFrame:")
+    print(result)
+
+    # Also show as dictionary for alternative view
+    print("\nAs Dictionary:")
+    print(result.to_dict(orient="records"))
+
+    # Extract text from clinical_note using indices in result
+    for i, row in result.iterrows():
+
+        # Check medication text
+        for med in row["medication"]:
+            extracted_text = clinical_note[med["start"] : med["end"]]
+            assert (
+                extracted_text == med["text"]
+            ), f"Medication text mismatch: {extracted_text} != {med['text']}"
+
+        # Check dosage text
+        for dose in row["dosage"]:
+            extracted_text = clinical_note[dose["start"] : dose["end"]]
+            assert (
+                extracted_text == dose["text"]
+            ), f"Dosage text mismatch: {extracted_text} != {dose['text']}"
+
+        # Check dosage unit text
+        for unit in row["dosage_unit"]:
+            extracted_text = clinical_note[unit["start"] : unit["end"]]
+            assert (
+                extracted_text == unit["text"]
+            ), f"Dosage unit text mismatch: {extracted_text} != {unit['text']}"
+
+        # Check frequency text
+        for freq in row["frequency"]:
+            extracted_text = clinical_note[freq["start"] : freq["end"]]
+            assert (
+                extracted_text == freq["text"]
+            ), f"Frequency text mismatch: {extracted_text} != {freq['text']}"
+
+        # Check strength text
+        for strength in row["strength"]:
+            extracted_text = clinical_note[strength["start"] : strength["end"]]
+            assert (
+                extracted_text == strength["text"]
+            ), f"Strength text mismatch: {extracted_text} != {strength['text']}"
