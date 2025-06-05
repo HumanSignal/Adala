@@ -218,13 +218,6 @@ class LabelStudioSkill(TransformSkill):
                 output = validate_output_format_for_ner_tag(
                     df, input_field_name, output_field_name
                 )
-                logger.debug(
-                    "Processing NER tag %s with input field %s and output field %s, output: %s",
-                    ner_tag.name,
-                    input_field_name,
-                    output_field_name,
-                    output,
-                )
                 output = extract_indices(
                     output, input_field_name, output_field_name, quote_string_field_name
                 )
