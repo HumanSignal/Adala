@@ -221,5 +221,4 @@ class LabelStudioSkill(TransformSkill):
                 output = extract_indices(
                     output, input_field_name, output_field_name, quote_string_field_name
                 )
-                logger.debug("After extract_indices, output: %s", output)
             return output
