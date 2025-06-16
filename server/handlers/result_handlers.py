@@ -212,6 +212,7 @@ class LSEHandler(ResultHandler):
             self.client.prompts.batch_predictions(
                 modelrun_id=self.modelrun_id,
                 results=result_batch,
+                num_predictions=num_predictions
             )
             logger.info(f"LSEHandler sent {num_predictions} predictions to LSE")
         else:
@@ -229,6 +230,7 @@ class LSEHandler(ResultHandler):
             self.client.prompts.batch_failed_predictions(
                 modelrun_id=self.modelrun_id,
                 failed_predictions=error_batch,
+                num_failed_predictions=num_failed_predictions
             )
             logger.info(
                 f"LSEHandler sent {num_failed_predictions} failed predictions to LSE"
