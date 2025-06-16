@@ -134,13 +134,12 @@ jobs:
           upstream_prs_urls: "${{ steps.upstream-prs.outputs.upstream_prs_urls }}"
 
       - name: Add PR Assignees
-        if: steps.upstream-prs.outputs.assignees
         uses: ./.github/actions-hub/actions/github-add-pull-request-assignees
         continue-on-error: true
         with:
           github_token: ${{ secrets.GIT_PAT }}
           pullrequest_number: "${{ steps.get-pr.outputs.number }}"
-          assignees: "${{ steps.upstream-prs.outputs.assignees }}"
+          assignees: "${{ steps.upstream-prs.outputs.assignees }},${{ github.event.client_payload.github.actor }}"
 
       - name: Add PR state Labels
         if: steps.upstream-prs.outputs.status == 'stale'
