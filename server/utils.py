@@ -389,13 +389,7 @@ async def ensure_worker_pool_input_topic():
     topic_name = "worker_pool_input"
     required_partitions = 50
 
-    logger.info(
-        f"Ensuring worker pool input topic {topic_name} has {required_partitions} partitions..."
-    )
     await ensure_topic_async(topic_name, required_partitions)
-    logger.info(
-        f"Worker pool input topic {topic_name} is ready with {required_partitions} partitions"
-    )
 
 
 def ensure_worker_pool_topics_sync():
