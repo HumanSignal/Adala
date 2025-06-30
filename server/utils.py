@@ -187,59 +187,170 @@ def get_output_topic_name(job_id: str):
     return topic_name
 
 
-def ensure_topic(topic_name: str):
+def ensure_topic(topic_name: str, num_partitions: int = 1):
+    """Ensure a Kafka topic exists (sync version)"""
+    try:
+        # Try to run in current event loop if one exists
+        loop = asyncio.get_running_loop()
+        # If we're in an event loop, create a task
+        task = asyncio.create_task(_ensure_topic_async(topic_name, num_partitions))
+        # Wait for it to complete
+        while not task.done():
+            pass
+        if task.exception():
+            raise task.exception()
+    except RuntimeError:
+        # No event loop running, use asyncio.run
+        asyncio.run(_ensure_topic_async(topic_name, num_partitions))
+
+
+async def ensure_topic_async(topic_name: str, num_partitions: int = 1):
+    """Ensure a Kafka topic exists (async version)"""
+    await _ensure_topic_async(topic_name, num_partitions)
+
+
+async def _ensure_topic_async(topic_name: str, num_partitions: int = 1):
+    """Internal async function to ensure topic exists with correct partition count"""
     settings = Settings()
     kafka_kwargs = settings.kafka.to_kafka_kwargs()
     retention_ms = settings.kafka.retention_ms
 
-    async def _ensure_topic():
-        admin_client = AIOKafkaAdminClient(
-            **kafka_kwargs,
-            client_id="topic_creator",
-        )
+    admin_client = AIOKafkaAdminClient(
+        **kafka_kwargs,
+        client_id="topic_creator",
+    )
+
+    try:
+        await admin_client.start()
+
+        # Check if topic exists and get its metadata
+        topic_exists = False
+        current_partitions = 0
 
         try:
-            await admin_client.start()
+            topic_metadata = await admin_client.describe_topics([topic_name])
+            if topic_name in topic_metadata:
+                topic_exists = True
+                current_partitions = len(topic_metadata[topic_name].partitions)
+                logger.info(
+                    f"Topic {topic_name} exists with {current_partitions} partitions"
+                )
+        except Exception as e:
+            logger.debug(f"Error checking topic {topic_name}: {e}")
+            # Topic doesn't exist or other error, proceed with creation
+            pass
+
+        # If topic exists but has fewer partitions than required, delete and recreate
+        if topic_exists and current_partitions < num_partitions:
+            logger.warning(
+                f"Topic {topic_name} has {current_partitions} partitions, but {num_partitions} required. Recreating..."
+            )
+
+            try:
+                # Delete the existing topic
+                await admin_client.delete_topics([topic_name])
+                logger.info(f"Deleted topic {topic_name} with insufficient partitions")
+
+                # Wait a bit for deletion to complete
+                await asyncio.sleep(2)
+
+                # Reset flag to create new topic
+                topic_exists = False
+
+            except UnknownTopicOrPartitionError:
+                logger.warning(
+                    f"Topic {topic_name} does not exist during deletion attempt"
+                )
+                topic_exists = False
+            except Exception as e:
+                logger.error(f"Error deleting topic {topic_name}: {e}")
+                # Continue anyway, maybe we can still create it
+                topic_exists = False
+
+        # Create topic if it doesn't exist or was just deleted
+        if not topic_exists or current_partitions < num_partitions:
             topic = NewTopic(
                 name=topic_name,
-                num_partitions=1,
+                num_partitions=num_partitions,
                 replication_factor=1,
                 topic_configs={"retention.ms": str(retention_ms)},
             )
 
             try:
                 await admin_client.create_topics([topic])
+                logger.info(
+                    f"Created topic {topic_name} with {num_partitions} partitions"
+                )
             except TopicAlreadyExistsError:
-                # we shouldn't hit this case when KAFKA_CFG_AUTO_CREATE_TOPICS=false unless there is a legitimate name collision, so should raise here after testing
-                pass
-        finally:
-            await admin_client.close()
+                # Topic was created between our check and creation attempt
+                logger.info(f"Topic {topic_name} already exists (created concurrently)")
+                # Verify it has the right number of partitions
+                try:
+                    topic_metadata = await admin_client.describe_topics([topic_name])
+                    if topic_name in topic_metadata:
+                        final_partitions = len(topic_metadata[topic_name].partitions)
+                        if final_partitions < num_partitions:
+                            logger.error(
+                                f"Topic {topic_name} was created with {final_partitions} partitions, but {num_partitions} required!"
+                            )
+                        else:
+                            logger.info(
+                                f"Topic {topic_name} has correct partition count: {final_partitions}"
+                            )
+                except Exception as e:
+                    logger.warning(
+                        f"Error verifying final partition count for {topic_name}: {e}"
+                    )
+        else:
+            logger.info(
+                f"Topic {topic_name} already has sufficient partitions ({current_partitions} >= {num_partitions})"
+            )
 
-    asyncio.run(_ensure_topic())
+    finally:
+        await admin_client.close()
 
 
 def delete_topic(topic_name: str):
+    """Delete a Kafka topic (sync version)"""
+    try:
+        # Try to run in current event loop if one exists
+        loop = asyncio.get_running_loop()
+        # If we're in an event loop, create a task
+        task = asyncio.create_task(_delete_topic_async(topic_name))
+        # Wait for it to complete
+        while not task.done():
+            pass
+        if task.exception():
+            raise task.exception()
+    except RuntimeError:
+        # No event loop running, use asyncio.run
+        asyncio.run(_delete_topic_async(topic_name))
+
+
+async def delete_topic_async(topic_name: str):
+    """Delete a Kafka topic (async version)"""
+    await _delete_topic_async(topic_name)
+
+
+async def _delete_topic_async(topic_name: str):
+    """Internal async function to delete topic"""
     settings = Settings()
     kafka_kwargs = settings.kafka.to_kafka_kwargs()
 
-    async def _delete_topic():
-        admin_client = AIOKafkaAdminClient(
-            **kafka_kwargs,
-            client_id="topic_deleter",
-        )
+    admin_client = AIOKafkaAdminClient(
+        **kafka_kwargs,
+        client_id="topic_deleter",
+    )
 
+    try:
+        await admin_client.start()
         try:
-            await admin_client.start()
-            try:
-                await admin_client.delete_topics([topic_name])
-            except UnknownTopicOrPartitionError:
-                logger.error(
-                    f"Topic {topic_name} does not exist and cannot be deleted."
-                )
-        finally:
-            await admin_client.close()
-
-    asyncio.run(_delete_topic())
+            await admin_client.delete_topics([topic_name])
+            logger.info(f"Successfully deleted topic: {topic_name}")
+        except UnknownTopicOrPartitionError:
+            logger.warning(f"Topic {topic_name} does not exist and cannot be deleted.")
+    finally:
+        await admin_client.close()
 
 
 def init_logger(name, level=LOG_LEVEL):
@@ -256,3 +367,37 @@ def init_logger(name, level=LOG_LEVEL):
     logger = logging.getLogger(name)
     logger.setLevel(level)
     return logger
+
+
+async def ensure_worker_pool_topics():
+    """Ensure all worker pool topics exist with appropriate partition counts"""
+    topics_config = [
+        (
+            "worker_pool_input",
+            50,
+        ),  # Multiple partitions for load balancing across workers
+        ("worker_pool_output", 1),  # Single partition for output
+    ]
+
+    for topic_name, num_partitions in topics_config:
+        await ensure_topic_async(topic_name, num_partitions)
+        logger.info(f"Ensured topic {topic_name} with {num_partitions} partitions")
+
+
+async def ensure_worker_pool_input_topic():
+    """Ensure worker pool input topic exists with exactly 50 partitions for proper load balancing"""
+    topic_name = "worker_pool_input"
+    required_partitions = 50
+
+    logger.info(
+        f"Ensuring worker pool input topic {topic_name} has {required_partitions} partitions..."
+    )
+    await ensure_topic_async(topic_name, required_partitions)
+    logger.info(
+        f"Worker pool input topic {topic_name} is ready with {required_partitions} partitions"
+    )
+
+
+def ensure_worker_pool_topics_sync():
+    """Synchronous version of ensure_worker_pool_topics"""
+    asyncio.run(ensure_worker_pool_topics())

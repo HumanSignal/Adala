@@ -1,0 +1,370 @@
+# AI-MEMORY: OutputProcessor class that receives predictions via shared async queue
+# Benefits: 1) No Kafka needed for output 2) Clean separation of concerns 3) Integrates with LSE per-batch API keys
+# 4) Runs alongside WorkerProcessor with shared async queue communication 5) Efficient LSE client caching per API key
+
+import asyncio
+import hashlib
+import logging
+import os
+import time
+from typing import Optional, Dict, Any
+from datetime import datetime, timedelta
+
+from server.handlers.result_handlers import ResultHandler, LSEHandler
+
+logger = logging.getLogger(__name__)
+
+class LSEClientCache:
+    """Cache for LSE clients by API key with expiration"""
+    
+    def __init__(self, expiration_hours: int = 1):
+        self.clients: Dict[str, Dict[str, Any]] = {}  # api_key_hash -> {client, last_used, api_key}
+        self.expiration_hours = expiration_hours
+        self.cleanup_interval = 300  # 5 minutes
+        self.last_cleanup = datetime.now()
+    
+    def _hash_api_key(self, api_key: str, modelrun_id: int = None) -> str:
+        """Generate hash for API key and modelrun_id combination"""
+        key_data = f"{api_key}:{modelrun_id}" if modelrun_id else api_key
+        return hashlib.md5(key_data.encode()).hexdigest()[:12]
+    
+    async def get_client(self, api_key: str, url: str = None, modelrun_id: int = None) -> Optional[LSEHandler]:
+        """Get or create LSE client for the given API key and modelrun_id combination"""
+        if not api_key:
+            return None
+        
+        if not modelrun_id:
+            logger.error("No modelrun_id provided - cannot create LSE client")
+            return None
+        
+        # Clean up expired clients periodically
+        await self._cleanup_expired_clients()
+        
+        cache_key = self._hash_api_key(api_key, modelrun_id)
+        
+        # Check if we have a cached client
+        if cache_key in self.clients:
+            client_info = self.clients[cache_key]
+            client_info['last_used'] = datetime.now()
+            logger.debug(f"Using cached LSE client for cache key {cache_key} (modelrun_id: {modelrun_id})")
+            return client_info['client']
+        
+        # Create new client
+        try:
+            if not url:
+                logger.error(f"No URL provided for LSE client creation (modelrun_id: {modelrun_id})")
+                return None
+            
+            client = LSEHandler(
+                api_key=api_key,
+                url=url,
+                modelrun_id=modelrun_id
+            )
+            
+            # Cache the client
+            self.clients[cache_key] = {
+                'client': client,
+                'last_used': datetime.now(),
+                'modelrun_id': modelrun_id,  # Store for debugging
+            }
+            
+            logger.info(f"Created new LSE client for cache key {cache_key} (modelrun_id: {modelrun_id})")
+            return client
+            
+        except Exception as e:
+            logger.error(f"Failed to create LSE client for cache key {cache_key} (modelrun_id: {modelrun_id}): {e}")
+            return None
+    
+    async def _cleanup_expired_clients(self):
+        """Remove expired clients from cache"""
+        now = datetime.now()
+        
+        # Only cleanup every cleanup_interval seconds
+        if (now - self.last_cleanup).total_seconds() < self.cleanup_interval:
+            return
+        
+        self.last_cleanup = now
+        expiration_time = now - timedelta(hours=self.expiration_hours)
+        
+        expired_keys = []
+        for api_key_hash, client_info in self.clients.items():
+            if client_info['last_used'] < expiration_time:
+                expired_keys.append(api_key_hash)
+        
+        for api_key_hash in expired_keys:
+            del self.clients[api_key_hash]
+            logger.info(f"Removed expired LSE client for cache key {api_key_hash}")
+        
+        if expired_keys:
+            logger.info(f"Cleaned up {len(expired_keys)} expired LSE clients")
+    
+    def get_cache_status(self) -> Dict[str, Any]:
+        """Get cache status for monitoring"""
+        now = datetime.now()
+        return {
+            'total_clients': len(self.clients),
+            'client_details': {
+                cache_key: {
+                    'age_seconds': (now - info['last_used']).total_seconds(),
+                    'modelrun_id': info.get('modelrun_id', 'unknown')
+                }
+                for cache_key, info in self.clients.items()
+            },
+            'expiration_hours': self.expiration_hours,
+            'last_cleanup': self.last_cleanup
+        }
+
+class OutputProcessor:
+    """Processor that receives predictions from WorkerProcessor via shared async queue and sends to LSE"""
+    
+    def __init__(self, prediction_queue: Optional[asyncio.Queue] = None):
+        self.processor_id = f"output_processor_{os.getpid()}"
+        self.is_running = False
+        self.lse_client_cache = LSEClientCache(expiration_hours=1)
+        self.processed_batches = 0
+        self.last_processed_at = None
+        self.prediction_queue = prediction_queue or asyncio.Queue(maxsize=100)  # Bounded queue
+        
+        logger.info(f"Initialized output processor: {self.processor_id}")
+    
+    async def initialize(self):
+        """Initialize the output processor"""
+        logger.info(f"Output processor {self.processor_id}: Initialized successfully")
+    
+    async def run_forever(self):
+        """Main loop that processes predictions from the async queue"""
+        self.is_running = True
+        logger.info(f"Output processor {self.processor_id}: Starting main loop")
+        
+        try:
+            while self.is_running:
+                try:
+                    # Wait for predictions from the queue with timeout
+                    prediction_data = await asyncio.wait_for(
+                        self.prediction_queue.get(), 
+                        timeout=1.0  # 1 second timeout to check is_running periodically
+                    )
+                    
+                    # Process the prediction
+                    await self._process_prediction(prediction_data)
+                    
+                    # Mark task as done
+                    self.prediction_queue.task_done()
+                    
+                except asyncio.TimeoutError:
+                    # No predictions available, continue loop to check is_running
+                    continue
+                except Exception as e:
+                    logger.error(f"Output processor {self.processor_id}: Error processing prediction: {e}")
+                    
+        except asyncio.CancelledError:
+            logger.info(f"Output processor {self.processor_id}: Main loop cancelled")
+        except Exception as e:
+            logger.error(f"Output processor {self.processor_id}: Error in main loop: {e}")
+        finally:
+            await self.cleanup()
+    
+    async def _process_prediction(self, prediction_data: Dict[str, Any]):
+        """Process a single prediction batch with per-batch API key handling"""
+        try:
+            batch_id = prediction_data.get('batch_id', 'unknown')
+            predictions = prediction_data.get('predictions')
+            api_key = prediction_data.get('api_key')
+            url = prediction_data.get('url')
+            modelrun_id = prediction_data.get('modelrun_id')
+            
+            # Debug: Log what we received from the queue
+            logger.info(f"Output processor {self.processor_id}: Received from queue - batch_id: {batch_id}, api_key: {'present' if api_key else 'missing'}, url: {'present' if url else 'missing'}, modelrun_id: {modelrun_id}")
+            logger.info(f"Output processor {self.processor_id}: Prediction data keys: {list(prediction_data.keys())}")
+            
+            # Check if we have an API key
+            if not api_key:
+                logger.error(f"Output processor {self.processor_id}: No API key provided for batch {batch_id} - cannot send to LSE")
+                return
+            
+            # Check if we have a URL
+            if not url:
+                logger.error(f"Output processor {self.processor_id}: No URL provided for batch {batch_id} - cannot send to LSE")
+                return
+            
+            # Check if we have a modelrun_id
+            if not modelrun_id:
+                logger.error(f"Output processor {self.processor_id}: No modelrun_id provided for batch {batch_id} - cannot send to LSE")
+                return
+            
+            # Check if predictions is None or empty more carefully
+            if predictions is None:
+                logger.warning(f"Output processor {self.processor_id}: No predictions in batch {batch_id} (predictions is None)")
+                return
+            
+            # Handle DataFrame predictions properly
+            if hasattr(predictions, 'empty'):
+                # It's a DataFrame-like object
+                if predictions.empty:
+                    logger.warning(f"Output processor {self.processor_id}: Empty predictions DataFrame in batch {batch_id}")
+                    return
+            elif isinstance(predictions, (list, tuple)):
+                # It's a list or tuple
+                if len(predictions) == 0:
+                    logger.warning(f"Output processor {self.processor_id}: Empty predictions list in batch {batch_id}")
+                    return
+            elif not predictions:
+                # Fallback for other falsy values
+                logger.warning(f"Output processor {self.processor_id}: No predictions in batch {batch_id}")
+                return
+            
+            logger.info(f"Output processor {self.processor_id}: Processing batch {batch_id} with predictions (modelrun_id: {modelrun_id})")
+            
+            # Convert predictions to the format expected by result handlers
+            records = self._convert_predictions_to_records(predictions)
+            
+            # Check if we got valid records after conversion
+            if not records or len(records) == 0:
+                logger.warning(f"Output processor {self.processor_id}: No valid records after conversion for batch {batch_id}")
+                return
+            
+            logger.info(f"Output processor {self.processor_id}: Converted to {len(records)} records for batch {batch_id}")
+            
+            # Get LSE client for this API key with URL and modelrun_id
+            lse_client = await self.lse_client_cache.get_client(api_key, url=url, modelrun_id=modelrun_id)
+            if not lse_client:
+                logger.error(f"Output processor {self.processor_id}: Failed to get LSE client for batch {batch_id}")
+                return
+            
+            # Send results to LSE
+            await self._handle_results(lse_client, records)
+            
+            self.processed_batches += 1
+            self.last_processed_at = datetime.now()
+            
+            logger.info(f"Output processor {self.processor_id}: Successfully processed batch {batch_id}")
+            
+        except Exception as e:
+            logger.error(f"Output processor {self.processor_id}: Error processing prediction: {e}")
+            logger.error(f"Output processor {self.processor_id}: Prediction data type: {type(prediction_data.get('predictions', None))}")
+            if hasattr(prediction_data.get('predictions', None), 'shape'):
+                logger.error(f"Output processor {self.processor_id}: Prediction shape: {prediction_data['predictions'].shape}")
+    
+    def _convert_predictions_to_records(self, predictions) -> list:
+        """Convert predictions to records format expected by result handlers"""
+        try:
+            logger.debug(f"Converting predictions of type: {type(predictions)}")
+            
+            # Handle None case
+            if predictions is None:
+                logger.warning("Predictions is None, returning empty list")
+                return []
+            
+            # If predictions is already a list of records, return as-is
+            if isinstance(predictions, list):
+                logger.debug(f"Predictions is already a list with {len(predictions)} items")
+                return predictions
+            
+            # If predictions is a DataFrame-like object, convert to records
+            if hasattr(predictions, 'to_dict'):
+                logger.debug("Converting DataFrame-like object to records")
+                records = predictions.to_dict('records')
+                logger.debug(f"Converted to {len(records)} records")
+                return records
+            
+            # If predictions has a records attribute, use it
+            if hasattr(predictions, 'records'):
+                logger.debug("Using predictions.records attribute")
+                records = predictions.records
+                if isinstance(records, list):
+                    return records
+                else:
+                    logger.warning(f"predictions.records is not a list, type: {type(records)}")
+                    return [records] if records else []
+            
+            # If predictions has a values attribute (like numpy array), convert
+            if hasattr(predictions, 'values'):
+                logger.debug("Converting array-like predictions to records")
+                # Convert to list and wrap each item as a record
+                values = predictions.values.tolist() if hasattr(predictions.values, 'tolist') else list(predictions.values)
+                return [{'prediction': val} for val in values]
+            
+            # Fallback: wrap in a list if it's a single prediction
+            logger.debug("Using fallback: wrapping single prediction in list")
+            return [predictions] if predictions else []
+            
+        except Exception as e:
+            logger.error(f"Error converting predictions to records: {e}")
+            logger.error(f"Predictions type: {type(predictions)}")
+            if hasattr(predictions, '__dict__'):
+                logger.error(f"Predictions attributes: {list(predictions.__dict__.keys())}")
+            return []
+    
+    async def _handle_results(self, result_handler: ResultHandler, records: list):
+        """Handle results using the result handler, with async support"""
+        try:
+            logger.info(f"Output processor {self.processor_id}: Sending {len(records)} records to LSE")
+            
+            # Check if the handler is async-compatible
+            if asyncio.iscoroutinefunction(result_handler.__call__):
+                await result_handler(records)
+                logger.info(f"Output processor {self.processor_id}: Successfully sent records via async handler")
+            else:
+                # Run sync handler in executor to avoid blocking
+                loop = asyncio.get_event_loop()
+                await loop.run_in_executor(None, result_handler, records)
+                logger.info(f"Output processor {self.processor_id}: Successfully sent records via sync handler")
+                
+        except Exception as e:
+            logger.error(f"Output processor {self.processor_id}: Error handling results: {e}")
+            # Log the first few records for debugging
+            if records:
+                logger.error(f"Output processor {self.processor_id}: Sample record: {records[0] if records else 'None'}")
+            raise
+    
+    async def cleanup(self):
+        """Clean up resources"""
+        self.is_running = False
+        
+        # Process any remaining items in the queue
+        try:
+            while not self.prediction_queue.empty():
+                try:
+                    prediction_data = self.prediction_queue.get_nowait()
+                    await self._process_prediction(prediction_data)
+                    self.prediction_queue.task_done()
+                except asyncio.QueueEmpty:
+                    break
+                except Exception as e:
+                    logger.error(f"Error processing remaining prediction during cleanup: {e}")
+        except Exception as e:
+            logger.error(f"Error during queue cleanup: {e}")
+        
+        logger.info(f"Output processor {self.processor_id}: Cleaned up")
+    
+    def get_status(self) -> Dict[str, Any]:
+        """Get current status of the processor with detailed cache information"""
+        cache_info = {
+            'total_clients': len(self.lse_client_cache.clients),
+            'client_ages': {},
+            'expiration_hours': self.lse_client_cache.expiration_hours
+        }
+        
+        # Get cache age information
+        current_time = time.time()
+        for key, (client, timestamp) in self.lse_client_cache.clients.items():
+            age_hours = (current_time - timestamp) / 3600
+            cache_info['client_ages'][key] = round(age_hours, 2)
+        
+        status = {
+            'processor_id': self.processor_id,
+            'is_running': self.is_running,
+            'processed_batches': self.processed_batches,
+            'last_processed_at': self.last_processed_at.isoformat() if self.last_processed_at else None,
+            'queue_size': self.prediction_queue.qsize() if self.prediction_queue else 0,
+            'queue_maxsize': self.prediction_queue.maxsize if self.prediction_queue else 0,
+            'queue_empty': self.prediction_queue.empty() if self.prediction_queue else True,
+            'queue_full': self.prediction_queue.full() if self.prediction_queue else False,
+            'lse_client_cache': cache_info
+        }
+        
+        logger.debug(f"OutputProcessor {self.processor_id} status: {status}")
+        return status
+
+# Global output processor instance (one per worker)
+output_processor = None 
