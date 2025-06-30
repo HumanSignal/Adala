@@ -117,12 +117,6 @@ client = AdalaClient()
 
 # Submit batch for processing
 result = client.submit_worker_pool_batch(model_run, data)
-
-# Monitor batch status
-status = client.get_worker_pool_batch_status(result['batch_id'])
-
-# Check worker pool health
-health = client.get_worker_pool_health()
 ```
 
 ## Configuration

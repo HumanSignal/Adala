@@ -31,6 +31,30 @@ class LSEClientCache:
         key_data = f"{api_key}:{modelrun_id}" if modelrun_id else api_key
         return hashlib.md5(key_data.encode()).hexdigest()[:12]
 
+    async def _create_client(
+        self, cache_key: str, api_key: str, url: str, modelrun_id: int
+    ) -> LSEHandler:
+        """Create a new LSE client"""
+        if not url:
+            logger.error(
+                f"No URL provided for LSE client creation (modelrun_id: {modelrun_id})"
+            )
+            return None
+
+        client = LSEHandler(api_key=api_key, url=url, modelrun_id=modelrun_id)
+
+        # Cache the client
+        self.clients[cache_key] = {
+            "client": client,
+            "last_used": datetime.now(),
+            "modelrun_id": modelrun_id,  # Store for debugging
+        }
+
+        logger.info(
+            f"Created new LSE client for cache key {cache_key} (modelrun_id: {modelrun_id})"
+        )
+        return client
+
     async def get_client(
         self, api_key: str, url: str = None, modelrun_id: int = None
     ) -> Optional[LSEHandler]:
@@ -49,33 +73,19 @@ class LSEClientCache:
 
         # Check if we have a cached client
         if cache_key in self.clients:
-            client_info = self.clients[cache_key]
-            client_info["last_used"] = datetime.now()
+            cached_client = self.clients[cache_key]
+            # If the client is no longer ready, recreate it - this fallback is unlikely to happen
+            if not cached_client["client"].ready():
+                await self._create_client(cache_key, api_key, url, modelrun_id)
+            cached_client["last_used"] = datetime.now()
             logger.debug(
                 f"Using cached LSE client for cache key {cache_key} (modelrun_id: {modelrun_id})"
             )
-            return client_info["client"]
+            return cached_client["client"]
 
         # Create new client
         try:
-            if not url:
-                logger.error(
-                    f"No URL provided for LSE client creation (modelrun_id: {modelrun_id})"
-                )
-                return None
-
-            client = LSEHandler(api_key=api_key, url=url, modelrun_id=modelrun_id)
-
-            # Cache the client
-            self.clients[cache_key] = {
-                "client": client,
-                "last_used": datetime.now(),
-                "modelrun_id": modelrun_id,  # Store for debugging
-            }
-
-            logger.info(
-                f"Created new LSE client for cache key {cache_key} (modelrun_id: {modelrun_id})"
-            )
+            client = await self._create_client(cache_key, api_key, url, modelrun_id)
             return client
 
         except Exception as e:
@@ -117,10 +127,7 @@ class OutputProcessor:
         self.lse_client_cache = LSEClientCache(expiration_hours=1)
         self.processed_batches = 0
         self.last_processed_at = None
-        self.prediction_queue = prediction_queue or asyncio.Queue(
-            maxsize=100
-        )  # Bounded queue
-
+        self.prediction_queue = prediction_queue
         logger.info(f"Initialized output processor: {self.processor_id}")
 
     async def initialize(self):
@@ -138,7 +145,7 @@ class OutputProcessor:
                     # Wait for predictions from the queue with timeout
                     prediction_data = await asyncio.wait_for(
                         self.prediction_queue.get(),
-                        timeout=1.0,  # 1 second timeout to check is_running periodically
+                        timeout=1.0,
                     )
 
                     # Process the prediction
@@ -148,7 +155,7 @@ class OutputProcessor:
                     self.prediction_queue.task_done()
 
                 except asyncio.TimeoutError:
-                    # No predictions available, continue loop to check is_running
+                    # No predictions available, continue loop
                     continue
                 except Exception as e:
                     logger.error(
@@ -292,7 +299,7 @@ class OutputProcessor:
             # Log the first few records for debugging
             if records:
                 logger.error(
-                    f"Output processor {self.processor_id}: Sample record: {records[0] if records else 'None'}"
+                    f"Output processor {self.processor_id}: Sample record: {records[0]}"
                 )
             raise
 

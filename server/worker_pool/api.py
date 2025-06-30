@@ -71,9 +71,7 @@ async def submit_batch(request: SubmitBatchRequest) -> SubmitBatchResponse:
             batch_id=batch_id,
             skills=request.skills,
             runtime_params=request.runtime_params,
-            batch_size=request.batch_size,
             input_topic="worker_pool_input",
-            output_topic="worker_pool_output",
             records=request.records,
             api_key=request.api_key,  # Pass through the API key
             url=request.url,  # Pass through the URL

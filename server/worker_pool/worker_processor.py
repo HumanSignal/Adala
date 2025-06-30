@@ -31,9 +31,7 @@ class WorkMessage:
     batch_id: str
     skills: List[Dict]
     runtime_params: Dict
-    batch_size: int
     input_topic: str
-    output_topic: str
     records: List[Dict]  # The actual data to process
     api_key: Optional[str] = None  # LSE API key for this batch
     url: Optional[str] = None  # LSE URL to send predictions back to
@@ -46,7 +44,6 @@ class WorkMessage:
             {
                 "skills": sorted(self.skills, key=lambda x: x.get("name", "")),
                 "runtime_params": self.runtime_params,
-                "batch_size": self.batch_size,
             },
             sort_keys=True,
         )
