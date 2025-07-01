@@ -15,6 +15,13 @@ from server.handlers.result_handlers import ResultHandler, LSEHandler
 logger = logging.getLogger(__name__)
 
 
+def _mask_api_key(api_key: str) -> str:
+    """Safely mask API key for logging, showing only first 4 and last 4 characters"""
+    if not api_key or len(api_key) < 8:
+        return "***masked***"
+    return f"{api_key[:4]}...{api_key[-4:]}"
+
+
 class LSEClientCache:
     """Cache for LSE clients by API key with expiration"""
 
@@ -51,7 +58,7 @@ class LSEClientCache:
         }
 
         logger.info(
-            f"Created new LSE client for cache key {cache_key} (modelrun_id: {modelrun_id})"
+            f"Created new LSE client for cache key {cache_key} (modelrun_id: {modelrun_id}, api_key: {_mask_api_key(api_key)})"
         )
         return client
 
@@ -79,7 +86,7 @@ class LSEClientCache:
                 await self._create_client(cache_key, api_key, url, modelrun_id)
             cached_client["last_used"] = datetime.now()
             logger.debug(
-                f"Using cached LSE client for cache key {cache_key} (modelrun_id: {modelrun_id})"
+                f"Using cached LSE client for cache key {cache_key} (modelrun_id: {modelrun_id}, api_key: {_mask_api_key(api_key)})"
             )
             return cached_client["client"]
 
@@ -90,7 +97,7 @@ class LSEClientCache:
 
         except Exception as e:
             logger.error(
-                f"Failed to create LSE client for cache key {cache_key} (modelrun_id: {modelrun_id}): {e}"
+                f"Failed to create LSE client for cache key {cache_key} (modelrun_id: {modelrun_id}, api_key: {_mask_api_key(api_key)}): {e}"
             )
             return None
 
@@ -333,11 +340,13 @@ class OutputProcessor:
             "expiration_hours": self.lse_client_cache.expiration_hours,
         }
 
-        # Get cache age information
-        current_time = time.time()
-        for key, (client, timestamp) in self.lse_client_cache.clients.items():
-            age_hours = (current_time - timestamp) / 3600
-            cache_info["client_ages"][key] = round(age_hours, 2)
+        # Get cache age information - safely access the cache structure
+        current_time = datetime.now()
+        for cache_key, client_info in self.lse_client_cache.clients.items():
+            last_used = client_info.get("last_used", current_time)
+            age_hours = (current_time - last_used).total_seconds() / 3600
+            # Only include the cache key (hash) - no sensitive information
+            cache_info["client_ages"][cache_key] = round(age_hours, 2)
 
         status = {
             "processor_id": self.processor_id,

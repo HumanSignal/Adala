@@ -90,9 +90,7 @@ async def submit_batch(request: SubmitBatchRequest) -> SubmitBatchResponse:
         producer = await get_kafka_producer()
         await producer.send_and_wait("worker_pool_input", value=work_message.__dict__)
 
-        logger.info(
-            f"Submitted batch {batch_id} to worker pool with API key: {'present' if request.api_key else 'missing'}"
-        )
+        logger.info(f"Submitted batch {batch_id} to worker pool")
 
         return SubmitBatchResponse(
             batch_id=batch_id,
