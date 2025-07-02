@@ -53,10 +53,19 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
 
         # Separate consumer and producer kwargs
         consumer_kwargs = {k: v for k, v in self.kafka_kwargs.items()}
+        # Filter out consumer-specific settings from producer kwargs
+        consumer_only_settings = [
+            "group_id",
+            "auto_offset_reset",
+            "max_poll_interval_ms",
+            "session_timeout_ms",
+            "heartbeat_interval_ms",
+            "enable_auto_commit",
+        ]
         producer_kwargs = {
             k: v
             for k, v in self.kafka_kwargs.items()
-            if k not in ["group_id", "auto_offset_reset"]
+            if k not in consumer_only_settings
         }
 
         self.consumer = AIOKafkaConsumer(

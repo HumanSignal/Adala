@@ -102,6 +102,14 @@ class KafkaSettings(BaseModel):
     input_consumer_timeout_ms: int = 2500  # 2.5 seconds
     output_consumer_timeout_ms: int = 1500  # 1.5 seconds
 
+    # Consumer timeout settings for long-running processing
+    max_poll_interval_ms: int = 600000  # 10 minutes - allow time for LLM processing
+    session_timeout_ms: int = 300000  # 5 minutes - session timeout
+    heartbeat_interval_ms: int = 90000  # 1.5 minutes - heartbeat interval
+    enable_auto_commit: bool = (
+        True  # Enable auto commit since we're not manually committing
+    )
+
     # for producers and consumers
     bootstrap_servers: Union[str, List[str]] = "localhost:9093"
     security_protocol: Literal["PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"] = (
@@ -124,12 +132,26 @@ class KafkaSettings(BaseModel):
         extra="allow",
     )
 
-    def to_kafka_kwargs(self) -> Dict[str, Any]:
+    def to_kafka_kwargs(self, client_type: str = "consumer") -> Dict[str, Any]:
         """
         Convert the KafkaSettings object to kwargs for AIOKafkaProducer/Consumer/AdminClient.
         These are common kwargs for all Kafka objects; usage-specific kwargs are passed in separately.
+
+        Args:
+            client_type: Type of client ("consumer", "producer", "admin") to filter appropriate settings
         """
         kwargs = self.model_dump(include=["bootstrap_servers", "security_protocol"])
+
+        # Add consumer-specific settings
+        if client_type == "consumer":
+            kwargs.update(
+                {
+                    "max_poll_interval_ms": self.max_poll_interval_ms,
+                    "session_timeout_ms": self.session_timeout_ms,
+                    "heartbeat_interval_ms": self.heartbeat_interval_ms,
+                    "enable_auto_commit": self.enable_auto_commit,
+                }
+            )
 
         # Add SSL parameters if using SSL
         if self.security_protocol in ["SSL", "SASL_SSL"]:
@@ -212,11 +234,10 @@ async def ensure_topic_async(topic_name: str, num_partitions: int = 1):
 async def _ensure_topic_async(topic_name: str, num_partitions: int = 1):
     """Internal async function to ensure topic exists with correct partition count"""
     settings = Settings()
-    kafka_kwargs = settings.kafka.to_kafka_kwargs()
     retention_ms = settings.kafka.retention_ms
 
     admin_client = AIOKafkaAdminClient(
-        **kafka_kwargs,
+        **settings.kafka.to_kafka_kwargs(client_type="admin"),
         client_id="topic_creator",
     )
 
@@ -335,10 +356,9 @@ async def delete_topic_async(topic_name: str):
 async def _delete_topic_async(topic_name: str):
     """Internal async function to delete topic"""
     settings = Settings()
-    kafka_kwargs = settings.kafka.to_kafka_kwargs()
 
     admin_client = AIOKafkaAdminClient(
-        **kafka_kwargs,
+        **settings.kafka.to_kafka_kwargs(client_type="admin"),
         client_id="topic_deleter",
     )
 

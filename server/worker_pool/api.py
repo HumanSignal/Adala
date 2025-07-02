@@ -31,7 +31,7 @@ async def get_kafka_producer():
 
         settings = Settings()
         _kafka_producer = AIOKafkaProducer(
-            **settings.kafka.to_kafka_kwargs(),
+            **settings.kafka.to_kafka_kwargs(client_type="producer"),
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
         )
         await _kafka_producer.start()

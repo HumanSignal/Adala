@@ -109,7 +109,7 @@ class WorkerProcessor:
             kafka_output_topic="dummy_output_topic",  # Dummy topic - not used since we pass predictions directly
             timeout_ms=1000,  # 1 second timeout for work distribution
             kafka_kwargs={
-                **settings.kafka.to_kafka_kwargs(),
+                **settings.kafka.to_kafka_kwargs(client_type="consumer"),
                 "group_id": "worker_pool_workers",  # Use same group ID for all workers for load balancing
             },
         )
