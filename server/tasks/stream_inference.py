@@ -21,6 +21,8 @@ from server.utils import (
     init_logger,
 )
 
+import server.worker_pool.celery_integration
+
 logger = init_logger(__name__)
 
 settings = Settings()
