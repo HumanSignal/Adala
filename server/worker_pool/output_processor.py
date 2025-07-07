@@ -102,7 +102,7 @@ class LSEClientCache:
             if not cached_client["client"].ready():
                 await self._create_client(cache_key, api_key, url, modelrun_id)
             cached_client["last_used"] = datetime.now()
-            logger.debug(
+            logger.info(
                 f"Using cached LSE client for cache key {cache_key} (modelrun_id: {modelrun_id}, api_key: {_mask_api_key(api_key)})"
             )
             return cached_client["client"]
@@ -250,9 +250,6 @@ class OutputProcessor:
             )
 
             # Convert predictions to the format expected by result handlers
-            logger.debug(
-                f"Output processor {self.processor_id}: Converting predictions to records for {batch_id}"
-            )
             before_conversion_memory = _log_memory_usage(
                 self.processor_id, "before_conversion"
             )
@@ -261,9 +258,6 @@ class OutputProcessor:
 
             after_conversion_memory = _log_memory_usage(
                 self.processor_id, "after_conversion"
-            )
-            logger.debug(
-                f"Output processor {self.processor_id}: Conversion complete for {batch_id}"
             )
 
             # Check if we got valid records after conversion
@@ -274,9 +268,6 @@ class OutputProcessor:
                 return
 
             # Get LSE client for this API key with URL and modelrun_id
-            logger.debug(
-                f"Output processor {self.processor_id}: Getting LSE client for {batch_id}"
-            )
             before_client_memory = _log_memory_usage(
                 self.processor_id, "before_lse_client"
             )
@@ -296,17 +287,11 @@ class OutputProcessor:
                 return
 
             # Send results to LSE
-            logger.debug(
-                f"Output processor {self.processor_id}: Sending results to LSE for {batch_id}"
-            )
             before_send_memory = _log_memory_usage(self.processor_id, "before_lse_send")
 
             await self._handle_results(lse_client, records)
 
             after_send_memory = _log_memory_usage(self.processor_id, "after_lse_send")
-            logger.debug(
-                f"Output processor {self.processor_id}: Results sent to LSE for {batch_id}"
-            )
 
             self.processed_batches += 1
             self.last_processed_at = datetime.now()
@@ -351,7 +336,7 @@ class OutputProcessor:
                     f"Output processor {self.processor_id}: Memory not fully recovered - {total_memory_diff:.1f}MB still allocated after cleanup"
                 )
             else:
-                logger.debug(
+                logger.info(
                     f"Output processor {self.processor_id}: Memory cleanup successful - {total_memory_diff:.1f}MB change"
                 )
 
@@ -457,5 +442,4 @@ class OutputProcessor:
             "lse_client_cache": cache_info,
         }
 
-        logger.debug(f"OutputProcessor {self.processor_id} status: {status}")
         return status

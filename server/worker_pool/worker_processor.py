@@ -223,9 +223,6 @@ class WorkerProcessor:
             if hasattr(work_message, "records") and work_message.records:
                 data_batch = InternalDataFrame(work_message.get_records_for_llm())
                 _log_memory_usage(self.worker_id, "after_dataframe_creation")
-                logger.debug(
-                    f"Worker {self.worker_id}: Created data_batch with {len(data_batch)} records"
-                )
             else:
                 logger.warning(
                     f"Worker {self.worker_id}: No records found in work message {work_message.batch_id}"
@@ -233,9 +230,6 @@ class WorkerProcessor:
                 return
 
             # Process the batch
-            logger.debug(
-                f"Worker {self.worker_id}: Starting LLM processing for {work_message.batch_id}"
-            )
             before_llm_memory = _log_memory_usage(
                 self.worker_id, "before_llm_processing"
             )
@@ -248,10 +242,6 @@ class WorkerProcessor:
                 logger.warning(
                     f"Worker {self.worker_id}: LLM processing increased memory by {llm_memory_diff:.1f}MB"
                 )
-
-            logger.debug(
-                f"Worker {self.worker_id}: Completed LLM processing for {work_message.batch_id}"
-            )
 
             # Send predictions directly to prediction queue instead of Kafka
             if self.prediction_queue:
@@ -268,9 +258,6 @@ class WorkerProcessor:
                     modelrun_id,
                 )
                 _log_memory_usage(self.worker_id, "after_queue_add")
-                logger.debug(
-                    f"Worker {self.worker_id}: Sent predictions to queue for batch {work_message.batch_id}"
-                )
             else:
                 logger.warning(
                     f"Worker {self.worker_id}: No prediction queue available, predictions for batch {work_message.batch_id} will be lost"
@@ -278,10 +265,6 @@ class WorkerProcessor:
 
             self.last_processed_at = datetime.now()
             self.processed_batches += 1
-
-            logger.debug(
-                f"Worker {self.worker_id}: Processed batch for {work_message.batch_id}"
-            )
 
         except Exception as e:
             logger.error(f"Worker {self.worker_id}: Error processing work: {e}")
@@ -308,7 +291,7 @@ class WorkerProcessor:
                     f"Worker {self.worker_id}: Memory not fully recovered - {total_memory_diff:.1f}MB still allocated after cleanup"
                 )
             else:
-                logger.debug(
+                logger.info(
                     f"Worker {self.worker_id}: Memory cleanup successful - {total_memory_diff:.1f}MB change"
                 )
 
@@ -333,10 +316,6 @@ class WorkerProcessor:
 
             # Use put_nowait to avoid blocking the worker processor
             self.prediction_queue.put_nowait(prediction_data)
-
-            logger.debug(
-                f"Worker {self.worker_id}: Added prediction batch {batch_id} to queue (modelrun_id: {modelrun_id})"
-            )
 
         except Exception as e:
             logger.error(
