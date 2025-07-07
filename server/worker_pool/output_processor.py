@@ -7,12 +7,29 @@ import hashlib
 import logging
 import os
 import time
+import gc  # Added for memory tracking
+import psutil  # Added for memory tracking
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 
 from server.handlers.result_handlers import ResultHandler, LSEHandler
 
 logger = logging.getLogger(__name__)
+
+
+# MEMORY TRACKING UTILITY
+def _log_memory_usage(processor_id: str, stage: str):
+    """Log current memory usage for debugging"""
+    try:
+        process = psutil.Process()
+        memory_mb = process.memory_info().rss / 1024 / 1024
+        logger.info(
+            f"Output processor {processor_id}: Memory at {stage}: {memory_mb:.1f}MB"
+        )
+        return memory_mb
+    except Exception as e:
+        logger.debug(f"Output processor {processor_id}: Error getting memory info: {e}")
+        return 0
 
 
 def _mask_api_key(api_key: str) -> str:
@@ -135,6 +152,8 @@ class OutputProcessor:
         self.processed_batches = 0
         self.last_processed_at = None
         self.prediction_queue = prediction_queue
+        # Log initial memory usage
+        initial_memory = _log_memory_usage(self.processor_id, "process_starting")
         logger.info(f"Initialized output processor: {self.processor_id}")
 
     async def initialize(self):
@@ -180,6 +199,12 @@ class OutputProcessor:
 
     async def _process_prediction(self, prediction_data: Dict[str, Any]):
         """Process a single prediction batch with per-batch API key handling"""
+        records = None
+        lse_client = None
+
+        # MEMORY TRACKING: Log memory at start of processing
+        start_memory = _log_memory_usage(self.processor_id, "start_processing")
+
         try:
             batch_id = prediction_data.get("batch_id", "unknown")
             predictions = prediction_data.get("predictions")
@@ -225,7 +250,21 @@ class OutputProcessor:
             )
 
             # Convert predictions to the format expected by result handlers
+            logger.debug(
+                f"Output processor {self.processor_id}: Converting predictions to records for {batch_id}"
+            )
+            before_conversion_memory = _log_memory_usage(
+                self.processor_id, "before_conversion"
+            )
+
             records = self._convert_predictions_to_records(predictions)
+
+            after_conversion_memory = _log_memory_usage(
+                self.processor_id, "after_conversion"
+            )
+            logger.debug(
+                f"Output processor {self.processor_id}: Conversion complete for {batch_id}"
+            )
 
             # Check if we got valid records after conversion
             if not records or len(records) == 0:
@@ -235,9 +274,21 @@ class OutputProcessor:
                 return
 
             # Get LSE client for this API key with URL and modelrun_id
+            logger.debug(
+                f"Output processor {self.processor_id}: Getting LSE client for {batch_id}"
+            )
+            before_client_memory = _log_memory_usage(
+                self.processor_id, "before_lse_client"
+            )
+
             lse_client = await self.lse_client_cache.get_client(
                 api_key, url=url, modelrun_id=modelrun_id
             )
+
+            after_client_memory = _log_memory_usage(
+                self.processor_id, "after_lse_client"
+            )
+
             if not lse_client:
                 logger.error(
                     f"Output processor {self.processor_id}: Failed to get LSE client for batch {batch_id}"
@@ -245,7 +296,17 @@ class OutputProcessor:
                 return
 
             # Send results to LSE
+            logger.debug(
+                f"Output processor {self.processor_id}: Sending results to LSE for {batch_id}"
+            )
+            before_send_memory = _log_memory_usage(self.processor_id, "before_lse_send")
+
             await self._handle_results(lse_client, records)
+
+            after_send_memory = _log_memory_usage(self.processor_id, "after_lse_send")
+            logger.debug(
+                f"Output processor {self.processor_id}: Results sent to LSE for {batch_id}"
+            )
 
             self.processed_batches += 1
             self.last_processed_at = datetime.now()
@@ -264,6 +325,34 @@ class OutputProcessor:
             if hasattr(prediction_data.get("predictions", None), "shape"):
                 logger.error(
                     f"Output processor {self.processor_id}: Prediction shape: {prediction_data['predictions'].shape}"
+                )
+        finally:
+            # MEMORY TRACKING: Log memory during cleanup
+            cleanup_start_memory = _log_memory_usage(self.processor_id, "cleanup_start")
+
+            # Basic cleanup
+            if records is not None:
+                del records
+                records = None
+            if prediction_data is not None:
+                del prediction_data
+                prediction_data = None
+            if lse_client is not None:
+                lse_client = None
+
+            # Force garbage collection
+            gc.collect()
+
+            cleanup_end_memory = _log_memory_usage(self.processor_id, "cleanup_end")
+            total_memory_diff = cleanup_end_memory - start_memory
+
+            if total_memory_diff > 5:  # More than 5MB not recovered
+                logger.warning(
+                    f"Output processor {self.processor_id}: Memory not fully recovered - {total_memory_diff:.1f}MB still allocated after cleanup"
+                )
+            else:
+                logger.debug(
+                    f"Output processor {self.processor_id}: Memory cleanup successful - {total_memory_diff:.1f}MB change"
                 )
 
     def _convert_predictions_to_records(self, predictions) -> list:

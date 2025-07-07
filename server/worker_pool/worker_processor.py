@@ -9,6 +9,8 @@ import logging
 import os
 import random
 import time
+import gc  # Added for memory tracking
+import psutil  # Added for memory tracking
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 from datetime import datetime
@@ -22,6 +24,19 @@ from adala.utils.internal_data import InternalDataFrame
 import weakref
 
 logger = logging.getLogger(__name__)
+
+
+# MEMORY TRACKING UTILITY
+def _log_memory_usage(worker_id: str, stage: str):
+    """Log current memory usage for debugging"""
+    try:
+        process = psutil.Process()
+        memory_mb = process.memory_info().rss / 1024 / 1024
+        logger.info(f"Worker {worker_id}: Memory at {stage}: {memory_mb:.1f}MB")
+        return memory_mb
+    except Exception as e:
+        logger.debug(f"Worker {worker_id}: Error getting memory info: {e}")
+        return 0
 
 
 @dataclass
@@ -65,7 +80,12 @@ class WorkerProcessor:
     def __init__(self, prediction_queue: Optional[asyncio.Queue] = None):
         self.worker_id = f"worker_{os.getpid()}"
         self.current_config_hash: Optional[str] = None
-        self.current_config: Optional[WorkMessage] = None
+        self.current_batch_id: Optional[str] = (
+            None  # Only store the current batch ID, not entire work message
+        )
+        self.current_runtime_config: Optional[Dict] = (
+            None  # Store runtime config for recreation
+        )
         self.environment = None
         self.skills = None
         self.runtime = None
@@ -79,6 +99,8 @@ class WorkerProcessor:
         # Shared topics for input (output now goes directly to prediction queue)
         self.input_topic = "worker_pool_input"  # Shared topic for work messages
 
+        # Log initial memory usage
+        initial_memory = _log_memory_usage(self.worker_id, "process_starting")
         logger.info(f"Initialized worker processor: {self.worker_id}")
 
     def set_prediction_queue(self, prediction_queue: asyncio.Queue):
@@ -169,8 +191,8 @@ class WorkerProcessor:
             if self.current_config_hash != work_message.config_hash:
                 await self._switch_configuration(work_message)
 
-            # Update current work
-            self.current_config = work_message
+            # Update current work - store only essential identifiers, not entire work message
+            self.current_batch_id = work_message.batch_id
             self.current_config_hash = work_message.config_hash
 
             # Process the work immediately
@@ -190,10 +212,20 @@ class WorkerProcessor:
         if not self.skills or not self.runtime:
             return
 
+        data_batch = None
+        predictions = None
+
+        # MEMORY TRACKING: Log memory at start of processing
+        start_memory = _log_memory_usage(self.worker_id, "start_processing")
+
         try:
             # Process the data directly from the work message
             if hasattr(work_message, "records") and work_message.records:
                 data_batch = InternalDataFrame(work_message.get_records_for_llm())
+                _log_memory_usage(self.worker_id, "after_dataframe_creation")
+                logger.debug(
+                    f"Worker {self.worker_id}: Created data_batch with {len(data_batch)} records"
+                )
             else:
                 logger.warning(
                     f"Worker {self.worker_id}: No records found in work message {work_message.batch_id}"
@@ -201,16 +233,41 @@ class WorkerProcessor:
                 return
 
             # Process the batch
+            logger.debug(
+                f"Worker {self.worker_id}: Starting LLM processing for {work_message.batch_id}"
+            )
+            before_llm_memory = _log_memory_usage(
+                self.worker_id, "before_llm_processing"
+            )
+
             predictions = await self.skills.aapply(data_batch, runtime=self.runtime)
+
+            after_llm_memory = _log_memory_usage(self.worker_id, "after_llm_processing")
+            llm_memory_diff = after_llm_memory - before_llm_memory
+            if llm_memory_diff > 10:  # More than 10MB growth
+                logger.warning(
+                    f"Worker {self.worker_id}: LLM processing increased memory by {llm_memory_diff:.1f}MB"
+                )
+
+            logger.debug(
+                f"Worker {self.worker_id}: Completed LLM processing for {work_message.batch_id}"
+            )
 
             # Send predictions directly to prediction queue instead of Kafka
             if self.prediction_queue:
+                # Extract modelrun_id from first record for this batch
+                modelrun_id = None
+                if work_message.records:
+                    modelrun_id = work_message.records[0].get("modelrun_id")
+
                 await self._add_prediction_to_queue(
                     work_message.batch_id,
                     predictions,
                     work_message.api_key,
                     work_message.url,
+                    modelrun_id,
                 )
+                _log_memory_usage(self.worker_id, "after_queue_add")
                 logger.debug(
                     f"Worker {self.worker_id}: Sent predictions to queue for batch {work_message.batch_id}"
                 )
@@ -228,6 +285,32 @@ class WorkerProcessor:
 
         except Exception as e:
             logger.error(f"Worker {self.worker_id}: Error processing work: {e}")
+        finally:
+            # MEMORY TRACKING: Log memory during cleanup
+            cleanup_start_memory = _log_memory_usage(self.worker_id, "cleanup_start")
+
+            # Basic cleanup
+            if data_batch is not None:
+                del data_batch
+                data_batch = None
+            if predictions is not None:
+                del predictions
+                predictions = None
+
+            # Force garbage collection
+            gc.collect()
+
+            cleanup_end_memory = _log_memory_usage(self.worker_id, "cleanup_end")
+            total_memory_diff = cleanup_end_memory - start_memory
+
+            if total_memory_diff > 5:  # More than 5MB not recovered
+                logger.warning(
+                    f"Worker {self.worker_id}: Memory not fully recovered - {total_memory_diff:.1f}MB still allocated after cleanup"
+                )
+            else:
+                logger.debug(
+                    f"Worker {self.worker_id}: Memory cleanup successful - {total_memory_diff:.1f}MB change"
+                )
 
     async def _add_prediction_to_queue(
         self,
@@ -235,20 +318,10 @@ class WorkerProcessor:
         predictions,
         api_key: Optional[str] = None,
         url: Optional[str] = None,
+        modelrun_id: Optional[str] = None,
     ):
         """Add predictions to the processing queue with api_key for LSE client"""
         try:
-            # Extract modelrun_id from current work message records if available
-            modelrun_id = None
-            if (
-                self.current_config
-                and hasattr(self.current_config, "records")
-                and self.current_config.records
-            ):
-                # Get modelrun_id from the first record (all records in a batch should have the same modelrun_id)
-                first_record = self.current_config.records[0]
-                modelrun_id = first_record.get("modelrun_id")
-
             prediction_data = {
                 "batch_id": batch_id,
                 "predictions": predictions,
@@ -277,6 +350,9 @@ class WorkerProcessor:
         than the last message.
         """
         logger.info(f"Worker {self.worker_id}: Switching configuration")
+
+        # Store runtime config for recreation after each batch
+        self.current_runtime_config = work_message.runtime_params.copy()
 
         # Create new skills and runtime
         self.skills = self._create_skills_from_config(work_message.skills)
@@ -357,8 +433,9 @@ class WorkerProcessor:
         # Clear references
         self.skills = None
         self.runtime = None
-        self.current_config = None
+        self.current_batch_id = None
         self.current_config_hash = None
+        self.current_runtime_config = None
 
         logger.info(f"Worker {self.worker_id}: Cleaned up")
 
@@ -367,9 +444,7 @@ class WorkerProcessor:
         return {
             "worker_id": self.worker_id,
             "is_running": self.is_running,
-            "current_batch_id": (
-                self.current_config.batch_id if self.current_config else None
-            ),
+            "current_batch_id": self.current_batch_id,
             "current_config_hash": self.current_config_hash,
             "config_switch_count": self.config_switch_count,
             "last_processed_at": self.last_processed_at,
