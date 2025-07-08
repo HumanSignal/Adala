@@ -3,6 +3,9 @@ import logging
 import traceback
 import litellm
 import time
+import os
+import psutil
+import gc
 from litellm import token_counter
 from collections import defaultdict
 from typing import Any, Dict, List, Type, Optional, Tuple, DefaultDict
@@ -304,8 +307,12 @@ async def arun_instructor_with_messages(
         Dict containing the parsed response and usage information
     """
     start_time = time.time()
-    try:
 
+    # Variables to track for cleanup
+    response = None
+    completion = None
+
+    try:
         response, completion = await client.chat.completions.create_with_completion(
             messages=messages,
             response_model=response_model,
@@ -316,6 +323,7 @@ async def arun_instructor_with_messages(
             max_retries=retries,
             **kwargs,
         )
+
         usage = completion.usage
         dct = to_jsonable_python(response)
         # With successful completions we can get canonical model name
@@ -327,11 +335,36 @@ async def arun_instructor_with_messages(
         usage_model = canonical_model_provider_string or model
 
     inference_time = time.time() - start_time
+
     # Add usage data to the response (e.g. token counts, cost)
     usage_data = _get_usage_dict(
         usage, model=usage_model, messages=messages, inference_time=inference_time
     )
     dct.update(usage_data)
+
+    # MEMORY LEAK FIX: Explicit cleanup of large objects
+    try:
+        # Clear response and completion objects that can hold large amounts of memory
+        if response is not None:
+            # Clear any cached or internal references if they exist
+            if hasattr(response, "_raw_response"):
+                response._raw_response = None
+            if hasattr(response, "__dict__"):
+                response.__dict__.clear()
+            del response
+
+        if completion is not None:
+            # Clear completion object which can hold full response context
+            if hasattr(completion, "__dict__"):
+                completion.__dict__.clear()
+            del completion
+
+        # Only trigger garbage collection if we actually had response objects
+        if response is not None or completion is not None:
+            gc.collect()
+
+    except Exception as cleanup_error:
+        logger.warning(f"Error during response cleanup: {cleanup_error}")
 
     return dct
 
@@ -626,4 +659,32 @@ async def arun_instructor_with_payloads(
             )
         )
 
-    return await asyncio.gather(*tasks)
+    try:
+        result = await asyncio.gather(*tasks)
+
+        # Create a copy of results to avoid holding references
+        result_copy = [dict(res) for res in result]
+
+    finally:
+        # MEMORY LEAK FIX: Explicit cleanup of tasks and results
+        try:
+            # Clear task references
+            for i in range(len(tasks)):
+                tasks[i] = None
+            tasks.clear()
+
+            # Clear the original result to avoid holding references
+            if "result" in locals():
+                del result
+
+            # Clear messages builder references
+            messages_builder = None
+
+            # Trigger garbage collection for large batches
+            if len(payloads) > 10:
+                gc.collect()
+
+        except Exception as cleanup_error:
+            logger.warning(f"Error during memory cleanup: {cleanup_error}")
+
+    return result_copy
