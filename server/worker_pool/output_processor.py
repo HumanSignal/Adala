@@ -152,6 +152,8 @@ class OutputProcessor:
         self.processed_batches = 0
         self.last_processed_at = None
         self.prediction_queue = prediction_queue
+        self.restart_trigger = None  # Will be set by celery_integration.py
+        self.restart_event = None  # Will be set by celery_integration.py
         # Log initial memory usage
         initial_memory = _log_memory_usage(self.processor_id, "process_starting")
         logger.info(f"Initialized output processor: {self.processor_id}")
@@ -167,6 +169,12 @@ class OutputProcessor:
 
         try:
             while self.is_running:
+                # Check if restart has been triggered by other processor
+                if self.restart_event and self.restart_event.is_set():
+                    logger.info(f"Output processor {self.processor_id}: Restart event detected - exiting gracefully")
+                    from server.worker_pool.celery_integration import RestartWorkerException
+                    raise RestartWorkerException("Coordinated restart from WorkerProcessor")
+                
                 try:
                     # Wait for predictions from the queue with timeout
                     prediction_data = await asyncio.wait_for(
@@ -181,21 +189,34 @@ class OutputProcessor:
                     self.prediction_queue.task_done()
 
                 except asyncio.TimeoutError:
-                    # No predictions available, continue loop
+                    # No predictions available, continue loop (also check restart event on next iteration)
                     continue
                 except Exception as e:
-                    logger.error(
-                        f"Output processor {self.processor_id}: Error processing prediction: {e}"
-                    )
+                    from server.worker_pool.celery_integration import RestartWorkerException
+                    if isinstance(e, RestartWorkerException):
+                        await self.cleanup()
+                        raise  # Re-raise restart exception to bubble up to main loop
+                    else:
+                        logger.error(
+                            f"Output processor {self.processor_id}: Error processing prediction: {e}"
+                        )
 
         except asyncio.CancelledError:
             logger.info(f"Output processor {self.processor_id}: Main loop cancelled")
         except Exception as e:
-            logger.error(
-                f"Output processor {self.processor_id}: Error in main loop: {e}"
-            )
+            from server.worker_pool.celery_integration import RestartWorkerException
+            if isinstance(e, RestartWorkerException):
+                logger.info(f"Output processor {self.processor_id}: RestartWorkerException caught in main loop: {e}")
+                await self.cleanup()
+                raise  # Re-raise restart exception to bubble up to celery
+            else:
+                logger.error(
+                    f"Output processor {self.processor_id}: Error in main loop: {e}"
+                )
         finally:
+            logger.info(f"Output processor {self.processor_id}: Entering cleanup in finally block")
             await self.cleanup()
+            logger.info(f"Output processor {self.processor_id}: Cleanup completed in finally block")
 
     async def _process_prediction(self, prediction_data: Dict[str, Any]):
         """Process a single prediction batch with per-batch API key handling"""
@@ -301,16 +322,20 @@ class OutputProcessor:
             )
 
         except Exception as e:
-            logger.error(
-                f"Output processor {self.processor_id}: Error processing prediction: {e}"
-            )
-            logger.error(
-                f"Output processor {self.processor_id}: Prediction data type: {type(prediction_data.get('predictions', None))}"
-            )
-            if hasattr(prediction_data.get("predictions", None), "shape"):
+            from server.worker_pool.celery_integration import RestartWorkerException
+            if isinstance(e, RestartWorkerException):
+                raise  # Re-raise restart exception to bubble up to main loop
+            else:
                 logger.error(
-                    f"Output processor {self.processor_id}: Prediction shape: {prediction_data['predictions'].shape}"
+                    f"Output processor {self.processor_id}: Error processing prediction: {e}"
                 )
+                logger.error(
+                    f"Output processor {self.processor_id}: Prediction data type: {type(prediction_data.get('predictions', None))}"
+                )
+                if hasattr(prediction_data.get("predictions", None), "shape"):
+                    logger.error(
+                        f"Output processor {self.processor_id}: Prediction shape: {prediction_data['predictions'].shape}"
+                    )
         finally:
             # MEMORY TRACKING: Log memory during cleanup
             cleanup_start_memory = _log_memory_usage(self.processor_id, "cleanup_start")

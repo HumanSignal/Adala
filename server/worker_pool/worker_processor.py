@@ -95,6 +95,11 @@ class WorkerProcessor:
         self.last_config_switch = None
         self.processed_batches = 0
         self.prediction_queue = prediction_queue  # Direct reference to the async queue
+        self.restart_event = None  # Will be set by celery_integration.py
+
+        # Memory monitoring
+        self.last_memory_check = datetime.now()
+        self.memory_check_interval = 30  # Check memory every 30 seconds when idle
 
         # Shared topics for input (output now goes directly to prediction queue)
         self.input_topic = "worker_pool_input"  # Shared topic for work messages
@@ -145,8 +150,15 @@ class WorkerProcessor:
 
         try:
             while self.is_running:
+                logger.debug(f"Worker {self.worker_id}: Main loop iteration starting")
+                
                 # Check for new work and process it immediately
                 await self._check_for_work()
+
+                # Check memory periodically when idle
+                logger.debug(f"Worker {self.worker_id}: About to check memory threshold")
+                await self._check_memory_threshold()
+                logger.debug(f"Worker {self.worker_id}: Memory threshold check completed")
 
                 # Wait a bit before checking again
                 await asyncio.sleep(1)
@@ -154,9 +166,17 @@ class WorkerProcessor:
         except asyncio.CancelledError:
             logger.info(f"Worker {self.worker_id}: Main loop cancelled")
         except Exception as e:
-            logger.error(f"Worker {self.worker_id}: Error in main loop: {e}")
+            from server.worker_pool.celery_integration import RestartWorkerException
+            if isinstance(e, RestartWorkerException):
+                logger.info(f"Worker {self.worker_id}: RestartWorkerException caught in main loop: {e}")
+                await self.cleanup()
+                raise  # Re-raise restart exception to bubble up to celery
+            else:
+                logger.error(f"Worker {self.worker_id}: Error in main loop: {e}")
         finally:
+            logger.info(f"Worker {self.worker_id}: Entering cleanup in finally block")
             await self.cleanup()
+            logger.info(f"Worker {self.worker_id}: Cleanup completed in finally block")
 
     async def _check_for_work(self):
         """Check for new work from the shared queue and process it immediately"""
@@ -180,7 +200,50 @@ class WorkerProcessor:
             # No work available, this is normal
             pass
         except Exception as e:
-            logger.error(f"Worker {self.worker_id}: Error checking for work: {e}")
+            from server.worker_pool.celery_integration import RestartWorkerException
+            if isinstance(e, RestartWorkerException):
+                raise  # Re-raise restart exception to bubble up to main loop
+            else:
+                logger.error(f"Worker {self.worker_id}: Error checking for work: {e}")
+
+    async def _check_memory_threshold(self):
+        """Check memory usage periodically and trigger restart if needed"""
+        from server.worker_pool.celery_integration import RestartWorkerException
+        
+        try:
+            # Only check memory every X seconds to avoid excessive logging
+            now = datetime.now()
+            time_since_last_check = (now - self.last_memory_check).total_seconds()
+            
+            if time_since_last_check < self.memory_check_interval:
+                return
+                
+            # Update last check time
+            self.last_memory_check = now
+            
+            # Get current memory usage
+            current_memory = _log_memory_usage(self.worker_id, "periodic_memory_check")
+            
+            # Check if memory exceeds 340MB threshold
+            if current_memory > 335:
+                logger.warning(
+                    f"Worker {self.worker_id}: Periodic memory check - {current_memory:.1f}MB exceeds 340MB threshold"
+                )
+                if hasattr(self, 'restart_trigger') and self.restart_trigger:
+                    logger.info(f"Worker {self.worker_id}: About to trigger restart from periodic memory check")
+                    await self.cleanup()
+                    self.restart_trigger.trigger_restart(
+                        f"Periodic memory check: {current_memory:.1f}MB exceeds 340MB threshold"
+                    )
+                    logger.error(f"Worker {self.worker_id}: ERROR - This line should never be reached after trigger_restart!")
+                else:
+                    logger.error(f"Worker {self.worker_id}: No restart trigger available for periodic memory check")
+                    
+        except RestartWorkerException:
+            # Re-raise restart exception to bubble up to main loop
+            raise
+        except Exception as e:
+            logger.error(f"Worker {self.worker_id}: Error during periodic memory check: {e}")
 
     async def _assign_work(self, work_message: WorkMessage):
         """Assign and process work immediately"""
@@ -203,9 +266,13 @@ class WorkerProcessor:
             )
 
         except Exception as e:
-            logger.error(
-                f"Worker {self.worker_id}: Failed to process work {work_message.batch_id}: {e}"
-            )
+            from server.worker_pool.celery_integration import RestartWorkerException
+            if isinstance(e, RestartWorkerException):
+                raise  # Re-raise restart exception to bubble up to main loop
+            else:
+                logger.error(
+                    f"Worker {self.worker_id}: Failed to process work {work_message.batch_id}: {e}"
+                )
 
     async def _process_work(self, work_message: WorkMessage):
         """Process the assigned work"""
@@ -267,7 +334,11 @@ class WorkerProcessor:
             self.processed_batches += 1
 
         except Exception as e:
-            logger.error(f"Worker {self.worker_id}: Error processing work: {e}")
+            from server.worker_pool.celery_integration import RestartWorkerException
+            if isinstance(e, RestartWorkerException):
+                raise  # Re-raise restart exception to bubble up to main loop
+            else:
+                logger.error(f"Worker {self.worker_id}: Error processing work: {e}")
         finally:
             # MEMORY TRACKING: Log memory during cleanup
             cleanup_start_memory = _log_memory_usage(self.worker_id, "cleanup_start")
@@ -294,6 +365,27 @@ class WorkerProcessor:
                 logger.info(
                     f"Worker {self.worker_id}: Memory cleanup successful - {total_memory_diff:.1f}MB change"
                 )
+
+            # Check if memory usage exceeds 340MB and trigger restart if needed
+            if cleanup_end_memory > 340:
+                logger.warning(
+                    f"Worker {self.worker_id}: Memory usage {cleanup_end_memory:.1f}MB exceeds 340MB threshold"
+                )
+                if hasattr(self, 'restart_trigger') and self.restart_trigger:
+                    try:
+                        self.restart_trigger.trigger_restart(
+                            f"Memory usage {cleanup_end_memory:.1f}MB exceeds 340MB threshold"
+                        )
+                    except Exception as restart_exc:
+                        # Re-raise restart exception to bubble up to main loop
+                        from server.worker_pool.celery_integration import RestartWorkerException
+                        if isinstance(restart_exc, RestartWorkerException):
+                            raise
+                        else:
+                            logger.error(f"Worker {self.worker_id}: Unexpected error during restart trigger: {restart_exc}")
+                            raise
+                else:
+                    logger.error(f"Worker {self.worker_id}: No restart trigger available for memory threshold restart")
 
     async def _add_prediction_to_queue(
         self,
