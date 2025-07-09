@@ -359,8 +359,15 @@ async def arun_instructor_with_messages(
                 completion.__dict__.clear()
             del completion
 
-        # Only trigger garbage collection if we actually had response objects
-        if response is not None or completion is not None:
+        # PERFORMANCE FIX: Only trigger expensive GC occasionally, not after every request
+        # Use a counter to trigger GC every N requests instead of every request
+        if not hasattr(arun_instructor_with_messages, "_gc_counter"):
+            arun_instructor_with_messages._gc_counter = 0
+
+        arun_instructor_with_messages._gc_counter += 1
+
+        # Only trigger GC every 10 requests to reduce performance impact
+        if arun_instructor_with_messages._gc_counter % 100 == 0:
             gc.collect()
 
     except Exception as cleanup_error:
@@ -659,6 +666,10 @@ async def arun_instructor_with_payloads(
             )
         )
 
+    # Variables to track for cleanup
+    result = None
+    result_copy = None
+
     try:
         result = await asyncio.gather(*tasks)
 
@@ -674,14 +685,15 @@ async def arun_instructor_with_payloads(
             tasks.clear()
 
             # Clear the original result to avoid holding references
-            if "result" in locals():
+            if result is not None:
                 del result
 
             # Clear messages builder references
             messages_builder = None
 
-            # Trigger garbage collection for large batches
-            if len(payloads) > 10:
+            # PERFORMANCE FIX: Only trigger GC for very large batches to reduce performance impact
+            # Increase threshold from 10 to 50 to reduce frequency
+            if len(payloads) > 50:
                 gc.collect()
 
         except Exception as cleanup_error:
