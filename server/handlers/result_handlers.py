@@ -1,5 +1,7 @@
 from typing import Optional, List, Dict
 import json
+import time
+import random
 from abc import abstractmethod
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 import csv
@@ -194,6 +196,51 @@ class LSEHandler(ResultHandler):
 
         return transformed_errors
 
+    def _retry_with_backoff(self, operation_name, operation_func, *args, **kwargs):
+        """
+        Retry an operation with exponential backoff.
+
+        Args:
+            operation_name: Name of the operation for logging
+            operation_func: Function to call
+            *args, **kwargs: Arguments to pass to the function
+        """
+        max_retries = 5
+        base_delay = 1  # Start with 1 second delay
+
+        for attempt in range(max_retries + 1):
+            try:
+                return operation_func(*args, **kwargs)
+            except Exception as e:
+                # Check if this is a retryable error
+                is_retryable = False
+
+                # Check for 429 (Too Many Requests) or 5xx server errors
+                if hasattr(e, "response") and hasattr(e.response, "status_code"):
+                    status_code = e.response.status_code
+                    is_retryable = status_code == 429 or 500 <= status_code < 600
+                elif hasattr(e, "status_code"):
+                    status_code = e.status_code
+                    is_retryable = status_code == 429 or 500 <= status_code < 600
+
+                if not is_retryable or attempt == max_retries:
+                    # Not retryable or max retries reached
+                    logger.error(
+                        f"LSEHandler {operation_name} failed after {attempt + 1} attempts: {e}"
+                    )
+                    raise
+
+                # Calculate delay with exponential backoff and jitter
+                delay = base_delay * (2**attempt)
+                jitter = delay * 0.1 * (random.random() - 0.5)  # Add some randomness
+                total_delay = max(0.1, delay + jitter)  # Ensure minimum delay
+
+                logger.warning(
+                    f"LSEHandler {operation_name} failed on attempt {attempt + 1}: {e}. "
+                    f"Retrying in {total_delay:.2f} seconds..."
+                )
+                time.sleep(total_delay)
+
     def __call__(self, result_batch: list[Dict]):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
         logger.info("LSEHandler received batch")
@@ -216,7 +263,10 @@ class LSEHandler(ResultHandler):
             num_predictions = len(result_batch)
             logger.info(f"LSEHandler sending {num_predictions} predictions to LSE")
 
-            client.prompts.batch_predictions(
+            # Use retry mechanism for batch_predictions
+            self._retry_with_backoff(
+                "batch_predictions",
+                client.prompts.batch_predictions,
                 modelrun_id=self.modelrun_id,
                 results=result_batch,
                 num_predictions=num_predictions,
@@ -236,7 +286,10 @@ class LSEHandler(ResultHandler):
                 f"LSEHandler sending {num_failed_predictions} failed predictions to LSE"
             )
 
-            client.prompts.batch_failed_predictions(
+            # Use retry mechanism for batch_failed_predictions
+            self._retry_with_backoff(
+                "batch_failed_predictions",
+                client.prompts.batch_failed_predictions,
                 modelrun_id=self.modelrun_id,
                 failed_predictions=error_batch,
                 num_failed_predictions=num_failed_predictions,
