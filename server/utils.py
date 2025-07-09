@@ -9,6 +9,7 @@ from aiokafka.admin import AIOKafkaAdminClient, NewTopic
 from aiokafka.errors import TopicAlreadyExistsError, UnknownTopicOrPartitionError
 from aiokafka.helpers import create_ssl_context
 import asyncio
+import psutil
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 
@@ -198,6 +199,7 @@ class Settings(BaseSettings):
     # https://docs.celeryq.dev/en/v5.4.0/userguide/configuration.html#worker-max-memory-per-child
     celery_worker_max_memory_per_child_kb: int = 1024000  # 1GB
     redis: RedisSettings = RedisSettings()
+    memory_threshold_mb: int = 350  # 350MB threshold for memory check (per worker)
 
     model_config = SettingsConfigDict(
         # have to use an absolute path here so celery workers can find it
@@ -425,3 +427,15 @@ async def ensure_worker_pool_input_topic():
 def ensure_worker_pool_topics_sync():
     """Synchronous version of ensure_worker_pool_topics"""
     asyncio.run(ensure_worker_pool_topics())
+
+
+def log_memory_usage(worker_id: str, stage: str):
+    """Log current memory usage for debugging"""
+    try:
+        process = psutil.Process()
+        memory_mb = process.memory_info().rss / 1024 / 1024
+        logger.info(f"Worker {worker_id}: Memory at {stage}: {memory_mb:.1f}MB")
+        return memory_mb
+    except Exception as e:
+        logger.warning(f"Worker {worker_id}: Error getting memory info: {e}")
+        return 0

@@ -1,7 +1,5 @@
 from typing import Optional, List, Dict
 import json
-import os  # Added for memory tracking
-import psutil  # Added for memory tracking
 from abc import abstractmethod
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 import csv
@@ -12,17 +10,6 @@ from server.utils import init_logger
 
 logger = init_logger(__name__)
 
-# MEMORY TRACKING UTILITY for LSEHandler
-def _log_lse_memory_usage(stage: str) -> float:
-    """Log current memory usage for LSEHandler debugging"""
-    try:
-        process = psutil.Process(os.getpid())
-        memory_mb = process.memory_info().rss / 1024 / 1024
-        logger.info(f"LSEHandler: Memory at {stage}: {memory_mb:.1f}MB")
-        return memory_mb
-    except Exception as e:
-        logger.debug(f"LSEHandler: Error getting memory info: {e}")
-        return 0
 
 try:
     from label_studio_sdk import LabelStudio as LSEClient
@@ -195,9 +182,6 @@ class LSEHandler(ResultHandler):
         return self
 
     def prepare_errors_payload(self, error_batch):
-        # MEMORY TRACKING: Log memory before error payload preparation
-        before_error_prep_memory = _log_lse_memory_usage("before_error_payload_prep")
-        
         transformed_errors = []
         for error in error_batch:
             error = error.dict()
@@ -208,35 +192,14 @@ class LSEHandler(ResultHandler):
             }
             transformed_errors.append(transformed_error)
 
-        # MEMORY TRACKING: Log memory after error payload preparation
-        after_error_prep_memory = _log_lse_memory_usage("after_error_payload_prep")
-        error_prep_memory_diff = after_error_prep_memory - before_error_prep_memory
-        if error_prep_memory_diff > 1:
-            logger.warning(f"LSEHandler: Error payload preparation increased memory by {error_prep_memory_diff:.1f}MB")
-
         return transformed_errors
 
     def __call__(self, result_batch: list[Dict]):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
         logger.info("LSEHandler received batch")
 
-        # MEMORY TRACKING: Log memory at start of LSEHandler processing
-        start_memory = _log_lse_memory_usage("lse_handler_start")
-
-        # MEMORY TRACKING: Log memory before client access
-        before_client_memory = _log_lse_memory_usage("before_client_access")
-        
         # Access client to ensure it's initialized
         client = self.client
-        
-        # MEMORY TRACKING: Log memory after client access
-        after_client_memory = _log_lse_memory_usage("after_client_access")
-        client_memory_diff = after_client_memory - before_client_memory
-        if client_memory_diff > 1:
-            logger.warning(f"LSEHandler: Client access increased memory by {client_memory_diff:.1f}MB")
-
-        # MEMORY TRACKING: Log memory before data transformations
-        before_transform_memory = _log_lse_memory_usage("before_data_transformations")
 
         # coerce dicts to LSEBatchItems for validation
         norm_result_batch = [
@@ -248,32 +211,17 @@ class LSEHandler(ResultHandler):
 
         # coerce back to dicts for sending
         result_batch = [record.dict() for record in result_batch]
-        
-        # MEMORY TRACKING: Log memory after data transformations
-        after_transform_memory = _log_lse_memory_usage("after_data_transformations")
-        transform_memory_diff = after_transform_memory - before_transform_memory
-        if transform_memory_diff > 1:
-            logger.warning(f"LSEHandler: Data transformations increased memory by {transform_memory_diff:.1f}MB")
 
         if result_batch:
             num_predictions = len(result_batch)
             logger.info(f"LSEHandler sending {num_predictions} predictions to LSE")
-            
-            # MEMORY TRACKING: Log memory before HTTP request
-            before_http_memory = _log_lse_memory_usage("before_batch_predictions_http")
-            
+
             client.prompts.batch_predictions(
                 modelrun_id=self.modelrun_id,
                 results=result_batch,
                 num_predictions=num_predictions,
             )
-            
-            # MEMORY TRACKING: Log memory after HTTP request
-            after_http_memory = _log_lse_memory_usage("after_batch_predictions_http")
-            http_memory_diff = after_http_memory - before_http_memory
-            if http_memory_diff > 1:
-                logger.warning(f"LSEHandler: batch_predictions HTTP request increased memory by {http_memory_diff:.1f}MB")
-                
+
             logger.info(f"LSEHandler sent {num_predictions} predictions to LSE")
         else:
             logger.error(
@@ -287,35 +235,18 @@ class LSEHandler(ResultHandler):
             logger.info(
                 f"LSEHandler sending {num_failed_predictions} failed predictions to LSE"
             )
-            
-            # MEMORY TRACKING: Log memory before failed predictions HTTP request
-            before_failed_http_memory = _log_lse_memory_usage("before_failed_predictions_http")
-            
+
             client.prompts.batch_failed_predictions(
                 modelrun_id=self.modelrun_id,
                 failed_predictions=error_batch,
                 num_failed_predictions=num_failed_predictions,
             )
-            
-            # MEMORY TRACKING: Log memory after failed predictions HTTP request
-            after_failed_http_memory = _log_lse_memory_usage("after_failed_predictions_http")
-            failed_http_memory_diff = after_failed_http_memory - before_failed_http_memory
-            if failed_http_memory_diff > 1:
-                logger.warning(f"LSEHandler: batch_failed_predictions HTTP request increased memory by {failed_http_memory_diff:.1f}MB")
-            
+
             logger.info(
                 f"LSEHandler sent {num_failed_predictions} failed predictions to LSE"
             )
         else:
             logger.debug(f"No errors to send to LSE for modelrun_id {self.modelrun_id}")
-
-        # MEMORY TRACKING: Log memory at end and calculate total diff
-        end_memory = _log_lse_memory_usage("lse_handler_end")
-        total_memory_diff = end_memory - start_memory
-        if total_memory_diff > 1:
-            logger.warning(f"LSEHandler: Total memory increase: {total_memory_diff:.1f}MB")
-        else:
-            logger.info(f"LSEHandler: Memory change: {total_memory_diff:.1f}MB")
 
 
 class CSVHandler(ResultHandler):

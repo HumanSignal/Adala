@@ -17,21 +17,6 @@ from server.handlers.result_handlers import ResultHandler, LSEHandler
 logger = logging.getLogger(__name__)
 
 
-# MEMORY TRACKING UTILITY
-def _log_memory_usage(processor_id: str, stage: str):
-    """Log current memory usage for debugging"""
-    try:
-        process = psutil.Process()
-        memory_mb = process.memory_info().rss / 1024 / 1024
-        logger.info(
-            f"Output processor {processor_id}: Memory at {stage}: {memory_mb:.1f}MB"
-        )
-        return memory_mb
-    except Exception as e:
-        logger.debug(f"Output processor {processor_id}: Error getting memory info: {e}")
-        return 0
-
-
 def _mask_api_key(api_key: str) -> str:
     """Safely mask API key for logging, showing only first 4 and last 4 characters"""
     if not api_key or len(api_key) < 8:
@@ -153,9 +138,6 @@ class OutputProcessor:
         self.last_processed_at = None
         self.prediction_queue = prediction_queue
         self.restart_trigger = None  # Will be set by celery_integration.py
-        self.restart_event = None  # Will be set by celery_integration.py
-        # Log initial memory usage
-        initial_memory = _log_memory_usage(self.processor_id, "process_starting")
         logger.info(f"Initialized output processor: {self.processor_id}")
 
     async def initialize(self):
@@ -169,12 +151,6 @@ class OutputProcessor:
 
         try:
             while self.is_running:
-                # Check if restart has been triggered by other processor
-                if self.restart_event and self.restart_event.is_set():
-                    logger.info(f"Output processor {self.processor_id}: Restart event detected - exiting gracefully")
-                    from server.worker_pool.celery_integration import RestartWorkerException
-                    raise RestartWorkerException("Coordinated restart from WorkerProcessor")
-                
                 try:
                     # Wait for predictions from the queue with timeout
                     prediction_data = await asyncio.wait_for(
@@ -192,39 +168,23 @@ class OutputProcessor:
                     # No predictions available, continue loop (also check restart event on next iteration)
                     continue
                 except Exception as e:
-                    from server.worker_pool.celery_integration import RestartWorkerException
-                    if isinstance(e, RestartWorkerException):
-                        await self.cleanup()
-                        raise  # Re-raise restart exception to bubble up to main loop
-                    else:
-                        logger.error(
-                            f"Output processor {self.processor_id}: Error processing prediction: {e}"
-                        )
+                    logger.error(
+                        f"Output processor {self.processor_id}: Error processing prediction: {e}"
+                    )
 
         except asyncio.CancelledError:
             logger.info(f"Output processor {self.processor_id}: Main loop cancelled")
         except Exception as e:
-            from server.worker_pool.celery_integration import RestartWorkerException
-            if isinstance(e, RestartWorkerException):
-                logger.info(f"Output processor {self.processor_id}: RestartWorkerException caught in main loop: {e}")
-                await self.cleanup()
-                raise  # Re-raise restart exception to bubble up to celery
-            else:
-                logger.error(
-                    f"Output processor {self.processor_id}: Error in main loop: {e}"
-                )
+            logger.error(
+                f"Output processor {self.processor_id}: Error in main loop: {e}"
+            )
         finally:
-            logger.info(f"Output processor {self.processor_id}: Entering cleanup in finally block")
             await self.cleanup()
-            logger.info(f"Output processor {self.processor_id}: Cleanup completed in finally block")
 
     async def _process_prediction(self, prediction_data: Dict[str, Any]):
         """Process a single prediction batch with per-batch API key handling"""
         records = None
         lse_client = None
-
-        # MEMORY TRACKING: Log memory at start of processing
-        start_memory = _log_memory_usage(self.processor_id, "start_processing")
 
         try:
             batch_id = prediction_data.get("batch_id", "unknown")
@@ -270,16 +230,7 @@ class OutputProcessor:
                 f"Output processor {self.processor_id}: Processing batch {batch_id} with predictions (modelrun_id: {modelrun_id})"
             )
 
-            # Convert predictions to the format expected by result handlers
-            before_conversion_memory = _log_memory_usage(
-                self.processor_id, "before_conversion"
-            )
-
             records = self._convert_predictions_to_records(predictions)
-
-            after_conversion_memory = _log_memory_usage(
-                self.processor_id, "after_conversion"
-            )
 
             # Check if we got valid records after conversion
             if not records or len(records) == 0:
@@ -289,16 +240,8 @@ class OutputProcessor:
                 return
 
             # Get LSE client for this API key with URL and modelrun_id
-            before_client_memory = _log_memory_usage(
-                self.processor_id, "before_lse_client"
-            )
-
             lse_client = await self.lse_client_cache.get_client(
                 api_key, url=url, modelrun_id=modelrun_id
-            )
-
-            after_client_memory = _log_memory_usage(
-                self.processor_id, "after_lse_client"
             )
 
             if not lse_client:
@@ -308,11 +251,7 @@ class OutputProcessor:
                 return
 
             # Send results to LSE
-            before_send_memory = _log_memory_usage(self.processor_id, "before_lse_send")
-
             await self._handle_results(lse_client, records)
-
-            after_send_memory = _log_memory_usage(self.processor_id, "after_lse_send")
 
             self.processed_batches += 1
             self.last_processed_at = datetime.now()
@@ -322,24 +261,17 @@ class OutputProcessor:
             )
 
         except Exception as e:
-            from server.worker_pool.celery_integration import RestartWorkerException
-            if isinstance(e, RestartWorkerException):
-                raise  # Re-raise restart exception to bubble up to main loop
-            else:
+            logger.error(
+                f"Output processor {self.processor_id}: Error processing prediction: {e}"
+            )
+            logger.error(
+                f"Output processor {self.processor_id}: Prediction data type: {type(prediction_data.get('predictions', None))}"
+            )
+            if hasattr(prediction_data.get("predictions", None), "shape"):
                 logger.error(
-                    f"Output processor {self.processor_id}: Error processing prediction: {e}"
+                    f"Output processor {self.processor_id}: Prediction shape: {prediction_data['predictions'].shape}"
                 )
-                logger.error(
-                    f"Output processor {self.processor_id}: Prediction data type: {type(prediction_data.get('predictions', None))}"
-                )
-                if hasattr(prediction_data.get("predictions", None), "shape"):
-                    logger.error(
-                        f"Output processor {self.processor_id}: Prediction shape: {prediction_data['predictions'].shape}"
-                    )
         finally:
-            # MEMORY TRACKING: Log memory during cleanup
-            cleanup_start_memory = _log_memory_usage(self.processor_id, "cleanup_start")
-
             # Basic cleanup
             if records is not None:
                 del records
@@ -352,18 +284,6 @@ class OutputProcessor:
 
             # Force garbage collection
             gc.collect()
-
-            cleanup_end_memory = _log_memory_usage(self.processor_id, "cleanup_end")
-            total_memory_diff = cleanup_end_memory - start_memory
-
-            if total_memory_diff > 5:  # More than 5MB not recovered
-                logger.warning(
-                    f"Output processor {self.processor_id}: Memory not fully recovered - {total_memory_diff:.1f}MB still allocated after cleanup"
-                )
-            else:
-                logger.info(
-                    f"Output processor {self.processor_id}: Memory cleanup successful - {total_memory_diff:.1f}MB change"
-                )
 
     def _convert_predictions_to_records(self, predictions) -> list:
         """Convert predictions to records format expected by result handlers"""
