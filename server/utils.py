@@ -104,11 +104,18 @@ class KafkaSettings(BaseModel):
 
     # Consumer timeout settings for long-running processing
     max_poll_interval_ms: int = 600000  # 10 minutes - allow time for LLM processing
-    session_timeout_ms: int = 300000  # 5 minutes - session timeout
-    heartbeat_interval_ms: int = 90000  # 1.5 minutes - heartbeat interval
+    session_timeout_ms: int = 45000  # 45 seconds - reduced for faster failure detection
+    heartbeat_interval_ms: int = (
+        15000  # 15 seconds - heartbeat interval (1/3 of session timeout)
+    )
     enable_auto_commit: bool = (
         True  # Enable auto commit since we're not manually committing
     )
+
+    # Connection timeout settings to prevent join group hangs
+    request_timeout_ms: int = 40000  # 40 seconds - timeout for individual requests
+    connections_max_idle_ms: int = 300000  # 5 minutes - max idle time for connections
+    metadata_max_age_ms: int = 300000  # 5 minutes - max age for metadata
 
     # for producers and consumers
     bootstrap_servers: Union[str, List[str]] = "localhost:9093"
@@ -150,6 +157,9 @@ class KafkaSettings(BaseModel):
                     "session_timeout_ms": self.session_timeout_ms,
                     "heartbeat_interval_ms": self.heartbeat_interval_ms,
                     "enable_auto_commit": self.enable_auto_commit,
+                    "request_timeout_ms": self.request_timeout_ms,
+                    "connections_max_idle_ms": self.connections_max_idle_ms,
+                    "metadata_max_age_ms": self.metadata_max_age_ms,
                 }
             )
 

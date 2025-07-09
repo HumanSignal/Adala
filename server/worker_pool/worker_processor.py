@@ -120,10 +120,11 @@ class WorkerProcessor:
 
         settings = Settings()
 
-        # Add a small random delay to help with partition distribution
-        delay = random.uniform(0, 2)
+        # Add a random delay to prevent consumer group coordination storms
+        # When multiple workers start simultaneously, they can overwhelm the Kafka coordinator
+        delay = random.uniform(0, 20)  # Increased delay between 0-20 seconds
         logger.info(
-            f"Worker {self.worker_id}: Starting initialization with {delay:.2f}s delay"
+            f"Worker {self.worker_id}: Starting initialization with {delay:.2f}s delay to prevent consumer group coordination storms"
         )
         await asyncio.sleep(delay)
 
@@ -140,8 +141,31 @@ class WorkerProcessor:
                 "group_id": "worker_pool_workers",  # Use same group ID for all workers for load balancing
             },
         )
-        await self.environment.initialize()
-        logger.info(f"Worker {self.worker_id}: Initialized successfully")
+
+        # Retry consumer group join with exponential backoff
+        max_retries = 5
+        base_delay = 1  # Start with 1 second delay
+
+        for attempt in range(max_retries):
+            try:
+                await self.environment.initialize()
+                logger.info(
+                    f"Worker {self.worker_id}: Initialized successfully on attempt {attempt + 1}"
+                )
+                break
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    logger.error(
+                        f"Worker {self.worker_id}: Failed to initialize after {max_retries} attempts: {e}"
+                    )
+                    raise
+
+                # Exponential backoff with jitter
+                delay = base_delay * (2**attempt) + random.uniform(0, 1)
+                logger.warning(
+                    f"Worker {self.worker_id}: Initialization attempt {attempt + 1} failed: {e}. Retrying in {delay:.2f}s..."
+                )
+                await asyncio.sleep(delay)
 
     async def run_forever(self):
         """Main loop that runs forever on this worker"""
@@ -151,14 +175,18 @@ class WorkerProcessor:
         try:
             while self.is_running:
                 logger.debug(f"Worker {self.worker_id}: Main loop iteration starting")
-                
+
                 # Check for new work and process it immediately
                 await self._check_for_work()
 
                 # Check memory periodically when idle
-                logger.debug(f"Worker {self.worker_id}: About to check memory threshold")
+                logger.debug(
+                    f"Worker {self.worker_id}: About to check memory threshold"
+                )
                 await self._check_memory_threshold()
-                logger.debug(f"Worker {self.worker_id}: Memory threshold check completed")
+                logger.debug(
+                    f"Worker {self.worker_id}: Memory threshold check completed"
+                )
 
                 # Wait a bit before checking again
                 await asyncio.sleep(1)
@@ -167,8 +195,11 @@ class WorkerProcessor:
             logger.info(f"Worker {self.worker_id}: Main loop cancelled")
         except Exception as e:
             from server.worker_pool.celery_integration import RestartWorkerException
+
             if isinstance(e, RestartWorkerException):
-                logger.info(f"Worker {self.worker_id}: RestartWorkerException caught in main loop: {e}")
+                logger.info(
+                    f"Worker {self.worker_id}: RestartWorkerException caught in main loop: {e}"
+                )
                 await self.cleanup()
                 raise  # Re-raise restart exception to bubble up to celery
             else:
@@ -201,6 +232,7 @@ class WorkerProcessor:
             pass
         except Exception as e:
             from server.worker_pool.celery_integration import RestartWorkerException
+
             if isinstance(e, RestartWorkerException):
                 raise  # Re-raise restart exception to bubble up to main loop
             else:
@@ -209,41 +241,49 @@ class WorkerProcessor:
     async def _check_memory_threshold(self):
         """Check memory usage periodically and trigger restart if needed"""
         from server.worker_pool.celery_integration import RestartWorkerException
-        
+
         try:
             # Only check memory every X seconds to avoid excessive logging
             now = datetime.now()
             time_since_last_check = (now - self.last_memory_check).total_seconds()
-            
+
             if time_since_last_check < self.memory_check_interval:
                 return
-                
+
             # Update last check time
             self.last_memory_check = now
-            
+
             # Get current memory usage
             current_memory = _log_memory_usage(self.worker_id, "periodic_memory_check")
-            
+
             # Check if memory exceeds 340MB threshold
             if current_memory > 335:
                 logger.warning(
                     f"Worker {self.worker_id}: Periodic memory check - {current_memory:.1f}MB exceeds 340MB threshold"
                 )
-                if hasattr(self, 'restart_trigger') and self.restart_trigger:
-                    logger.info(f"Worker {self.worker_id}: About to trigger restart from periodic memory check")
+                if hasattr(self, "restart_trigger") and self.restart_trigger:
+                    logger.info(
+                        f"Worker {self.worker_id}: About to trigger restart from periodic memory check"
+                    )
                     await self.cleanup()
                     self.restart_trigger.trigger_restart(
                         f"Periodic memory check: {current_memory:.1f}MB exceeds 340MB threshold"
                     )
-                    logger.error(f"Worker {self.worker_id}: ERROR - This line should never be reached after trigger_restart!")
+                    logger.error(
+                        f"Worker {self.worker_id}: ERROR - This line should never be reached after trigger_restart!"
+                    )
                 else:
-                    logger.error(f"Worker {self.worker_id}: No restart trigger available for periodic memory check")
-                    
+                    logger.error(
+                        f"Worker {self.worker_id}: No restart trigger available for periodic memory check"
+                    )
+
         except RestartWorkerException:
             # Re-raise restart exception to bubble up to main loop
             raise
         except Exception as e:
-            logger.error(f"Worker {self.worker_id}: Error during periodic memory check: {e}")
+            logger.error(
+                f"Worker {self.worker_id}: Error during periodic memory check: {e}"
+            )
 
     async def _assign_work(self, work_message: WorkMessage):
         """Assign and process work immediately"""
@@ -267,6 +307,7 @@ class WorkerProcessor:
 
         except Exception as e:
             from server.worker_pool.celery_integration import RestartWorkerException
+
             if isinstance(e, RestartWorkerException):
                 raise  # Re-raise restart exception to bubble up to main loop
             else:
@@ -335,6 +376,7 @@ class WorkerProcessor:
 
         except Exception as e:
             from server.worker_pool.celery_integration import RestartWorkerException
+
             if isinstance(e, RestartWorkerException):
                 raise  # Re-raise restart exception to bubble up to main loop
             else:
@@ -371,21 +413,28 @@ class WorkerProcessor:
                 logger.warning(
                     f"Worker {self.worker_id}: Memory usage {cleanup_end_memory:.1f}MB exceeds 340MB threshold"
                 )
-                if hasattr(self, 'restart_trigger') and self.restart_trigger:
+                if hasattr(self, "restart_trigger") and self.restart_trigger:
                     try:
                         self.restart_trigger.trigger_restart(
                             f"Memory usage {cleanup_end_memory:.1f}MB exceeds 340MB threshold"
                         )
                     except Exception as restart_exc:
                         # Re-raise restart exception to bubble up to main loop
-                        from server.worker_pool.celery_integration import RestartWorkerException
+                        from server.worker_pool.celery_integration import (
+                            RestartWorkerException,
+                        )
+
                         if isinstance(restart_exc, RestartWorkerException):
                             raise
                         else:
-                            logger.error(f"Worker {self.worker_id}: Unexpected error during restart trigger: {restart_exc}")
+                            logger.error(
+                                f"Worker {self.worker_id}: Unexpected error during restart trigger: {restart_exc}"
+                            )
                             raise
                 else:
-                    logger.error(f"Worker {self.worker_id}: No restart trigger available for memory threshold restart")
+                    logger.error(
+                        f"Worker {self.worker_id}: No restart trigger available for memory threshold restart"
+                    )
 
     async def _add_prediction_to_queue(
         self,
