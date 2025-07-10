@@ -39,7 +39,11 @@ def validate_output_format_for_ner_tag(
                     entity["text"] = corrected_text
                 elif entity["text"] != corrected_text:
                     # this seems to happen rarely if at all in testing, but could lead to invalid predictions
-                    logger.error(f"text and indices disagree for a predicted entity")
+                    logger.error(
+                        "text and indices disagree for a predicted entity: Entity: %s, Corrected text: %s",
+                        entity["text"],
+                        corrected_text,
+                    )
     return df
 
 
@@ -65,7 +69,7 @@ def extract_indices(
             logger.warning(f"Error in row {i}: {row['_adala_message']}")
             continue
         text = row[input_field_name]
-        entities = row[output_field_name]
+        entities = row[output_field_name] or []
         to_remove = []
         found_entities_ends = {}
         for entity in entities:

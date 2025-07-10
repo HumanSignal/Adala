@@ -11,7 +11,7 @@ jobs:
   merge:
     if: ${{ github.event.client_payload.slash_command.args.unnamed.arg1 == 'merge' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: hmarr/debug-action@v3.0.0
 
@@ -30,7 +30,6 @@ jobs:
           token: ${{ secrets.GIT_PAT }}
           repository: ${{ github.event.client_payload.pull_request.head.repo.full_name }}
           ref: ${{ github.event.client_payload.pull_request.head.ref }}
-          fetch-depth: 0
 
       - name: Checkout Actions Hub
         uses: actions/checkout@v4
@@ -44,14 +43,11 @@ jobs:
         with:
           username: ${{ github.event.client_payload.github.actor }}
 
-# Merge
-
       - name: Git Merge
         id: merge
         uses: ./.github/actions-hub/actions/git-merge
         with:
           base_branch: ${{ github.event.client_payload.slash_command.args.unnamed.arg2 || github.event.client_payload.pull_request.base.ref }}
-          head_branch: ${{ github.event.client_payload.pull_request.head.ref }}
           our_files: "pyproject.toml poetry.lock"
 
       - name: Git Push
@@ -84,4 +80,4 @@ jobs:
             > Command | Description
             > --- | ---
             > /git merge `branch` | Merge branch `branch` into current branch
-          reaction-type: hooray
+          reactions: hooray

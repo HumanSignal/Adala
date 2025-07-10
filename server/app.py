@@ -4,6 +4,10 @@ import os
 import json
 import pandas as pd
 import traceback
+import asyncio
+import signal
+import sys
+from contextlib import asynccontextmanager
 
 import fastapi
 from fastapi import Request, status
@@ -41,6 +45,10 @@ from server.utils import (
 logger = init_logger(__name__)
 
 app = fastapi.FastAPI()
+
+from server.worker_pool.api import router as worker_pool_router
+
+app.include_router(worker_pool_router)
 
 # TODO: add a correct middleware policy to handle CORS
 app.add_middleware(
@@ -591,6 +599,24 @@ async def model_metadata(request: ModelMetadataRequest):
         }
     }
     return Response[ModelMetadataResponse](success=True, data=resp)
+
+
+# Simple cleanup handler
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Clean up resources when the server shuts down"""
+    logger.info("Shutting down server...")
+
+    # Clean up worker pool API producer
+    try:
+        from server.worker_pool.api import cleanup_kafka_producer
+
+        await cleanup_kafka_producer()
+        logger.info("Worker pool API producer cleaned up")
+    except Exception as e:
+        logger.warning(f"Error cleaning up worker pool API producer: {e}")
+
+    logger.info("Server shutdown complete")
 
 
 if __name__ == "__main__":

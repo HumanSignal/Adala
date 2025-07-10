@@ -51,11 +51,28 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         ), "missing initialization for kafka_output_topic"
         assert self.timeout_ms is not None, "missing initialization for timeout_ms"
 
+        # Separate consumer and producer kwargs
+        consumer_kwargs = {k: v for k, v in self.kafka_kwargs.items()}
+        # Filter out consumer-specific settings from producer kwargs
+        consumer_only_settings = [
+            "group_id",
+            "auto_offset_reset",
+            "max_poll_interval_ms",
+            "session_timeout_ms",
+            "heartbeat_interval_ms",
+            "enable_auto_commit",
+        ]
+        producer_kwargs = {
+            k: v
+            for k, v in self.kafka_kwargs.items()
+            if k not in consumer_only_settings
+        }
+
         self.consumer = AIOKafkaConsumer(
             self.kafka_input_topic,
-            **self.kafka_kwargs,
+            **consumer_kwargs,
             value_deserializer=lambda v: json.loads(v.decode("utf-8")),
-            auto_offset_reset="earliest",
+            auto_offset_reset="latest",
             max_partition_fetch_bytes=3000000,
             # enable_auto_commit=False, # Turned off as its not supported without group ID
             # group_id=output_topic_name, # No longer using group ID as of DIA-1584 - unclear details but causes problems
@@ -63,7 +80,7 @@ class AsyncKafkaEnvironment(AsyncEnvironment):
         await self.consumer.start()
 
         self.producer = AIOKafkaProducer(
-            **self.kafka_kwargs,
+            **producer_kwargs,
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
             max_request_size=3000000,
             acks="all",  # waits for all replicas to respond that they have written the message

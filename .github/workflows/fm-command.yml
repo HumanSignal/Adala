@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   sync:
-    name: "Update: Update Feature Flags"
+    name: "Follow Merge: Sync Upstream PRs"
     if: github.event.client_payload.slash_command.args.unnamed.arg1 == 'sync'
     uses: ./.github/workflows/follow-merge-upstream-repo-sync-v2.yml
     with:
@@ -31,4 +31,4 @@ jobs:
             > Command | Description
             > --- | ---
             > /fm sync | Sync upstream prs and merge with pull request base
-          reaction-type: hooray
+          reactions: hooray
