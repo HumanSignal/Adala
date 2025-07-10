@@ -7,8 +7,6 @@ import hashlib
 import logging
 import os
 import time
-import gc  # Added for memory tracking
-import psutil  # Added for memory tracking
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 
@@ -184,8 +182,6 @@ class OutputProcessor:
 
     async def _process_prediction(self, prediction_data: Dict[str, Any]):
         """Process a single prediction batch with per-batch API key handling"""
-        records = None
-        lse_client = None
 
         try:
             batch_id = prediction_data.get("batch_id", "unknown")
@@ -231,6 +227,7 @@ class OutputProcessor:
                 f"Output processor {self.processor_id}: Processing batch {batch_id} with predictions (modelrun_id: {modelrun_id})"
             )
 
+            # Convert predictions to the format expected by result handlers
             records = self._convert_predictions_to_records(predictions)
 
             # Check if we got valid records after conversion
@@ -272,19 +269,6 @@ class OutputProcessor:
                 logger.error(
                     f"Output processor {self.processor_id}: Prediction shape: {prediction_data['predictions'].shape}"
                 )
-        finally:
-            # Basic cleanup
-            if records is not None:
-                del records
-                records = None
-            if prediction_data is not None:
-                del prediction_data
-                prediction_data = None
-            if lse_client is not None:
-                lse_client = None
-
-            # Force garbage collection
-            gc.collect()
 
     def _convert_predictions_to_records(self, predictions) -> list:
         """Convert predictions to records format expected by result handlers"""
