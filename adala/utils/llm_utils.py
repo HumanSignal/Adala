@@ -3,9 +3,6 @@ import logging
 import traceback
 import litellm
 import time
-import os
-import psutil
-import gc
 from litellm import token_counter
 from collections import defaultdict
 from typing import Any, Dict, List, Type, Optional, Tuple, DefaultDict
@@ -342,37 +339,6 @@ async def arun_instructor_with_messages(
     )
     dct.update(usage_data)
 
-    # MEMORY LEAK FIX: Explicit cleanup of large objects
-    try:
-        # Clear response and completion objects that can hold large amounts of memory
-        if response is not None:
-            # Clear any cached or internal references if they exist
-            if hasattr(response, "_raw_response"):
-                response._raw_response = None
-            if hasattr(response, "__dict__"):
-                response.__dict__.clear()
-            del response
-
-        if completion is not None:
-            # Clear completion object which can hold full response context
-            if hasattr(completion, "__dict__"):
-                completion.__dict__.clear()
-            del completion
-
-        # PERFORMANCE FIX: Only trigger expensive GC occasionally, not after every request
-        # Use a counter to trigger GC every N requests instead of every request
-        if not hasattr(arun_instructor_with_messages, "_gc_counter"):
-            arun_instructor_with_messages._gc_counter = 0
-
-        arun_instructor_with_messages._gc_counter += 1
-
-        # Only trigger GC every 10 requests to reduce performance impact
-        if arun_instructor_with_messages._gc_counter % 100 == 0:
-            gc.collect()
-
-    except Exception as cleanup_error:
-        logger.warning(f"Error during response cleanup: {cleanup_error}")
-
     return dct
 
 
@@ -666,37 +632,4 @@ async def arun_instructor_with_payloads(
             )
         )
 
-    # Variables to track for cleanup
-    result = None
-    result_copy = None
-
-    try:
-        result = await asyncio.gather(*tasks)
-
-        # Create a copy of results to avoid holding references
-        result_copy = [dict(res) for res in result]
-
-    finally:
-        # MEMORY LEAK FIX: Explicit cleanup of tasks and results
-        try:
-            # Clear task references
-            for i in range(len(tasks)):
-                tasks[i] = None
-            tasks.clear()
-
-            # Clear the original result to avoid holding references
-            if result is not None:
-                del result
-
-            # Clear messages builder references
-            messages_builder = None
-
-            # PERFORMANCE FIX: Only trigger GC for very large batches to reduce performance impact
-            # Increase threshold from 10 to 50 to reduce frequency
-            if len(payloads) > 50:
-                gc.collect()
-
-        except Exception as cleanup_error:
-            logger.warning(f"Error during memory cleanup: {cleanup_error}")
-
-    return result_copy
+    return await asyncio.gather(*tasks)

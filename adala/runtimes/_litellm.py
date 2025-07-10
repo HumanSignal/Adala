@@ -1,9 +1,6 @@
 import asyncio
 import logging
 import traceback
-import gc
-import os
-import psutil
 from openai import OpenAI, AsyncOpenAI
 from collections import defaultdict
 from typing import (
@@ -446,45 +443,25 @@ class AsyncLiteLLMChatRuntime(
         payloads = batch.to_dict(orient="records")
         extra_fields = extra_fields or {}
 
-        df_data = None
-        try:
-            df_data = await arun_instructor_with_payloads(
-                client=self.client,
-                payloads=payloads,
-                user_prompt_template=input_template,
-                response_model=response_model,
-                model=self.model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                seed=self.seed,
-                retries=async_retries,
-                extra_fields=extra_fields,
-                instructions_first=instructions_first,
-                instructions_template=instructions_template,
-                canonical_model_provider_string=self.get_canonical_model_provider_string(),
-                **self.model_extra,
-            )
+        df_data = await arun_instructor_with_payloads(
+            client=self.client,
+            payloads=payloads,
+            user_prompt_template=input_template,
+            response_model=response_model,
+            model=self.model,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            seed=self.seed,
+            retries=async_retries,
+            extra_fields=extra_fields,
+            instructions_first=instructions_first,
+            instructions_template=instructions_template,
+            canonical_model_provider_string=self.get_canonical_model_provider_string(),
+            **self.model_extra,
+        )
 
-            output_df = InternalDataFrame(df_data)
-            indexed_df = output_df.set_index(batch.index)
-
-            return indexed_df
-
-        finally:
-            # MEMORY LEAK FIX: Runtime level cleanup
-            try:
-                # Clear references to large objects
-                if df_data is not None:
-                    del df_data
-                payloads.clear()
-
-                # Force garbage collection for large batches
-                if len(payloads) > 50:
-                    gc.collect()
-
-            except Exception as cleanup_error:
-                logger.warning(f"Error during runtime cleanup: {cleanup_error}")
-                # Continue execution even if cleanup fails
+        output_df = InternalDataFrame(df_data)
+        return output_df.set_index(batch.index)
 
     async def record_to_record(
         self,
