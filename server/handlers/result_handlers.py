@@ -180,6 +180,7 @@ class LSEHandler(ResultHandler):
     def ready(self):
         # Use versions endpoint to verify connection to LS instance
         # First attempt without retry to quickly catch auth/config issues
+        # TODO: remove retry mechanism once we get rid of rate limits for Adala
         try:
             self.client.versions.get()
             logger.info(f"LSE client connection verified")
@@ -282,6 +283,7 @@ class LSEHandler(ResultHandler):
             logger.info(f"LSEHandler sending {num_predictions} predictions to LSE")
 
             # Use retry mechanism for batch_predictions
+            # TODO: remove retry mechanism once we get rid of rate limits for Adala
             self._retry_with_backoff(
                 "batch_predictions",
                 client.prompts.batch_predictions,
@@ -305,6 +307,7 @@ class LSEHandler(ResultHandler):
             )
 
             # Use retry mechanism for batch_failed_predictions
+            # TODO: remove retry mechanism once we get rid of rate limits for Adala
             self._retry_with_backoff(
                 "batch_failed_predictions",
                 client.prompts.batch_failed_predictions,
