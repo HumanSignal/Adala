@@ -9,8 +9,7 @@ import logging
 import os
 import random
 import time
-import gc  # Added for memory tracking
-import psutil  # Added for memory tracking
+import psutil
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 from datetime import datetime
