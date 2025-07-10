@@ -179,9 +179,27 @@ class LSEHandler(ResultHandler):
     @model_validator(mode="after")
     def ready(self):
         # Use versions endpoint to verify connection to LS instance
-        assert self.client.versions.get()
-
-        return self
+        # First attempt without retry to quickly catch auth/config issues
+        try:
+            self.client.versions.get()
+            logger.info(f"LSE client connection verified")
+            return self
+        except Exception as e:
+            # Check if this is a rate limit that should be retried
+            if e.status_code == 429:
+                logger.info(
+                    f"Rate limit detected during LSE client initialization, retrying..."
+                )
+                # Use retry mechanism for rate limits
+                self._retry_with_backoff("versions.get", self.client.versions.get)
+                logger.info(f"LSE client connection verified after retry")
+                return self
+            else:
+                # Non-rate-limit error - fail fast with descriptive message
+                error_msg = (
+                    f"Failed to connect to Label Studio Enterprise at {self.url}. "
+                )
+                raise ValueError(error_msg) from e
 
     def prepare_errors_payload(self, error_batch):
         transformed_errors = []

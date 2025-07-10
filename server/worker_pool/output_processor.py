@@ -69,6 +69,7 @@ class LSEClientCache:
     ) -> Optional[LSEHandler]:
         """Get or create LSE client for the given API key and modelrun_id combination"""
         if not api_key:
+            logger.error("No API key provided - cannot create LSE client")
             return None
 
         if not modelrun_id:
