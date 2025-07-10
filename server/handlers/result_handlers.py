@@ -1,13 +1,17 @@
 from typing import Optional, List, Dict
 import json
+import time
+import random
 from abc import abstractmethod
-from pydantic import BaseModel, Field, computed_field, ConfigDict, model_validator
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 import csv
+from functools import cached_property
 
 from adala.utils.registry import BaseModelInRegistry
 from server.utils import init_logger
 
 logger = init_logger(__name__)
+
 
 try:
     from label_studio_sdk import LabelStudio as LSEClient
@@ -157,13 +161,13 @@ class LSEHandler(ResultHandler):
     Handler to use the Label Studio SDK to load a batch of results back into a Label Studio project
     """
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)  # for @computed_field
+    model_config = ConfigDict(arbitrary_types_allowed=True)  # for cached_property
 
     api_key: str
     url: str
     modelrun_id: int
 
-    @computed_field
+    @cached_property
     def client(self) -> LSEClient:
         _client = LSEClient(
             api_key=self.api_key,
@@ -175,9 +179,28 @@ class LSEHandler(ResultHandler):
     @model_validator(mode="after")
     def ready(self):
         # Use versions endpoint to verify connection to LS instance
-        assert self.client.versions.get()
-
-        return self
+        # First attempt without retry to quickly catch auth/config issues
+        # TODO: remove retry mechanism once we get rid of rate limits for Adala
+        try:
+            self.client.versions.get()
+            logger.info(f"LSE client connection verified")
+            return self
+        except Exception as e:
+            # Check if this is a rate limit that should be retried
+            if e.status_code == 429:
+                logger.info(
+                    f"Rate limit detected during LSE client initialization, retrying..."
+                )
+                # Use retry mechanism for rate limits
+                self._retry_with_backoff("versions.get", self.client.versions.get)
+                logger.info(f"LSE client connection verified after retry")
+                return self
+            else:
+                # Non-rate-limit error - fail fast with descriptive message
+                error_msg = (
+                    f"Failed to connect to Label Studio Enterprise at {self.url}. "
+                )
+                raise ValueError(error_msg) from e
 
     def prepare_errors_payload(self, error_batch):
         transformed_errors = []
@@ -192,9 +215,57 @@ class LSEHandler(ResultHandler):
 
         return transformed_errors
 
+    def _retry_with_backoff(self, operation_name, operation_func, *args, **kwargs):
+        """
+        Retry an operation with exponential backoff.
+
+        Args:
+            operation_name: Name of the operation for logging
+            operation_func: Function to call
+            *args, **kwargs: Arguments to pass to the function
+        """
+        max_retries = 5
+        base_delay = 1  # Start with 1 second delay
+
+        for attempt in range(max_retries + 1):
+            try:
+                return operation_func(*args, **kwargs)
+            except Exception as e:
+                # Check if this is a retryable error
+                is_retryable = False
+
+                # Check for 429 (Too Many Requests) or 5xx server errors
+                if hasattr(e, "response") and hasattr(e.response, "status_code"):
+                    status_code = e.response.status_code
+                    is_retryable = status_code == 429 or 500 <= status_code < 600
+                elif hasattr(e, "status_code"):
+                    status_code = e.status_code
+                    is_retryable = status_code == 429 or 500 <= status_code < 600
+
+                if not is_retryable or attempt == max_retries:
+                    # Not retryable or max retries reached
+                    logger.error(
+                        f"LSEHandler {operation_name} failed after {attempt + 1} attempts: {e}"
+                    )
+                    raise
+
+                # Calculate delay with exponential backoff and jitter
+                delay = base_delay * (2**attempt)
+                jitter = delay * 0.1 * (random.random() - 0.5)  # Add some randomness
+                total_delay = max(0.1, delay + jitter)  # Ensure minimum delay
+
+                logger.warning(
+                    f"LSEHandler {operation_name} failed on attempt {attempt + 1}: {e}. "
+                    f"Retrying in {total_delay:.2f} seconds..."
+                )
+                time.sleep(total_delay)
+
     def __call__(self, result_batch: list[Dict]):
         logger.debug(f"\n\nHandler received batch: {result_batch}\n\n")
         logger.info("LSEHandler received batch")
+
+        # Access client to ensure it's initialized
+        client = self.client
 
         # coerce dicts to LSEBatchItems for validation
         norm_result_batch = [
@@ -206,14 +277,21 @@ class LSEHandler(ResultHandler):
 
         # coerce back to dicts for sending
         result_batch = [record.dict() for record in result_batch]
+
         if result_batch:
             num_predictions = len(result_batch)
             logger.info(f"LSEHandler sending {num_predictions} predictions to LSE")
-            self.client.prompts.batch_predictions(
+
+            # Use retry mechanism for batch_predictions
+            # TODO: remove retry mechanism once we get rid of rate limits for Adala
+            self._retry_with_backoff(
+                "batch_predictions",
+                client.prompts.batch_predictions,
                 modelrun_id=self.modelrun_id,
                 results=result_batch,
                 num_predictions=num_predictions,
             )
+
             logger.info(f"LSEHandler sent {num_predictions} predictions to LSE")
         else:
             logger.error(
@@ -227,11 +305,17 @@ class LSEHandler(ResultHandler):
             logger.info(
                 f"LSEHandler sending {num_failed_predictions} failed predictions to LSE"
             )
-            self.client.prompts.batch_failed_predictions(
+
+            # Use retry mechanism for batch_failed_predictions
+            # TODO: remove retry mechanism once we get rid of rate limits for Adala
+            self._retry_with_backoff(
+                "batch_failed_predictions",
+                client.prompts.batch_failed_predictions,
                 modelrun_id=self.modelrun_id,
                 failed_predictions=error_batch,
                 num_failed_predictions=num_failed_predictions,
             )
+
             logger.info(
                 f"LSEHandler sent {num_failed_predictions} failed predictions to LSE"
             )

@@ -67,6 +67,7 @@ class LSEClientCache:
     ) -> Optional[LSEHandler]:
         """Get or create LSE client for the given API key and modelrun_id combination"""
         if not api_key:
+            logger.error("No API key provided - cannot create LSE client")
             return None
 
         if not modelrun_id:
@@ -85,7 +86,7 @@ class LSEClientCache:
             if not cached_client["client"].ready():
                 await self._create_client(cache_key, api_key, url, modelrun_id)
             cached_client["last_used"] = datetime.now()
-            logger.debug(
+            logger.info(
                 f"Using cached LSE client for cache key {cache_key} (modelrun_id: {modelrun_id}, api_key: {_mask_api_key(api_key)})"
             )
             return cached_client["client"]
@@ -180,6 +181,7 @@ class OutputProcessor:
 
     async def _process_prediction(self, prediction_data: Dict[str, Any]):
         """Process a single prediction batch with per-batch API key handling"""
+
         try:
             batch_id = prediction_data.get("batch_id", "unknown")
             predictions = prediction_data.get("predictions")
@@ -238,6 +240,7 @@ class OutputProcessor:
             lse_client = await self.lse_client_cache.get_client(
                 api_key, url=url, modelrun_id=modelrun_id
             )
+
             if not lse_client:
                 logger.error(
                     f"Output processor {self.processor_id}: Failed to get LSE client for batch {batch_id}"
@@ -368,5 +371,4 @@ class OutputProcessor:
             "lse_client_cache": cache_info,
         }
 
-        logger.debug(f"OutputProcessor {self.processor_id} status: {status}")
         return status

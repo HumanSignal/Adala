@@ -304,8 +304,8 @@ async def arun_instructor_with_messages(
         Dict containing the parsed response and usage information
     """
     start_time = time.time()
-    try:
 
+    try:
         response, completion = await client.chat.completions.create_with_completion(
             messages=messages,
             response_model=response_model,
@@ -316,6 +316,7 @@ async def arun_instructor_with_messages(
             max_retries=retries,
             **kwargs,
         )
+
         usage = completion.usage
         dct = to_jsonable_python(response)
         # With successful completions we can get canonical model name
@@ -327,6 +328,7 @@ async def arun_instructor_with_messages(
         usage_model = canonical_model_provider_string or model
 
     inference_time = time.time() - start_time
+
     # Add usage data to the response (e.g. token counts, cost)
     usage_data = _get_usage_dict(
         usage, model=usage_model, messages=messages, inference_time=inference_time

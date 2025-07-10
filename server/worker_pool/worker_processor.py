@@ -9,6 +9,7 @@ import logging
 import os
 import random
 import time
+import psutil
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 from datetime import datetime
@@ -17,6 +18,8 @@ from server.utils import (
     ensure_topic_async,
     ensure_worker_pool_topics,
     ensure_worker_pool_input_topic,
+    get_memory_usage,
+    Settings,
 )
 from adala.utils.internal_data import InternalDataFrame
 import weakref
@@ -65,7 +68,12 @@ class WorkerProcessor:
     def __init__(self, prediction_queue: Optional[asyncio.Queue] = None):
         self.worker_id = f"worker_{os.getpid()}"
         self.current_config_hash: Optional[str] = None
-        self.current_config: Optional[WorkMessage] = None
+        self.current_batch_id: Optional[str] = (
+            None  # Only store the current batch ID, not entire work message
+        )
+        self.current_runtime_config: Optional[Dict] = (
+            None  # Store runtime config for recreation
+        )
         self.environment = None
         self.skills = None
         self.runtime = None
@@ -75,11 +83,10 @@ class WorkerProcessor:
         self.last_config_switch = None
         self.processed_batches = 0
         self.prediction_queue = prediction_queue  # Direct reference to the async queue
+        self.restart_trigger = None  # Will be set by celery_integration.py
 
         # Shared topics for input (output now goes directly to prediction queue)
         self.input_topic = "worker_pool_input"  # Shared topic for work messages
-
-        logger.info(f"Initialized worker processor: {self.worker_id}")
 
     def set_prediction_queue(self, prediction_queue: asyncio.Queue):
         """Set the prediction queue for direct communication"""
@@ -89,14 +96,14 @@ class WorkerProcessor:
     async def initialize(self):
         """Initialize the processor"""
         from adala.environments import AsyncKafkaEnvironment
-        from server.utils import Settings
 
         settings = Settings()
 
-        # Add a small random delay to help with partition distribution
-        delay = random.uniform(0, 2)
+        # Add a random delay to prevent consumer group coordination storms
+        # When multiple workers start simultaneously, they can overwhelm the Kafka coordinator
+        delay = random.uniform(0, 10)
         logger.info(
-            f"Worker {self.worker_id}: Starting initialization with {delay:.2f}s delay"
+            f"Worker {self.worker_id}: Starting initialization with {delay:.2f}s delay to prevent consumer group coordination storms"
         )
         await asyncio.sleep(delay)
 
@@ -113,8 +120,31 @@ class WorkerProcessor:
                 "group_id": "worker_pool_workers",  # Use same group ID for all workers for load balancing
             },
         )
-        await self.environment.initialize()
-        logger.info(f"Worker {self.worker_id}: Initialized successfully")
+
+        # Retry consumer group join with exponential backoff
+        max_retries = 5
+        base_delay = 1  # Start with 1 second delay
+
+        for attempt in range(max_retries):
+            try:
+                await self.environment.initialize()
+                logger.info(
+                    f"Worker {self.worker_id}: Initialized successfully on attempt {attempt + 1}"
+                )
+                break
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    logger.error(
+                        f"Worker {self.worker_id}: Failed to initialize after {max_retries} attempts: {e}"
+                    )
+                    raise
+
+                # Exponential backoff with jitter
+                delay = base_delay * (2**attempt) + random.uniform(0, 1)
+                logger.warning(
+                    f"Worker {self.worker_id}: Initialization attempt {attempt + 1} failed: {e}. Retrying in {delay:.2f}s..."
+                )
+                await asyncio.sleep(delay)
 
     async def run_forever(self):
         """Main loop that runs forever on this worker"""
@@ -123,6 +153,10 @@ class WorkerProcessor:
 
         try:
             while self.is_running:
+                # Check memory before taking new work (ensures previous batches have been processed)
+                # This happens every iteration to prevent taking new work when memory is high
+                await self._check_memory_threshold()
+
                 # Check for new work and process it immediately
                 await self._check_for_work()
 
@@ -160,6 +194,33 @@ class WorkerProcessor:
         except Exception as e:
             logger.error(f"Worker {self.worker_id}: Error checking for work: {e}")
 
+    async def _check_memory_threshold(self):
+        """Check memory usage and trigger restart if needed"""
+
+        try:
+            settings = Settings()
+
+            current_memory = get_memory_usage(self.worker_id, "check memory threshold")
+
+            # Check if memory exceeds threshold
+            if current_memory > settings.memory_threshold_mb:
+                logger.warning(
+                    f"Worker {self.worker_id}: Memory check - {current_memory:.1f}MB exceeds {settings.memory_threshold_mb}MB threshold"
+                )
+                logger.info(
+                    f"Worker {self.worker_id}: About to trigger restart from memory check"
+                )
+                await self.cleanup()
+                time.sleep(
+                    10
+                )  # Wait to ensure output processor has processed the last batch
+                self.restart_trigger.trigger_restart(
+                    f"Memory check: {current_memory:.1f}MB exceeds {settings.memory_threshold_mb}MB threshold"
+                )
+
+        except Exception as e:
+            logger.error(f"Worker {self.worker_id}: Error during memory check: {e}")
+
     async def _assign_work(self, work_message: WorkMessage):
         """Assign and process work immediately"""
         logger.info(f"Worker {self.worker_id}: Processing work {work_message.batch_id}")
@@ -169,8 +230,8 @@ class WorkerProcessor:
             if self.current_config_hash != work_message.config_hash:
                 await self._switch_configuration(work_message)
 
-            # Update current work
-            self.current_config = work_message
+            # Update current work - store only essential identifiers, not entire work message
+            self.current_batch_id = work_message.batch_id
             self.current_config_hash = work_message.config_hash
 
             # Process the work immediately
@@ -205,14 +266,17 @@ class WorkerProcessor:
 
             # Send predictions directly to prediction queue instead of Kafka
             if self.prediction_queue:
+                # Extract modelrun_id from first record for this batch
+                modelrun_id = None
+                if work_message.records:
+                    modelrun_id = work_message.records[0].get("modelrun_id")
+
                 await self._add_prediction_to_queue(
                     work_message.batch_id,
                     predictions,
                     work_message.api_key,
                     work_message.url,
-                )
-                logger.debug(
-                    f"Worker {self.worker_id}: Sent predictions to queue for batch {work_message.batch_id}"
+                    modelrun_id,
                 )
             else:
                 logger.warning(
@@ -222,12 +286,10 @@ class WorkerProcessor:
             self.last_processed_at = datetime.now()
             self.processed_batches += 1
 
-            logger.debug(
-                f"Worker {self.worker_id}: Processed batch for {work_message.batch_id}"
-            )
-
         except Exception as e:
             logger.error(f"Worker {self.worker_id}: Error processing work: {e}")
+        finally:
+            get_memory_usage(self.worker_id, "after processing batch", log=True)
 
     async def _add_prediction_to_queue(
         self,
@@ -235,20 +297,10 @@ class WorkerProcessor:
         predictions,
         api_key: Optional[str] = None,
         url: Optional[str] = None,
+        modelrun_id: Optional[str] = None,
     ):
         """Add predictions to the processing queue with api_key for LSE client"""
         try:
-            # Extract modelrun_id from current work message records if available
-            modelrun_id = None
-            if (
-                self.current_config
-                and hasattr(self.current_config, "records")
-                and self.current_config.records
-            ):
-                # Get modelrun_id from the first record (all records in a batch should have the same modelrun_id)
-                first_record = self.current_config.records[0]
-                modelrun_id = first_record.get("modelrun_id")
-
             prediction_data = {
                 "batch_id": batch_id,
                 "predictions": predictions,
@@ -260,10 +312,6 @@ class WorkerProcessor:
 
             # Use put_nowait to avoid blocking the worker processor
             self.prediction_queue.put_nowait(prediction_data)
-
-            logger.debug(
-                f"Worker {self.worker_id}: Added prediction batch {batch_id} to queue (modelrun_id: {modelrun_id})"
-            )
 
         except Exception as e:
             logger.error(
@@ -277,6 +325,9 @@ class WorkerProcessor:
         than the last message.
         """
         logger.info(f"Worker {self.worker_id}: Switching configuration")
+
+        # Store runtime config for recreation after each batch
+        self.current_runtime_config = work_message.runtime_params.copy()
 
         # Create new skills and runtime
         self.skills = self._create_skills_from_config(work_message.skills)
@@ -357,8 +408,9 @@ class WorkerProcessor:
         # Clear references
         self.skills = None
         self.runtime = None
-        self.current_config = None
+        self.current_batch_id = None
         self.current_config_hash = None
+        self.current_runtime_config = None
 
         logger.info(f"Worker {self.worker_id}: Cleaned up")
 
@@ -367,9 +419,7 @@ class WorkerProcessor:
         return {
             "worker_id": self.worker_id,
             "is_running": self.is_running,
-            "current_batch_id": (
-                self.current_config.batch_id if self.current_config else None
-            ),
+            "current_batch_id": self.current_batch_id,
             "current_config_hash": self.current_config_hash,
             "config_switch_count": self.config_switch_count,
             "last_processed_at": self.last_processed_at,
