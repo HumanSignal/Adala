@@ -260,9 +260,6 @@ class WorkerProcessor:
         if not self.skills or not self.runtime:
             return
 
-        data_batch = None
-        predictions = None
-
         try:
             # Process the data directly from the work message
             if hasattr(work_message, "records") and work_message.records:
@@ -301,17 +298,6 @@ class WorkerProcessor:
         except Exception as e:
             logger.error(f"Worker {self.worker_id}: Error processing work: {e}")
         finally:
-            # Basic cleanup
-            if data_batch is not None:
-                del data_batch
-                data_batch = None
-            if predictions is not None:
-                del predictions
-                predictions = None
-
-            # Force garbage collection
-            gc.collect()
-
             log_memory_usage(self.worker_id, "after processing batch")
 
     async def _add_prediction_to_queue(

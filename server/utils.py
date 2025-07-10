@@ -118,6 +118,9 @@ class KafkaSettings(BaseModel):
     connections_max_idle_ms: int = 300000  # 5 minutes - max idle time for connections
     metadata_max_age_ms: int = 300000  # 5 minutes - max age for metadata
 
+    # for producers
+    max_request_size: int = 3000000  # 3MB - maximum size for producer requests
+
     # for producers and consumers
     bootstrap_servers: Union[str, List[str]] = "localhost:9093"
     security_protocol: Literal["PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"] = (
@@ -161,6 +164,14 @@ class KafkaSettings(BaseModel):
                     "request_timeout_ms": self.request_timeout_ms,
                     "connections_max_idle_ms": self.connections_max_idle_ms,
                     "metadata_max_age_ms": self.metadata_max_age_ms,
+                }
+            )
+
+        # Add producer-specific settings
+        if client_type == "producer":
+            kwargs.update(
+                {
+                    "max_request_size": self.max_request_size,
                 }
             )
 

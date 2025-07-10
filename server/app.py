@@ -234,11 +234,10 @@ async def submit_batch(batch: BatchData):
 
     topic = get_input_topic_name(batch.job_id)
     settings = Settings()
-    kafka_kwargs = settings.kafka.to_kafka_kwargs()
+    kafka_kwargs = settings.kafka.to_kafka_kwargs(client_type="producer")
     producer = AIOKafkaProducer(
         **kafka_kwargs,
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-        max_request_size=3000000,
         acks="all",  # waits for all replicas to respond that they have written the message
     )
     await producer.start()
