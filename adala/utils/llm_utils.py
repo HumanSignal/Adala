@@ -305,10 +305,6 @@ async def arun_instructor_with_messages(
     """
     start_time = time.time()
 
-    # Variables to track for cleanup
-    response = None
-    completion = None
-
     try:
         response, completion = await client.chat.completions.create_with_completion(
             messages=messages,
