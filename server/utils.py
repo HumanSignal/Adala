@@ -440,12 +440,13 @@ def ensure_worker_pool_topics_sync():
     asyncio.run(ensure_worker_pool_topics())
 
 
-def log_memory_usage(worker_id: str, stage: str):
+def get_memory_usage(worker_id: str, stage: str, log: bool = False):
     """Log current memory usage for debugging"""
     try:
         process = psutil.Process()
         memory_mb = process.memory_info().rss / 1024 / 1024
-        logger.info(f"Worker {worker_id}: Memory at {stage}: {memory_mb:.1f}MB")
+        if log:
+            logger.info(f"Worker {worker_id}: Memory at {stage}: {memory_mb:.1f}MB")
         return memory_mb
     except Exception as e:
         logger.warning(f"Worker {worker_id}: Error getting memory info: {e}")

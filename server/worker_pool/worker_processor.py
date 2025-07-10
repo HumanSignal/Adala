@@ -18,7 +18,7 @@ from server.utils import (
     ensure_topic_async,
     ensure_worker_pool_topics,
     ensure_worker_pool_input_topic,
-    log_memory_usage,
+    get_memory_usage,
     Settings,
 )
 from adala.utils.internal_data import InternalDataFrame
@@ -200,15 +200,7 @@ class WorkerProcessor:
         try:
             settings = Settings()
 
-            # Get current memory without logging (to avoid spam)
-            try:
-                process = psutil.Process()
-                current_memory = process.memory_info().rss / 1024 / 1024
-            except Exception as e:
-                logger.warning(
-                    f"Worker {self.worker_id}: Error getting memory info: {e}"
-                )
-                return  # Skip check if we can't get memory info
+            current_memory = get_memory_usage(self.worker_id, "check memory threshold")
 
             # Check if memory exceeds threshold
             if current_memory > settings.memory_threshold_mb:
@@ -297,7 +289,7 @@ class WorkerProcessor:
         except Exception as e:
             logger.error(f"Worker {self.worker_id}: Error processing work: {e}")
         finally:
-            log_memory_usage(self.worker_id, "after processing batch")
+            get_memory_usage(self.worker_id, "after processing batch", log=True)
 
     async def _add_prediction_to_queue(
         self,
