@@ -44,7 +44,6 @@ def worker_process_init_handler(**kwargs):
                 # Create restart trigger for forceful termination
                 restart_trigger = WorkerRestartTrigger()
                 worker_processor.restart_trigger = restart_trigger
-                output_processor.restart_trigger = restart_trigger
 
                 # Initialize processors
                 await worker_processor.initialize()

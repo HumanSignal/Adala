@@ -136,7 +136,6 @@ class OutputProcessor:
         self.processed_batches = 0
         self.last_processed_at = None
         self.prediction_queue = prediction_queue
-        self.restart_trigger = None  # Will be set by celery_integration.py
         logger.info(f"Initialized output processor: {self.processor_id}")
 
     async def initialize(self):
@@ -164,7 +163,7 @@ class OutputProcessor:
                     self.prediction_queue.task_done()
 
                 except asyncio.TimeoutError:
-                    # No predictions available, continue loop (also check restart event on next iteration)
+                    # No predictions available, continue loop
                     continue
                 except Exception as e:
                     logger.error(
