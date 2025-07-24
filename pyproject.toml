@@ -33,7 +33,7 @@ dependencies = [
     # https://github.com/python-poetry/poetry/issues/834
     # they also can't be installed as a `group`, because those are for dev dependencies only and could not be included if this package was pip-installed
     "redis-om",
-    "fastapi (>=0.115.6,<0.116.0)",
+    "fastapi",
     "celery[redis] (>=5.3.6,<6.0.0)",
     "kombu (>=5.4.0rc2)",
     "uvicorn",
@@ -81,6 +81,7 @@ pytest-recording = "0.13.2"
 mypy = "^1.15.0"
 pytest-benchmark = "^5.1.0"
 pytest-profiling = "^1.8.1"
+openai-responses = "^0.12.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

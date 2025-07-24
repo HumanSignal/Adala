@@ -9,6 +9,7 @@ import asyncio
 import uuid
 import json
 import logging
+import math
 from datetime import datetime
 
 from .worker_processor import WorkMessage
@@ -66,31 +67,77 @@ async def submit_batch(request: SubmitBatchRequest) -> SubmitBatchResponse:
             f"batch_{uuid.uuid4().hex[:8]}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         )
 
-        # Create work message with API key, URL, and modelrun_id
-        work_message = WorkMessage(
-            batch_id=batch_id,
-            skills=request.skills,
-            runtime_params=request.runtime_params,
-            input_topic="worker_pool_input",
-            records=request.records,
-            api_key=request.api_key,  # Pass through the API key
-            url=request.url,  # Pass through the URL
-            priority=request.priority,
-        )
-
-        # Add modelrun_id to each record for processing
+        # Add modelrun_id to records if provided
         if request.modelrun_id:
-            for record in work_message.records:
+            for record in request.records:
                 record["modelrun_id"] = request.modelrun_id
 
         # Ensure topic exists
         await ensure_topic_async("worker_pool_input", num_partitions=50)
 
-        # Get producer and publish work message
+        # Get producer for chunking calculations
         producer = await get_kafka_producer()
-        await producer.send_and_wait("worker_pool_input", value=work_message.__dict__)
 
-        logger.info(f"Submitted batch {batch_id} to worker pool")
+        # Calculate message size with all records
+        work_message_with_records = WorkMessage(
+            batch_id=batch_id,
+            skills=request.skills,
+            runtime_params=request.runtime_params,
+            input_topic="worker_pool_input",
+            records=request.records,
+            api_key=request.api_key,
+            url=request.url,
+            priority=request.priority,
+        )
+
+        # Calculate total message size with 10% buffer for metadata
+        total_message_size = (
+            len(json.dumps(work_message_with_records.__dict__).encode("utf-8")) * 1.10
+        )
+
+        # Check if we need to chunk the message
+        if total_message_size > producer._max_request_size and len(request.records) > 1:
+            # Calculate how many chunks we need
+            num_chunks = min(
+                len(request.records),
+                math.ceil(total_message_size / producer._max_request_size),
+            )
+            chunk_size = math.ceil(len(request.records) / num_chunks)
+
+            logger.warning(
+                f"Message size of {total_message_size} is larger than max_request_size {producer._max_request_size} - "
+                f"splitting {len(request.records)} records into {num_chunks} chunks of size {chunk_size}"
+            )
+
+            # Send chunked work messages
+            for chunk_idx in range(0, len(request.records), chunk_size):
+                chunk_records = request.records[chunk_idx : chunk_idx + chunk_size]
+
+                # Create work message for this chunk
+                chunked_work_message = WorkMessage(
+                    batch_id=f"{batch_id}_chunk_{chunk_idx // chunk_size + 1}",
+                    skills=request.skills,
+                    runtime_params=request.runtime_params,
+                    input_topic="worker_pool_input",
+                    records=chunk_records,
+                    api_key=request.api_key,
+                    url=request.url,
+                    priority=request.priority,
+                )
+
+                await producer.send_and_wait(
+                    "worker_pool_input", value=chunked_work_message.__dict__
+                )
+
+            logger.info(
+                f"Submitted batch {batch_id} to worker pool in {num_chunks} chunks"
+            )
+        else:
+            # Send single work message
+            await producer.send_and_wait(
+                "worker_pool_input", value=work_message_with_records.__dict__
+            )
+            logger.info(f"Submitted batch {batch_id} to worker pool")
 
         return SubmitBatchResponse(
             batch_id=batch_id,
