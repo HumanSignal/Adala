@@ -289,7 +289,6 @@ class LSEHandler(ResultHandler):
                 client.prompts.batch_predictions,
                 modelrun_id=self.modelrun_id,
                 results=result_batch,
-                num_predictions=num_predictions,
             )
 
             logger.info(f"LSEHandler sent {num_predictions} predictions to LSE")
