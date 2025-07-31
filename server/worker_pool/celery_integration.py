@@ -10,6 +10,7 @@ from celery.signals import worker_process_init, worker_process_shutdown
 
 from .worker_processor import WorkerProcessor
 from .output_processor import OutputProcessor
+from .restart_utils import WorkerRestartTrigger
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ def worker_process_init_handler(**kwargs):
     global worker_processor, output_processor, processor_thread, prediction_queue
 
     def run_async_processors():
-        """Run both processors in the same event loop with shared queue"""
+        """Run both processors in the same event loop"""
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
@@ -40,9 +41,13 @@ def worker_process_init_handler(**kwargs):
                 worker_processor = WorkerProcessor(prediction_queue=prediction_queue)
                 output_processor = OutputProcessor(prediction_queue=prediction_queue)
 
+                # Create restart trigger for forceful termination
+                restart_trigger = WorkerRestartTrigger()
+                worker_processor.restart_trigger = restart_trigger
+
                 # Initialize processors
                 await worker_processor.initialize()
-                await output_processor.initialize()  # No default result handler needed
+                await output_processor.initialize()
 
                 logger.info("Worker pool processors initialized successfully")
 
@@ -50,27 +55,34 @@ def worker_process_init_handler(**kwargs):
                 await asyncio.gather(
                     worker_processor.run_forever(),
                     output_processor.run_forever(),
-                    return_exceptions=True,
                 )
 
             except Exception as e:
                 logger.error(f"Processors error: {e}")
+                raise
             finally:
-                loop.stop()
+                # Cleanup processors
+                if worker_processor:
+                    worker_processor.is_running = False
+                if output_processor:
+                    output_processor.is_running = False
 
         try:
             loop.run_until_complete(start_processors())
         except Exception as e:
             logger.error(f"Event loop error: {e}")
         finally:
-            loop.close()
+            try:
+                loop.close()
+            except:
+                pass
 
     # Start both processors in a separate thread
     processor_thread = threading.Thread(target=run_async_processors, daemon=True)
     processor_thread.start()
 
     logger.info(
-        f"Worker and output processors started with shared queue for PID {os.getpid()}"
+        f"Worker and output processors started with restart capability for PID {os.getpid()}"
     )
 
 
@@ -97,4 +109,9 @@ def worker_process_shutdown_handler(**kwargs):
             )
 
     # Clear global references
+    worker_processor = None
+    output_processor = None
+    processor_thread = None
     prediction_queue = None
+
+    logger.info(f"Worker pool processors cleaned up for PID {os.getpid()}")

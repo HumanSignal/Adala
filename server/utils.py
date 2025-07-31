@@ -9,6 +9,7 @@ from aiokafka.admin import AIOKafkaAdminClient, NewTopic
 from aiokafka.errors import TopicAlreadyExistsError, UnknownTopicOrPartitionError
 from aiokafka.helpers import create_ssl_context
 import asyncio
+import psutil
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 
@@ -104,11 +105,21 @@ class KafkaSettings(BaseModel):
 
     # Consumer timeout settings for long-running processing
     max_poll_interval_ms: int = 600000  # 10 minutes - allow time for LLM processing
-    session_timeout_ms: int = 300000  # 5 minutes - session timeout
-    heartbeat_interval_ms: int = 90000  # 1.5 minutes - heartbeat interval
+    session_timeout_ms: int = 45000  # 45 seconds - reduced for faster failure detection
+    heartbeat_interval_ms: int = (
+        15000  # 15 seconds - heartbeat interval (1/3 of session timeout)
+    )
     enable_auto_commit: bool = (
         True  # Enable auto commit since we're not manually committing
     )
+
+    # Connection timeout settings to prevent join group hangs
+    request_timeout_ms: int = 40000  # 40 seconds - timeout for individual requests
+    connections_max_idle_ms: int = 300000  # 5 minutes - max idle time for connections
+    metadata_max_age_ms: int = 300000  # 5 minutes - max age for metadata
+
+    # for producers
+    max_request_size: int = 3000000  # 3MB - maximum size for producer requests
 
     # for producers and consumers
     bootstrap_servers: Union[str, List[str]] = "localhost:9093"
@@ -150,6 +161,17 @@ class KafkaSettings(BaseModel):
                     "session_timeout_ms": self.session_timeout_ms,
                     "heartbeat_interval_ms": self.heartbeat_interval_ms,
                     "enable_auto_commit": self.enable_auto_commit,
+                    "request_timeout_ms": self.request_timeout_ms,
+                    "connections_max_idle_ms": self.connections_max_idle_ms,
+                    "metadata_max_age_ms": self.metadata_max_age_ms,
+                }
+            )
+
+        # Add producer-specific settings
+        if client_type == "producer":
+            kwargs.update(
+                {
+                    "max_request_size": self.max_request_size,
                 }
             )
 
@@ -188,6 +210,7 @@ class Settings(BaseSettings):
     # https://docs.celeryq.dev/en/v5.4.0/userguide/configuration.html#worker-max-memory-per-child
     celery_worker_max_memory_per_child_kb: int = 1024000  # 1GB
     redis: RedisSettings = RedisSettings()
+    memory_threshold_mb: int = 350  # 350MB threshold for memory check (per worker)
 
     model_config = SettingsConfigDict(
         # have to use an absolute path here so celery workers can find it
@@ -415,3 +438,16 @@ async def ensure_worker_pool_input_topic():
 def ensure_worker_pool_topics_sync():
     """Synchronous version of ensure_worker_pool_topics"""
     asyncio.run(ensure_worker_pool_topics())
+
+
+def get_memory_usage(worker_id: str, stage: str, log: bool = False):
+    """Log current memory usage for debugging"""
+    try:
+        process = psutil.Process()
+        memory_mb = process.memory_info().rss / 1024 / 1024
+        if log:
+            logger.info(f"Worker {worker_id}: Memory at {stage}: {memory_mb:.1f}MB")
+        return memory_mb
+    except Exception as e:
+        logger.warning(f"Worker {worker_id}: Error getting memory info: {e}")
+        return 0
