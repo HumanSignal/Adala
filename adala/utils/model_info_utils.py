@@ -127,11 +127,6 @@ def _estimate_cost(
     provider: str,
 ):
     try:
-        # Quick hack to support gpt-5 models before they are included in litellm models list
-        # TODO: Remove this once litellm has it in their model list
-        if 'gpt-5' in model:
-            model = f'openai/{model}'
-
         prompt_tokens = _get_prompt_tokens(user_prompt, model, output_fields)
 
         completion_tokens = _get_completion_tokens(model, output_fields)

@@ -98,10 +98,6 @@ def _get_usage_dict(
     # TODO make sure this is calculated correctly after we turn on caching
     # litellm will register the cost of an azure model on first successful completion. If there hasn't been a successful completion, the model will not be registered
     try:
-        # Quick hack to support gpt-5 models before they are included in litellm models list
-        # TODO: Remove this once litellm has it in their model list
-        if 'gpt-5' in model:
-            model = f'openai/{model}'
         prompt_cost, completion_cost = litellm.cost_per_token(
             model, data["_prompt_tokens"], data["_completion_tokens"]
         )
@@ -310,10 +306,6 @@ async def arun_instructor_with_messages(
     start_time = time.time()
 
     try:
-        # Quick hack to support gpt-5 models before they are included in litellm models list
-        # TODO: Remove this once litellm has it in their model list
-        if 'gpt-5' in model:
-            model = f'openai/{model}'
         response, completion = await client.chat.completions.create_with_completion(
             messages=messages,
             response_model=response_model,
