@@ -52,7 +52,7 @@ jobs:
             core.setOutput("active", membership.state == "active");
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           token: ${{ github.token }}
           ref: ${{ inputs.sha }}
