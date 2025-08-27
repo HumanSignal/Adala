@@ -72,7 +72,7 @@ jobs:
 
   docker_build:
     name: "Docker image (${{ matrix.platform }})"
-    timeout-minutes: 25
+    timeout-minutes: 15
     runs-on: ${{ matrix.runner }}
     needs: calculate_version
     strategy:
