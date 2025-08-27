@@ -26,7 +26,7 @@ env:
 jobs:
   docker_build_and_push:
     name: "Docker image"
-    timeout-minutes: 15
+    timeout-minutes: 25
     runs-on: ubuntu-latest
     outputs:
       image_version: ${{ steps.version.outputs.image_version }}
