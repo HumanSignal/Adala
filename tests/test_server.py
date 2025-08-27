@@ -597,30 +597,33 @@ async def test_estimate_cost_endpoint_invalid_model(async_client):
 @pytest.mark.vcr
 def test_chat_completion_endpoint_api_client(client):
     """Test the chat/completion endpoint using sync requests with OpenAI format validation."""
-    
+
     # Make a direct request using the existing test client fixture
-    response = client.post("/chat/completions", json={
-        "model": "gemini/gemini-2.0-flash",
-        "messages": [{"role": "user", "content": "Hello, how are you?"}],
-        "api_key": os.getenv('GEMINI_API_KEY')
-    })
-    
+    response = client.post(
+        "/chat/completions",
+        json={
+            "model": "gemini/gemini-2.0-flash",
+            "messages": [{"role": "user", "content": "Hello, how are you?"}],
+            "api_key": os.getenv("GEMINI_API_KEY"),
+        },
+    )
+
     assert response.status_code == 200
     response_data = response.json()
-    
+
     # Verify the response structure matches OpenAI's format
     assert "choices" in response_data
     assert "model" in response_data
     assert "usage" in response_data
     assert len(response_data["choices"]) > 0
     assert response_data["choices"][0]["message"]["content"] is not None
-    
+
     # Validate the response data object structure and content
     assert response_data["id"] is not None
     assert response_data["object"] == "chat.completion"
     assert isinstance(response_data["created"], int)
     assert response_data["model"] is not None
-    
+
     # Validate choices structure
     choices = response_data["choices"]
     assert len(choices) > 0
@@ -628,18 +631,18 @@ def test_chat_completion_endpoint_api_client(client):
     assert "finish_reason" in choice
     assert "index" in choice
     assert "message" in choice
-    
+
     # Validate message content
     message = choice["message"]
     assert "content" in message
     assert message["content"] is not None
     assert "role" in message
     assert message["role"] == "assistant"
-    
+
     # Validate the actual response content contains expected text
     content = message["content"]
     assert "thank you" in content.lower()
-    
+
     # Validate usage structure
     usage = response_data["usage"]
     assert "completion_tokens" in usage
@@ -651,7 +654,7 @@ def test_chat_completion_endpoint_api_client(client):
     assert usage["completion_tokens"] > 0
     assert usage["prompt_tokens"] > 0
     assert usage["total_tokens"] > 0
-    
+
     # Validate service_tier exists
     assert "service_tier" in response_data
 
@@ -661,32 +664,31 @@ def test_chat_completion_endpoint_api_client(client):
 async def test_chat_completion_endpoint_openai_client():
     """Test the chat/completion endpoint using AsyncOpenAI client with mocked test server."""
     from server.app import app
-    
+
     # Create async httpx client with ASGITransport for mocked test server
     http_client = httpx.AsyncClient(
-        transport=httpx.ASGITransport(app=app),
-        base_url="http://localhost:30001"
+        transport=httpx.ASGITransport(app=app), base_url="http://localhost:30001"
     )
-    
+
     # Create AsyncOpenAI client with the mocked httpx client
     client = AsyncOpenAI(
         base_url="http://localhost:30001",
-        api_key=os.getenv('GEMINI_API_KEY'),
+        api_key=os.getenv("GEMINI_API_KEY"),
         http_client=http_client,
     )
 
     response = await client.chat.completions.create(
         model="gemini/gemini-2.0-flash",
-        messages=[{"role": "user", "content": "Hello, how are you?"}]
+        messages=[{"role": "user", "content": "Hello, how are you?"}],
     )
 
     # Verify the response structure matches OpenAI's format
-    assert hasattr(response, 'choices')
-    assert hasattr(response, 'model')
-    assert hasattr(response, 'usage')
+    assert hasattr(response, "choices")
+    assert hasattr(response, "model")
+    assert hasattr(response, "usage")
     assert len(response.choices) > 0
-    assert 'thank you' in response.choices[0].message.content.lower()
-    
+    assert "thank you" in response.choices[0].message.content.lower()
+
     # Clean up
     await http_client.aclose()
 
@@ -696,17 +698,16 @@ async def test_chat_completion_endpoint_openai_client():
 async def test_chat_completion_endpoint_error_handling():
     """Test error handling when using non-existent endpoint via extra_headers."""
     from server.app import app
-    
+
     # Create async httpx client with ASGITransport for mocked test server
     http_client = httpx.AsyncClient(
-        transport=httpx.ASGITransport(app=app),
-        base_url="http://localhost:30001"
+        transport=httpx.ASGITransport(app=app), base_url="http://localhost:30001"
     )
-    
+
     # Create AsyncOpenAI client with the mocked httpx client
     client = AsyncOpenAI(
         base_url="http://localhost:30001",
-        api_key=os.getenv('GEMINI_API_KEY'),
+        api_key=os.getenv("GEMINI_API_KEY"),
         http_client=http_client,
     )
 
@@ -715,10 +716,8 @@ async def test_chat_completion_endpoint_error_handling():
         response = await client.chat.completions.create(
             model="gemini/gemini-2.0-flash",
             messages=[{"role": "user", "content": "Hello, how are you?"}],
-            extra_headers={
-                'base_url': 'http://non.existent.endpoint'
-            }
+            extra_headers={"base_url": "http://non.existent.endpoint"},
         )
-    
+
     # Clean up
     await http_client.aclose()

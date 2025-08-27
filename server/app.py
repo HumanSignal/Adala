@@ -418,15 +418,18 @@ class ChatCompletionRequest(BaseModel):
     """
     Request for immediate chat completion.
     """
+
     messages: List[Dict]
     model: str
     base_url: Optional[str] = None
     api_key: Optional[str] = None
-    
+
+
 class ChatCompletionResponse(BaseModel):
     """
     Response for immediate chat completion following OpenAI chat completion format.
     """
+
     id: str
     object: str = "chat.completion"
     created: int
@@ -443,7 +446,7 @@ async def chat_completion(request: Request, chat_request: ChatCompletionRequest)
     https://platform.openai.com/docs/api-reference/chat/create
     """
     from litellm import acompletion
-    
+
     try:
         if chat_request.api_key is None:
             # Extract token from Authorization header or from `api_key` header if present. `api_key` header takes precedence.
@@ -453,11 +456,11 @@ async def chat_completion(request: Request, chat_request: ChatCompletionRequest)
                 chat_request.api_key = api_key_header
             elif auth_header and auth_header.startswith("Bearer "):
                 chat_request.api_key = auth_header[7:]
-            
+
         if chat_request.base_url is None:
             # Extract base_url from headers if present.
             chat_request.base_url = request.headers.get("base_url")
-        
+
         response = await acompletion(
             messages=chat_request.messages,
             model=chat_request.model,
@@ -471,16 +474,13 @@ async def chat_completion(request: Request, chat_request: ChatCompletionRequest)
             model=response.model,
             choices=[choice.model_dump() for choice in response.choices],
             usage=response.usage.model_dump(),
-            service_tier=getattr(response, 'service_tier', 'default')
+            service_tier=getattr(response, "service_tier", "default"),
         )
-    
+
     except Exception as e:
         logger.error(f"Error in chat completion: {e}")
         logger.debug(traceback.format_exc())
-        raise HTTPException(
-            status_code=500,
-            detail=f"Chat completion failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Chat completion failed: {str(e)}")
 
 
 @app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])
