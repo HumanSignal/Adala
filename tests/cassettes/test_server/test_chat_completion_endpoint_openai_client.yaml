@@ -1,0 +1,113 @@
+interactions:
+- request:
+    body: '{"contents": [{"role": "user", "parts": [{"text": "Hello, how are you?"}]}],
+      "generationConfig": {}}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '100'
+      content-type:
+      - application/json
+      host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - litellm/1.65.6
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/61STW/aQBC9+1dM99ILIKCA1V6qKI1UIqqSFLWV2hwmeGyvWO9a3nESC/HfO2ti
+        Yppr9rBazZuPN+/tPgJQW7SJTpDJq0/wRyIA+/YOmLNMlgXoQhIsseKX3OPZ996SwvQUitQSsIDE
+        aZvBIxkzAM7R7qBxNaSuAvQ7gd7BhQcEg1VGctusRnkULiEpWEq5fc9ATyVVmuyWgArH2lkP0iEl
+        MtLCg9E7grwuUOKJG8B9zdBOT2u7DemBgytZF2hMA7IzVIRJA+yEhteeA6sRfHWPIIpIbU6mbJmy
+        S7D5/Neq3o6H0/tu8KJM5QyFtVvuXfqhS1Cpttrnt4Te2ZD2Y/N9rU4oPmQrl5WVuw/iDsej8XwR
+        L6bxR7nj6WQ2n0yibnQ7VNVehPpGjOIenjxS0qIoeeN2ZC9d3bq3OE7peX0Gz+JnnB2jOYPmHwav
+        uvovMlOb/h/ofQ9ZHo3mJmy4ufq9UT2B+IxUJ1DU0/F/im80axafD4uefTla9ZMqr4+eZFSIS8Pp
+        aDxMDfq87agq8qX8OFomISe90A+4Wq+u+dfY+qs1Xzd1c3OjokP0DzJurrBSAwAA
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Wed, 27 Aug 2025 13:30:37 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=704
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "user", "content": "Hello, how are you?"}], "model":
+      "gemini/gemini-2.0-flash"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '102'
+      content-type:
+      - application/json
+      host:
+      - localhost:30001
+      user-agent:
+      - AsyncOpenAI/Python 1.76.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.76.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.12
+    method: POST
+    uri: http://localhost:30001/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-38f02a73-ec84-4e09-b470-a468018a7eee","object":"chat.completion","created":1756301436,"model":"gemini-2.0-flash","choices":[{"finish_reason":"stop","index":0,"message":{"content":"I
+        am doing well, thank you for asking! As a large language model, I don''t experience
+        emotions or feelings like humans do, but I am functioning optimally and ready
+        to assist you. How can I help you today?\n","role":"assistant","tool_calls":null,"function_call":null},"logprobs":-0.05676279676721451}],"usage":{"completion_tokens":47,"prompt_tokens":6,"total_tokens":53,"completion_tokens_details":null,"prompt_tokens_details":{"audio_tokens":null,"cached_tokens":null}},"service_tier":"default"}'
+    headers:
+      content-length:
+      - '690'
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1
