@@ -22,13 +22,14 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAC/61R0U6DMBR95ytqnzczmAz0xRg1ccZlixKjUWOucscaSkto2cRl/24B2br5ah+a
-        5p7Te+49Z+0QQj9BxCwGjYqekRdTIWTd3DUmhUahDdCVTDGHQu+47Vlbb0PR+FV/omMCGYklEwlZ
-        Iec9ohcgUlLJksxlQUClBjoiN3JFoMCmrmUM1fmroFbHzfb91tvNUUiOtUgmY+QdfdMR6JwJphb3
-        CEqKmvYQTWd0i8IyuZNJXsiPepX+4HgwDAI3dId+OBr6J57vB04n3YjSUkGCE9RgvIKtI9S0yHId
-        yRTFpSwbr0atiuXsHux2uJYa+B7keb0/XdWV0WTcdtwKwywPnOmq3jC6foqoZZDeG6ozyLF8PBzx
-        n7TcAzHnN5c2qkcsFGszSTAzKfW940F/zkEtmo60QJVLoXAc1xw2Ll2Y4vvt8zcLJuHsdLoMq4uU
-        OhvnBxC84mHAAgAA
+        H4sIAAAAAAAC/61SwW7TQBC9+yuGvXBJIidt2pQLQgWpEaAWSAsScJjGY3uV9Y61uya1ovw7s06d
+        OpzxwVrtezPz5r3dJQBqjTbTGQby6g38lBuAXfePGNtANgjQX8lljS68cA/fbnAWSqCnWKSWgBVk
+        rG0BWzJmBKFEu4GWG8jZAfqNQK/gnQcEg64g+duiQTlUnJEULKXcvg5ATzU5TXZNQBUHzdaDdMiJ
+        jLTwoK30JvBYEWyxhbKpUCgZj+CxCdAJyRu7jpVRDtdBV2hMC7I+OMKshcCiyGsfosAJ3PAWxByp
+        LcnUnejAGbZvf1k1WHd/PP8evZjk2FB0oFujp+97gsq11b78SujZRtq31e2dOqL4p/jERe34Mfo8
+        Tifp+exscbW4SKfzs+nVYnae9JO7marxYtlnCig54jEtJR2qOqx4Q/aamy7Hi8OQQeon8Dx9xgMH
+        NKdQXzro6t/LTG2Gr2HwUGR3NDq0ccHVhx8rNfAnnIjq/UkGNv4r8T/Nmqenw5LnWA5JPZDz+hBJ
+        QZWENJ5N0nFu0JddR+XI1/L2aJlFzvbyeorLm+Zjfnu5ye7vGvq+1l9YJfvkL0NhMvJcAwAA
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -37,11 +38,11 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Mon, 01 Sep 2025 12:03:20 GMT
+      - Mon, 01 Sep 2025 14:42:12 GMT
       Server:
       - scaffolding on HTTPServer2
       Server-Timing:
-      - gfet4t7; dur=423
+      - gfet4t7; dur=807
       Transfer-Encoding:
       - chunked
       Vary:
@@ -74,7 +75,7 @@ interactions:
       host:
       - localhost:30001
       user-agent:
-      - AsyncOpenAI/Python 1.76.0
+      - AsyncOpenAI/Python 1.102.0
       x-stainless-arch:
       - arm64
       x-stainless-async:
@@ -84,7 +85,7 @@ interactions:
       x-stainless-os:
       - MacOS
       x-stainless-package-version:
-      - 1.76.0
+      - 1.102.0
       x-stainless-read-timeout:
       - '600'
       x-stainless-retry-count:
@@ -97,11 +98,13 @@ interactions:
     uri: http://localhost:30001/chat/completions
   response:
     body:
-      string: '{"id":"chatcmpl-26e1bc3a-2b1a-4917-bb03-49e951b15c35","object":"chat.completion","created":1756728200,"model":"gemini-2.0-flash","choices":[{"finish_reason":"stop","index":0,"message":{"content":"I
-        am doing well, thank you for asking! How are you today?\n","role":"assistant","tool_calls":null,"function_call":null},"logprobs":-0.03771813586354256}],"usage":{"completion_tokens":16,"prompt_tokens":6,"total_tokens":22,"completion_tokens_details":null,"prompt_tokens_details":{"audio_tokens":null,"cached_tokens":null}},"service_tier":"default"}'
+      string: '{"id":"chatcmpl-9f43a26c-1e47-4edc-891a-7b2bf46dca3a","object":"chat.completion","created":1756737731,"model":"gemini-2.0-flash","choices":[{"finish_reason":"stop","index":0,"message":{"content":"I
+        am doing well, thank you for asking! As a large language model, I don''t experience
+        emotions or feelings in the same way humans do, but I am functioning optimally
+        and ready to assist you. How can I help you today?\n","role":"assistant","tool_calls":null,"function_call":null},"logprobs":-0.04238986015319824}],"usage":{"completion_tokens":50,"prompt_tokens":6,"total_tokens":56,"completion_tokens_details":null,"prompt_tokens_details":{"audio_tokens":null,"cached_tokens":null}},"service_tier":"default"}'
     headers:
       content-length:
-      - '544'
+      - '701'
       content-type:
       - application/json
     status:
@@ -126,7 +129,7 @@ interactions:
       host:
       - localhost:30001
       user-agent:
-      - AsyncOpenAI/Python 1.76.0
+      - AsyncOpenAI/Python 1.102.0
       x-stainless-arch:
       - arm64
       x-stainless-async:
@@ -136,7 +139,7 @@ interactions:
       x-stainless-os:
       - MacOS
       x-stainless-package-version:
-      - 1.76.0
+      - 1.102.0
       x-stainless-read-timeout:
       - '600'
       x-stainless-retry-count:
@@ -202,7 +205,7 @@ interactions:
       host:
       - localhost:30001
       user-agent:
-      - AsyncOpenAI/Python 1.76.0
+      - AsyncOpenAI/Python 1.102.0
       x-stainless-arch:
       - arm64
       x-stainless-async:
@@ -212,7 +215,7 @@ interactions:
       x-stainless-os:
       - MacOS
       x-stainless-package-version:
-      - 1.76.0
+      - 1.102.0
       x-stainless-read-timeout:
       - '600'
       x-stainless-retry-count:
@@ -278,7 +281,7 @@ interactions:
       host:
       - localhost:30001
       user-agent:
-      - AsyncOpenAI/Python 1.76.0
+      - AsyncOpenAI/Python 1.102.0
       x-stainless-arch:
       - arm64
       x-stainless-async:
@@ -288,7 +291,7 @@ interactions:
       x-stainless-os:
       - MacOS
       x-stainless-package-version:
-      - 1.76.0
+      - 1.102.0
       x-stainless-read-timeout:
       - '600'
       x-stainless-retry-count:

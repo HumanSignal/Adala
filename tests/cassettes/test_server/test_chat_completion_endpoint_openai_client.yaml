@@ -22,14 +22,14 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAC/61SwW7TQBC9+yuGvXBJIpOmScsFVRSpQVSNIEIgQGgaj+1V1jvW7prWRPl3Zp06
-        deCKLa1WM2/mvZm3uwRAbdBmOsNAXr2GbxIB2HVnzLENZIMk+pAEa3ThGXv4doO7QAI9xiK1BKwg
-        Y20LeCBjRhBKtFtouYGcHaDfSuoFXHlAMOgKktMWDcql4oykYCnl9mUAeqzJabIbAqo4aLYepENO
-        ZKSFB6O3BGVTocQzHsF9E6Bjzxu7ifCogeugKzSmBZkZHGHWQmCR4bUPUdUEbvgBZCNSW5KpO6WB
-        M2zffLdqMOP+eP8xet6MY0Nx7E57D9/3AJVrq335kdCzjbBP67uVOmbxV/GBi9rxfVzuOJ2ks4X8
-        6dlsenGZXs6n83nSU3ekqvGyqFsKKO7h0SMlLao6rHlL9i03nXvzA8vA65P0bPGUDxzQnKTOz0b/
-        dPXXwqnN8A0MnocMj0aHNk64fvdlrQYLCiei+gUlgz3+LfE/cc0Wp2TJky8Hqz6T8/rgSUGVuDSe
-        TtJxbtCXXUflyNfy4miZdZivzStc0c+b8996cXuxcnfX75srVsk++QNPjAV+UgMAAA==
+        H4sIAAAAAAAC/61STW/TQBC9+1cMe+GSREljGsoFQahKJFALRAgJEJrGY3uV9Y67u6a1ovx3Zp06
+        deDKHlareW++3ttdAqA2aDOdYSCvXsF3iQDsujtibAPZIEAfkmCNLjxxD2c3eAsl0ENMUivACjLW
+        toB7MmYEoUS7hZYbyNkB+q1Az+CNBwSDriC5bdGgPCrOSBJWkm6fB6CHmpwmuyGgioNm60Eq5ERG
+        SngwektQNhVKPOMR3DYBuu55YzeRHmfgOugKjWlBdgZHmLUQWMbw2oc41QTe8z2IIpJbkqm7SQNn
+        2L7+YdVgx/3x/XP0pIxjQ3Htbvaevu8JKtdW+/IzoWcbaV/W1zfqiOLv4gMXtePbKO54Opmmi4uL
+        dDY/fzmbzqdni3ma9K27pqrxItRHCiju4dEjJSWqOqx5S3bJTefe+aHLwOsTOF084oEDmhPoxXz0
+        T1X/TnpqM/wDg+8hy6PRoY0bri+/rdVAoHAyVC9QMtDx7xH/U690cdosefTlYNVXcl4fPCmoEpfG
+        Z5PpODfoy66icuRr+XG0yiLHuOUMr6+u3t4tU+svb+pfd03ziVWyT/4A4Brg91IDAAA=
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -38,11 +38,11 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Mon, 01 Sep 2025 12:03:14 GMT
+      - Mon, 01 Sep 2025 14:41:26 GMT
       Server:
       - scaffolding on HTTPServer2
       Server-Timing:
-      - gfet4t7; dur=812
+      - gfet4t7; dur=552
       Transfer-Encoding:
       - chunked
       Vary:
@@ -75,7 +75,7 @@ interactions:
       host:
       - localhost:30001
       user-agent:
-      - AsyncOpenAI/Python 1.76.0
+      - AsyncOpenAI/Python 1.102.0
       x-stainless-arch:
       - arm64
       x-stainless-async:
@@ -85,7 +85,7 @@ interactions:
       x-stainless-os:
       - MacOS
       x-stainless-package-version:
-      - 1.76.0
+      - 1.102.0
       x-stainless-read-timeout:
       - '600'
       x-stainless-retry-count:
@@ -98,10 +98,10 @@ interactions:
     uri: http://localhost:30001/chat/completions
   response:
     body:
-      string: '{"id":"chatcmpl-d6480e6a-098d-4bcf-9eee-c575ff43b37e","object":"chat.completion","created":1756728193,"model":"gemini-2.0-flash","choices":[{"finish_reason":"stop","index":0,"message":{"content":"I
+      string: '{"id":"chatcmpl-2b0f240b-8fb8-4837-98a5-0fe889f6b656","object":"chat.completion","created":1756737685,"model":"gemini-2.0-flash","choices":[{"finish_reason":"stop","index":0,"message":{"content":"I
         am doing well, thank you for asking! As a large language model, I don''t experience
         emotions or feelings like humans do, but I am functioning optimally and ready
-        to assist you. How can I help you today?\n","role":"assistant","tool_calls":null,"function_call":null},"logprobs":-0.047474034289096266}],"usage":{"completion_tokens":47,"prompt_tokens":6,"total_tokens":53,"completion_tokens_details":null,"prompt_tokens_details":{"audio_tokens":null,"cached_tokens":null}},"service_tier":"default"}'
+        to assist you. How can I help you today?\n","role":"assistant","tool_calls":null,"function_call":null},"logprobs":-0.047994136810302734}],"usage":{"completion_tokens":47,"prompt_tokens":6,"total_tokens":53,"completion_tokens_details":null,"prompt_tokens_details":{"audio_tokens":null,"cached_tokens":null}},"service_tier":"default"}'
     headers:
       content-length:
       - '691'

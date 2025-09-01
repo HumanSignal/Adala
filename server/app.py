@@ -19,7 +19,7 @@ import litellm
 from litellm.exceptions import AuthenticationError
 from litellm.utils import check_valid_key, get_valid_models
 from litellm import acompletion
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 
 from pydantic import BaseModel, SerializeAsAny, field_validator, Field, model_validator
 from redis import Redis
@@ -433,50 +433,56 @@ class ChatCompletionResponse(BaseModel):
     choices: List[Dict]
     usage: Dict
     service_tier: Optional[str] = "default"
-    
-    
+
+
 def _chat_completion_get_runtime_params(request: Request) -> Dict:
     """
     Get runtime params from the request headers.
     The minimal `runtime_params` must include `api_key` field.
     """
-    auth_header = request.headers.get("Authorization") or request.headers.get("authorization")
+    auth_header = request.headers.get("Authorization") or request.headers.get(
+        "authorization"
+    )
 
     if auth_header and auth_header.startswith("Bearer "):
         credentials_payload = auth_header[7:]
         try:
             # Try to decode as base64 and parse as JSON
             decoded_bytes = base64.b64decode(credentials_payload)
-            decoded_str = decoded_bytes.decode('utf-8')
+            decoded_str = decoded_bytes.decode("utf-8")
             runtime_params = json.loads(decoded_str)
-            
+
             if "api_key" not in runtime_params:
                 raise ValueError("api_key missing from credentials")
-                
+
             # Remove JWT-related fields as they only needed to check the integrity
             for field in ("exp", "iat", "iss", "sub"):
                 runtime_params.pop(field, None)
-                
+
             return runtime_params
-            
+
         except Exception:
             # If decoding/parsing fails, treat as plain API key
             return {"api_key": credentials_payload}
-    
+
     # Fallback to environment variable
     if os.getenv("OPENAI_API_KEY"):
         return {"api_key": os.getenv("OPENAI_API_KEY")}
-    
+
     raise HTTPException(
-        status_code=400, 
-        detail="No credentials found in the request headers or environment variables"
+        status_code=400,
+        detail="No credentials found in the request headers or environment variables",
     )
-    
-    
-async def _chat_completion_handle_request(chat_request: ChatCompletionRequest, runtime_params: Dict, provider: str) -> ChatCompletionResponse:
-    if provider == "Custom":
+
+
+async def _chat_completion_handle_request(
+    chat_request: ChatCompletionRequest, runtime_params: Dict, provider: str
+) -> ChatCompletionResponse:
+    if isinstance(provider, str) and provider.lower() == "custom":
         # LiteLLM has issues working with Custom OpenAI-compatible API providers
-        client = OpenAI(api_key=runtime_params["api_key"], base_url=runtime_params["base_url"])
+        client = AsyncOpenAI(
+            api_key=runtime_params["api_key"], base_url=runtime_params["base_url"]
+        )
         response = client.chat.completions.create(
             messages=chat_request.messages,
             model=chat_request.model,
@@ -496,7 +502,7 @@ async def _chat_completion_handle_request(chat_request: ChatCompletionRequest, r
         usage=response.usage.model_dump(),
         service_tier=getattr(response, "service_tier", "default"),
     )
-    
+
 
 @app.post("/chat/completions", response_model=ChatCompletionResponse)
 async def chat_completion(request: Request, chat_request: ChatCompletionRequest):
@@ -511,16 +517,17 @@ async def chat_completion(request: Request, chat_request: ChatCompletionRequest)
         if not runtime_params.get("base_url"):
             # Extract base_url from headers if present (due to the OpenAI-compatible API providers)
             runtime_params["base_url"] = request.headers.get("base_url")
-            
+
         # pop the `model` to ensure it's passed as an input request parameter
         runtime_params.pop("model", None)
         provider = runtime_params.pop("provider", None) or "openai"
-        response = await _chat_completion_handle_request(chat_request, runtime_params, provider)
+        response = await _chat_completion_handle_request(
+            chat_request, runtime_params, provider
+        )
         return response
 
-
     except Exception as e:
-        logger.error(f"Error in chat completion: {e}")
+        logger.error("Error in chat completion: %s", e)
         logger.debug(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Chat completion failed: {str(e)}")
 

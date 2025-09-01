@@ -601,14 +601,18 @@ def test_chat_completion_endpoint_api_client(client):
     """Test the chat/completion endpoint using sync requests with OpenAI format validation."""
 
     # Make a direct request using the existing test client fixture
-    encoded_credentials = base64.b64encode(json.dumps({
-        'api_key': os.getenv("GEMINI_API_KEY"),
-        'iat': time.time(),
-        'iss': 'test',
-        'exp': time.time() + 3600,
-        'sub': 'test',
-        'additional': 'payload',
-    }).encode('utf-8')).decode('utf-8')
+    encoded_credentials = base64.b64encode(
+        json.dumps(
+            {
+                "api_key": os.getenv("GEMINI_API_KEY"),
+                "iat": time.time(),
+                "iss": "test",
+                "exp": time.time() + 3600,
+                "sub": "test",
+                "additional": "payload",
+            }
+        ).encode("utf-8")
+    ).decode("utf-8")
     response = client.post(
         "/chat/completions",
         headers={
@@ -718,19 +722,21 @@ async def test_chat_completion_endpoint_error_handling():
 
     # note that here we use a different schema to pass the `api_key`.
     # the reason is because different providers may require additional credentials.
-    encoded_credentials = base64.b64encode(json.dumps({'api_key': os.getenv("GEMINI_API_KEY")}).encode('utf-8')).decode('utf-8')
+    encoded_credentials = base64.b64encode(
+        json.dumps({"api_key": os.getenv("GEMINI_API_KEY")}).encode("utf-8")
+    ).decode("utf-8")
     client = AsyncOpenAI(
         base_url="http://localhost:30001",
         api_key=encoded_credentials,
         http_client=http_client,
     )
-    
+
     # First test with valid configuration to ensure it passes
     response = await client.chat.completions.create(
         model="gemini/gemini-2.0-flash",
         messages=[{"role": "user", "content": "Hello, how are you?"}],
     )
-    
+
     # Verify the response structure matches OpenAI's format
     assert hasattr(response, "choices")
     assert hasattr(response, "model")
