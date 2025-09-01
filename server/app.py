@@ -483,7 +483,7 @@ async def _chat_completion_handle_request(
         client = AsyncOpenAI(
             api_key=runtime_params["api_key"], base_url=runtime_params["base_url"]
         )
-        response = client.chat.completions.create(
+        response = await client.chat.completions.create(
             messages=chat_request.messages,
             model=chat_request.model,
         )
