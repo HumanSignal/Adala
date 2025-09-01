@@ -513,7 +513,6 @@ async def chat_completion(request: Request, chat_request: ChatCompletionRequest)
 
     try:
         runtime_params = _chat_completion_get_runtime_params(request)
-
         if not runtime_params.get("base_url"):
             # Extract base_url from headers if present (due to the OpenAI-compatible API providers)
             runtime_params["base_url"] = request.headers.get("base_url")

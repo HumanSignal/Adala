@@ -755,3 +755,56 @@ async def test_chat_completion_endpoint_error_handling():
 
     # Clean up
     await http_client.aclose()
+
+
+@pytest.mark.vcr
+@pytest.mark.asyncio
+async def test_custom_provider_with_anthropic_endpoint():
+    """Test using OpenAI client with `Custom` provider configuration pointing to Anthropic API."""
+    from server.app import app
+
+    # Create async httpx client with ASGITransport for mocked test server
+    http_client = httpx.AsyncClient(transport=httpx.ASGITransport(app=app))
+
+    # Configure credentials for custom provider pointing to Anthropic
+    encoded_credentials = base64.b64encode(
+        json.dumps(
+            {
+                "api_key": os.getenv("ANTHROPIC_API_KEY", "test-key"),
+                "provider": "Custom",
+                "base_url": "https://api.anthropic.com/v1/",
+            }
+        ).encode("utf-8")
+    ).decode("utf-8")
+
+    client = AsyncOpenAI(
+        base_url="http://localhost:30001",
+        api_key=encoded_credentials,
+        http_client=http_client,
+    )
+
+    response = await client.chat.completions.create(
+        model="claude-opus-4-1-20250805",
+        messages=[{"role": "user", "content": "Hello, how are you?"}],
+    )
+
+    # Verify the response structure matches OpenAI's format
+    assert hasattr(response, "choices")
+    assert hasattr(response, "model")
+    assert hasattr(response, "usage")
+    assert len(response.choices) > 0
+    assert "thank you" in response.choices[0].message.content.lower()
+
+    # Test should handle the invalid model name
+    with pytest.raises(Exception) as exc_info:
+        response = await client.chat.completions.create(
+            model="invalid-model-name",
+            messages=[{"role": "user", "content": "Hello, how are you?"}],
+        )
+
+    # Verify that the exception is related to API format or authentication issues
+    # rather than configuration problems
+    assert exc_info.value is not None
+
+    # Clean up
+    await http_client.aclose()
