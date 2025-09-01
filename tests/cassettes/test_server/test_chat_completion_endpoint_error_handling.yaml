@@ -1,0 +1,341 @@
+interactions:
+- request:
+    body: '{"contents": [{"role": "user", "parts": [{"text": "Hello, how are you?"}]}],
+      "generationConfig": {}}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '100'
+      content-type:
+      - application/json
+      host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - litellm/1.65.6
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/61SwW7TQBC9+yuGvXBJIidt2pQLQgWpEaAWSAsScJjGY3uV9Y61uya1ovw7s06d
+        OpzxwVrtezPz5r3dJQBqjTbTGQby6g38lBuAXfePGNtANgjQX8lljS68cA/fbnAWSqCnWKSWgBVk
+        rG0BWzJmBKFEu4GWG8jZAfqNQK/gnQcEg64g+duiQTlUnJEULKXcvg5ATzU5TXZNQBUHzdaDdMiJ
+        jLTwoK30JvBYEWyxhbKpUCgZj+CxCdAJyRu7jpVRDtdBV2hMC7I+OMKshcCiyGsfosAJ3PAWxByp
+        LcnUnejAGbZvf1k1WHd/PP8evZjk2FB0oFujp+97gsq11b78SujZRtq31e2dOqL4p/jERe34Mfo8
+        Tifp+exscbW4SKfzs+nVYnae9JO7marxYtlnCig54jEtJR2qOqx4Q/aamy7Hi8OQQeon8Dx9xgMH
+        NKdQXzro6t/LTG2Gr2HwUGR3NDq0ccHVhx8rNfAnnIjq/UkGNv4r8T/Nmqenw5LnWA5JPZDz+hBJ
+        QZWENJ5N0nFu0JddR+XI1/L2aJlFzvbyeorLm+Zjfnu5ye7vGvq+1l9YJfvkL0NhMvJcAwAA
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Mon, 01 Sep 2025 14:42:12 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=807
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "user", "content": "Hello, how are you?"}], "model":
+      "gemini/gemini-2.0-flash"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '102'
+      content-type:
+      - application/json
+      host:
+      - localhost:30001
+      user-agent:
+      - AsyncOpenAI/Python 1.102.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.102.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.12
+    method: POST
+    uri: http://localhost:30001/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-9f43a26c-1e47-4edc-891a-7b2bf46dca3a","object":"chat.completion","created":1756737731,"model":"gemini-2.0-flash","choices":[{"finish_reason":"stop","index":0,"message":{"content":"I
+        am doing well, thank you for asking! As a large language model, I don''t experience
+        emotions or feelings in the same way humans do, but I am functioning optimally
+        and ready to assist you. How can I help you today?\n","role":"assistant","tool_calls":null,"function_call":null},"logprobs":-0.04238986015319824}],"usage":{"completion_tokens":50,"prompt_tokens":6,"total_tokens":56,"completion_tokens_details":null,"prompt_tokens_details":{"audio_tokens":null,"cached_tokens":null}},"service_tier":"default"}'
+    headers:
+      content-length:
+      - '701'
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages": [{"role": "user", "content": "Hello, how are you?"}], "model":
+      "gemini/gemini-2.0-flash"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      base_url:
+      - http://non.existent.endpoint
+      connection:
+      - keep-alive
+      content-length:
+      - '102'
+      content-type:
+      - application/json
+      host:
+      - localhost:30001
+      user-agent:
+      - AsyncOpenAI/Python 1.102.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.102.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.12
+    method: POST
+    uri: http://localhost:30001/chat/completions
+  response:
+    body:
+      string: '{"detail":"Chat completion failed: litellm.APIConnectionError: Invalid
+        port: ''generateContent''\nTraceback (most recent call last):\n  File \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_urlparse.py\",
+        line 364, in normalize_port\n    port_as_int = int(port)\n                  ^^^^^^^^^\nValueError:
+        invalid literal for int() with base 10: ''generateContent''\n\nDuring handling
+        of the above exception, another exception occurred:\n\nTraceback (most recent
+        call last):\n  File \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/main.py\",
+        line 477, in acompletion\n    response = await init_response\n               ^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py\",
+        line 1179, in async_completion\n    response = await client.post(\n               ^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/litellm_core_utils/logging_utils.py\",
+        line 135, in async_wrapper\n    result = await func(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/llms/custom_httpx/http_handler.py\",
+        line 258, in post\n    raise e\n  File \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/llms/custom_httpx/http_handler.py\",
+        line 208, in post\n    req = self.client.build_request(\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_client.py\",
+        line 346, in build_request\n    url = self._merge_url(url)\n          ^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_client.py\",
+        line 376, in _merge_url\n    merge_url = URL(url)\n                ^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_urls.py\",
+        line 117, in __init__\n    self._uri_reference = urlparse(url, **kwargs)\n                          ^^^^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_urlparse.py\",
+        line 260, in urlparse\n    parsed_port: int | None = normalize_port(port,
+        scheme)\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_urlparse.py\",
+        line 366, in normalize_port\n    raise InvalidURL(f\"Invalid port: {port!r}\")\nhttpx.InvalidURL:
+        Invalid port: ''generateContent''\n"}'
+    headers:
+      content-length:
+      - '2485'
+      content-type:
+      - application/json
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: '{"messages": [{"role": "user", "content": "Hello, how are you?"}], "model":
+      "gemini/gemini-2.0-flash"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      base_url:
+      - http://non.existent.endpoint
+      connection:
+      - keep-alive
+      content-length:
+      - '102'
+      content-type:
+      - application/json
+      host:
+      - localhost:30001
+      user-agent:
+      - AsyncOpenAI/Python 1.102.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.102.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '1'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.12
+    method: POST
+    uri: http://localhost:30001/chat/completions
+  response:
+    body:
+      string: '{"detail":"Chat completion failed: litellm.APIConnectionError: Invalid
+        port: ''generateContent''\nTraceback (most recent call last):\n  File \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_urlparse.py\",
+        line 364, in normalize_port\n    port_as_int = int(port)\n                  ^^^^^^^^^\nValueError:
+        invalid literal for int() with base 10: ''generateContent''\n\nDuring handling
+        of the above exception, another exception occurred:\n\nTraceback (most recent
+        call last):\n  File \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/main.py\",
+        line 477, in acompletion\n    response = await init_response\n               ^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py\",
+        line 1179, in async_completion\n    response = await client.post(\n               ^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/litellm_core_utils/logging_utils.py\",
+        line 135, in async_wrapper\n    result = await func(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/llms/custom_httpx/http_handler.py\",
+        line 258, in post\n    raise e\n  File \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/llms/custom_httpx/http_handler.py\",
+        line 208, in post\n    req = self.client.build_request(\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_client.py\",
+        line 346, in build_request\n    url = self._merge_url(url)\n          ^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_client.py\",
+        line 376, in _merge_url\n    merge_url = URL(url)\n                ^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_urls.py\",
+        line 117, in __init__\n    self._uri_reference = urlparse(url, **kwargs)\n                          ^^^^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_urlparse.py\",
+        line 260, in urlparse\n    parsed_port: int | None = normalize_port(port,
+        scheme)\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_urlparse.py\",
+        line 366, in normalize_port\n    raise InvalidURL(f\"Invalid port: {port!r}\")\nhttpx.InvalidURL:
+        Invalid port: ''generateContent''\n"}'
+    headers:
+      content-length:
+      - '2485'
+      content-type:
+      - application/json
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: '{"messages": [{"role": "user", "content": "Hello, how are you?"}], "model":
+      "gemini/gemini-2.0-flash"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      base_url:
+      - http://non.existent.endpoint
+      connection:
+      - keep-alive
+      content-length:
+      - '102'
+      content-type:
+      - application/json
+      host:
+      - localhost:30001
+      user-agent:
+      - AsyncOpenAI/Python 1.102.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.102.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '2'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.12
+    method: POST
+    uri: http://localhost:30001/chat/completions
+  response:
+    body:
+      string: '{"detail":"Chat completion failed: litellm.APIConnectionError: Invalid
+        port: ''generateContent''\nTraceback (most recent call last):\n  File \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_urlparse.py\",
+        line 364, in normalize_port\n    port_as_int = int(port)\n                  ^^^^^^^^^\nValueError:
+        invalid literal for int() with base 10: ''generateContent''\n\nDuring handling
+        of the above exception, another exception occurred:\n\nTraceback (most recent
+        call last):\n  File \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/main.py\",
+        line 477, in acompletion\n    response = await init_response\n               ^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py\",
+        line 1179, in async_completion\n    response = await client.post(\n               ^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/litellm_core_utils/logging_utils.py\",
+        line 135, in async_wrapper\n    result = await func(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/llms/custom_httpx/http_handler.py\",
+        line 258, in post\n    raise e\n  File \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/litellm/llms/custom_httpx/http_handler.py\",
+        line 208, in post\n    req = self.client.build_request(\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_client.py\",
+        line 346, in build_request\n    url = self._merge_url(url)\n          ^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_client.py\",
+        line 376, in _merge_url\n    merge_url = URL(url)\n                ^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_urls.py\",
+        line 117, in __init__\n    self._uri_reference = urlparse(url, **kwargs)\n                          ^^^^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_urlparse.py\",
+        line 260, in urlparse\n    parsed_port: int | None = normalize_port(port,
+        scheme)\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File
+        \"/Users/nik/code/Adala/.venv/lib/python3.11/site-packages/httpx/_urlparse.py\",
+        line 366, in normalize_port\n    raise InvalidURL(f\"Invalid port: {port!r}\")\nhttpx.InvalidURL:
+        Invalid port: ''generateContent''\n"}'
+    headers:
+      content-length:
+      - '2485'
+      content-type:
+      - application/json
+    status:
+      code: 500
+      message: Internal Server Error
+version: 1

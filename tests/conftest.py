@@ -14,7 +14,6 @@ def vcr_config():
     return {
         "filter_headers": ["authorization", "api-key", "x-api-key"],
         "filter_query_parameters": ["api_key", "key"],
-        "filter_post_data_parameters": ["api_key"],
         "match_on": ("method", "scheme", "host", "port", "path", "query", "body"),
     }
 
