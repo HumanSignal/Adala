@@ -22,14 +22,14 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAC/61STW/aQBC9+1dM99ILIKCA1V6qKI1UIqqSFLWV2hwmeGyvWO9a3nESC/HfO2ti
-        Yppr9rBazZuPN+/tPgJQW7SJTpDJq0/wRyIA+/YOmLNMlgXoQhIsseKX3OPZ996SwvQUitQSsIDE
-        aZvBIxkzAM7R7qBxNaSuAvQ7gd7BhQcEg1VGctusRnkULiEpWEq5fc9ATyVVmuyWgArH2lkP0iEl
-        MtLCg9E7grwuUOKJG8B9zdBOT2u7DemBgytZF2hMA7IzVIRJA+yEhteeA6sRfHWPIIpIbU6mbJmy
-        S7D5/Neq3o6H0/tu8KJM5QyFtVvuXfqhS1Cpttrnt4Te2ZD2Y/N9rU4oPmQrl5WVuw/iDsej8XwR
-        L6bxR7nj6WQ2n0yibnQ7VNVehPpGjOIenjxS0qIoeeN2ZC9d3bq3OE7peX0Gz+JnnB2jOYPmHwav
-        uvovMlOb/h/ofQ9ZHo3mJmy4ufq9UT2B+IxUJ1DU0/F/im80axafD4uefTla9ZMqr4+eZFSIS8Pp
-        aDxMDfq87agq8qX8OFomISe90A+4Wq+u+dfY+qs1Xzd1c3OjokP0DzJurrBSAwAA
+        H4sIAAAAAAAC/61SwW7TQBC9+yuGvXBJIpOmScsFVRSpQVSNIEIgQGgaj+1V1jvW7prWRPl3Zp06
+        deCKLa1WM2/mvZm3uwRAbdBmOsNAXr2GbxIB2HVnzLENZIMk+pAEa3ThGXv4doO7QAI9xiK1BKwg
+        Y20LeCBjRhBKtFtouYGcHaDfSuoFXHlAMOgKktMWDcql4oykYCnl9mUAeqzJabIbAqo4aLYepENO
+        ZKSFB6O3BGVTocQzHsF9E6Bjzxu7ifCogeugKzSmBZkZHGHWQmCR4bUPUdUEbvgBZCNSW5KpO6WB
+        M2zffLdqMOP+eP8xet6MY0Nx7E57D9/3AJVrq335kdCzjbBP67uVOmbxV/GBi9rxfVzuOJ2ks4X8
+        6dlsenGZXs6n83nSU3ekqvGyqFsKKO7h0SMlLao6rHlL9i03nXvzA8vA65P0bPGUDxzQnKTOz0b/
+        dPXXwqnN8A0MnocMj0aHNk64fvdlrQYLCiei+gUlgz3+LfE/cc0Wp2TJky8Hqz6T8/rgSUGVuDSe
+        TtJxbtCXXUflyNfy4miZdZivzStc0c+b8996cXuxcnfX75srVsk++QNPjAV+UgMAAA==
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -38,11 +38,11 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Wed, 27 Aug 2025 13:30:37 GMT
+      - Mon, 01 Sep 2025 12:03:14 GMT
       Server:
       - scaffolding on HTTPServer2
       Server-Timing:
-      - gfet4t7; dur=704
+      - gfet4t7; dur=812
       Transfer-Encoding:
       - chunked
       Vary:
@@ -98,13 +98,13 @@ interactions:
     uri: http://localhost:30001/chat/completions
   response:
     body:
-      string: '{"id":"chatcmpl-38f02a73-ec84-4e09-b470-a468018a7eee","object":"chat.completion","created":1756301436,"model":"gemini-2.0-flash","choices":[{"finish_reason":"stop","index":0,"message":{"content":"I
+      string: '{"id":"chatcmpl-d6480e6a-098d-4bcf-9eee-c575ff43b37e","object":"chat.completion","created":1756728193,"model":"gemini-2.0-flash","choices":[{"finish_reason":"stop","index":0,"message":{"content":"I
         am doing well, thank you for asking! As a large language model, I don''t experience
         emotions or feelings like humans do, but I am functioning optimally and ready
-        to assist you. How can I help you today?\n","role":"assistant","tool_calls":null,"function_call":null},"logprobs":-0.05676279676721451}],"usage":{"completion_tokens":47,"prompt_tokens":6,"total_tokens":53,"completion_tokens_details":null,"prompt_tokens_details":{"audio_tokens":null,"cached_tokens":null}},"service_tier":"default"}'
+        to assist you. How can I help you today?\n","role":"assistant","tool_calls":null,"function_call":null},"logprobs":-0.047474034289096266}],"usage":{"completion_tokens":47,"prompt_tokens":6,"total_tokens":53,"completion_tokens_details":null,"prompt_tokens_details":{"audio_tokens":null,"cached_tokens":null}},"service_tier":"default"}'
     headers:
       content-length:
-      - '690'
+      - '691'
       content-type:
       - application/json
     status:

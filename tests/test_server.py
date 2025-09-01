@@ -3,6 +3,8 @@ import httpx
 import os
 import asyncio
 import pytest
+import base64
+import json
 from tempfile import NamedTemporaryFile
 import pandas as pd
 from copy import deepcopy
@@ -599,12 +601,22 @@ def test_chat_completion_endpoint_api_client(client):
     """Test the chat/completion endpoint using sync requests with OpenAI format validation."""
 
     # Make a direct request using the existing test client fixture
+    encoded_credentials = base64.b64encode(json.dumps({
+        'api_key': os.getenv("GEMINI_API_KEY"),
+        'iat': time.time(),
+        'iss': 'test',
+        'exp': time.time() + 3600,
+        'sub': 'test',
+        'additional': 'payload',
+    }).encode('utf-8')).decode('utf-8')
     response = client.post(
         "/chat/completions",
+        headers={
+            "Authorization": f"Bearer {encoded_credentials}",
+        },
         json={
             "model": "gemini/gemini-2.0-flash",
             "messages": [{"role": "user", "content": "Hello, how are you?"}],
-            "api_key": os.getenv("GEMINI_API_KEY"),
         },
     )
 
@@ -667,7 +679,7 @@ async def test_chat_completion_endpoint_openai_client():
 
     # Create async httpx client with ASGITransport for mocked test server
     http_client = httpx.AsyncClient(
-        transport=httpx.ASGITransport(app=app), base_url="http://localhost:30001"
+        transport=httpx.ASGITransport(app=app),
     )
 
     # Create AsyncOpenAI client with the mocked httpx client
@@ -693,7 +705,7 @@ async def test_chat_completion_endpoint_openai_client():
     await http_client.aclose()
 
 
-# @pytest.mark.vcr
+@pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_chat_completion_endpoint_error_handling():
     """Test error handling when using non-existent endpoint via extra_headers."""
@@ -704,18 +716,34 @@ async def test_chat_completion_endpoint_error_handling():
         transport=httpx.ASGITransport(app=app), base_url="http://localhost:30001"
     )
 
-    # Create AsyncOpenAI client with the mocked httpx client
+    # note that here we use a different schema to pass the `api_key`.
+    # the reason is because different providers may require additional credentials.
+    encoded_credentials = base64.b64encode(json.dumps({'api_key': os.getenv("GEMINI_API_KEY")}).encode('utf-8')).decode('utf-8')
     client = AsyncOpenAI(
         base_url="http://localhost:30001",
-        api_key=os.getenv("GEMINI_API_KEY"),
+        api_key=encoded_credentials,
         http_client=http_client,
     )
+    
+    # First test with valid configuration to ensure it passes
+    response = await client.chat.completions.create(
+        model="gemini/gemini-2.0-flash",
+        messages=[{"role": "user", "content": "Hello, how are you?"}],
+    )
+    
+    # Verify the response structure matches OpenAI's format
+    assert hasattr(response, "choices")
+    assert hasattr(response, "model")
+    assert hasattr(response, "usage")
+    assert len(response.choices) > 0
+    assert "thank you" in response.choices[0].message.content.lower()
 
     # Test should raise an exception due to non-existent endpoint in extra_headers
-    with pytest.raises(Exception):  # OpenAI client should raise an exception
+    with pytest.raises(Exception):
         response = await client.chat.completions.create(
             model="gemini/gemini-2.0-flash",
             messages=[{"role": "user", "content": "Hello, how are you?"}],
+            # This will raise an exception as the endpoint does not exist
             extra_headers={"base_url": "http://non.existent.endpoint"},
         )
 
