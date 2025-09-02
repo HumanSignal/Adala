@@ -22,13 +22,13 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAC/61RwU7CQBC99yvWPYOhxQLxYgyQQKIBtFET9TDaod10u1O7C0gI/+62tVDw6h42
-        m3lv5828t3MY45+gQhGCQc2v2autMLYr7wIjZVAZC9QlW8wgN0dudXaNt6UY/C4+8SmDlIUkVMQ2
-        KGWLmRhUwra0YkvKGejEQhdsQhsGOZZ1QyFsb94Ub3TcH97vreMcOUksRFIKUdb0fU3gS6GEjh8Q
-        NKmC9hjM5vyAwjq6oyjL6aNYpd257HT7fXfgdv1Br+tfeb7fd2rpUpSvNER4jwasV3BwhNsWaWYC
-        SlANaVV61atUGs6ewG6NGzIgTyDPa/3pqkdWU8im440w7PIghdkWGwbjl4A3DDInQ9UGOQ0fz0f8
-        Jy33TMz5zaWK6glzLapMIkxtSm3vstNeStBx2ZHnqDNSGqdhwYlvxRpmIxwiuEqP51/h8yRZLLiz
-        d34A3UhFUMACAAA=
+        H4sIAAAAAAAC/61R0U7CMBR931fUPgPZhgP0xRgwkaiR4KImaszVXcZC17u0RSSEf7fdHAx8tQ9N
+        c8/pPfees/EY458gkywBg5qfsxdbYWxT3g4jaVAaC9QlWyxAmT23OpvG21IMfrtPfMwgZwllMmUr
+        FKLFzBzkgq1pyWakGOiFhU7YNa0YKCzrhhJYX7xK3ui43b3fWvs5FAl0IjklKGr6tibwWSYzPZ8i
+        aJKO9hDfT/gOha/0ltJC0Ydbpe13/G6/HwyCbjTodaPTMIr6Xi1divKlhhTv0ID1CnaOcNsiL0xM
+        C5RDWpZe9SqVhrMHcFDjhgyIAygMW3+66pHVzETT8UYYdnkQmVm7DeOr55g3DDIHQ9UGeQ0fj0f8
+        J63gSMz7zaWK6hGVzqpMUsxtSu2w47dnAvS87MgV6oKkxnHiOEYNA7iZPvUKOPPT93gwntDokntb
+        7wexRLZfvwIAAA==
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -37,11 +37,11 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Wed, 27 Aug 2025 13:30:44 GMT
+      - Mon, 01 Sep 2025 14:41:58 GMT
       Server:
       - scaffolding on HTTPServer2
       Server-Timing:
-      - gfet4t7; dur=658
+      - gfet4t7; dur=496
       Transfer-Encoding:
       - chunked
       Vary:
@@ -68,7 +68,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '156'
+      - '102'
       content-type:
       - application/json
       host:
@@ -79,7 +79,7 @@ interactions:
     uri: http://testserver/chat/completions
   response:
     body:
-      string: '{"id":"chatcmpl-191361c0-1fdb-48d7-af1d-13c38430e62d","object":"chat.completion","created":1756301443,"model":"gemini-2.0-flash","choices":[{"finish_reason":"stop","index":0,"message":{"content":"I
+      string: '{"id":"chatcmpl-8948fa56-6bc3-48ac-b839-6534449beb70","object":"chat.completion","created":1756737717,"model":"gemini-2.0-flash","choices":[{"finish_reason":"stop","index":0,"message":{"content":"I
         am doing well, thank you for asking! How are you today?\n","role":"assistant","tool_calls":null,"function_call":null},"logprobs":-0.03771813586354256}],"usage":{"completion_tokens":16,"prompt_tokens":6,"total_tokens":22,"completion_tokens_details":null,"prompt_tokens_details":{"audio_tokens":null,"cached_tokens":null}},"service_tier":"default"}'
     headers:
       content-length:

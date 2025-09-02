@@ -1,14 +1,9 @@
 from enum import Enum
 from typing import Any, Dict, Generic, List, Optional, TypeVar
-import os
+import base64
 import json
-import pandas as pd
 import traceback
-import asyncio
-import signal
-import sys
-from contextlib import asynccontextmanager
-
+import os
 import fastapi
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
@@ -23,6 +18,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import litellm
 from litellm.exceptions import AuthenticationError
 from litellm.utils import check_valid_key, get_valid_models
+from litellm import acompletion
+from openai import OpenAI, AsyncOpenAI
+
 from pydantic import BaseModel, SerializeAsAny, field_validator, Field, model_validator
 from redis import Redis
 import time
@@ -421,8 +419,6 @@ class ChatCompletionRequest(BaseModel):
 
     messages: List[Dict]
     model: str
-    base_url: Optional[str] = None
-    api_key: Optional[str] = None
 
 
 class ChatCompletionResponse(BaseModel):
@@ -439,46 +435,98 @@ class ChatCompletionResponse(BaseModel):
     service_tier: Optional[str] = "default"
 
 
+def _chat_completion_get_runtime_params(request: Request) -> Dict:
+    """
+    Get runtime params from the request headers.
+    The minimal `runtime_params` must include `api_key` field.
+    """
+    auth_header = request.headers.get("Authorization") or request.headers.get(
+        "authorization"
+    )
+
+    if auth_header and auth_header.startswith("Bearer "):
+        credentials_payload = auth_header[7:]
+        try:
+            # Try to decode as base64 and parse as JSON
+            decoded_bytes = base64.b64decode(credentials_payload)
+            decoded_str = decoded_bytes.decode("utf-8")
+            runtime_params = json.loads(decoded_str)
+
+            if "api_key" not in runtime_params:
+                raise ValueError("api_key missing from credentials")
+
+            # Remove JWT-related fields as they only needed to check the integrity
+            for field in ("exp", "iat", "iss", "sub"):
+                runtime_params.pop(field, None)
+
+            return runtime_params
+
+        except Exception:
+            # If decoding/parsing fails, treat as plain API key
+            return {"api_key": credentials_payload}
+
+    # Fallback to environment variable
+    if os.getenv("OPENAI_API_KEY"):
+        return {"api_key": os.getenv("OPENAI_API_KEY")}
+
+    raise HTTPException(
+        status_code=400,
+        detail="No credentials found in the request headers or environment variables",
+    )
+
+
+async def _chat_completion_handle_request(
+    chat_request: ChatCompletionRequest, runtime_params: Dict, provider: str
+) -> ChatCompletionResponse:
+    if isinstance(provider, str) and provider.lower() == "custom":
+        # LiteLLM has issues working with Custom OpenAI-compatible API providers
+        client = AsyncOpenAI(
+            api_key=runtime_params["api_key"], base_url=runtime_params["base_url"]
+        )
+        response = await client.chat.completions.create(
+            messages=chat_request.messages,
+            model=chat_request.model,
+        )
+    else:
+        response = await acompletion(
+            messages=chat_request.messages,
+            model=chat_request.model,
+            **runtime_params,
+        )
+    return ChatCompletionResponse(
+        id=response.id,
+        object=response.object,
+        created=response.created,
+        model=response.model,
+        choices=[choice.model_dump() for choice in response.choices],
+        usage=response.usage.model_dump(),
+        service_tier=getattr(response, "service_tier", "default"),
+    )
+
+
 @app.post("/chat/completions", response_model=ChatCompletionResponse)
 async def chat_completion(request: Request, chat_request: ChatCompletionRequest):
     """
     Mimics the OpenAI chat completion API.
     https://platform.openai.com/docs/api-reference/chat/create
     """
-    from litellm import acompletion
 
     try:
-        if chat_request.api_key is None:
-            # Extract token from Authorization header or from `api_key` header if present. `api_key` header takes precedence.
-            auth_header = request.headers.get("authorization")
-            api_key_header = request.headers.get("api_key")
-            if api_key_header:
-                chat_request.api_key = api_key_header
-            elif auth_header and auth_header.startswith("Bearer "):
-                chat_request.api_key = auth_header[7:]
+        runtime_params = _chat_completion_get_runtime_params(request)
+        if not runtime_params.get("base_url"):
+            # Extract base_url from headers if present (due to the OpenAI-compatible API providers)
+            runtime_params["base_url"] = request.headers.get("base_url")
 
-        if chat_request.base_url is None:
-            # Extract base_url from headers if present.
-            chat_request.base_url = request.headers.get("base_url")
-
-        response = await acompletion(
-            messages=chat_request.messages,
-            model=chat_request.model,
-            base_url=chat_request.base_url,
-            api_key=chat_request.api_key,
+        # pop the `model` to ensure it's passed as an input request parameter
+        runtime_params.pop("model", None)
+        provider = runtime_params.pop("provider", None) or "openai"
+        response = await _chat_completion_handle_request(
+            chat_request, runtime_params, provider
         )
-        return ChatCompletionResponse(
-            id=response.id,
-            object=response.object,
-            created=response.created,
-            model=response.model,
-            choices=[choice.model_dump() for choice in response.choices],
-            usage=response.usage.model_dump(),
-            service_tier=getattr(response, "service_tier", "default"),
-        )
+        return response
 
     except Exception as e:
-        logger.error(f"Error in chat completion: {e}")
+        logger.error("Error in chat completion: %s", e)
         logger.debug(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Chat completion failed: {str(e)}")
 
