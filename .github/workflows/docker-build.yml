@@ -12,7 +12,7 @@ on:
     outputs:
       image_version:
         description: "Docker tag"
-        value: ${{ jobs.calculate_version.outputs.image_version }}
+        value: ${{ jobs.calculate_version.outputs.build_version }}
       pretty_branch_name:
         description: "Pretty Branch Name"
         value: ${{ jobs.calculate_version.outputs.pretty_branch_name }}
@@ -197,7 +197,7 @@ jobs:
             const details = {
               "branch": "${{ inputs.branch_name }}",
               "pretty_branch_name": "${{ needs.calculate_version.outputs.pretty_branch_name }}",
-              "image_version": "${{ needs.calculate_version.outputs.image_version }}",
+              "image_version": "${{ needs.calculate_version.outputs.build_version }}",
               "sha": "${{ needs.calculate_version.outputs.sha }}"
             }
             const { data: check } = await github.rest.checks.create({
