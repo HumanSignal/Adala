@@ -41,8 +41,8 @@ dependencies = [
     "label-studio-sdk @ https://github.com/HumanSignal/label-studio-sdk/archive/db302c3cebec59a1f7a3ea09c39d752170157059.zip",
     "requests (>=2.32.0,<3.0.0)",
     # Using litellm from forked repo until vertex fix is released: https://github.com/BerriAI/litellm/issues/7904
-    #litellm = "^1.47.2"
-    "litellm @ https://github.com/HumanSignal/litellm/archive/9deadf35b9b2ff351388abc3a2ea144ed93ca013.zip",
+    "litellm  (>=1.76.1,<2.0.0)",
+    #"litellm @ https://github.com/HumanSignal/litellm/archive/9deadf35b9b2ff351388abc3a2ea144ed93ca013.zip",
     "pandarallel (>=1.6.5,<2.0.0)",
     "instructor (==1.4.3)",
     "async-lru (>=2.0.5,<3.0.0)",
