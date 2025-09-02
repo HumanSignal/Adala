@@ -98,14 +98,14 @@ jobs:
             core.setOutput('user_email', user_email);
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ env.INFRA_REPO }}
           token: ${{ secrets.GIT_PAT }}
           fetch-depth: 1
 
       - name: Checkout Actions Hub
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.GIT_PAT }}
           repository: HumanSignal/actions-hub
