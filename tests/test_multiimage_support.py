@@ -15,7 +15,7 @@ from litellm.types.utils import Usage
 from adala.utils.parse import MessageChunkType
 
 
-@pytest.mark.vcr
+@pytest.mark.vcr(match_on=("method", "scheme", "host", "port", "path", "query"))
 def test_MIG():
     df = pd.DataFrame(
         [

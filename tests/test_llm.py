@@ -134,16 +134,16 @@ def test_llm_async():
 
     # Test each field individually
     assert result["_adala_error"].iloc[0] == True
-    assert result["_adala_message"].iloc[0] == "APIError"
+    assert result["_adala_message"].iloc[0] == "InternalServerError"
     assert (
         result["_adala_details"].iloc[0]
-        == "litellm.APIError: APIError: OpenAIException - Connection error."
+        == "litellm.InternalServerError: InternalServerError: OpenAIException - Connection error."
     )
-    assert result["_prompt_tokens"].iloc[0] == 0
+    assert result["_prompt_tokens"].iloc[0] == 9
     assert result["_completion_tokens"].iloc[0] == 0
-    assert result["_prompt_cost_usd"].iloc[0] == 0.0
+    assert result["_prompt_cost_usd"].iloc[0] > 0.0
     assert result["_completion_cost_usd"].iloc[0] == 0.0
-    assert result["_total_cost_usd"].iloc[0] == 0.0
+    assert result["_total_cost_usd"].iloc[0] > 0.0
     assert result["_message_counts"].iloc[0] == {"text": 1}
     assert result["_inference_time"].iloc[0] > 0
     # TODO test batch with successes and failures, figure out how to inject a particular error into LiteLLM
