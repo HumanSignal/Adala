@@ -31,7 +31,7 @@ jobs:
     name: Code formatting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: "Install poetry"
         run: pipx install "poetry==${{ env.POETRY_VERSION }}"
@@ -63,7 +63,7 @@ jobs:
         python-version: ['3.12']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: "Install poetry"
         run: pipx install "poetry==${{ env.POETRY_VERSION }}"
@@ -91,7 +91,7 @@ jobs:
           matrix.os == 'ubuntu-latest' &&
           matrix.python-version == '3.12' &&
           github.event.pull_request.user.login != 'dependabot[bot]'
-        uses: codecov/codecov-action@v5.4.3
+        uses: codecov/codecov-action@v5.5.1
         with:
           files: tests/coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}

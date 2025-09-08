@@ -36,7 +36,7 @@ jobs:
       - uses: hmarr/debug-action@v3.0.0
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.sha }}
 
@@ -92,7 +92,7 @@ jobs:
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.sha }}
 
@@ -149,7 +149,7 @@ jobs:
       - calculate_version
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-*
