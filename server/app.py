@@ -269,20 +269,23 @@ async def validate_connection(request: ValidateConnectionRequest):
     # For multi-model providers use a model that every account should have access to
     if request.model:
         if provider == "vertexai":
-            model_extra = {"vertex_credentials": request.vertex_credentials}
+            runtime_params = {"vertex_credentials": request.vertex_credentials}
             if request.vertex_location:
-                model_extra["vertex_location"] = request.vertex_location
+                runtime_params["vertex_location"] = request.vertex_location
             if request.vertex_project:
-                model_extra["vertex_project"] = request.vertex_project
+                runtime_params["vertex_project"] = request.vertex_project
+        elif provider == "custom":
+            runtime_params = {"api_key": request.api_key, "base_url": request.endpoint}
+            if request.auth_token:
+                runtime_params["extra_headers"] = {"Authorization": request.auth_token}
         else:
-            model_extra = {"api_key": request.api_key}
+            runtime_params = {"api_key": request.api_key}
+
         try:
-            response = litellm.completion(
-                messages=messages,
-                model=request.model,
-                max_tokens=10,
-                temperature=0.0,
-                **model_extra,
+            response = await _chat_completion_handle_request(
+                ChatCompletionRequest(messages=messages, model=request.model),
+                runtime_params,
+                provider,
             )
         except AuthenticationError:
             raise HTTPException(
@@ -297,26 +300,28 @@ async def validate_connection(request: ValidateConnectionRequest):
 
     # For single-model connections use the provided model
     else:
-        if provider.lower() == "azureopenai":
+        runtime_params = {"api_key": request.api_key}
+        if provider == "azureopenai":
             model = "azure/" + request.deployment_name
-            model_extra = {"base_url": request.endpoint}
-        elif provider.lower() == "azureaifoundry":
+            runtime_params["base_url"] = request.endpoint
+        elif provider == "azureaifoundry":
             model = "azure_ai/" + request.deployment_name
-            model_extra = {"base_url": request.endpoint}
-        elif provider.lower() == "custom":
-            model = "openai/" + request.deployment_name
-            model_extra = {"base_url": request.endpoint}
+            runtime_params["base_url"] = request.endpoint
+        elif provider == "custom":
+            # For custom OpenAI-compatible providers use AsyncOpenAI path
+            model = request.deployment_name
+            runtime_params["base_url"] = request.endpoint
             if request.auth_token:
-                model_extra["extra_headers"] = {"Authorization": request.auth_token}
+                runtime_params["extra_headers"] = {"Authorization": request.auth_token}
+        else:
+            # Default to using the provided deployment name directly
+            model = request.deployment_name
 
-        model_extra["api_key"] = request.api_key
         try:
-            response = litellm.completion(
-                messages=messages,
-                model=model,
-                max_tokens=10,
-                temperature=0.0,
-                **model_extra,
+            response = await _chat_completion_handle_request(
+                ChatCompletionRequest(messages=messages, model=model),
+                runtime_params,
+                provider,
             )
         except AuthenticationError:
             raise HTTPException(
