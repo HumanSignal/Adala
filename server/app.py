@@ -73,22 +73,6 @@ class Response(BaseModel, Generic[ResponseData]):
         return super().model_dump(*args, exclude_none=True, **kwargs)
 
 
-class JobCreated(BaseModel):
-    """
-    Response model for a job created.
-    """
-
-    job_id: str
-
-
-class BatchSubmitted(BaseModel):
-    """
-    Response model for a batch submitted.
-    """
-
-    job_id: str
-
-
 class ModelsListRequest(BaseModel):
     provider: str
 
@@ -122,56 +106,6 @@ class ValidateConnectionResponse(BaseModel):
     success: bool
 
 
-class Status(Enum):
-    PENDING = "Pending"
-    INPROGRESS = "InProgress"
-    COMPLETED = "Completed"
-    FAILED = "Failed"
-    CANCELED = "Canceled"
-
-
-class JobStatusResponse(BaseModel):
-    """
-    Response model for getting the status of a job.
-
-    Attributes:
-        status (str): The status of the job.
-        processed_total (List[int]): The total number of processed records and the total number of records in job.
-            Example: [10, 100] means 10% of the completeness.
-    """
-
-    status: Status
-    # processed_total: List[int] = Annotated[List[int], AfterValidator(lambda x: len(x) == 2)]
-
-    class Config:
-        use_enum_values = True
-
-
-class SubmitStreamingRequest(BaseModel):
-    """
-    Request model for submitting a streaming job.
-    """
-
-    agent: Agent
-    # SerializeAsAny allows for subclasses of ResultHandler
-    result_handler: SerializeAsAny[ResultHandler]
-    task_name: str = "streaming_parent_task"
-
-    @field_validator("result_handler", mode="before")
-    def validate_result_handler(cls, value: Dict) -> ResultHandler:
-        """
-        Allows polymorphism for ResultHandlers created from a dict; same implementation as the Skills, Environment, and Runtime within an Agent
-        "type" is the name of the subclass of ResultHandler being used. Currently available subclasses: LSEHandler, DummyHandler
-        Look in server/handlers/result_handlers.py for available subclasses.
-        """
-        if "type" not in value:
-            raise HTTPException(
-                status_code=400, detail="Missing type in result_handler"
-            )
-        result_handler = ResultHandler.create_from_registry(value.pop("type"), **value)
-        return result_handler
-
-
 @app.get("/")
 def get_index():
     return {"status": "ok"}
@@ -193,72 +127,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content=f"Validation {'errors' if len(formatted_errors) > 1 else 'error'}: {formatted_errors_str}",
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
     )
-
-
-@app.post("/jobs/submit-streaming", response_model=Response[JobCreated])
-async def submit_streaming(request: SubmitStreamingRequest):
-    """
-    Submit a request to execute task `request.task_name` in celery.
-
-    Args:
-        request (SubmitStreamingRequest): The request model for submitting a job.
-
-    Returns:
-        Response[JobCreated]: The response model for a job created.
-    """
-
-    task = streaming_parent_task
-
-    result = task.apply_async(
-        kwargs={"agent": request.agent, "result_handler": request.result_handler}
-    )
-    logger.info(f"Submitted {task.name} with ID {result.id}")
-
-    return Response[JobCreated](data=JobCreated(job_id=result.id))
-
-
-@app.post("/jobs/submit-batch", response_model=Response)
-async def submit_batch(batch: BatchData):
-    """
-    Submits a batch of data to an existing streaming job.
-    Will push the batch of data into Kafka in a topic specific to the job ID
-
-    Args:
-        batch (BatchData): The data to push to Kafka queue to be processed by agent.arun()
-
-    Returns:
-        Response: Generic response indicating status of request
-    """
-
-    topic = get_input_topic_name(batch.job_id)
-    settings = Settings()
-    kafka_kwargs = settings.kafka.to_kafka_kwargs(client_type="producer")
-    producer = AIOKafkaProducer(
-        **kafka_kwargs,
-        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-        acks="all",  # waits for all replicas to respond that they have written the message
-    )
-    await producer.start()
-
-    try:
-        for record in batch.data:
-            await producer.send_and_wait(topic, value=record)
-
-        batch_size = len(json.dumps(batch.dict()).encode("utf-8"))
-        logger.info(
-            f"The number of records sent to input_topic:{topic} record_no:{len(batch.data)}"
-        )
-        logger.info(
-            f"Size of batch in bytes received for job_id:{batch.job_id} batch_size:{batch_size}"
-        )
-    except UnknownTopicOrPartitionError:
-        raise HTTPException(
-            status_code=500, detail=f"{topic=} for job {batch.job_id} not found"
-        )
-    finally:
-        await producer.stop()
-
-    return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
 
 
 @app.post("/validate-connection", response_model=Response[ValidateConnectionResponse])
@@ -534,62 +402,6 @@ async def chat_completion(request: Request, chat_request: ChatCompletionRequest)
         logger.error("Error in chat completion: %s", e)
         logger.debug(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Chat completion failed: {str(e)}")
-
-
-@app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])
-def get_status(job_id):
-    """
-    Get the status of a job.
-
-    Args:
-        job_id (str)
-
-    Returns:
-        JobStatusResponse: The response model for getting the status of a job.
-    """
-    celery_status_map = {
-        "PENDING": Status.PENDING,
-        "STARTED": Status.INPROGRESS,
-        "SUCCESS": Status.COMPLETED,
-        "FAILURE": Status.FAILED,
-        "REVOKED": Status.CANCELED,
-        "RETRY": Status.INPROGRESS,
-    }
-    job = streaming_parent_task.AsyncResult(job_id)
-    try:
-        status: Status = celery_status_map[job.status]
-    except Exception as e:
-        logger.error(f"Error getting job status: {e}")
-        status = Status.FAILED
-    else:
-        logger.info(f"Job {job_id} status: {status}")
-    return Response[JobStatusResponse](data=JobStatusResponse(status=status))
-
-
-@app.delete("/jobs/{job_id}", response_model=Response[JobStatusResponse])
-def cancel_job(job_id):
-    """
-    Cancel a job.
-
-    Args:
-        job_id (str)
-
-    Returns:
-        JobStatusResponse[status.CANCELED]
-    """
-    job = streaming_parent_task.AsyncResult(job_id)
-    # try using wait=True? then what kind of timeout is acceptable? currently we don't know if we've failed to cancel a job, this always returns success
-    # should use SIGTERM or SIGINT in theory, but there is some unhandled kafka cleanup that causes the celery worker to report a bunch of errors on those, will fix in a later PR
-    job.revoke(terminate=True, signal="SIGKILL")
-
-    # Delete Kafka topics
-    # TODO check this doesn't conflict with parent_job_error_handler
-    input_topic_name = get_input_topic_name(job_id)
-    output_topic_name = get_output_topic_name(job_id)
-    delete_topic(input_topic_name)
-    delete_topic(output_topic_name)
-
-    return Response[JobStatusResponse](data=JobStatusResponse(status=Status.CANCELED))
 
 
 @app.get("/health")
