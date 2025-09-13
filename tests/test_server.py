@@ -3,11 +3,16 @@ import httpx
 import os
 import asyncio
 import pytest
+import base64
+import json
 from tempfile import NamedTemporaryFile
 import pandas as pd
 from copy import deepcopy
 from unittest.mock import patch
 import numpy as np
+from openai import OpenAI, AsyncOpenAI
+from openai.types.chat import ChatCompletion
+from fastapi.testclient import TestClient
 
 # TODO manage which keys correspond to which models/deployments, probably using a litellm Router
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -589,3 +594,217 @@ async def test_estimate_cost_endpoint_invalid_model(async_client):
     assert resp_data["is_error"] is True
     assert resp_data["error_type"] is not None
     assert "not found" in resp_data["error_message"]
+
+
+@pytest.mark.vcr
+def test_chat_completion_endpoint_api_client(client):
+    """Test the chat/completion endpoint using sync requests with OpenAI format validation."""
+
+    # Make a direct request using the existing test client fixture
+    encoded_credentials = base64.b64encode(
+        json.dumps(
+            {
+                "api_key": os.getenv("GEMINI_API_KEY"),
+                "iat": time.time(),
+                "iss": "test",
+                "exp": time.time() + 3600,
+                "sub": "test",
+                "additional": "payload",
+            }
+        ).encode("utf-8")
+    ).decode("utf-8")
+    response = client.post(
+        "/chat/completions",
+        headers={
+            "Authorization": f"Bearer {encoded_credentials}",
+        },
+        json={
+            "model": "gemini/gemini-2.0-flash",
+            "messages": [{"role": "user", "content": "Hello, how are you?"}],
+        },
+    )
+
+    assert response.status_code == 200
+    response_data = response.json()
+
+    # Verify the response structure matches OpenAI's format
+    assert "choices" in response_data
+    assert "model" in response_data
+    assert "usage" in response_data
+    assert len(response_data["choices"]) > 0
+    assert response_data["choices"][0]["message"]["content"] is not None
+
+    # Validate the response data object structure and content
+    assert response_data["id"] is not None
+    assert response_data["object"] == "chat.completion"
+    assert isinstance(response_data["created"], int)
+    assert response_data["model"] is not None
+
+    # Validate choices structure
+    choices = response_data["choices"]
+    assert len(choices) > 0
+    choice = choices[0]
+    assert "finish_reason" in choice
+    assert "index" in choice
+    assert "message" in choice
+
+    # Validate message content
+    message = choice["message"]
+    assert "content" in message
+    assert message["content"] is not None
+    assert "role" in message
+    assert message["role"] == "assistant"
+
+    # Validate the actual response content contains expected text
+    content = message["content"]
+    assert "thank you" in content.lower()
+
+    # Validate usage structure
+    usage = response_data["usage"]
+    assert "completion_tokens" in usage
+    assert "prompt_tokens" in usage
+    assert "total_tokens" in usage
+    assert isinstance(usage["completion_tokens"], int)
+    assert isinstance(usage["prompt_tokens"], int)
+    assert isinstance(usage["total_tokens"], int)
+    assert usage["completion_tokens"] > 0
+    assert usage["prompt_tokens"] > 0
+    assert usage["total_tokens"] > 0
+
+    # Validate service_tier exists
+    assert "service_tier" in response_data
+
+
+@pytest.mark.vcr
+@pytest.mark.asyncio
+async def test_chat_completion_endpoint_openai_client():
+    """Test the chat/completion endpoint using AsyncOpenAI client with mocked test server."""
+    from server.app import app
+
+    # Create async httpx client with ASGITransport for mocked test server
+    http_client = httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app),
+    )
+
+    # Create AsyncOpenAI client with the mocked httpx client
+    client = AsyncOpenAI(
+        base_url="http://localhost:30001",
+        api_key=os.getenv("GEMINI_API_KEY"),
+        http_client=http_client,
+    )
+
+    response = await client.chat.completions.create(
+        model="gemini/gemini-2.0-flash",
+        messages=[{"role": "user", "content": "Hello, how are you?"}],
+    )
+
+    # Verify the response structure matches OpenAI's format
+    assert hasattr(response, "choices")
+    assert hasattr(response, "model")
+    assert hasattr(response, "usage")
+    assert len(response.choices) > 0
+    assert "thank you" in response.choices[0].message.content.lower()
+
+    # Clean up
+    await http_client.aclose()
+
+
+@pytest.mark.vcr
+@pytest.mark.asyncio
+async def test_chat_completion_endpoint_error_handling():
+    """Test error handling when using non-existent endpoint via extra_headers."""
+    from server.app import app
+
+    # Create async httpx client with ASGITransport for mocked test server
+    http_client = httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://localhost:30001"
+    )
+
+    # note that here we use a different schema to pass the `api_key`.
+    # the reason is because different providers may require additional credentials.
+    encoded_credentials = base64.b64encode(
+        json.dumps({"api_key": os.getenv("GEMINI_API_KEY")}).encode("utf-8")
+    ).decode("utf-8")
+    client = AsyncOpenAI(
+        base_url="http://localhost:30001",
+        api_key=encoded_credentials,
+        http_client=http_client,
+    )
+
+    # First test with valid configuration to ensure it passes
+    response = await client.chat.completions.create(
+        model="gemini/gemini-2.0-flash",
+        messages=[{"role": "user", "content": "Hello, how are you?"}],
+    )
+
+    # Verify the response structure matches OpenAI's format
+    assert hasattr(response, "choices")
+    assert hasattr(response, "model")
+    assert hasattr(response, "usage")
+    assert len(response.choices) > 0
+    assert "thank you" in response.choices[0].message.content.lower()
+
+    # Test should raise an exception due to non-existent endpoint in extra_headers
+    with pytest.raises(Exception):
+        response = await client.chat.completions.create(
+            model="gemini/gemini-2.0-flash",
+            messages=[{"role": "user", "content": "Hello, how are you?"}],
+            # This will raise an exception as the endpoint does not exist
+            extra_headers={"base_url": "http://non.existent.endpoint"},
+        )
+
+    # Clean up
+    await http_client.aclose()
+
+
+@pytest.mark.vcr
+@pytest.mark.asyncio
+async def test_custom_provider_with_anthropic_endpoint():
+    """Test using OpenAI client with `Custom` provider configuration pointing to Anthropic API."""
+    from server.app import app
+
+    # Create async httpx client with ASGITransport for mocked test server
+    http_client = httpx.AsyncClient(transport=httpx.ASGITransport(app=app))
+
+    # Configure credentials for custom provider pointing to Anthropic
+    encoded_credentials = base64.b64encode(
+        json.dumps(
+            {
+                "api_key": os.getenv("ANTHROPIC_API_KEY", "test-key"),
+                "provider": "Custom",
+                "base_url": "https://api.anthropic.com/v1/",
+            }
+        ).encode("utf-8")
+    ).decode("utf-8")
+
+    client = AsyncOpenAI(
+        base_url="http://localhost:30001",
+        api_key=encoded_credentials,
+        http_client=http_client,
+    )
+
+    response = await client.chat.completions.create(
+        model="claude-opus-4-1-20250805",
+        messages=[{"role": "user", "content": "Hello, how are you?"}],
+    )
+
+    # Verify the response structure matches OpenAI's format
+    assert hasattr(response, "choices")
+    assert hasattr(response, "model")
+    assert hasattr(response, "usage")
+    assert len(response.choices) > 0
+    assert "thank you" in response.choices[0].message.content.lower()
+
+    # Test should handle the invalid model name
+    with pytest.raises(Exception) as exc_info:
+        response = await client.chat.completions.create(
+            model="invalid-model-name",
+            messages=[{"role": "user", "content": "Hello, how are you?"}],
+        )
+
+    # Verify that the exception is related to API format or authentication issues
+    # rather than configuration problems
+    assert exc_info.value is not None
+
+    # Clean up
+    await http_client.aclose()

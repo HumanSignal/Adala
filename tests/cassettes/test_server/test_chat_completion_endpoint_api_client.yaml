@@ -1,0 +1,92 @@
+interactions:
+- request:
+    body: '{"contents": [{"role": "user", "parts": [{"text": "Hello, how are you?"}]}],
+      "generationConfig": {}}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '100'
+      content-type:
+      - application/json
+      host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - litellm/1.65.6
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/61R0U7CMBR931fUPgPZhgP0xRgwkaiR4KImaszVXcZC17u0RSSEf7fdHAx8tQ9N
+        c8/pPfees/EY458gkywBg5qfsxdbYWxT3g4jaVAaC9QlWyxAmT23OpvG21IMfrtPfMwgZwllMmUr
+        FKLFzBzkgq1pyWakGOiFhU7YNa0YKCzrhhJYX7xK3ui43b3fWvs5FAl0IjklKGr6tibwWSYzPZ8i
+        aJKO9hDfT/gOha/0ltJC0Ydbpe13/G6/HwyCbjTodaPTMIr6Xi1divKlhhTv0ID1CnaOcNsiL0xM
+        C5RDWpZe9SqVhrMHcFDjhgyIAygMW3+66pHVzETT8UYYdnkQmVm7DeOr55g3DDIHQ9UGeQ0fj0f8
+        J63gSMz7zaWK6hGVzqpMUsxtSu2w47dnAvS87MgV6oKkxnHiOEYNA7iZPvUKOPPT93gwntDokntb
+        7wexRLZfvwIAAA==
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Mon, 01 Sep 2025 14:41:58 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=496
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"model": "gemini/gemini-2.0-flash", "messages": [{"role": "user", "content":
+      "Hello, how are you?"}]}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '102'
+      content-type:
+      - application/json
+      host:
+      - testserver
+      user-agent:
+      - testclient
+    method: POST
+    uri: http://testserver/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-8948fa56-6bc3-48ac-b839-6534449beb70","object":"chat.completion","created":1756737717,"model":"gemini-2.0-flash","choices":[{"finish_reason":"stop","index":0,"message":{"content":"I
+        am doing well, thank you for asking! How are you today?\n","role":"assistant","tool_calls":null,"function_call":null},"logprobs":-0.03771813586354256}],"usage":{"completion_tokens":16,"prompt_tokens":6,"total_tokens":22,"completion_tokens_details":null,"prompt_tokens_details":{"audio_tokens":null,"cached_tokens":null}},"service_tier":"default"}'
+    headers:
+      content-length:
+      - '544'
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

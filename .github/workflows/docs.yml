@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'  # Run this job for pull requests only
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: "Install poetry"
         run: pipx install "poetry==${{ env.POETRY_VERSION }}"
@@ -50,7 +50,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: "Install poetry"
         run: pipx install "poetry==${{ env.POETRY_VERSION }}"

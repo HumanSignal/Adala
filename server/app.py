@@ -1,14 +1,9 @@
 from enum import Enum
 from typing import Any, Dict, Generic, List, Optional, TypeVar
-import os
+import base64
 import json
-import pandas as pd
 import traceback
-import asyncio
-import signal
-import sys
-from contextlib import asynccontextmanager
-
+import os
 import fastapi
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
@@ -23,6 +18,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import litellm
 from litellm.exceptions import AuthenticationError
 from litellm.utils import check_valid_key, get_valid_models
+from litellm import acompletion
+from openai import OpenAI, AsyncOpenAI
+
 from pydantic import BaseModel, SerializeAsAny, field_validator, Field, model_validator
 from redis import Redis
 import time
@@ -33,7 +31,6 @@ from server.handlers.result_handlers import ResultHandler
 from server.log_middleware import LogMiddleware
 from adala.skills.collection.prompt_improvement import ImprovedPromptResponse
 from adala.runtimes.base import CostEstimate
-from server.tasks.stream_inference import streaming_parent_task
 from server.utils import (
     Settings,
     delete_topic,
@@ -65,7 +62,7 @@ ResponseData = TypeVar("ResponseData")
 
 class Response(BaseModel, Generic[ResponseData]):
     success: bool = True
-    data: ResponseData
+    data: Optional[ResponseData] = None
     message: Optional[str] = None
     errors: Optional[list] = None
 
@@ -73,22 +70,6 @@ class Response(BaseModel, Generic[ResponseData]):
         """Exclude `null` values from the response."""
         kwargs.pop("exclude_none", None)
         return super().model_dump(*args, exclude_none=True, **kwargs)
-
-
-class JobCreated(BaseModel):
-    """
-    Response model for a job created.
-    """
-
-    job_id: str
-
-
-class BatchSubmitted(BaseModel):
-    """
-    Response model for a batch submitted.
-    """
-
-    job_id: str
 
 
 class ModelsListRequest(BaseModel):
@@ -124,56 +105,6 @@ class ValidateConnectionResponse(BaseModel):
     success: bool
 
 
-class Status(Enum):
-    PENDING = "Pending"
-    INPROGRESS = "InProgress"
-    COMPLETED = "Completed"
-    FAILED = "Failed"
-    CANCELED = "Canceled"
-
-
-class JobStatusResponse(BaseModel):
-    """
-    Response model for getting the status of a job.
-
-    Attributes:
-        status (str): The status of the job.
-        processed_total (List[int]): The total number of processed records and the total number of records in job.
-            Example: [10, 100] means 10% of the completeness.
-    """
-
-    status: Status
-    # processed_total: List[int] = Annotated[List[int], AfterValidator(lambda x: len(x) == 2)]
-
-    class Config:
-        use_enum_values = True
-
-
-class SubmitStreamingRequest(BaseModel):
-    """
-    Request model for submitting a streaming job.
-    """
-
-    agent: Agent
-    # SerializeAsAny allows for subclasses of ResultHandler
-    result_handler: SerializeAsAny[ResultHandler]
-    task_name: str = "streaming_parent_task"
-
-    @field_validator("result_handler", mode="before")
-    def validate_result_handler(cls, value: Dict) -> ResultHandler:
-        """
-        Allows polymorphism for ResultHandlers created from a dict; same implementation as the Skills, Environment, and Runtime within an Agent
-        "type" is the name of the subclass of ResultHandler being used. Currently available subclasses: LSEHandler, DummyHandler
-        Look in server/handlers/result_handlers.py for available subclasses.
-        """
-        if "type" not in value:
-            raise HTTPException(
-                status_code=400, detail="Missing type in result_handler"
-            )
-        result_handler = ResultHandler.create_from_registry(value.pop("type"), **value)
-        return result_handler
-
-
 @app.get("/")
 def get_index():
     return {"status": "ok"}
@@ -197,72 +128,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-@app.post("/jobs/submit-streaming", response_model=Response[JobCreated])
-async def submit_streaming(request: SubmitStreamingRequest):
-    """
-    Submit a request to execute task `request.task_name` in celery.
-
-    Args:
-        request (SubmitStreamingRequest): The request model for submitting a job.
-
-    Returns:
-        Response[JobCreated]: The response model for a job created.
-    """
-
-    task = streaming_parent_task
-
-    result = task.apply_async(
-        kwargs={"agent": request.agent, "result_handler": request.result_handler}
-    )
-    logger.info(f"Submitted {task.name} with ID {result.id}")
-
-    return Response[JobCreated](data=JobCreated(job_id=result.id))
-
-
-@app.post("/jobs/submit-batch", response_model=Response)
-async def submit_batch(batch: BatchData):
-    """
-    Submits a batch of data to an existing streaming job.
-    Will push the batch of data into Kafka in a topic specific to the job ID
-
-    Args:
-        batch (BatchData): The data to push to Kafka queue to be processed by agent.arun()
-
-    Returns:
-        Response: Generic response indicating status of request
-    """
-
-    topic = get_input_topic_name(batch.job_id)
-    settings = Settings()
-    kafka_kwargs = settings.kafka.to_kafka_kwargs(client_type="producer")
-    producer = AIOKafkaProducer(
-        **kafka_kwargs,
-        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-        acks="all",  # waits for all replicas to respond that they have written the message
-    )
-    await producer.start()
-
-    try:
-        for record in batch.data:
-            await producer.send_and_wait(topic, value=record)
-
-        batch_size = len(json.dumps(batch.dict()).encode("utf-8"))
-        logger.info(
-            f"The number of records sent to input_topic:{topic} record_no:{len(batch.data)}"
-        )
-        logger.info(
-            f"Size of batch in bytes received for job_id:{batch.job_id} batch_size:{batch_size}"
-        )
-    except UnknownTopicOrPartitionError:
-        raise HTTPException(
-            status_code=500, detail=f"{topic=} for job {batch.job_id} not found"
-        )
-    finally:
-        await producer.stop()
-
-    return Response[BatchSubmitted](data=BatchSubmitted(job_id=batch.job_id))
-
-
 @app.post("/validate-connection", response_model=Response[ValidateConnectionResponse])
 async def validate_connection(request: ValidateConnectionRequest):
     provider = request.provider.lower()
@@ -271,20 +136,23 @@ async def validate_connection(request: ValidateConnectionRequest):
     # For multi-model providers use a model that every account should have access to
     if request.model:
         if provider == "vertexai":
-            model_extra = {"vertex_credentials": request.vertex_credentials}
+            runtime_params = {"vertex_credentials": request.vertex_credentials}
             if request.vertex_location:
-                model_extra["vertex_location"] = request.vertex_location
+                runtime_params["vertex_location"] = request.vertex_location
             if request.vertex_project:
-                model_extra["vertex_project"] = request.vertex_project
+                runtime_params["vertex_project"] = request.vertex_project
+        elif provider == "custom":
+            runtime_params = {"api_key": request.api_key, "base_url": request.endpoint}
+            if request.auth_token:
+                runtime_params["extra_headers"] = {"Authorization": request.auth_token}
         else:
-            model_extra = {"api_key": request.api_key}
+            runtime_params = {"api_key": request.api_key}
+
         try:
-            response = litellm.completion(
-                messages=messages,
-                model=request.model,
-                max_tokens=10,
-                temperature=0.0,
-                **model_extra,
+            response = await _chat_completion_handle_request(
+                ChatCompletionRequest(messages=messages, model=request.model),
+                runtime_params,
+                provider,
             )
         except AuthenticationError:
             raise HTTPException(
@@ -299,26 +167,28 @@ async def validate_connection(request: ValidateConnectionRequest):
 
     # For single-model connections use the provided model
     else:
-        if provider.lower() == "azureopenai":
+        runtime_params = {"api_key": request.api_key}
+        if provider == "azureopenai":
             model = "azure/" + request.deployment_name
-            model_extra = {"base_url": request.endpoint}
-        elif provider.lower() == "azureaifoundry":
+            runtime_params["base_url"] = request.endpoint
+        elif provider == "azureaifoundry":
             model = "azure_ai/" + request.deployment_name
-            model_extra = {"base_url": request.endpoint}
-        elif provider.lower() == "custom":
-            model = "openai/" + request.deployment_name
-            model_extra = {"base_url": request.endpoint}
+            runtime_params["base_url"] = request.endpoint
+        elif provider == "custom":
+            # For custom OpenAI-compatible providers use AsyncOpenAI path
+            model = request.deployment_name
+            runtime_params["base_url"] = request.endpoint
             if request.auth_token:
-                model_extra["extra_headers"] = {"Authorization": request.auth_token}
+                runtime_params["extra_headers"] = {"Authorization": request.auth_token}
+        else:
+            # Default to using the provided deployment name directly
+            model = request.deployment_name
 
-        model_extra["api_key"] = request.api_key
         try:
-            response = litellm.completion(
-                messages=messages,
-                model=model,
-                max_tokens=10,
-                temperature=0.0,
-                **model_extra,
+            response = await _chat_completion_handle_request(
+                ChatCompletionRequest(messages=messages, model=model),
+                runtime_params,
+                provider,
             )
         except AuthenticationError:
             raise HTTPException(
@@ -414,60 +284,123 @@ async def estimate_cost(
     return Response[CostEstimate](data=total_cost_estimate)
 
 
-@app.get("/jobs/{job_id}", response_model=Response[JobStatusResponse])
-def get_status(job_id):
+class ChatCompletionRequest(BaseModel):
     """
-    Get the status of a job.
-
-    Args:
-        job_id (str)
-
-    Returns:
-        JobStatusResponse: The response model for getting the status of a job.
+    Request for immediate chat completion.
     """
-    celery_status_map = {
-        "PENDING": Status.PENDING,
-        "STARTED": Status.INPROGRESS,
-        "SUCCESS": Status.COMPLETED,
-        "FAILURE": Status.FAILED,
-        "REVOKED": Status.CANCELED,
-        "RETRY": Status.INPROGRESS,
-    }
-    job = streaming_parent_task.AsyncResult(job_id)
-    try:
-        status: Status = celery_status_map[job.status]
-    except Exception as e:
-        logger.error(f"Error getting job status: {e}")
-        status = Status.FAILED
+
+    messages: List[Dict]
+    model: str
+
+
+class ChatCompletionResponse(BaseModel):
+    """
+    Response for immediate chat completion following OpenAI chat completion format.
+    """
+
+    id: str
+    object: str = "chat.completion"
+    created: int
+    model: str
+    choices: List[Dict]
+    usage: Dict
+    service_tier: Optional[str] = "default"
+
+
+def _chat_completion_get_runtime_params(request: Request) -> Dict:
+    """
+    Get runtime params from the request headers.
+    The minimal `runtime_params` must include `api_key` field.
+    """
+    auth_header = request.headers.get("Authorization") or request.headers.get(
+        "authorization"
+    )
+
+    if auth_header and auth_header.startswith("Bearer "):
+        credentials_payload = auth_header[7:]
+        try:
+            # Try to decode as base64 and parse as JSON
+            decoded_bytes = base64.b64decode(credentials_payload)
+            decoded_str = decoded_bytes.decode("utf-8")
+            runtime_params = json.loads(decoded_str)
+
+            if "api_key" not in runtime_params:
+                raise ValueError("api_key missing from credentials")
+
+            # Remove JWT-related fields as they only needed to check the integrity
+            for field in ("exp", "iat", "iss", "sub"):
+                runtime_params.pop(field, None)
+
+            return runtime_params
+
+        except Exception:
+            # If decoding/parsing fails, treat as plain API key
+            return {"api_key": credentials_payload}
+
+    # Fallback to environment variable
+    if os.getenv("OPENAI_API_KEY"):
+        return {"api_key": os.getenv("OPENAI_API_KEY")}
+
+    raise HTTPException(
+        status_code=400,
+        detail="No credentials found in the request headers or environment variables",
+    )
+
+
+async def _chat_completion_handle_request(
+    chat_request: ChatCompletionRequest, runtime_params: Dict, provider: str
+) -> ChatCompletionResponse:
+    if isinstance(provider, str) and provider.lower() == "custom":
+        # LiteLLM has issues working with Custom OpenAI-compatible API providers
+        client = AsyncOpenAI(
+            api_key=runtime_params["api_key"], base_url=runtime_params["base_url"]
+        )
+        response = await client.chat.completions.create(
+            messages=chat_request.messages,
+            model=chat_request.model,
+        )
     else:
-        logger.info(f"Job {job_id} status: {status}")
-    return Response[JobStatusResponse](data=JobStatusResponse(status=status))
+        response = await acompletion(
+            messages=chat_request.messages,
+            model=chat_request.model,
+            **runtime_params,
+        )
+    return ChatCompletionResponse(
+        id=response.id,
+        object=response.object,
+        created=response.created,
+        model=response.model,
+        choices=[choice.model_dump() for choice in response.choices],
+        usage=response.usage.model_dump(),
+        service_tier=getattr(response, "service_tier", "default"),
+    )
 
 
-@app.delete("/jobs/{job_id}", response_model=Response[JobStatusResponse])
-def cancel_job(job_id):
+@app.post("/chat/completions", response_model=ChatCompletionResponse)
+async def chat_completion(request: Request, chat_request: ChatCompletionRequest):
     """
-    Cancel a job.
-
-    Args:
-        job_id (str)
-
-    Returns:
-        JobStatusResponse[status.CANCELED]
+    Mimics the OpenAI chat completion API.
+    https://platform.openai.com/docs/api-reference/chat/create
     """
-    job = streaming_parent_task.AsyncResult(job_id)
-    # try using wait=True? then what kind of timeout is acceptable? currently we don't know if we've failed to cancel a job, this always returns success
-    # should use SIGTERM or SIGINT in theory, but there is some unhandled kafka cleanup that causes the celery worker to report a bunch of errors on those, will fix in a later PR
-    job.revoke(terminate=True, signal="SIGKILL")
 
-    # Delete Kafka topics
-    # TODO check this doesn't conflict with parent_job_error_handler
-    input_topic_name = get_input_topic_name(job_id)
-    output_topic_name = get_output_topic_name(job_id)
-    delete_topic(input_topic_name)
-    delete_topic(output_topic_name)
+    try:
+        runtime_params = _chat_completion_get_runtime_params(request)
+        if not runtime_params.get("base_url"):
+            # Extract base_url from headers if present (due to the OpenAI-compatible API providers)
+            runtime_params["base_url"] = request.headers.get("base_url")
 
-    return Response[JobStatusResponse](data=JobStatusResponse(status=Status.CANCELED))
+        # pop the `model` to ensure it's passed as an input request parameter
+        runtime_params.pop("model", None)
+        provider = runtime_params.pop("provider", None) or "openai"
+        response = await _chat_completion_handle_request(
+            chat_request, runtime_params, provider
+        )
+        return response
+
+    except Exception as e:
+        logger.error("Error in chat completion: %s", e)
+        logger.debug(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Chat completion failed: {str(e)}")
 
 
 @app.get("/health")
