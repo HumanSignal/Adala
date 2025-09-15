@@ -26,7 +26,7 @@ jobs:
       membership: ${{ steps.membership.outputs.membership }}
     steps:
       - name: Check user's membership
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         id: membership
         env:
           ACTOR: ${{ github.actor }}
