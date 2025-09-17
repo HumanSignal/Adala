@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG PYTHON_VERSION=3.12
+ARG PYTHON_VERSION=3.13
 ARG POETRY_VERSION=2.1.4
 
 ################################ Overview
