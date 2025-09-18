@@ -1714,19 +1714,16 @@ idna = ">=2.0.0"
 
 [[package]]
 name = "exceptiongroup"
-version = "1.3.0"
+version = "1.2.2"
 description = "Backport of PEP 654 (exception groups)"
 optional = false
 python-versions = ">=3.7"
 groups = ["main", "dev"]
 markers = "python_version == \"3.10\""
 files = [
-    {file = "exceptiongroup-1.3.0-py3-none-any.whl", hash = "sha256:4d111e6e0c13d0644cad6ddaa7ed0261a0b36971f6d23e7ec9b4b9097da78a10"},
-    {file = "exceptiongroup-1.3.0.tar.gz", hash = "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88"},
+    {file = "exceptiongroup-1.2.2-py3-none-any.whl", hash = "sha256:3111b9d131c238bec2f8f516e123e14ba243563fb135d3fe885990585aa7795b"},
+    {file = "exceptiongroup-1.2.2.tar.gz", hash = "sha256:47c2edf7c6738fafb49fd34290706d1a1a2f4d1c6df275526b62cbb4aa5393cc"},
 ]
-
-[package.dependencies]
-typing-extensions = {version = ">=4.6.0", markers = "python_version < \"3.13\""}
 
 [package.extras]
 test = ["pytest (>=6)"]
@@ -3737,7 +3734,7 @@ optional = false
 python-versions = ">=3.9,<4"
 groups = ["main"]
 files = [
-    {file = "505bf93abcdab7e916722deed8cd9bfc75b65955.zip", hash = "sha256:afd107d00d7464a0ef0560b8b58f9be7ed0efd365d418b975691440b81574955"},
+    {file = "3f7d2eeb6c9ea5e05e348035877b347cdb0a9024.zip", hash = "sha256:7d49adc7c7641ea06850d06deae018c89fb3fa711054b16988c0bd4786730599"},
 ]
 
 [package.dependencies]
@@ -3765,7 +3762,7 @@ xmljson = "0.2.1"
 
 [package.source]
 type = "url"
-url = "https://github.com/HumanSignal/label-studio-sdk/archive/505bf93abcdab7e916722deed8cd9bfc75b65955.zip"
+url = "https://github.com/HumanSignal/label-studio-sdk/archive/3f7d2eeb6c9ea5e05e348035877b347cdb0a9024.zip"
 
 [[package]]
 name = "litellm"
@@ -8839,4 +8836,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "bf32b976d699ebe38b7ece5b435b40d280ed64e9cffcd5be2757a81c351aed8d"
+content-hash = "ecf59254d507985e722ac51fe47d783eea89f223607a6757ac0ec91a560ccfef"
