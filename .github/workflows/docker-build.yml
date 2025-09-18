@@ -190,7 +190,7 @@ jobs:
     if: success()
     steps:
       - name: Create Docker image tag Check
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { repo, owner } = context.repo;
