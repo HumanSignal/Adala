@@ -5121,7 +5121,10 @@ files = [
 [package.dependencies]
 deprecated = ">=1.2.6"
 googleapis-common-protos = ">=1.52,<2.0"
-grpcio = {version = ">=1.63.2,<2.0.0", markers = "python_version < \"3.13\""}
+grpcio = [
+    {version = ">=1.63.2,<2.0.0", markers = "python_version < \"3.13\""},
+    {version = ">=1.66.2,<2.0.0", markers = "python_version >= \"3.13\""},
+]
 opentelemetry-api = ">=1.15,<2.0"
 opentelemetry-exporter-otlp-proto-common = "1.32.1"
 opentelemetry-proto = "1.32.1"
@@ -8832,5 +8835,5 @@ type = ["pytest-mypy"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.10,<3.13"
-content-hash = "8bf35a8c1ff3e3a449f42811b1f405be197bed8ec9833be1c3bcfcfbfaf9b1f1"
+python-versions = ">=3.10,<4"
+content-hash = "ecf59254d507985e722ac51fe47d783eea89f223607a6757ac0ec91a560ccfef"

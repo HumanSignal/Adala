@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG PYTHON_VERSION=3.12
+ARG PYTHON_VERSION=3.13
 ARG POETRY_VERSION=2.1.4
 
 ################################ Overview
@@ -46,7 +46,7 @@ RUN --mount=type=cache,target="/var/cache/apt",sharing=locked \
     --mount=type=cache,target="/var/lib/apt/lists",sharing=locked \
     set -eux; \
     apt-get update; \
-    apt-get install --no-install-recommends -y git gcc python3-dev; \
+    apt-get install --no-install-recommends -y git build-essential gcc g++ python3-dev; \
     apt-get autoremove -y
 
 # Set the working directory in the container to where the source is mounted as
