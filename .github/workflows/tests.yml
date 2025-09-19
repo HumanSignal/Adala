@@ -40,7 +40,7 @@ jobs:
         id: setup_python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           cache: 'poetry'
 
       - name: Install Python dependencies
@@ -60,7 +60,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
         # python-version: ['3.9', '3.10', '3.11']
-        python-version: ['3.12']
+        python-version: ['3.13']
 
     steps:
       - uses: actions/checkout@v5
@@ -84,12 +84,12 @@ jobs:
       - name: Run tests with coverage
         if: matrix.os == 'ubuntu-latest'
         run: |
-          poetry run pytest tests/ -vv ${{ matrix.python-version == '3.12' && '--cov=. --cov-report=xml' || '' }}
+          poetry run pytest tests/ -vv ${{ matrix.python-version == '3.13' && '--cov=. --cov-report=xml' || '' }}
 
       - name: Upload to Codecov
         if: |
           matrix.os == 'ubuntu-latest' &&
-          matrix.python-version == '3.12' &&
+          matrix.python-version == '3.13' &&
           github.event.pull_request.user.login != 'dependabot[bot]'
         uses: codecov/codecov-action@v5.5.1
         with:
