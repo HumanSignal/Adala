@@ -12,7 +12,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
 ]
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10,<4"
 dependencies = [
     "pandas (==2.2.3)",
     "openai (>=1.60.2,<2.0.0)",
@@ -38,7 +38,7 @@ dependencies = [
     "kombu (>=5.4.0rc2)",
     "uvicorn",
     "pydantic-settings (>=2.9.0,<3.0.0)",
-    "label-studio-sdk @ https://github.com/HumanSignal/label-studio-sdk/archive/620d3bce402bd222c7f5e87f6060033b6e27066e.zip",
+    "label-studio-sdk @ https://github.com/HumanSignal/label-studio-sdk/archive/9d8bd488b7470c858d11271e808080388b71e6b8.zip",
     "requests (>=2.32.0,<3.0.0)",
     # Using litellm from forked repo until vertex fix is released: https://github.com/BerriAI/litellm/issues/7904
     "litellm  (>=1.76.1,<2.0.0)",
@@ -58,7 +58,7 @@ adala = "adala.cli:main"
 [tool.poetry]
 requires-poetry = '>=2.0.0,<3.0.0'
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.10,<4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
@@ -71,7 +71,7 @@ mkdocs-material = "^9.4.7"
 mkdocstrings-python = "^1.7.3"
 ipykernel = "^6.28.0"
 jupyter = "^1.0.0"
-jupyterlab = "^4.2.5"
+jupyterlab = "^4.4.8"
 jupyter-client = "8.4.0"
 matplotlib = "^3.7.4"
 fakeredis = "^2.23.2"
