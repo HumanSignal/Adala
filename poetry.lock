@@ -3729,13 +3729,13 @@ adal = ["adal (>=1.0.2)"]
 
 [[package]]
 name = "label-studio-sdk"
-version = "2.0.10"
+version = "2.0.11.dev"
 description = ""
 optional = false
 python-versions = ">=3.9,<4"
 groups = ["main"]
 files = [
-    {file = "01e9d007ebf41a4b3d54701900f02420e55ff251.zip", hash = "sha256:65fcc55296741d73c6ee081b26ab5515298b2a835b0aafc31e4b38acee2db211"},
+    {file = "59b70271e32254cec3f281c6ba68aa49ba923a30.zip", hash = "sha256:25d90f71b96528fc88b9f29ea52dd611b219c7192ff5b2c9401623dd8b3ea102"},
 ]
 
 [package.dependencies]
@@ -3763,7 +3763,7 @@ xmljson = "0.2.1"
 
 [package.source]
 type = "url"
-url = "https://github.com/HumanSignal/label-studio-sdk/archive/01e9d007ebf41a4b3d54701900f02420e55ff251.zip"
+url = "https://github.com/HumanSignal/label-studio-sdk/archive/59b70271e32254cec3f281c6ba68aa49ba923a30.zip"
 
 [[package]]
 name = "litellm"
@@ -8837,4 +8837,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "1f2a421b898b767d54a4788b9667bf00a56f4e52e5bc1283fbf2f9f632777a41"
+content-hash = "29d64ce4bbc6dab814ffdb9269200859bf41be89d413414391c0be90b5a45372"
