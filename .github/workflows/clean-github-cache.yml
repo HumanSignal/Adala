@@ -1,0 +1,34 @@
+name: "Clean github cache"
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"  # Runs every day at 06:00 UTC
+permissions:
+  actions: write
+jobs:
+  delete-cache:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Delete all caches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          while true; do
+            CACHE_IDS=$(gh cache list --repo "${{ github.repository }}" --limit 100 --json id --jq '.[].id' | tr '\n' ' ')
+            if [ -z "$CACHE_IDS" ]; then
+              echo "No more caches to delete."
+              break
+            fi
+            echo "$CACHE_IDS" | xargs -n 1 -P 10 gh cache delete --repo "${{ github.repository }}"
+            sleep 1
+          done
+      - name: Verify cache deletion
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REMAINING_CACHES=$(gh cache list --repo "${{ github.repository }}" --limit 1 --json id | jq length)
+          if [ "$REMAINING_CACHES" -ne 0 ]; then
+            echo "Warning: $REMAINING_CACHES caches remain"
+          fi

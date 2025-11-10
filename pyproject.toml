@@ -12,7 +12,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
 ]
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10,<4"
 dependencies = [
     "pandas (==2.2.3)",
     "openai (>=1.60.2,<2.0.0)",
@@ -57,7 +57,7 @@ adala = "adala.cli:main"
 [tool.poetry]
 requires-poetry = '>=2.0.0,<3.0.0'
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.10,<4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
@@ -70,7 +70,7 @@ mkdocs-material = "^9.4.7"
 mkdocstrings-python = "^1.7.3"
 ipykernel = "^6.28.0"
 jupyter = "^1.0.0"
-jupyterlab = "^4.2.5"
+jupyterlab = "^4.4.8"
 jupyter-client = "8.4.0"
 matplotlib = "^3.7.4"
 fakeredis = "^2.23.2"
