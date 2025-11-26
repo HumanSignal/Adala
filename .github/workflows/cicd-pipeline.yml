@@ -63,7 +63,7 @@ jobs:
 
   deploy:
     name: "Deploy"
-    if: github.event_name == 'pull_request' && needs.details.outputs.membership || github.event_name == 'push' && needs.details.outputs.membership
+    if: needs.details.outputs.membership && (github.event_name == 'push' || github.event.pull_request.draft == false)
     uses: ./.github/workflows/argocd-deploy.yml
     needs:
       - details
