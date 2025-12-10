@@ -2,7 +2,7 @@
 services:
   kafka:
     restart: always
-    image: bitnami/kafka
+    image: bitnamilegacy/kafka:4.0.0-debian-12-r10
     ports:
       - "9093:9093"
     volumes:
