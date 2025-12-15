@@ -742,3 +742,240 @@ Annotate the following data:
             assert (
                 extracted_text == strength["text"]
             ), f"Strength text mismatch: {extracted_text} != {strength['text']}"
+
+
+@pytest.mark.vcr
+@pytest.mark.asyncio
+async def test_label_studio_skill_custom_interface():
+    df = pd.DataFrame(
+        [
+            {
+                "transactions": [
+                    {
+                        "Client ID": "USC001",
+                        "Account ID": "A001",
+                        "Transaction date": "2025-02-01",
+                        "Transaction text": "ONLINE PAYMENT - MUNICIPAL WATER",
+                        "Transaction amount": -45.8,
+                    },
+                    {
+                        "Client ID": "USC001",
+                        "Account ID": "A001",
+                        "Transaction date": "2025-02-05",
+                        "Transaction text": "ONLINE PAYMENT - SPECTRUM INTERNET",
+                        "Transaction amount": -79.99,
+                    },
+                    {
+                        "Client ID": "USC001",
+                        "Account ID": "A001",
+                        "Transaction date": "2025-02-06",
+                        "Transaction text": "PAYROLL DEPOSIT - BIGTECH INC",
+                        "Transaction amount": 2450.75,
+                    },
+                    {
+                        "Client ID": "USC001",
+                        "Account ID": "A001",
+                        "Transaction date": "2025-02-07",
+                        "Transaction text": "CARD PAYMENT - TRADER JOE'S #123 AUSTIN TX",
+                        "Transaction amount": -88.45,
+                    },
+                    {
+                        "Client ID": "USC001",
+                        "Account ID": "A001",
+                        "Transaction date": "2025-02-08",
+                        "Transaction text": "CARD PAYMENT - WHOLE FOODS AUSTIN TX",
+                        "Transaction amount": -110.32,
+                    },
+                    {
+                        "Client ID": "USC001",
+                        "Account ID": "A001",
+                        "Transaction date": "2025-02-10",
+                        "Transaction text": "AUTOPAY - GEICO AUTO INSURANCE",
+                        "Transaction amount": -112.5,
+                    },
+                    {
+                        "Client ID": "USC001",
+                        "Account ID": "A001",
+                        "Transaction date": "2025-02-11",
+                        "Transaction text": "CARD PAYMENT - RESTAURANT",
+                        "Transaction amount": -85.4,
+                    },
+                    {
+                        "Client ID": "USC001",
+                        "Account ID": "A001",
+                        "Transaction date": "2025-02-13",
+                        "Transaction text": "ONLINE TRANSFER TO SAVINGS",
+                        "Transaction amount": -500,
+                    },
+                    {
+                        "Client ID": "USC001",
+                        "Account ID": "A001",
+                        "Transaction date": "2025-02-14",
+                        "Transaction text": "PAYROLL DEPOSIT - BIGTECH INC",
+                        "Transaction amount": 2450.75,
+                    },
+                    {
+                        "Client ID": "USC001",
+                        "Account ID": "A001",
+                        "Transaction date": "2025-02-15",
+                        "Transaction text": "AUTOPAY - CHASE AUTO LOAN",
+                        "Transaction amount": -350.25,
+                    },
+                ]
+            }
+        ]
+    )
+
+    agent_payload = {
+        "runtimes": {
+            "default": {
+                "type": "AsyncLiteLLMChatRuntime",
+                "model": "gpt-4o-mini",
+            }
+        },
+        "skills": [
+            {
+                "type": "LabelStudioSkill",
+                "name": "TransactionAnnotator",
+                "input_template": """
+                    Annotate the transactions in the input data:
+                    {transactions}
+                """,
+                "label_config": """
+<View>
+  <Text name="title" value="$title" />
+  <TextArea name="summary" toName="title" />
+  <CustomInterface
+                   name="sheet"
+                   toName="sheet"
+                   data="$transactions"
+                   outputs="{
+  &quot;type&quot;: &quot;array&quot;,
+  &quot;items&quot;: {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;properties&quot;: {
+      &quot;index&quot;: {
+        &quot;type&quot;: &quot;integer&quot;
+      },
+      &quot;category&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;enum&quot;: [
+          &quot;Alimentation&quot;,
+          &quot;Transport&quot;,
+          &quot;Divertissement&quot;,
+          &quot;Services publics&quot;,
+          &quot;Santé&quot;,
+          &quot;Achats&quot;,
+          &quot;Logement&quot;,
+          &quot;Revenu&quot;,
+          &quot;Autre&quot;,
+          &quot;New Category&quot;
+        ]
+      },
+      &quot;groupNames&quot;: {
+        &quot;type&quot;: &quot;array&quot;,
+        &quot;items&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    },
+    &quot;required&quot;: [&quot;index&quot;, &quot;category&quot;, &quot;groupNames&quot;]
+  }
+}
+">
+    <![CDATA[
+    // ============================================================================
+    // ANNOTATEUR DE TRANSACTIONS - Interface personnalisée pour l'étiquetage des transactions bancaires
+    // ============================================================================
+    // Cette interface fournit une vue tableau avec filtrage avancé, sélection en masse,
+    // attribution de catégories et étiquetage multi-groupes pour les transactions bancaires.
+    // 
+    // Fonctionnalités clés :
+    // - Filtrage avancé par description, date, montant et catégorie
+    // - Attribution multi-groupes : les transactions peuvent appartenir à plusieurs groupes
+    // - Filtres de groupe cliquables : cliquez pour basculer (logique ET - affiche les lignes avec TOUS les groupes sélectionnés)
+    // - Opérations en masse : attribuer des catégories et ajouter des groupes à plusieurs transactions
+    // - Étiquetage individuel avec menus déroulants de catégories
+    // ============================================================================
+    
+    function TransactionAnnotator({ React, addRegion, regions, data }) {
+      const { useState, useEffect, useMemo } = React;
+      ....your code here...
+      return <div>Hello, world!</div>;
+          }
+    ]]>
+  </CustomInterface>
+</View>
+""",
+            }
+        ],
+    }
+
+    agent = Agent(**agent_payload)
+    predictions = await agent.arun(df)
+    # Test validation: Verify the predictions match expected structure and values
+    # This test validates step by step:
+    # - The agent successfully processes the transaction data
+    # - The output contains the expected fields (transactions, summary, sheet)
+    # - Each transaction is correctly categorized
+    # - Group names are properly assigned
+    # - The sheet contains all 10 transactions with correct indices
+    #
+    # Critical validation: The agent correctly interprets the custom Label Studio
+    # interface and produces structured output matching the field schema
+
+    result = predictions.to_dict(orient="records")
+    assert len(result) == 1, "Expected exactly one prediction result"
+
+    prediction = result[0]
+
+    # Validate top-level structure
+    assert "transactions" in prediction, "Missing 'transactions' field"
+    assert "summary" in prediction, "Missing 'summary' field"
+    assert "sheet" in prediction, "Missing 'sheet' field"
+
+    # Validate transactions
+    assert len(prediction["transactions"]) == 10, "Expected 10 transactions"
+
+    # Validate summary
+    assert (
+        prediction["summary"] == "Transaction Annotations"
+    ), "Unexpected summary value"
+
+    # Validate sheet structure and content
+    sheet = prediction["sheet"]
+    assert len(sheet) == 10, "Expected 10 sheet entries"
+
+    expected_sheet = [
+        {"index": 1, "category": "Services publics", "groupNames": ["Municipal Water"]},
+        {"index": 2, "category": "Services publics", "groupNames": ["Internet"]},
+        {"index": 3, "category": "Revenu", "groupNames": ["Payroll Deposit"]},
+        {"index": 4, "category": "Achats", "groupNames": ["Trader Joe's"]},
+        {"index": 5, "category": "Achats", "groupNames": ["Whole Foods"]},
+        {"index": 6, "category": "Services publics", "groupNames": ["Auto Insurance"]},
+        {"index": 7, "category": "Achats", "groupNames": ["Restaurant"]},
+        {"index": 8, "category": "Achats", "groupNames": ["Savings Transfer"]},
+        {"index": 9, "category": "Revenu", "groupNames": ["Payroll Deposit"]},
+        {"index": 10, "category": "Services publics", "groupNames": ["Auto Loan"]},
+    ]
+
+    for i, expected_entry in enumerate(expected_sheet):
+        actual_entry = sheet[i]
+        assert (
+            actual_entry["index"] == expected_entry["index"]
+        ), f"Sheet entry {i}: index mismatch"
+        assert (
+            actual_entry["category"] == expected_entry["category"]
+        ), f"Sheet entry {i}: category mismatch"
+        assert (
+            actual_entry["groupNames"] == expected_entry["groupNames"]
+        ), f"Sheet entry {i}: groupNames mismatch"
+
+    # Validate that cost/token fields exist (excluding float value checks for stability)
+    assert "_prompt_tokens" in prediction, "Missing '_prompt_tokens' field"
+    assert "_completion_tokens" in prediction, "Missing '_completion_tokens' field"
+    assert "_prompt_cost_usd" in prediction, "Missing '_prompt_cost_usd' field"
+    assert "_completion_cost_usd" in prediction, "Missing '_completion_cost_usd' field"
+    assert "_total_cost_usd" in prediction, "Missing '_total_cost_usd' field"
+    assert "_message_counts" in prediction, "Missing '_message_counts' field"
+    assert "_inference_time" in prediction, "Missing '_inference_time' field"
