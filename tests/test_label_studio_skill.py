@@ -746,7 +746,7 @@ Annotate the following data:
 
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_label_studio_skill_custom_interface():
+async def test_label_studio_skill_react():
     df = pd.DataFrame(
         [
             {
@@ -845,7 +845,7 @@ async def test_label_studio_skill_custom_interface():
 <View>
   <Text name="title" value="$title" />
   <TextArea name="summary" toName="title" />
-  <CustomInterface
+  <React
                    name="sheet"
                    toName="sheet"
                    data="$transactions"
@@ -885,17 +885,17 @@ async def test_label_studio_skill_custom_interface():
 ">
     <![CDATA[
     // ============================================================================
-    // ANNOTATEUR DE TRANSACTIONS - Interface personnalisée pour l'étiquetage des transactions bancaires
+    // ANNOTATEUR DE TRANSACTIONS - React interface for labeling banking transactions
     // ============================================================================
-    // Cette interface fournit une vue tableau avec filtrage avancé, sélection en masse,
-    // attribution de catégories et étiquetage multi-groupes pour les transactions bancaires.
+    // This interface provides a table view with advanced filtering, bulk selection,
+    // category assignment, and multi-group labeling for banking transactions.
     // 
-    // Fonctionnalités clés :
-    // - Filtrage avancé par description, date, montant et catégorie
-    // - Attribution multi-groupes : les transactions peuvent appartenir à plusieurs groupes
-    // - Filtres de groupe cliquables : cliquez pour basculer (logique ET - affiche les lignes avec TOUS les groupes sélectionnés)
-    // - Opérations en masse : attribuer des catégories et ajouter des groupes à plusieurs transactions
-    // - Étiquetage individuel avec menus déroulants de catégories
+    // Key features:
+    // - Advanced filtering by description, date, amount, and category
+    // - Multi-group assignment: transactions can belong to multiple groups
+    // - Clickable group filters: click to toggle (AND logic - shows rows with ALL selected groups)
+    // - Bulk operations: assign categories and add groups to multiple transactions
+    // - Individual labeling with category dropdown menus
     // ============================================================================
     
     function TransactionAnnotator({ React, addRegion, regions, data }) {
@@ -904,7 +904,7 @@ async def test_label_studio_skill_custom_interface():
       return <div>Hello, world!</div>;
           }
     ]]>
-  </CustomInterface>
+  </React>
 </View>
 """,
             }
