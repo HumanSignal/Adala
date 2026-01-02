@@ -746,7 +746,7 @@ Annotate the following data:
 
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_label_studio_skill_react():
+async def test_label_studio_skill_react_code():
     df = pd.DataFrame(
         [
             {
