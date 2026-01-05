@@ -845,7 +845,7 @@ async def test_label_studio_skill_react_code():
 <View>
   <Text name="title" value="$title" />
   <TextArea name="summary" toName="title" />
-  <React
+  <ReactCode
                    name="sheet"
                    toName="sheet"
                    data="$transactions"
@@ -904,7 +904,7 @@ async def test_label_studio_skill_react_code():
       return <div>Hello, world!</div>;
           }
     ]]>
-  </React>
+  </ReactCode>
 </View>
 """,
             }
