@@ -678,3 +678,136 @@ def test_entity_extraction_no_labels():
             {"quote_string": "Apple Inc.", "start": 76, "end": 86},
         ],
     ]
+
+
+def test_extract_indices_word_boundary():
+    """
+    Test that extract_indices prefers word-boundary matches over partial matches within words.
+
+    This addresses the bug where "CA" in "BOCA CHICA ... CA 92276" would incorrectly
+    match the "CA" inside "BOCA" instead of the standalone state abbreviation "CA".
+    """
+    from adala.skills.collection.entity_extraction import extract_indices
+
+    # Input text with "CA" appearing multiple times:
+    # - Inside "BOCA" at position 18-20
+    # - Inside "CHICA" at position 24-26
+    # - As standalone state abbreviation at position 46-48
+    text = "NWC VARNER RD / BOCA CHICA TRL THOUSAND PALMS CA 92276 UNITED STATES"
+
+    df = pd.DataFrame(
+        [
+            {
+                "text": text,
+                "entities": [
+                    {"quote_string": "NWC", "label": "direction"},
+                    {"quote_string": "VARNER", "label": "street_name"},
+                    {"quote_string": "BOCA CHICA TRL", "label": "street_name"},
+                    {"quote_string": "CA", "label": "state"},  # Should match standalone CA, not CA in BOCA
+                    {"quote_string": "92276", "label": "zip_code"},
+                ],
+            }
+        ]
+    )
+
+    result = extract_indices(df, "text", "entities", "quote_string", "label")
+    entities = result.iloc[0]["entities"]
+
+    # Verify the state "CA" matches the standalone occurrence at position 46-48
+    # NOT the "CA" inside "BOCA" (18-20) or "CHICA" (24-26)
+    ca_entity = next(e for e in entities if e["label"] == "state")
+    assert ca_entity["start"] == 46, f"Expected CA to start at 46 (standalone), got {ca_entity['start']}"
+    assert ca_entity["end"] == 48, f"Expected CA to end at 48 (standalone), got {ca_entity['end']}"
+
+    # Verify the extracted text matches
+    assert text[ca_entity["start"] : ca_entity["end"]] == "CA"
+
+    # Also verify other entities are correctly extracted
+    direction_entity = next(e for e in entities if e["label"] == "direction")
+    assert direction_entity["start"] == 0
+    assert direction_entity["end"] == 3
+    assert text[direction_entity["start"] : direction_entity["end"]] == "NWC"
+
+    street_entities = [e for e in entities if e["label"] == "street_name"]
+    assert len(street_entities) == 2
+
+    # VARNER should be at position 4-10
+    varner_entity = next(e for e in street_entities if e["quote_string"] == "VARNER")
+    assert varner_entity["start"] == 4
+    assert varner_entity["end"] == 10
+
+    # BOCA CHICA TRL should be at position 16-30
+    boca_entity = next(e for e in street_entities if e["quote_string"] == "BOCA CHICA TRL")
+    assert boca_entity["start"] == 16
+    assert boca_entity["end"] == 30
+
+
+def test_extract_indices_multiple_same_word():
+    """
+    Test that extract_indices correctly handles multiple occurrences of the same
+    standalone word by using position hints when available.
+    """
+    from adala.skills.collection.entity_extraction import extract_indices
+
+    # Text with "Apple" appearing twice as standalone words
+    text = "Apple pie is great. I love Apple products."
+
+    df = pd.DataFrame(
+        [
+            {
+                "text": text,
+                "entities": [
+                    # First Apple at position 0, second at position 27
+                    # Without hint, should get first occurrence
+                    {"quote_string": "Apple", "label": "food"},
+                    # With hint near second occurrence, should get second
+                    {"quote_string": "Apple", "label": "company", "start": 25},
+                ],
+            }
+        ]
+    )
+
+    result = extract_indices(df, "text", "entities", "quote_string", "label")
+    entities = result.iloc[0]["entities"]
+
+    food_entity = next(e for e in entities if e["label"] == "food")
+    company_entity = next(e for e in entities if e["label"] == "company")
+
+    # First Apple (food) should be at position 0
+    assert food_entity["start"] == 0
+    assert food_entity["end"] == 5
+
+    # Second Apple (company) should be at position 27 (using hint)
+    assert company_entity["start"] == 27
+    assert company_entity["end"] == 32
+
+
+def test_extract_indices_no_valid_word_boundary():
+    """
+    Test that extract_indices falls back to partial matches when no word-boundary
+    matches exist.
+    """
+    from adala.skills.collection.entity_extraction import extract_indices
+
+    # "cat" only appears within "concatenate" - no standalone occurrence
+    text = "We need to concatenate these strings."
+
+    df = pd.DataFrame(
+        [
+            {
+                "text": text,
+                "entities": [
+                    {"quote_string": "cat", "label": "animal"},
+                ],
+            }
+        ]
+    )
+
+    result = extract_indices(df, "text", "entities", "quote_string", "label")
+    entities = result.iloc[0]["entities"]
+
+    # Should still find "cat" within "concatenate" as fallback
+    cat_entity = entities[0]
+    assert cat_entity["start"] == 14  # "cat" in "concatenate"
+    assert cat_entity["end"] == 17
+    assert text[cat_entity["start"] : cat_entity["end"]] == "cat"
