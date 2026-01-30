@@ -47,6 +47,105 @@ def validate_output_format_for_ner_tag(
     return df
 
 
+def find_all_occurrences(text: str, substring: str) -> List[int]:
+    """Find all starting indices of substring in text (case-insensitive)."""
+    occurrences = []
+    text_lower = text.lower()
+    substring_lower = substring.lower()
+    start = 0
+    while True:
+        idx = text_lower.find(substring_lower, start)
+        if idx == -1:
+            break
+        occurrences.append(idx)
+        start = idx + 1
+    return occurrences
+
+
+def is_word_boundary(text: str, start: int, end: int) -> bool:
+    """
+    Check if the substring at text[start:end] has word boundaries on both sides.
+    A word boundary is the start/end of string, whitespace, or punctuation.
+    """
+    # Check left boundary
+    if start > 0:
+        char_before = text[start - 1]
+        if char_before.isalnum():
+            return False
+
+    # Check right boundary
+    if end < len(text):
+        char_after = text[end]
+        if char_after.isalnum():
+            return False
+
+    return True
+
+
+def find_best_occurrence(
+    text: str,
+    substring: str,
+    hint_start: Optional[int],
+    used_ranges: List[tuple],
+) -> Optional[int]:
+    """
+    Find the best occurrence of substring in text, using multiple strategies:
+    1. Prefer word-boundary matches (standalone words) over partial matches within words
+    2. If hint_start is provided, prefer occurrences closest to the hint
+    3. Avoid already used ranges
+
+    Args:
+        text: The input text to search in
+        substring: The substring to find
+        hint_start: The model's predicted start index (used as a hint for finding closest match)
+        used_ranges: List of (start, end) tuples representing already assigned entity ranges
+
+    Returns:
+        The start index of the best occurrence, or None if not found
+    """
+    occurrences = find_all_occurrences(text, substring)
+    if not occurrences:
+        return None
+
+    # Filter out occurrences that overlap with already used ranges
+    substring_len = len(substring)
+    valid_occurrences = []
+    for occ_start in occurrences:
+        occ_end = occ_start + substring_len
+        # Check if this occurrence overlaps with any used range
+        overlaps = False
+        for used_start, used_end in used_ranges:
+            # Check for overlap: ranges overlap if one starts before the other ends
+            if occ_start < used_end and occ_end > used_start:
+                overlaps = True
+                break
+        if not overlaps:
+            valid_occurrences.append(occ_start)
+
+    if not valid_occurrences:
+        return None
+
+    # Separate into word-boundary matches and partial matches
+    word_boundary_matches = []
+    partial_matches = []
+    for occ_start in valid_occurrences:
+        occ_end = occ_start + substring_len
+        if is_word_boundary(text, occ_start, occ_end):
+            word_boundary_matches.append(occ_start)
+        else:
+            partial_matches.append(occ_start)
+
+    # Prefer word-boundary matches; fall back to partial matches if none exist
+    candidates = word_boundary_matches if word_boundary_matches else partial_matches
+
+    # If we have a hint from the model, find the closest occurrence to it
+    if hint_start is not None:
+        return min(candidates, key=lambda x: abs(x - hint_start))
+
+    # Otherwise, return the first valid occurrence
+    return candidates[0]
+
+
 def extract_indices(
     df,
     input_field_name,
@@ -63,6 +162,9 @@ def extract_indices(
         ```
         [{"quote_string": "entity_1", "start": 0, "end": 5}, {"quote_string": "entity_2", "start": 10, "end": 15}, ...]
         ```
+
+    If the model provides start/end indices, they are used as hints to find the closest
+    matching occurrence in the text (since model indices are often incorrect but close).
     """
     for i, row in df.iterrows():
         if row.get("_adala_error"):
@@ -71,38 +173,26 @@ def extract_indices(
         text = row[input_field_name]
         entities = row[output_field_name] or []
         to_remove = []
-        found_entities_ends = {}
-        for entity in entities:
-            # TODO: current naive implementation uses exact string matching which can seem to be a baseline
-            # we can improve this further by handling ambiguity, for example:
-            # - requesting surrounding context from LLM
-            # - perform fuzzy matching over strings if model still hallucinates when copying the text
-            ent_str = entity[quote_string_field_name]
-            # to avoid overlapping entities, start from the end of the last entity with the same prefix
-            matching_end_indices = [
-                found_entities_ends[found_ent]
-                for found_ent in found_entities_ends
-                if found_ent.startswith(ent_str)
-            ]
-            if matching_end_indices:
-                # start searching from the end of the last entity with the same prefix
-                start_search_idx = max(matching_end_indices)
-            else:
-                # start searching from the beginning
-                start_search_idx = 0
+        used_ranges = []  # Track (start, end) of already assigned entities
 
-            start_idx = text.lower().find(
-                entity[quote_string_field_name].lower(),
-                start_search_idx,
-            )
-            if start_idx == -1:
-                # we need to remove the entity if it is not found in the text
+        for entity in entities:
+            ent_str = entity[quote_string_field_name]
+
+            # Use model's predicted start index as a hint (if available)
+            # The model's indices are often wrong but typically close to the correct position
+            hint_start = entity.get("start")
+
+            start_idx = find_best_occurrence(text, ent_str, hint_start, used_ranges)
+
+            if start_idx is None:
+                # Entity string not found in text (or all occurrences already used)
                 to_remove.append(entity)
             else:
-                end_index = start_idx + len(entity[quote_string_field_name])
+                end_idx = start_idx + len(ent_str)
                 entity["start"] = start_idx
-                entity["end"] = end_index
-                found_entities_ends[ent_str] = end_index
+                entity["end"] = end_idx
+                used_ranges.append((start_idx, end_idx))
+
         for entity in to_remove:
             entities.remove(entity)
     return df
