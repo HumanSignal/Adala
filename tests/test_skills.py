@@ -705,7 +705,10 @@ def test_extract_indices_word_boundary():
                     {"quote_string": "NWC", "label": "direction"},
                     {"quote_string": "VARNER", "label": "street_name"},
                     {"quote_string": "BOCA CHICA TRL", "label": "street_name"},
-                    {"quote_string": "CA", "label": "state"},  # Should match standalone CA, not CA in BOCA
+                    {
+                        "quote_string": "CA",
+                        "label": "state",
+                    },  # Should match standalone CA, not CA in BOCA
                     {"quote_string": "92276", "label": "zip_code"},
                 ],
             }
@@ -718,8 +721,12 @@ def test_extract_indices_word_boundary():
     # Verify the state "CA" matches the standalone occurrence at position 46-48
     # NOT the "CA" inside "BOCA" (18-20) or "CHICA" (24-26)
     ca_entity = next(e for e in entities if e["label"] == "state")
-    assert ca_entity["start"] == 46, f"Expected CA to start at 46 (standalone), got {ca_entity['start']}"
-    assert ca_entity["end"] == 48, f"Expected CA to end at 48 (standalone), got {ca_entity['end']}"
+    assert (
+        ca_entity["start"] == 46
+    ), f"Expected CA to start at 46 (standalone), got {ca_entity['start']}"
+    assert (
+        ca_entity["end"] == 48
+    ), f"Expected CA to end at 48 (standalone), got {ca_entity['end']}"
 
     # Verify the extracted text matches
     assert text[ca_entity["start"] : ca_entity["end"]] == "CA"
@@ -739,7 +746,9 @@ def test_extract_indices_word_boundary():
     assert varner_entity["end"] == 10
 
     # BOCA CHICA TRL should be at position 16-30
-    boca_entity = next(e for e in street_entities if e["quote_string"] == "BOCA CHICA TRL")
+    boca_entity = next(
+        e for e in street_entities if e["quote_string"] == "BOCA CHICA TRL"
+    )
     assert boca_entity["start"] == 16
     assert boca_entity["end"] == 30
 
