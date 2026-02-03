@@ -152,8 +152,10 @@ def test_classification_skill_multilabel():
 
     # define skill with response_model
 
+    TagName = Literal.__getitem__(tuple(tag_names))
+
     class Output(BaseModel):
-        predicted_tags: Set[Literal[*tag_names]] = Field(
+        predicted_tags: Set[TagName] = Field(
             ..., min_items=1, description="The classification label"
         )
 

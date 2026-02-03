@@ -3,8 +3,27 @@ import hashlib
 from .base import Memory
 from uuid import uuid4
 from pydantic import BaseModel, Field, model_validator
-from chromadb.utils import embedding_functions
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Optional
+
+from openai import OpenAI
+
+
+class OpenAIEmbeddingFunction:
+    """
+    ChromaDB embedding function using the OpenAI Python SDK (v1+).
+
+    ChromaDB's built-in `embedding_functions.OpenAIEmbeddingFunction` relies on the
+    legacy `openai.Embedding` API which was removed in openai>=1.0.
+    """
+
+    def __init__(self, *, model_name: str, api_key: str, base_url: Optional[str] = None):
+        self._model_name = model_name
+        self._client = OpenAI(api_key=api_key, base_url=base_url)
+
+    def __call__(self, input: List[str]) -> List[List[float]]:
+        resp = self._client.embeddings.create(model=self._model_name, input=input)
+        # Keep ordering stable
+        return [item.embedding for item in resp.data]
 
 
 class VectorDBMemory(Memory):
@@ -22,12 +41,13 @@ class VectorDBMemory(Memory):
     @model_validator(mode="after")
     def init_database(self):
         self._client = chromadb.Client()
-        self._embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+        self._embedding_function = OpenAIEmbeddingFunction(
             model_name=self.openai_embedding_model, api_key=self.openai_api_key
         )
         self._collection = self._client.get_or_create_collection(
             name=self.db_name, embedding_function=self._embedding_function
         )
+        return self
 
     def create_unique_id(self, string):
         return hashlib.md5(string.encode()).hexdigest()
