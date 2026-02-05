@@ -9,7 +9,7 @@ from pydantic import (
     AfterValidator,
 )
 from adala.skills import Skill
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Type
 from typing_extensions import Annotated
 from adala.skills import AnalysisSkill
 from adala.utils.parse import parse_template
@@ -67,7 +67,7 @@ class PromptImprovementSkill(AnalysisSkill):
     input_prefix: str = ""  # Used to provide additional context for the input
     input_separator: str = "\n"
 
-    response_model = PromptImprovementSkillResponseModel
+    response_model: Type[BaseModel] = PromptImprovementSkillResponseModel
 
     @model_validator(mode="after")
     def validate_prompts(self):

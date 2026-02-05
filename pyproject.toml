@@ -15,7 +15,7 @@ classifiers = [
 requires-python = ">=3.10,<4"
 dependencies = [
     "pandas (==2.2.3)",
-    "openai (>=1.60.2,<2.0.0)",
+    "openai (>=2.0.0,<3.0.0)",
     "guidance (==0.0.64)",
     "pydantic (>=2,<3)",
     "rich (>=13,<14)",
@@ -44,7 +44,7 @@ dependencies = [
     "litellm  (>=1.76.1,<2.0.0)",
     #"litellm @ https://github.com/HumanSignal/litellm/archive/9deadf35b9b2ff351388abc3a2ea144ed93ca013.zip",
     "pandarallel (>=1.6.5,<2.0.0)",
-    "instructor (==1.4.3)",
+    "instructor (>=1.14.5, <2.0.0)",
     "async-lru (>=2.0.5,<3.0.0)",
     "jinja2 (>=3.1.6,<4.0)"
 ]
@@ -63,7 +63,6 @@ python = ">=3.10,<4"
 pytest = "^8.3.5"
 pytest-cov = "^4.1.0"
 black = "^24.8.0"
-pytest-black = "^0.3.12"
 mkdocs = "^1.5.3"
 mkdocs-jupyter = "^0.24.3"
 mkdocs-material = "^9.4.7"
@@ -81,7 +80,6 @@ pytest-recording = "0.13.2"
 mypy = "^1.15.0"
 pytest-benchmark = "^5.1.0"
 pytest-profiling = "^1.8.1"
-openai-responses = "^0.12.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
