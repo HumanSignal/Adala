@@ -47,7 +47,7 @@ jobs:
         run: poetry install
 
       - name: Run black
-        run: poetry run pytest --black .
+        run: poetry run black --check .
 
   run_pytest:
     name: "pytest ${{ matrix.os }} | ${{ matrix.python-version }}"

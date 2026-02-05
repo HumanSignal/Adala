@@ -1,6 +1,7 @@
 import pytest
 import httpx
 from unittest import mock
+import os
 
 # from contextlib import asynccontextmanager
 import pytest_asyncio
@@ -13,12 +14,21 @@ from server.app import _get_redis_conn
 def vcr_config():
     return {
         "filter_headers": ["authorization", "api-key", "x-api-key"],
-        "filter_query_parameters": ["api_key", "key"],
-        "match_on": ("method", "scheme", "host", "port", "path", "query", "body"),
+        "filter_query_parameters": ["api_key", "key", "api-version"],
+        # Dependency upgrades (e.g. OpenAI/LiteLLM/Instructor) frequently change request
+        # bodies in non-semantic ways; matching on body makes existing cassettes brittle.
+        "match_on": ("method", "scheme", "host", "port", "path", "query"),
     }
 
 
 def pytest_configure(config):
+    # Newer OpenAI / LiteLLM versions error early if no API key is present,
+    # even when requests are replayed from VCR cassettes. Provide harmless defaults.
+    os.environ.setdefault("OPENAI_API_KEY", "test")
+    os.environ.setdefault("AZURE_OPENAI_API_KEY", "test")
+    os.environ.setdefault("GOOGLE_API_KEY", "test")
+    os.environ.setdefault("GEMINI_API_KEY", "test")
+
     config.addinivalue_line("markers", "use_openai: mark test as requiring OpenAI key")
     config.addinivalue_line(
         "markers", "use_azure: mark test as requiring Azure OpenAI key"
