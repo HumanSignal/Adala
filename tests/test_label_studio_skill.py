@@ -72,6 +72,8 @@ async def test_label_studio_skill_basic():
 
     agent = Agent(**agent_payload)
     predictions = await agent.arun(df)
+    # Sort to ensure deterministic order regardless of async execution order
+    predictions = predictions.sort_values("title").reset_index(drop=True)
     # Check individual fields
     assert predictions.title.tolist() == ["I can't login", "Support new file types"]
     assert predictions.description.tolist() == [
@@ -164,7 +166,7 @@ async def test_label_studio_skill_partial_label_config():
     agent = Agent(**agent_payload)
     predictions = await agent.arun(df)
 
-    assert predictions.classification.tolist() == ["Bug report", "Feature request"]
+    assert set(predictions.classification.tolist()) == {"Bug report", "Feature request"}
     assert predictions.evaluation.tolist() == [5, 5]
     assert "rationale" in predictions.columns
     assert "screenshot_quality" not in predictions.columns
