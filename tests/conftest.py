@@ -2,12 +2,15 @@ import pytest
 import httpx
 from unittest import mock
 import os
+from contextlib import suppress
 
 # from contextlib import asynccontextmanager
 import pytest_asyncio
 from fakeredis import FakeStrictRedis
 from fastapi.testclient import TestClient
 from server.app import _get_redis_conn
+from litellm import close_litellm_async_clients
+from litellm.litellm_core_utils.logging_worker import GLOBAL_LOGGING_WORKER
 
 
 @pytest.fixture(scope="module")
@@ -71,3 +74,21 @@ def redis_mock(client):
         client.app.dependency_overrides, {_get_redis_conn: lambda: fake_redis}
     ):
         yield fake_redis
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def cleanup_litellm_logging_worker():
+    """
+    Keep LiteLLM's global logging worker from leaking tasks across pytest event loops.
+    https://github.com/BerriAI/litellm/issues/14521
+    """
+    yield
+
+    # Flush first, then unbind queue from the current loop, then stop worker.
+    with suppress(Exception):
+        await GLOBAL_LOGGING_WORKER.flush()
+    GLOBAL_LOGGING_WORKER._queue = None
+    with suppress(Exception):
+        await GLOBAL_LOGGING_WORKER.stop()
+    with suppress(Exception):
+        await close_litellm_async_clients()
