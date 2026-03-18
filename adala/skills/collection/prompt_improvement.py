@@ -10,6 +10,7 @@ from pydantic import (
 )
 from adala.skills import Skill
 from typing import Any, Dict, List, Optional, Type, Union
+
 from typing_extensions import Annotated
 from adala.skills import AnalysisSkill
 from adala.utils.parse import parse_template

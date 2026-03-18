@@ -67,12 +67,11 @@ async def test_simple_estimate_cost_azure():
     )
 
 
-@pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_simple_estimate_cost_vertex_ai():
 
     runtime = AsyncLiteLLMChatRuntime(
-        model="vertex_ai/gemini-1.5-flash",
+        model="vertex_ai/gemini-2.5-flash",
         vertex_credentials=os.getenv("VERTEX_CREDENTIALS", "123"),
     )
 
@@ -84,9 +83,9 @@ async def test_simple_estimate_cost_vertex_ai():
     )
 
     assert isinstance(cost_estimate, CostEstimate)
-    assert np.isclose(cost_estimate.prompt_cost_usd, 5.25e-06, rtol=1e-2, atol=1e-2)
-    assert np.isclose(cost_estimate.completion_cost_usd, 1.2e-06, rtol=1e-2, atol=1e-2)
-    assert np.isclose(cost_estimate.total_cost_usd, 6.45e-06, rtol=1e-2, atol=1e-2)
+    assert np.isclose(cost_estimate.prompt_cost_usd, 2.1e-05, rtol=1e-2, atol=1e-2)
+    assert np.isclose(cost_estimate.completion_cost_usd, 1.0e-05, rtol=1e-2, atol=1e-2)
+    assert np.isclose(cost_estimate.total_cost_usd, 3.1e-05, rtol=1e-2, atol=1e-2)
     assert cost_estimate.is_error is False
     assert cost_estimate.error_type is None
     assert cost_estimate.error_message is None
