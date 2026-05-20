@@ -412,3 +412,109 @@ versatile and impactful for users across the globe.
 
 Do you need help or are you looking to engage with community? Check out [Discord channel](https://discord.gg/QBtgTbXTgU)!
 Whether you have questions, need clarification, or simply want to discuss topics related to the project, the Discord community is welcoming!
+
+## ❓ FAQ (Frequently Asked Questions)
+
+### What is Adala?
+
+Adala (**A**utonomous **DA**ta **L**abeling **A**gent) is a Python framework for building agents specialized in data processing, with emphasis on diverse data labeling tasks. These agents are autonomous — they independently acquire skills through iterative learning influenced by environment, observations, and reflections.
+
+### How does Adala differ from LangChain or CrewAI?
+
+| Feature | Adala | LangChain | CrewAI |
+|---------|-------|-----------|--------|
+| Focus | Data labeling & processing | General LLM chains | Multi-agent orchestration |
+| Learning | Autonomous skill acquisition | Prompt-based | Role-based collaboration |
+| Ground Truth | Built on labeled datasets | Optional | Optional |
+| Target | Data scientists/ML engineers | Developers | AI teams |
+
+### What are the key components?
+
+- **Agent**: Autonomous entity with skills and environment
+- **Environment**: Dataset context (e.g., StaticEnvironment with ground truth)
+- **Skill**: Specific task capability (ClassificationSkill, etc.)
+- **Runtime**: LLM backend (OpenAIChatRuntime, etc.)
+- **Memory**: Context and state management
+
+### What LLM providers are supported?
+
+- **OpenAI**: GPT-4, GPT-3.5 (requires `OPENAI_API_KEY`)
+- **Azure OpenAI**: Via `AzureChatRuntime`
+- **Anthropic**: Via custom runtime integration
+- **Local LLMs**: Compatible with LiteLLM/Ollama
+
+### How do I get started?
+
+```bash
+pip install adala
+export OPENAI_API_KEY='your-key'
+```
+
+```python
+from adala.agents import Agent
+from adala.environments import StaticEnvironment
+from adala.skills import ClassificationSkill
+from adala.runtimes import OpenAIChatRuntime
+
+agent = Agent(
+    environment=StaticEnvironment(df=train_df),
+    skills=ClassificationSkill(
+        name='sentiment',
+        instructions="Label text as positive, negative or neutral.",
+        labels=["Positive", "Negative", "Neutral"]
+    )
+)
+```
+
+### What data labeling tasks can Adala handle?
+
+- Text classification (sentiment, topic, intent)
+- Named entity recognition (NER)
+- Data extraction and transformation
+- Quality control and validation
+- Multi-label classification
+
+### How does autonomous learning work?
+
+Agents learn through iterative feedback loops:
+1. Apply skill to dataset
+2. Compare against ground truth
+3. Reflect on errors
+4. Adjust approach
+5. Repeat until accuracy target met
+
+### What is the student/teacher architecture?
+
+A runtime pattern where:
+- **Student**: Applies skills on data
+- **Teacher**: Provides feedback from ground truth
+- Enables skill refinement without explicit prompt engineering
+
+### Does Adala support Label Studio integration?
+
+Yes! Adala works seamlessly with Label Studio for:
+- Ground truth dataset creation
+- Human-in-the-loop labeling
+- Output format compatibility
+
+### What Python versions are supported?
+
+Python 3.8, 3.9, 3.10, 3.11
+
+### Is there documentation?
+
+Yes: https://humansignal.github.io/Adala/
+
+### How can I contribute?
+
+See [CONTRIBUTION.md](CONTRIBUTION.md) for guidelines. Pull requests welcome!
+
+### License
+
+Apache License 2.0
+
+### Help Resources
+
+- 📖 Documentation: https://humansignal.github.io/Adala/
+- 💬 Discord: https://discord.gg/QBtgTbXTgU
+- 🐛 Issues: https://github.com/HumanSignal/Adala/issues
