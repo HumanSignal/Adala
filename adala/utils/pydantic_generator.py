@@ -50,9 +50,12 @@ def json_schema_to_model(json_schema: Dict[str, Any]) -> Type[BaseModel]:
     # `description` is the model class docstring
     model_description = json_schema.get("description", "")
 
+    required_fields = set(json_schema.get("required", []))
     fields_def = {}
     for name, prop in json_schema.get("properties", {}).items():
-        fields_def[name] = json_schema_to_pydantic_field(prop)
+        fields_def[name] = json_schema_to_pydantic_field(
+            prop, required=name in required_fields
+        )
 
     # Create the BaseModel class using create_model().
     model = create_model(model_name, **fields_def)
@@ -63,13 +66,16 @@ def json_schema_to_model(json_schema: Dict[str, Any]) -> Type[BaseModel]:
     return model
 
 
-def json_schema_to_pydantic_field(json_schema: Dict[str, Any]) -> Tuple[Any, Field]:
+def json_schema_to_pydantic_field(
+    json_schema: Dict[str, Any], required: bool = True
+) -> Tuple[Any, Field]:
     """
     Converts a JSON schema property to a Pydantic field definition.
 
     Args:
         name: The field name.
         json_schema: The JSON schema property.
+        required: Whether the containing object requires this property.
 
     Returns:
         A Pydantic field definition.
@@ -95,8 +101,10 @@ def json_schema_to_pydantic_field(json_schema: Dict[str, Any]) -> Tuple[Any, Fie
         if constraint in json_schema:
             field_params[constraint] = json_schema[constraint]
 
+    default = ... if required else json_schema.get("default", None)
+
     # Create a Field object with the type and optional parameters.
-    return type_, Field(..., **field_params)
+    return type_, Field(default, **field_params)
 
 
 def json_schema_to_pydantic_type(
@@ -195,6 +203,9 @@ def field_schema_to_pydantic_class(
         "title": class_name,
         "description": description,
         "properties": field_schema,
+        # Skill response fields have historically all been required. Keep that
+        # contract while the general JSON Schema converter honors `required`.
+        "required": list(field_schema),
     }
 
     return json_schema_to_model(json_schema)
