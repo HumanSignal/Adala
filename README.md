@@ -255,6 +255,41 @@ print('\n => Test results:')
 print(predictions)
 ```
 
+### 🤖 Using OrcaRouter
+
+Alternatively, you can route Adala through [OrcaRouter](https://www.orcarouter.ai),
+an OpenAI-compatible gateway that exposes 150+ models from OpenAI, Anthropic,
+Google, DeepSeek, Qwen and others behind a single endpoint and API key. It also
+runs gateway-level, zero-trust security for AI agents on the same endpoint —
+screening every prompt/response and governing every tool call on a default-deny
+basis, with no application code changes.
+
+Start by setting the `ORCAROUTER_API_KEY` environment variable, which you can get
+from [OrcaRouter](https://www.orcarouter.ai).
+
+```
+export ORCAROUTER_API_KEY='your-orcarouter-api-key'
+```
+
+Then register an OrcaRouter runtime the same way as the OpenRouter example above,
+using any namespaced model id from the OrcaRouter catalog (for example
+`deepseek/deepseek-v4-flash` or `openai/gpt-5.5`):
+
+```python
+# define all the different runtimes your skills may use
+runtimes = {
+    # You can specify your OrcaRouter API Key here or set it ahead of time in your environment variable, ORCAROUTER_API_KEY
+    'orcarouter': OpenAIChatRuntime(
+        base_url="https://api.orcarouter.ai/v1",
+        model="deepseek/deepseek-v4-flash",
+        api_key=os.getenv("ORCAROUTER_API_KEY"),
+        provider="Custom"
+    ),
+},
+
+default_runtime='orcarouter',
+```
+
 ### 👉 Examples
 
 | Skill                                                                              | Description                                                                       | Colab                                                                                                                                                                                                                                        |
