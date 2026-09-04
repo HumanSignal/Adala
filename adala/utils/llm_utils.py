@@ -386,7 +386,7 @@ def run_instructor_with_payload(
     messages_builder = MessagesBuilder(
         user_prompt_template=user_prompt_template,
         system_prompt=instructions_template,
-        instructions_first=instructions_first,
+        instruction_first=instructions_first,
         input_field_types=input_field_types,
         extra_fields=extra_fields,
         split_into_chunks=split_into_chunks,
@@ -455,7 +455,7 @@ async def arun_instructor_with_payload(
     messages_builder = MessagesBuilder(
         user_prompt_template=user_prompt_template,
         system_prompt=instructions_template,
-        instructions_first=instructions_first,
+        instruction_first=instructions_first,
         input_field_types=input_field_types,
         extra_fields=extra_fields,
         split_into_chunks=split_into_chunks,
