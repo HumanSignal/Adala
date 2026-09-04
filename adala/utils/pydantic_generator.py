@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Type, Union, Tuple, Literal, Set
+from typing import Any, Dict, List, Optional, Type, Union, Tuple, Literal, Set, get_origin, get_args
 from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel, Field, create_model
@@ -95,8 +95,12 @@ def json_schema_to_pydantic_field(json_schema: Dict[str, Any]) -> Tuple[Any, Fie
         if constraint in json_schema:
             field_params[constraint] = json_schema[constraint]
 
+    # Use None default for Optional types so they aren't required
+    is_optional = get_origin(type_) is Union and type(None) in get_args(type_)
+    default = None if is_optional else ...
+
     # Create a Field object with the type and optional parameters.
-    return type_, Field(..., **field_params)
+    return type_, Field(default, **field_params)
 
 
 def json_schema_to_pydantic_type(
@@ -114,6 +118,13 @@ def json_schema_to_pydantic_type(
     """
 
     type_ = json_schema.get("type")
+
+    # Handle union types: ["string", "null"] → Optional[str]
+    if isinstance(type_, list):
+        non_null = [t for t in type_ if t != 'null']
+        has_null = len(non_null) < len(type_)
+        inner = json_schema_to_pydantic_type({**json_schema, 'type': non_null[0]})
+        return Optional[inner] if has_null else inner
 
     if type_ == "string":
         if "format" in json_schema:
