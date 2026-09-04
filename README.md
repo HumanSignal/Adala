@@ -387,6 +387,91 @@ adala help <command>
 ```
 -->
 
+## ❓ FAQ
+
+### General
+
+**What is Adala?**
+Adala (Autonomous DAta Labeling Agent) is a Python framework for building autonomous agents specialized in data processing tasks, with emphasis on diverse data labeling tasks. Agents independently acquire skills through iterative learning influenced by environment, observations, and reflections.
+
+**How does Adala differ from other agent frameworks?**
+Unlike general-purpose agent frameworks, Adala is specialized for data processing:
+- **Reliable foundation**: Built on ground truth data for consistent results
+- **Controllable output**: Configure desired output and constraints per skill
+- **Autonomous learning**: Agents iteratively develop skills without manual intervention
+- **Flexible runtime**: Deploy skills across multiple LLM runtimes (student/teacher architecture)
+
+**What types of tasks is Adala best suited for?**
+Adala excels at data labeling, classification, sentiment analysis, entity extraction, and other structured data processing tasks where ground truth datasets are available for agent learning.
+
+### Installation & Setup
+
+**What Python version is required?**
+Python 3.8, 3.9, 3.10, or 3.11 are supported. Install via `pip install adala`.
+
+**Which LLM providers are supported?**
+- OpenAI (GPT-4o, GPT-3.5-turbo, etc.)
+- Anthropic (via OpenRouter)
+- VertexAI
+- Any OpenAI-compatible API (OpenRouter, local servers)
+
+Set the appropriate API key (`OPENAI_API_KEY` or `OPENROUTER_API_KEY`) before running.
+
+**Can I use local models?**
+Yes. Point the runtime to your local OpenAI-compatible server (Ollama, vLLM, etc.) via the `base_url` parameter in `OpenAIChatRuntime`.
+
+### Core Concepts
+
+**What is a "Skill" in Adala?**
+A Skill defines a specific capability the agent performs, such as classification or entity extraction. Skills have:
+- `name`: Skill identifier
+- `instructions`: Task description
+- `input_template`: How input data is formatted
+- `output_template`: How output is formatted
+
+**What is a "Runtime"?**
+A Runtime is the LLM execution environment. Adala supports multiple runtimes per skill, enabling scenarios like student/teacher architecture where one LLM learns and another evaluates.
+
+**What is an "Environment"?**
+An Environment provides the ground truth dataset for learning. `StaticEnvironment` wraps a pandas DataFrame containing labeled examples.
+
+**How does agent learning work?**
+`agent.learn(learning_iterations=3, accuracy_threshold=0.95)` runs iterative learning:
+1. Agent applies skill to training data
+2. Runtime evaluates predictions against ground truth
+3. Agent reflects on errors and adjusts approach
+4. Process repeats until accuracy threshold is met
+
+### Development
+
+**How do I create a custom Skill?**
+Extend base skill classes or create new ones with custom `instructions`, `input_template`, and `output_template`. See examples in `./examples/` directory.
+
+**Can I use Adala in production?**
+Yes. Adala is designed for production-level agent systems. Use the Python API for programmatic integration or the planned REST API (coming soon) for service deployment.
+
+**How do I debug agent behavior?**
+Use `print(agent)` and `print(agent.skills)` to inspect configuration. The `rich` library provides enhanced output formatting. Check predictions with `agent.run(test_df)`.
+
+### Troubleshooting
+
+**Why is my agent not learning?**
+- Verify API key is set correctly
+- Check that ground truth data format matches skill's templates
+- Ensure model supports the task complexity (try GPT-4o for complex tasks)
+- Increase `learning_iterations` if accuracy threshold isn't met
+
+**What if predictions are incorrect?**
+- Review skill `instructions` for clarity
+- Add more ground truth examples covering edge cases
+- Try a stronger model (GPT-4o vs GPT-3.5-turbo)
+- Adjust `accuracy_threshold` based on acceptable quality
+
+**Where can I get help?**
+- Discord: https://discord.gg/QBtgTbXTgU
+- GitHub Issues: https://github.com/HumanSignal/Adala/issues
+- Examples: `./examples/` directory with quickstart notebooks
+
 ## 🗺 Roadmap
 
 - [x] Low-level skill management (i.e. agent.get_skill("name")) [COMPLETE @niklub]
