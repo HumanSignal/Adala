@@ -22,14 +22,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'  # Run this job for pull requests only
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: "Install poetry"
         run: pipx install "poetry==${{ env.POETRY_VERSION }}"
 
       - name: "Set up Python"
         id: setup_python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.13'
           cache: 'poetry'
@@ -50,14 +50,14 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: "Install poetry"
         run: pipx install "poetry==${{ env.POETRY_VERSION }}"
 
       - name: "Set up Python"
         id: setup_python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.13'
           cache: 'poetry'

@@ -33,7 +33,7 @@ jobs:
       - uses: hmarr/debug-action@v3.0.0
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GIT_PAT }}
           ref: ${{ inputs.branch }}
@@ -41,7 +41,7 @@ jobs:
 
       - name: Get GitHub user details
         id: get-github-user
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           ACTOR_USERNAME: ${{ github.event.sender.login }}
         with:
