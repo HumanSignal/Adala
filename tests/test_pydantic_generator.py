@@ -21,6 +21,7 @@ sample_schema = {
             "enum": ["engineer", "doctor", "teacher"],
         },
     },
+    "required": ["name", "age", "profession"],
 }
 
 
@@ -57,6 +58,61 @@ def test_json_schema_to_model():
     assert instance.name == expected_instance.name
     assert instance.age == expected_instance.age
     assert instance.profession == expected_instance.profession
+
+
+def test_json_schema_to_model_honors_required_fields():
+    GeneratedModel = json_schema_to_model(
+        {
+            "type": "object",
+            "title": "Record",
+            "properties": {
+                "required_name": {"type": "string"},
+                "optional_note": {"type": "string"},
+                "priority": {"type": "integer", "default": 3},
+            },
+            "required": ["required_name"],
+        }
+    )
+
+    assert GeneratedModel.model_fields["required_name"].is_required()
+    assert not GeneratedModel.model_fields["optional_note"].is_required()
+    assert not GeneratedModel.model_fields["priority"].is_required()
+
+    instance = GeneratedModel(required_name="task")
+    assert instance.optional_note is None
+    assert instance.priority == 3
+    assert instance.model_dump(exclude_unset=True) == {"required_name": "task"}
+
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        GeneratedModel(required_name="task", optional_note=None)
+
+
+def test_json_schema_to_model_honors_nested_required_fields():
+    GeneratedModel = json_schema_to_model(
+        {
+            "type": "object",
+            "properties": {
+                "profile": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "note": {"type": "string"},
+                    },
+                    "required": ["name"],
+                }
+            },
+        }
+    )
+
+    assert GeneratedModel().profile is None
+    assert GeneratedModel(profile={"name": "Ada"}).profile.note is None
+
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        GeneratedModel(profile={"note": "missing name"})
 
 
 @pytest.mark.parametrize(
