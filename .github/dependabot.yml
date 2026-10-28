@@ -2,6 +2,8 @@ version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
+    cooldown:
+      default-days: 4
     schedule:
       interval: "weekly"
       timezone: "Europe/London"
@@ -9,3 +11,7 @@ updates:
       day: "monday"
     commit-message:
       prefix: "ci:"
+    groups:
+      github-actions-updates:
+        patterns:
+          - "*"
