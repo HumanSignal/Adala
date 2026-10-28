@@ -41,7 +41,7 @@ jobs:
             > [Workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
       - name: Checkout Actions Hub
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GIT_PAT }}
           repository: HumanSignal/actions-hub
@@ -80,14 +80,14 @@ jobs:
           branch_name: "${{ inputs.branch_name }}"
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GIT_PAT }}
           ref: ${{ steps.get-branch.outputs.branch_name }}
           fetch-depth: 0
 
       - name: Checkout Actions Hub
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GIT_PAT }}
           repository: HumanSignal/actions-hub
@@ -107,7 +107,7 @@ jobs:
 
       - name: "Set up Python"
         id: setup_python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.13'
           cache: 'poetry'
@@ -233,7 +233,7 @@ jobs:
 
       - name: Send Slack Notification on failure
         if: failure()
-        uses: slackapi/slack-github-action@v2.1.1
+        uses: slackapi/slack-github-action@v4.0
         env:
           MENTION: "<@${{ steps.team_details.outputs.slack-user-id }}>"
           UPSTREAM_PR: "<${{ steps.upstream-prs.outputs.first_upstream_pr_url }}|upstream pr>, "

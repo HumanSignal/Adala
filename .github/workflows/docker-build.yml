@@ -36,7 +36,7 @@ jobs:
       - uses: hmarr/debug-action@v3.0.0
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.sha }}
 
@@ -92,7 +92,7 @@ jobs:
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.sha }}
 
@@ -107,12 +107,12 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.IMAGE_NAME }}
 
       - name: Push Docker image (${{ matrix.platform }})
-        uses: docker/build-push-action@v7.0.0
+        uses: docker/build-push-action@v7.4.0
         id: docker_build_and_push
         with:
           context: .
@@ -166,7 +166,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
@@ -190,7 +190,7 @@ jobs:
     if: success()
     steps:
       - name: Create Docker image tag Check
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { repo, owner } = context.repo;
