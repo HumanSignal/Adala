@@ -255,6 +255,90 @@ print('\n => Test results:')
 print(predictions)
 ```
 
+You can also route Adala through [OrcaRouter](https://www.orcarouter.ai) — an OpenAI-compatible gateway that exposes a provider/model namespace across many models behind a single endpoint, with adaptive routing and automatic failover. Below is an example of how to use the OrcaRouter API:
+
+Start by setting the `ORCAROUTER_API_KEY` environment variable, which you can get from the [OrcaRouter dashboard](https://www.orcarouter.ai).
+
+```
+export ORCAROUTER_API_KEY='your-orcarouter-api-key'
+```
+
+Then, let's see how to modify the previous example to use OrcaRouter with the `orcarouter/auto` model, which routes each request to a live model:
+
+```python
+import os
+import pandas as pd
+
+from adala.agents import Agent
+from adala.environments import StaticEnvironment
+from adala.skills import ClassificationSkill
+from adala.runtimes import OpenAIChatRuntime
+from rich import print
+
+# Train dataset
+train_df = pd.DataFrame([
+    ["It was the negative first impressions, and then it started working.", "Positive"],
+    ["Not loud enough and doesn't turn on like it should.", "Negative"],
+    ["I don't know what to say.", "Neutral"],
+    ["Manager was rude, but the most important that mic shows very flat frequency response.", "Positive"],
+    ["The phone doesn't seem to accept anything except CBR mp3s.", "Negative"],
+    ["I tried it before, I bought this device for my son.", "Neutral"],
+], columns=["text", "sentiment"])
+
+# Test dataset
+test_df = pd.DataFrame([
+    "All three broke within two months of use.",
+    "The device worked for a long time, can't say anything bad.",
+    "Just a random line of text."
+], columns=["text"])
+
+agent = Agent(
+    # connect to a dataset
+    environment=StaticEnvironment(df=train_df),
+
+    # define a skill
+    skills=ClassificationSkill(
+        name='sentiment',
+        instructions="Label text as positive, negative or neutral.",
+        labels=["Positive", "Negative", "Neutral"],
+        input_template="Text: {text}",
+        output_template="Sentiment: {sentiment}"
+    ),
+
+    # define all the different runtimes your skills may use
+    runtimes = {
+        # You can specify your OrcaRouter API Key here or set it ahead of time in your environment variable, ORCAROUTER_API_KEY
+        'orcarouter': OpenAIChatRuntime(
+            base_url="https://api.orcarouter.ai/v1",
+            model="orcarouter/auto",
+            api_key=os.getenv("ORCAROUTER_API_KEY"),
+            provider="Custom"
+            ),
+    },
+
+    default_runtime='orcarouter',
+
+    teacher_runtimes = {
+        "default" : OpenAIChatRuntime(
+            base_url="https://api.orcarouter.ai/v1",
+            model="orcarouter/auto",
+            api_key=os.getenv("ORCAROUTER_API_KEY"),
+            provider="Custom"
+        ),
+    }
+)
+
+print(agent)
+print(agent.skills)
+
+agent.learn(learning_iterations=3, accuracy_threshold=0.95)
+
+print('\n=> Run tests ...')
+predictions = agent.run(test_df)
+print('\n => Test results:')
+print(predictions)
+```
+
 ### 👉 Examples
 
 | Skill                                                                              | Description                                                                       | Colab                                                                                                                                                                                                                                        |
