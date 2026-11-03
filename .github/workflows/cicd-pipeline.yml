@@ -42,10 +42,10 @@ jobs:
               .then(response => core.setOutput("membership", true))
               .catch(reason => core.setOutput("membership", false));
 
-  gitleaks:
+  trufflehog:
     name: "Linter"
     if: github.event_name == 'pull_request'
-    uses: ./.github/workflows/gitleaks.yml
+    uses: ./.github/workflows/trufflehog.yml
     with:
       head_sha: ${{ github.sha }}
       base_sha: ${{ github.event.pull_request.base.sha || github.event.before }}
