@@ -4,6 +4,12 @@ from unittest import mock
 import os
 from contextlib import suppress
 
+# litellm downloads its model cost map from GitHub at import time unless told otherwise,
+# so cost assertions would follow whatever upstream last edited (repricing, removed
+# deprecated models) instead of the litellm version pinned in poetry.lock.
+# Must be set before litellm is imported below.
+os.environ.setdefault("LITELLM_LOCAL_MODEL_COST_MAP", "True")
+
 # from contextlib import asynccontextmanager
 import pytest_asyncio
 from fakeredis import FakeStrictRedis
